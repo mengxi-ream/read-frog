@@ -99,6 +99,7 @@ describe("selection toolbar built-in actions", () => {
         enabled: false,
         providerId: "openai-default",
         notebaseConnection: undefined,
+        shortcut: "Alt+Shift+G",
       },
       improveWriting: selectionToolbar.builtInActions.improveWriting,
     })
@@ -138,6 +139,7 @@ describe("selection toolbar built-in actions", () => {
       enabled: false,
       providerId: "openai-default",
       notebaseConnection: connection,
+      shortcut: "Alt+Shift+D",
     })
     expect(getBuiltInDictionaryAction(next)).toMatchObject({
       id: "default-dictionary",
@@ -222,14 +224,51 @@ describe("selection toolbar built-in actions", () => {
       { ...dictionary, id: "same-name", name: dictionary.name },
     ])
 
+    // Everything but the key: one key runs one action.
+    const { shortcut: _shortcut, ...dictionaryWithoutShortcut } = dictionary
     expect(duplicate).toEqual({
-      ...dictionary,
+      ...dictionaryWithoutShortcut,
       id: expect.any(String),
       name: `${dictionary.name} 1`,
     })
+    expect(duplicate).not.toHaveProperty("shortcut")
     expect(duplicate.id).not.toBe(dictionary.id)
     expect(duplicate.notebaseConnection).not.toBe(dictionary.notebaseConnection)
     expect(duplicate.notebaseConnection?.mappings).not.toBe(dictionary.notebaseConnection?.mappings)
+  })
+
+  it("reads a built-in action's key from its state, and its default key without one", () => {
+    const selectionToolbar = cloneSelectionToolbar()
+    selectionToolbar.builtInActions.dictionary.shortcut = ""
+    selectionToolbar.builtInActions.sentenceAnalysis.shortcut = "Alt+Shift+K"
+    delete selectionToolbar.builtInActions.improveWriting.shortcut
+
+    expect(findSelectionToolbarAction(selectionToolbar, "default-dictionary")?.shortcut).toBe("")
+    expect(
+      findSelectionToolbarAction(selectionToolbar, "default-sentence-analysis")?.shortcut,
+    ).toBe("Alt+Shift+K")
+    expect(findSelectionToolbarAction(selectionToolbar, "default-improve-writing")?.shortcut).toBe(
+      "Alt+Shift+W",
+    )
+  })
+
+  it("writes back a state without a key without one, until the key changes", () => {
+    const selectionToolbar = cloneSelectionToolbar()
+    delete selectionToolbar.builtInActions.dictionary.shortcut
+    const dictionary = getBuiltInDictionaryAction(selectionToolbar)
+    expect(dictionary.shortcut).toBe("Alt+Shift+D")
+
+    const providerChanged = replaceSelectionToolbarAction(selectionToolbar, {
+      ...dictionary,
+      providerId: "openai-default",
+    })
+    expect(providerChanged.builtInActions.dictionary).not.toHaveProperty("shortcut")
+
+    const keyChanged = replaceSelectionToolbarAction(selectionToolbar, {
+      ...dictionary,
+      shortcut: "Alt+Shift+K",
+    })
+    expect(keyChanged.builtInActions.dictionary.shortcut).toBe("Alt+Shift+K")
   })
 
   it("resolves the configured Note suggestion action even when it is disabled", () => {

@@ -14,7 +14,7 @@ import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
 import { classifyResolvedProvider, UNKNOWN_FEATURE_PROVIDER } from "@/utils/analytics-provider"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { findSelectionToolbarAction } from "@/utils/custom-actions"
+import { findSelectionToolbarAction, getSelectionToolbarActions } from "@/utils/custom-actions"
 import { onMessage } from "@/utils/message"
 import { resolveProviderRefForCapability } from "@/utils/providers/provider-registry"
 import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-host"
@@ -26,12 +26,18 @@ import {
   selectionSessionAtom,
 } from "../atoms"
 import { useSelectionOpenRequestResolver } from "../use-selection-open-request"
+import { useSelectionShortcuts } from "../use-selection-shortcuts"
+
+type SelectionCustomActionSurface =
+  | typeof ANALYTICS_SURFACE.SELECTION_TOOLBAR
+  | typeof ANALYTICS_SURFACE.CONTEXT_MENU
+  | typeof ANALYTICS_SURFACE.SHORTCUT
 
 interface SelectionCustomActionPendingOpenRequest {
   actionId: string
   anchor?: { x: number; y: number }
   session: SelectionSession | null
-  surface: typeof ANALYTICS_SURFACE.SELECTION_TOOLBAR | typeof ANALYTICS_SURFACE.CONTEXT_MENU
+  surface: SelectionCustomActionSurface
 }
 
 interface SelectionCustomActionContextValue {
@@ -72,7 +78,8 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
   const popoverActionsRef = useRef<SelectionPopoverActions | null>(null)
   const nextEphemeralSessionIdRef = useRef(0)
   const sessionKeyRef = useRef(0)
-  const { resolveContextMenuOpenRequest } = useSelectionOpenRequestResolver(selectionSession)
+  const { resolveContextMenuOpenRequest, resolveShortcutOpenRequest } =
+    useSelectionOpenRequestResolver(selectionSession)
 
   // Anchor application is owned by SelectionPopover.Root (via requestOpen) so
   // a pinned popover reused in place never moves.
@@ -217,6 +224,31 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
     },
     [openActionRequest, providersConfig, resolveContextMenuOpenRequest, selectionToolbarConfig],
   )
+
+  // An action switched off has no key, whatever it was given.
+  const actionShortcuts = useMemo(
+    () =>
+      Object.fromEntries(
+        getSelectionToolbarActions(selectionToolbarConfig)
+          .filter((action) => action.enabled !== false)
+          .map((action) => [action.id, action.shortcut]),
+      ),
+    [selectionToolbarConfig],
+  )
+
+  useSelectionShortcuts(actionShortcuts, (actionId, session) => {
+    const request = resolveShortcutOpenRequest(session)
+    if (!request) {
+      return false
+    }
+    openActionRequest({
+      actionId,
+      anchor: request.anchor,
+      session: request.session,
+      surface: ANALYTICS_SURFACE.SHORTCUT,
+    })
+    return true
+  })
 
   useEffect(() => {
     return onMessage("openSelectionCustomActionFromContextMenu", (message) => {

@@ -18,17 +18,6 @@ interface CachedSelectionOpenRequest extends SelectionOpenRequest {
 }
 
 const RECENT_OPEN_REQUEST_TTL_MS = 10_000
-const SELECTION_OPEN_REQUEST_TRIGGER = {
-  CONTEXT_MENU: "contextMenu",
-  SHORTCUT: "shortcut",
-} as const
-
-type SelectionOpenRequestTrigger =
-  (typeof SELECTION_OPEN_REQUEST_TRIGGER)[keyof typeof SELECTION_OPEN_REQUEST_TRIGGER]
-
-function shouldUseRecentCapturedRequest(trigger: SelectionOpenRequestTrigger) {
-  return trigger === SELECTION_OPEN_REQUEST_TRIGGER.CONTEXT_MENU
-}
 
 function getSelectionAnchorFromRange(rangeSnapshot: SelectionRangeSnapshot) {
   try {
@@ -96,42 +85,34 @@ export function useSelectionOpenRequestResolver(selectionSession: SelectionSessi
     }
   }, [selectionSession])
 
-  const resolveSelectionOpenRequest = useCallback(
-    (trigger: SelectionOpenRequestTrigger): SelectionOpenRequest | null => {
-      const cachedRequest = recentCapturedOpenRequestRef.current
-      if (
-        shouldUseRecentCapturedRequest(trigger) &&
-        cachedRequest &&
-        Date.now() - cachedRequest.capturedAt <= RECENT_OPEN_REQUEST_TTL_MS
-      ) {
-        return {
-          anchor: cachedRequest.anchor,
-          session: cachedRequest.session,
-        }
-      }
-
-      if (!selectionSession) {
-        return null
-      }
-
+  // The context menu opens where it was right-clicked, on the selection it was opened for.
+  const resolveContextMenuOpenRequest = useCallback((): SelectionOpenRequest | null => {
+    const cachedRequest = recentCapturedOpenRequestRef.current
+    if (cachedRequest && Date.now() - cachedRequest.capturedAt <= RECENT_OPEN_REQUEST_TTL_MS) {
       return {
-        anchor: getSelectionAnchor(selectionSession) ?? getViewportCenterAnchor(),
-        session: selectionSession,
+        anchor: cachedRequest.anchor,
+        session: cachedRequest.session,
       }
-    },
-    [selectionSession],
-  )
+    }
 
-  const resolveContextMenuOpenRequest = useCallback(
-    (): SelectionOpenRequest | null =>
-      resolveSelectionOpenRequest(SELECTION_OPEN_REQUEST_TRIGGER.CONTEXT_MENU),
-    [resolveSelectionOpenRequest],
-  )
+    if (!selectionSession) {
+      return null
+    }
 
+    return {
+      anchor: getSelectionAnchor(selectionSession) ?? getViewportCenterAnchor(),
+      session: selectionSession,
+    }
+  }, [selectionSession])
+
+  // A shortcut acts on the selection it was pressed on (see useSelectionShortcuts), not the
+  // one recorded at the last mouseup.
   const resolveShortcutOpenRequest = useCallback(
-    (): SelectionOpenRequest | null =>
-      resolveSelectionOpenRequest(SELECTION_OPEN_REQUEST_TRIGGER.SHORTCUT),
-    [resolveSelectionOpenRequest],
+    (session: SelectionSession | null): SelectionOpenRequest | null =>
+      session
+        ? { anchor: getSelectionAnchor(session) ?? getViewportCenterAnchor(), session }
+        : null,
+    [],
   )
 
   return {

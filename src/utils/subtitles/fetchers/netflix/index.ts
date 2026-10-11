@@ -2,8 +2,10 @@ import type { SubtitlesFetcher } from "../types"
 import type { SubtitlesFragment } from "@/utils/subtitles/types"
 import { z } from "zod"
 import {
+  NETFLIX_LOAD_POST_MESSAGE_TIMEOUT_MS,
   NETFLIX_SUBTITLES_REQUEST_TYPE,
   NETFLIX_SUBTITLES_RESPONSE_TYPE,
+  POST_MESSAGE_TIMEOUT_MS,
 } from "@/utils/constants/subtitles"
 import { i18n } from "@/utils/i18n"
 import { OverlaySubtitlesError } from "@/utils/subtitles/errors"
@@ -26,10 +28,11 @@ export type NetflixSubtitlesResponse = z.infer<typeof netflixSubtitlesResponseSc
 async function requestNetflixSubtitles(
   action: NetflixSubtitlesAction,
 ): Promise<NetflixSubtitlesResponse | null> {
-  const response = await postMessageRequest(NETFLIX_SUBTITLES_RESPONSE_TYPE, {
-    type: NETFLIX_SUBTITLES_REQUEST_TYPE,
-    action,
-  })
+  const response = await postMessageRequest(
+    NETFLIX_SUBTITLES_RESPONSE_TYPE,
+    { type: NETFLIX_SUBTITLES_REQUEST_TYPE, action },
+    action === "load" ? NETFLIX_LOAD_POST_MESSAGE_TIMEOUT_MS : POST_MESSAGE_TIMEOUT_MS,
+  )
   const parsed = netflixSubtitlesResponseSchema.safeParse(response)
   return parsed.success ? parsed.data : null
 }
@@ -37,31 +40,51 @@ async function requestNetflixSubtitles(
 export class NetflixSubtitlesFetcher implements SubtitlesFetcher {
   private subtitles: SubtitlesFragment[] = []
   private sourceLanguage = ""
-  private movieId: number | null = null
-  private trackId: string | null = null
+  // What the latest load found, even one that ended without subtitles.
+  private lastLoad: { movieId: number | null; trackId: string | null } | null = null
+  private loadsInFlight = 0
 
   async fetch(): Promise<SubtitlesFragment[]> {
-    const response = await requestNetflixSubtitles("load")
-    if (!response) {
-      throw new OverlaySubtitlesError(i18n.t("subtitles.errors.fetchSubTimeout"))
+    let response: NetflixSubtitlesResponse | null
+    this.loadsInFlight++
+    try {
+      response = await requestNetflixSubtitles("load")
+    } finally {
+      this.loadsInFlight--
     }
+
+    const found = { movieId: response?.movieId ?? null, trackId: response?.trackId ?? null }
     if (
       this.subtitles.length > 0 &&
-      response.movieId === this.movieId &&
-      response.trackId === this.trackId
+      found.movieId === this.lastLoad?.movieId &&
+      found.trackId === this.lastLoad.trackId
     ) {
       return this.subtitles
     }
+    // Recorded before the checks below, so the track poll also compares with a load that failed.
+    this.lastLoad = found
+    this.subtitles = []
+    this.sourceLanguage = ""
 
-    const parsed = response.translatable && response.ttml ? parseNetflixTtml(response.ttml) : null
-    if (!parsed?.fragments.length) {
+    // No reply, or a player that never became ready: either way the wait ran out.
+    if (!response || response.movieId === null) {
+      throw new OverlaySubtitlesError(i18n.t("subtitles.errors.fetchSubTimeout"))
+    }
+    if (!response.translatable) {
+      throw new OverlaySubtitlesError(i18n.t("subtitles.errors.noSubtitlesFound"))
+    }
+    // The video has a usable track, but its subtitle file never reached the page script.
+    if (!response.ttml) {
+      throw new OverlaySubtitlesError(i18n.t("subtitles.errors.trackFileNotLoaded"))
+    }
+
+    const parsed = parseNetflixTtml(response.ttml)
+    if (!parsed.fragments.length) {
       throw new OverlaySubtitlesError(i18n.t("subtitles.errors.noSubtitlesFound"))
     }
 
     this.subtitles = parsed.fragments
     this.sourceLanguage = parsed.language
-    this.movieId = response.movieId
-    this.trackId = response.trackId
     return this.subtitles
   }
 
@@ -77,18 +100,26 @@ export class NetflixSubtitlesFetcher implements SubtitlesFetcher {
     return true
   }
 
+  // Netflix's track poll asks this every second, so only a change on the page should start a load.
   async shouldUseSameTrack(): Promise<boolean> {
-    if (this.subtitles.length === 0) {
+    // Starting another load now would only throw away the one still running.
+    if (this.loadsInFlight > 0) {
+      return true
+    }
+    const lastLoad = this.lastLoad
+    if (!lastLoad) {
       return false
     }
     const response = await requestNetflixSubtitles("state")
     if (!response) {
       return true
     }
-    if (response.movieId !== this.movieId) {
+    // A failed load counts too: the same failure is not retried every second, but a new episode,
+    // a new track, or a player that is finally ready still reloads.
+    if (response.movieId !== lastLoad.movieId) {
       return false
     }
-    return !response.translatable || response.trackId === this.trackId
+    return !response.translatable || response.trackId === lastLoad.trackId
   }
 
   showNativeSubtitles(): void {
@@ -98,7 +129,6 @@ export class NetflixSubtitlesFetcher implements SubtitlesFetcher {
   cleanup(): void {
     this.subtitles = []
     this.sourceLanguage = ""
-    this.movieId = null
-    this.trackId = null
+    this.lastLoad = null
   }
 }

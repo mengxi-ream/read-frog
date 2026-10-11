@@ -521,7 +521,7 @@ options:
         description: バグの特定や UI レイアウトの改善などを通じて Read Frog をより良くします
   shortcuts:
     title: ショートカット
-    pageDescription: 読みながら翻訳を実行するキーを設定します。
+    pageDescription: 読みながら翻訳・読み上げ・AI アクションを実行するキーを設定します。
     setShortcut: ショートカットを設定
     pageTranslation:
       title: ページ翻訳
@@ -541,6 +541,15 @@ options:
     translationHub:
       title: 翻訳ハブ
       description: 翻訳ハブを新しいタブで開きます。
+    selectionSpeak:
+      title: "選択範囲の読み上げ"
+      description: "選択したテキストを読み上げます。もう一度押すと停止します。"
+    actions:
+      title: "AI アクション"
+      description: "選択したテキストに AI アクションを実行します。カスタムアクションには最初はショートカットがないので、ここで設定してください。"
+    turnedOff: "この機能はオフのため、オンに戻すまでこのキーは何もしません。"
+    clash: "「$1」と同じキーです。どちらかを変更してください。"
+    taken: "$1 はすでに「$2」で使われています。"
   overlayTools:
     title: オーバーレイツール
   inputTranslation:
@@ -1377,7 +1386,7 @@ options:
       title: 基本設定
       enable:
         title: 動画字幕を有効にする
-        description: 動画プレーヤーのコントロールバーに翻訳ボタンを表示します。現在は YouTube のみ対応です。
+        description: YouTube、X、Netflix の動画プレーヤーのコントロールバーに翻訳ボタンを表示します。
       autoStart:
         title: 動画を開いたら翻訳する
         description: 動画の読み込みが終わり次第、ボタンを押さなくても字幕の翻訳を始めます。
@@ -1655,9 +1664,10 @@ subtitles:
     httpUnknown: HTTP エラー $1
     invalidResponse: YouTube字幕のレスポンス形式が無効です
     networkError: 字幕取得時にネットワークエラーが発生しました
-    fetchSubTimeout: YouTube字幕の取得がタイムアウトしました
+    fetchSubTimeout: 字幕の取得がタイムアウトしました
     buttonNotFound: 字幕ボタンが見つかりません
     noSubtitlesFound: この動画には字幕がありません
+    trackFileNotLoaded: 字幕を読み込めませんでした。ページを再読み込みしてみてください
     videoNotFound: 動画要素が見つかりません
     controlsBarNotFound: コントロールバーが見つかりません
     aiRateLimited: リクエストが多すぎます。後でもう一度お試しください

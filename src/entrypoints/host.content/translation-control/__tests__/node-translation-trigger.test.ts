@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import type { Config } from "@/types/config/config"
 import { afterEach, describe, expect, it, vi } from "vitest"
+import { SELECTION_SHORTCUT_CLAIMED_EVENT } from "@/utils/constants/selection"
 import { registerNodeTranslationTriggerListeners } from "../node-translation-trigger"
 
 function createConfig(hotkey: Config["pageTranslation"]["node"]["hotkey"]): Config {
@@ -219,6 +220,27 @@ describe("registerNodeTranslationTriggerListeners", () => {
     await vi.advanceTimersByTimeAsync(500)
     dispatchKeyboardEvent("keyup", "a")
     dispatchKeyboardEvent("keyup", "Control")
+    await Promise.resolve()
+
+    expect(onTrigger).not.toHaveBeenCalled()
+  })
+
+  it("cancels the hotkey when a selection shortcut takes a key the hotkey never sees", async () => {
+    vi.useFakeTimers()
+    const onTrigger = vi.fn<(...args: any[]) => any>()
+
+    teardown = registerNodeTranslationTriggerListeners({
+      getConfig: () => Promise.resolve(createConfig("alt")),
+      onTrigger,
+    })
+
+    dispatchMouseEvent("mouseover", { clientX: 70, clientY: 80 })
+    dispatchKeyboardEvent("keydown", "Alt")
+    await Promise.resolve()
+    // Alt+T ran selection translation; its "T" keydown never reached the document.
+    window.dispatchEvent(new Event(SELECTION_SHORTCUT_CLAIMED_EVENT))
+    await vi.advanceTimersByTimeAsync(500)
+    dispatchKeyboardEvent("keyup", "Alt")
     await Promise.resolve()
 
     expect(onTrigger).not.toHaveBeenCalled()

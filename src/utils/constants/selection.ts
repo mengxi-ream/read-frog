@@ -12,6 +12,12 @@ export const EXTERNAL_SELECTION_CLEAR_EVENT = "read-frog:external-selection-clea
 /** The lazy iframe trigger replays the gesture after React installs its listeners. */
 export const DEFERRED_SELECTION_OPEN_EVENT = "read-frog:deferred-selection-open"
 export const SELECTION_TOOLBAR_READY_EVENT = "read-frog:selection-toolbar-ready"
+/**
+ * Fired on `window` when a selection shortcut runs and stops its key from reaching the page.
+ * The paragraph hotkey (host content script) would otherwise see only the modifier it shares
+ * with that shortcut, and translate the hovered paragraph when it is released.
+ */
+export const SELECTION_SHORTCUT_CLAIMED_EVENT = "read-frog:selection-shortcut-claimed"
 
 export interface DeferredSelectionOpenDetail {
   text: string
@@ -29,3 +35,12 @@ declare global {
 // beside the actions' ids.
 export const SELECTION_TOOLBAR_FEATURE_IDS = ["translate", "speak"] as const
 export type SelectionToolbarFeatureId = (typeof SELECTION_TOOLBAR_FEATURE_IDS)[number]
+
+// Reads the selection aloud. Alt+Shift, like the built-in actions' keys (see
+// BUILT_IN_ACTION_DEFAULT_SHORTCUTS); S is taken by ChromeOS, so R, for "read".
+export const DEFAULT_SELECTION_SPEAK_SHORTCUT_KEY = "Alt+Shift+R"
+
+// Speak's key: a config without one has the default key, an empty one has none.
+export function getSpeakShortcut(speak: { shortcut?: string }) {
+  return speak.shortcut ?? DEFAULT_SELECTION_SPEAK_SHORTCUT_KEY
+}

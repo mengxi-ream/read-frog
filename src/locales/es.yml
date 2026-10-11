@@ -522,7 +522,7 @@ options:
         description: Mejora Read Frog ayudándonos a localizar errores, pulir la interfaz y más
   shortcuts:
     title: Atajos
-    pageDescription: Define las teclas que activan la traducción mientras lees.
+    pageDescription: Define las teclas que traducen, leen en voz alta y ejecutan acciones AI mientras lees.
     setShortcut: Configurar atajo
     pageTranslation:
       title: Traducción de la página
@@ -542,6 +542,15 @@ options:
     translationHub:
       title: Centro de traducción
       description: Abre el Centro de traducción en una pestaña nueva.
+    selectionSpeak:
+      title: "Leer la selección en voz alta"
+      description: "Lee en voz alta el texto seleccionado. Vuelve a pulsar para detener."
+    actions:
+      title: "Acciones AI"
+      description: "Ejecuta una acción AI sobre el texto seleccionado. Las acciones personalizadas no tienen atajo hasta que les asignes uno aquí."
+    turnedOff: "Está desactivado, así que este atajo no hace nada hasta que lo vuelvas a activar."
+    clash: "Mismo atajo que «$1». Cambia uno de ellos."
+    taken: "«$2» ya usa $1."
   overlayTools:
     title: Herramientas superpuestas
   inputTranslation:
@@ -1382,7 +1391,7 @@ options:
       title: Aspectos básicos
       enable:
         title: Activar subtítulos de video
-        description: Añade un botón de traducción a los controles del reproductor. Por ahora solo funciona en YouTube.
+        description: Añade un botón de traducción a los controles del reproductor en YouTube, X y Netflix.
       autoStart:
         title: Traducir al abrir el video
         description: Empieza a traducir en cuanto se carga el video, sin pulsar el botón.
@@ -1660,9 +1669,10 @@ subtitles:
     httpUnknown: Error HTTP $1
     invalidResponse: Formato de respuesta de subtítulos de Youtube no válido
     networkError: Se produjo un error de red al obtener subtítulos
-    fetchSubTimeout: Se agotó el tiempo al obtener subtítulos de youtube
+    fetchSubTimeout: Se agotó el tiempo al obtener subtítulos
     buttonNotFound: Botón de subtítulos no encontrado
     noSubtitlesFound: No hay subtítulos disponibles para este video
+    trackFileNotLoaded: No se pudieron cargar los subtítulos; intenta actualizar la página
     videoNotFound: Elemento de video no encontrado
     controlsBarNotFound: Barra de controles no encontrada
     aiRateLimited: Demasiadas solicitudes, inténtalo de nuevo más tarde

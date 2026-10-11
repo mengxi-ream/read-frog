@@ -281,15 +281,19 @@ export function renderInlineAtomTranslation(
   container.replaceChildren(fragment)
 }
 
+/** Every element `isInlineAtomElement` accepts: native MathML plus the site-rule atoms. */
+export function getInlineAtomSelector(config: Config): string {
+  const { atomSelector } = getEffectiveSiteRule(config, window.location.href)
+  return atomSelector ? `math,${atomSelector}` : "math"
+}
+
 /**
  * Whether `root` holds a renderable atom that is host content (clones inside
  * our own wrappers never count). Used to keep atom-bearing containers off the
  * virtual-paragraph path, whose unit texts cannot carry placeholders.
  */
 export function containsInlineAtomOutsideWrappers(root: HTMLElement, config: Config): boolean {
-  const { atomSelector } = getEffectiveSiteRule(config, window.location.href)
-  const selector = atomSelector ? `math,${atomSelector}` : "math"
-  for (const element of root.querySelectorAll<HTMLElement>(selector)) {
+  for (const element of root.querySelectorAll<HTMLElement>(getInlineAtomSelector(config))) {
     if (element.closest(`.${CONTENT_WRAPPER_CLASS}`) !== null) continue
     if (isRenderableInlineAtom(element)) return true
   }

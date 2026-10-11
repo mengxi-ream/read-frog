@@ -99,6 +99,10 @@ export const LLM_PROVIDER_MODELS = {
     "gemini-2.0-flash",
   ],
   anthropic: [
+    // https://platform.claude.com/docs/en/models/overview (reviewed 2026-10-08)
+    "claude-haiku-5-5",
+    "claude-sonnet-5-5",
+    "claude-opus-5-5",
     "claude-haiku-4-5",
     "claude-sonnet-5",
     "claude-opus-5",
@@ -166,6 +170,9 @@ export const LLM_PROVIDER_MODELS = {
     "grok-4.20-0309-reasoning",
   ],
   bedrock: [
+    "anthropic.claude-haiku-5-5",
+    "anthropic.claude-sonnet-5-5",
+    "anthropic.claude-opus-5-5",
     "us.anthropic.claude-sonnet-5",
     "amazon.titan-tg1-large",
     "amazon.titan-text-express-v1",
@@ -598,7 +605,16 @@ export const LLM_MODEL_OPTIONS: Array<{
     options: { thinkingConfig: { thinkingBudget: 0, includeThoughts: false } },
   },
 
-  // Claude - disable thinking
+  // Claude - use the lowest supported thinking setting.
+  // https://platform.claude.com/docs/en/build-with-claude/thinking
+  {
+    pattern: /^claude-(?:opus-5-5|fable-5(?:-1)?)$/i,
+    options: { effort: "low" },
+  },
+  {
+    pattern: /^claude-sonnet-5-5$/i,
+    options: { thinking: { type: "between_tools" } },
+  },
   {
     pattern: /^claude-/i,
     options: { thinking: { type: "disabled" } },

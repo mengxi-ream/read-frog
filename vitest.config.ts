@@ -1,10 +1,18 @@
+import process from "node:process"
 import react from "@vitejs/plugin-react"
 import { configDefaults, defineConfig } from "vitest/config"
 import { WxtVitest } from "wxt/testing/vitest-plugin"
+import { isLocalPackagesEnabled, LOCAL_PACKAGES_DEDUPE } from "./src/env/shared.ts"
 
 export default defineConfig({
   // TODO: remove any
   plugins: [WxtVitest() as any, react()],
+  resolve: {
+    // WxtVitest brings wxt.config.ts's aliases but not its `vite` options.
+    // Only local packages need deduping here: the CodeMirror tests must still
+    // fail when the lockfile splits a package (#1782).
+    dedupe: isLocalPackagesEnabled(process.env) ? LOCAL_PACKAGES_DEDUPE : [],
+  },
   test: {
     exclude: [...configDefaults.exclude, "**/.claude/**", "**/repos/**"],
     environment: "node",

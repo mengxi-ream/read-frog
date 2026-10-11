@@ -5,16 +5,18 @@ import type { TestSeriesObject } from "./types"
  * spreads the previous version is not a snapshot, because editing v109 would
  * silently change what v110 asserts.
  *
- * Delta from v109: top-level `wordLookup` is added with the built-in Dictionary
- * as its action in every series — the action word lookup ran before it was
- * configurable.
+ * Delta from v109: `selectionToolbar.features.speak.shortcut` is added
+ * ("Alt+Shift+R"), and each built-in action's state in
+ * `selectionToolbar.builtInActions` gets its key: dictionary "Alt+Shift+D",
+ * sentence analysis "Alt+Shift+G", improve writing "Alt+Shift+W". No series
+ * already gives one of those keys to another shortcut, so every series gets
+ * all four; custom actions get no key.
  */
 
 export const testSeries: TestSeriesObject = {
   "complex-config-from-v020": {
     description: "Adds opacity to selection toolbar",
     config: {
-      wordLookup: { actionId: "default-dictionary" },
       translationHub: {
         shortcut: "Alt+Shift+H",
         selectedProviderIds: null,
@@ -390,20 +392,24 @@ export const testSeries: TestSeriesObject = {
           },
           speak: {
             enabled: true,
+            shortcut: "Alt+Shift+R",
           },
         },
         builtInActions: {
           dictionary: {
             enabled: true,
             providerId: "deepseek-default",
+            shortcut: "Alt+Shift+D",
           },
           sentenceAnalysis: {
             enabled: true,
             providerId: "deepseek-default",
+            shortcut: "Alt+Shift+G",
           },
           improveWriting: {
             enabled: true,
             providerId: "deepseek-default",
+            shortcut: "Alt+Shift+W",
           },
         },
       },
@@ -483,7 +489,6 @@ export const testSeries: TestSeriesObject = {
     description:
       "Single provider, LLM detection mode; features get enabled toggles and speak added",
     config: {
-      wordLookup: { actionId: "default-dictionary" },
       translationHub: {
         shortcut: "Alt+Shift+H",
         selectedProviderIds: null,
@@ -802,20 +807,24 @@ export const testSeries: TestSeriesObject = {
           },
           speak: {
             enabled: true,
+            shortcut: "Alt+Shift+R",
           },
         },
         builtInActions: {
           dictionary: {
             enabled: true,
             providerId: "google-default",
+            shortcut: "Alt+Shift+D",
           },
           sentenceAnalysis: {
             enabled: true,
             providerId: "google-default",
+            shortcut: "Alt+Shift+G",
           },
           improveWriting: {
             enabled: true,
             providerId: "google-default",
+            shortcut: "Alt+Shift+W",
           },
         },
       },
@@ -895,7 +904,6 @@ export const testSeries: TestSeriesObject = {
     description:
       "Covers legacy prompt token migration for translate, custom actions, and video subtitles",
     config: {
-      wordLookup: { actionId: "default-dictionary" },
       translationHub: {
         shortcut: "Alt+Shift+H",
         selectedProviderIds: null,
@@ -1308,20 +1316,24 @@ export const testSeries: TestSeriesObject = {
           },
           speak: {
             enabled: true,
+            shortcut: "Alt+Shift+R",
           },
         },
         builtInActions: {
           dictionary: {
             enabled: false,
             providerId: "read-frog-free-ai",
+            shortcut: "Alt+Shift+D",
           },
           sentenceAnalysis: {
             enabled: true,
             providerId: "read-frog-free-ai",
+            shortcut: "Alt+Shift+G",
           },
           improveWriting: {
             enabled: true,
             providerId: "read-frog-free-ai",
+            shortcut: "Alt+Shift+W",
           },
         },
       },
@@ -1409,7 +1421,6 @@ export const testSeries: TestSeriesObject = {
   "default-dictionary-wording": {
     description: "Renames dictionary wording from context to paragraphs",
     config: {
-      wordLookup: { actionId: "default-dictionary" },
       translationHub: {
         shortcut: "Alt+Shift+H",
         selectedProviderIds: null,
@@ -1728,20 +1739,24 @@ export const testSeries: TestSeriesObject = {
           },
           speak: {
             enabled: true,
+            shortcut: "Alt+Shift+R",
           },
         },
         builtInActions: {
           dictionary: {
             enabled: true,
             providerId: "google-default",
+            shortcut: "Alt+Shift+D",
           },
           sentenceAnalysis: {
             enabled: true,
             providerId: "google-default",
+            shortcut: "Alt+Shift+G",
           },
           improveWriting: {
             enabled: true,
             providerId: "google-default",
+            shortcut: "Alt+Shift+W",
           },
         },
       },
@@ -1821,7 +1836,6 @@ export const testSeries: TestSeriesObject = {
     description:
       "v103 only: a custom action with a hand-written layout using bracket refs, CJK field names and an escaped %",
     config: {
-      wordLookup: { actionId: "default-dictionary" },
       translationHub: {
         shortcut: "Alt+Shift+H",
         selectedProviderIds: null,
@@ -2195,20 +2209,24 @@ export const testSeries: TestSeriesObject = {
           },
           speak: {
             enabled: true,
+            shortcut: "Alt+Shift+R",
           },
         },
         builtInActions: {
           dictionary: {
             enabled: true,
             providerId: "google-default",
+            shortcut: "Alt+Shift+D",
           },
           sentenceAnalysis: {
             enabled: true,
             providerId: "google-default",
+            shortcut: "Alt+Shift+G",
           },
           improveWriting: {
             enabled: true,
             providerId: "google-default",
+            shortcut: "Alt+Shift+W",
           },
         },
       },

@@ -522,7 +522,7 @@ options:
         description: Xətaları tapmaqda, görünüşü təkmilləşdirməkdə və digər işlərdə bizə kömək edərək Read Frog təcrübəsini yaxşılaşdırın
   shortcuts:
     title: Qısayollar
-    pageDescription: Oxuyarkən tərcüməni başladan düymələri təyin edin.
+    pageDescription: Oxuyarkən tərcümə, səsləndirmə və süni intellekt əməliyyatlarını başladan düymələri təyin edin.
     setShortcut: Qısayol təyin et
     pageTranslation:
       title: Səhifə tərcüməsi
@@ -542,6 +542,15 @@ options:
     translationHub:
       title: Tərcümə mərkəzi
       description: Tərcümə mərkəzini yeni vərəqdə açın.
+    selectionSpeak:
+      title: "Seçilmiş mətnin səsləndirilməsi"
+      description: "Seçilmiş mətni ucadan oxuyun. Dayandırmaq üçün yenidən basın."
+    actions:
+      title: "Süni intellekt əməliyyatları"
+      description: "Seçilmiş mətn üzərində süni intellekt əməliyyatı işə salın. Fərdi əməliyyatların burada təyin edənə qədər qısayolu olmur."
+    turnedOff: "Bu funksiya söndürülüb, yenidən yandırana qədər bu qısayol heç nə etmir."
+    clash: "“$1” ilə eyni qısayol. Birini dəyişin."
+    taken: "$1 artıq “$2” tərəfindən istifadə olunur."
   overlayTools:
     title: Səhifəüstü alətlər
   inputTranslation:
@@ -1382,7 +1391,7 @@ options:
       title: Əsas parametrlər
       enable:
         title: Video subtitrlərini aktiv et
-        description: Video pleyerin idarəetmə panelinə tərcümə düyməsi əlavə edir. Hələlik yalnız YouTube üçün.
+        description: YouTube, X və Netflix-də video pleyerin idarəetmə panelinə tərcümə düyməsi əlavə edir.
       autoStart:
         title: Açılan kimi tərcümə et
         description: Düyməyə basmadan video yüklənən kimi tərcüməyə başlayın.
@@ -1653,9 +1662,10 @@ subtitles:
     httpUnknown: HTTP xətası $1
     invalidResponse: YouTube subtitr cavabının formatı yanlışdır
     networkError: Subtitrlər gətirilərkən şəbəkə xətası baş verdi
-    fetchSubTimeout: YouTube subtitrlərinin gətirilməsi üçün vaxt bitdi
+    fetchSubTimeout: Subtitrlərin gətirilməsi üçün vaxt bitdi
     buttonNotFound: Subtitr düyməsi tapılmadı
     noSubtitlesFound: Bu video üçün subtitr yoxdur
+    trackFileNotLoaded: Subtitrləri yükləmək mümkün olmadı, səhifəni yeniləməyə cəhd edin
     videoNotFound: Video elementi tapılmadı
     controlsBarNotFound: İdarəetmə paneli tapılmadı
     aiRateLimited: Həddindən artıq sorğu var, daha sonra yenidən cəhd edin

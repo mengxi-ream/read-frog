@@ -522,7 +522,7 @@ options:
         description: 通过帮助我们定位 bug、优化界面布局等改善 Read Frog
   shortcuts:
     title: 快捷键
-    pageDescription: 设置阅读时触发翻译的按键。
+    pageDescription: 设置阅读时触发翻译、朗读和 AI 指令的按键。
     setShortcut: 设置快捷键
     pageTranslation:
       title: 网页翻译
@@ -542,6 +542,15 @@ options:
     translationHub:
       title: 翻译中心
       description: 在新标签页中打开翻译中心。
+    selectionSpeak:
+      title: "划词朗读"
+      description: "朗读选中的文本，再按一次停止。"
+    actions:
+      title: "AI 指令"
+      description: "对选中的文本运行 AI 指令。自定义指令默认没有快捷键，在这里设置即可。"
+    turnedOff: "该功能已关闭，重新开启前快捷键不会生效。"
+    clash: "与「$1」的快捷键相同，请修改其中一个。"
+    taken: "$1 已被「$2」使用。"
   overlayTools:
     title: 悬浮工具
   inputTranslation:
@@ -1387,7 +1396,7 @@ options:
       title: 基础设置
       enable:
         title: 开启视频字幕
-        description: 在视频播放器控制栏加上翻译按钮。目前只支持 YouTube。
+        description: 在 YouTube、X 和 Netflix 的视频播放器控制栏加上翻译按钮。
       autoStart:
         title: 打开视频就翻译
         description: 视频加载完成后自动开始翻译字幕，不用再点按钮。
@@ -1665,9 +1674,10 @@ subtitles:
     httpUnknown: HTTP 错误 $1
     invalidResponse: youtube 字幕响应格式无效
     networkError: 获取字幕时发生网络错误
-    fetchSubTimeout: 获取 youtube 字幕超时
+    fetchSubTimeout: 获取字幕超时
     buttonNotFound: 字幕按钮未找到
     noSubtitlesFound: 当前视频没有字幕
+    trackFileNotLoaded: 字幕加载失败，请刷新页面后重试
     videoNotFound: 视频元素未找到
     controlsBarNotFound: 控制栏未找到
     aiRateLimited: 请求过于频繁，请稍后再试

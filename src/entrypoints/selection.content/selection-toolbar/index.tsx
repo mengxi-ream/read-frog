@@ -38,7 +38,6 @@ import {
   SelectionDirection,
   viewportPointToHostPoint,
 } from "./positioning"
-import { SelectionSpeechProvider } from "./speak-button"
 
 const EXTERNAL_SELECTION_DIRECTION_MAP: Record<ExternalSelectionDirection, SelectionDirection> = {
   "top-left": SelectionDirection.TOP_LEFT,
@@ -630,22 +629,20 @@ export function SelectionToolbar() {
               : "pointer-events-none opacity-0",
           )}
         >
-          <SelectionSpeechProvider>
-            {/* Clips the buttons' hover fills to its rounded corners. The close
-                button is positioned against the wrapper above, so it isn't clipped. */}
-            <div
-              data-slot="selection-toolbar-surface"
-              className="flex items-center overflow-hidden rounded-lg border border-border/50 bg-popover shadow-md"
-              style={{ opacity: "var(--rf-selection-opacity, 1)" }}
-            >
-              <div className="no-scrollbar flex max-w-105 items-center overflow-x-auto overflow-y-hidden scroll-driven:scroll-fade-x">
-                <SelectionToolbarPinnedItems />
-              </div>
-              {hasAnyPinnedItem && <div className="w-px shrink-0 self-stretch bg-border" />}
-              <SelectionToolbarMoreMenu />
-              <CloseButton />
+          {/* Clips the buttons' hover fills to its rounded corners. The close
+              button is positioned against the wrapper above, so it isn't clipped. */}
+          <div
+            data-slot="selection-toolbar-surface"
+            className="flex items-center overflow-hidden rounded-lg border border-border/50 bg-popover shadow-md"
+            style={{ opacity: "var(--rf-selection-opacity, 1)" }}
+          >
+            <div className="no-scrollbar flex max-w-105 items-center overflow-x-auto overflow-y-hidden scroll-driven:scroll-fade-x">
+              <SelectionToolbarPinnedItems />
             </div>
-          </SelectionSpeechProvider>
+            {hasAnyPinnedItem && <div className="w-px shrink-0 self-stretch bg-border" />}
+            <SelectionToolbarMoreMenu />
+            <CloseButton />
+          </div>
         </div>
       )}
     </div>

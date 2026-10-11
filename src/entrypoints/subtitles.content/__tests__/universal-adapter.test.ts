@@ -260,6 +260,18 @@ describe("universalVideoAdapter", () => {
     await expect((adapter as any).startTranslation()).resolves.toBe(false)
   })
 
+  // Netflix answers the track check with a round trip to the page, which can take seconds.
+  it("starts a fresh load without waiting on the fetcher's track check", async () => {
+    const { adapter, subtitlesFetcher } = createAdapter([{ text: "x", start: 0, end: 1 }])
+    subtitlesFetcher.shouldUseSameTrack.mockReturnValue(new Promise(() => {}))
+    subtitlesFetcher.fetch.mockRejectedValue(new Error("boom"))
+    attachScheduler(adapter, true)
+
+    void (adapter as any).startTranslation()
+
+    await vi.waitFor(() => expect(subtitlesFetcher.fetch).toHaveBeenCalledTimes(1))
+  })
+
   // The loading state has no auto-hide of its own, so a wall that only raises a
   // toast used to leave "Loading AI subtitles" pinned to the player forever.
   it("clears the loading state and anchors the AI wall to its trigger", async () => {

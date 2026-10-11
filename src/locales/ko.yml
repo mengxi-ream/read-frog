@@ -521,7 +521,7 @@ options:
         description: 버그를 찾고 UI 레이아웃을 다듬는 등 Read Frog 개선에 기여합니다
   shortcuts:
     title: 단축키
-    pageDescription: 읽는 중에 번역을 실행하는 키를 설정합니다.
+    pageDescription: 읽는 중에 번역, 읽기, AI 액션을 실행하는 키를 설정합니다.
     setShortcut: 단축키 설정
     pageTranslation:
       title: 페이지 번역
@@ -541,6 +541,15 @@ options:
     translationHub:
       title: 번역 허브
       description: 번역 허브를 새 탭에서 엽니다.
+    selectionSpeak:
+      title: "선택 영역 읽기"
+      description: "선택한 텍스트를 소리 내어 읽습니다. 다시 누르면 멈춥니다."
+    actions:
+      title: "AI 액션"
+      description: "선택한 텍스트에 AI 액션을 실행합니다. 커스텀 액션은 처음에 단축키가 없으니 여기서 설정하세요."
+    turnedOff: "이 기능이 꺼져 있어 다시 켤 때까지 이 키는 동작하지 않습니다."
+    clash: "“$1”과(와) 같은 키입니다. 하나를 바꾸세요."
+    taken: "$1 키는 이미 “$2”에서 사용 중입니다."
   overlayTools:
     title: 오버레이 도구
   inputTranslation:
@@ -1377,7 +1386,7 @@ options:
       title: 기본 설정
       enable:
         title: 비디오 자막 켜기
-        description: 동영상 플레이어 컨트롤 바에 번역 버튼을 추가합니다. 현재는 YouTube만 지원합니다.
+        description: YouTube, X, Netflix의 동영상 플레이어 컨트롤 바에 번역 버튼을 추가합니다.
       autoStart:
         title: 영상을 열면 바로 번역
         description: 영상이 로드되면 버튼을 누르지 않아도 자막 번역을 시작합니다.
@@ -1655,9 +1664,10 @@ subtitles:
     httpUnknown: HTTP 오류 $1
     invalidResponse: 유튜브 자막 응답 형식이 잘못되었습니다
     networkError: 자막을 가져오는 도중 네트워크 오류가 발생했습니다
-    fetchSubTimeout: 유튜브 자막 가져오기 시간이 초과되었습니다
+    fetchSubTimeout: 자막 가져오기 시간이 초과되었습니다
     buttonNotFound: 자막 버튼을 찾을 수 없습니다
     noSubtitlesFound: 현재 영상에 자막이 없습니다
+    trackFileNotLoaded: 자막을 불러오지 못했습니다. 페이지를 새로고침해 보세요
     videoNotFound: 비디오 요소를 찾을 수 없습니다
     controlsBarNotFound: 컨트롤 바를 찾을 수 없습니다
     aiRateLimited: 요청이 너무 많습니다. 나중에 다시 시도해 주세요
