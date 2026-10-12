@@ -1,7 +1,11 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
-import { prepareLatexmlTextBoxes, restoreLatexmlTextBoxes } from "../latexml-text-box"
+import {
+  isLatexmlTextBoxReflowRecord,
+  prepareLatexmlTextBoxes,
+  restoreLatexmlTextBoxes,
+} from "../latexml-text-box"
 
 const originalLocation = window.location
 
@@ -69,6 +73,26 @@ describe("LaTeXML text box adaptation", () => {
     root.hidden = true
     prepareLatexmlTextBoxes(root, DEFAULT_CONFIG)
     expect(root.querySelector("svg")).not.toBeNull()
+  })
+
+  it("marks its own DOM moves so the page observer does not walk the card again", () => {
+    const root = fixture()
+    const observer = new MutationObserver(() => {})
+    observer.observe(document.body, { childList: true, subtree: true })
+
+    prepareLatexmlTextBoxes(root, DEFAULT_CONFIG)
+    const reflowRecords = observer.takeRecords()
+    expect(reflowRecords.length).toBeGreaterThan(0)
+    expect(reflowRecords.every(isLatexmlTextBoxReflowRecord)).toBe(true)
+
+    root.querySelector(".ltx_p")!.append(document.createElement("span"))
+    expect(observer.takeRecords().some(isLatexmlTextBoxReflowRecord)).toBe(false)
+
+    restoreLatexmlTextBoxes()
+    const restoreRecords = observer.takeRecords()
+    expect(restoreRecords.length).toBeGreaterThan(0)
+    expect(restoreRecords.every(isLatexmlTextBoxReflowRecord)).toBe(true)
+    observer.disconnect()
   })
 
   it("follows the reflowLatexmlTextBoxes site rule", () => {

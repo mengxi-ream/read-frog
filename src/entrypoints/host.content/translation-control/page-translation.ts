@@ -30,6 +30,7 @@ import {
   isWalkBlockedElement as isWalkBlockedElementFilter,
 } from "@/utils/host/dom/filter"
 import { deepQueryTopLevelSelector } from "@/utils/host/dom/find"
+import { isLatexmlTextBoxReflowRecord } from "@/utils/host/dom/latexml-text-box"
 import {
   canSplitGiantWithoutStrandingOwnText,
   walkAndLabelElement,
@@ -1038,6 +1039,10 @@ export class PageTranslationManager implements IPageTranslationManager {
     if (record.type === "characterData" && wasCharacterDataChangeExtensionDriven(record.target)) {
       return true
     }
+    // The LaTeXML reflow swaps an SVG box for a card during the walk that
+    // already labels the card's content; walking it again would translate the
+    // box twice.
+    if (isLatexmlTextBoxReflowRecord(record)) return true
     const targetElement = isHTMLElement(record.target) ? record.target : record.target.parentElement
     const wrapperElement = targetElement?.closest<HTMLElement>(`.${CONTENT_WRAPPER_CLASS}`)
     if (wrapperElement) {

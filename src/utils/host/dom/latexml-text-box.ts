@@ -11,6 +11,18 @@ import { deepQueryAllSelector } from "./find"
 const TEXT_BOX_ATTRIBUTE = "data-read-frog-latexml-text-box"
 const ORIGINAL_ATTRIBUTE = "data-read-frog-latexml-original"
 
+// Nodes the reflow itself moves. The page MutationObserver would otherwise
+// treat the card as new site content and walk it as a fresh root, which makes
+// the box content its own translation unit and translates it a second time.
+const reflowedNodes = new WeakSet<Node>()
+
+/** Whether a mutation record only moves nodes of a LaTeXML text box reflow. */
+export function isLatexmlTextBoxReflowRecord(record: MutationRecord): boolean {
+  if (record.type !== "childList") return false
+  const nodes = [...record.addedNodes, ...record.removedNodes]
+  return nodes.length > 0 && nodes.every((node) => reflowedNodes.has(node))
+}
+
 /**
  * LaTeXML renders some abstracts as HTML inside fixed-size SVG foreignObjects.
  * Reflow those text-only cards as HTML while translating: entering SVG directly
@@ -71,6 +83,7 @@ export function prepareLatexmlTextBoxes(root: HTMLElement, config: Config): void
     // so cleanup still works after a content-script/extension reload.
     const original = svg.ownerDocument.createElement("template")
     original.setAttribute(ORIGINAL_ATTRIBUTE, "")
+    for (const node of [wrapper, svg, content, original]) reflowedNodes.add(node)
     parent.replaceChild(wrapper, svg)
     original.content.append(svg)
     wrapper.append(content, original)
@@ -121,6 +134,7 @@ export function restoreLatexmlTextBoxes(root: Document | ShadowRoot = document):
     const originalParent = svg?.querySelector(".ltx_foreignobject_container")
     const content = wrapper.querySelector<HTMLElement>(".ltx_foreignobject_content")
     if (svg && originalParent && content?.parentElement === wrapper) {
+      for (const node of [wrapper, svg, content]) reflowedNodes.add(node)
       originalParent.append(content)
       wrapper.replaceWith(svg)
     }
