@@ -6,6 +6,7 @@ import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
 import { defineLayoutHost } from "@read-frog/layout-engine/contract"
 import { buildLayoutScope } from "@read-frog/layout-engine/core"
 import { MAX_CUSTOM_ACTION_LAYOUT_LENGTH } from "@/types/config/selection-toolbar"
+import { getSelectionOutputValues } from "@/utils/constants/custom-action"
 import { contentLocaleFor, getImproveWritingLabels, getSentenceAnalysisLabels } from "./labels"
 import { IMPROVE_WRITING_LABELS_CTX_KEY, SENTENCE_ANALYSIS_LABELS_CTX_KEY } from "./slots"
 
@@ -49,7 +50,8 @@ export interface CustomActionLayoutScopeInput {
 }
 
 // The data a custom action's layout renders: the (possibly partial) answer
-// keyed by field name, plus ctx.
+// keyed by field name, plus ctx. A field that holds the selection has it from
+// the first frame, before the model has written anything.
 export function buildCustomActionLayoutScope({
   outputSchema,
   value,
@@ -57,10 +59,11 @@ export function buildCustomActionLayoutScope({
   targetCode,
   status,
 }: CustomActionLayoutScopeInput): LayoutScope {
+  const selectionValues = getSelectionOutputValues(outputSchema, selection)
   return buildLayoutScope({
     host: CUSTOM_ACTION_LAYOUT_HOST,
     fields: outputSchema,
-    values: value,
+    values: value === null && status !== "streaming" ? null : { ...value, ...selectionValues },
     ctx: {
       selection,
       targetLanguage: LANG_CODE_TO_EN_NAME[targetCode],

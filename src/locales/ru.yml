@@ -705,6 +705,8 @@ options:
         save: Сохранить
         defaultFieldName: результат
         fieldNamePlaceholder: имя_поля
+        selectionField: "Выделенный текст"
+        selectionFieldDescription: "Выделенный вами текст сохраняется как есть. ИИ его не пишет."
         autoFieldPrefix: поле
         addFieldDialog:
           title: Добавить поле вывода
@@ -927,6 +929,7 @@ options:
         sentenceAnalysis:
           name: "Разбор предложения"
           description: "Размечает длинное предложение, как учитель: основа, все придаточные и трудные места"
+          fieldSentence: "Предложение"
           fieldAnnotations: "Разметка"
           fieldTranslation: "Перевод"
           roles:
@@ -992,6 +995,7 @@ options:
         improveWriting:
           name: "Улучшить текст"
           description: "Отмечает ошибки и неудачные фразы, как учитель, и исправляет текст под ситуацию"
+          fieldOriginal: "Исходный текст"
           fieldSetting: "Ситуация"
           fieldAnnotations: "Пометки"
           fieldImproved: "Исправленный текст"

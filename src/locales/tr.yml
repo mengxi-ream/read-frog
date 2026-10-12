@@ -705,6 +705,8 @@ options:
         save: Kaydet
         defaultFieldName: sonuç
         fieldNamePlaceholder: alan_adı
+        selectionField: "Seçilen metin"
+        selectionFieldDescription: "Seçtiğiniz metin olduğu gibi kaydedilir. Yapay zekâ yazmaz."
         autoFieldPrefix: alan
         addFieldDialog:
           title: Çıktı alanı ekle
@@ -927,6 +929,7 @@ options:
         sentenceAnalysis:
           name: "Cümle Analizi"
           description: "Uzun bir cümleyi öğretmen gibi işaretler: çekirdeği, her yan cümleyi ve zor noktaları"
+          fieldSentence: "Cümle"
           fieldAnnotations: "Açıklamalar"
           fieldTranslation: "Çeviri"
           roles:
@@ -992,6 +995,7 @@ options:
         improveWriting:
           name: "Yazıyı iyileştir"
           description: "Bir öğretmen gibi hataları ve doğal olmayan ifadeleri işaretler, metni duruma göre düzeltir"
+          fieldOriginal: "Orijinal metin"
           fieldSetting: "Bağlam"
           fieldAnnotations: "İşaretler"
           fieldImproved: "Düzeltilmiş metin"

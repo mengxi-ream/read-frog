@@ -48,9 +48,11 @@ describe("selection toolbar built-in actions", () => {
       icon: "streamline-color:search-visual-flat",
     })
     expect(action?.outputSchema.map((field) => field.id)).toEqual([
+      "default-sentence-analysis-sentence",
       "default-sentence-analysis-annotations",
       "default-sentence-analysis-translation",
     ])
+    expect(action?.outputSchema[0]?.source).toBe("selection")
     expect(action?.layout).toContain("default-sentence-analysis-annotations")
   })
 
@@ -64,6 +66,7 @@ describe("selection toolbar built-in actions", () => {
       icon: "streamline-color:ai-edit-spark-flat",
     })
     expect(action?.outputSchema.map((field) => field.id)).toEqual([
+      "default-improve-writing-original",
       "default-improve-writing-setting",
       "default-improve-writing-annotations",
       "default-improve-writing-improved",

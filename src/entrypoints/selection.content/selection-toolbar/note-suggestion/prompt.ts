@@ -1,5 +1,6 @@
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import type { SelectionToolbarCustomActionPromptTokens } from "@/utils/custom-action-prompt"
+import { getModelOutputFields } from "@/utils/constants/custom-action"
 import {
   buildStructuredOutputFieldList,
   replaceSelectionToolbarCustomActionPromptTokens,
@@ -166,7 +167,12 @@ export function buildNoteSuggestionPrompts(input: NoteSuggestionPromptInput): {
     replaceSelectionToolbarCustomActionPromptTokens(action.prompt, tokens),
     NOTE_SUGGESTION_MAX_ACTION_PROMPT_CHARS,
   )
-  const outputFields = buildStructuredOutputFieldList(action.outputSchema, tokens)
+  // A selection field is the selected text itself, filled in after; the model
+  // writes the rest.
+  const outputFields = buildStructuredOutputFieldList(
+    getModelOutputFields(action.outputSchema),
+    tokens,
+  )
 
   return {
     systemPrompt: buildNoteSuggestionSystemPrompt(
