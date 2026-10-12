@@ -37,6 +37,12 @@ export interface NoteSuggestionSessionResult {
 export interface NoteSuggestionFireInput {
   sessionKey: string
   selectionText: string
+  /**
+   * The selection as a custom action run saves it (normalizeSelectedText),
+   * which every note keeps in the action's selection fields. selectionText is
+   * prepared for translation and may have lost a few invisible characters.
+   */
+  savedSelectionText: string
   paragraphsText: string
   /** English name of the target language. */
   targetLangName: string
@@ -211,7 +217,7 @@ export function useNoteSuggestion() {
         ? validateNoteSuggestion({
             envelope: envelope.data,
             action: actionSnapshot,
-            selection: input.selectionText,
+            selection: input.savedSelectionText,
           })
         : null
 

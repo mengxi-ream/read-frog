@@ -164,7 +164,7 @@ describe("validateNoteSuggestion", () => {
     ).toEqual({ notes: [{ Score: 8 }], summaryFieldName: null })
   })
 
-  it("keeps the selected text in a selection field, which the model does not write", () => {
+  it("keeps the selected text, as given, in a selection field the model does not write", () => {
     const sentenceAction = createAction({
       outputSchema: [
         { id: "sentence", name: "Sentence", type: "string", description: "", source: "selection" },
@@ -176,7 +176,7 @@ describe("validateNoteSuggestion", () => {
       validateNoteSuggestion({
         envelope: { notes: [note([{ name: "Annotations", value: "[]" }])] },
         action: sentenceAction,
-        selection: "  Only then did she turn it down.  ",
+        selection: "Only then did she turn it down.",
       }),
     ).toEqual({
       notes: [{ Annotations: "[]", Sentence: "Only then did she turn it down." }],

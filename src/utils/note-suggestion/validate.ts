@@ -39,7 +39,10 @@ export interface ValidateNoteSuggestionInput {
   }
   /** Selected action snapshot taken when the request was fired. */
   action: SelectionToolbarCustomAction
-  /** The selected text, which every note keeps in the action's selection fields. */
+  /**
+   * The selected text as a custom action run saves it (normalizeSelectedText),
+   * which every note keeps, as given, in the action's selection fields.
+   */
   selection: string
 }
 
@@ -88,7 +91,7 @@ export function validateNoteSuggestion(
   const noteSchema = createStructuredObjectSchema(
     modelFields.map(({ name, type }) => ({ name, type })),
   )
-  const selectionValues = getSelectionOutputValues(action.outputSchema, input.selection.trim())
+  const selectionValues = getSelectionOutputValues(action.outputSchema, input.selection)
 
   const notes: NoteSuggestionNoteRecord[] = []
   for (const note of envelope.notes) {
