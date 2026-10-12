@@ -42,11 +42,8 @@ describe("getOrCreateWebPageContext", () => {
     mockParse.mockReset()
     mockWarn.mockReset()
 
-    mockParse.mockReturnValue({
-      content: "<h1>Readable page body</h1>",
-      contentMarkdown: "# Readable page body",
-    })
-    mockCreateMarkdownContent.mockReturnValue("# Converted readable page body")
+    mockParse.mockReturnValue({ content: "<h1>Readable page body</h1>" })
+    mockCreateMarkdownContent.mockReturnValue("# Readable page body")
 
     document.head.innerHTML = ""
     document.title = "Original Title"
@@ -74,17 +71,50 @@ describe("getOrCreateWebPageContext", () => {
     expect(mockDefuddleConstructor).toHaveBeenCalledTimes(1)
   })
 
-  it("parses webpage content as markdown with Defuddle", async () => {
+  it("extracts webpage content with Defuddle and converts it to markdown", async () => {
     const { getOrCreateWebPageContext } = await loadModule()
 
     const result = await getOrCreateWebPageContext()
 
     expect(result?.webContent).toBe("# Readable page body")
     expect(mockDefuddleConstructor).toHaveBeenCalledWith(document, {
-      separateMarkdown: true,
       url: window.location.href,
       useAsync: false,
     })
+    expect(mockCreateMarkdownContent).toHaveBeenCalledWith(
+      "<h1>Readable page body</h1>",
+      window.location.href,
+    )
+  })
+
+  it("converts only the leading content that fits the context limit", async () => {
+    const leading = `<p>${"a".repeat(1500)}</p><p>${"b".repeat(1500)}</p>`
+    const cladogram =
+      '<table class="clade"><tr><td>'.repeat(20) + "Anura" + "</td></tr></table>".repeat(20)
+    mockParse.mockReturnValueOnce({
+      content: `<article>${leading}<h2>Phylogeny</h2>${cladogram}</article>`,
+    })
+    const { getOrCreateWebPageContext } = await loadModule()
+
+    await getOrCreateWebPageContext()
+
+    expect(mockCreateMarkdownContent).toHaveBeenCalledWith(
+      `<article>${leading}</article>`,
+      window.location.href,
+    )
+  })
+
+  it("flattens tables nested inside other tables before converting to markdown", async () => {
+    const cladogram =
+      '<table class="clade"><tr><td>'.repeat(20) + "Anura" + "</td></tr></table>".repeat(20)
+    mockParse.mockReturnValueOnce({ content: `<article><p>Frogs</p>${cladogram}</article>` })
+    const { getOrCreateWebPageContext } = await loadModule()
+
+    await getOrCreateWebPageContext()
+
+    const markdownSource = String(mockCreateMarkdownContent.mock.lastCall?.[0])
+    expect(markdownSource.match(/<table/g)).toHaveLength(1)
+    expect(markdownSource).toContain("Anura")
   })
 
   it("reads webpage description from meta tags", async () => {
@@ -94,19 +124,6 @@ describe("getOrCreateWebPageContext", () => {
     const result = await getOrCreateWebPageContext()
 
     expect(result?.webDescription).toBe("Article description")
-  })
-
-  it("converts Defuddle HTML content when a separate markdown field is missing", async () => {
-    mockParse.mockReturnValueOnce({ content: "<h1>Readable page body</h1>" })
-    const { getOrCreateWebPageContext } = await loadModule()
-
-    const result = await getOrCreateWebPageContext()
-
-    expect(result?.webContent).toBe("# Converted readable page body")
-    expect(mockCreateMarkdownContent).toHaveBeenCalledWith(
-      "<h1>Readable page body</h1>",
-      window.location.href,
-    )
   })
 
   it("uses the page's own title for a context built while the tab shows its translation", async () => {
@@ -135,7 +152,7 @@ describe("getOrCreateWebPageContext", () => {
 
     // By now the page holds its translations; re-reading it would change the content.
     document.body.innerHTML += "<p>Translated paragraph</p>"
-    mockParse.mockReturnValueOnce({ contentMarkdown: "# Page body with translations" })
+    mockCreateMarkdownContent.mockReturnValueOnce("# Page body with translations")
     window.history.replaceState({}, "", "/article#far")
 
     const second = await getOrCreateWebPageContext()
@@ -177,7 +194,7 @@ describe("getOrCreateWebPageContext", () => {
 
     document.title = "Next Article Title"
     document.body.innerHTML = "<main>Next article body</main>"
-    mockParse.mockReturnValueOnce({ contentMarkdown: "## Next readable page body" })
+    mockCreateMarkdownContent.mockReturnValueOnce("## Next readable page body")
     window.history.replaceState({}, "", "/article-2")
 
     const second = await getOrCreateWebPageContext()
@@ -193,7 +210,7 @@ describe("getOrCreateWebPageContext", () => {
 
     const longContent = "x".repeat(2100)
     document.body.innerHTML = `<main>${longContent}</main>`
-    mockParse.mockReturnValueOnce({ contentMarkdown: longContent })
+    mockCreateMarkdownContent.mockReturnValueOnce(longContent)
 
     const result = await getOrCreateWebPageContext()
 
