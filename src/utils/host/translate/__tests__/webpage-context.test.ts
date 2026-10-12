@@ -104,6 +104,19 @@ describe("getOrCreateWebPageContext", () => {
     )
   })
 
+  it("flattens tables nested inside other tables before converting to markdown", async () => {
+    const cladogram =
+      '<table class="clade"><tr><td>'.repeat(20) + "Anura" + "</td></tr></table>".repeat(20)
+    mockParse.mockReturnValueOnce({ content: `<article><p>Frogs</p>${cladogram}</article>` })
+    const { getOrCreateWebPageContext } = await loadModule()
+
+    await getOrCreateWebPageContext()
+
+    const markdownSource = String(mockCreateMarkdownContent.mock.lastCall?.[0])
+    expect(markdownSource.match(/<table/g)).toHaveLength(1)
+    expect(markdownSource).toContain("Anura")
+  })
+
   it("reads webpage description from meta tags", async () => {
     document.head.innerHTML = `<meta name="description" content="  Article   description  ">`
     const { getOrCreateWebPageContext } = await loadModule()

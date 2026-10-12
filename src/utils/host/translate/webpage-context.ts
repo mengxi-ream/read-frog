@@ -32,9 +32,27 @@ function keepLeadingText(node: Node, budget: number) {
   }
 }
 
-function trimHtmlToLeadingText(html: string, budget: number): string {
+function flattenNestedTables(root: Element) {
+  for (const table of Array.from(root.querySelectorAll<HTMLTableElement>("table table"))) {
+    const block = table.ownerDocument.createElement("div")
+    if (table.caption) {
+      block.append(...table.caption.childNodes)
+    }
+    for (const row of Array.from(table.rows)) {
+      for (const cell of Array.from(row.cells)) {
+        const cellBlock = table.ownerDocument.createElement("div")
+        cellBlock.append(...cell.childNodes)
+        block.append(cellBlock)
+      }
+    }
+    table.replaceWith(block)
+  }
+}
+
+function prepareMarkdownSource(html: string): string {
   const doc = new DOMParser().parseFromString(html, "text/html")
-  keepLeadingText(doc.body, budget)
+  keepLeadingText(doc.body, WEB_PAGE_CONTENT_CHAR_LIMIT)
+  flattenNestedTables(doc.body)
   return doc.body.innerHTML
 }
 
@@ -48,10 +66,7 @@ async function extractWebpageContent(): Promise<string> {
     }).parse()
 
     if (result.content) {
-      return createMarkdownContent(
-        trimHtmlToLeadingText(result.content, WEB_PAGE_CONTENT_CHAR_LIMIT),
-        window.location.href,
-      )
+      return createMarkdownContent(prepareMarkdownSource(result.content), window.location.href)
     }
   } catch (error) {
     logger.warn("Defuddle parsing failed, falling back to body text:", error)
