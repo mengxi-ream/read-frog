@@ -6,6 +6,8 @@ import {
   getBuiltInDictionaryAction,
   getSelectionToolbarActions,
   replaceSelectionToolbarAction,
+  resolveClickLookupAction,
+  resolveDragLookupAction,
   resolveNoteSuggestionAction,
 } from "@/utils/custom-actions"
 
@@ -292,5 +294,41 @@ describe("selection toolbar built-in actions", () => {
     expect(() => resolveNoteSuggestionAction(selectionToolbar)).toThrow(
       'Note suggestion action "deleted-action" is missing from the validated configuration.',
     )
+  })
+})
+
+describe("subtitle lookup actions", () => {
+  function configWithCustomAction(enabled: boolean) {
+    const config = structuredClone(DEFAULT_CONFIG)
+    const customAction = {
+      ...getBuiltInDictionaryAction(config.selectionToolbar),
+      id: "custom-phrase-action",
+      name: "Custom Phrase",
+      enabled,
+    }
+    config.selectionToolbar.customActions = [customAction]
+    return { config, customAction }
+  }
+
+  it("answers a click with Dictionary and a drag with Sentence Analysis by default", () => {
+    expect(resolveClickLookupAction(DEFAULT_CONFIG).id).toBe("default-dictionary")
+    expect(resolveDragLookupAction(DEFAULT_CONFIG).id).toBe("default-sentence-analysis")
+  })
+
+  it("answers a drag with the action the reader picked", () => {
+    const { config, customAction } = configWithCustomAction(true)
+    config.wordLookup.dragActionId = customAction.id
+
+    expect(resolveDragLookupAction(config)).toBe(customAction)
+    expect(resolveClickLookupAction(config).id).toBe("default-dictionary")
+  })
+
+  it("falls back to the built-in action when the picked one is disabled or deleted", () => {
+    const { config, customAction } = configWithCustomAction(false)
+    config.wordLookup.dragActionId = customAction.id
+    config.wordLookup.clickActionId = "deleted-action"
+
+    expect(resolveDragLookupAction(config).id).toBe("default-sentence-analysis")
+    expect(resolveClickLookupAction(config).id).toBe("default-dictionary")
   })
 })

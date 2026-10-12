@@ -35,7 +35,7 @@ describe("useLookupShortcuts", () => {
 
   beforeEach(() => {
     document.addEventListener("keydown", pageKeyDown, true)
-    subtitlesStore.set(wordLookupAtom, { cueStart: 0, tokenIndex: 0, anchor: { x: 0, y: 0 } })
+    subtitlesStore.set(wordLookupAtom, { cueStart: 0, start: 0, end: 0, anchor: { x: 0, y: 0 } })
   })
 
   afterEach(() => {

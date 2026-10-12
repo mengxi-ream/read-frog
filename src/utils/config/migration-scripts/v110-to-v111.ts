@@ -1,13 +1,14 @@
 /**
  * Migration script from v110 to v111
- * - Adds the top-level `wordLookup` section with `actionId`, the custom AI
- *   action that answers a click on a word in video subtitles. Existing configs
- *   get the built-in Dictionary, which is what word lookup ran before it was
- *   configurable.
+ * - Adds the top-level `wordLookup` section, the custom AI actions that answer
+ *   a lookup in video subtitles: `clickActionId` for a click on one word and
+ *   `dragActionId` for a drag across several. Existing configs get the
+ *   built-in Dictionary for a click, which is what word lookup ran before it
+ *   was configurable, and the built-in Sentence Analysis for a drag.
  *
- * Idempotent: a config that already has the section is returned by identity.
+ * Idempotent: a config that already has both fields is returned by identity.
  *
- * IMPORTANT: The default is hardcoded inline. Migration scripts are frozen
+ * IMPORTANT: The defaults are hardcoded inline. Migration scripts are frozen
  * snapshots - never import constants, helpers, or shared types.
  */
 export function migrate(oldConfig: any): any {
@@ -15,11 +16,13 @@ export function migrate(oldConfig: any): any {
     return oldConfig
   }
 
+  const wordLookup = oldConfig.wordLookup
   if (
-    oldConfig.wordLookup &&
-    typeof oldConfig.wordLookup === "object" &&
-    !Array.isArray(oldConfig.wordLookup) &&
-    typeof oldConfig.wordLookup.actionId === "string"
+    wordLookup &&
+    typeof wordLookup === "object" &&
+    !Array.isArray(wordLookup) &&
+    typeof wordLookup.clickActionId === "string" &&
+    typeof wordLookup.dragActionId === "string"
   ) {
     return oldConfig
   }
@@ -27,7 +30,8 @@ export function migrate(oldConfig: any): any {
   return {
     ...oldConfig,
     wordLookup: {
-      actionId: "default-dictionary",
+      clickActionId: "default-dictionary",
+      dragActionId: "default-sentence-analysis",
     },
   }
 }

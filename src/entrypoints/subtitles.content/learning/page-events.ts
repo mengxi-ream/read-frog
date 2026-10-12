@@ -1,6 +1,6 @@
 import { REACT_SHADOW_HOST_CLASS } from "@/utils/constants/dom-labels"
 
-export const SELECTION_TOOLBAR_HOST_TAG = "read-frog-selection"
+const SELECTION_TOOLBAR_HOST_TAG = "read-frog-selection"
 
 function isExtensionUiHost(node: EventTarget) {
   return (

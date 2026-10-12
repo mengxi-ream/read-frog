@@ -1,12 +1,13 @@
 import type { MouseEvent } from "react"
+import type { CueWordRange } from "./atoms"
 import { useAtomValue } from "jotai"
 import { useMemo, useRef } from "react"
 import { configAtom } from "@/utils/atoms/config"
-import { resolveWordLookupAction } from "@/utils/custom-actions"
+import { resolveClickLookupAction } from "@/utils/custom-actions"
 import { cn } from "@/utils/styles/utils"
 import { segmentWords } from "@/utils/subtitles/segment-words"
 import { displaySubtitleAtom, sourceLanguageAtom } from "../atoms"
-import { wordLookupAtom, wordSelectionAtom } from "./atoms"
+import { dragRangeAtom, wordLookupAtom } from "./atoms"
 import { useWordDrag } from "./use-word-drag"
 
 function stopPlayerToggle(event: MouseEvent) {
@@ -17,7 +18,7 @@ export function SubtitleWordTokens() {
   const locale = useAtomValue(sourceLanguageAtom)
   const cue = useAtomValue(displaySubtitleAtom)
   const lookup = useAtomValue(wordLookupAtom)
-  const selection = useAtomValue(wordSelectionAtom)
+  const dragRange = useAtomValue(dragRangeAtom)
   const config = useAtomValue(configAtom)
   const text = cue?.text ?? ""
   const tokens = useMemo(() => segmentWords(text, locale ?? undefined), [locale, text])
@@ -25,14 +26,12 @@ export function SubtitleWordTokens() {
   const { startDrag, extendDrag } = useWordDrag(tokens, lineRef)
   const cueStart = cue?.start ?? -1
 
-  if (resolveWordLookupAction(config).enabled === false) {
+  if (resolveClickLookupAction(config).enabled === false) {
     return text
   }
 
-  const highlightedIndex = lookup?.cueStart === cueStart ? lookup.tokenIndex : null
-  const selected = selection?.cueStart === cueStart ? selection : null
-  const isSelected = (index: number) =>
-    selected ? index >= selected.start && index <= selected.end : false
+  const isWithin = (range: CueWordRange | null, index: number) =>
+    range?.cueStart === cueStart && index >= range.start && index <= range.end
 
   return (
     <span ref={lineRef} data-slot="subtitle-line">
@@ -45,8 +44,8 @@ export function SubtitleWordTokens() {
             data-index={index}
             className={cn(
               "cursor-pointer rounded-sm transition-colors hover:bg-white/25",
-              highlightedIndex === index && "bg-amber-300 text-amber-950",
-              isSelected(index) && "bg-sky-300 text-sky-950",
+              isWithin(lookup, index) && "bg-amber-300 text-amber-950",
+              isWithin(dragRange, index) && "bg-sky-300 text-sky-950",
             )}
             onPointerDown={(event) => startDrag(event, index)}
             onPointerEnter={() => extendDrag(index)}

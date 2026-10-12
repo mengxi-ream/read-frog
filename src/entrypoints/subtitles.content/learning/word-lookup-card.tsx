@@ -10,7 +10,6 @@ import { closeWordLookupAtom, wordLookupAtom } from "./atoms"
 import { useLookupPlayback } from "./use-lookup-playback"
 import { useLookupShortcuts } from "./use-lookup-shortcuts"
 import { useTopLayerPortalContainer } from "./use-top-layer-portal-container"
-import { useWordSelectionDismiss } from "./use-word-selection-dismiss"
 
 export function WordLookupCard() {
   const lookup = useAtomValue(wordLookupAtom)
@@ -23,7 +22,6 @@ export function WordLookupCard() {
 
   useLookupPlayback()
   useLookupShortcuts()
-  useWordSelectionDismiss()
 
   return (
     <ShadowWrapperContext value={container}>

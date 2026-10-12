@@ -4,16 +4,18 @@ import { useAtomValue, useSetAtom } from "jotai"
 import { useEffect, useRef } from "react"
 import { SUBTITLES_BOX_CLASS } from "@/utils/constants/subtitles"
 import { displaySubtitleAtom } from "../atoms"
-import {
-  clearWordSelectionAtom,
-  openWordLookupAtom,
-  selectWordsAtom,
-  wordSelectionAtom,
-} from "./atoms"
+import { dragRangeAtom, openWordLookupAtom } from "./atoms"
 
 const CARD_GAP_ABOVE_SUBTITLES_PX = 8
 
 const WORD_SELECTOR = '[data-slot="subtitle-word"]'
+
+interface Rect {
+  top: number
+  left: number
+  width: number
+  height: number
+}
 
 interface WordDrag {
   anchorIndex: number
@@ -29,11 +31,11 @@ function getWordRects(line: HTMLElement, start: number, end: number) {
     .map((el) => el.getBoundingClientRect())
 }
 
-function getLookupAnchor(line: HTMLElement, wordRect: DOMRect) {
+function getLookupAnchor(line: HTMLElement, wordsRect: Rect) {
   const boxTop = line.closest(`.${SUBTITLES_BOX_CLASS}`)?.getBoundingClientRect().top
   return {
-    x: wordRect.left + wordRect.width / 2,
-    y: (boxTop ?? wordRect.top) - CARD_GAP_ABOVE_SUBTITLES_PX,
+    x: wordsRect.left + wordsRect.width / 2,
+    y: (boxTop ?? wordsRect.top) - CARD_GAP_ABOVE_SUBTITLES_PX,
   }
 }
 
@@ -45,7 +47,7 @@ function joinWordText(tokens: WordToken[], start: number, end: number) {
     .trim()
 }
 
-function unionRect(rects: DOMRect[]) {
+function unionRect(rects: DOMRect[]): Rect {
   const top = Math.min(...rects.map((rect) => rect.top))
   const left = Math.min(...rects.map((rect) => rect.left))
   const right = Math.max(...rects.map((rect) => rect.right))
@@ -56,13 +58,11 @@ function unionRect(rects: DOMRect[]) {
 export function useWordDrag(tokens: WordToken[], lineRef: RefObject<HTMLElement | null>) {
   const cueStart = useAtomValue(displaySubtitleAtom)?.start ?? -1
   const openLookup = useSetAtom(openWordLookupAtom)
-  const selectWords = useSetAtom(selectWordsAtom)
-  const clearSelection = useSetAtom(clearWordSelectionAtom)
-  const setSelection = useSetAtom(wordSelectionAtom)
+  const setDragRange = useSetAtom(dragRangeAtom)
   const dragRef = useRef<WordDrag | null>(null)
 
   useEffect(() => {
-    const finishDrag = (event: globalThis.PointerEvent) => {
+    const finishDrag = () => {
       const drag = dragRef.current
       const line = lineRef.current
       if (!drag || !line) {
@@ -70,37 +70,25 @@ export function useWordDrag(tokens: WordToken[], lineRef: RefObject<HTMLElement 
       }
       dragRef.current = null
 
-      const { anchorIndex, focusIndex } = drag
-      const start = Math.min(anchorIndex, focusIndex)
-      const end = Math.max(anchorIndex, focusIndex)
+      const start = Math.min(drag.anchorIndex, drag.focusIndex)
+      const end = Math.max(drag.anchorIndex, drag.focusIndex)
       const wordRects = getWordRects(line, start, end)
-      const firstRect = wordRects[0]
-      if (!firstRect) {
+      if (wordRects.length === 0) {
+        setDragRange(null)
         return
       }
 
-      if (start === end) {
-        openLookup({
-          tokenIndex: start,
-          term: tokens[start]?.text ?? "",
-          anchor: getLookupAnchor(line, firstRect),
-        })
-        return
-      }
-
-      selectWords({
+      openLookup({
         start,
         end,
         text: joinWordText(tokens, start, end),
-        rect: unionRect(wordRects),
-        anchor: { x: event.clientX, y: event.clientY },
-        direction: focusIndex >= anchorIndex ? "bottom-right" : "bottom-left",
+        anchor: getLookupAnchor(line, unionRect(wordRects)),
       })
     }
 
     window.addEventListener("pointerup", finishDrag)
     return () => window.removeEventListener("pointerup", finishDrag)
-  }, [lineRef, openLookup, selectWords, tokens])
+  }, [lineRef, openLookup, setDragRange, tokens])
 
   const startDrag = (event: PointerEvent<HTMLElement>, index: number) => {
     if (event.button !== 0) {
@@ -109,7 +97,7 @@ export function useWordDrag(tokens: WordToken[], lineRef: RefObject<HTMLElement 
     event.preventDefault()
     event.stopPropagation()
     dragRef.current = { anchorIndex: index, focusIndex: index }
-    clearSelection()
+    setDragRange(null)
   }
 
   const extendDrag = (index: number) => {
@@ -118,7 +106,7 @@ export function useWordDrag(tokens: WordToken[], lineRef: RefObject<HTMLElement 
       return
     }
     drag.focusIndex = index
-    setSelection({
+    setDragRange({
       cueStart,
       start: Math.min(drag.anchorIndex, index),
       end: Math.max(drag.anchorIndex, index),

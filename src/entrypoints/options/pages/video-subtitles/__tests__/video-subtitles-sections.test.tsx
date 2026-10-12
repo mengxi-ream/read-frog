@@ -33,8 +33,8 @@ vi.mock("@/utils/atoms/config", () => ({
   },
 }))
 
-vi.mock("../preference/word-lookup-action-item", () => ({
-  WordLookupActionItem: () => null,
+vi.mock("../preference/word-lookup-action-items", () => ({
+  WordLookupActionItems: () => null,
 }))
 
 function renderInRouter(ui: ReactNode) {
