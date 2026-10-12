@@ -16,15 +16,11 @@ const ORIGINAL_ATTRIBUTE = "data-read-frog-latexml-original"
  * Reflow those text-only cards as HTML while translating: entering SVG directly
  * would either clip bilingual text or overlap the next section. Keep the actual
  * source nodes (including links, IDs and listeners) for exact restoration.
+ * Enabled per site by the `reflowLatexmlTextBoxes` site rule; `svg` itself stays
+ * in the dont-walk set, so every other SVG on the page is still skipped.
  */
 export function prepareLatexmlTextBoxes(root: HTMLElement, config: Config): void {
-  if (
-    !/^(?:arxiv\.org|browse\.arxiv\.org|ar5iv\.labs\.arxiv\.org)$/.test(window.location.hostname)
-  ) {
-    return
-  }
-  if (getEffectiveSiteRule(config, window.location.href).dontWalkTagsExplicitAdds?.has("svg"))
-    return
+  if (getEffectiveSiteRule(config, window.location.href).reflowLatexmlTextBoxes !== true) return
 
   for (const svg of root.querySelectorAll("svg.ltx_picture")) {
     const objects = svg.querySelectorAll("foreignObject")
@@ -60,7 +56,6 @@ export function prepareLatexmlTextBoxes(root: HTMLElement, config: Config): void
       continue
     const svgStyle = window.getComputedStyle(svg)
     const contentStyle = window.getComputedStyle(object)
-    const background = svg.querySelector("path")
     const wrapper = svg.ownerDocument.createElement("div")
     wrapper.setAttribute(TEXT_BOX_ATTRIBUTE, "")
     wrapper.style.display = "block"
@@ -70,10 +65,7 @@ export function prepareLatexmlTextBoxes(root: HTMLElement, config: Config): void
     wrapper.style.padding = "1.5em"
     wrapper.style.borderRadius = "0.75em"
     wrapper.style.fontSize = contentStyle.fontSize
-    if (background) {
-      const fill = window.getComputedStyle(background).fill
-      if (fill && fill !== "none") wrapper.style.backgroundColor = fill
-    }
+    applyBoxColors(wrapper, svg)
 
     // Store the original SVG in an inert template, rather than only JS state,
     // so cleanup still works after a content-script/extension reload.
@@ -83,6 +75,41 @@ export function prepareLatexmlTextBoxes(root: HTMLElement, config: Config): void
     original.content.append(svg)
     wrapper.append(content, original)
   }
+}
+
+/**
+ * Boxes like tcolorbox draw an outer frame first and an inset interior on top
+ * of it. Hand the declared colors to LaTeXML's own theme variables instead of
+ * freezing computed ones: the arXiv/ar5iv stylesheet maps `--ltx-bg-color` and
+ * `--ltx-border-color` to background and border colors and recomputes them in
+ * dark mode, so the card follows theme switches like the rest of the paper. The
+ * `var()` fallbacks keep the colors on LaTeXML pages without that stylesheet.
+ */
+function applyBoxColors(wrapper: HTMLElement, svg: Element): void {
+  const paths = svg.querySelectorAll("path")
+  const interior = declaredFill(paths[paths.length - 1], svg)
+  const frame = paths.length > 1 ? declaredFill(paths[0], svg) : null
+  if (interior) {
+    wrapper.style.setProperty("--ltx-bg-color", interior)
+    wrapper.style.setProperty("background-color", `var(--background-color, ${interior})`)
+  }
+  if (frame && frame !== interior) {
+    wrapper.style.setProperty("--ltx-border-color", frame)
+    wrapper.style.setProperty("border", `1px solid var(--border-color, ${frame})`)
+  }
+}
+
+/** The fill LaTeXML declared on a path, usually inherited from its `<g>`. */
+function declaredFill(path: Element | undefined, svg: Element): string | null {
+  for (let element = path ?? null; element && element !== svg; element = element.parentElement) {
+    const value = (
+      (element as SVGElement).style?.getPropertyValue("--ltx-fill-color") ||
+      element.getAttribute("fill") ||
+      ""
+    ).trim()
+    if (value) return value === "none" || value.startsWith("url(") ? null : value
+  }
+  return null
 }
 
 export function restoreLatexmlTextBoxes(root: Document | ShadowRoot = document): void {

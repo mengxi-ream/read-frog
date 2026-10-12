@@ -3288,6 +3288,7 @@
   {
     "id": "arxiv",
     "matches": ["https://browse.arxiv.org", "https://arxiv.org/html/*"],
+    "reflowLatexmlTextBoxes": true,
     "injectedCss.add": [
       ".ltx_title .read-frog-translated-inline-content, .ltx_title .read-frog-translated-block-content { line-height: 1.5; }"
     ],
@@ -3302,6 +3303,7 @@
   {
     "id": "ar5iv",
     "matches": "ar5iv.labs.arxiv.org",
+    "reflowLatexmlTextBoxes": true,
     "excludeSelectors.add": [
       ".ltx_bibliography",
       ".ltx_tag.ltx_tag_item",

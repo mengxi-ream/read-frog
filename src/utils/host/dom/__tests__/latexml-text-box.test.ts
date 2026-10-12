@@ -71,14 +71,46 @@ describe("LaTeXML text box adaptation", () => {
     expect(root.querySelector("svg")).not.toBeNull()
   })
 
-  it("honors an explicit SVG dont-walk rule", () => {
+  it("follows the reflowLatexmlTextBoxes site rule", () => {
     const root = fixture()
-    const config = structuredClone(DEFAULT_CONFIG)
-    config.siteRules.userRules = [
-      { id: "opaque-svg", matches: "arxiv.org", "dontWalkTags.add": ["svg"] },
+    const disabled = structuredClone(DEFAULT_CONFIG)
+    disabled.siteRules.userRules = [
+      { id: "no-reflow", matches: "arxiv.org", reflowLatexmlTextBoxes: false },
     ]
-    prepareLatexmlTextBoxes(root, config)
+    prepareLatexmlTextBoxes(root, disabled)
     expect(root.querySelector("svg")).not.toBeNull()
+
+    Object.defineProperty(window, "location", {
+      value: new URL("https://docs.example.org/paper"),
+      configurable: true,
+    })
+    prepareLatexmlTextBoxes(root, DEFAULT_CONFIG)
+    expect(root.querySelector("svg")).not.toBeNull()
+    const enabled = structuredClone(DEFAULT_CONFIG)
+    enabled.siteRules.userRules = [
+      { id: "latexml-docs", matches: "docs.example.org", reflowLatexmlTextBoxes: true },
+    ]
+    prepareLatexmlTextBoxes(root, enabled)
+    expect(root.querySelector("svg")).toBeNull()
+  })
+
+  it("uses the interior color as the background and the frame as the border", () => {
+    const root = document.createElement("main")
+    root.innerHTML = `<svg class="ltx_picture" width="600" height="376"><g style="--ltx-fill-color:#800000;" fill="#800000"><path d="M0 0H600V376H0Z"></path></g><g style="--ltx-fill-color:#FFF5F5;" fill="#FFF5F5"><path d="M1 1H599V375H1Z"></path></g><g><foreignObject><span class="ltx_foreignobject_container"><span class="ltx_foreignobject_content"><span class="ltx_p">A trajectory readers must be able to translate.</span></span></span></foreignObject></g></svg>`
+    document.body.append(root)
+    prepareLatexmlTextBoxes(root, DEFAULT_CONFIG)
+    const card = root.querySelector<HTMLElement>("[data-read-frog-latexml-text-box]")!
+    expect(card.style.getPropertyValue("--ltx-bg-color")).toBe("#FFF5F5")
+    expect(card.style.getPropertyValue("--ltx-border-color")).toBe("#800000")
+  })
+
+  it("leaves theming to the page stylesheet instead of freezing colors", () => {
+    const root = fixture()
+    prepareLatexmlTextBoxes(root, DEFAULT_CONFIG)
+    const card = root.querySelector<HTMLElement>("[data-read-frog-latexml-text-box]")!
+    expect(card.style.getPropertyValue("--ltx-bg-color")).toBe("#f3f8fa")
+    expect(card.style.getPropertyValue("--ltx-border-color")).toBe("")
+    expect(card.getAttribute("style")).not.toMatch(/rgb\(/)
   })
 
   it("can restore the serialized card without in-memory adaptation state", () => {

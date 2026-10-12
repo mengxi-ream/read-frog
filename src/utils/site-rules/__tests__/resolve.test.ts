@@ -57,6 +57,22 @@ describe("resolveSiteRule", () => {
     ).toBeNull()
   })
 
+  it("lets user rules override the built-in LaTeXML text box reflow", () => {
+    const builtIn = rule({ id: "built-in", reflowLatexmlTextBoxes: true })
+    expect(resolveSiteRule(URL_ON_SITE, [builtIn], [], []).reflowLatexmlTextBoxes).toBe(true)
+    expect(
+      resolveSiteRule(
+        URL_ON_SITE,
+        [builtIn],
+        [rule({ id: "user", reflowLatexmlTextBoxes: false })],
+        [],
+      ).reflowLatexmlTextBoxes,
+    ).toBe(false)
+    expect(
+      resolveSiteRule(URL_ON_SITE, [builtIn], [], [builtIn.id]).reflowLatexmlTextBoxes,
+    ).toBeNull()
+  })
+
   it("concatenates injectedCss instead of replacing it", () => {
     const resolved = resolveSiteRule(
       URL_ON_SITE,
