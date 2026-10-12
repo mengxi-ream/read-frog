@@ -2,8 +2,7 @@ import { useAtomValue, useSetAtom } from "jotai"
 import { useEffect } from "react"
 import { displaySubtitleAtom } from "../atoms"
 import { clearWordSelectionAtom, wordSelectionAtom } from "./atoms"
-
-const SELECTION_TOOLBAR_HOST_TAG = "read-frog-selection"
+import { isFromPage, SELECTION_TOOLBAR_HOST_TAG } from "./page-events"
 
 export function useWordSelectionDismiss() {
   const selection = useAtomValue(wordSelectionAtom)
@@ -29,16 +28,21 @@ export function useWordSelectionDismiss() {
     }
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        clearSelection()
+      if (event.key !== "Escape") {
+        return
       }
+      if (isFromPage(event)) {
+        event.preventDefault()
+        event.stopPropagation()
+      }
+      clearSelection()
     }
 
     document.addEventListener("pointerdown", handlePointerDown, true)
-    document.addEventListener("keydown", handleKeyDown, true)
+    window.addEventListener("keydown", handleKeyDown, true)
     return () => {
       document.removeEventListener("pointerdown", handlePointerDown, true)
-      document.removeEventListener("keydown", handleKeyDown, true)
+      window.removeEventListener("keydown", handleKeyDown, true)
     }
   }, [active, clearSelection])
 

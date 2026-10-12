@@ -1,11 +1,13 @@
 import { useAtomValue, useSetAtom } from "jotai"
 import { useEffect } from "react"
 import { isEditable } from "@/utils/host/dom/filter"
-import { shiftWordLookupAtom, wordLookupAtom } from "./atoms"
+import { closeWordLookupAtom, shiftWordLookupAtom, wordLookupAtom } from "./atoms"
+import { isFromPage } from "./page-events"
 
 export function useLookupShortcuts() {
   const open = useAtomValue(wordLookupAtom) !== null
   const shift = useSetAtom(shiftWordLookupAtom)
+  const closeLookup = useSetAtom(closeWordLookupAtom)
 
   useEffect(() => {
     if (!open) {
@@ -24,9 +26,14 @@ export function useLookupShortcuts() {
         event.stopPropagation()
         shift(event.key === "ArrowLeft" ? -1 : 1)
       }
+      if (event.key === "Escape" && isFromPage(event)) {
+        event.preventDefault()
+        event.stopPropagation()
+        closeLookup()
+      }
     }
 
-    document.addEventListener("keydown", handleKeyDown, true)
-    return () => document.removeEventListener("keydown", handleKeyDown, true)
-  }, [open, shift])
+    window.addEventListener("keydown", handleKeyDown, true)
+    return () => window.removeEventListener("keydown", handleKeyDown, true)
+  }, [closeLookup, open, shift])
 }
