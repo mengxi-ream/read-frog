@@ -2,7 +2,7 @@ import type { WebPageContext } from "@/types/content"
 import { getSourceDocumentTitle } from "@/utils/content/document-title"
 import { getDocumentDescription } from "@/utils/content/metadata"
 import { logger } from "@/utils/logger"
-import { truncateWebPageContent } from "./webpage-content"
+import { truncateWebPageContent, WEB_PAGE_CONTENT_CHAR_LIMIT } from "./webpage-content"
 
 export interface CachedWebPageContext extends WebPageContext {
   url: string
@@ -17,18 +17,42 @@ function createDefuddleSnapshotDocument() {
   return clonedDoc
 }
 
+function keepLeadingText(node: Node, budget: number) {
+  let remaining = budget
+  for (const child of Array.from(node.childNodes)) {
+    if (remaining <= 0) {
+      child.remove()
+      continue
+    }
+    const length = (child.textContent ?? "").replace(/\s+/g, " ").length
+    if (length > remaining) {
+      keepLeadingText(child, remaining)
+    }
+    remaining -= length
+  }
+}
+
+function trimHtmlToLeadingText(html: string, budget: number): string {
+  const doc = new DOMParser().parseFromString(html, "text/html")
+  keepLeadingText(doc.body, budget)
+  return doc.body.innerHTML
+}
+
 async function extractWebpageContent(): Promise<string> {
   try {
     const { default: Defuddle, createMarkdownContent } = await import("defuddle/full")
     const snapshotDoc = createDefuddleSnapshotDocument()
     const result = new Defuddle(snapshotDoc, {
-      separateMarkdown: true,
       url: window.location.href,
       useAsync: false,
     }).parse()
 
-    if (result.contentMarkdown) return result.contentMarkdown
-    if (result.content) return createMarkdownContent(result.content, window.location.href)
+    if (result.content) {
+      return createMarkdownContent(
+        trimHtmlToLeadingText(result.content, WEB_PAGE_CONTENT_CHAR_LIMIT),
+        window.location.href,
+      )
+    }
   } catch (error) {
     logger.warn("Defuddle parsing failed, falling back to body text:", error)
   }
