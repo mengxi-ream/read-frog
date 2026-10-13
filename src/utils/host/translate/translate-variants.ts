@@ -102,6 +102,7 @@ async function translateTextUsingPageConfig(
     // Session captured at pipeline entry by the caller; see translateTextForPage.
     sessionId?: string
     forceRetranslation?: boolean
+    targetLanguagePrechecked?: boolean
   } = {},
 ): Promise<string> {
   const preparedText = prepareTranslationText(text)
@@ -113,7 +114,10 @@ async function translateTextUsingPageConfig(
 
   // Backstop only: the page modes hoist this check before DOM insertion, but
   // other callers (e.g. the page title) still rely on it here.
-  if (await shouldSkipAsTargetLanguage(preparedText, config)) {
+  if (
+    !options.targetLanguagePrechecked &&
+    (await shouldSkipAsTargetLanguage(preparedText, config))
+  ) {
     logger.info(
       `translateTextForPage: skipping translation because text is already in target language. text: ${preparedText}`,
     )
@@ -151,6 +155,8 @@ async function translateTextUsingPageConfig(
 export interface PageTranslationRequestOptions {
   preserveLineBreaks?: boolean
   forceRetranslation?: boolean
+  /** The DOM-aware preflight already checked this paragraph's target language. */
+  targetLanguagePrechecked?: boolean
 }
 
 /**
@@ -182,6 +188,7 @@ export async function translateTextForPage(
     preserveLineBreaks: options?.preserveLineBreaks,
     sessionId,
     forceRetranslation: options?.forceRetranslation,
+    targetLanguagePrechecked: options?.targetLanguagePrechecked,
   })
 }
 

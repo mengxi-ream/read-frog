@@ -10,8 +10,9 @@ export const MIN_LENGTH_FOR_TARGET_LANG_DETECTION = 50
  * Runs BEFORE any wrapper/spinner DOM insertion: detection is pure synchronous
  * CPU (`enableLLM: false` is deliberate), so same-language paragraphs can be
  * skipped without the insert-then-remove DOM churn and spinner flash they
- * previously paid. Texts under the length threshold are never skipped — franc
- * is unreliable on short input.
+ * previously paid. Texts under the length threshold are never guessed here —
+ * franc is unreliable on short input. Page paragraphs can instead use their
+ * local, declared DOM language before reaching this text-only fallback.
  */
 export async function shouldSkipAsTargetLanguage(text: string, config: Config): Promise<boolean> {
   if (!config.pageTranslation.page.enableTargetLanguageSkip) return false

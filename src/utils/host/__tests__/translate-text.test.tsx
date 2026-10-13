@@ -196,6 +196,21 @@ describe("translate-text", () => {
       expect(mockSendMessage).not.toHaveBeenCalled()
     })
 
+    it("preserves a DOM-aware decision for a mixed or declared foreign paragraph", async () => {
+      mockDetectLanguage.mockResolvedValue(DEFAULT_CONFIG.language.targetCode)
+      mockSendMessage.mockResolvedValue("translated foreign passage")
+      const text =
+        "这是一个中文段落，其中引用了一个明确标注为英语的句子：This sentence needs translation, even if the combined text is detected as Chinese."
+
+      const result = await translateTextForPage(text, "plain", { targetLanguagePrechecked: true })
+
+      expect(result).toBe("translated foreign passage")
+      expect(mockDetectLanguage).not.toHaveBeenCalled()
+      expect(
+        mockSendMessage.mock.calls.filter(([type]: [string]) => type === "enqueueTranslateRequest"),
+      ).toHaveLength(1)
+    })
+
     it("sends the translation request when target-language precheck is disabled", async () => {
       const config = {
         ...DEFAULT_CONFIG,

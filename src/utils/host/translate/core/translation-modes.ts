@@ -116,7 +116,14 @@ async function filterVirtualParagraphUnits(
   config: Config,
 ): Promise<VirtualParagraphUnit[]> {
   const included = await Promise.all(
-    units.map(async (unit) => !(await shouldSkipPageTranslationText(unit.text, config))),
+    units.map(
+      async (unit) =>
+        !(await shouldSkipPageTranslationText(
+          unit.text,
+          config,
+          unit.sourceFragments.map((fragment) => fragment.source),
+        )),
+    ),
   )
   return units.filter((_, index) => included[index])
 }
@@ -147,6 +154,7 @@ async function translateVirtualParagraph(
       translateTextForPage(unit.text, "plain", {
         preserveLineBreaks: true,
         forceRetranslation,
+        targetLanguagePrechecked: true,
       }),
   )
   if (!isCurrent()) {
@@ -458,7 +466,11 @@ export async function translateNodesBilingualMode(
     try {
       // Target-language skip runs here, BEFORE the wrapper/spinner is inserted,
       // so same-language paragraphs never touch the DOM.
-      shouldFilter = await shouldSkipPageTranslationText(atomExtraction.filterText, config)
+      shouldFilter = await shouldSkipPageTranslationText(
+        atomExtraction.filterText,
+        config,
+        transNodes,
+      )
     } catch (error) {
       if (bilingualState) unregisterBilingualTranslationState(bilingualState)
       throw error
@@ -981,7 +993,8 @@ async function translateTranslationOnlyRun(
     }
 
     const source = preparePageTranslationSource(transNodes, config)
-    if (!source || (await shouldSkipPageTranslationText(source.filterText, config))) return
+    if (!source || (await shouldSkipPageTranslationText(source.filterText, config, transNodes)))
+      return
 
     const ownerDoc = getOwnerDocument(targetNode)
     const request = createPageTranslationRequest(source, config, "html", { forceRetranslation })

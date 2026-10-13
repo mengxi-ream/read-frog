@@ -6,6 +6,7 @@ import type { TransNode } from "@/types/dom"
 import { logger } from "@/utils/logger"
 import { resolvePageTranslationProvider } from "@/utils/providers/provider-ref"
 import { getOwnerDocument } from "../../dom/node"
+import { getDeclaredTranslationLanguage } from "../dom/declared-language"
 import { extractInlineAtomText, getInlineAtomSelector } from "../dom/inline-atoms"
 import { protectTranslationHtmlAttributes } from "../dom/translation-html-attributes"
 import { shouldFilterSmallParagraph } from "../filter-small-paragraph"
@@ -46,12 +47,17 @@ export function preparePageTranslationSource(
 export async function shouldSkipPageTranslationText(
   text: string,
   config: Config,
+  nodes: readonly TransNode[] = [],
 ): Promise<boolean> {
+  const declaredLanguage = config.pageTranslation.page.enableTargetLanguageSkip
+    ? getDeclaredTranslationLanguage(nodes)
+    : null
+  if (declaredLanguage === config.language.targetCode) return true
   return (
     !text.trim() ||
     isNumericContent(text) ||
     (await shouldFilterSmallParagraph(text, config)) ||
-    (await shouldSkipAsTargetLanguage(text, config))
+    (declaredLanguage === null && (await shouldSkipAsTargetLanguage(text, config)))
   )
 }
 
@@ -63,14 +69,6 @@ interface DeepLXHtmlAttributeProbe {
   resolve: (result: DeepLXHtmlAttributeProbeResult) => void
 }
 const deepLXHtmlAttributeProbes = new Map<string, DeepLXHtmlAttributeProbe>()
-
-function translateTextForAction(
-  text: string,
-  textFormat: "plain" | "html",
-  forceRetranslation: boolean = false,
-): Promise<string> {
-  return translateTextForPage(text, textFormat, { forceRetranslation })
-}
 
 function createDeepLXHtmlAttributeProbe(): DeepLXHtmlAttributeProbe {
   let resolve!: (result: DeepLXHtmlAttributeProbeResult) => void
@@ -152,11 +150,12 @@ export function createPageTranslationRequest(
   textFormat: TranslationTextFormat,
   options: PageTranslationRequestOptions,
 ): PageTranslationRequest {
+  const precheckedOptions = { ...options, targetLanguagePrechecked: true }
   if (textFormat === "plain") {
     return {
       sourceText: source.requestText,
       textFormat,
-      translate: () => translateTextForPage(source.requestText, textFormat, options),
+      translate: () => translateTextForPage(source.requestText, textFormat, precheckedOptions),
       getDisplayText: (translatedText) => getDisplayTranslation(source.requestText, translatedText),
     }
   }
@@ -171,10 +170,10 @@ export function createPageTranslationRequest(
   // its tags intact.
   const deepLXProviderKey = getDeepLXHtmlAttributeProviderKey(config)
   const translateLegacyHtml = async () => {
-    const translatedHtml = await translateTextForAction(
+    const translatedHtml = await translateTextForPage(
       protectedHtml.legacyRequestHtml,
       "html",
-      options.forceRetranslation,
+      precheckedOptions,
     )
     return translatedHtml ? protectedHtml.restoreLegacy(translatedHtml) : translatedHtml
   }
@@ -189,10 +188,10 @@ export function createPageTranslationRequest(
     }
 
     try {
-      const translatedHtml = await translateTextForAction(
+      const translatedHtml = await translateTextForPage(
         protectedHtml.requestHtml,
         "html",
-        options.forceRetranslation,
+        precheckedOptions,
       )
       if (!translatedHtml) {
         if (deepLXProviderKey) {

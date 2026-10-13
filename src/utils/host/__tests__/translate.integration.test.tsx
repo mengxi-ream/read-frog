@@ -44,10 +44,12 @@ vi.mock("@/utils/host/translate/translate-variants", () => ({
 const DEFAULT_PAGE_TRANSLATION_OPTIONS = {
   preserveLineBreaks: false,
   forceRetranslation: false,
+  targetLanguagePrechecked: true,
 }
 const PRESERVE_LINE_BREAKS_TRANSLATION_OPTIONS = {
   preserveLineBreaks: true,
   forceRetranslation: false,
+  targetLanguagePrechecked: true,
 }
 
 const BILINGUAL_CONFIG: Config = {
@@ -676,6 +678,64 @@ describe("translate", () => {
         vi.mocked(translateTextForPage).mockReset().mockResolvedValue(MOCK_TRANSLATION)
       })
 
+      it.each(["bilingual", "translationOnly"] as const)(
+        "%s: skips annotated Chinese links and names while translating a neighboring English post",
+        async (mode) => {
+          await withHost("x.com", async () => {
+            render(
+              <>
+                <div
+                  data-testid="tweetText"
+                  aria-label="Chinese post"
+                  lang="zh"
+                  style={{ whiteSpace: "pre-wrap" }}
+                >
+                  <span>{"其实 REA 这种事情在物理世界曾经发生过一次。\n\n新用户订阅入口："}</span>
+                  <a href="https://x.ai/pricing">x.ai/pricing</a>
+                  <span>{"，这是 "}</span>
+                  <a href="/grok">@grok</a>
+                  <span>
+                    {
+                      " 官号回复里给的入口。\n\n已经在用 SuperGrok、Cursor 或 X Premium 的话，从下面这个入口切换："
+                    }
+                  </span>
+                  <a href="https://accounts.x.ai/unify">accounts.x.ai/unify</a>
+                </div>
+                <div data-testid="tweetText" aria-label="English post" lang="en">
+                  <span>
+                    This English post still needs a translation in the same Chinese interface.
+                  </span>
+                </div>
+              </>,
+            )
+            const chinese = screen.getByLabelText("Chinese post")
+            const originalText = chinese.textContent
+            const originalNodes = [...chinese.childNodes]
+            const insertions: MutationRecord[] = []
+            const observer = new MutationObserver((records) => insertions.push(...records))
+            observer.observe(chinese, { childList: true, subtree: true })
+            vi.mocked(translateTextForPage).mockClear()
+
+            await removeOrShowPageTranslation(mode, true)
+
+            expect(translateTextForPage).toHaveBeenCalledOnce()
+            expect(vi.mocked(translateTextForPage).mock.calls[0]![0]).toContain("This English post")
+            expect(getTranslationWrappers(chinese)).toHaveLength(0)
+            expect(chinese.textContent).toBe(originalText)
+            expect([...chinese.childNodes]).toEqual(originalNodes)
+            insertions.push(...observer.takeRecords())
+            observer.disconnect()
+            expect(insertions).toHaveLength(0)
+
+            await removeOrShowPageTranslation(mode, true)
+            expect(chinese.textContent).toBe(originalText)
+            expect(screen.getByLabelText("English post").textContent).toBe(
+              "This English post still needs a translation in the same Chinese interface.",
+            )
+          })
+        },
+      )
+
       it("keeps a simple single-span tweet as one block translation", async () => {
         await withHost("x.com", async () => {
           const sourceText = "Music changes the way we think."
@@ -772,6 +832,7 @@ describe("translate", () => {
           expect(translateTextForPage).toHaveBeenCalledTimes(1)
           expect(translateTextForPage).toHaveBeenCalledWith(sourceText, "html", {
             forceRetranslation: false,
+            targetLanguagePrechecked: true,
           })
           expectInPlaceTranslation(sourceSpan, translatedText)
           expect(sourceSpan.firstChild).toBe(sourceTextNode)
@@ -4474,9 +4535,11 @@ describe("translate", () => {
         expect(translateTextForPage).toHaveBeenCalledTimes(2)
         expect(translateTextForPage).toHaveBeenNthCalledWith(1, MOCK_ORIGINAL_TEXT, "html", {
           forceRetranslation: false,
+          targetLanguagePrechecked: true,
         })
         expect(translateTextForPage).toHaveBeenNthCalledWith(2, MOCK_ORIGINAL_TEXT, "html", {
           forceRetranslation: false,
+          targetLanguagePrechecked: true,
         })
       })
     })
