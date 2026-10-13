@@ -96,6 +96,9 @@ export function useWordDrag(tokens: WordToken[], lineRef: RefObject<HTMLElement 
     return () => {
       window.removeEventListener("pointerup", finishDrag)
       window.removeEventListener("pointercancel", cancelDrag)
+      if (dragRef.current) {
+        cancelDrag()
+      }
     }
   }, [lineRef, openLookup, setDragRange, tokens])
 

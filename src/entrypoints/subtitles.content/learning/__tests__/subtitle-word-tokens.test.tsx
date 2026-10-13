@@ -97,6 +97,22 @@ describe("SubtitleWordTokens", () => {
     expect(subtitlesStore.get(customActionRequestAtom)).toBeNull()
   })
 
+  it("drops the drag when the cue changes before the release", () => {
+    const words = renderLine("You can see the blood run from their face.")
+
+    fireEvent.pointerDown(words[0]!, { button: 0 })
+    fireEvent.pointerEnter(words[1]!)
+    act(() => {
+      subtitlesStore.set(sourceTrackAtom, [{ text: "A different line now.", start: 0, end: 5000 }])
+    })
+    act(() => {
+      window.dispatchEvent(new PointerEvent("pointerup"))
+    })
+
+    expect(subtitlesStore.get(dragRangeAtom)).toBeNull()
+    expect(subtitlesStore.get(customActionRequestAtom)).toBeNull()
+  })
+
   it("runs the click action for a press released on the same word", () => {
     const words = renderLine("You can see the blood run from their face.")
 
