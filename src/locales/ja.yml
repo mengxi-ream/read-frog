@@ -536,7 +536,7 @@ options:
       title: 字幕翻訳
       description: 動画の翻訳字幕をオンまたはオフにします。
     nodeTranslation:
-      title: 段落翻訳
+      title: ホバー翻訳
       description: 段落にホバーまたは長押しすると、その段落だけ翻訳します。
       customDescription: 段落にホバーしたままこのキーを押すと、その段落を翻訳します。
     translationHub:
@@ -549,6 +549,7 @@ options:
       title: "AI アクション"
       description: "選択したテキストに AI アクションを実行します。カスタムアクションには最初はショートカットがないので、ここで設定してください。"
     turnedOff: "この機能はオフのため、オンに戻すまでこのキーは何もしません。"
+    turnOn: "オンにする"
     clash: "「$1」と同じキーです。どちらかを変更してください。"
     taken: "$1 はすでに「$2」で使われています。"
   overlayTools:

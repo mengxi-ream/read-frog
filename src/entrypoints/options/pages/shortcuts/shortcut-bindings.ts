@@ -17,7 +17,7 @@ export function getActionShortcutId(actionId: string) {
 
 /**
  * Every key combination Read Frog listens for on a page. They all hear the same keystrokes, so
- * two of them on one key would both run. Paragraph translation is in only while it uses a custom
+ * two of them on one key would both run. Hover translation is in only while it uses a custom
  * shortcut: its other hotkeys are a single key or a long press, not a combination.
  */
 export function getShortcutBindings(config: Config): ShortcutBinding[] {

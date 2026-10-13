@@ -13,6 +13,7 @@ import {
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { HOTKEYS } from "@/utils/constants/hotkeys"
 import { i18n } from "@/utils/i18n"
+import { buildSectionSearch } from "../../command-palette/section-scroll"
 import { ConfigItem } from "../../components/config-item"
 import { SELECT_CONTENT_PROPS } from "../../components/select-content-props"
 import { ShortcutConfigItem } from "./shortcut-config-item"
@@ -38,7 +39,14 @@ export function NodeTranslationHotkey() {
         description={
           <>
             {i18n.t("options.shortcuts.nodeTranslation.description")}
-            {!enabled && <TurnedOffNote />}
+            {!enabled && (
+              <TurnedOffNote
+                to={{
+                  pathname: "/page-translation",
+                  search: buildSectionSearch("hover-translation"),
+                }}
+              />
+            )}
           </>
         }
       >

@@ -87,7 +87,7 @@ describe("shortcut bindings", () => {
     expect(bindings.at(-1)?.shortcut).toBe("")
   })
 
-  it("lists the paragraph translation shortcut only while paragraph translation uses it", () => {
+  it("lists the hover translation shortcut only while hover translation uses it", () => {
     const config = structuredClone(DEFAULT_CONFIG)
     config.pageTranslation.node.shortcut = "Alt+Shift+K"
     const paragraphBinding = (bindings: ReturnType<typeof getShortcutBindings>) =>

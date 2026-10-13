@@ -1,5 +1,5 @@
 /**
- * What runs paragraph translation on the paragraph under the pointer: a single key tapped or
+ * What runs hover translation on the paragraph under the pointer: a single key tapped or
  * held while hovering, a long press of the mouse, or `custom`, the key combination recorded in
  * `pageTranslation.node.shortcut`.
  */

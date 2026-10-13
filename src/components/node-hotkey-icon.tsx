@@ -7,7 +7,7 @@ import { cn } from "@/utils/styles/utils"
 const DRAWN_ICON_PROPS = { className: "size-3.5", stroke: 1.75 }
 
 /**
- * The symbol of a paragraph translation hotkey, in a box one icon wide so the labels after it
+ * The symbol of a hover translation hotkey, in a box one icon wide so the labels after it
  * line up. A single key shows its own symbol. A long press and a recorded combination are not one
  * key: they get a drawn icon, where an emoji would stand out in color and size.
  */

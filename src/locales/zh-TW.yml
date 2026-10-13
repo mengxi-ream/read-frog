@@ -537,7 +537,7 @@ options:
       title: 字幕翻譯
       description: 開啟或關閉影片的翻譯字幕。
     nodeTranslation:
-      title: 段落翻譯
+      title: 滑鼠停留翻譯
       description: 滑鼠停留或長按段落，只翻譯這一段。
       customDescription: 滑鼠停留在段落上時按下這組按鍵，即可翻譯這一段。
     translationHub:
@@ -550,6 +550,7 @@ options:
       title: "AI 指令"
       description: "對選取的文字執行 AI 指令。自訂指令預設沒有快速鍵，在這裡設定即可。"
     turnedOff: "此功能已關閉，重新開啟前快速鍵不會生效。"
+    turnOn: "去開啟"
     clash: "與「$1」的快速鍵相同，請修改其中一個。"
     taken: "$1 已被「$2」使用。"
   overlayTools:

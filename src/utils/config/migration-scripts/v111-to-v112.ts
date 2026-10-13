@@ -1,7 +1,7 @@
 /**
  * Migration script from v111 to v112
  * - Adds `pageTranslation.node.shortcut` ("Alt+Q"), the key combination
- *   paragraph translation listens for when `node.hotkey` is the new "custom".
+ *   hover translation listens for when `node.hotkey` is the new "custom".
  *   No config chose "custom" before v112, so the key does nothing until the
  *   reader picks it; it is not checked against the reader's other shortcuts
  *   here, and the Shortcuts page flags a clash once it is in use.

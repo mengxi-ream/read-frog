@@ -6,7 +6,7 @@ import type { TestSeriesObject } from "./types"
  * silently change what v112 asserts.
  *
  * Delta from v111: every series gains `pageTranslation.node.shortcut`
- * ("Alt+Q"), the combination paragraph translation listens for once
+ * ("Alt+Q"), the combination hover translation listens for once
  * `node.hotkey` is "custom". No series picks "custom", so every hotkey stays
  * as it was.
  */

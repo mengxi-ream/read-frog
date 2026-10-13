@@ -536,7 +536,7 @@ options:
       title: Dịch phụ đề
       description: Bật hoặc tắt phụ đề đã dịch của video.
     nodeTranslation:
-      title: Dịch đoạn văn
+      title: Dịch khi di chuột
       description: Di chuột hoặc nhấn giữ một đoạn để chỉ dịch đoạn đó.
       customDescription: Nhấn các phím này khi di chuột lên một đoạn văn để dịch đoạn đó.
     translationHub:
@@ -549,6 +549,7 @@ options:
       title: "Hành động AI"
       description: "Chạy một hành động AI trên văn bản đã chọn. Hành động tùy chỉnh chưa có phím tắt cho đến khi bạn đặt ở đây."
     turnedOff: "Tính năng đang tắt nên phím tắt này không có tác dụng cho đến khi bạn bật lại."
+    turnOn: "Bật"
     clash: "Trùng phím tắt với “$1”. Hãy đổi một trong hai."
     taken: "$1 đã được dùng cho “$2”."
   overlayTools:

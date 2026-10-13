@@ -537,7 +537,7 @@ options:
       title: Subtitr tərcüməsi
       description: Tərcümə edilmiş video subtitrlərini aktiv və ya deaktiv edin.
     nodeTranslation:
-      title: Abzas tərcüməsi
+      title: Kursorla tərcümə
       description: Yalnız bir abzası tərcümə etmək üçün kursoru üzərinə gətirin və ya basıb saxlayın.
       customDescription: Abzası tərcümə etmək üçün kursor onun üzərində olarkən bu düymələri basın.
     translationHub:
@@ -550,6 +550,7 @@ options:
       title: "Süni intellekt əməliyyatları"
       description: "Seçilmiş mətn üzərində süni intellekt əməliyyatı işə salın. Fərdi əməliyyatların burada təyin edənə qədər qısayolu olmur."
     turnedOff: "Bu funksiya söndürülüb, yenidən yandırana qədər bu qısayol heç nə etmir."
+    turnOn: "Aktiv et"
     clash: "“$1” ilə eyni qısayol. Birini dəyişin."
     taken: "$1 artıq “$2” tərəfindən istifadə olunur."
   overlayTools:
