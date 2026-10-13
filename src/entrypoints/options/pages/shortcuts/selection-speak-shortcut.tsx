@@ -2,9 +2,8 @@ import { useAtom } from "jotai"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { getSpeakShortcut } from "@/utils/constants/selection"
 import { i18n } from "@/utils/i18n"
-import { buildSectionSearch } from "../../command-palette/section-scroll"
+import { buildSectionLink } from "../../command-palette/section-scroll"
 import { ShortcutConfigItem } from "./shortcut-config-item"
-import { TurnOnButton } from "./turn-on-button"
 
 export function SelectionSpeakShortcut() {
   const [selectionToolbar, setSelectionToolbar] = useAtom(configFieldsAtomMap.selectionToolbar)
@@ -13,20 +12,13 @@ export function SelectionSpeakShortcut() {
   return (
     <ShortcutConfigItem
       id="selection-speak-shortcut"
-      title={
-        <span className="flex items-center gap-2">
-          {i18n.t("options.shortcuts.selectionSpeak.title")}
-          {!speak.enabled && (
-            <TurnOnButton
-              to={{
-                pathname: "/selection-toolbar",
-                search: buildSectionSearch("selection-toolbar-speak"),
-              }}
-            />
-          )}
-        </span>
-      }
+      title={i18n.t("options.shortcuts.selectionSpeak.title")}
       description={i18n.t("options.shortcuts.selectionSpeak.description")}
+      turnOn={
+        speak.enabled
+          ? undefined
+          : buildSectionLink("/selection-toolbar", "selection-toolbar-speak")
+      }
       shortcut={getSpeakShortcut(speak)}
       onChange={(nextShortcut) => {
         void setSelectionToolbar((current) => ({

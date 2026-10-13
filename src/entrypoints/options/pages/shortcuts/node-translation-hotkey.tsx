@@ -13,11 +13,11 @@ import {
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { HOTKEYS } from "@/utils/constants/hotkeys"
 import { i18n } from "@/utils/i18n"
-import { buildSectionSearch } from "../../command-palette/section-scroll"
+import { buildSectionLink } from "../../command-palette/section-scroll"
 import { ConfigItem } from "../../components/config-item"
 import { SELECT_CONTENT_PROPS } from "../../components/select-content-props"
 import { ShortcutConfigItem } from "./shortcut-config-item"
-import { TurnOnButton } from "./turn-on-button"
+import { ShortcutTitle } from "./shortcut-title"
 
 const PRESET_HOTKEYS = HOTKEYS.filter((hotkey) => hotkey !== "custom")
 
@@ -36,17 +36,12 @@ export function NodeTranslationHotkey() {
       <ConfigItem
         id="node-translation-hotkey"
         title={
-          <span className="flex items-center gap-2">
-            {i18n.t("options.shortcuts.nodeTranslation.title")}
-            {!enabled && (
-              <TurnOnButton
-                to={{
-                  pathname: "/page-translation",
-                  search: buildSectionSearch("hover-translation"),
-                }}
-              />
-            )}
-          </span>
+          <ShortcutTitle
+            title={i18n.t("options.shortcuts.nodeTranslation.title")}
+            turnOn={
+              enabled ? undefined : buildSectionLink("/page-translation", "hover-translation")
+            }
+          />
         }
         description={i18n.t("options.shortcuts.nodeTranslation.description")}
       >

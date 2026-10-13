@@ -8,7 +8,6 @@ import { getSelectionToolbarItems } from "@/utils/selection-toolbar-items"
 import { ConfigSection } from "../../components/config-section"
 import { getActionShortcutId } from "./shortcut-bindings"
 import { ShortcutConfigItem } from "./shortcut-config-item"
-import { TurnOnButton } from "./turn-on-button"
 
 /**
  * A key for every AI action, built-in or the user's own, in the selection toolbar's order. A
@@ -37,11 +36,9 @@ export function ActionShortcuts() {
             <span className="flex items-center gap-2">
               <Icon icon={action.icon} className="size-4 shrink-0 text-muted-foreground" />
               {action.name}
-              {action.enabled === false && (
-                <TurnOnButton to={buildCustomActionOptionsRoute(action.id)} />
-              )}
             </span>
           }
+          turnOn={action.enabled === false ? buildCustomActionOptionsRoute(action.id) : undefined}
           shortcut={action.shortcut ?? ""}
           onChange={(nextShortcut) => {
             void setSelectionToolbar((current) =>

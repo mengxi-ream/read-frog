@@ -7,6 +7,11 @@ export function buildSectionSearch(sectionId: string): string {
   return `?${params.toString()}`
 }
 
+/** A link to a section of a settings page: `?section=` scrolls it into view once the page is up. */
+export function buildSectionLink(pathname: string, sectionId: string) {
+  return { pathname, search: buildSectionSearch(sectionId) }
+}
+
 export function getSectionIdFromSearch(search: string): string | null {
   const params = new URLSearchParams(search)
   const sectionId = params.get(SECTION_QUERY_PARAM)
