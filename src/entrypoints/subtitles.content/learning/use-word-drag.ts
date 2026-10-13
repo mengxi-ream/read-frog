@@ -18,6 +18,7 @@ interface Rect {
 }
 
 interface WordDrag {
+  pointerId: number
   anchorIndex: number
   focusIndex: number
 }
@@ -62,10 +63,10 @@ export function useWordDrag(tokens: WordToken[], lineRef: RefObject<HTMLElement 
   const dragRef = useRef<WordDrag | null>(null)
 
   useEffect(() => {
-    const finishDrag = () => {
+    const finishDrag = ({ pointerId }: { pointerId: number }) => {
       const drag = dragRef.current
       const line = lineRef.current
-      if (!drag || !line) {
+      if (!drag || drag.pointerId !== pointerId || !line) {
         return
       }
       dragRef.current = null
@@ -86,9 +87,15 @@ export function useWordDrag(tokens: WordToken[], lineRef: RefObject<HTMLElement 
       })
     }
 
-    const cancelDrag = () => {
+    const clearDrag = () => {
       dragRef.current = null
       setDragRange(null)
+    }
+
+    const cancelDrag = ({ pointerId }: { pointerId: number }) => {
+      if (dragRef.current?.pointerId === pointerId) {
+        clearDrag()
+      }
     }
 
     window.addEventListener("pointerup", finishDrag)
@@ -97,13 +104,13 @@ export function useWordDrag(tokens: WordToken[], lineRef: RefObject<HTMLElement 
       window.removeEventListener("pointerup", finishDrag)
       window.removeEventListener("pointercancel", cancelDrag)
       if (dragRef.current) {
-        cancelDrag()
+        clearDrag()
       }
     }
   }, [lineRef, openLookup, setDragRange, tokens])
 
   const startDrag = (event: PointerEvent<HTMLElement>, index: number) => {
-    if (event.button !== 0) {
+    if (event.button !== 0 || dragRef.current) {
       return
     }
     event.preventDefault()
@@ -111,13 +118,13 @@ export function useWordDrag(tokens: WordToken[], lineRef: RefObject<HTMLElement 
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId)
     }
-    dragRef.current = { anchorIndex: index, focusIndex: index }
+    dragRef.current = { pointerId: event.pointerId, anchorIndex: index, focusIndex: index }
     setDragRange(null)
   }
 
-  const extendDrag = (index: number) => {
+  const extendDrag = (event: PointerEvent<HTMLElement>, index: number) => {
     const drag = dragRef.current
-    if (!drag) {
+    if (!drag || drag.pointerId !== event.pointerId) {
       return
     }
     drag.focusIndex = index

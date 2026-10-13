@@ -52,7 +52,7 @@ export function SubtitleWordTokens() {
               isWithin(dragRange, index) && "bg-sky-300 text-sky-950",
             )}
             onPointerDown={(event) => startDrag(event, index)}
-            onPointerEnter={() => extendDrag(index)}
+            onPointerEnter={(event) => extendDrag(event, index)}
             onClick={stopPlayerToggle}
             onDoubleClick={stopPlayerToggle}
           >

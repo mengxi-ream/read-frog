@@ -113,6 +113,27 @@ describe("SubtitleWordTokens", () => {
     expect(subtitlesStore.get(customActionRequestAtom)).toBeNull()
   })
 
+  it("ignores other pointers while a drag is held", () => {
+    const words = renderLine("You can see the blood run from their face.")
+
+    fireEvent.pointerDown(words[0]!, { button: 0, pointerId: 1 })
+    fireEvent.pointerEnter(words[1]!, { pointerId: 1 })
+    fireEvent.pointerDown(words[3]!, { button: 0, pointerId: 2 })
+    fireEvent.pointerEnter(words[4]!, { pointerId: 2 })
+    act(() => {
+      window.dispatchEvent(new PointerEvent("pointerup", { pointerId: 2 }))
+    })
+
+    expect(subtitlesStore.get(dragRangeAtom)).toMatchObject({ start: 0, end: 2 })
+    expect(subtitlesStore.get(customActionRequestAtom)).toBeNull()
+
+    act(() => {
+      window.dispatchEvent(new PointerEvent("pointerup", { pointerId: 1 }))
+    })
+
+    expect(subtitlesStore.get(customActionRequestAtom)).toMatchObject({ selectionText: "You can" })
+  })
+
   it("runs the click action for a press released on the same word", () => {
     const words = renderLine("You can see the blood run from their face.")
 
