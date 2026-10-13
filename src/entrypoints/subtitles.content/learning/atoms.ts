@@ -37,8 +37,12 @@ export const openWordLookupAtom = atom(
     const action =
       start === end ? resolveClickLookupAction(config) : resolveDragLookupAction(config)
 
-    nextSessionKey += 1
     set(dragRangeAtom, null)
+    if (action.enabled === false) {
+      return
+    }
+
+    nextSessionKey += 1
     set(wordLookupAtom, { cueStart: cue?.start ?? -1, start, end, anchor })
     set(customActionRequestAtom, {
       actionId: action.id,

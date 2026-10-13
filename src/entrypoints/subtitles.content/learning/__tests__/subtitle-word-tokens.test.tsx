@@ -4,6 +4,7 @@ import { Provider } from "jotai"
 import { afterEach, describe, expect, it } from "vitest"
 import { vi } from "vitest"
 import { customActionRequestAtom } from "@/components/custom-action/atoms"
+import { configAtom } from "@/utils/atoms/config"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { currentTimeMsAtom, sourceTrackAtom, subtitlesStore } from "../../atoms"
 import { closeWordLookupAtom, dragRangeAtom, wordLookupAtom } from "../atoms"
@@ -11,9 +12,10 @@ import { SubtitleWordTokens } from "../subtitle-word-tokens"
 
 vi.mock("@/utils/atoms/config", async () => {
   const { atom } = await import("jotai")
+  const constants = await import("@/utils/constants/config")
   return {
-    configFieldsAtomMap: { selectionToolbar: atom(DEFAULT_CONFIG.selectionToolbar) },
-    configAtom: atom(DEFAULT_CONFIG),
+    configFieldsAtomMap: { selectionToolbar: atom(constants.DEFAULT_CONFIG.selectionToolbar) },
+    configAtom: atom(constants.DEFAULT_CONFIG),
   }
 })
 
@@ -33,6 +35,7 @@ describe("SubtitleWordTokens", () => {
     subtitlesStore.set(closeWordLookupAtom)
     subtitlesStore.set(dragRangeAtom, null)
     subtitlesStore.set(sourceTrackAtom, [])
+    subtitlesStore.set(configAtom, DEFAULT_CONFIG)
   })
 
   it("lights the words under a drag before it is released", () => {
@@ -76,6 +79,40 @@ describe("SubtitleWordTokens", () => {
     expect(subtitlesStore.get(customActionRequestAtom)).toMatchObject({
       actionId: "default-dictionary",
       selectionText: "see",
+    })
+  })
+
+  it("keeps drag lookups working when the click action is disabled", () => {
+    const { builtInActions } = DEFAULT_CONFIG.selectionToolbar
+    subtitlesStore.set(configAtom, {
+      ...DEFAULT_CONFIG,
+      selectionToolbar: {
+        ...DEFAULT_CONFIG.selectionToolbar,
+        builtInActions: {
+          ...builtInActions,
+          dictionary: { ...builtInActions.dictionary, enabled: false },
+        },
+      },
+    })
+    const words = renderLine("You can see the blood run from their face.")
+
+    fireEvent.pointerDown(words[2]!, { button: 0 })
+    act(() => {
+      window.dispatchEvent(new PointerEvent("pointerup"))
+    })
+
+    expect(subtitlesStore.get(wordLookupAtom)).toBeNull()
+    expect(subtitlesStore.get(customActionRequestAtom)).toBeNull()
+
+    fireEvent.pointerDown(words[0]!, { button: 0 })
+    fireEvent.pointerEnter(words[1]!)
+    act(() => {
+      window.dispatchEvent(new PointerEvent("pointerup"))
+    })
+
+    expect(subtitlesStore.get(customActionRequestAtom)).toMatchObject({
+      actionId: "default-sentence-analysis",
+      selectionText: "You can",
     })
   })
 

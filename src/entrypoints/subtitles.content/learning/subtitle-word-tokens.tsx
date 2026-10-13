@@ -3,7 +3,7 @@ import type { CueWordRange } from "./atoms"
 import { useAtomValue } from "jotai"
 import { useMemo, useRef } from "react"
 import { configAtom } from "@/utils/atoms/config"
-import { resolveClickLookupAction } from "@/utils/custom-actions"
+import { resolveClickLookupAction, resolveDragLookupAction } from "@/utils/custom-actions"
 import { cn } from "@/utils/styles/utils"
 import { segmentWords } from "@/utils/subtitles/segment-words"
 import { displaySubtitleAtom, sourceLanguageAtom } from "../atoms"
@@ -26,7 +26,11 @@ export function SubtitleWordTokens() {
   const { startDrag, extendDrag } = useWordDrag(tokens, lineRef)
   const cueStart = cue?.start ?? -1
 
-  if (resolveClickLookupAction(config).enabled === false) {
+  const canLookUp = [resolveClickLookupAction, resolveDragLookupAction].some(
+    (resolve) => resolve(config).enabled !== false,
+  )
+
+  if (!canLookUp) {
     return text
   }
 
