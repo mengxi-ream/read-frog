@@ -3,11 +3,11 @@ import { useAtom } from "jotai"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { patchSelectionToolbarAction } from "@/utils/custom-actions"
 import { i18n } from "@/utils/i18n"
+import { buildCustomActionOptionsRoute } from "@/utils/navigation"
 import { getSelectionToolbarItems } from "@/utils/selection-toolbar-items"
 import { ConfigSection } from "../../components/config-section"
 import { getActionShortcutId } from "./shortcut-bindings"
 import { ShortcutConfigItem } from "./shortcut-config-item"
-import { TurnedOffNote } from "./turned-off-note"
 
 /**
  * A key for every AI action, built-in or the user's own, in the selection toolbar's order. A
@@ -38,7 +38,7 @@ export function ActionShortcuts() {
               {action.name}
             </span>
           }
-          description={action.enabled === false ? <TurnedOffNote /> : undefined}
+          turnOn={action.enabled === false ? buildCustomActionOptionsRoute(action.id) : undefined}
           shortcut={action.shortcut ?? ""}
           onChange={(nextShortcut) => {
             void setSelectionToolbar((current) =>

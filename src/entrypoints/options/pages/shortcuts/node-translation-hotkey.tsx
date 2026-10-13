@@ -1,56 +1,100 @@
-import { deepmerge } from "deepmerge-ts"
+import type { NodeHotkey } from "@/utils/constants/hotkeys"
 import { useAtom } from "jotai"
+import { NodeHotkeyIcon } from "@/components/node-hotkey-icon"
 import {
   Select,
   SelectContent,
   SelectGroup,
   SelectItem,
+  SelectSeparator,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/base-ui/select"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { HOTKEY_ICONS, HOTKEYS } from "@/utils/constants/hotkeys"
+import { HOTKEYS } from "@/utils/constants/hotkeys"
 import { i18n } from "@/utils/i18n"
+import { buildSectionLink } from "../../command-palette/section-scroll"
 import { ConfigItem } from "../../components/config-item"
 import { SELECT_CONTENT_PROPS } from "../../components/select-content-props"
+import { ShortcutConfigItem } from "./shortcut-config-item"
+import { ShortcutTitle } from "./shortcut-title"
+
+const PRESET_HOTKEYS = HOTKEYS.filter((hotkey) => hotkey !== "custom")
 
 /**
- * The one shortcut that is picked from a list rather than recorded — it is a single held
- * modifier, not a combination. Turning the feature on and off stays on the Translation page;
- * this page only sets keys.
+ * The one shortcut picked from a list: a single key held while hovering, or a long press. The
+ * last choice records a combination instead, in a row under this one that is the same recorder
+ * every other shortcut on the page has. Turning the feature on and off stays on the Translation
+ * page; this page only sets keys.
  */
 export function NodeTranslationHotkey() {
   const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.pageTranslation)
-  const { hotkey } = translateConfig.node
+  const { enabled, hotkey, shortcut } = translateConfig.node
 
   return (
-    <ConfigItem
-      id="node-translation-hotkey"
-      title={i18n.t("options.shortcuts.nodeTranslation.title")}
-      description={i18n.t("options.shortcuts.nodeTranslation.description")}
-    >
-      <Select
-        value={hotkey}
-        onValueChange={(value: (typeof HOTKEYS)[number] | null) => {
-          if (!value) return
-          void setTranslateConfig(deepmerge(translateConfig, { node: { hotkey: value } }))
-        }}
+    <>
+      <ConfigItem
+        id="node-translation-hotkey"
+        title={
+          <ShortcutTitle
+            title={i18n.t("options.shortcuts.nodeTranslation.title")}
+            turnOn={
+              enabled ? undefined : buildSectionLink("/page-translation", "hover-translation")
+            }
+          />
+        }
+        description={i18n.t("options.shortcuts.nodeTranslation.description")}
       >
-        <SelectTrigger className="w-44">
-          <SelectValue render={<span />}>
-            {HOTKEY_ICONS[hotkey]} {i18n.t(`hotkey.${hotkey}`)}
-          </SelectValue>
-        </SelectTrigger>
-        <SelectContent {...SELECT_CONTENT_PROPS}>
-          <SelectGroup>
-            {HOTKEYS.map((item) => (
-              <SelectItem key={item} value={item}>
-                {HOTKEY_ICONS[item]} {i18n.t(`hotkey.${item}`)}
+        <Select
+          value={hotkey}
+          onValueChange={(value: NodeHotkey | null) => {
+            if (!value) return
+            void setTranslateConfig((current) => ({ node: { ...current.node, hotkey: value } }))
+          }}
+        >
+          <SelectTrigger className="w-44">
+            <SelectValue render={<span />}>
+              <HotkeyOption hotkey={hotkey} />
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent {...SELECT_CONTENT_PROPS}>
+            <SelectGroup>
+              {PRESET_HOTKEYS.map((item) => (
+                <SelectItem key={item} value={item}>
+                  <HotkeyOption hotkey={item} />
+                </SelectItem>
+              ))}
+            </SelectGroup>
+            <SelectSeparator />
+            <SelectGroup>
+              <SelectItem value="custom">
+                <HotkeyOption hotkey="custom" />
               </SelectItem>
-            ))}
-          </SelectGroup>
-        </SelectContent>
-      </Select>
-    </ConfigItem>
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+      </ConfigItem>
+      {hotkey === "custom" && (
+        <ShortcutConfigItem
+          id="node-translation-shortcut"
+          description={i18n.t("options.shortcuts.nodeTranslation.customDescription")}
+          shortcut={shortcut}
+          onChange={(nextShortcut) => {
+            void setTranslateConfig((current) => ({
+              node: { ...current.node, shortcut: nextShortcut },
+            }))
+          }}
+        />
+      )}
+    </>
+  )
+}
+
+function HotkeyOption({ hotkey }: { hotkey: NodeHotkey }) {
+  return (
+    <>
+      <NodeHotkeyIcon hotkey={hotkey} className="text-muted-foreground" />
+      <span className="truncate">{i18n.t(`hotkey.${hotkey}`)}</span>
+    </>
   )
 }

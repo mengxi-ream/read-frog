@@ -537,8 +537,9 @@ options:
       title: Subtitle translation
       description: Turn translated video subtitles on or off.
     nodeTranslation:
-      title: Paragraph translation
+      title: Hover translation
       description: Hover or long-press a paragraph to translate just that one.
+      customDescription: Press these keys while hovering over a paragraph to translate it.
     translationHub:
       title: Translation Hub
       description: Open the Translation Hub in a new tab.
@@ -549,6 +550,7 @@ options:
       title: "AI actions"
       description: "Run an AI action on the text you selected. Custom actions have no key until you set one here."
     turnedOff: "Turned off, so this key does nothing until you turn it back on."
+    turnOn: "Turn on"
     clash: "Same key as “$1”. Change one of them."
     taken: "$1 is already used by “$2”."
   overlayTools:
@@ -1856,6 +1858,7 @@ hotkey:
   shift: Shift
   backtick: Backtick
   clickAndHold: Click and hold
+  custom: Custom shortcut
 translationHub:
   searchLanguages: Search languages...
   noLanguagesFound: No languages found

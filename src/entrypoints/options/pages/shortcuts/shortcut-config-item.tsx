@@ -1,4 +1,5 @@
 import type { ReactNode } from "react"
+import type { To } from "react-router"
 import { useAtomValue } from "jotai"
 import { ShortcutKeyRecorder } from "@/components/shortcut-key-recorder"
 import { toastManager } from "@/components/ui/base-ui/toast"
@@ -7,6 +8,7 @@ import { i18n } from "@/utils/i18n"
 import { formatHotkey } from "@/utils/os"
 import { ConfigItem } from "../../components/config-item"
 import { findShortcutOwner, getShortcutBindings } from "./shortcut-bindings"
+import { ShortcutTitle } from "./shortcut-title"
 
 /**
  * One recorded key combination, framed as a config item. The recorder is an `Input`, which
@@ -15,6 +17,9 @@ import { findShortcutOwner, getShortcutBindings } from "./shortcut-bindings"
  *
  * Keys another shortcut already has are turned down, naming that shortcut. A clash saved
  * before this check existed is flagged under the description instead.
+ *
+ * Without a title, the row hangs off the previous item's, as `ConfigItem` does. While the
+ * shortcut's feature is switched off, `turnOn` is where its switch is (see `ShortcutTitle`).
  */
 export function ShortcutConfigItem({
   id,
@@ -22,12 +27,14 @@ export function ShortcutConfigItem({
   description,
   shortcut,
   onChange,
+  turnOn,
 }: {
   id: string
-  title: ReactNode
+  title?: ReactNode
   description?: ReactNode
   shortcut: string
   onChange: (shortcut: string) => void
+  turnOn?: To
 }) {
   const bindings = getShortcutBindings(useAtomValue(configAtom))
   const clash = findShortcutOwner(bindings, id, shortcut)
@@ -35,7 +42,7 @@ export function ShortcutConfigItem({
   return (
     <ConfigItem
       id={id}
-      title={title}
+      title={title && <ShortcutTitle title={title} turnOn={turnOn} />}
       description={
         clash ? (
           <>
