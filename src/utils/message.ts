@@ -12,6 +12,12 @@ import type {
   EdgeTTSSynthesizeRequest,
   EdgeTTSSynthesizeWireResponse,
 } from "@/types/edge-tts"
+import type {
+  GeminiTTSListVoicesRequest,
+  GeminiTTSListVoicesResponse,
+  GeminiTTSSynthesizeRequest,
+  GeminiTTSSynthesizeResponse,
+} from "@/types/gemini-tts"
 import type { ProviderRequestRouting } from "@/types/hosted-request"
 import type { ProxyRequest, ProxyResponse } from "@/types/proxy-fetch"
 import type {
@@ -199,6 +205,9 @@ interface ProtocolMap {
   edgeTtsSynthesize: (data: EdgeTTSSynthesizeRequest) => Promise<EdgeTTSSynthesizeWireResponse>
   edgeTtsListVoices: () => Promise<EdgeTTSVoice[]>
   edgeTtsHealthCheck: () => Promise<EdgeTTSHealthStatus>
+  // gemini tts
+  geminiTtsSynthesize: (data: GeminiTTSSynthesizeRequest) => Promise<GeminiTTSSynthesizeResponse>
+  geminiTtsListVoices: (data: GeminiTTSListVoicesRequest) => Promise<GeminiTTSListVoicesResponse>
   // tts playback
   ttsPlaybackPrepare: () => Promise<{ ok: true }>
   ttsPlaybackStart: (data: TTSPlaybackStartRequest) => Promise<TTSPlaybackStartResponse>

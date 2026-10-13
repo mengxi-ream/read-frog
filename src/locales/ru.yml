@@ -1361,6 +1361,23 @@ options:
   tts:
     title: Синтез речи
     pageDescription: Озвучивайте выделенный текст естественным голосом.
+    provider:
+      title: Сервис
+      engine:
+        title: Движок
+        description: Какой сервис читает текст вслух.
+        edgeTts: Edge TTS
+        gemini: Gemini TTS
+      gemini:
+        provider:
+          title: Провайдер Google
+          description: Gemini TTS использует API-ключ провайдера Google (Gemini).
+          manage: Управлять в API-провайдерах
+          placeholder: Выберите провайдера
+          noProviders: Добавьте провайдера Google в API-провайдерах
+        model:
+          title: Модель
+          description: Используемая модель Gemini TTS.
     voice:
       title: Голос
       selectPlaceholder: Выберите голос
@@ -1373,8 +1390,45 @@ options:
       fallback:
         title: Резервный голос
         description: Голос для языков, которым вы не назначили собственный.
+      gemini:
+        title: Голос
+        description: Голоса Gemini читают на всех языках, поэтому одного голоса достаточно для всех.
+        currentVoice: Текущий голос
+        searchPlaceholder: Поиск среди $1 голосов
+        filters:
+          language: Язык
+          gender: Пол
+          pitch: Высота
+          useCase: Назначение
+          all: Все
+        gender:
+          female: Женский
+          male: Мужской
+          neutral: Нейтральный
+        pitch:
+          low: Низкий тон
+          medium: Средний тон
+          high: Высокий тон
+        viewAll: Показать все $1
+        showLess: Свернуть
+        loadFailed: Не удалось загрузить библиотеку голосов, поэтому показаны только классические голоса. Проверьте API-ключ провайдера Google.
     speech:
       title: Чтение вслух
+      style:
+        title: Стиль голоса
+        description: Опишите своими словами, как должен звучать голос. Оставьте пустым для естественной подачи.
+        placeholder: "например: спокойно и тепло, как ведущий ночного радио"
+        presets:
+          none: Выберите пресет
+          custom: Свой
+          podcast: Подкаст
+          friendly: Дружелюбно
+          narration: Повествование
+          calm: Спокойно
+          news: Новости
+          teacher: Учитель
+          promote: Реклама
+          whisper: Шёпот
       rate:
         title: Скорость
         description: Насколько быстрее или медленнее собственного темпа читает голос, от -100 до 100 процентов.

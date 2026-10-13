@@ -1,8 +1,20 @@
 import { useAtom } from "jotai"
-import { useState } from "react"
+import { useEffect, useEffectEvent, useState } from "react"
 import { Input } from "@/components/ui/base-ui/input"
-import { toastManager } from "@/components/ui/base-ui/toast"
 import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/base-ui/select"
+import { Textarea } from "@/components/ui/base-ui/textarea"
+import { toastManager } from "@/components/ui/base-ui/toast"
+import { useDebouncedValue } from "@/hooks/use-debounced-value"
+import {
+  GEMINI_TTS_STYLE_PRESETS,
+  MAX_GEMINI_TTS_STYLE_LENGTH,
   MAX_TTS_PITCH,
   MAX_TTS_RATE,
   MAX_TTS_VOLUME,
@@ -17,10 +29,22 @@ import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
 import { ConfigItem } from "../../../components/config-item"
 import { ConfigSection } from "../../../components/config-section"
+import { SELECT_CONTENT_PROPS } from "../../../components/select-content-props"
 
-/** How the chosen voice delivers a line — three dials, each an offset from how it speaks alone. */
+/**
+ * How the chosen voice delivers a line. Edge takes three dials, each an offset from how it speaks
+ * alone; Gemini takes the delivery in words instead.
+ */
 export function SpeechSection() {
   const [ttsConfig, setTtsConfig] = useAtom(configFieldsAtomMap.tts)
+
+  if (ttsConfig.provider === "gemini") {
+    return (
+      <ConfigSection id="speech" title={i18n.t("options.tts.speech.title")}>
+        <VoiceStyleItem />
+      </ConfigSection>
+    )
+  }
 
   return (
     <ConfigSection id="speech" title={i18n.t("options.tts.speech.title")}>
@@ -70,6 +94,97 @@ export function SpeechSection() {
         />
       </ConfigItem>
     </ConfigSection>
+  )
+}
+
+const CUSTOM_STYLE = "custom"
+
+/**
+ * A preset fills the style text in; editing it afterwards turns the pick back into "Custom".
+ *
+ * Typed text is saved 500 ms after the last keystroke, or when the field is left, rather than on
+ * every keystroke: each save writes the whole config, which every open tab then reads again.
+ */
+function VoiceStyleItem() {
+  const [ttsConfig, setTtsConfig] = useAtom(configFieldsAtomMap.tts)
+  const savedStyle = ttsConfig.gemini.style
+  const [style, setStyle] = useState(savedStyle)
+  const [prevSavedStyle, setPrevSavedStyle] = useState(savedStyle)
+  const matchedPreset = GEMINI_TTS_STYLE_PRESETS.find((preset) => preset.style === style.trim())
+  const presetValue = matchedPreset?.id ?? CUSTOM_STYLE
+
+  // A style saved elsewhere (another tab, a synced config) replaces the draft.
+  if (prevSavedStyle !== savedStyle) {
+    setPrevSavedStyle(savedStyle)
+    setStyle(savedStyle)
+  }
+
+  const saveStyle = (nextStyle: string) => {
+    if (nextStyle === savedStyle) return
+    void setTtsConfig({ gemini: { ...ttsConfig.gemini, style: nextStyle } })
+  }
+
+  const debouncedStyle = useDebouncedValue(style, 500)
+  const saveDebouncedStyle = useEffectEvent(() => saveStyle(debouncedStyle))
+  useEffect(() => {
+    saveDebouncedStyle()
+    // oxlint-disable-next-line react/exhaustive-effect-dependencies -- the dependency is a re-run trigger, not a value the effect body reads
+  }, [debouncedStyle])
+
+  const pickStyle = (nextStyle: string) => {
+    setStyle(nextStyle)
+    saveStyle(nextStyle)
+  }
+
+  return (
+    <ConfigItem
+      id="tts-voice-style"
+      orientation="vertical"
+      title={i18n.t("options.tts.speech.style.title")}
+      description={i18n.t("options.tts.speech.style.description")}
+    >
+      <div className="flex flex-col gap-2">
+        <Select
+          value={presetValue}
+          onValueChange={(value: string | null) => {
+            const preset = GEMINI_TTS_STYLE_PRESETS.find((item) => item.id === value)
+            if (preset) pickStyle(preset.style)
+          }}
+        >
+          <SelectTrigger size="sm" className="w-fit">
+            <SelectValue render={<span />}>
+              {matchedPreset
+                ? i18n.t(`options.tts.speech.style.presets.${matchedPreset.id}`)
+                : style.trim()
+                  ? i18n.t("options.tts.speech.style.presets.custom")
+                  : i18n.t("options.tts.speech.style.presets.none")}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent {...SELECT_CONTENT_PROPS}>
+            <SelectGroup>
+              {GEMINI_TTS_STYLE_PRESETS.map((preset) => (
+                <SelectItem key={preset.id} value={preset.id}>
+                  <div className="flex max-w-80 flex-col gap-0.5 py-0.5">
+                    <span>{i18n.t(`options.tts.speech.style.presets.${preset.id}`)}</span>
+                    <span className="text-xs whitespace-normal text-muted-foreground">
+                      {preset.style}
+                    </span>
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+        <Textarea
+          className="min-h-20"
+          maxLength={MAX_GEMINI_TTS_STYLE_LENGTH}
+          placeholder={i18n.t("options.tts.speech.style.placeholder")}
+          value={style}
+          onChange={(e) => setStyle(e.target.value)}
+          onBlur={() => saveStyle(style)}
+        />
+      </div>
+    </ConfigItem>
   )
 }
 

@@ -550,7 +550,43 @@ export const SEARCH_ITEMS: SearchItem[] = [
     pageKey: "options.videoSubtitles.title",
   },
 
-  // Text to Speech page
+  // Text to Speech page. The Gemini rows show only while Gemini reads aloud, and the Edge rows
+  // only while Edge TTS does; the engine row is always there.
+  {
+    sectionId: "tts-engine",
+    route: "/tts",
+    titleKey: "options.tts.provider.engine.title",
+    descriptionKey: "options.tts.provider.engine.description",
+    pageKey: "options.tts.title",
+  },
+  {
+    sectionId: "tts-gemini-provider",
+    route: "/tts",
+    titleKey: "options.tts.provider.gemini.provider.title",
+    descriptionKey: "options.tts.provider.gemini.provider.description",
+    pageKey: "options.tts.title",
+  },
+  {
+    sectionId: "tts-gemini-model",
+    route: "/tts",
+    titleKey: "options.tts.provider.gemini.model.title",
+    descriptionKey: "options.tts.provider.gemini.model.description",
+    pageKey: "options.tts.title",
+  },
+  {
+    sectionId: "tts-gemini-voice",
+    route: "/tts",
+    titleKey: "options.tts.voice.gemini.title",
+    descriptionKey: "options.tts.voice.gemini.description",
+    pageKey: "options.tts.title",
+  },
+  {
+    sectionId: "tts-voice-style",
+    route: "/tts",
+    titleKey: "options.tts.speech.style.title",
+    descriptionKey: "options.tts.speech.style.description",
+    pageKey: "options.tts.title",
+  },
   {
     sectionId: "language-voice",
     route: "/tts",

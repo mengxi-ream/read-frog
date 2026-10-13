@@ -20,6 +20,7 @@ import { patchProviderConfigAtom } from "@/utils/atoms/entity-config"
 import { providerConfigAtom } from "@/utils/atoms/provider"
 import {
   computeLanguageDetectionFallbackAfterDeletion,
+  computeTTSFallbackAfterDeletion,
   computeProviderFallbacksAfterDeletion,
   computeSelectionToolbarCustomActionFallbacksAfterDeletion,
   findFeatureMissingProvider,
@@ -121,7 +122,9 @@ function EditableProviderConfig({ providerConfig }: { providerConfig: APIProvide
         title: i18n.t("options.apiProviders.form.featureWouldLoseProvider", [
           unsatisfied === "languageDetection"
             ? i18n.t("options.apiProviders.languageDetection.title")
-            : i18n.t(getFeatureLabelI18nKey(unsatisfied)),
+            : unsatisfied === "tts"
+              ? i18n.t("options.tts.title")
+              : i18n.t(getFeatureLabelI18nKey(unsatisfied)),
         ]),
       })
       return
@@ -175,6 +178,21 @@ function EditableProviderConfig({ providerConfig }: { providerConfig: APIProvide
       }
     }
 
+    const ttsFallback = computeTTSFallbackAfterDeletion(
+      providerConfig.id,
+      config,
+      updatedAllProviders,
+    )
+    if (ttsFallback !== null) {
+      patch = {
+        ...patch,
+        tts: {
+          ...config.tts,
+          gemini: { ...config.tts.gemini, providerId: ttsFallback ?? null },
+        },
+      }
+    }
+
     if (Object.keys(patch).length > 0) {
       await setConfig(patch)
     }
@@ -214,6 +232,7 @@ function EditableProviderConfig({ providerConfig }: { providerConfig: APIProvide
                 <ProviderEditor.Assignments>
                   <ProviderEditor.CompatibleFeatureAssignments />
                   <ProviderEditor.LanguageDetectionAssignment />
+                  <ProviderEditor.TTSAssignment />
                   <ProviderEditor.CustomActionAssignments />
                 </ProviderEditor.Assignments>
               )}

@@ -1,4 +1,5 @@
 import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { GeminiTTSVoice } from "@/types/gemini-tts"
 import { LANG_CODE_ISO6393_OPTIONS, langCodeISO6393Schema } from "@read-frog/definitions"
 import { z } from "zod"
 
@@ -3240,7 +3241,401 @@ export const ttsRateSchema = z.coerce.number().int().min(MIN_TTS_RATE).max(MAX_T
 export const ttsPitchSchema = z.coerce.number().int().min(MIN_TTS_PITCH).max(MAX_TTS_PITCH)
 export const ttsVolumeSchema = z.coerce.number().int().min(MIN_TTS_VOLUME).max(MAX_TTS_VOLUME)
 
+export const TTS_PROVIDERS = ["edge-tts", "gemini"] as const
+export type TTSProvider = (typeof TTS_PROVIDERS)[number]
+export const ttsProviderSchema = z.enum(TTS_PROVIDERS)
+
+export const GEMINI_TTS_MODELS = [
+  "gemini-3.8-flash-lite-tts",
+  "gemini-3.8-flash-tts",
+  "gemini-3.1-flash-tts-preview",
+  "gemini-2.5-flash-preview-tts",
+  "gemini-2.5-pro-preview-tts",
+] as const
+
+export const GEMINI_TTS_DEFAULT_MODEL = GEMINI_TTS_MODELS[0]
+
+// Gemini's prebuilt voices speak every language it supports, so one voice
+// covers all of them; the language-voice table only applies to Edge TTS.
+// The full library (about two thousand voices) is listed from the API with the
+// provider's key; these classic voices stand in until it loads or when it can't.
+export const GEMINI_TTS_FALLBACK_VOICES: GeminiTTSVoice[] = [
+  {
+    voice: "achernar",
+    name: "Achernar",
+    languageCode: "en-US",
+    accent: "General American",
+    useCase: "Storyteller & Narrator",
+    description:
+      "Soft, calm, and soothing voice with a higher pitch. Recommended for quiet or personal storytelling.",
+    gender: "female",
+    pitch: "high",
+  },
+  {
+    voice: "achird",
+    name: "Achird",
+    languageCode: "en-US",
+    accent: "General American",
+    useCase: "Companion & Peer",
+    description:
+      "Friendly, approachable, and warm voice with a lower-middle pitch. Recommended for casual walkthroughs or vlogs.",
+    gender: "male",
+    pitch: "low",
+  },
+  {
+    voice: "algenib",
+    name: "Algenib",
+    languageCode: "en-US",
+    accent: "General American",
+    useCase: "Storyteller & Narrator",
+    description:
+      "Gravelly, grounded, and hard-hitting voice with a low pitch. Recommended for dramatic narration or intense stories.",
+    gender: "male",
+    pitch: "low",
+  },
+  {
+    voice: "algieba",
+    name: "Algieba",
+    languageCode: "en-US",
+    accent: "General American",
+    useCase: "High-Trust Advisor",
+    description:
+      "Smooth, relaxed, and polished voice with a low pitch. Recommended for corporate videos or polished explainers.",
+    gender: "male",
+    pitch: "low",
+  },
+  {
+    voice: "alnilam",
+    name: "Alnilam",
+    languageCode: "en-US",
+    accent: "General American",
+    useCase: "High-Trust Advisor",
+    description:
+      "Firm, direct, and commanding voice with a lower-middle pitch. Recommended for authoritative instructions or announcements.",
+    gender: "male",
+    pitch: "low",
+  },
+  {
+    voice: "aoede",
+    name: "Aoede",
+    languageCode: "en-US",
+    accent: "General American",
+    useCase: "Video Voiceover & Host",
+    description:
+      "Breezy, light, and relaxed voice with a medium pitch. Recommended for lifestyle or travel vlogs.",
+    gender: "female",
+    pitch: "medium",
+  },
+  {
+    voice: "autonoe",
+    name: "Autonoe",
+    languageCode: "en-US",
+    accent: "General American",
+    useCase: "Advertising Pitch & Commerce",
+    description:
+      "Bright, positive, and enthusiastic voice with a medium pitch. Recommended for promotions or product feature updates.",
+    gender: "female",
+    pitch: "medium",
+  },
+  {
+    voice: "callirrhoe",
+    name: "Callirrhoe",
+    languageCode: "en-US",
+    accent: "General American",
+    useCase: "Companion & Peer",
+    description:
+      "Easy-going, relaxed, and casual voice with a medium pitch. Recommended for friendly guides or casual vlogs.",
+    gender: "female",
+    pitch: "medium",
+  },
+  {
+    voice: "charon",
+    name: "Charon",
+    languageCode: "en-US",
+    accent: "General American",
+    useCase: "News & Podcast Host",
+    description:
+      "Informative and steady voice with a low pitch. Recommended for technical explainers or documentaries.",
+    gender: "male",
+    pitch: "low",
+  },
+  {
+    voice: "despina",
+    name: "Despina",
+    languageCode: "en-US",
+    accent: "General American",
+    useCase: "Educational Tutor",
+    description:
+      "Smooth, mellow, and polished voice with a medium pitch. Recommended for marketing ads or professional e-learning.",
+    gender: "female",
+    pitch: "medium",
+  },
+  {
+    voice: "enceladus",
+    name: "Enceladus",
+    languageCode: "en-US",
+    accent: "General American",
+    useCase: "Storyteller & Narrator",
+    description:
+      "Breathy, intimate, and soft-spoken voice with a low pitch. Recommended for storytelling or intimate narrations.",
+    gender: "male",
+    pitch: "low",
+  },
+  {
+    voice: "erinome",
+    name: "Erinome",
+    languageCode: "en-US",
+    accent: "General American",
+    useCase: "Educational Tutor",
+    description:
+      "Clear, articulate, and precise voice with a medium pitch. Recommended for training walkthroughs or instructions.",
+    gender: "female",
+    pitch: "medium",
+  },
+  {
+    voice: "fenrir",
+    name: "Fenrir",
+    languageCode: "en-US",
+    accent: "General American",
+    useCase: "Video Voiceover & Host",
+    description:
+      "Excitable, high-energy, and passionate voice with a lower-middle pitch. Recommended for sports clips or energetic intros.",
+    gender: "male",
+    pitch: "low",
+  },
+  {
+    voice: "gacrux",
+    name: "Gacrux",
+    languageCode: "en-US",
+    accent: "General American",
+    useCase: "High-Trust Advisor",
+    description:
+      "Mature, authoritative, and professional voice with a medium pitch. Recommended for official announcements or serious presentations.",
+    gender: "female",
+    pitch: "medium",
+  },
+  {
+    voice: "iapetus",
+    name: "Iapetus",
+    languageCode: "en-US",
+    accent: "General American",
+    useCase: "Tech Support Agent",
+    description:
+      "Clear, crisp, and articulate voice with a lower-middle pitch. Recommended for help videos or onboarding walkthroughs.",
+    gender: "male",
+    pitch: "low",
+  },
+  {
+    voice: "kore",
+    name: "Kore",
+    languageCode: "en-US",
+    accent: "General American",
+    useCase: "News & Podcast Host",
+    description:
+      "Firm, direct, and authoritative voice with a medium pitch. Recommended for news reports or official messages.",
+    gender: "female",
+    pitch: "medium",
+  },
+  {
+    voice: "laomedeia",
+    name: "Laomedeia",
+    languageCode: "en-US",
+    accent: "General American",
+    useCase: "Advertising Pitch & Commerce",
+    description:
+      "Upbeat, energetic, and positive voice with a higher pitch. Recommended for sales pitches or social media marketing.",
+    gender: "female",
+    pitch: "high",
+  },
+  {
+    voice: "leda",
+    name: "Leda",
+    languageCode: "en-US",
+    accent: "General American",
+    useCase: "Video Voiceover & Host",
+    description:
+      "Youthful, vibrant, and energetic voice with a higher pitch. Recommended for pop culture updates or gaming content.",
+    gender: "female",
+    pitch: "high",
+  },
+  {
+    voice: "orus",
+    name: "Orus",
+    languageCode: "en-US",
+    accent: "General American",
+    useCase: "High-Trust Advisor",
+    description:
+      "Firm, serious, and no-nonsense voice with a lower-middle pitch. Recommended for project reports or safety readouts.",
+    gender: "male",
+    pitch: "low",
+  },
+  {
+    voice: "puck",
+    name: "Puck",
+    languageCode: "en-US",
+    accent: "General American",
+    useCase: "Podcaster",
+    description:
+      "Upbeat, energetic, and cheerful voice with a rich, approachable tone. Recommended for podcasts, conversational agents, entertainment reviews, or ads.",
+    gender: "male",
+    pitch: "low",
+  },
+  {
+    voice: "pulcherrima",
+    name: "Pulcherrima",
+    languageCode: "en-US",
+    accent: "General American",
+    useCase: "Customer Support Agent",
+    description:
+      "Forward, confident, and direct voice with a medium pitch. Recommended for sales calls or direct prompts.",
+    gender: "neutral",
+    pitch: "medium",
+  },
+  {
+    voice: "rasalgethi",
+    name: "Rasalgethi",
+    languageCode: "en-US",
+    accent: "General American",
+    useCase: "Educational Tutor",
+    description:
+      "Informative and measured voice with a medium pitch. Recommended for history lectures or audiobooks.",
+    gender: "male",
+    pitch: "medium",
+  },
+  {
+    voice: "sadachbia",
+    name: "Sadachbia",
+    languageCode: "en-US",
+    accent: "General American",
+    useCase: "News & Podcast Host",
+    description:
+      "Lively, animated, and engaging voice with a low pitch. Recommended for daily digests or podcasts.",
+    gender: "male",
+    pitch: "low",
+  },
+  {
+    voice: "sadaltager",
+    name: "Sadaltager",
+    languageCode: "en-US",
+    accent: "General American",
+    useCase: "Educational Tutor",
+    description:
+      "Knowledgeable and steady voice with a medium pitch. Recommended for scientific explanations or deep dives.",
+    gender: "male",
+    pitch: "medium",
+  },
+  {
+    voice: "schedar",
+    name: "Schedar",
+    languageCode: "en-US",
+    accent: "General American",
+    useCase: "Tech Support Agent",
+    description:
+      "Even, balanced, and steady voice with a lower-middle pitch. Recommended for neutral scripts or documentation readouts.",
+    gender: "male",
+    pitch: "low",
+  },
+  {
+    voice: "sulafat",
+    name: "Sulafat",
+    languageCode: "en-US",
+    accent: "General American",
+    useCase: "Customer Support Agent",
+    description:
+      "Warm, inviting, and comforting voice with a medium pitch. Recommended for onboarding screens or warm welcomes.",
+    gender: "female",
+    pitch: "medium",
+  },
+  {
+    voice: "umbriel",
+    name: "Umbriel",
+    languageCode: "en-US",
+    accent: "General American",
+    useCase: "Companion & Peer",
+    description:
+      "Easy-going, laid-back, and casual voice with a lower-middle pitch. Recommended for reviews or casual explainers.",
+    gender: "male",
+    pitch: "low",
+  },
+  {
+    voice: "vindemiatrix",
+    name: "Vindemiatrix",
+    languageCode: "en-US",
+    accent: "General American",
+    useCase: "Coach & Motivational Guide",
+    description:
+      "Gentle, mild, and calming voice with a medium pitch. Recommended for kids content or meditation videos.",
+    gender: "female",
+    pitch: "medium",
+  },
+  {
+    voice: "zephyr",
+    name: "Zephyr",
+    languageCode: "en-US",
+    accent: "General American",
+    useCase: "Advertising Pitch & Commerce",
+    description:
+      "Bright, positive, and forward-looking voice with a higher pitch. Recommended for showreels or product announcements.",
+    gender: "female",
+    pitch: "high",
+  },
+  {
+    voice: "zubenelgenubi",
+    name: "Zubenelgenubi",
+    languageCode: "en-US",
+    accent: "General American",
+    useCase: "Companion & Peer",
+    description:
+      "Casual, conversational, and laid-back voice with a lower-middle pitch. Recommended for startup updates or casual pitches.",
+    gender: "male",
+    pitch: "low",
+  },
+]
+
+export const GEMINI_TTS_DEFAULT_VOICE: TTSVoice = "kore"
+
+export const MAX_GEMINI_TTS_STYLE_LENGTH = 500
+
+// Picking a preset only fills the style text, so a reader can start from one and edit it. The
+// styles stay in English: they are instructions to the model, not text shown as the label.
+export const GEMINI_TTS_STYLE_PRESETS = [
+  { id: "podcast", style: "Relaxed podcast host, conversational and natural, light emphasis" },
+  { id: "friendly", style: "Warm and neutral delivery with micro-pauses" },
+  { id: "narration", style: "commanding, rich vocal modulation, dramatic pauses" },
+  { id: "calm", style: "Calm and soothing, slow pace, soft volume" },
+  { id: "news", style: "Clear, neutral news anchor delivery at a steady pace" },
+  { id: "teacher", style: "Patient and clear, like a teacher explaining step by step" },
+  { id: "promote", style: "High energy, elongated vowels" },
+  { id: "whisper", style: "whisper quietly" },
+] as const
+
+export const geminiTTSStyleSchema = z.string().max(MAX_GEMINI_TTS_STYLE_LENGTH)
+
+export const geminiTTSConfigSchema = z.object({
+  // A Google (Gemini) provider from API Providers, which owns the API key.
+  providerId: z.string().nullable(),
+  model: z.string().trim().min(1),
+  voice: ttsVoiceSchema,
+  // How the voice delivers a line, told to the model in words ("calm and warm").
+  style: geminiTTSStyleSchema,
+})
+
+export type GeminiTTSConfig = z.infer<typeof geminiTTSConfigSchema>
+
+export const DEFAULT_GEMINI_TTS_CONFIG: GeminiTTSConfig = {
+  providerId: null,
+  model: GEMINI_TTS_DEFAULT_MODEL,
+  voice: GEMINI_TTS_DEFAULT_VOICE,
+  style: "",
+}
+
 export const ttsConfigSchema = z.object({
+  // `.default()` mirrors `translationHubSchema`: it lets a v111 config still parse in UI contexts
+  // that load ahead of the background migration, instead of falling back to DEFAULT_CONFIG and
+  // writing that over the user's settings. The migration still preselects a Google provider for
+  // a `gemini` block stored this way.
+  provider: ttsProviderSchema.default("edge-tts"),
+  gemini: geminiTTSConfigSchema.default(DEFAULT_GEMINI_TTS_CONFIG),
   defaultVoice: ttsVoiceSchema,
   languageVoices: z.record(langCodeISO6393Schema, ttsVoiceSchema),
   rate: ttsRateSchema,

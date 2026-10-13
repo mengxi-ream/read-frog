@@ -1361,6 +1361,23 @@ options:
   tts:
     title: Metinden Konuşmaya
     pageDescription: Seçtiğiniz metni doğal bir sesle okutun.
+    provider:
+      title: Sağlayıcı
+      engine:
+        title: Motor
+        description: Metni hangi hizmetin sesli okuyacağı.
+        edgeTts: Edge TTS
+        gemini: Gemini TTS
+      gemini:
+        provider:
+          title: Google sağlayıcısı
+          description: Gemini TTS, bir Google (Gemini) sağlayıcısının API anahtarını kullanır.
+          manage: API Sağlayıcılarında yönet
+          placeholder: Bir sağlayıcı seçin
+          noProviders: API Sağlayıcılarına bir Google sağlayıcısı ekleyin
+        model:
+          title: Model
+          description: Kullanılacak Gemini TTS modeli.
     voice:
       title: Ses
       selectPlaceholder: Bir ses seçin
@@ -1373,8 +1390,45 @@ options:
       fallback:
         title: Yedek ses
         description: Kendine ait bir ses atamadığınız diller bu sesle okunur.
+      gemini:
+        title: Ses
+        description: Gemini sesleri her dili okur, bu yüzden tek bir ses hepsini kapsar.
+        currentVoice: Geçerli ses
+        searchPlaceholder: $1 ses içinde ara
+        filters:
+          language: Dil
+          gender: Cinsiyet
+          pitch: Perde
+          useCase: Kullanım
+          all: Tümü
+        gender:
+          female: Kadın
+          male: Erkek
+          neutral: Nötr
+        pitch:
+          low: Kalın perde
+          medium: Orta perde
+          high: İnce perde
+        viewAll: $1 sesin tümünü gör
+        showLess: Daha az göster
+        loadFailed: Ses kitaplığı yüklenemedi, bu yüzden yalnızca klasik sesler listeleniyor. Google sağlayıcısının API anahtarını kontrol edin.
     speech:
       title: Okuma
+      style:
+        title: Ses tarzı
+        description: Sesin nasıl duyulması gerektiğini kendi sözlerinizle anlatın. Doğal okuyuş için boş bırakın.
+        placeholder: ör. Gece radyosu sunucusu gibi sakin ve sıcak
+        presets:
+          none: Hazır ayar seçin
+          custom: Özel
+          podcast: Podcast
+          friendly: Samimi
+          narration: Anlatım
+          calm: Sakin
+          news: Haber
+          teacher: Öğretmen
+          promote: Tanıtım
+          whisper: Fısıltı
       rate:
         title: Hız
         description: Sesin kendi hızına göre ne kadar hızlı ya da yavaş okuduğu, -100 ile 100 yüzde arasında.

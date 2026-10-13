@@ -17,7 +17,11 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui
 import { isAPIProvider, isAPIProviderConfig } from "@/types/config/provider"
 import { configAtom, configFieldsAtomMap } from "@/utils/atoms/config"
 import { patchProviderConfigAtom } from "@/utils/atoms/entity-config"
-import { getAPIProvidersConfig, getProviderConfigById } from "@/utils/config/helpers"
+import {
+  getAPIProvidersConfig,
+  getProviderConfigById,
+  isGeminiTTSProviderAssigned,
+} from "@/utils/config/helpers"
 import {
   FEATURE_KEYS,
   FEATURE_PROVIDER_DEFS,
@@ -236,8 +240,12 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
   )
   const isLanguageDetectionProvider =
     config.languageDetection.mode === "llm" && config.languageDetection.providerId === id
+  const isTTSProvider = isGeminiTTSProviderAssigned(config, id)
   const totalAssigned =
-    assignedFeatures.length + assignedCustomActions.length + (isLanguageDetectionProvider ? 1 : 0)
+    assignedFeatures.length +
+    assignedCustomActions.length +
+    (isLanguageDetectionProvider ? 1 : 0) +
+    (isTTSProvider ? 1 : 0)
 
   const handleProviderEnabledChange = (checked: boolean) => {
     if (!checked && enabled && totalAssigned > 0) {
@@ -282,6 +290,7 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
             {isLanguageDetectionProvider && (
               <li>{i18n.t("options.apiProviders.languageDetection.title")}</li>
             )}
+            {isTTSProvider && <li>{i18n.t("options.tts.title")}</li>}
             {assignedCustomActions.map((action) => (
               <li key={action.id}>{action.name}</li>
             ))}

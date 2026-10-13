@@ -1508,6 +1508,23 @@ options:
   tts:
     title: Text to Speech
     pageDescription: Read any selection aloud with a natural voice.
+    provider:
+      title: Provider
+      engine:
+        title: Engine
+        description: Which service reads text aloud.
+        edgeTts: Edge TTS
+        gemini: Gemini TTS
+      gemini:
+        provider:
+          title: Google provider
+          description: Gemini TTS uses the API key of a Google (Gemini) provider.
+          manage: Manage in API Providers
+          placeholder: Select a provider
+          noProviders: Add a Google provider in API Providers
+        model:
+          title: Model
+          description: The Gemini TTS model to use.
     voice:
       title: Voice
       selectPlaceholder: Select a voice
@@ -1520,8 +1537,45 @@ options:
       fallback:
         title: Fallback voice
         description: The voice for any language you have not given one of its own.
+      gemini:
+        title: Voice
+        description: Gemini voices read every language, so one voice covers them all.
+        currentVoice: Current voice
+        searchPlaceholder: Search $1 voices
+        filters:
+          language: Language
+          gender: Gender
+          pitch: Pitch
+          useCase: Use case
+          all: All
+        gender:
+          female: Female
+          male: Male
+          neutral: Neutral
+        pitch:
+          low: Low pitch
+          medium: Medium pitch
+          high: High pitch
+        viewAll: View all $1
+        showLess: Show less
+        loadFailed: Couldn't load the voice library, so only the classic voices are listed. Check the Google provider's API key.
     speech:
       title: Speech
+      style:
+        title: Voice style
+        description: Describe how the voice should sound, in your own words. Leave empty for its natural delivery.
+        placeholder: e.g. Calm and warm, like a late-night radio host
+        presets:
+          none: Choose a preset
+          custom: Custom
+          podcast: Podcast
+          friendly: Friendly
+          narration: Narration
+          calm: Calm
+          news: News
+          teacher: Teacher
+          promote: Promote
+          whisper: Whisper
       rate:
         title: Rate
         description: How much faster or slower the voice reads than its own pace, from -100 to 100 percent.

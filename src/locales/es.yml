@@ -1366,6 +1366,23 @@ options:
   tts:
     title: Texto a voz
     pageDescription: Lee en voz alta cualquier selección con una voz natural.
+    provider:
+      title: Proveedor
+      engine:
+        title: Motor
+        description: Qué servicio lee el texto en voz alta.
+        edgeTts: Edge TTS
+        gemini: Gemini TTS
+      gemini:
+        provider:
+          title: Proveedor de Google
+          description: Gemini TTS usa la clave de API de un proveedor de Google (Gemini).
+          manage: Gestionar en Proveedores de API
+          placeholder: Selecciona un proveedor
+          noProviders: Añade un proveedor de Google en Proveedores de API
+        model:
+          title: Modelo
+          description: El modelo de Gemini TTS que se usa.
     voice:
       title: Voz
       selectPlaceholder: Selecciona una voz
@@ -1378,8 +1395,45 @@ options:
       fallback:
         title: Voz alternativa
         description: La voz para cualquier idioma al que no le hayas asignado una propia.
+      gemini:
+        title: Voz
+        description: Las voces de Gemini leen todos los idiomas, así que una sola voz sirve para todos.
+        currentVoice: Voz actual
+        searchPlaceholder: Buscar entre $1 voces
+        filters:
+          language: Idioma
+          gender: Género
+          pitch: Tono
+          useCase: Uso
+          all: Todos
+        gender:
+          female: Femenina
+          male: Masculina
+          neutral: Neutra
+        pitch:
+          low: Tono grave
+          medium: Tono medio
+          high: Tono agudo
+        viewAll: Ver las $1
+        showLess: Ver menos
+        loadFailed: No se pudo cargar la biblioteca de voces, así que solo se muestran las voces clásicas. Revisa la clave de API del proveedor de Google.
     speech:
       title: Habla
+      style:
+        title: Estilo de voz
+        description: Describe con tus palabras cómo debe sonar la voz. Déjalo vacío para su entonación natural.
+        placeholder: p. ej., Tranquila y cálida, como una locutora de radio nocturna
+        presets:
+          none: Elige un ajuste
+          custom: Personalizado
+          podcast: Pódcast
+          friendly: Cercano
+          narration: Narración
+          calm: Tranquilo
+          news: Noticias
+          teacher: Profesor
+          promote: Promoción
+          whisper: Susurro
       rate:
         title: Velocidad
         description: Cuánto más rápido o más lento lee la voz respecto a su propio ritmo, de -100 a 100 por ciento.

@@ -1371,6 +1371,23 @@ options:
   tts:
     title: 文字轉語音
     pageDescription: 用自然的語音朗讀任何選取的文字。
+    provider:
+      title: 服務
+      engine:
+        title: 朗讀引擎
+        description: 選擇用哪個服務朗讀文字。
+        edgeTts: Edge TTS
+        gemini: Gemini TTS
+      gemini:
+        provider:
+          title: Google 服務商
+          description: Gemini TTS 使用 Google (Gemini) 服務商的 API 金鑰。
+          manage: 在 API 服務商中管理
+          placeholder: 選擇服務商
+          noProviders: 請先在 API 服務商中新增 Google 服務商
+        model:
+          title: 模型
+          description: 使用的 Gemini TTS 模型。
     voice:
       title: 語音
       selectPlaceholder: 請選擇一個語音
@@ -1383,8 +1400,45 @@ options:
       fallback:
         title: 備用語音
         description: 你還沒有單獨指定語音的語言，都用這個語音朗讀。
+      gemini:
+        title: 音色
+        description: Gemini 音色可朗讀所有語言，一個音色即可涵蓋全部語言。
+        currentVoice: 目前音色
+        searchPlaceholder: 搜尋 $1 個音色
+        filters:
+          language: 語言
+          gender: 性別
+          pitch: 音調
+          useCase: 用途
+          all: 全部
+        gender:
+          female: 女聲
+          male: 男聲
+          neutral: 中性
+        pitch:
+          low: 低音調
+          medium: 中音調
+          high: 高音調
+        viewAll: 檢視全部 $1 個
+        showLess: 收合
+        loadFailed: 無法載入音色庫，目前只列出經典音色。請檢查 Google 服務商的 API 金鑰。
     speech:
       title: 朗讀
+      style:
+        title: 語氣風格
+        description: 用自己的話描述聲音應該怎麼說。留空則使用自然語氣。
+        placeholder: 例如：平靜溫暖，像深夜電台主持人
+        presets:
+          none: 選擇預設
+          custom: 自訂
+          podcast: Podcast
+          friendly: 親切
+          narration: 旁白
+          calm: 平靜
+          news: 新聞
+          teacher: 講解
+          promote: 推廣
+          whisper: 耳語
       rate:
         title: 語速
         description: 相對語音本身的語速快多少或慢多少，範圍 -100 到 100 個百分點。

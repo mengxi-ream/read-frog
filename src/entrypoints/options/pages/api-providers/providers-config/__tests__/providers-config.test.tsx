@@ -125,6 +125,10 @@ vi.mock("@/utils/config/helpers", () => ({
   getAPIProvidersConfig: (providers: unknown[]) => providers,
   getProviderConfigById: (providers: (typeof providerConfig)[], id: string) =>
     providers.find((provider) => provider.id === id),
+  isGeminiTTSProviderAssigned: (
+    currentConfig: { tts?: { provider?: string; gemini?: { providerId?: string | null } } },
+    id: string,
+  ) => currentConfig.tts?.provider === "gemini" && currentConfig.tts.gemini?.providerId === id,
 }))
 
 vi.mock("@/utils/constants/feature-providers", () => ({

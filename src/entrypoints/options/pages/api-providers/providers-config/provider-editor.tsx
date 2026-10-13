@@ -30,6 +30,7 @@ import {
 import { Switch } from "@/components/ui/base-ui/switch"
 import { isLLMProvider } from "@/types/config/provider"
 import { configAtom, configFieldsAtomMap, writeConfigAtom } from "@/utils/atoms/config"
+import { isGeminiTTSProviderAssigned } from "@/utils/config/helpers"
 import {
   buildFeatureProviderPatch,
   FEATURE_KEYS,
@@ -74,6 +75,7 @@ interface ProviderEditorContextValue {
   actions: {
     assignFeature: (featureKey: FeatureKey) => Promise<void>
     assignLanguageDetection: () => Promise<void>
+    assignTTS: () => Promise<void>
     assignCustomAction: (actionId: string) => Promise<void>
     duplicate?: () => Promise<void>
     delete?: () => Promise<void>
@@ -152,6 +154,18 @@ function useProviderEditorValue({
           },
           ...getAssignmentProvidersPatch(),
         })
+      },
+      assignTTS: async () => {
+        // Built from the config as stored at write time, so a TTS change made in another tab
+        // since this editor rendered is kept.
+        await setConfig((current) => ({
+          tts: {
+            ...current.tts,
+            provider: "gemini",
+            gemini: { ...current.tts.gemini, providerId },
+          },
+          ...getAssignmentProvidersPatch(),
+        }))
       },
       assignCustomAction: async (actionId) => {
         await setConfig({
@@ -483,6 +497,32 @@ function LanguageDetectionAssignment({
   )
 }
 
+/** Gemini TTS takes its API key from a Google provider, so only those editors offer the row. */
+function TTSAssignment() {
+  const {
+    state: {
+      assignmentTarget: { providerId, providerType },
+    },
+    actions,
+  } = useProviderEditor()
+  const config = useAtomValue(configAtom)
+
+  if (providerType !== "google") {
+    return null
+  }
+
+  return (
+    <AssignmentRow
+      checked={isGeminiTTSProviderAssigned(config, providerId)}
+      onCheckedChange={(checked) => {
+        if (checked) void actions.assignTTS()
+      }}
+    >
+      {i18n.t("options.tts.title")}
+    </AssignmentRow>
+  )
+}
+
 /**
  * A single feature row (from FEATURE_KEYS) for the built-in provider editors.
  * Local API providers keep using CompatibleFeatureAssignments; this row exists
@@ -615,6 +655,7 @@ export const ProviderEditor = {
   CompatibleFeatureAssignments,
   FeatureAssignment,
   LanguageDetectionAssignment,
+  TTSAssignment,
   CustomActionAssignments,
   DuplicateButton,
   DeleteButton,

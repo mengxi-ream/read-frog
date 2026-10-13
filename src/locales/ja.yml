@@ -1361,6 +1361,23 @@ options:
   tts:
     title: テキスト読み上げ
     pageDescription: 選択したテキストを自然な音声で読み上げます。
+    provider:
+      title: サービス
+      engine:
+        title: 読み上げエンジン
+        description: テキストを読み上げるサービスを選びます。
+        edgeTts: Edge TTS
+        gemini: Gemini TTS
+      gemini:
+        provider:
+          title: Google プロバイダー
+          description: Gemini TTS は Google (Gemini) プロバイダーの API キーを使います。
+          manage: API プロバイダーで管理
+          placeholder: プロバイダーを選択
+          noProviders: API プロバイダーで Google プロバイダーを追加してください
+        model:
+          title: モデル
+          description: 使用する Gemini TTS モデル。
     voice:
       title: ボイス
       selectPlaceholder: ボイスを選択
@@ -1373,8 +1390,45 @@ options:
       fallback:
         title: フォールバックボイス
         description: 個別にボイスを指定していない言語は、このボイスで読み上げます。
+      gemini:
+        title: 音声
+        description: Gemini の音声はすべての言語を読み上げられるため、1 つの音声で全言語に対応します。
+        currentVoice: 現在の音声
+        searchPlaceholder: $1 件の音声を検索
+        filters:
+          language: 言語
+          gender: 性別
+          pitch: ピッチ
+          useCase: 用途
+          all: すべて
+        gender:
+          female: 女性
+          male: 男性
+          neutral: ニュートラル
+        pitch:
+          low: 低いピッチ
+          medium: 中くらいのピッチ
+          high: 高いピッチ
+        viewAll: すべて表示（$1 件）
+        showLess: 折りたたむ
+        loadFailed: 音声ライブラリを読み込めなかったため、定番の音声のみ表示しています。Google プロバイダーの API キーを確認してください。
     speech:
       title: 読み上げ
+      style:
+        title: 話し方のスタイル
+        description: 声の話し方を自由に記述します。空欄なら自然な話し方になります。
+        placeholder: 例：深夜ラジオのパーソナリティのように落ち着いて温かく
+        presets:
+          none: プリセットを選択
+          custom: カスタム
+          podcast: ポッドキャスト
+          friendly: フレンドリー
+          narration: ナレーション
+          calm: 穏やか
+          news: ニュース
+          teacher: 講師
+          promote: プロモーション
+          whisper: ささやき
       rate:
         title: 速度
         description: ボイス本来の速さからどれだけ速く、または遅く読むか。-100 から 100 パーセント。

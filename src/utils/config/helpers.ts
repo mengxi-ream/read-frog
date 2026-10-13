@@ -9,6 +9,7 @@ import type {
   PureAPIProviderConfig,
   TranslateProviderConfig,
 } from "@/types/config/provider"
+import type { TTSProvider } from "@/types/config/tts"
 import type { FeatureKey } from "@/utils/constants/feature-providers"
 import type { HostedAiStatus } from "@/utils/hosted-ai/types"
 import {
@@ -21,6 +22,7 @@ import {
 import { FEATURE_KEYS, FEATURE_PROVIDER_DEFS } from "@/utils/constants/feature-providers"
 import { getSelectionToolbarActions, patchSelectionToolbarAction } from "@/utils/custom-actions"
 import { getUsableProviderIdsForCapability } from "@/utils/providers/provider-availability"
+import { getGeminiTTSProviders, resolveGeminiTTSProvider } from "@/utils/tts/gemini-providers"
 
 export function getProviderConfigById<T extends ProviderConfig>(
   providersConfig: T[],
@@ -170,7 +172,7 @@ export function findFeatureMissingProvider(
   remainingProviders: ProvidersConfig,
   config?: Config,
   status?: HostedAiStatus,
-): FeatureKey | "languageDetection" | null {
+): FeatureKey | "languageDetection" | "tts" | null {
   for (const key of FEATURE_KEYS) {
     if (!getUsableProviderIdsForCapability(key, remainingProviders, status)[0]) {
       return key
@@ -182,6 +184,10 @@ export function findFeatureMissingProvider(
     getUsableProviderIdsForCapability("languageDetection", remainingProviders, status).length === 0
   ) {
     return "languageDetection"
+  }
+
+  if (config?.tts.provider === "gemini" && getGeminiTTSProviders(remainingProviders).length === 0) {
+    return "tts"
   }
 
   return null
@@ -243,4 +249,50 @@ export function computeLanguageDetectionFallbackAfterDeletion(
   // account can actually run it: handing detection to a walled-off tier is what
   // produced a green "LLM detection enabled" card over a path that never ran.
   return getUsableProviderIdsForCapability("languageDetection", remainingProviders, status)[0]
+}
+
+/** Whether Gemini TTS reads aloud with this provider's API key. */
+export function isGeminiTTSProviderAssigned(config: Config, providerId: string): boolean {
+  return config.tts.provider === "gemini" && config.tts.gemini.providerId === providerId
+}
+
+/**
+ * The TTS change for picking an engine. Gemini keeps a still-usable Google provider, else takes
+ * the first, so it can speak without a second step. Returns null when no Google provider can lend
+ * Gemini an API key: switching to it then would only leave text that cannot be read aloud.
+ */
+export function resolveTTSConfigForProviderChange(
+  currentConfig: Config["tts"],
+  nextProvider: TTSProvider,
+  providersConfig: ProvidersConfig,
+): Partial<Config["tts"]> | null {
+  if (nextProvider !== "gemini") {
+    return { provider: nextProvider }
+  }
+
+  const providerId =
+    resolveGeminiTTSProvider(providersConfig, currentConfig.gemini.providerId)?.id ??
+    getGeminiTTSProviders(providersConfig)[0]?.id
+  if (!providerId) {
+    return null
+  }
+
+  return { provider: nextProvider, gemini: { ...currentConfig.gemini, providerId } }
+}
+
+/**
+ * Compute the Gemini TTS provider fallback when a provider is deleted.
+ * Applies whenever the deleted provider is the stored one, even while Edge TTS
+ * reads aloud, so switching back to Gemini never lands on a provider that is gone.
+ * Returns the new providerId (first enabled Google provider), or undefined if none available.
+ * Returns null when no change is needed.
+ */
+export function computeTTSFallbackAfterDeletion(
+  deletedProviderId: string,
+  config: Config,
+  remainingProviders: ProvidersConfig,
+): string | undefined | null {
+  if (config.tts.gemini.providerId !== deletedProviderId) return null
+
+  return getGeminiTTSProviders(remainingProviders)[0]?.id
 }

@@ -1361,6 +1361,23 @@ options:
   tts:
     title: 텍스트 음성 변환
     pageDescription: 선택한 텍스트를 자연스러운 음성으로 읽어 줍니다.
+    provider:
+      title: 서비스
+      engine:
+        title: 읽기 엔진
+        description: 텍스트를 읽어 줄 서비스를 선택합니다.
+        edgeTts: Edge TTS
+        gemini: Gemini TTS
+      gemini:
+        provider:
+          title: Google 제공자
+          description: Gemini TTS는 Google (Gemini) 제공자의 API 키를 사용합니다.
+          manage: API 제공자에서 관리
+          placeholder: 제공자 선택
+          noProviders: API 제공자에서 Google 제공자를 추가하세요
+        model:
+          title: 모델
+          description: 사용할 Gemini TTS 모델입니다.
     voice:
       title: 음성
       selectPlaceholder: 음성을 선택하세요
@@ -1373,8 +1390,45 @@ options:
       fallback:
         title: 대체 음성
         description: 따로 음성을 지정하지 않은 언어는 이 음성으로 읽습니다.
+      gemini:
+        title: 음성
+        description: Gemini 음성은 모든 언어를 읽을 수 있어 하나의 음성으로 모든 언어를 처리합니다.
+        currentVoice: 현재 음성
+        searchPlaceholder: 음성 $1개 검색
+        filters:
+          language: 언어
+          gender: 성별
+          pitch: 음높이
+          useCase: 용도
+          all: 전체
+        gender:
+          female: 여성
+          male: 남성
+          neutral: 중성
+        pitch:
+          low: 낮은 음높이
+          medium: 중간 음높이
+          high: 높은 음높이
+        viewAll: $1개 모두 보기
+        showLess: 접기
+        loadFailed: 음성 라이브러리를 불러오지 못해 기본 음성만 표시합니다. Google 제공자의 API 키를 확인하세요.
     speech:
       title: 읽어 주기
+      style:
+        title: 음성 스타일
+        description: 목소리가 어떻게 말해야 하는지 자유롭게 설명하세요. 비워 두면 자연스러운 말투로 읽습니다.
+        placeholder: "예: 심야 라디오 진행자처럼 차분하고 따뜻하게"
+        presets:
+          none: 프리셋 선택
+          custom: 사용자 지정
+          podcast: 팟캐스트
+          friendly: 친근함
+          narration: 내레이션
+          calm: 차분함
+          news: 뉴스
+          teacher: 강의
+          promote: 홍보
+          whisper: 속삭임
       rate:
         title: 속도
         description: 음성 본래의 속도보다 얼마나 빠르거나 느리게 읽을지, -100에서 100 퍼센트.

@@ -1366,6 +1366,23 @@ options:
   tts:
     title: Mətnin səsləndirilməsi
     pageDescription: İstənilən seçilmiş mətni təbii səslə ucadan oxudun.
+    provider:
+      title: Provayder
+      engine:
+        title: Mühərrik
+        description: Mətni hansı xidmətin səsli oxuyacağı.
+        edgeTts: Edge TTS
+        gemini: Gemini TTS
+      gemini:
+        provider:
+          title: Google provayderi
+          description: Gemini TTS Google (Gemini) provayderinin API açarından istifadə edir.
+          manage: API provayderlərində idarə et
+          placeholder: Provayder seçin
+          noProviders: API provayderlərində Google provayderi əlavə edin
+        model:
+          title: Model
+          description: İstifadə olunan Gemini TTS modeli.
     voice:
       title: Səs
       selectPlaceholder: Səs seçin
@@ -1378,8 +1395,45 @@ options:
       fallback:
         title: Ehtiyat səs
         description: Ayrıca səs təyin etmədiyiniz dillər üçün istifadə olunan səs.
+      gemini:
+        title: Səs
+        description: Gemini səsləri bütün dilləri oxuyur, ona görə bir səs hamısı üçün kifayətdir.
+        currentVoice: Cari səs
+        searchPlaceholder: $1 səs arasında axtar
+        filters:
+          language: Dil
+          gender: Cins
+          pitch: Ton
+          useCase: İstifadə
+          all: Hamısı
+        gender:
+          female: Qadın
+          male: Kişi
+          neutral: Neytral
+        pitch:
+          low: Aşağı ton
+          medium: Orta ton
+          high: Yüksək ton
+        viewAll: Hamısına bax ($1)
+        showLess: Daha az göstər
+        loadFailed: Səs kitabxanası yüklənmədi, ona görə yalnız klassik səslər göstərilir. Google provayderinin API açarını yoxlayın.
     speech:
       title: Nitq
+      style:
+        title: Səs üslubu
+        description: Səsin necə səslənməli olduğunu öz sözlərinizlə təsvir edin. Təbii oxunuş üçün boş qoyun.
+        placeholder: məs. Gecə radiosu aparıcısı kimi sakit və isti
+        presets:
+          none: Hazır üslub seçin
+          custom: Fərdi
+          podcast: Podkast
+          friendly: Səmimi
+          narration: Nəql
+          calm: Sakit
+          news: Xəbər
+          teacher: Müəllim
+          promote: Təbliğ
+          whisper: Pıçıltı
       rate:
         title: Sürət
         description: Səsləndirmənin normal tempdən nə qədər sürətli və ya yavaş olacağını -100 ilə 100 faiz arasında təyin edin.

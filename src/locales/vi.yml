@@ -1361,6 +1361,23 @@ options:
   tts:
     title: Chuyển văn bản thành giọng nói
     pageDescription: Đọc to đoạn văn bản bạn chọn bằng giọng tự nhiên.
+    provider:
+      title: Nhà cung cấp
+      engine:
+        title: Công cụ
+        description: Dịch vụ nào đọc to văn bản.
+        edgeTts: Edge TTS
+        gemini: Gemini TTS
+      gemini:
+        provider:
+          title: Nhà cung cấp Google
+          description: Gemini TTS dùng khóa API của một nhà cung cấp Google (Gemini).
+          manage: Quản lý trong Nhà cung cấp API
+          placeholder: Chọn nhà cung cấp
+          noProviders: Hãy thêm nhà cung cấp Google trong Nhà cung cấp API
+        model:
+          title: Mô hình
+          description: Mô hình Gemini TTS được sử dụng.
     voice:
       title: Giọng nói
       selectPlaceholder: Chọn giọng nói
@@ -1373,8 +1390,45 @@ options:
       fallback:
         title: Giọng dự phòng
         description: Ngôn ngữ nào bạn chưa gán giọng riêng sẽ được đọc bằng giọng này.
+      gemini:
+        title: Giọng
+        description: Giọng Gemini đọc được mọi ngôn ngữ, nên một giọng dùng cho tất cả.
+        currentVoice: Giọng hiện tại
+        searchPlaceholder: Tìm trong $1 giọng
+        filters:
+          language: Ngôn ngữ
+          gender: Giới tính
+          pitch: Cao độ
+          useCase: Mục đích
+          all: Tất cả
+        gender:
+          female: Nữ
+          male: Nam
+          neutral: Trung tính
+        pitch:
+          low: Cao độ thấp
+          medium: Cao độ trung bình
+          high: Cao độ cao
+        viewAll: Xem tất cả $1
+        showLess: Thu gọn
+        loadFailed: Không tải được thư viện giọng nên chỉ hiển thị các giọng cổ điển. Hãy kiểm tra khóa API của nhà cung cấp Google.
     speech:
       title: Đọc to
+      style:
+        title: Phong cách giọng
+        description: Mô tả bằng lời của bạn giọng nên nghe như thế nào. Để trống để đọc tự nhiên.
+        placeholder: "vd: Điềm tĩnh và ấm áp, như người dẫn chương trình radio đêm khuya"
+        presets:
+          none: Chọn mẫu có sẵn
+          custom: Tùy chỉnh
+          podcast: Podcast
+          friendly: Thân thiện
+          narration: Thuyết minh
+          calm: Điềm tĩnh
+          news: Tin tức
+          teacher: Giảng giải
+          promote: Quảng bá
+          whisper: Thì thầm
       rate:
         title: Tốc độ
         description: Giọng đọc nhanh hay chậm hơn nhịp vốn có của nó bao nhiêu, từ -100 đến 100 phần trăm.

@@ -17,6 +17,7 @@ import {
   getProviderIdsForCapability,
 } from "@/utils/providers/provider-registry"
 import { normalizeSelectionToolbarLists } from "@/utils/selection-toolbar-order"
+import { getGeminiTTSProviders } from "@/utils/tts/gemini-providers"
 import { floatingButtonSchema } from "./floating-button"
 import { glossaryConfigSchema } from "./glossary"
 import { languageDetectionConfigSchema } from "./language-detection"
@@ -241,6 +242,23 @@ export const configSchema = z
           }),
           message: `Invalid provider id "${ldProviderId}".`,
           path: ["languageDetection", "providerId"],
+        })
+      }
+    }
+
+    // Validate tts: when Gemini reads aloud, providerId must be an enabled Google provider,
+    // which owns the API key it speaks with.
+    if (data.tts.provider === "gemini") {
+      const ttsProviderId = data.tts.gemini.providerId
+      const geminiProviderIds = getGeminiTTSProviders(data.providersConfig).map(
+        (provider) => provider.id,
+      )
+      if (!ttsProviderId || !geminiProviderIds.includes(ttsProviderId)) {
+        ctx.addIssue({
+          code: "invalid_value",
+          values: geminiProviderIds,
+          message: `Invalid Gemini TTS provider id "${ttsProviderId}".`,
+          path: ["tts", "gemini", "providerId"],
         })
       }
     }
