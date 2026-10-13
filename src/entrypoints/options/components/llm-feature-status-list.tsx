@@ -1,7 +1,7 @@
 import type { FeatureKey } from "@/utils/constants/feature-providers"
 import { useAtomValue } from "jotai"
 import { useMemo } from "react"
-import { useNavigate } from "react-router"
+import { Link } from "react-router"
 import { useHostedAiStatus } from "@/components/llm-providers/use-hosted-ai-status"
 import { Button } from "@/components/ui/base-ui/button"
 import { configAtom, configFieldsAtomMap } from "@/utils/atoms/config"
@@ -11,31 +11,7 @@ import { isProviderIdDurablyUnusable } from "@/utils/providers/provider-availabi
 import { canResolvedProviderRefGenerateText } from "@/utils/providers/provider-ref"
 import { resolveProviderRefForCapability } from "@/utils/providers/provider-registry"
 import { cn } from "@/utils/styles/utils"
-
-const FEATURE_PROVIDERS_ROUTE = "/api-providers"
-const FEATURE_PROVIDERS_SECTION_ID = "feature-providers"
-
-/**
- * Scroll to the Feature providers section after the route has mounted.
- *
- * The app's `?section=` deep-link never actually scrolls, and a plain `#` anchor
- * is unavailable because the options app runs on a HashRouter — the hash IS the
- * route. So poll briefly: the target route is lazy and is not in the DOM on the
- * tick after navigate(). Harmless when already on that page: the element is
- * found on the first frame and the view scrolls to it.
- */
-function scrollToFeatureProviders() {
-  let frames = 0
-  const tick = () => {
-    const target = document.getElementById(FEATURE_PROVIDERS_SECTION_ID)
-    if (target) {
-      target.scrollIntoView({ behavior: "smooth", block: "start" })
-      return
-    }
-    if (frames++ < 60) requestAnimationFrame(tick)
-  }
-  requestAnimationFrame(tick)
-}
+import { buildSectionLink } from "../command-palette/section-scroll"
 
 /**
  * Per-feature "is this running on an LLM provider" status, with the way to go
@@ -67,7 +43,6 @@ export function LlmFeatureStatusList({
   const config = useAtomValue(configAtom)
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
   const { status } = useHostedAiStatus()
-  const navigate = useNavigate()
 
   const statuses = useMemo(
     () =>
@@ -108,10 +83,7 @@ export function LlmFeatureStatusList({
         size="xs"
         variant="outline"
         className="mt-1"
-        onClick={() => {
-          void navigate(FEATURE_PROVIDERS_ROUTE)
-          scrollToFeatureProviders()
-        }}
+        render={<Link to={buildSectionLink("/api-providers", "feature-providers")} />}
       >
         {i18n.t("options.apiProviders.featureProviders.chooseProvider")}
       </Button>
