@@ -538,6 +538,7 @@ options:
     nodeTranslation:
       title: Dịch đoạn văn
       description: Di chuột hoặc nhấn giữ một đoạn để chỉ dịch đoạn đó.
+      customDescription: Nhấn các phím này khi di chuột lên một đoạn văn để dịch đoạn đó.
     translationHub:
       title: Trung tâm Dịch thuật
       description: Mở Trung tâm Dịch thuật trong tab mới.
@@ -1709,6 +1710,7 @@ hotkey:
   shift: Shift
   backtick: Dấu huyền
   clickAndHold: Nhấn và giữ
+  custom: Phím tắt tùy chỉnh
 translationHub:
   searchLanguages: Tìm kiếm ngôn ngữ...
   noLanguagesFound: Không tìm thấy ngôn ngữ

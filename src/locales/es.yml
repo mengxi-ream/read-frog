@@ -539,6 +539,7 @@ options:
     nodeTranslation:
       title: Traducción de párrafo
       description: Pasa el cursor o mantén pulsado un párrafo para traducir solo ese.
+      customDescription: Pulsa estas teclas con el cursor sobre un párrafo para traducirlo.
     translationHub:
       title: Centro de traducción
       description: Abre el Centro de traducción en una pestaña nueva.
@@ -1714,6 +1715,7 @@ hotkey:
   shift: Mayús
   backtick: Acento grave
   clickAndHold: Hacer clic y mantener
+  custom: Atajo personalizado
 translationHub:
   searchLanguages: Buscar idiomas...
   noLanguagesFound: No se encontraron idiomas

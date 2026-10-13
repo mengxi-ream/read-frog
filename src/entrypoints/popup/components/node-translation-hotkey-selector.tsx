@@ -1,50 +1,56 @@
-import { deepmerge } from "deepmerge-ts"
+import type { NodeHotkey } from "@/utils/constants/hotkeys"
 import { useAtom } from "jotai"
+import { NodeHotkeyIcon } from "@/components/node-hotkey-icon"
 import {
   Select,
   SelectContent,
   SelectGroup,
   SelectItem,
+  SelectSeparator,
   SelectTrigger,
 } from "@/components/ui/base-ui/select"
 import { Switch } from "@/components/ui/base-ui/switch"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { HOTKEY_ICONS, HOTKEYS } from "@/utils/constants/hotkeys"
 import { i18n } from "@/utils/i18n"
+import { formatHotkey } from "@/utils/os"
 
-function HotkeyDisplay({ hotkey }: { hotkey: (typeof HOTKEYS)[number] }) {
-  const icon = HOTKEY_ICONS[hotkey]
-  const label = i18n.t(`hotkey.${hotkey}`)
+const PRESET_HOTKEYS = HOTKEYS.filter((hotkey) => hotkey !== "custom")
 
+// A custom hotkey reads as the keys it records, like the single keys do.
+function HotkeyDisplay({ hotkey, shortcut }: { hotkey: NodeHotkey; shortcut: string }) {
   if (hotkey === "clickAndHold") {
     return (
       <>
-        {icon} {label} {i18n.t("popup.translateParagraph")}
+        <NodeHotkeyIcon hotkey={hotkey} /> {i18n.t("hotkey.clickAndHold")}{" "}
+        {i18n.t("popup.translateParagraph")}
       </>
     )
   }
 
+  const keys =
+    hotkey === "custom"
+      ? formatHotkey(shortcut) || i18n.t("hotkey.custom")
+      : `${HOTKEY_ICONS[hotkey]} ${i18n.t(`hotkey.${hotkey}`)}`
+
   return (
     <>
-      {i18n.t("popup.hover")} + {icon} {label} {i18n.t("popup.translateParagraph")}
+      {i18n.t("popup.hover")} + {keys} {i18n.t("popup.translateParagraph")}
     </>
   )
 }
 
 export default function NodeTranslationHotkeySelector() {
   const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.pageTranslation)
-
-  const handleNodeTranslationEnabledChange = async (checked: boolean) => {
-    await setTranslateConfig(deepmerge(translateConfig, { node: { enabled: checked } }))
-  }
+  const { enabled, hotkey, shortcut } = translateConfig.node
 
   return (
     <div className="flex items-center justify-between gap-2">
       <Select
-        value={translateConfig.node.hotkey}
-        onValueChange={(value: (typeof HOTKEYS)[number] | null) => {
-          if (value)
-            void setTranslateConfig(deepmerge(translateConfig, { node: { hotkey: value } }))
+        value={hotkey}
+        onValueChange={(value: NodeHotkey | null) => {
+          if (!value) return
+          void setTranslateConfig((current) => ({ node: { ...current.node, hotkey: value } }))
         }}
       >
         <SelectTrigger
@@ -52,22 +58,30 @@ export default function NodeTranslationHotkeySelector() {
           className="ring-none -mt-3.5 -mb-4 -ml-2 h-5! cursor-pointer truncate rounded-md border-none bg-transparent! px-2 pt-3.5 pb-4 text-[13px] font-medium shadow-none focus-visible:border-none focus-visible:ring-0"
         >
           <div className="truncate">
-            <HotkeyDisplay hotkey={translateConfig.node.hotkey} />
+            <HotkeyDisplay hotkey={hotkey} shortcut={shortcut} />
           </div>
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
-            {HOTKEYS.map((item) => (
+            {PRESET_HOTKEYS.map((item) => (
               <SelectItem key={item} value={item}>
-                <HotkeyDisplay hotkey={item} />
+                <HotkeyDisplay hotkey={item} shortcut={shortcut} />
               </SelectItem>
             ))}
+          </SelectGroup>
+          <SelectSeparator />
+          <SelectGroup>
+            <SelectItem value="custom">
+              <HotkeyDisplay hotkey="custom" shortcut={shortcut} />
+            </SelectItem>
           </SelectGroup>
         </SelectContent>
       </Select>
       <Switch
-        checked={translateConfig.node.enabled}
-        onCheckedChange={(checked) => void handleNodeTranslationEnabledChange(checked)}
+        checked={enabled}
+        onCheckedChange={(checked) => {
+          void setTranslateConfig((current) => ({ node: { ...current.node, enabled: checked } }))
+        }}
       />
     </div>
   )

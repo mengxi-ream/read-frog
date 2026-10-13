@@ -539,6 +539,7 @@ options:
     nodeTranslation:
       title: Paragraph translation
       description: Hover or long-press a paragraph to translate just that one.
+      customDescription: Press these keys while hovering over a paragraph to translate it.
     translationHub:
       title: Translation Hub
       description: Open the Translation Hub in a new tab.
@@ -1856,6 +1857,7 @@ hotkey:
   shift: Shift
   backtick: Backtick
   clickAndHold: Click and hold
+  custom: Custom shortcut
 translationHub:
   searchLanguages: Search languages...
   noLanguagesFound: No languages found

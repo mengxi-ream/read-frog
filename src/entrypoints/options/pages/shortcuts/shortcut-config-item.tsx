@@ -15,6 +15,8 @@ import { findShortcutOwner, getShortcutBindings } from "./shortcut-bindings"
  *
  * Keys another shortcut already has are turned down, naming that shortcut. A clash saved
  * before this check existed is flagged under the description instead.
+ *
+ * Without a title, the row hangs off the previous item's, as `ConfigItem` does.
  */
 export function ShortcutConfigItem({
   id,
@@ -24,7 +26,7 @@ export function ShortcutConfigItem({
   onChange,
 }: {
   id: string
-  title: ReactNode
+  title?: ReactNode
   description?: ReactNode
   shortcut: string
   onChange: (shortcut: string) => void

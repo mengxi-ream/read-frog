@@ -538,6 +538,7 @@ options:
     nodeTranslation:
       title: Paragraf çevirisi
       description: Bir paragrafın üzerine gelin veya uzun basın; yalnızca o paragraf çevrilir.
+      customDescription: Bir paragrafın üzerindeyken bu tuşlara basarak o paragrafı çevirin.
     translationHub:
       title: Çeviri Merkezi
       description: Çeviri Merkezini yeni bir sekmede açar.
@@ -1709,6 +1710,7 @@ hotkey:
   shift: Shift
   backtick: Ters tırnak
   clickAndHold: Tıkla ve basılı tut
+  custom: Özel kısayol
 translationHub:
   searchLanguages: Dil ara...
   noLanguagesFound: Dil bulunamadı

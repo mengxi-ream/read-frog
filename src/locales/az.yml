@@ -539,6 +539,7 @@ options:
     nodeTranslation:
       title: Abzas tərcüməsi
       description: Yalnız bir abzası tərcümə etmək üçün kursoru üzərinə gətirin və ya basıb saxlayın.
+      customDescription: Abzası tərcümə etmək üçün kursor onun üzərində olarkən bu düymələri basın.
     translationHub:
       title: Tərcümə mərkəzi
       description: Tərcümə mərkəzini yeni vərəqdə açın.
@@ -1707,6 +1708,7 @@ hotkey:
   shift: Shift düyməsi
   backtick: Tərs apostrof
   clickAndHold: Kliklə və saxla
+  custom: Fərdi qısayol
 translationHub:
   searchLanguages: Dilləri axtar...
   noLanguagesFound: Dil tapılmadı

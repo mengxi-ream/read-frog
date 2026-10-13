@@ -538,6 +538,7 @@ options:
     nodeTranslation:
       title: Перевод абзаца
       description: Наведите курсор на абзац или нажмите и удерживайте его, чтобы перевести только его.
+      customDescription: Нажмите эти клавиши, наведя курсор на абзац, чтобы перевести его.
     translationHub:
       title: Центр переводов
       description: Открывает Центр переводов в новой вкладке.
@@ -1709,6 +1710,7 @@ hotkey:
   shift: Shift
   backtick: Обратный апостроф
   clickAndHold: Нажмите и удерживайте
+  custom: Своя горячая клавиша
 translationHub:
   searchLanguages: Поиск языков...
   noLanguagesFound: Языки не найдены

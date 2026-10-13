@@ -538,6 +538,7 @@ options:
     nodeTranslation:
       title: 단락 번역
       description: 단락에 마우스를 올리거나 길게 누르면 그 단락만 번역합니다.
+      customDescription: 단락에 마우스를 올린 채 이 키를 누르면 그 단락을 번역합니다.
     translationHub:
       title: 번역 허브
       description: 번역 허브를 새 탭에서 엽니다.
@@ -1709,6 +1710,7 @@ hotkey:
   shift: Shift
   backtick: 백틱
   clickAndHold: 클릭하고 길게 누르기
+  custom: 사용자 지정 단축키
 translationHub:
   searchLanguages: 언어 검색...
   noLanguagesFound: 언어를 찾을 수 없습니다

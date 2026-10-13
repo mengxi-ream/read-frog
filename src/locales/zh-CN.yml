@@ -539,6 +539,7 @@ options:
     nodeTranslation:
       title: 段落翻译
       description: 悬停或长按段落，只翻译这一段。
+      customDescription: 悬停在段落上时按下这组按键，即可翻译这一段。
     translationHub:
       title: 翻译中心
       description: 在新标签页中打开翻译中心。
@@ -1719,6 +1720,7 @@ hotkey:
   shift: Shift
   backtick: 反引号
   clickAndHold: 点击并按住
+  custom: 自定义快捷键
 translationHub:
   searchLanguages: 搜索语言...
   noLanguagesFound: 未找到语言

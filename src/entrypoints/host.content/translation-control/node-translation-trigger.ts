@@ -1,7 +1,10 @@
+import type { Hotkey } from "@tanstack/hotkeys"
 import type { Config } from "@/types/config/config"
 import type { Point } from "@/types/dom"
-import { HOTKEY_EVENT_KEYS } from "@/utils/constants/hotkeys"
+import { matchesKeyboardEvent } from "@tanstack/hotkeys"
+import { HOTKEY_EVENT_KEYS, isSingleKeyHotkey } from "@/utils/constants/hotkeys"
 import { SELECTION_SHORTCUT_CLAIMED_EVENT } from "@/utils/constants/selection"
+import { isShortcutEmpty, isValidShortcut } from "@/utils/shortcut"
 
 const NODE_TRANSLATION_HOLD_TRIGGER_MS = 500
 const CLICK_AND_HOLD_MOVE_TOLERANCE = 6
@@ -23,6 +26,12 @@ function isEditableTarget(target: EventTarget | null): boolean {
   return false
 }
 
+// Where a key was pressed. Inside a shadow root, `event.target` at the document
+// is only the root's host, which hides a field typed in there.
+function isTypingInField(event: KeyboardEvent): boolean {
+  return isEditableTarget(event.composedPath()[0] ?? event.target)
+}
+
 function isDocumentSurfaceTarget(target: EventTarget | null): boolean {
   return (
     target === document ||
@@ -32,11 +41,32 @@ function isDocumentSurfaceTarget(target: EventTarget | null): boolean {
   )
 }
 
+/** The key a single-key hotkey listens for; null while the feature is off or uses another trigger. */
+function getHotkeyEventKey(config: Config | null): string | null {
+  if (!config?.pageTranslation.node.enabled) return null
+
+  const { hotkey } = config.pageTranslation.node
+  return isSingleKeyHotkey(hotkey) ? HOTKEY_EVENT_KEYS[hotkey] : null
+}
+
+/** Whether the event presses the recorded combination of the `custom` hotkey. */
+function matchesCustomShortcut(event: KeyboardEvent, config: Config | null): boolean {
+  if (!config?.pageTranslation.node.enabled) return false
+
+  const { hotkey, shortcut } = config.pageTranslation.node
+  if (hotkey !== "custom" || isShortcutEmpty(shortcut) || !isValidShortcut(shortcut)) return false
+  return matchesKeyboardEvent(event, shortcut as Hotkey)
+}
+
 /**
  * Registers the shared node-translation interaction state machine.
  *
  * The full host content script uses this to translate immediately while keeping
  * the hotkey and click-and-hold handling in one place.
+ *
+ * A single-key hotkey runs when its key is tapped alone or held, a custom one
+ * when its combination is pressed: on keydown, as Read Frog's other shortcuts
+ * do, and kept from the page like them.
  */
 export function registerNodeTranslationTriggerListeners({
   getConfig,
@@ -102,9 +132,15 @@ export function registerNodeTranslationTriggerListeners({
     }
   }
 
+  // The last config read. Keeping the custom combination from the page has to
+  // happen before keydown returns, too early to wait for a fresh read; every
+  // keydown reads the config, so the modifiers pressed first refresh it.
+  let latestConfig: Config | null = null
+
   const getCurrentConfig = async (): Promise<Config | null> => {
     const config = await getConfig()
     if (signal.aborted) return null
+    latestConfig = config
     return config
   }
 
@@ -244,21 +280,30 @@ export function registerNodeTranslationTriggerListeners({
   document.addEventListener(
     "keydown",
     (event) => {
-      void (async () => {
-        if (shouldIgnoreEvent()) return
-        if (isEditableTarget(event.target)) return
+      if (shouldIgnoreEvent()) return
+      if (isTypingInField(event)) return
 
+      if (matchesCustomShortcut(event, latestConfig)) {
+        event.preventDefault()
+        event.stopPropagation()
+      }
+
+      void (async () => {
         const config = await getCurrentConfig()
-        if (
-          !config ||
-          !config.pageTranslation.node.enabled ||
-          config.pageTranslation.node.hotkey === "clickAndHold"
-        ) {
+        if (config?.pageTranslation.node.hotkey === "custom") {
           resetHotkeySession()
+          // A held combination repeats its keydown: it translates once.
+          if (!event.repeat && matchesCustomShortcut(event, config)) {
+            triggerNodeTranslation(resolveTriggerPoint(), config)
+          }
           return
         }
 
-        const hotkeyEventKey = HOTKEY_EVENT_KEYS[config.pageTranslation.node.hotkey]
+        const hotkeyEventKey = getHotkeyEventKey(config)
+        if (!hotkeyEventKey) {
+          resetHotkeySession()
+          return
+        }
 
         if (event.key === hotkeyEventKey) {
           if (!isHotkeyPressed) {
@@ -273,17 +318,11 @@ export function registerNodeTranslationTriggerListeners({
                 }
 
                 const currentConfig = await getCurrentConfig()
+                const currentEventKey = getHotkeyEventKey(currentConfig)
                 if (
                   !currentConfig ||
-                  !currentConfig.pageTranslation.node.enabled ||
-                  currentConfig.pageTranslation.node.hotkey === "clickAndHold"
-                ) {
-                  timerId = null
-                  return
-                }
-                if (
-                  HOTKEY_EVENT_KEYS[currentConfig.pageTranslation.node.hotkey] !==
-                  activeHotkeyEventKey
+                  !currentEventKey ||
+                  currentEventKey !== activeHotkeyEventKey
                 ) {
                   timerId = null
                   return
@@ -332,19 +371,14 @@ export function registerNodeTranslationTriggerListeners({
     (event) => {
       void (async () => {
         if (shouldIgnoreEvent()) return
-        if (isEditableTarget(event.target)) return
+        if (isTypingInField(event)) return
 
         const config = await getCurrentConfig()
-        if (
-          !config ||
-          !config.pageTranslation.node.enabled ||
-          config.pageTranslation.node.hotkey === "clickAndHold"
-        ) {
+        const hotkeyEventKey = getHotkeyEventKey(config)
+        if (!hotkeyEventKey) {
           if (event.key === activeHotkeyEventKey) resetHotkeySession()
           return
         }
-
-        const hotkeyEventKey = HOTKEY_EVENT_KEYS[config.pageTranslation.node.hotkey]
 
         if (event.key === hotkeyEventKey || event.key === activeHotkeyEventKey) {
           if (isHotkeyPressed && isHotkeySessionPure) {
@@ -354,12 +388,7 @@ export function registerNodeTranslationTriggerListeners({
             }
             if (!actionTriggered) {
               const currentConfig = await getCurrentConfig()
-              if (
-                !currentConfig ||
-                !currentConfig.pageTranslation.node.enabled ||
-                currentConfig.pageTranslation.node.hotkey === "clickAndHold"
-              )
-                return
+              if (!currentConfig || !getHotkeyEventKey(currentConfig)) return
 
               triggerNodeTranslation(resolveTriggerPoint(), currentConfig)
             }
