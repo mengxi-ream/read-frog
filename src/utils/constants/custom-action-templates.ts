@@ -8,7 +8,7 @@ import {
   buildImproveWritingActionLayout,
   buildSentenceAnalysisActionLayout,
 } from "@/utils/layout-host/slots"
-import { createOutputSchemaField } from "./custom-action"
+import { createOutputSchemaField, createSelectionOutputField } from "./custom-action"
 
 const T_PREFIX = "options.selectionToolbar.customActions.templates"
 const SA_PREFIX = `${T_PREFIX}.sentenceAnalysis`
@@ -123,10 +123,17 @@ export function createSentenceAnalysisDefinition(providerId: string): CustomActi
     providerId,
     systemPrompt: i18n.t(`${SA_PREFIX}.systemPrompt`, [annotations, translation]),
     prompt: i18n.t(`${SA_PREFIX}.prompt`),
-    // Field types are only string and number, so the annotations travel as a
-    // JSON array inside a string field. Each one quotes a span of the
-    // selection; the card parses them and anchors the quotes onto it.
+    // The sentence itself comes first: it is the selection, not something the
+    // model writes, so "save to notebase" keeps it (a sentence analysis card
+    // cannot be drawn without it) and it names the note. Field types are only
+    // string and number, so the annotations travel as a JSON array inside a
+    // string field. Each one quotes a span of the sentence; the card parses
+    // them and anchors the quotes onto it.
     outputSchema: [
+      createSelectionOutputField(
+        i18n.t(`${SA_PREFIX}.fieldSentence`),
+        "sentence-analysis-sentence",
+      ),
       createOutputSchemaField(
         annotations,
         "string",
@@ -145,8 +152,9 @@ export function createSentenceAnalysisDefinition(providerId: string): CustomActi
 
 // Like Sentence Analysis, the prompt and the field descriptions are English in
 // every UI language, and name the fields, whose names are localized. The model
-// judges the setting first (its first field), then marks the selection and
-// rewrites it for that setting, writing its words in the target language.
+// judges the setting first (the first field it writes), then marks the
+// selection and rewrites it for that setting, writing its words in the target
+// language.
 export function createImproveWritingDefinition(providerId: string): CustomActionDefinition {
   const setting = i18n.t(`${IW_PREFIX}.fieldSetting`)
   const annotations = i18n.t(`${IW_PREFIX}.fieldAnnotations`)
@@ -160,10 +168,13 @@ export function createImproveWritingDefinition(providerId: string): CustomAction
     providerId,
     systemPrompt: i18n.t(`${IW_PREFIX}.systemPrompt`, [setting, annotations, improved, summary]),
     prompt: i18n.t(`${IW_PREFIX}.prompt`),
-    // In the order the card fills: the setting it judges everything by, the
-    // marks (a JSON array inside a string field, like Sentence Analysis's),
-    // the rewrite, and the one-line summary.
+    // In the order the card fills: the writer's own text (the selection, which
+    // the model does not write, kept so "save to notebase" stores it), the
+    // setting the model judges everything by, the marks (a JSON array inside a
+    // string field, like Sentence Analysis's), the rewrite, and the one-line
+    // summary.
     outputSchema: [
+      createSelectionOutputField(i18n.t(`${IW_PREFIX}.fieldOriginal`), "improve-writing-original"),
       createOutputSchemaField(
         setting,
         "string",

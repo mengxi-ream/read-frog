@@ -119,13 +119,30 @@ export function buildDictionaryActionLayout(outputSchema: readonly Field[]): str
 // layout itself holds none.
 export const SENTENCE_ANALYSIS_LABELS_CTX_KEY = "sentenceAnalysisLabels"
 
+// The text a card marks up: the field that saves the selection with the
+// answer (`…-sentence-analysis-sentence`, `…-improve-writing-original`), which
+// the card then leaves out of the rows it appends; or, for a copy made before
+// the presets had one, the selection in ctx.
+const SENTENCE_ANALYSIS_SOURCE_ID_RE = /(?:^|-)sentence-analysis-sentence$/
+const IMPROVE_WRITING_SOURCE_ID_RE = /(?:^|-)improve-writing-original$/
+
+function cardSource(
+  outputSchema: readonly Field[],
+  idPattern: RegExp,
+): { fieldId: string } | { ctxKey: "selection" } {
+  const field = outputSchema.find(
+    (candidate) => candidate.source === "selection" && idPattern.test(candidate.id),
+  )
+  return field ? { fieldId: field.id } : { ctxKey: "selection" }
+}
+
 // The sentence analysis card for this action's fields, annotating and
 // speaking the selection; null when it has no annotations field.
 export function buildSentenceAnalysisActionLayout(outputSchema: readonly Field[]): string | null {
   return buildSentenceAnalysisLayout({
     slots: slotIds(getSentenceAnalysisSlots(outputSchema)),
     labels: { ctxKey: SENTENCE_ANALYSIS_LABELS_CTX_KEY },
-    source: { ctxKey: "selection" },
+    source: cardSource(outputSchema, SENTENCE_ANALYSIS_SOURCE_ID_RE),
   })
 }
 
@@ -139,6 +156,6 @@ export function buildImproveWritingActionLayout(outputSchema: readonly Field[]):
   return buildImproveWritingLayout({
     slots: slotIds(getImproveWritingSlots(outputSchema)),
     labels: { ctxKey: IMPROVE_WRITING_LABELS_CTX_KEY },
-    source: { ctxKey: "selection" },
+    source: cardSource(outputSchema, IMPROVE_WRITING_SOURCE_ID_RE),
   })
 }

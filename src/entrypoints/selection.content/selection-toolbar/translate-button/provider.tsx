@@ -59,6 +59,7 @@ import { checkProviderAvailability } from "@/utils/providers/provider-ref"
 import { getSelectableProvidersForCapability } from "@/utils/providers/provider-registry"
 import { getTopLevelReasoning } from "@/utils/providers/reasoning"
 import { shadowWrapper } from "../.."
+import { normalizeSelectedText } from "../../utils"
 import {
   isSelectionToolbarOpenAtom,
   noteSuggestionProviderAtom,
@@ -412,6 +413,9 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
       maybeFireNoteSuggestion({
         sessionKey: noteSuggestionSessionKey,
         selectionText: preparedText,
+        // Kept in the note's selection fields as a custom action run keeps it,
+        // not as prepared for translation.
+        savedSelectionText: normalizeSelectedText(selectionText),
         paragraphsText: paragraphsText ?? preparedText,
         targetLangName: LANG_CODE_TO_EN_NAME[translateRequest.language.targetCode],
         webTitle: titleText ?? "",

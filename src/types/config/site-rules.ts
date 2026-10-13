@@ -73,6 +73,10 @@ export const siteRuleSchema = z.object({
   // including cross-origin ones; false disables lazy activation too. Matching
   // frame URLs can opt in independently. Refresh after changing this setting.
   injectIntoIframes: z.boolean().optional(),
+  // LaTeXML (arXiv HTML) draws some prose boxes as fixed-size SVG pictures,
+  // which the walk never enters. True reflows text-only ones into temporary
+  // HTML cards so they can be translated; SVG diagrams stay untouched.
+  reflowLatexmlTextBoxes: z.boolean().optional(),
   injectedCss: z.string().max(MAX_CUSTOM_CSS_LENGTH).optional(),
   "injectedCss.add": z.array(z.string().max(MAX_CUSTOM_CSS_LENGTH)).optional(),
   enabled: z.boolean().optional(),

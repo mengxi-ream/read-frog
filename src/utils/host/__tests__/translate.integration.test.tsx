@@ -187,6 +187,64 @@ describe("translate", () => {
     })
   }
 
+  describe("LaTeXML SVG text boxes", () => {
+    // Shapes reported on arxiv.org/html/2609.32423 and /2601.21557v2.
+    // The latter puts its title, authors and abstract inside the same SVG.
+    const fixtures = [
+      {
+        paper: "2609.32423",
+        content:
+          '<span class="ltx_para"><span class="ltx_p" style="display:block">Abstract</span><span class="ltx_p" style="display:block"><span>The harness surrounding a language model is a central determinant of agent performance.</span></span></span>',
+      },
+      {
+        paper: "2601.21557v2",
+        content:
+          '<span class="ltx_para"><span class="ltx_p" style="display:block">Meta Context Engineering via Agentic Skill Evolution</span><span class="ltx_p" style="display:block">Haoran Ye<sup>1</sup></span></span><span class="ltx_para"><span class="ltx_p" style="display:block"><b>Abstract:</b><span>The operational efficacy of large language models relies heavily on their inference-time context.</span></span></span>',
+      },
+    ]
+
+    it.each(
+      fixtures.flatMap((fixture) =>
+        (["bilingual", "translationOnly"] as const).map((mode) => ({ ...fixture, mode })),
+      ),
+    )("translates $paper in $mode mode and restores the SVG nodes", async ({ content, mode }) => {
+      await withHost(
+        "arxiv.org",
+        async () => {
+          const host = document.createElement("div")
+          host.innerHTML = `<span class="ltx_inline-block"><svg class="ltx_picture" width="550" height="357" viewBox="0 0 550 357"><g fill="#F3F8FA"><path d="M0 0H550V357H0Z"></path></g><g><foreignObject width="500" height="320" style="font-size:10pt"><span class="ltx_foreignobject_container"><span class="ltx_foreignobject_content"><span class="ltx_minipage">${content}<span class="ltx_p" style="display:block"><a href="https://example.com/code">Code repository</a></span></span></span></span></foreignObject></g></svg></span>`
+          document.body.append(host)
+          const svg = host.querySelector("svg")!
+          const source = host.querySelector(".ltx_foreignobject_content")!
+          const link = host.querySelector("a")!
+          const original = svg.textContent
+          const onClick = vi.fn<(event: MouseEvent) => void>((event) => event.preventDefault())
+          link.addEventListener("click", onClick)
+
+          await removeOrShowPageTranslation(mode)
+
+          expect(host.querySelector("svg")).toBeNull()
+          expect(host.querySelector("[data-read-frog-latexml-text-box]")?.contains(source)).toBe(
+            true,
+          )
+          expect(translateTextForPage).toHaveBeenCalled()
+          expect(host.textContent).toContain(MOCK_TRANSLATION)
+          expect(host.textContent?.includes("Abstract")).toBe(mode === "bilingual")
+
+          removeAllTranslatedWrapperNodes()
+          expect(host.querySelector("svg")).toBe(svg)
+          expect(svg.querySelector(".ltx_foreignobject_content")).toBe(source)
+          expect(svg.textContent).toBe(original)
+          expect(svg.querySelector("a")).toBe(link)
+          link.dispatchEvent(new MouseEvent("click", { cancelable: true }))
+          expect(onClick).toHaveBeenCalledOnce()
+          host.remove()
+        },
+        "/html/test-paper",
+      )
+    })
+  })
+
   describe("translateTextForPage stub", () => {
     it("translateTextForPage should be mocked", async () => {
       expect(await translateTextForPage("任何文字")).toBe(MOCK_TRANSLATION)

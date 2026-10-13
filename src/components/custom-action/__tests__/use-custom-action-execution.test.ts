@@ -1,16 +1,37 @@
 import type { CachedWebPageContext } from "@/utils/host/translate/webpage-context"
 // @vitest-environment jsdom
-import { act, render, screen, waitFor } from "@testing-library/react"
+import { act, render, renderHook, screen, waitFor } from "@testing-library/react"
 import { createElement } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import { ANALYTICS_SURFACE } from "@/types/analytics"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { CUSTOM_ACTION_CONTEXT_CHAR_LIMIT } from "@/utils/custom-action-prompt"
-import { getBuiltInDictionaryAction } from "@/utils/custom-actions"
+import { findSelectionToolbarAction, getBuiltInDictionaryAction } from "@/utils/custom-actions"
 import { resolveProviderRefForCapability } from "@/utils/providers/provider-registry"
 import {
   buildCustomActionExecutionPlan,
+  useCustomActionExecution,
   useCustomActionWebPageContext,
 } from "../use-custom-action-execution"
+
+const streamBackgroundStructuredObjectMock = vi.fn<(...args: any[]) => any>()
+
+vi.mock("@/utils/content-script/background-stream-client", async () => {
+  const actual = await vi.importActual<
+    typeof import("@/utils/content-script/background-stream-client")
+  >("@/utils/content-script/background-stream-client")
+
+  return {
+    ...actual,
+    streamBackgroundStructuredObject: (...args: unknown[]) =>
+      streamBackgroundStructuredObjectMock(...args),
+  }
+})
+
+vi.mock("@/utils/analytics", async () => {
+  const actual = await vi.importActual<typeof import("@/utils/analytics")>("@/utils/analytics")
+  return { ...actual, trackFeatureUsed: vi.fn<(...args: any[]) => any>() }
+})
 
 const getOrCreateWebPageContextMock = vi.fn<(...args: any[]) => any>()
 
@@ -206,5 +227,75 @@ describe("buildCustomActionExecutionPlan", () => {
 
     expect(plan.error).toBeNull()
     expect(plan.executionContext?.promptTokens.webUrl).toBe(window.location.href)
+  })
+})
+
+describe("useCustomActionExecution", () => {
+  it("never asks the model for a selection field, and fills it into every answer", async () => {
+    const action = findSelectionToolbarAction(
+      DEFAULT_CONFIG.selectionToolbar,
+      "default-sentence-analysis",
+    )
+    if (!action) throw new Error("the built-in Sentence Analysis must exist")
+    const provider = resolveProviderRefForCapability(
+      "customAction",
+      DEFAULT_CONFIG.providersConfig,
+      action.providerId,
+    )
+    if (!provider) throw new Error("its provider must be available")
+    const [sentence, annotations, translation] = action.outputSchema.map((field) => field.name)
+    const selection = "Only then did she turn the offer down."
+
+    const chunks: unknown[] = []
+    streamBackgroundStructuredObjectMock.mockImplementation(
+      async (_payload: unknown, { onChunk }: { onChunk: (snapshot: unknown) => void }) => {
+        onChunk({ output: { [annotations!]: "[" }, thinking: { status: "thinking", text: "" } })
+        return {
+          output: { [annotations!]: "[]", [translation!]: "直到那时她才拒绝。" },
+          thinking: { status: "complete", text: "" },
+        }
+      },
+    )
+
+    const { result } = renderHook(() => {
+      const execution = useCustomActionExecution({
+        analyticsSurface: ANALYTICS_SURFACE.SELECTION_TOOLBAR,
+        bodyRef: { current: null },
+        executionContext: {
+          action,
+          provider,
+          targetCode: "cmn",
+          promptTokens: {
+            selection,
+            paragraphs: selection,
+            targetLanguage: "Simplified Chinese",
+            webTitle: "",
+            webUrl: "https://example.com",
+            webContent: "",
+          },
+        },
+        open: true,
+        popoverSessionKey: 1,
+        rerunNonce: 0,
+      })
+      chunks.push(execution.result)
+      return execution
+    })
+
+    await waitFor(() => expect(result.current.isRunning).toBe(false))
+    expect(result.current.result).toEqual({
+      [annotations!]: "[]",
+      [translation!]: "直到那时她才拒绝。",
+      [sentence!]: selection,
+    })
+    // The partial answer already holds it, so the card never loses the sentence.
+    expect(chunks).toContainEqual({ [annotations!]: "[", [sentence!]: selection })
+
+    const [payload] = streamBackgroundStructuredObjectMock.mock.calls[0]!
+    expect(payload.outputSchema).toEqual([
+      { name: annotations, type: "string" },
+      { name: translation, type: "string" },
+    ])
+    expect(payload.instructions).not.toContain(`- key: ${JSON.stringify(sentence)}`)
   })
 })

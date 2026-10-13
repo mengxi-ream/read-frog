@@ -67,6 +67,7 @@ export function CustomActionContent({
               status={status}
               theme={theme}
               speakSurface={ANALYTICS_SURFACE.SELECTION_TOOLBAR}
+              autoplay
               onRenderInfo={(info) => setLayoutFellBack(info.fellBack)}
             />
           )}
