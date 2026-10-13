@@ -15,6 +15,7 @@ import {
 import { removeReactShadowHost } from "../../../react-shadow-host/create-shadow-host"
 import { isHTMLElement, isTranslatedWrapperNode } from "../../dom/filter"
 import { deepQueryAllSelector, deepQueryTopLevelSelector } from "../../dom/find"
+import { restoreLatexmlTextBoxes } from "../../dom/latexml-text-box"
 import {
   dropTranslationOnlySwapRecords,
   getBilingualTranslationStateForWrapper,
@@ -426,4 +427,5 @@ export function removeAllTranslatedWrapperNodes(root: Document | ShadowRoot = do
     element.hasAttribute(TRANSLATION_ONLY_ATTRIBUTE),
   )
   swapAnchors.forEach((anchor) => restoreTranslationOnlySwapsForAnchor(anchor))
+  restoreLatexmlTextBoxes(root)
 }

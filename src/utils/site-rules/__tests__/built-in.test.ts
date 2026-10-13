@@ -86,6 +86,16 @@ describe("built-in site rules", () => {
     expect(resolveSiteRule(url, BUILT_IN_SITE_RULES, [], []).injectIntoIframes).toBeNull()
   })
 
+  it.each([
+    ["https://arxiv.org/html/2609.32423", true],
+    ["https://browse.arxiv.org/html/2310.06825", true],
+    ["https://ar5iv.labs.arxiv.org/html/2310.06825", true],
+    ["https://arxiv.org/abs/2609.32423", null],
+    ["https://example.com/article", null],
+  ])("resolves LaTeXML text box reflow on %s to %s", (url, expected) => {
+    expect(resolveSiteRule(url, BUILT_IN_SITE_RULES, [], []).reflowLatexmlTextBoxes).toBe(expected)
+  })
+
   it("resolves the inline atom defaults on any URL and folds them into preserve-text", () => {
     const resolved = resolveSiteRule("https://example.com/article", BUILT_IN_SITE_RULES, [], [])
     const atomSelectors = resolved.atomSelector?.split(",") ?? []

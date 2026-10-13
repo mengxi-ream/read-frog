@@ -20,6 +20,13 @@ describe("validateUserRulesDocument", () => {
     ).toMatchObject({ ok: false, kind: "schema" })
   })
 
+  it("accepts reflowLatexmlTextBoxes in user rules", () => {
+    const rules = [
+      { id: "latexml-docs", matches: "docs.example.org", reflowLatexmlTextBoxes: true },
+    ]
+    expect(validateUserRulesDocument(JSON.stringify(rules))).toEqual({ ok: true, rules })
+  })
+
   it("treats an empty or whitespace-only document as no rules", () => {
     expect(validateUserRulesDocument("")).toEqual({ ok: true, rules: [] })
     expect(validateUserRulesDocument("  \n\t  ")).toEqual({ ok: true, rules: [] })
