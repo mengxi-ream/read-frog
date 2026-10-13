@@ -4,7 +4,7 @@ import { act, renderHook } from "@testing-library/react"
 import { Provider } from "jotai"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { REACT_SHADOW_HOST_CLASS } from "@/utils/constants/dom-labels"
-import { subtitlesStore } from "../../atoms"
+import { currentSubtitleAtom, currentTimeMsAtom, subtitlesStore } from "../../atoms"
 import { closeWordLookupAtom, wordLookupAtom } from "../atoms"
 import { useLookupShortcuts } from "../use-lookup-shortcuts"
 
@@ -15,9 +15,11 @@ function renderShortcuts() {
   return renderHook(() => useLookupShortcuts(), { wrapper })
 }
 
-function press(target: EventTarget, key: string) {
+function press(target: EventTarget, key: string, init: KeyboardEventInit = {}) {
   act(() => {
-    target.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, composed: true }))
+    target.dispatchEvent(
+      new KeyboardEvent("keydown", { key, bubbles: true, composed: true, ...init }),
+    )
   })
 }
 
@@ -85,6 +87,30 @@ describe("useLookupShortcuts", () => {
 
     expect(subtitlesStore.get(wordLookupAtom)).toBe(lookup)
     expect(pageKeyDown).toHaveBeenCalledTimes(1)
+  })
+
+  it("leaves modified arrow keys to the browser and the page", () => {
+    renderShortcuts()
+    const lookup = subtitlesStore.get(wordLookupAtom)
+
+    press(document.body, "ArrowLeft", { altKey: true })
+    press(document.body, "ArrowRight", { metaKey: true })
+
+    expect(subtitlesStore.get(wordLookupAtom)).toBe(lookup)
+    expect(pageKeyDown).toHaveBeenCalledTimes(2)
+  })
+
+  it("swallows a held arrow key without stepping again", () => {
+    subtitlesStore.set(currentTimeMsAtom, 500)
+    subtitlesStore.set(currentSubtitleAtom, { text: "one two three", start: 0, end: 1000 })
+    renderShortcuts()
+    const lookup = subtitlesStore.get(wordLookupAtom)
+
+    press(document.body, "ArrowRight", { repeat: true })
+
+    expect(subtitlesStore.get(wordLookupAtom)).toBe(lookup)
+    expect(pageKeyDown).not.toHaveBeenCalled()
+    subtitlesStore.set(currentSubtitleAtom, null)
   })
 
   it("keeps the arrow keys away from the page while the card is open", () => {

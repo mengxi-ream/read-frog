@@ -3,6 +3,16 @@ import { useEffect } from "react"
 import { closeWordLookupAtom, shiftWordLookupAtom, wordLookupAtom } from "./atoms"
 import { isFromEditable, isFromPage } from "./page-events"
 
+function isPlainArrow(event: KeyboardEvent) {
+  return (
+    (event.key === "ArrowLeft" || event.key === "ArrowRight") &&
+    !event.altKey &&
+    !event.ctrlKey &&
+    !event.metaKey &&
+    !event.shiftKey
+  )
+}
+
 export function useLookupShortcuts() {
   const open = useAtomValue(wordLookupAtom) !== null
   const shift = useSetAtom(shiftWordLookupAtom)
@@ -17,10 +27,12 @@ export function useLookupShortcuts() {
       if (event.defaultPrevented || !isFromPage(event) || isFromEditable(event)) {
         return
       }
-      if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+      if (isPlainArrow(event)) {
         event.preventDefault()
         event.stopPropagation()
-        shift(event.key === "ArrowLeft" ? -1 : 1)
+        if (!event.repeat) {
+          shift(event.key === "ArrowLeft" ? -1 : 1)
+        }
       }
       if (event.key === "Escape") {
         event.preventDefault()
