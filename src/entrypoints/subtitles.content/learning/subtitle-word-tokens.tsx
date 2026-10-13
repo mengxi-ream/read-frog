@@ -38,7 +38,7 @@ export function SubtitleWordTokens() {
     range?.cueStart === cueStart && index >= range.start && index <= range.end
 
   return (
-    <span ref={lineRef} data-slot="subtitle-line">
+    <span ref={lineRef} data-slot="subtitle-line" className="select-none">
       {tokens.map((token, index) =>
         token.isWord ? (
           <span
@@ -47,7 +47,7 @@ export function SubtitleWordTokens() {
             data-slot="subtitle-word"
             data-index={index}
             className={cn(
-              "cursor-pointer rounded-sm transition-colors hover:bg-white/25",
+              "cursor-pointer touch-none rounded-sm transition-colors hover:bg-white/25",
               isWithin(lookup, index) && "bg-amber-300 text-amber-950",
               isWithin(dragRange, index) && "bg-sky-300 text-sky-950",
             )}

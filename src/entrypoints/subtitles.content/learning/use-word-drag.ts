@@ -86,8 +86,17 @@ export function useWordDrag(tokens: WordToken[], lineRef: RefObject<HTMLElement 
       })
     }
 
+    const cancelDrag = () => {
+      dragRef.current = null
+      setDragRange(null)
+    }
+
     window.addEventListener("pointerup", finishDrag)
-    return () => window.removeEventListener("pointerup", finishDrag)
+    window.addEventListener("pointercancel", cancelDrag)
+    return () => {
+      window.removeEventListener("pointerup", finishDrag)
+      window.removeEventListener("pointercancel", cancelDrag)
+    }
   }, [lineRef, openLookup, setDragRange, tokens])
 
   const startDrag = (event: PointerEvent<HTMLElement>, index: number) => {
@@ -96,6 +105,9 @@ export function useWordDrag(tokens: WordToken[], lineRef: RefObject<HTMLElement 
     }
     event.preventDefault()
     event.stopPropagation()
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId)
+    }
     dragRef.current = { anchorIndex: index, focusIndex: index }
     setDragRange(null)
   }

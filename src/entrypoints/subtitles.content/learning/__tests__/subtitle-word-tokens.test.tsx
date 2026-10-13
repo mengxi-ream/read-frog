@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { act, fireEvent, render } from "@testing-library/react"
 import { Provider } from "jotai"
-import { afterEach, describe, expect, it } from "vitest"
+import { afterEach, beforeAll, describe, expect, it } from "vitest"
 import { vi } from "vitest"
 import { customActionRequestAtom } from "@/components/custom-action/atoms"
 import { configAtom } from "@/utils/atoms/config"
@@ -30,8 +30,16 @@ function renderLine(text: string) {
   return [...container.querySelectorAll<HTMLElement>('[data-slot="subtitle-word"]')]
 }
 
+const releasePointerCapture = vi.fn<(pointerId: number) => void>()
+
 describe("SubtitleWordTokens", () => {
+  beforeAll(() => {
+    HTMLElement.prototype.hasPointerCapture = () => true
+    HTMLElement.prototype.releasePointerCapture = releasePointerCapture
+  })
+
   afterEach(() => {
+    releasePointerCapture.mockClear()
     subtitlesStore.set(closeWordLookupAtom)
     subtitlesStore.set(dragRangeAtom, null)
     subtitlesStore.set(sourceTrackAtom, [])
@@ -65,6 +73,28 @@ describe("SubtitleWordTokens", () => {
       selectionText: "You can see the",
     })
     expect(subtitlesStore.get(dragRangeAtom)).toBeNull()
+  })
+
+  it("releases the touch pointer capture so a drag reaches the next words", () => {
+    const words = renderLine("You can see the blood run from their face.")
+
+    fireEvent.pointerDown(words[0]!, { button: 0, pointerId: 7 })
+
+    expect(releasePointerCapture).toHaveBeenCalledWith(7)
+  })
+
+  it("drops the drag when the browser cancels the pointer", () => {
+    const words = renderLine("You can see the blood run from their face.")
+
+    fireEvent.pointerDown(words[0]!, { button: 0 })
+    fireEvent.pointerEnter(words[1]!)
+    act(() => {
+      window.dispatchEvent(new PointerEvent("pointercancel"))
+      window.dispatchEvent(new PointerEvent("pointerup"))
+    })
+
+    expect(subtitlesStore.get(dragRangeAtom)).toBeNull()
+    expect(subtitlesStore.get(customActionRequestAtom)).toBeNull()
   })
 
   it("runs the click action for a press released on the same word", () => {
