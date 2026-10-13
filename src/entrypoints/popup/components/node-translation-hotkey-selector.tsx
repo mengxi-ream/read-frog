@@ -6,7 +6,6 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectSeparator,
   SelectTrigger,
 } from "@/components/ui/base-ui/select"
 import { Switch } from "@/components/ui/base-ui/switch"
@@ -14,8 +13,6 @@ import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { HOTKEY_ICONS, HOTKEYS } from "@/utils/constants/hotkeys"
 import { i18n } from "@/utils/i18n"
 import { formatHotkey } from "@/utils/os"
-
-const PRESET_HOTKEYS = HOTKEYS.filter((hotkey) => hotkey !== "custom")
 
 // A custom hotkey reads as the keys it records, like the single keys do.
 function HotkeyDisplay({ hotkey, shortcut }: { hotkey: NodeHotkey; shortcut: string }) {
@@ -63,17 +60,11 @@ export default function NodeTranslationHotkeySelector() {
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
-            {PRESET_HOTKEYS.map((item) => (
+            {HOTKEYS.map((item) => (
               <SelectItem key={item} value={item}>
                 <HotkeyDisplay hotkey={item} shortcut={shortcut} />
               </SelectItem>
             ))}
-          </SelectGroup>
-          <SelectSeparator />
-          <SelectGroup>
-            <SelectItem value="custom">
-              <HotkeyDisplay hotkey="custom" shortcut={shortcut} />
-            </SelectItem>
           </SelectGroup>
         </SelectContent>
       </Select>
