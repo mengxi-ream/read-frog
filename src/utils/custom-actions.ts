@@ -106,6 +106,15 @@ export function resolveDragLookupAction(config: Config): SelectionToolbarCustomA
   )
 }
 
+export function getLookupActionChoices(
+  selectionToolbar: SelectionToolbarConfig,
+  selectedActionId: string,
+): SelectionToolbarCustomAction[] {
+  return getSelectionToolbarActions(selectionToolbar).filter(
+    (action) => action.enabled !== false || action.id === selectedActionId,
+  )
+}
+
 export function resolveNoteSuggestionAction(
   selectionToolbar: SelectionToolbarConfig,
 ): SelectionToolbarCustomAction {

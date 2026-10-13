@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/base-ui/select"
 import { configAtom, configFieldsAtomMap } from "@/utils/atoms/config"
 import {
-  getSelectionToolbarActions,
+  getLookupActionChoices,
   resolveClickLookupAction,
   resolveDragLookupAction,
 } from "@/utils/custom-actions"
@@ -32,7 +32,7 @@ function LookupActionItem({
   onSelect: (actionId: string) => void
 }) {
   const config = useAtomValue(configAtom)
-  const actions = getSelectionToolbarActions(config.selectionToolbar)
+  const actions = getLookupActionChoices(config.selectionToolbar, selectedAction.id)
 
   return (
     <ConfigItem id={id} title={title} description={description}>

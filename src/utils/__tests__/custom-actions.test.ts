@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import {
+  getLookupActionChoices,
   duplicateSelectionToolbarAction,
   findSelectionToolbarAction,
   getBuiltInDictionaryAction,
@@ -324,6 +325,19 @@ describe("subtitle lookup actions", () => {
 
     expect(resolveDragLookupAction(config)).toBe(customAction)
     expect(resolveClickLookupAction(config).id).toBe("default-dictionary")
+  })
+
+  it("offers only enabled actions, plus the one currently in effect", () => {
+    const { config, customAction } = configWithCustomAction(false)
+    const ids = (selectedId: string) =>
+      getLookupActionChoices(config.selectionToolbar, selectedId).map((action) => action.id)
+
+    expect(ids("default-dictionary")).not.toContain(customAction.id)
+
+    config.selectionToolbar.builtInActions.dictionary.enabled = false
+
+    expect(ids("default-dictionary")).toContain("default-dictionary")
+    expect(ids("default-sentence-analysis")).not.toContain("default-dictionary")
   })
 
   it("falls back to the built-in action when the picked one is disabled or deleted", () => {
