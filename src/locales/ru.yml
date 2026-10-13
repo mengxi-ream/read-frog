@@ -705,6 +705,8 @@ options:
         save: Сохранить
         defaultFieldName: результат
         fieldNamePlaceholder: имя_поля
+        selectionField: "Выделенный текст"
+        selectionFieldDescription: "Выделенный вами текст сохраняется как есть. ИИ его не пишет."
         autoFieldPrefix: поле
         addFieldDialog:
           title: Добавить поле вывода
@@ -759,6 +761,8 @@ options:
             condition: Показывает содержимое, только если у поля есть значение.
             loop: Повторяется для каждого поля по порядку. Доступны f.name, f.value и f.type.
             speak: Любой элемент с data-speak озвучивает значение (или собственный текст, если значение пустое), когда ответ готов.
+            speakLang: data-speak-lang задаёт язык озвучки (код вроде es или en-US), чтобы читал голос этого языка. Без него язык определяется автоматически, что для отдельного слова часто даёт ошибку.
+            speakAutoplay: Элемент с data-speak-autoplay озвучивается сам, когда ответ готов. Звучит только первый такой элемент.
             status: Стили по состоянию. data-status контейнера — streaming, done или error.
             filters: newline_to_br сохраняет переносы строк (ставьте последним); lines разбивает текст на список строк.
             styles: CSS в блоке <style> действует только внутри этого результата. Цвета --rf-* следуют светлой и тёмной теме.
@@ -925,6 +929,7 @@ options:
         sentenceAnalysis:
           name: "Разбор предложения"
           description: "Размечает длинное предложение, как учитель: основа, все придаточные и трудные места"
+          fieldSentence: "Предложение"
           fieldAnnotations: "Разметка"
           fieldTranslation: "Перевод"
           roles:
@@ -990,6 +995,7 @@ options:
         improveWriting:
           name: "Улучшить текст"
           description: "Отмечает ошибки и неудачные фразы, как учитель, и исправляет текст под ситуацию"
+          fieldOriginal: "Исходный текст"
           fieldSetting: "Ситуация"
           fieldAnnotations: "Пометки"
           fieldImproved: "Исправленный текст"

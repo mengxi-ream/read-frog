@@ -15,6 +15,7 @@ import { isLLMProviderConfig } from "@/types/config/provider"
 import { configAtom } from "@/utils/atoms/config"
 import { CONFIG_STORAGE_KEY, DEFAULT_CONFIG } from "@/utils/constants/config"
 import { getBuiltInDictionaryAction } from "@/utils/custom-actions"
+import { prepareTranslationText } from "@/utils/host/translate/text-preparation"
 import { buildContextSnapshot, createRangeSnapshot, normalizeSelectedText } from "../../utils"
 import { setSelectionStateAtom } from "../atoms"
 import { SelectionCustomActionProvider } from "../custom-action-button/provider"
@@ -31,6 +32,7 @@ const getOrCreateWebPageContextMock = vi.fn<(...args: any[]) => any>().mockResol
 const getOrGenerateWebPageSummaryMock = vi.fn<(...args: any[]) => any>()
 const toastAddMock = vi.fn<(...args: any[]) => any>()
 const onMessageMock = vi.fn<(...args: any[]) => any>()
+const maybeFireNoteSuggestionMock = vi.fn<(...args: any[]) => any>()
 const originalGetSelection = window.getSelection
 const DEFAULT_DICTIONARY_ACTION = getBuiltInDictionaryAction(DEFAULT_CONFIG.selectionToolbar)
 
@@ -339,6 +341,21 @@ vi.mock("@/utils/host/translate/webpage-context", () => ({
 vi.mock("@/utils/host/translate/webpage-summary", () => ({
   getOrGenerateWebPageSummary: (...args: unknown[]) => getOrGenerateWebPageSummaryMock(...args),
 }))
+
+// The note suggestion's own request is not under test here, only what a
+// translation run hands it.
+vi.mock("../note-suggestion/use-note-suggestion", () => {
+  const noop = () => {}
+  return {
+    useNoteSuggestion: () => ({
+      suggestion: null,
+      maybeFire: (...args: unknown[]) => maybeFireNoteSuggestionMock(...args),
+      cancel: noop,
+      resetSession: noop,
+      markShownOnce: noop,
+    }),
+  }
+})
 
 vi.mock("@/components/ui/base-ui/toast", () => ({
   toastManager: {
@@ -1034,6 +1051,31 @@ describe("selection toolbar requests", () => {
     })
 
     expect(screen.getByTestId("translation-result").textContent).toBe("Selected text")
+  })
+
+  // A note keeps the selection as a custom action run keeps it. Translation
+  // prepares its own copy, which drops invisible joiners such as the one that
+  // holds an emoji sequence together.
+  it("hands the note suggestion the selection as a custom action run saves it", async () => {
+    translateTextCoreMock.mockResolvedValue("I am a coder.")
+    const coder = String.fromCodePoint(0x1f469, 0x200d, 0x1f4bb)
+    const selected = `I am a ${coder}.`
+    const config = cloneConfig(DEFAULT_CONFIG)
+    const store = createStore()
+    store.set(configAtom, config)
+    setSelectionState(store, { text: selected })
+    renderWithProviders(<TranslateButton />, store)
+
+    fireEvent.click(screen.getByRole("button", { name: "action.translation" }))
+
+    await waitFor(() => {
+      expect(maybeFireNoteSuggestionMock).toHaveBeenCalledTimes(1)
+    })
+    const input = maybeFireNoteSuggestionMock.mock.calls[0]![0]
+    expect(input.savedSelectionText).toBe(normalizeSelectedText(selected))
+    expect(input.savedSelectionText).toContain(coder)
+    expect(input.selectionText).toBe(prepareTranslationText(selected))
+    expect(input.selectionText).not.toContain(coder)
   })
 
   it("opens selection translation from the context menu and tracks the context-menu surface", async () => {

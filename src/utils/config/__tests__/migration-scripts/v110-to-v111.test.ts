@@ -1,39 +1,36 @@
 import { describe, expect, it } from "vitest"
+import { configSchema } from "@/types/config/config"
+import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { migrate } from "../../migration-scripts/v110-to-v111"
 
-const DEFAULT_WORD_LOOKUP = {
-  clickActionId: "default-dictionary",
-  dragActionId: "default-sentence-analysis",
-}
-
 describe("v110-to-v111 migration", () => {
-  it("points a click at Dictionary and a drag at Sentence Analysis", () => {
-    const oldConfig = {
-      selectionToolbar: { customActions: [] },
-      videoSubtitles: { enabled: true },
+  it("changes nothing: v111 only allows a new optional key", () => {
+    const config = { selectionToolbar: { customActions: [{ id: "custom-1", name: "Mine" }] } }
+    expect(migrate(config)).toBe(config)
+  })
+
+  it("keeps a selection field, which the v111 schema accepts", () => {
+    const customAction = {
+      id: "custom-1",
+      name: "Sentence Analysis",
+      enabled: true,
+      icon: "tabler:sparkles",
+      providerId: DEFAULT_CONFIG.selectionToolbar.customActions[0]?.providerId ?? "openai-default",
+      systemPrompt: "",
+      prompt: "{{selection}}",
+      outputSchema: [
+        { id: "sentence", name: "Sentence", type: "string", description: "", source: "selection" },
+        { id: "annotations", name: "Annotations", type: "string", description: "" },
+      ],
     }
-    const snapshot = structuredClone(oldConfig)
-
-    const migrated = migrate(oldConfig)
-
-    expect(migrated).toEqual({
-      selectionToolbar: { customActions: [] },
-      videoSubtitles: { enabled: true },
-      wordLookup: DEFAULT_WORD_LOOKUP,
-    })
-    expect(oldConfig).toEqual(snapshot)
-    expect(migrate(migrated)).toBe(migrated)
-  })
-
-  it("keeps actions the reader already picked when rerun", () => {
-    const oldConfig = { wordLookup: { clickActionId: "my-word", dragActionId: "my-sentence" } }
-
-    expect(migrate(oldConfig)).toBe(oldConfig)
-  })
-
-  it("leaves malformed config shapes unchanged", () => {
-    expect(migrate(null)).toBeNull()
-    expect(migrate([])).toEqual([])
-    expect(migrate({ wordLookup: null })).toEqual({ wordLookup: DEFAULT_WORD_LOOKUP })
+    const config = {
+      ...DEFAULT_CONFIG,
+      selectionToolbar: { ...DEFAULT_CONFIG.selectionToolbar, customActions: [customAction] },
+    }
+    const parsed = configSchema.safeParse(migrate(structuredClone(config)))
+    expect(parsed.success).toBe(true)
+    expect(parsed.data?.selectionToolbar.customActions[0]?.outputSchema[0]?.source).toBe(
+      "selection",
+    )
   })
 })

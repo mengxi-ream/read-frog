@@ -705,6 +705,8 @@ options:
         save: Lưu
         defaultFieldName: kết quả
         fieldNamePlaceholder: tên_trường
+        selectionField: "Văn bản đã chọn"
+        selectionFieldDescription: "Văn bản bạn đã chọn, được lưu nguyên văn. AI không viết phần này."
         autoFieldPrefix: trường
         addFieldDialog:
           title: Thêm trường đầu ra
@@ -759,6 +761,8 @@ options:
             condition: Chỉ hiển thị nội dung khi trường có giá trị.
             loop: Lặp lại cho từng trường theo thứ tự. Có thể dùng f.name, f.value và f.type.
             speak: Mọi phần tử có data-speak sẽ đọc to giá trị (hoặc văn bản của chính nó nếu giá trị trống) khi câu trả lời hoàn tất.
+            speakLang: data-speak-lang chỉ định ngôn ngữ đọc (mã như es hoặc en-US) để dùng giọng của ngôn ngữ đó. Nếu không có, ngôn ngữ được tự động nhận diện, thường sai với một từ đơn lẻ.
+            speakAutoplay: Phần tử có data-speak-autoplay sẽ tự đọc to khi câu trả lời hoàn tất. Chỉ phần tử đầu tiên như vậy được phát.
             status: Tạo kiểu theo trạng thái. data-status của phần tử chứa là streaming, done hoặc error.
             filters: newline_to_br giữ ngắt dòng (đặt ở cuối); lines tách văn bản thành danh sách dòng.
             styles: CSS trong khối <style> chỉ áp dụng bên trong kết quả này. Các màu --rf-* theo giao diện sáng và tối.
@@ -925,6 +929,7 @@ options:
         sentenceAnalysis:
           name: "Phân tích câu"
           description: "Đánh dấu câu dài như giáo viên: nòng cốt, từng mệnh đề và chỗ khó"
+          fieldSentence: "Câu"
           fieldAnnotations: "Chú thích"
           fieldTranslation: "Bản dịch"
           roles:
@@ -990,6 +995,7 @@ options:
         improveWriting:
           name: "Cải thiện bài viết"
           description: "Chấm như giáo viên: đánh dấu lỗi và cách diễn đạt chưa tự nhiên, sửa lại cho hợp hoàn cảnh"
+          fieldOriginal: "Bản gốc"
           fieldSetting: "Ngữ cảnh"
           fieldAnnotations: "Chú thích"
           fieldImproved: "Bản đã sửa"

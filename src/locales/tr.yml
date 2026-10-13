@@ -705,6 +705,8 @@ options:
         save: Kaydet
         defaultFieldName: sonuç
         fieldNamePlaceholder: alan_adı
+        selectionField: "Seçilen metin"
+        selectionFieldDescription: "Seçtiğiniz metin olduğu gibi kaydedilir. Yapay zekâ yazmaz."
         autoFieldPrefix: alan
         addFieldDialog:
           title: Çıktı alanı ekle
@@ -759,6 +761,8 @@ options:
             condition: İçeriği yalnızca alanın bir değeri olduğunda gösterir.
             loop: Her alan için sırayla tekrarlanır. f.name, f.value ve f.type kullanılabilir.
             speak: data-speak içeren her öğe, yanıt tamamlandığında değeri (değer boşsa kendi metnini) sesli okur.
+            speakLang: data-speak-lang okuma dilini belirtir (es veya en-US gibi bir kod), böylece o dilin sesi kullanılır. Belirtilmezse dil otomatik algılanır; tek bir kelimede bu çoğu zaman yanılır.
+            speakAutoplay: data-speak-autoplay içeren öğe, yanıt tamamlandığında kendiliğinden sesli okunur. Yalnızca ilk böyle öğe çalınır.
             status: Duruma göre stil verir. Kapsayıcının data-status değeri streaming, done veya error olur.
             filters: newline_to_br satır sonlarını korur (en sona koyun); lines metni satır listesine böler.
             styles: <style> bloğundaki CSS yalnızca bu sonucun içinde geçerlidir. --rf-* renkleri açık ve koyu temayı izler.
@@ -925,6 +929,7 @@ options:
         sentenceAnalysis:
           name: "Cümle Analizi"
           description: "Uzun bir cümleyi öğretmen gibi işaretler: çekirdeği, her yan cümleyi ve zor noktaları"
+          fieldSentence: "Cümle"
           fieldAnnotations: "Açıklamalar"
           fieldTranslation: "Çeviri"
           roles:
@@ -990,6 +995,7 @@ options:
         improveWriting:
           name: "Yazıyı iyileştir"
           description: "Bir öğretmen gibi hataları ve doğal olmayan ifadeleri işaretler, metni duruma göre düzeltir"
+          fieldOriginal: "Orijinal metin"
           fieldSetting: "Bağlam"
           fieldAnnotations: "İşaretler"
           fieldImproved: "Düzeltilmiş metin"

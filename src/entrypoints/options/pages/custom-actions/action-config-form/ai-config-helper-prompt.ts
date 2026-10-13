@@ -21,6 +21,7 @@ import {
 } from "@/types/config/selection-toolbar"
 import {
   getSelectionToolbarCustomActionTokenCellText,
+  isSelectionOutputField,
   SELECTION_TOOLBAR_CUSTOM_ACTION_TOKENS,
 } from "@/utils/constants/custom-action"
 import { i18n, translateIn } from "@/utils/i18n"
@@ -178,6 +179,9 @@ function buildCurrentAction(
   const layoutNote = layout === DEFAULT_LAYOUT ? " (the default field list)" : ""
   const fields = action.outputSchema
     .map((field, index) => {
+      if (isSelectionOutputField(field)) {
+        return `${index + 1}. Name: \`${field.name}\` · Holds the selected text itself: Read Frog fills it in, the model never writes it`
+      }
       const description = field.description.trim()
         ? `\n${fence(field.description, "text")}`
         : " (no description)"
@@ -313,6 +317,7 @@ The fields of the JSON object the model returns, in order. At least one. Each ha
 - **Field name**: the JSON key, and the label the default layout shows above the value, so name it in the language I read. Unique within the action. ${reservedNames} are reserved in layouts; don't use them.
 - **Field type**: ${fieldTypes}. There is no boolean, array or object type. For a list or anything structured, use a \`string\` field whose description asks for **a compact JSON array serialized as a string**, spells out each item's keys, and gives a one-line example; the layout parses it with \`parse_json\`. For yes/no or a category, use a \`string\` with fixed values listed in the description. A \`number\` field reaches the layout as a real number.
 - **Description**: exactly what goes in the field, and in which language. Tokens are allowed.
+A field that holds the selected text itself (the built-in Sentence Analysis and Improve Writing start with one, so the Notebase keeps the sentence) is filled in by Read Frog and never sent to the model: keep it as it is, and leave it out of the System prompt.
 Fields stream in this order, so put what I want to read first at the top. Fewer fields make faster, more reliable answers; aim for no more than about eight. Any value may come back empty.
 In the editor, ${addField} adds a field, clicking a field edits it, and each field can be deleted. Renaming a field there also updates the layout's references to it.
 
@@ -359,7 +364,7 @@ A layout is HTML with Liquid (the liquidjs flavor of Shopify's template language
 - The host element carries \`data-status\` (\`streaming\` | \`done\` | \`error\`) and \`data-theme\` (\`light\` | \`dark\`): \`:host([data-status=streaming]) .skeleton{…}\`, \`:host([data-theme=dark]) .badge{…}\`.
 
 ### Built-in interactions (no JavaScript needed)
-- **Speak**: clicking an element with \`data-speak="text"\` reads the text aloud (an empty value reads the element's own text), once the answer is done. E.g. \`<button type="button" data-speak="{{ ["Word"] }}" aria-label="Speak">🔊</button>\`.
+- **Speak**: clicking an element with \`data-speak="text"\` reads the text aloud (an empty value reads the element's own text), once the answer is done. E.g. \`<button type="button" data-speak="{{ ["Word"] }}" aria-label="Speak">🔊</button>\`. When the text's language is known, add \`data-speak-lang\` with a BCP 47 code (\`es\`, \`en-US\`) so it is read in that language's voice; without it the language is detected, which often fails for a single word. \`data-speak-autoplay\` reads the element aloud on its own once the answer is done (only the first such element plays); add it only when the user asks for it.
 - **Tips**: an element with \`data-tip="text"\` shows a bubble while hovered, focused or tapped. For rich content, put a hidden child \`<span data-tip-body>…</span>\` in it instead of the value. With \`data-tip-link="k"\` on it and \`data-tip-key="k"\` on other elements, arrows point from it to them while its tip shows; \`:host([data-tip-active])\` and \`[data-tip-state=active]\` / \`[data-tip-state=linked]\` let CSS dim everything else.
 - **Toggles**: pressing an element with \`data-toggle="name"\` switches \`name\` on and off in the host's \`data-toggles\`; style with \`:host([data-toggles~=name]) .more{display:block}\`. The toggle gets \`aria-pressed\`.
 - \`data-rf-key="unique-key"\` on larger blocks keeps them steady across streaming re-renders. Keys must be unique.

@@ -26,6 +26,13 @@ export const selectionToolbarCustomActionOutputFieldSchema = z.object({
   name: z.string().trim().min(1),
   type: selectionToolbarCustomActionOutputTypeSchema,
   description: z.string(),
+  // Where the value comes from: the model, unless this is "selection", the
+  // text the reader selected, which then rides along with the answer (so
+  // "save to notebase" keeps it next to what the model wrote about it). A
+  // selection field is never asked of the model; it is always text. Added in
+  // v111, which older builds refuse rather than drop it and turn the field
+  // into one the model writes.
+  source: z.literal("selection").optional(),
 })
 
 // What the layout preview renders an action's result with: the text the

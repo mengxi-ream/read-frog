@@ -1,37 +1,20 @@
 /**
- * Migration script from v110 to v111
- * - Adds the top-level `wordLookup` section, the custom AI actions that answer
- *   a lookup in video subtitles: `clickActionId` for a click on one word and
- *   `dragActionId` for a drag across several. Existing configs get the
- *   built-in Dictionary for a click, which is what word lookup ran before it
- *   was configurable, and the built-in Sentence Analysis for a drag.
+ * Migration script from v110 to v111.
  *
- * Idempotent: a config that already has both fields is returned by identity.
+ * Changes no data. v111 lets an output field hold the text the reader
+ * selected instead of something the model writes (`source: "selection"`):
+ * the built-in Sentence Analysis and Improve Writing actions start with one,
+ * and so does a custom action copied from them, so "save to notebase" keeps
+ * the sentence their cards need.
  *
- * IMPORTANT: The defaults are hardcoded inline. Migration scripts are frozen
- * snapshots - never import constants, helpers, or shared types.
+ * The CONFIG_SCHEMA_VERSION bump is what protects sync: an older build
+ * refuses a v111 config instead of quietly dropping `source` (the schema
+ * strips unknown keys), which turns the field into one the model writes, and
+ * uploading the result.
+ *
+ * IMPORTANT: This is a frozen snapshot. It imports nothing from the evolving
+ * application code.
  */
 export function migrate(oldConfig: any): any {
-  if (!oldConfig || typeof oldConfig !== "object" || Array.isArray(oldConfig)) {
-    return oldConfig
-  }
-
-  const wordLookup = oldConfig.wordLookup
-  if (
-    wordLookup &&
-    typeof wordLookup === "object" &&
-    !Array.isArray(wordLookup) &&
-    typeof wordLookup.clickActionId === "string" &&
-    typeof wordLookup.dragActionId === "string"
-  ) {
-    return oldConfig
-  }
-
-  return {
-    ...oldConfig,
-    wordLookup: {
-      clickActionId: "default-dictionary",
-      dragActionId: "default-sentence-analysis",
-    },
-  }
+  return oldConfig
 }

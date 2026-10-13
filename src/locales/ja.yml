@@ -705,6 +705,8 @@ options:
         save: 保存
         defaultFieldName: 結果
         fieldNamePlaceholder: フィールド名
+        selectionField: "選択したテキスト"
+        selectionFieldDescription: "選択したテキストをそのまま保存します。AI は書きません。"
         autoFieldPrefix: フィールド
         addFieldDialog:
           title: 出力フィールドを追加
@@ -759,6 +761,8 @@ options:
             condition: フィールドに値があるときだけ中身を表示します。
             loop: すべてのフィールドについて順に繰り返します。f.name、f.value、f.type が使えます。
             speak: data-speak を付けた要素は、回答の完了後にその値（空なら要素自身のテキスト）を読み上げます。
+            speakLang: data-speak-lang で読み上げる言語（es、en-US など）を指定すると、その言語の音声で読み上げます。指定しない場合は言語を自動判定しますが、単語だけだとよく外れます。
+            speakAutoplay: data-speak-autoplay を付けた要素は、回答の完了後に自動で読み上げます。再生されるのは最初の 1 つだけです。
             status: 状態ごとにスタイルを設定します。ホストの data-status は streaming、done、error のいずれかです。
             filters: newline_to_br は改行を保持します（最後に置いてください）。lines はテキストを行のリストに分けます。
             styles: <style> ブロックの CSS はこの結果の中だけに適用されます。--rf-* の色はライト／ダークテーマに追従します。
@@ -925,6 +929,7 @@ options:
         sentenceAnalysis:
           name: "構文解析"
           description: "長い文を先生のように書き込み、骨組み・節・つまずきやすい所をひと目で示す"
+          fieldSentence: "文"
           fieldAnnotations: "注釈"
           fieldTranslation: "訳文"
           roles:
@@ -990,6 +995,7 @@ options:
         improveWriting:
           name: "文章添削"
           description: "先生のように添削：誤りや不自然な表現に印をつけ、場面に合った文に直します"
+          fieldOriginal: "修正前"
           fieldSetting: "場面"
           fieldAnnotations: "添削"
           fieldImproved: "修正後"

@@ -5,19 +5,15 @@ import type { TestSeriesObject } from "./types"
  * spreads the previous version is not a snapshot, because editing v110 would
  * silently change what v111 asserts.
  *
- * Delta from v110: top-level `wordLookup` is added in every series, with the
- * built-in Dictionary answering a click — the action word lookup ran before it
- * was configurable — and the built-in Sentence Analysis answering a drag.
+ * Delta from v110: none. v111 only allows `source: "selection"` on an output
+ * field (a field holding the selected text, which the model never writes);
+ * no series has one, so every series is the same as at v110.
  */
 
 export const testSeries: TestSeriesObject = {
   "complex-config-from-v020": {
     description: "Adds opacity to selection toolbar",
     config: {
-      wordLookup: {
-        clickActionId: "default-dictionary",
-        dragActionId: "default-sentence-analysis",
-      },
       translationHub: {
         shortcut: "Alt+Shift+H",
         selectedProviderIds: null,
@@ -490,10 +486,6 @@ export const testSeries: TestSeriesObject = {
     description:
       "Single provider, LLM detection mode; features get enabled toggles and speak added",
     config: {
-      wordLookup: {
-        clickActionId: "default-dictionary",
-        dragActionId: "default-sentence-analysis",
-      },
       translationHub: {
         shortcut: "Alt+Shift+H",
         selectedProviderIds: null,
@@ -909,10 +901,6 @@ export const testSeries: TestSeriesObject = {
     description:
       "Covers legacy prompt token migration for translate, custom actions, and video subtitles",
     config: {
-      wordLookup: {
-        clickActionId: "default-dictionary",
-        dragActionId: "default-sentence-analysis",
-      },
       translationHub: {
         shortcut: "Alt+Shift+H",
         selectedProviderIds: null,
@@ -1430,10 +1418,6 @@ export const testSeries: TestSeriesObject = {
   "default-dictionary-wording": {
     description: "Renames dictionary wording from context to paragraphs",
     config: {
-      wordLookup: {
-        clickActionId: "default-dictionary",
-        dragActionId: "default-sentence-analysis",
-      },
       translationHub: {
         shortcut: "Alt+Shift+H",
         selectedProviderIds: null,
@@ -1849,10 +1833,6 @@ export const testSeries: TestSeriesObject = {
     description:
       "v103 only: a custom action with a hand-written layout using bracket refs, CJK field names and an escaped %",
     config: {
-      wordLookup: {
-        clickActionId: "default-dictionary",
-        dragActionId: "default-sentence-analysis",
-      },
       translationHub: {
         shortcut: "Alt+Shift+H",
         selectedProviderIds: null,

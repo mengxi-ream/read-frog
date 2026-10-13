@@ -144,3 +144,26 @@ describe("useTextToSpeech superseded runs", () => {
     expect(toastManager.add).not.toHaveBeenCalled()
   })
 })
+
+describe("useTextToSpeech failures", () => {
+  it("reports a failed run with a toast, unless it is a quiet one nobody pressed for", async () => {
+    detectLanguageMock.mockResolvedValue("eng")
+    sendMessageMock.mockImplementation(async (type) =>
+      type === "edgeTtsSynthesize"
+        ? { ok: false, error: { code: "NETWORK_ERROR", message: "offline" } }
+        : undefined,
+    )
+    const { toastManager } = await import("@/components/ui/base-ui/toast")
+    const { result } = renderHook(() => useTextToSpeech(), { wrapper })
+
+    await act(async () => {
+      await expect(result.current.play("A", ttsConfig, { quiet: true })).rejects.toThrow("offline")
+    })
+    expect(toastManager.add).not.toHaveBeenCalled()
+
+    await act(async () => {
+      await expect(result.current.play("B", ttsConfig)).rejects.toThrow("offline")
+    })
+    expect(toastManager.add).toHaveBeenCalledOnce()
+  })
+})

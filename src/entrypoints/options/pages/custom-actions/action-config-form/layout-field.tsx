@@ -117,6 +117,8 @@ type LayoutKey =
   | "help.condition"
   | "help.loop"
   | "help.speak"
+  | "help.speakLang"
+  | "help.speakAutoplay"
   | "help.status"
   | "help.filters"
   | "help.styles"
@@ -164,6 +166,8 @@ function getHelpItems(example: string): Array<{ code: string; key: LayoutKey }> 
     { code: `{% if ${ref} != blank %}…{% endif %}`, key: "help.condition" },
     { code: `{% for f in ${LAYOUT_CTX_ROOT}.fields %}{{ f.name }}{% endfor %}`, key: "help.loop" },
     { code: `<span data-speak="{{ ${ref} }}">…</span>`, key: "help.speak" },
+    { code: `data-speak-lang="es"`, key: "help.speakLang" },
+    { code: "data-speak-autoplay", key: "help.speakAutoplay" },
     { code: ":host([data-status=streaming]) .x { … }", key: "help.status" },
     { code: `{{ ${ref} | newline_to_br }}`, key: "help.filters" },
     { code: "<style>.x { color: var(--rf-muted-foreground) }</style>", key: "help.styles" },

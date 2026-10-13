@@ -711,6 +711,8 @@ options:
         save: Save
         defaultFieldName: Result
         fieldNamePlaceholder: Field name
+        selectionField: "Selected text"
+        selectionFieldDescription: "The text you selected, saved as it is. The AI doesn't write it."
         autoFieldPrefix: Field
         addFieldDialog:
           title: Add output field
@@ -765,6 +767,8 @@ options:
             condition: Shows the content only when the field has a value.
             loop: Repeats for every field, in order. f.name, f.value and f.type are available.
             speak: Any element with data-speak reads the value aloud (or its own text if the value is empty) once the answer is done.
+            speakLang: data-speak-lang names the language to read in (a code such as es or en-US), so it gets that language's voice. Without it the language is detected, which often fails for a single word.
+            speakAutoplay: An element with data-speak-autoplay is read aloud on its own once the answer is done. Only the first such element plays.
             status: Styles by state. The host's data-status is streaming, done or error.
             filters: newline_to_br keeps line breaks (use it last); lines splits text into a list of lines.
             styles: CSS in a <style> block only applies inside this result. The --rf-* colors follow the light and dark themes.
@@ -986,6 +990,7 @@ options:
             Selection: {{selection}}
             Paragraphs: {{paragraphs}}
             Target language: {{targetLanguage}}
+          fieldSentence: "Sentence"
           fieldAnnotations: "Annotations"
           fieldAnnotationsDescription: 'A compact JSON array serialized as a string. Each item has "text" and "type", plus only the optional keys that apply ("form", "sense", "head", "obstacle", "restore", "note", "occurrence").'
           fieldTranslation: "Translation"
@@ -1131,6 +1136,7 @@ options:
             Page title: {{webTitle}}
             Page URL: {{webUrl}}
             Target language: {{targetLanguage}}
+          fieldOriginal: "Original"
           fieldSetting: "Setting"
           fieldSettingDescription: 'How formal the setting is and what the text is, in {{targetLanguage}}: "<formality> · <what it is>", at most 16 characters.'
           fieldAnnotations: "Annotations"

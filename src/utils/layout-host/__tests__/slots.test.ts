@@ -178,8 +178,24 @@ describe("getSentenceAnalysisSlots", () => {
 })
 
 describe("buildSentenceAnalysisActionLayout", () => {
-  it("builds the card for the recognized slots, annotating the selection", () => {
+  it("builds the card for the recognized slots, annotating the sentence field", () => {
     const schema = presetSchema("sentence-analysis")
+
+    expect(buildSentenceAnalysisActionLayout(schema)).toBe(
+      buildSentenceAnalysisLayout({
+        slots: {
+          annotations: "sentence-analysis-annotations",
+          translation: "sentence-analysis-translation",
+        },
+        labels: { ctxKey: "sentenceAnalysisLabels" },
+        source: { fieldId: "sentence-analysis-sentence" },
+      }),
+    )
+  })
+
+  // A copy made before the preset kept the sentence has no such field.
+  it("annotates the selection in ctx when the action has no sentence field", () => {
+    const schema = presetSchema("sentence-analysis").filter((entry) => entry.source !== "selection")
 
     expect(buildSentenceAnalysisActionLayout(schema)).toBe(
       buildSentenceAnalysisLayout({
@@ -191,6 +207,24 @@ describe("buildSentenceAnalysisActionLayout", () => {
         source: { ctxKey: "selection" },
       }),
     )
+  })
+
+  it("shows the selection from the first frame, and never as a row of its own", () => {
+    const schema = presetSchema("sentence-analysis")
+    const compiled = compileLayout(buildSentenceAnalysisActionLayout(schema) ?? "")
+    if (!compiled.ok) throw compiled.error
+    const html = renderLayoutHtml(
+      compiled.compiled,
+      buildCustomActionLayoutScope({
+        outputSchema: schema,
+        value: null,
+        selection: "It rained.",
+        targetCode: "eng",
+        status: "streaming",
+      }),
+    )
+    expect(html).toContain("It rained.")
+    expect(html).not.toContain('data-rf-key="sentence-analysis-sentence"')
   })
 
   it("shows a first-version structure field as a row of its own", () => {
@@ -263,8 +297,25 @@ describe("getImproveWritingSlots", () => {
 })
 
 describe("buildImproveWritingActionLayout", () => {
-  it("builds the card for the recognized slots, marking the selection", () => {
+  it("builds the card for the recognized slots, marking the original field", () => {
     expect(buildImproveWritingActionLayout(presetSchema("improve-writing"))).toBe(
+      buildImproveWritingLayout({
+        slots: {
+          setting: "improve-writing-setting",
+          annotations: "improve-writing-annotations",
+          improved: "improve-writing-improved",
+          summary: "improve-writing-summary",
+        },
+        labels: { ctxKey: "improveWritingLabels" },
+        source: { fieldId: "improve-writing-original" },
+      }),
+    )
+  })
+
+  it("marks the selection in ctx when the action has no original field", () => {
+    const schema = presetSchema("improve-writing").filter((entry) => entry.source !== "selection")
+
+    expect(buildImproveWritingActionLayout(schema)).toBe(
       buildImproveWritingLayout({
         slots: {
           setting: "improve-writing-setting",

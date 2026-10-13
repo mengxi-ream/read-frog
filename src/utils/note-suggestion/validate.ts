@@ -4,6 +4,7 @@ import type {
   SelectionToolbarCustomActionOutputField,
 } from "@/types/config/selection-toolbar"
 import { createStructuredObjectSchema } from "@/utils/ai/structured-object-schema"
+import { getModelOutputFields, getSelectionOutputValues } from "@/utils/constants/custom-action"
 
 /**
  * Convert a note's name/value pairs into a record keyed by output-field name:
@@ -38,6 +39,11 @@ export interface ValidateNoteSuggestionInput {
   }
   /** Selected action snapshot taken when the request was fired. */
   action: SelectionToolbarCustomAction
+  /**
+   * The selected text as a custom action run saves it (normalizeSelectedText),
+   * which every note keeps, as given, in the action's selection fields.
+   */
+  selection: string
 }
 
 /**
@@ -79,18 +85,22 @@ export function validateNoteSuggestion(
     return null
   }
 
+  // The model writes only the fields that are not the selection; those are
+  // the selected text, added to every note.
+  const modelFields = getModelOutputFields(action.outputSchema)
   const noteSchema = createStructuredObjectSchema(
-    action.outputSchema.map(({ name, type }) => ({ name, type })),
+    modelFields.map(({ name, type }) => ({ name, type })),
   )
+  const selectionValues = getSelectionOutputValues(action.outputSchema, input.selection)
 
   const notes: NoteSuggestionNoteRecord[] = []
   for (const note of envelope.notes) {
-    const parsed = noteSchema.safeParse(notePairsToRecord(note, action.outputSchema))
+    const parsed = noteSchema.safeParse(notePairsToRecord(note, modelFields))
     if (!parsed.success) {
       return null
     }
 
-    const record = parsed.data as NoteSuggestionNoteRecord
+    const record = { ...parsed.data, ...selectionValues } as NoteSuggestionNoteRecord
     const primaryValue = record[primaryFieldName]
     const hasPrimaryValue =
       typeof primaryValue === "string" ? primaryValue.trim().length > 0 : primaryValue !== null
