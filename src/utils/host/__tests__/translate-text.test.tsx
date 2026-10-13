@@ -196,6 +196,23 @@ describe("translate-text", () => {
       expect(mockSendMessage).not.toHaveBeenCalled()
     })
 
+    it.each([
+      ["paragraph", translateTextForPage],
+      ["page title", translateTextForPageTitle],
+    ] as const)("skips a short Chinese %s before enqueueing translation", async (_, translate) => {
+      mockGetConfigFromStorage.mockResolvedValue({
+        ...DEFAULT_CONFIG,
+        language: { ...DEFAULT_CONFIG.language, sourceCode: "eng", targetCode: "cmn" },
+      })
+      mockDetectLanguage.mockResolvedValueOnce("cmn")
+      const text = "其实 REA 这种事情在物理世界曾经发生过一次。"
+
+      await expect(translate(text)).resolves.toBe("")
+
+      expect(mockDetectLanguage).toHaveBeenCalledWith(text, { enableLLM: false })
+      expect(mockSendMessage).not.toHaveBeenCalledWith("enqueueTranslateRequest", expect.anything())
+    })
+
     it("sends the translation request when target-language precheck is disabled", async () => {
       const config = {
         ...DEFAULT_CONFIG,

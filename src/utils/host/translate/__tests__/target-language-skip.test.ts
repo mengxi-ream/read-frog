@@ -39,6 +39,7 @@ function createConfig({
   config.pageTranslation.page.minCharactersPerNode = 0
   config.pageTranslation.page.minWordsPerNode = 0
   config.language.targetCode = targetCode
+  config.language.sourceCode = "eng"
   return config
 }
 
@@ -50,6 +51,107 @@ beforeEach(() => {
 
 afterEach(() => {
   flushBatchedOperations()
+})
+
+const SHORT_CHINESE_POSTS = [
+  "其实 REA 这种事情在物理世界曾经发生过一次。",
+  "设计CC讨论串这个功能的人",
+  "一定是一个非常非常有逻辑，结构严谨，且明白大模型能力边界的人",
+  "最低每月仅仅需要 8 美金！最高 200 美金可拉满 50X 用量！",
+  "并且首月只需要五折！！！赶紧冲订阅吧！",
+]
+
+describe("short Chinese posts with real local language detection", () => {
+  beforeEach(async () => {
+    const actual = await vi.importActual<typeof import("@/utils/content/language")>(
+      "@/utils/content/language",
+    )
+    mocks.detectLanguage.mockImplementation(actual.detectLanguage)
+  })
+
+  it.each(SHORT_CHINESE_POSTS)("skips an already-Chinese post: %s", async (text) => {
+    expect(text.length).toBeLessThan(50)
+    await expect(shouldSkipAsTargetLanguage(text, createConfig())).resolves.toBe(true)
+    expect(mocks.detectLanguage).toHaveBeenCalledWith(text, { enableLLM: false })
+  })
+
+  it.each(SHORT_CHINESE_POSTS)("honors the disabled skip option: %s", async (text) => {
+    await expect(
+      shouldSkipAsTargetLanguage(text, createConfig({ enableSkip: false })),
+    ).resolves.toBe(false)
+    expect(mocks.detectLanguage).not.toHaveBeenCalled()
+  })
+
+  it.each([
+    "This release fixes the 中文 input bug.",
+    "这是一个足够长的中文句子，用来说明最新促销活动。 Buy now!",
+    "这是一个足够长的中文句子，用来说明最新促销活动。 Buy, now!",
+    "これは日本語の文章で翻訳する必要があります。",
+    "日本語の説明：这是一个用于测试的中文句子。",
+    "한국어 설명：这是一个用于测试的中文句子。",
+    "Русский：这是一个用于测试的中文句子。",
+    "这是中文句子 API SDK HTTP JSON",
+    "你好",
+    "中文！！！1234567890😀😀😀😀😀😀😀😀😀😀",
+  ])("keeps ambiguous or foreign short text eligible: %s", async (text) => {
+    expect(text.length).toBeLessThan(50)
+    await expect(shouldSkipAsTargetLanguage(text, createConfig())).resolves.toBe(false)
+    expect(mocks.detectLanguage).not.toHaveBeenCalled()
+  })
+
+  it("does not use Chinese script evidence for another target or a traditional Chinese conversion", async () => {
+    for (const targetCode of ["eng", "jpn", "cmn-Hant"] as const) {
+      await expect(
+        shouldSkipAsTargetLanguage(SHORT_CHINESE_POSTS[0]!, createConfig({ targetCode })),
+      ).resolves.toBe(false)
+    }
+    expect(mocks.detectLanguage).not.toHaveBeenCalled()
+  })
+
+  it("prepares invisible characters and whitespace before short-text detection", async () => {
+    const text = SHORT_CHINESE_POSTS[0]!
+    await expect(
+      shouldSkipAsTargetLanguage(`  \u200B${text}\uFEFF  `, createConfig()),
+    ).resolves.toBe(true)
+    expect(mocks.detectLanguage).toHaveBeenCalledWith(text, { enableLLM: false })
+  })
+
+  describe.each(["bilingual", "translationOnly"] as const)("%s translation", (mode) => {
+    it.each(SHORT_CHINESE_POSTS)(
+      "makes no translation request or DOM insertion: %s",
+      async (text) => {
+        const container = document.createElement("div")
+        const textNode = document.createTextNode(text)
+        container.appendChild(textNode)
+        document.body.appendChild(container)
+        const insertions: MutationRecord[] = []
+        const observer = new MutationObserver((records) => insertions.push(...records))
+        observer.observe(container, { childList: true, subtree: true })
+
+        await translateNodes([textNode], "walk-id", false, createConfig({ mode }))
+        flushBatchedOperations()
+        insertions.push(...observer.takeRecords())
+        observer.disconnect()
+
+        expect(mocks.translateTextForPage).not.toHaveBeenCalled()
+        expect(container.childNodes).toHaveLength(1)
+        expect(container.firstChild).toBe(textNode)
+        expect(textNode.textContent).toBe(text)
+        expect(insertions).toHaveLength(0)
+      },
+    )
+
+    it("still requests a translation for a short English paragraph", async () => {
+      const container = document.createElement("div")
+      const textNode = document.createTextNode("This feature needs a translation.")
+      container.appendChild(textNode)
+      document.body.appendChild(container)
+
+      await translateNodes([textNode], "walk-id", false, createConfig({ mode }))
+
+      expect(mocks.translateTextForPage).toHaveBeenCalledOnce()
+    })
+  })
 })
 
 describe("shouldSkipAsTargetLanguage", () => {
