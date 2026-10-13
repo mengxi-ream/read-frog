@@ -39,6 +39,8 @@ export const openWordLookupAtom = atom(
 
     set(dragRangeAtom, null)
     if (action.enabled === false) {
+      set(wordLookupAtom, null)
+      set(customActionRequestAtom, null)
       return
     }
 

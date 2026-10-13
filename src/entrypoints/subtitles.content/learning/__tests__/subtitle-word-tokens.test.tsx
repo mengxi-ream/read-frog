@@ -204,6 +204,14 @@ describe("SubtitleWordTokens", () => {
       actionId: "default-sentence-analysis",
       selectionText: "You can",
     })
+
+    fireEvent.pointerDown(words[3]!, { button: 0 })
+    act(() => {
+      window.dispatchEvent(new PointerEvent("pointerup"))
+    })
+
+    expect(subtitlesStore.get(wordLookupAtom)).toBeNull()
+    expect(subtitlesStore.get(customActionRequestAtom)).toBeNull()
   })
 
   it("treats a drag that returns to its first word as a click on that word", () => {

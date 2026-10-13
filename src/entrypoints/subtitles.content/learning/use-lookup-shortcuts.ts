@@ -1,8 +1,7 @@
 import { useAtomValue, useSetAtom } from "jotai"
 import { useEffect } from "react"
-import { isEditable } from "@/utils/host/dom/filter"
 import { closeWordLookupAtom, shiftWordLookupAtom, wordLookupAtom } from "./atoms"
-import { isFromPage } from "./page-events"
+import { isFromEditable, isFromPage } from "./page-events"
 
 export function useLookupShortcuts() {
   const open = useAtomValue(wordLookupAtom) !== null
@@ -15,11 +14,7 @@ export function useLookupShortcuts() {
     }
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (
-        event.defaultPrevented ||
-        !isFromPage(event) ||
-        (event.target instanceof HTMLElement && isEditable(event.target))
-      ) {
+      if (event.defaultPrevented || !isFromPage(event) || isFromEditable(event)) {
         return
       }
       if (event.key === "ArrowLeft" || event.key === "ArrowRight") {

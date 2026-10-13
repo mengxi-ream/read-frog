@@ -73,6 +73,20 @@ describe("useLookupShortcuts", () => {
     expect(pageKeyDown).toHaveBeenCalledTimes(1)
   })
 
+  it("leaves the arrow keys to an input inside a page web component", () => {
+    renderShortcuts()
+    const host = document.createElement("div")
+    const input = document.createElement("input")
+    host.attachShadow({ mode: "open" }).append(input)
+    document.body.append(host)
+    const lookup = subtitlesStore.get(wordLookupAtom)
+
+    press(input, "ArrowLeft")
+
+    expect(subtitlesStore.get(wordLookupAtom)).toBe(lookup)
+    expect(pageKeyDown).toHaveBeenCalledTimes(1)
+  })
+
   it("keeps the arrow keys away from the page while the card is open", () => {
     renderShortcuts()
 
