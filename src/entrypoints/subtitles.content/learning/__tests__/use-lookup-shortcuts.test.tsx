@@ -113,6 +113,18 @@ describe("useLookupShortcuts", () => {
     subtitlesStore.set(currentSubtitleAtom, null)
   })
 
+  it("also keeps the keys from page listeners added later on window", () => {
+    renderShortcuts()
+    const windowKeyDown = vi.fn<(event: KeyboardEvent) => void>()
+    window.addEventListener("keydown", windowKeyDown, true)
+
+    press(document.body, "ArrowRight")
+    press(document.body, "Escape")
+
+    window.removeEventListener("keydown", windowKeyDown, true)
+    expect(windowKeyDown).not.toHaveBeenCalled()
+  })
+
   it("keeps the arrow keys away from the page while the card is open", () => {
     renderShortcuts()
 

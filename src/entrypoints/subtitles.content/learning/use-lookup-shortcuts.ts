@@ -29,14 +29,14 @@ export function useLookupShortcuts() {
       }
       if (isPlainArrow(event)) {
         event.preventDefault()
-        event.stopPropagation()
+        event.stopImmediatePropagation()
         if (!event.repeat) {
           shift(event.key === "ArrowLeft" ? -1 : 1)
         }
       }
       if (event.key === "Escape") {
         event.preventDefault()
-        event.stopPropagation()
+        event.stopImmediatePropagation()
         closeLookup()
       }
     }
