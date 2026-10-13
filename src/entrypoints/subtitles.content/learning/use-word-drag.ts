@@ -19,6 +19,7 @@ interface Rect {
 
 interface WordDrag {
   pointerId: number
+  cueStart: number
   anchorIndex: number
   focusIndex: number
 }
@@ -63,10 +64,19 @@ export function useWordDrag(tokens: WordToken[], lineRef: RefObject<HTMLElement 
   const dragRef = useRef<WordDrag | null>(null)
 
   useEffect(() => {
+    const clearDrag = () => {
+      dragRef.current = null
+      setDragRange(null)
+    }
+
     const finishDrag = ({ pointerId }: { pointerId: number }) => {
       const drag = dragRef.current
       const line = lineRef.current
       if (!drag || drag.pointerId !== pointerId || !line) {
+        return
+      }
+      if (drag.cueStart !== cueStart) {
+        clearDrag()
         return
       }
       dragRef.current = null
@@ -87,11 +97,6 @@ export function useWordDrag(tokens: WordToken[], lineRef: RefObject<HTMLElement 
       })
     }
 
-    const clearDrag = () => {
-      dragRef.current = null
-      setDragRange(null)
-    }
-
     const cancelDrag = ({ pointerId }: { pointerId: number }) => {
       if (dragRef.current?.pointerId === pointerId) {
         clearDrag()
@@ -107,7 +112,7 @@ export function useWordDrag(tokens: WordToken[], lineRef: RefObject<HTMLElement 
         clearDrag()
       }
     }
-  }, [lineRef, openLookup, setDragRange, tokens])
+  }, [cueStart, lineRef, openLookup, setDragRange, tokens])
 
   const startDrag = (event: PointerEvent<HTMLElement>, index: number) => {
     if (event.button !== 0 || dragRef.current) {
@@ -118,7 +123,12 @@ export function useWordDrag(tokens: WordToken[], lineRef: RefObject<HTMLElement 
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId)
     }
-    dragRef.current = { pointerId: event.pointerId, anchorIndex: index, focusIndex: index }
+    dragRef.current = {
+      pointerId: event.pointerId,
+      cueStart,
+      anchorIndex: index,
+      focusIndex: index,
+    }
     setDragRange(null)
   }
 

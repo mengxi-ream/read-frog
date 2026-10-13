@@ -113,6 +113,29 @@ describe("SubtitleWordTokens", () => {
     expect(subtitlesStore.get(customActionRequestAtom)).toBeNull()
   })
 
+  it("drops the drag when the next cue repeats the same text", () => {
+    const line = "You can see the blood run from their face."
+    const words = renderLine(line)
+    act(() => {
+      subtitlesStore.set(sourceTrackAtom, [
+        { text: line, start: 0, end: 2000 },
+        { text: line, start: 2000, end: 4000 },
+      ])
+    })
+
+    fireEvent.pointerDown(words[0]!, { button: 0 })
+    fireEvent.pointerEnter(words[1]!)
+    act(() => {
+      subtitlesStore.set(currentTimeMsAtom, 3000)
+    })
+    act(() => {
+      window.dispatchEvent(new PointerEvent("pointerup"))
+    })
+
+    expect(subtitlesStore.get(dragRangeAtom)).toBeNull()
+    expect(subtitlesStore.get(customActionRequestAtom)).toBeNull()
+  })
+
   it("ignores other pointers while a drag is held", () => {
     const words = renderLine("You can see the blood run from their face.")
 

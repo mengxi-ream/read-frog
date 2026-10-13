@@ -63,6 +63,16 @@ describe("useLookupShortcuts", () => {
     expect(pageKeyDown).toHaveBeenCalledTimes(1)
   })
 
+  it("leaves the arrow keys inside the extension UI to its own controls", () => {
+    renderShortcuts()
+    const lookup = subtitlesStore.get(wordLookupAtom)
+
+    press(createExtensionButton(), "ArrowRight")
+
+    expect(subtitlesStore.get(wordLookupAtom)).toBe(lookup)
+    expect(pageKeyDown).toHaveBeenCalledTimes(1)
+  })
+
   it("keeps the arrow keys away from the page while the card is open", () => {
     renderShortcuts()
 

@@ -17,6 +17,7 @@ export function useLookupShortcuts() {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (
         event.defaultPrevented ||
+        !isFromPage(event) ||
         (event.target instanceof HTMLElement && isEditable(event.target))
       ) {
         return
@@ -26,7 +27,7 @@ export function useLookupShortcuts() {
         event.stopPropagation()
         shift(event.key === "ArrowLeft" ? -1 : 1)
       }
-      if (event.key === "Escape" && isFromPage(event)) {
+      if (event.key === "Escape") {
         event.preventDefault()
         event.stopPropagation()
         closeLookup()
