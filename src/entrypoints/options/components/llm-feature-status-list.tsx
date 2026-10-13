@@ -3,7 +3,7 @@ import { useAtomValue } from "jotai"
 import { useMemo } from "react"
 import { Link } from "react-router"
 import { useHostedAiStatus } from "@/components/llm-providers/use-hosted-ai-status"
-import { Button } from "@/components/ui/base-ui/button"
+import { buttonVariants } from "@/components/ui/base-ui/button"
 import { configAtom, configFieldsAtomMap } from "@/utils/atoms/config"
 import { FEATURE_PROVIDER_DEFS, getFeatureLabelI18nKey } from "@/utils/constants/feature-providers"
 import { i18n } from "@/utils/i18n"
@@ -79,14 +79,12 @@ export function LlmFeatureStatusList({
           <span className="text-[13px]">{text}</span>
         </span>
       ))}
-      <Button
-        size="xs"
-        variant="outline"
-        className="mt-1"
-        render={<Link to={buildSectionLink("/api-providers", "feature-providers")} />}
+      <Link
+        to={buildSectionLink("/api-providers", "feature-providers")}
+        className={cn(buttonVariants({ variant: "outline", size: "xs" }), "mt-1")}
       >
         {i18n.t("options.apiProviders.featureProviders.chooseProvider")}
-      </Button>
+      </Link>
     </span>
   )
 }
