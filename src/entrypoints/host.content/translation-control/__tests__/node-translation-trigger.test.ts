@@ -4,19 +4,42 @@ import { afterEach, describe, expect, it, vi } from "vitest"
 import { SELECTION_SHORTCUT_CLAIMED_EVENT } from "@/utils/constants/selection"
 import { registerNodeTranslationTriggerListeners } from "../node-translation-trigger"
 
-function createConfig(hotkey: Config["pageTranslation"]["node"]["hotkey"]): Config {
+function createConfig(
+  hotkey: Config["pageTranslation"]["node"]["hotkey"],
+  shortcut = "Alt+Q",
+): Config {
   return {
     pageTranslation: {
       node: {
         enabled: true,
         hotkey,
+        shortcut,
       },
     },
   } as Config
 }
 
-function dispatchKeyboardEvent(type: "keydown" | "keyup", key: string) {
-  document.dispatchEvent(new KeyboardEvent(type, { key, bubbles: true }))
+function dispatchKeyboardEvent(
+  type: "keydown" | "keyup",
+  key: string,
+  init: KeyboardEventInit = {},
+  target: EventTarget = document,
+) {
+  const event = new KeyboardEvent(type, { key, bubbles: true, cancelable: true, ...init })
+  target.dispatchEvent(event)
+  return event
+}
+
+async function flushMicrotasks() {
+  for (let i = 0; i < 5; i++) await Promise.resolve()
+}
+
+// Alt+Q as macOS sends it: Option turns the Q into "œ". The Alt keydown's
+// config read settles before Q goes down, as it does for a person typing.
+async function pressAltQ(target: EventTarget = document, init: KeyboardEventInit = {}) {
+  dispatchKeyboardEvent("keydown", "Alt", { code: "AltLeft", altKey: true }, target)
+  await flushMicrotasks()
+  return dispatchKeyboardEvent("keydown", "œ", { code: "KeyQ", altKey: true, ...init }, target)
 }
 
 function dispatchMouseEvent(
@@ -262,6 +285,110 @@ describe("registerNodeTranslationTriggerListeners", () => {
     await Promise.resolve()
 
     expect(onTrigger).not.toHaveBeenCalled()
+  })
+
+  it("translates the hovered paragraph on the custom shortcut and keeps the keys from the page", async () => {
+    const onTrigger = vi.fn<(...args: any[]) => any>()
+    const pageListener = vi.fn<(event: KeyboardEvent) => void>()
+    window.addEventListener("keydown", pageListener)
+
+    teardown = registerNodeTranslationTriggerListeners({
+      getConfig: () => Promise.resolve(createConfig("custom")),
+      onTrigger,
+    })
+
+    dispatchMouseEvent("mouseover", { clientX: 70, clientY: 80 })
+    const keyQ = await pressAltQ()
+
+    await vi.waitFor(() => {
+      expect(onTrigger).toHaveBeenCalledWith(
+        { x: 70, y: 80 },
+        expect.objectContaining({
+          pageTranslation: expect.objectContaining({
+            node: expect.objectContaining({ hotkey: "custom" }),
+          }),
+        }),
+      )
+    })
+    expect(keyQ.defaultPrevented).toBe(true)
+    expect(pageListener.mock.calls.map(([event]) => event)).not.toContain(keyQ)
+    window.removeEventListener("keydown", pageListener)
+  })
+
+  it("translates once while the custom shortcut is held", async () => {
+    const onTrigger = vi.fn<(...args: any[]) => any>()
+
+    teardown = registerNodeTranslationTriggerListeners({
+      getConfig: () => Promise.resolve(createConfig("custom")),
+      onTrigger,
+    })
+
+    await pressAltQ()
+    const repeats = [1, 2, 3].map(() =>
+      dispatchKeyboardEvent("keydown", "œ", { code: "KeyQ", altKey: true, repeat: true }),
+    )
+    await flushMicrotasks()
+
+    await vi.waitFor(() => {
+      expect(onTrigger).toHaveBeenCalledTimes(1)
+    })
+    expect(repeats.every((event) => event.defaultPrevented)).toBe(true)
+  })
+
+  it("leaves other keys alone while the custom shortcut is chosen", async () => {
+    vi.useFakeTimers()
+    const onTrigger = vi.fn<(...args: any[]) => any>()
+
+    teardown = registerNodeTranslationTriggerListeners({
+      getConfig: () => Promise.resolve(createConfig("custom", "Control+Q")),
+      onTrigger,
+    })
+
+    // Its modifier tapped or held alone, as the single-key hotkeys are.
+    dispatchKeyboardEvent("keydown", "Control", { ctrlKey: true })
+    await vi.advanceTimersByTimeAsync(500)
+    dispatchKeyboardEvent("keyup", "Control")
+    // Another combination with the same modifier.
+    const copy = dispatchKeyboardEvent("keydown", "c", { code: "KeyC", ctrlKey: true })
+    await vi.advanceTimersByTimeAsync(500)
+
+    expect(onTrigger).not.toHaveBeenCalled()
+    expect(copy.defaultPrevented).toBe(false)
+  })
+
+  it("does not listen for the custom shortcut while another hotkey is chosen", async () => {
+    vi.useFakeTimers()
+    const onTrigger = vi.fn<(...args: any[]) => any>()
+
+    teardown = registerNodeTranslationTriggerListeners({
+      getConfig: () => Promise.resolve(createConfig("control")),
+      onTrigger,
+    })
+
+    const keyQ = await pressAltQ()
+    await vi.advanceTimersByTimeAsync(500)
+
+    expect(onTrigger).not.toHaveBeenCalled()
+    expect(keyQ.defaultPrevented).toBe(false)
+  })
+
+  it("lets the custom shortcut through to a field, also one inside a shadow root", async () => {
+    const onTrigger = vi.fn<(...args: any[]) => any>()
+    const host = document.createElement("div")
+    document.body.append(host)
+    const field = document.createElement("input")
+    host.attachShadow({ mode: "open" }).append(field)
+
+    teardown = registerNodeTranslationTriggerListeners({
+      getConfig: () => Promise.resolve(createConfig("custom")),
+      onTrigger,
+    })
+
+    const keyQ = await pressAltQ(field, { composed: true })
+    await flushMicrotasks()
+
+    expect(onTrigger).not.toHaveBeenCalled()
+    expect(keyQ.defaultPrevented).toBe(false)
   })
 
   it("does not start click-and-hold translation from document surface targets", async () => {
