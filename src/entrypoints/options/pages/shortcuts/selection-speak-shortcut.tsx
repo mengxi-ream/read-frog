@@ -4,7 +4,7 @@ import { getSpeakShortcut } from "@/utils/constants/selection"
 import { i18n } from "@/utils/i18n"
 import { buildSectionSearch } from "../../command-palette/section-scroll"
 import { ShortcutConfigItem } from "./shortcut-config-item"
-import { TurnedOffNote } from "./turned-off-note"
+import { TurnOnButton } from "./turn-on-button"
 
 export function SelectionSpeakShortcut() {
   const [selectionToolbar, setSelectionToolbar] = useAtom(configFieldsAtomMap.selectionToolbar)
@@ -13,20 +13,20 @@ export function SelectionSpeakShortcut() {
   return (
     <ShortcutConfigItem
       id="selection-speak-shortcut"
-      title={i18n.t("options.shortcuts.selectionSpeak.title")}
-      description={
-        <>
-          {i18n.t("options.shortcuts.selectionSpeak.description")}
+      title={
+        <span className="flex items-center gap-2">
+          {i18n.t("options.shortcuts.selectionSpeak.title")}
           {!speak.enabled && (
-            <TurnedOffNote
+            <TurnOnButton
               to={{
                 pathname: "/selection-toolbar",
                 search: buildSectionSearch("selection-toolbar-speak"),
               }}
             />
           )}
-        </>
+        </span>
       }
+      description={i18n.t("options.shortcuts.selectionSpeak.description")}
       shortcut={getSpeakShortcut(speak)}
       onChange={(nextShortcut) => {
         void setSelectionToolbar((current) => ({
