@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/components/providers/theme-provider"
 import { SelectionPopover } from "@/components/ui/selection-popover"
 import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-host"
 import { closeWordLookupAtom, wordLookupAtom } from "./atoms"
+import { isFromSubtitleLine } from "./page-events"
 import { useLookupPlayback } from "./use-lookup-playback"
 
 function useCardLayer() {
@@ -59,6 +60,15 @@ export function WordLookupCard() {
           onOpenChange={(nextOpen) => {
             if (!nextOpen) {
               closeLookup()
+            }
+          }}
+          onOpenChangeRequest={(nextOpen, eventDetails) => {
+            if (
+              !nextOpen &&
+              eventDetails.reason === "outside-press" &&
+              isFromSubtitleLine(eventDetails.event)
+            ) {
+              eventDetails.cancel()
             }
           }}
           anchor={pinnedLayout?.anchor ?? lookup?.anchor ?? null}

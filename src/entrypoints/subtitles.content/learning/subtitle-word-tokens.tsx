@@ -29,32 +29,36 @@ export function SubtitleWordTokens() {
 
   const highlightedIndex = lookup?.cueStart === cue?.start ? lookup?.tokenIndex : null
 
-  return tokens.map((token, index) =>
-    token.isWord ? (
-      <span
-        // oxlint-disable-next-line react/no-array-index-key -- tokens have no identity beyond their position in the line
-        key={index}
-        data-slot="subtitle-word"
-        className={cn(
-          "cursor-pointer rounded-sm transition-colors hover:bg-white/25",
-          highlightedIndex === index && "bg-amber-300 text-amber-950",
-        )}
-        onMouseDown={stopPlayerToggle}
-        onDoubleClick={stopPlayerToggle}
-        onClick={(event) => {
-          stopPlayerToggle(event)
-          const wordRect = event.currentTarget.getBoundingClientRect()
-          openLookup({
-            tokenIndex: index,
-            term: token.text,
-            anchor: { x: wordRect.right, y: wordRect.bottom },
-          })
-        }}
-      >
-        {token.text}
-      </span>
-    ) : (
-      token.text
-    ),
+  return (
+    <span data-slot="subtitle-line">
+      {tokens.map((token, index) =>
+        token.isWord ? (
+          <span
+            // oxlint-disable-next-line react/no-array-index-key -- tokens have no identity beyond their position in the line
+            key={index}
+            data-slot="subtitle-word"
+            className={cn(
+              "cursor-pointer rounded-sm transition-colors hover:bg-white/25",
+              highlightedIndex === index && "bg-amber-300 text-amber-950",
+            )}
+            onMouseDown={stopPlayerToggle}
+            onDoubleClick={stopPlayerToggle}
+            onClick={(event) => {
+              stopPlayerToggle(event)
+              const wordRect = event.currentTarget.getBoundingClientRect()
+              openLookup({
+                tokenIndex: index,
+                term: token.text,
+                anchor: { x: wordRect.right, y: wordRect.bottom },
+              })
+            }}
+          >
+            {token.text}
+          </span>
+        ) : (
+          token.text
+        ),
+      )}
+    </span>
   )
 }
