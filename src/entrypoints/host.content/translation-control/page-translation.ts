@@ -87,6 +87,44 @@ interface RetranslationBudget {
   passes: number
 }
 
+/**
+ * How many descendants are probed while looking for a box to gate a boxless
+ * paragraph unit on. Every probe costs a forced layout (`getClientRects`), so
+ * the scan is bounded; a unit that stays `display: contents` all the way down
+ * is not worth more than this.
+ */
+const MAX_BOXLESS_TRIGGER_PROBES = 64
+
+/**
+ * The element to hand to the IntersectionObserver for `unit`.
+ *
+ * A unit with no layout box can never report an intersection: Chrome fires the
+ * callback once with `isIntersecting: false` (0×0 boundingClientRect, empty
+ * `getClientRects()`) and that is the last the observer ever says about it.
+ * Gating such a unit on itself therefore translates nothing at all — silently:
+ * no wrapper, no spinner, no error UI. `display: contents` wrappers are the
+ * common source (Telegram web puts one around every message), so a descendant
+ * that does have a box stands in as the viewport gate and the observer callback
+ * maps the hit back to the unit.
+ *
+ * Falls back to the unit itself when no boxed descendant exists (the unit is
+ * genuinely invisible, e.g. inside `display: none`), which is exactly the
+ * previous behavior.
+ */
+function findIntersectionTrigger(unit: HTMLElement): HTMLElement {
+  if (unit.getClientRects().length > 0) return unit
+
+  const queue: HTMLElement[] = [...unit.children].filter(isHTMLElement)
+  let probes = 0
+  while (queue.length > 0 && probes < MAX_BOXLESS_TRIGGER_PROBES) {
+    const candidate = queue.shift()!
+    probes += 1
+    if (candidate.getClientRects().length > 0) return candidate
+    queue.push(...[...candidate.children].filter(isHTMLElement))
+  }
+  return unit
+}
+
 interface IPageTranslationManager {
   /**
    * Indicates whether the page translation is currently active
@@ -153,6 +191,12 @@ export class PageTranslationManager implements IPageTranslationManager {
   /** Non-null while a start() is between its guard and activation; see start(). */
   private pendingStart: symbol | null = null
   private intersectionObserver: IntersectionObserver | null = null
+  /**
+   * Observed proxies for paragraph units that have no box of their own:
+   * trigger element → the unit it stands in for. Populated by observeUnit,
+   * consumed (and dropped) by the intersection callback, cleared on stop.
+   */
+  private intersectionTriggers = new Map<HTMLElement, HTMLElement>()
   private mutationObservers: MutationObserver[] = []
   private observedMutationRoots = new WeakSet<Node>()
   private walkId: string | null = null
@@ -368,9 +412,14 @@ export class PageTranslationManager implements IPageTranslationManager {
         for (const entry of entries) {
           if (!entry.isIntersecting) continue
           observer.unobserve(entry.target)
-          if (isHTMLElement(entry.target) && !entry.target.closest(`.${CONTENT_WRAPPER_CLASS}`)) {
-            targets.push(entry.target)
-          }
+          if (!isHTMLElement(entry.target)) continue
+          // A boxless unit is gated on a descendant box (see
+          // findIntersectionTrigger): the trigger only stands in for the unit
+          // it was registered for, so translate the unit and not the trigger.
+          const target = this.intersectionTriggers.get(entry.target) ?? entry.target
+          if (target !== entry.target) this.intersectionTriggers.delete(entry.target)
+          if (target.closest(`.${CONTENT_WRAPPER_CLASS}`)) continue
+          targets.push(target)
         }
         if (targets.length === 0) return
         void (async () => {
@@ -538,6 +587,7 @@ export class PageTranslationManager implements IPageTranslationManager {
       this.intersectionObserver.disconnect()
       this.intersectionObserver = null
     }
+    this.intersectionTriggers.clear()
     this.mutationObservers.forEach((observer) => observer.disconnect())
     this.mutationObservers = []
     this.observedMutationRoots = new WeakSet()
@@ -823,7 +873,7 @@ export class PageTranslationManager implements IPageTranslationManager {
       depth >= GIANT_PARAGRAPH_MAX_SPLIT_DEPTH ||
       element.getBoundingClientRect().height <= maxUnitHeight
     ) {
-      observer.observe(element)
+      this.observeUnit(observer, element)
       return
     }
 
@@ -838,7 +888,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     )
     if (innerTopLevelParagraphs.length === 0) {
       // Unsplittable giant (no nested paragraphs) — observe it whole.
-      observer.observe(element)
+      this.observeUnit(observer, element)
       return
     }
     if (
@@ -854,7 +904,7 @@ export class PageTranslationManager implements IPageTranslationManager {
       element !== element.ownerDocument.body &&
       !canSplitGiantWithoutStrandingOwnText(element)
     ) {
-      observer.observe(element)
+      this.observeUnit(observer, element)
       return
     }
     if (!canSplitParagraphIntoDescendants(element, innerTopLevelParagraphs, config)) {
@@ -869,12 +919,27 @@ export class PageTranslationManager implements IPageTranslationManager {
       // rather than here: bilingual can interleave a wrapper at any boundary,
       // while translationOnly has to cut the units apart into whole nodes and
       // therefore keeps per-span observation for the plans it cannot express.
-      observer.observe(element)
+      this.observeUnit(observer, element)
       return
     }
     for (const paragraph of innerTopLevelParagraphs) {
       this.observeParagraphUnit(paragraph, walkId, config, depth + 1)
     }
+  }
+
+  /**
+   * Register one paragraph unit with the intersection observer, substituting a
+   * boxed descendant when the unit has no box of its own — see
+   * findIntersectionTrigger for why a boxless unit must never be observed
+   * directly. The substitution is recorded so the callback can route the hit
+   * back to the unit.
+   */
+  private observeUnit(observer: IntersectionObserver, unit: HTMLElement): void {
+    const trigger = findIntersectionTrigger(unit)
+    if (trigger !== unit && !this.intersectionTriggers.has(trigger)) {
+      this.intersectionTriggers.set(trigger, unit)
+    }
+    observer.observe(trigger)
   }
 
   /**

@@ -333,6 +333,45 @@ describe("pageTranslationManager mutation re-walk", () => {
     }
   })
 
+  it("gates a boxless paragraph unit on a boxed descendant and translates the unit", async () => {
+    // jsdom has no layout, so every element reports an empty rect list until
+    // stubbed — which is exactly the shape a `display: contents` wrapper
+    // presents (Telegram web wraps every message in one). Such a unit can never
+    // report an intersection, so it must be gated on a descendant that has a
+    // box, and the callback must translate the unit rather than the trigger.
+    document.body.innerHTML = `
+      <div id="host">Message <span id="inner">body</span></div>
+    `
+    const host = document.getElementById("host") as HTMLElement
+    const inner = document.getElementById("inner") as HTMLElement
+    Object.defineProperty(host, "getClientRects", { value: () => [] })
+    Object.defineProperty(inner, "getClientRects", { value: () => [{ width: 120, height: 20 }] })
+
+    const manager = new PageTranslationManager()
+    try {
+      await manager.start()
+      await flushDomUpdates()
+
+      const observer = intersectionObservers[0]
+      expect(observer!.observe).toHaveBeenCalledWith(inner)
+      expect(observer!.observe).not.toHaveBeenCalledWith(host)
+
+      await observer!.triggerIntersect(inner)
+      await flushDomUpdates()
+
+      expect(mockTranslateWalkedElement).toHaveBeenCalledWith(
+        host,
+        "walk-id",
+        DEFAULT_CONFIG,
+        false,
+        expect.anything(),
+        expect.anything(),
+      )
+    } finally {
+      if (manager.isActive) manager.stop()
+    }
+  })
+
   it("observes and translates hidden accordion content after it becomes visible", async () => {
     document.body.innerHTML = `
       <section id="accordion" hidden>
