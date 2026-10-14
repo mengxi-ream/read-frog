@@ -269,6 +269,30 @@ describe("SubtitleWordTokens", () => {
     })
   })
 
+  it("anchors the card at the end of the last looked-up word, like a subtitle selection", () => {
+    const words = renderLine("You can see the blood run from their face.")
+    words.forEach((word, index) => {
+      vi.spyOn(word, "getBoundingClientRect").mockReturnValue(
+        new DOMRect(100 + index * 50, 600, 40, 24),
+      )
+    })
+
+    fireEvent.pointerDown(words[2]!, { button: 0 })
+    act(() => {
+      window.dispatchEvent(new PointerEvent("pointerup"))
+    })
+
+    expect(subtitlesStore.get(wordLookupAtom)?.anchor).toEqual({ x: 240, y: 624 })
+
+    fireEvent.pointerDown(words[0]!, { button: 0 })
+    fireEvent.pointerEnter(words[3]!)
+    act(() => {
+      window.dispatchEvent(new PointerEvent("pointerup"))
+    })
+
+    expect(subtitlesStore.get(wordLookupAtom)?.anchor).toEqual({ x: 290, y: 624 })
+  })
+
   it("treats a drag that returns to its first word as a click on that word", () => {
     const words = renderLine("You can see the blood run from their face.")
 

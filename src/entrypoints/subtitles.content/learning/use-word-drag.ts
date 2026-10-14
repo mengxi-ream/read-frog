@@ -2,20 +2,10 @@ import type { PointerEvent, RefObject } from "react"
 import type { WordToken } from "@/utils/subtitles/segment-words"
 import { useAtomValue, useSetAtom } from "jotai"
 import { useEffect, useRef } from "react"
-import { SUBTITLES_BOX_CLASS } from "@/utils/constants/subtitles"
 import { displaySubtitleAtom } from "../atoms"
 import { dragRangeAtom, openWordLookupAtom } from "./atoms"
 
-const CARD_GAP_ABOVE_SUBTITLES_PX = 8
-
 const WORD_SELECTOR = '[data-slot="subtitle-word"]'
-
-interface Rect {
-  top: number
-  left: number
-  width: number
-  height: number
-}
 
 interface WordDrag {
   pointerId: number
@@ -33,12 +23,9 @@ function getWordRects(line: HTMLElement, start: number, end: number) {
     .map((el) => el.getBoundingClientRect())
 }
 
-function getLookupAnchor(line: HTMLElement, wordsRect: Rect) {
-  const boxTop = line.closest(`.${SUBTITLES_BOX_CLASS}`)?.getBoundingClientRect().top
-  return {
-    x: wordsRect.left + wordsRect.width / 2,
-    y: (boxTop ?? wordsRect.top) - CARD_GAP_ABOVE_SUBTITLES_PX,
-  }
+function getLookupAnchor(wordRects: DOMRect[]) {
+  const lastRect = wordRects.at(-1)
+  return lastRect ? { x: lastRect.right, y: lastRect.bottom } : null
 }
 
 function joinWordText(tokens: WordToken[], start: number, end: number) {
@@ -47,14 +34,6 @@ function joinWordText(tokens: WordToken[], start: number, end: number) {
     .map((token) => token.text)
     .join("")
     .trim()
-}
-
-function unionRect(rects: DOMRect[]): Rect {
-  const top = Math.min(...rects.map((rect) => rect.top))
-  const left = Math.min(...rects.map((rect) => rect.left))
-  const right = Math.max(...rects.map((rect) => rect.right))
-  const bottom = Math.max(...rects.map((rect) => rect.bottom))
-  return { top, left, width: right - left, height: bottom - top }
 }
 
 export function useWordDrag(
@@ -91,8 +70,8 @@ export function useWordDrag(
         clearDrag()
         return
       }
-      const wordRects = getWordRects(line, start, end)
-      if (wordRects.length === 0) {
+      const anchor = getLookupAnchor(getWordRects(line, start, end))
+      if (!anchor) {
         setDragRange(null)
         return
       }
@@ -101,7 +80,7 @@ export function useWordDrag(
         start,
         end,
         text: joinWordText(tokens, start, end),
-        anchor: getLookupAnchor(line, unionRect(wordRects)),
+        anchor,
       })
     }
 

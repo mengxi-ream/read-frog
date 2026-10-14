@@ -1,6 +1,5 @@
 "use client"
 
-import type { SelectionPopoverAnchorPoint } from "./use-selection-popover-layout"
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
 import { mergeProps } from "@base-ui/react/merge-props"
 import { useRender } from "@base-ui/react/use-render"
@@ -427,14 +426,12 @@ function SelectionPopoverContent({
   className,
   children,
   container,
-  anchorPoint,
   finalFocus,
   render,
   ...props
 }: useRender.ComponentProps<"div"> &
   React.ComponentProps<"div"> & {
     container?: SelectionPopoverPortalContainer
-    anchorPoint?: SelectionPopoverAnchorPoint
     finalFocus?: DialogPrimitive.Popup.Props["finalFocus"]
   }) {
   const { open, setOpen, anchor, triggerElement } = useSelectionPopoverRootContext()
@@ -457,7 +454,6 @@ function SelectionPopoverContent({
     handleWheel,
   } = useSelectionPopoverLayout({
     anchor,
-    anchorPoint,
     isVisible: open,
   })
 

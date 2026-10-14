@@ -20,11 +20,8 @@ interface LayoutMemory {
   manualSize: Size | null
 }
 
-export type SelectionPopoverAnchorPoint = "top-left" | "bottom-center"
-
 interface UseSelectionPopoverLayoutOptions {
   anchor: Position | null
-  anchorPoint?: SelectionPopoverAnchorPoint
   isVisible: boolean
 }
 
@@ -96,26 +93,15 @@ function getInitialWidth(maxWidth: number) {
   return maxWidth > 0 ? Math.min(DEFAULT_WIDTH, maxWidth) : DEFAULT_WIDTH
 }
 
-function getInitialPosition(anchor: Position | null, anchorPoint: SelectionPopoverAnchorPoint) {
+function getInitialPosition(anchor: Position | null) {
   const maxWidth = getViewportMaxWidth()
   const initialWidth = getInitialWidth(maxWidth)
   const maxX = Math.max(0, window.innerWidth - initialWidth)
   const maxY = Math.max(0, window.innerHeight)
-  const estimatedHeight = MIN_HEIGHT
-  const fromBottomCenter = anchorPoint === "bottom-center"
-  const x = (anchor?.x ?? 0) - (fromBottomCenter ? initialWidth / 2 : 0)
-  const y = (anchor?.y ?? 0) - (fromBottomCenter ? estimatedHeight : 0)
 
   return {
-    x: clamp(x, 0, maxX),
-    y: clamp(y, 0, maxY),
-  }
-}
-
-function createAnchorBottomLayoutMemory(anchor: Position): VerticalLayoutMemory {
-  return {
-    mode: "bottom",
-    offset: Math.max(window.innerHeight - anchor.y, 0),
+    x: clamp(anchor?.x ?? 0, 0, maxX),
+    y: clamp(anchor?.y ?? 0, 0, maxY),
   }
 }
 
@@ -210,7 +196,6 @@ function getPopoverRect(rndRef: React.RefObject<Rnd | null>) {
 
 export function useSelectionPopoverLayout({
   anchor,
-  anchorPoint = "top-left",
   isVisible,
 }: UseSelectionPopoverLayoutOptions): UseSelectionPopoverLayoutResult {
   const rndRef = useRef<Rnd | null>(null)
@@ -285,10 +270,8 @@ export function useSelectionPopoverLayout({
     }
 
     preferredLayoutRef.current.x = popoverRect.rect.left
-    if (anchorPoint === "top-left") {
-      preferredLayoutRef.current.vertical = createTopVerticalLayoutMemory(popoverRect.rect.top)
-    }
-  }, [anchorPoint])
+    preferredLayoutRef.current.vertical = createTopVerticalLayoutMemory(popoverRect.rect.top)
+  }, [])
 
   const clampCurrentPositionToViewport = useCallback(() => {
     const popoverRect = getPopoverRect(rndRef)
@@ -348,7 +331,6 @@ export function useSelectionPopoverLayout({
 
       const preferredX = preferredLayoutRef.current.x ?? popoverRect.rect.left
       const preferredVertical =
-        (anchorPoint === "bottom-center" ? preferredLayoutRef.current.vertical : null) ??
         getBottomAnchoredLayoutMemory(popoverRect.rect) ??
         preferredLayoutRef.current.vertical ??
         createTopVerticalLayoutMemory(popoverRect.rect.top)
@@ -387,7 +369,7 @@ export function useSelectionPopoverLayout({
 
       updatePositionState(nextPosition, popoverRect.rect, options?.immediate)
     },
-    [anchorPoint, updatePositionState],
+    [updatePositionState],
   )
 
   const scheduleViewportLayout = useCallback(() => {
@@ -539,17 +521,14 @@ export function useSelectionPopoverLayout({
       return
     }
 
-    if (anchorPoint === "bottom-center" && anchor) {
-      preferredLayoutRef.current.vertical = createAnchorBottomLayoutMemory(anchor)
-    }
     ensureResizeObserver()
     scheduleViewportLayout()
     requestAnimationFrame(() => {
       syncPreferredPositionFromElement()
     })
   }, [
+    // oxlint-disable-next-line react/exhaustive-effect-dependencies -- the dependencies are re-run triggers, not values the effect body reads
     anchor,
-    anchorPoint,
     ensureResizeObserver,
     isVisible,
     scheduleViewportLayout,
@@ -581,9 +560,9 @@ export function useSelectionPopoverLayout({
   return {
     rndRef,
     isDragging,
-    position: position ?? getInitialPosition(anchor, anchorPoint),
+    position: position ?? getInitialPosition(anchor),
     defaultLayout: {
-      ...getInitialPosition(anchor, anchorPoint),
+      ...getInitialPosition(anchor),
       width: getInitialWidth(getViewportMaxWidth()),
       height: "auto",
     },

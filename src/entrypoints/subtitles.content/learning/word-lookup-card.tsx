@@ -67,7 +67,6 @@ export function WordLookupCard() {
           <SelectionPopover.Content
             key={pinnedLayout?.sessionKey ?? request?.sessionKey ?? 0}
             container={container}
-            anchorPoint="bottom-center"
           >
             <CustomActionPanel />
           </SelectionPopover.Content>
