@@ -6,14 +6,14 @@ import { wordLookupAtom } from "./atoms"
 const RESUME_AFTER_CLOSE_DELAY_MS = 200
 
 export function useLookupPlayback() {
-  const open = useAtomValue(wordLookupAtom) !== null
+  const lookup = useAtomValue(wordLookupAtom)
   const { getVideoElement } = useSubtitlesUI()
   const pausedByLookupRef = useRef(false)
   const pendingResumeRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     const video = getVideoElement()
-    if (!open || !video) {
+    if (!lookup || !video) {
       return undefined
     }
 
@@ -44,5 +44,5 @@ export function useLookupPlayback() {
         }
       }, RESUME_AFTER_CLOSE_DELAY_MS)
     }
-  }, [getVideoElement, open])
+  }, [getVideoElement, lookup])
 }

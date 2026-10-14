@@ -104,6 +104,21 @@ describe("useLookupPlayback", () => {
     expect(play).not.toHaveBeenCalled()
   })
 
+  it("pauses again when the viewer pressed play and then looked up another word", () => {
+    const { video, pause, play, pressPlay } = createVideo(false)
+    renderPlayback(video)
+
+    setOpen(true)
+    act(pressPlay)
+    setOpen(true)
+    expect(pause).toHaveBeenCalledTimes(2)
+    expect(video.paused).toBe(true)
+
+    setOpen(false)
+    advancePastResumeDelay()
+    expect(play).toHaveBeenCalledTimes(1)
+  })
+
   it("keeps the pause when a second word reopens the card within the resume delay", () => {
     const { video, pause, play } = createVideo(false)
     renderPlayback(video)
