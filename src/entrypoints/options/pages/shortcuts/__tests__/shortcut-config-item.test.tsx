@@ -86,6 +86,22 @@ describe("shortcut bindings", () => {
     ])
     expect(bindings.at(-1)?.shortcut).toBe("")
   })
+
+  it("lists the hover translation shortcut only while hover translation uses it", () => {
+    const config = structuredClone(DEFAULT_CONFIG)
+    config.pageTranslation.node.shortcut = "Alt+Shift+K"
+    const paragraphBinding = (bindings: ReturnType<typeof getShortcutBindings>) =>
+      bindings.find((binding) => binding.id === "node-translation-shortcut")
+
+    expect(paragraphBinding(getShortcutBindings(config))).toBeUndefined()
+
+    config.pageTranslation.node.hotkey = "custom"
+    expect(paragraphBinding(getShortcutBindings(config))).toEqual({
+      id: "node-translation-shortcut",
+      title: "options.shortcuts.nodeTranslation.title",
+      shortcut: "Alt+Shift+K",
+    })
+  })
 })
 
 describe("ShortcutConfigItem", () => {

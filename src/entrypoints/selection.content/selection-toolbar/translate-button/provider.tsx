@@ -830,8 +830,14 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
     })
   }, [openSelectionTranslationRequest, resolveContextMenuRequest])
 
+  // Turned off, the button and its key go together, as Speak's and the actions' do. Hiding the
+  // whole toolbar does not stop the key.
   useSelectionShortcuts(
-    { translate: selectionToolbar.features.translate.shortcut },
+    {
+      translate: selectionToolbar.features.translate.enabled
+        ? selectionToolbar.features.translate.shortcut
+        : undefined,
+    },
     (_, session) => {
       const request = resolveShortcutRequest(session)
       if (!request) {

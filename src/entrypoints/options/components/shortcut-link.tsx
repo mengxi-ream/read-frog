@@ -3,7 +3,7 @@ import { Link } from "react-router"
 import { Button } from "@/components/ui/base-ui/button"
 import { i18n } from "@/utils/i18n"
 import { cn } from "@/utils/styles/utils"
-import { buildSectionSearch } from "../command-palette/section-scroll"
+import { buildSectionLink } from "../command-palette/section-scroll"
 
 /**
  * Points a setting at the row on the Shortcuts page that records its keys. Every shortcut is
@@ -19,7 +19,7 @@ export function ShortcutLink({ sectionId, className }: { sectionId: string; clas
         variant="ghost"
         size="xs"
         className="-ml-2.5 text-muted-foreground"
-        render={<Link to={{ pathname: "/shortcuts", search: buildSectionSearch(sectionId) }} />}
+        render={<Link to={buildSectionLink("/shortcuts", sectionId)} />}
       >
         <Icon icon="tabler:command" />
         {i18n.t("options.shortcuts.setShortcut")}

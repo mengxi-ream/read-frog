@@ -536,8 +536,9 @@ options:
       title: Altyazı çevirisi
       description: Videonun çevrilmiş altyazılarını açıp kapatır.
     nodeTranslation:
-      title: Paragraf çevirisi
+      title: Üzerine gelme çevirisi
       description: Bir paragrafın üzerine gelin veya uzun basın; yalnızca o paragraf çevrilir.
+      customDescription: Bir paragrafın üzerindeyken bu tuşlara basarak o paragrafı çevirin.
     translationHub:
       title: Çeviri Merkezi
       description: Çeviri Merkezini yeni bir sekmede açar.
@@ -548,6 +549,7 @@ options:
       title: "AI eylemleri"
       description: "Seçili metin üzerinde bir AI eylemi çalıştırır. Özel eylemlerin, burada atayana kadar kısayolu yoktur."
     turnedOff: "Kapalı olduğu için bu kısayol, tekrar açılana kadar hiçbir şey yapmaz."
+    turnOn: "Aç"
     clash: "“$1” ile aynı kısayol. Birini değiştirin."
     taken: "$1 zaten “$2” tarafından kullanılıyor."
   overlayTools:
@@ -1709,6 +1711,7 @@ hotkey:
   shift: Shift
   backtick: Ters tırnak
   clickAndHold: Tıkla ve basılı tut
+  custom: Özel kısayol
 translationHub:
   searchLanguages: Dil ara...
   noLanguagesFound: Dil bulunamadı

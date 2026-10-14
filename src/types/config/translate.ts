@@ -1,6 +1,6 @@
 import { langCodeISO6393Schema } from "@read-frog/definitions"
 import { z } from "zod"
-import { HOTKEYS } from "@/utils/constants/hotkeys"
+import { DEFAULT_NODE_TRANSLATION_SHORTCUT_KEY, HOTKEYS } from "@/utils/constants/hotkeys"
 import {
   BUILT_IN_PAGE_TRANSLATE_PROMPT_IDS,
   DEFAULT_TRANSLATE_PROMPT_ID,
@@ -178,6 +178,10 @@ export const translateConfigSchema = z.object({
   node: z.object({
     enabled: z.boolean(),
     hotkey: z.enum(HOTKEYS),
+    // The combination `hotkey: "custom"` listens for. `.default()` for the same
+    // reason as `forceRetranslation`: pre-v112 config must still parse in UI
+    // contexts that load before the migration.
+    shortcut: shortcutSchema.default(DEFAULT_NODE_TRANSLATION_SHORTCUT_KEY),
     // Keep the migration as the durable upgrade path, but also accept pre-v090
     // config in UI contexts that can load before the background migration runs.
     // Otherwise storageAdapter falls back to the full DEFAULT_CONFIG and a UI
