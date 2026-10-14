@@ -3,14 +3,11 @@ import { useAtomValue, useSetAtom } from "jotai"
 import { useMemo } from "react"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { BUILT_IN_DICTIONARY_ACTION_ID } from "@/utils/constants/custom-action"
-import { SUBTITLES_BOX_CLASS } from "@/utils/constants/subtitles"
 import { findSelectionToolbarAction } from "@/utils/custom-actions"
 import { cn } from "@/utils/styles/utils"
 import { segmentWords } from "@/utils/subtitles/segment-words"
 import { displaySubtitleAtom, sourceLanguageAtom } from "../atoms"
 import { openWordLookupAtom, wordLookupAtom } from "./atoms"
-
-const CARD_CLEARANCE_ABOVE_SUBTITLES_PX = 300
 
 function stopPlayerToggle(event: MouseEvent) {
   event.stopPropagation()
@@ -47,16 +44,10 @@ export function SubtitleWordTokens() {
         onClick={(event) => {
           stopPlayerToggle(event)
           const wordRect = event.currentTarget.getBoundingClientRect()
-          const boxRect = event.currentTarget
-            .closest(`.${SUBTITLES_BOX_CLASS}`)
-            ?.getBoundingClientRect()
           openLookup({
             tokenIndex: index,
             term: token.text,
-            anchor: {
-              x: wordRect.left,
-              y: Math.max(0, (boxRect?.top ?? wordRect.top) - CARD_CLEARANCE_ABOVE_SUBTITLES_PX),
-            },
+            anchor: { x: wordRect.right, y: wordRect.bottom },
           })
         }}
       >
