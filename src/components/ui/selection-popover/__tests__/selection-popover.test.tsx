@@ -803,6 +803,36 @@ describe("selectionPopover", () => {
     expect(document.activeElement).not.toBe(trigger)
   })
 
+  it("leaves focus on the page when opened with initial focus disabled", async () => {
+    const actionsRef = React.createRef<{
+      requestOpen: (anchor?: { x: number; y: number } | null) => void
+    }>()
+    const pageButton = document.createElement("button")
+    document.body.append(pageButton)
+    pageButton.focus()
+    render(
+      <SelectionPopover.Root actionsRef={actionsRef} onOpenChange={onOpenChangeSpy}>
+        <SelectionPopover.Content initialFocus={false}>
+          <SelectionPopover.Header>
+            <SelectionPopover.Close />
+          </SelectionPopover.Header>
+        </SelectionPopover.Content>
+      </SelectionPopover.Root>,
+    )
+
+    act(() => {
+      actionsRef.current?.requestOpen({ x: 100, y: 100 })
+    })
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 50))
+    })
+    flushRaf()
+
+    expect(screen.getByRole("button", { name: "Close" })).toBeInTheDocument()
+    expect(pageButton).toHaveFocus()
+    pageButton.remove()
+  })
+
   it("closes a pinned popover when another popover opens", () => {
     const { firstOnOpenChange, secondOnOpenChange, firstTrigger, secondTrigger } =
       renderTwoPopovers()
