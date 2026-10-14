@@ -1,4 +1,6 @@
+import type { ReactNode } from "react"
 import { Icon } from "@iconify/react"
+import { useState } from "react"
 import { Link, useLocation } from "react-router"
 import { browser } from "#imports"
 import {
@@ -55,7 +57,7 @@ export function FeaturesNav() {
             </SidebarMenuButton>
           </SidebarMenuItem>
 
-          <Collapsible defaultOpen={isTranslationActive} className="group/collapsible">
+          <CollapsibleNavGroup active={isTranslationActive}>
             <SidebarMenuItem>
               <CollapsibleTrigger
                 render={
@@ -71,7 +73,7 @@ export function FeaturesNav() {
                 <span>{i18n.t("options.sidebar.translation")}</span>
                 <Icon
                   icon="tabler:chevron-right"
-                  className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90"
+                  className="ml-auto transition-transform duration-200 group-data-open/collapsible:rotate-90"
                 />
               </CollapsibleTrigger>
               <CollapsibleContent>
@@ -103,9 +105,9 @@ export function FeaturesNav() {
                 </SidebarMenuSub>
               </CollapsibleContent>
             </SidebarMenuItem>
-          </Collapsible>
+          </CollapsibleNavGroup>
 
-          <Collapsible defaultOpen={isOverlayToolsActive} className="group/collapsible">
+          <CollapsibleNavGroup active={isOverlayToolsActive}>
             <SidebarMenuItem>
               <CollapsibleTrigger
                 render={
@@ -119,7 +121,7 @@ export function FeaturesNav() {
                 <span>{i18n.t("options.overlayTools.title")}</span>
                 <Icon
                   icon="tabler:chevron-right"
-                  className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90"
+                  className="ml-auto transition-transform duration-200 group-data-open/collapsible:rotate-90"
                 />
               </CollapsibleTrigger>
               <CollapsibleContent>
@@ -151,7 +153,7 @@ export function FeaturesNav() {
                 </SidebarMenuSub>
               </CollapsibleContent>
             </SidebarMenuItem>
-          </Collapsible>
+          </CollapsibleNavGroup>
 
           <SidebarMenuItem>
             <SidebarMenuButton
@@ -179,7 +181,7 @@ export function FeaturesNav() {
               <span>{i18n.t("options.tools.translationHub")}</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
-          <Collapsible defaultOpen={isAdvancedActive} className="group/collapsible">
+          <CollapsibleNavGroup active={isAdvancedActive}>
             <SidebarMenuItem>
               <CollapsibleTrigger
                 render={
@@ -193,7 +195,7 @@ export function FeaturesNav() {
                 <span>{i18n.t("options.advanced.title")}</span>
                 <Icon
                   icon="tabler:chevron-right"
-                  className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90"
+                  className="ml-auto transition-transform duration-200 group-data-open/collapsible:rotate-90"
                 />
               </CollapsibleTrigger>
               <CollapsibleContent>
@@ -209,9 +211,32 @@ export function FeaturesNav() {
                 </SidebarMenuSub>
               </CollapsibleContent>
             </SidebarMenuItem>
-          </Collapsible>
+          </CollapsibleNavGroup>
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>
+  )
+}
+
+/**
+ * A feature group that opens whenever the route lands on one of its pages — from a link, the
+ * command palette or a URL as much as from the sidebar — and otherwise opens and closes only by
+ * hand. Base UI reads `defaultOpen` once, so a route-driven `defaultOpen` neither opened the
+ * group nor stayed quiet about changing.
+ */
+function CollapsibleNavGroup({ active, children }: { active: boolean; children: ReactNode }) {
+  const [open, setOpen] = useState(active)
+  // Adjusted while rendering rather than in an effect, so the group opens with the page instead of
+  // a frame later. Comparing booleans, one update settles it.
+  const [wasActive, setWasActive] = useState(active)
+  if (active !== wasActive) {
+    setWasActive(active)
+    if (active) setOpen(true)
+  }
+
+  return (
+    <Collapsible open={open} onOpenChange={setOpen} className="group/collapsible">
+      {children}
+    </Collapsible>
   )
 }
