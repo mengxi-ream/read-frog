@@ -1,39 +1,73 @@
 import { describe, expect, it } from "vitest"
+import { configSchema } from "@/types/config/config"
+import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { migrate } from "../../migration-scripts/v111-to-v112"
 
-const DEFAULT_WORD_LOOKUP = {
-  clickActionId: "default-dictionary",
-  dragActionId: "default-sentence-analysis",
-}
-
 describe("v111-to-v112 migration", () => {
-  it("points a click at Dictionary and a drag at Sentence Analysis", () => {
+  it("adds the custom paragraph shortcut without changing the chosen hotkey", () => {
     const oldConfig = {
-      selectionToolbar: { customActions: [] },
-      videoSubtitles: { enabled: true },
+      pageTranslation: {
+        providerId: "provider-1",
+        node: {
+          enabled: true,
+          hotkey: "shift",
+          forceRetranslation: false,
+        },
+      },
     }
     const snapshot = structuredClone(oldConfig)
 
     const migrated = migrate(oldConfig)
 
     expect(migrated).toEqual({
-      selectionToolbar: { customActions: [] },
-      videoSubtitles: { enabled: true },
-      wordLookup: DEFAULT_WORD_LOOKUP,
+      pageTranslation: {
+        providerId: "provider-1",
+        node: {
+          enabled: true,
+          hotkey: "shift",
+          shortcut: "Alt+Q",
+          forceRetranslation: false,
+        },
+      },
     })
     expect(oldConfig).toEqual(snapshot)
     expect(migrate(migrated)).toBe(migrated)
   })
 
-  it("keeps actions the reader already picked when rerun", () => {
-    const oldConfig = { wordLookup: { clickActionId: "my-word", dragActionId: "my-sentence" } }
+  it("keeps a shortcut that is already there when rerun", () => {
+    const oldConfig = { pageTranslation: { node: { hotkey: "custom", shortcut: "Control+Q" } } }
 
     expect(migrate(oldConfig)).toBe(oldConfig)
+  })
+
+  it("gives a config that the v112 schema accepts with the custom hotkey", () => {
+    const { shortcut: _shortcut, ...node } = DEFAULT_CONFIG.pageTranslation.node
+    const config = {
+      ...DEFAULT_CONFIG,
+      pageTranslation: { ...DEFAULT_CONFIG.pageTranslation, node },
+    }
+
+    const migrated = migrate(structuredClone(config))
+    const parsed = configSchema.safeParse({
+      ...migrated,
+      pageTranslation: {
+        ...migrated.pageTranslation,
+        node: { ...migrated.pageTranslation.node, hotkey: "custom" },
+      },
+    })
+
+    expect(parsed.success).toBe(true)
+    expect(parsed.data?.pageTranslation.node).toMatchObject({
+      hotkey: "custom",
+      shortcut: "Alt+Q",
+    })
   })
 
   it("leaves malformed config shapes unchanged", () => {
     expect(migrate(null)).toBeNull()
     expect(migrate([])).toEqual([])
-    expect(migrate({ wordLookup: null })).toEqual({ wordLookup: DEFAULT_WORD_LOOKUP })
+    expect(migrate({})).toEqual({})
+    expect(migrate({ pageTranslation: null })).toEqual({ pageTranslation: null })
+    expect(migrate({ pageTranslation: { node: [] } })).toEqual({ pageTranslation: { node: [] } })
   })
 })

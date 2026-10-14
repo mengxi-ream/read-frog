@@ -536,8 +536,9 @@ options:
       title: 자막 번역
       description: 동영상의 번역 자막을 켜거나 끕니다.
     nodeTranslation:
-      title: 단락 번역
+      title: 호버 번역
       description: 단락에 마우스를 올리거나 길게 누르면 그 단락만 번역합니다.
+      customDescription: 단락에 마우스를 올린 채 이 키를 누르면 그 단락을 번역합니다.
     translationHub:
       title: 번역 허브
       description: 번역 허브를 새 탭에서 엽니다.
@@ -548,6 +549,7 @@ options:
       title: "AI 액션"
       description: "선택한 텍스트에 AI 액션을 실행합니다. 커스텀 액션은 처음에 단축키가 없으니 여기서 설정하세요."
     turnedOff: "이 기능이 꺼져 있어 다시 켤 때까지 이 키는 동작하지 않습니다."
+    turnOn: "켜기"
     clash: "“$1”과(와) 같은 키입니다. 하나를 바꾸세요."
     taken: "$1 키는 이미 “$2”에서 사용 중입니다."
   overlayTools:
@@ -1715,6 +1717,7 @@ hotkey:
   shift: Shift
   backtick: 백틱
   clickAndHold: 클릭하고 길게 누르기
+  custom: 사용자 지정 단축키
 translationHub:
   searchLanguages: 언어 검색...
   noLanguagesFound: 언어를 찾을 수 없습니다

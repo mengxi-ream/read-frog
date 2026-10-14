@@ -537,8 +537,9 @@ options:
       title: Traducción de subtítulos
       description: Activa o desactiva los subtítulos traducidos del vídeo.
     nodeTranslation:
-      title: Traducción de párrafo
+      title: Traducción al pasar el cursor
       description: Pasa el cursor o mantén pulsado un párrafo para traducir solo ese.
+      customDescription: Pulsa estas teclas con el cursor sobre un párrafo para traducirlo.
     translationHub:
       title: Centro de traducción
       description: Abre el Centro de traducción en una pestaña nueva.
@@ -549,6 +550,7 @@ options:
       title: "Acciones AI"
       description: "Ejecuta una acción AI sobre el texto seleccionado. Las acciones personalizadas no tienen atajo hasta que les asignes uno aquí."
     turnedOff: "Está desactivado, así que este atajo no hace nada hasta que lo vuelvas a activar."
+    turnOn: "Activar"
     clash: "Mismo atajo que «$1». Cambia uno de ellos."
     taken: "«$2» ya usa $1."
   overlayTools:
@@ -1720,6 +1722,7 @@ hotkey:
   shift: Mayús
   backtick: Acento grave
   clickAndHold: Hacer clic y mantener
+  custom: Atajo personalizado
 translationHub:
   searchLanguages: Buscar idiomas...
   noLanguagesFound: No se encontraron idiomas

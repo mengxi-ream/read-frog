@@ -1298,6 +1298,28 @@ describe("selection toolbar requests", () => {
     expect(event.defaultPrevented).toBe(false)
   })
 
+  it("leaves the selection translation key to the page while Translate is turned off", async () => {
+    const paragraph = document.createElement("p")
+    paragraph.textContent = "Selected text inside a paragraph."
+    document.body.appendChild(paragraph)
+
+    const config = cloneConfig(DEFAULT_CONFIG)
+    config.selectionToolbar.features.translate.enabled = false
+    const store = createStore()
+    store.set(configAtom, config)
+    setSelectionState(store, { text: "Selected text", range: createRangeFor(paragraph) })
+    renderWithProviders(<TranslateButton />, store)
+
+    let event!: KeyboardEvent
+    act(() => {
+      event = pressShortcut()
+    })
+    await act(() => Promise.resolve())
+
+    expect(event.defaultPrevented).toBe(false)
+    expect(translateTextCoreMock).not.toHaveBeenCalled()
+  })
+
   it("binds no key for an empty or invalid selection translation shortcut", () => {
     const paragraph = document.createElement("p")
     paragraph.textContent = "Selected text inside a paragraph."

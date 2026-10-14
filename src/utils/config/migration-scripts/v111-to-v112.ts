@@ -1,37 +1,48 @@
 /**
  * Migration script from v111 to v112
- * - Adds the top-level `wordLookup` section, the custom AI actions that answer
- *   a lookup in video subtitles: `clickActionId` for a click on one word and
- *   `dragActionId` for a drag across several. Existing configs get the
- *   built-in Dictionary for a click, which is what word lookup ran before it
- *   was configurable, and the built-in Sentence Analysis for a drag.
+ * - Adds `pageTranslation.node.shortcut` ("Alt+Q"), the key combination
+ *   hover translation listens for when `node.hotkey` is the new "custom".
+ *   No config chose "custom" before v112, so the key does nothing until the
+ *   reader picks it; it is not checked against the reader's other shortcuts
+ *   here, and the Shortcuts page flags a clash once it is in use.
  *
- * Idempotent: a config that already has both fields is returned by identity.
+ * The CONFIG_SCHEMA_VERSION bump is also what protects sync: an older build
+ * refuses a v112 config instead of failing to parse `hotkey: "custom"`, a
+ * value its schema does not know, and falling back to the default config.
  *
- * IMPORTANT: The defaults are hardcoded inline. Migration scripts are frozen
+ * Idempotent: a config that already has a shortcut keeps it and is returned
+ * by identity.
+ *
+ * IMPORTANT: The default is hardcoded inline. Migration scripts are frozen
  * snapshots - never import constants, helpers, or shared types.
  */
 export function migrate(oldConfig: any): any {
-  if (!oldConfig || typeof oldConfig !== "object" || Array.isArray(oldConfig)) {
+  if (
+    !oldConfig ||
+    typeof oldConfig !== "object" ||
+    Array.isArray(oldConfig) ||
+    !oldConfig.pageTranslation ||
+    typeof oldConfig.pageTranslation !== "object" ||
+    Array.isArray(oldConfig.pageTranslation) ||
+    !oldConfig.pageTranslation.node ||
+    typeof oldConfig.pageTranslation.node !== "object" ||
+    Array.isArray(oldConfig.pageTranslation.node)
+  ) {
     return oldConfig
   }
 
-  const wordLookup = oldConfig.wordLookup
-  if (
-    wordLookup &&
-    typeof wordLookup === "object" &&
-    !Array.isArray(wordLookup) &&
-    typeof wordLookup.clickActionId === "string" &&
-    typeof wordLookup.dragActionId === "string"
-  ) {
+  if (typeof oldConfig.pageTranslation.node.shortcut === "string") {
     return oldConfig
   }
 
   return {
     ...oldConfig,
-    wordLookup: {
-      clickActionId: "default-dictionary",
-      dragActionId: "default-sentence-analysis",
+    pageTranslation: {
+      ...oldConfig.pageTranslation,
+      node: {
+        ...oldConfig.pageTranslation.node,
+        shortcut: "Alt+Q",
+      },
     },
   }
 }
