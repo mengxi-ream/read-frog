@@ -72,7 +72,10 @@ export function WordLookupCard() {
           }
           disablePointerDismissal={isSaveToNotebaseDialogOpen}
         >
-          <SelectionPopover.Content key={pinnedLayout?.sessionKey ?? request?.sessionKey ?? 0} container={layer}>
+          <SelectionPopover.Content
+            key={pinnedLayout?.sessionKey ?? request?.sessionKey ?? 0}
+            container={layer}
+          >
             <CustomActionPanel />
           </SelectionPopover.Content>
         </SelectionPopover.Root>
