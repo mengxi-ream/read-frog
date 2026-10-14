@@ -28,6 +28,7 @@ export function CustomActionPanel() {
           selectionContent={request.selectionText}
           value={run.result}
           thinking={run.thinking}
+          speakSurface={request.surface}
         />
         <SelectionToolbarErrorAlert error={run.error} />
       </SelectionPopover.Body>

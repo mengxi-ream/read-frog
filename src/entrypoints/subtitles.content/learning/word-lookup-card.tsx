@@ -1,4 +1,5 @@
 import { useAtomValue, useSetAtom } from "jotai"
+import { useState } from "react"
 import { customActionRequestAtom } from "@/components/custom-action/atoms"
 import { CustomActionPanel } from "@/components/custom-action/custom-action-panel"
 import { isSaveToNotebaseDialogOpenAtom } from "@/components/custom-action/save-to-notebase-dialog-atom"
@@ -11,6 +12,11 @@ import { useLookupPlayback } from "./use-lookup-playback"
 import { useLookupShortcuts } from "./use-lookup-shortcuts"
 import { useTopLayerPortalContainer } from "./use-top-layer-portal-container"
 
+interface PinnedLayout {
+  anchor: { x: number; y: number } | null
+  sessionKey: number
+}
+
 export function WordLookupCard() {
   const lookup = useAtomValue(wordLookupAtom)
   const request = useAtomValue(customActionRequestAtom)
@@ -19,6 +25,10 @@ export function WordLookupCard() {
   const open = lookup !== null
   const cardOrDialogOpen = open || isSaveToNotebaseDialogOpen
   const container = useTopLayerPortalContainer(cardOrDialogOpen)
+  const [pinnedLayout, setPinnedLayout] = useState<PinnedLayout | null>(null)
+  if (!open && pinnedLayout) {
+    setPinnedLayout(null)
+  }
 
   useLookupPlayback()
   useLookupShortcuts()
@@ -33,11 +43,19 @@ export function WordLookupCard() {
               closeLookup()
             }
           }}
-          anchor={lookup?.anchor ?? null}
+          anchor={pinnedLayout?.anchor ?? lookup?.anchor ?? null}
+          pinned={pinnedLayout !== null}
+          onPinnedChange={(nextPinned) =>
+            setPinnedLayout(
+              nextPinned
+                ? { anchor: lookup?.anchor ?? null, sessionKey: request?.sessionKey ?? 0 }
+                : null,
+            )
+          }
           disablePointerDismissal={isSaveToNotebaseDialogOpen}
         >
           <SelectionPopover.Content
-            key={request?.sessionKey ?? 0}
+            key={pinnedLayout?.sessionKey ?? request?.sessionKey ?? 0}
             container={container}
             anchorPoint="bottom-center"
           >
