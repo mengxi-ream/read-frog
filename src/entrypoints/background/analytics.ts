@@ -76,6 +76,7 @@ const FEATURE_SURFACES = listEveryFeatureSurface({
     "shortcut",
     "tts_settings",
     "translation_hub",
+    "video_subtitles",
   ],
   note_suggestion: ["selection_toolbar"],
   note_save: ["selection_toolbar"],

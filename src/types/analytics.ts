@@ -102,6 +102,7 @@ export interface SurfaceByFeature {
     | "shortcut"
     | "tts_settings"
     | "translation_hub"
+    | "video_subtitles"
   note_suggestion: "selection_toolbar"
   note_save: "selection_toolbar"
   glossary: "page_translation" | "video_subtitles" | "selection_toolbar" | "input_translation"

@@ -32,6 +32,11 @@ function useCardLayer() {
   return layer
 }
 
+interface PinnedLayout {
+  anchor: { x: number; y: number } | null
+  sessionKey: number
+}
+
 export function WordLookupCard() {
   const lookup = useAtomValue(wordLookupAtom)
   const request = useAtomValue(customActionRequestAtom)
@@ -39,6 +44,10 @@ export function WordLookupCard() {
   const isSaveToNotebaseDialogOpen = useAtomValue(isSaveToNotebaseDialogOpenAtom)
   const layer = useCardLayer()
   const open = lookup !== null
+  const [pinnedLayout, setPinnedLayout] = useState<PinnedLayout | null>(null)
+  if (!open && pinnedLayout) {
+    setPinnedLayout(null)
+  }
 
   useLookupPlayback()
 
@@ -52,10 +61,18 @@ export function WordLookupCard() {
               closeLookup()
             }
           }}
-          anchor={lookup?.anchor ?? null}
+          anchor={pinnedLayout?.anchor ?? lookup?.anchor ?? null}
+          pinned={pinnedLayout !== null}
+          onPinnedChange={(nextPinned) =>
+            setPinnedLayout(
+              nextPinned
+                ? { anchor: lookup?.anchor ?? null, sessionKey: request?.sessionKey ?? 0 }
+                : null,
+            )
+          }
           disablePointerDismissal={isSaveToNotebaseDialogOpen}
         >
-          <SelectionPopover.Content key={request?.sessionKey ?? 0} container={layer}>
+          <SelectionPopover.Content key={pinnedLayout?.sessionKey ?? request?.sessionKey ?? 0} container={layer}>
             <CustomActionPanel />
           </SelectionPopover.Content>
         </SelectionPopover.Root>
