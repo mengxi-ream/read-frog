@@ -316,6 +316,7 @@ describe("notebase pending save processor", () => {
       { surface: "custom_action", isGuide: false },
     )
     expect(loggedInDeps.reportNoteSave).toHaveBeenCalledExactlyOnceWith({
+      surface: "selection_toolbar",
       saveSource: "custom_action",
       isGuide: false,
       noteCount: 1,
@@ -597,12 +598,32 @@ describe("notebase pending save processor", () => {
       isGuide: false,
     })
     expect(deps.reportNoteSave).toHaveBeenCalledExactlyOnceWith({
+      surface: "selection_toolbar",
       saveSource: "note_suggestion",
       isGuide: false,
       noteCount: 2,
       path: "after_login",
       startedAt: 1_000,
     })
+  })
+
+  it("reports a save started from video subtitles under that surface after login", async () => {
+    const action = createConnectedAction()
+    const pending = createPendingConnectedNotebaseSave(
+      action,
+      action.notebaseConnection!,
+      [{ summary: "First" }],
+      1_000,
+      { analyticsSurface: "video_subtitles" },
+    )
+    const deps = createDeps({ pending, config: createConfig(action), authenticated: true })
+    deps.getSchema.mockResolvedValueOnce(createConnectedSchema())
+
+    await createNotebasePendingSaveProcessor(deps)("auth-cookie-change")
+
+    expect(deps.reportNoteSave).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({ surface: "video_subtitles", path: "after_login" }),
+    )
   })
 
   it("reports a pending save dropped for an error retrying cannot fix", async () => {

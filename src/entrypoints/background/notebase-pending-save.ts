@@ -49,6 +49,7 @@ import {
   getNotebaseDetailUrl,
   getPendingNotebaseSave,
   getPendingNotebaseSaveContext,
+  getPendingNoteSaveAnalyticsSurface,
   isPendingNotebaseSaveExpired,
   validateStillCanSavePendingConnectedNotebaseSave,
   validateStillCanSavePendingCreateNotebaseSave,
@@ -92,6 +93,7 @@ function reportPendingSaveOutcome(
 ) {
   const context = getPendingNotebaseSaveContext(pendingNotebaseSave)
   deps.reportNoteSave({
+    surface: getPendingNoteSaveAnalyticsSurface(pendingNotebaseSave),
     saveSource: context.surface,
     isGuide: context.isGuide,
     noteCount:
@@ -310,6 +312,9 @@ async function createReplacementNotebaseFromConnectedPending(
     {
       guideDictionaryNotebaseTracking: pendingNotebaseSave.guideDictionaryNotebaseTracking,
       ...(pendingNotebaseSave.saveSource ? { saveSource: pendingNotebaseSave.saveSource } : {}),
+      ...(pendingNotebaseSave.analyticsSurface
+        ? { analyticsSurface: pendingNotebaseSave.analyticsSurface }
+        : {}),
     },
   )
 

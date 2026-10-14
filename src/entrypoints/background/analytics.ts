@@ -79,7 +79,7 @@ const FEATURE_SURFACES = listEveryFeatureSurface({
     "video_subtitles",
   ],
   note_suggestion: ["selection_toolbar"],
-  note_save: ["selection_toolbar"],
+  note_save: ["selection_toolbar", "video_subtitles"],
   glossary: ["page_translation", "video_subtitles", "selection_toolbar", "input_translation"],
 })
 

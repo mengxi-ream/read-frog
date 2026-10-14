@@ -1,6 +1,7 @@
 import type { CustomActionRun } from "./use-custom-action-run"
 import { useHostedAiProviderOptions } from "@/components/llm-providers/use-hosted-ai-provider-options"
 import { SelectionToolbarFooterContent } from "@/components/ui/selection-popover/selection-toolbar-footer-content"
+import { ANALYTICS_SURFACE } from "@/types/analytics"
 import { CustomActionToolButton } from "./custom-action-tool-button"
 import { SaveToNotebaseButton } from "./save-to-notebase-button"
 
@@ -13,6 +14,10 @@ import { SaveToNotebaseButton } from "./save-to-notebase-button"
 export function CustomActionPanelFooter({ run }: { run: CustomActionRun }) {
   const providers = useHostedAiProviderOptions("customAction", run.providers)
   const { action } = run
+  const saveSurface =
+    run.request?.surface === ANALYTICS_SURFACE.VIDEO_SUBTITLES
+      ? ANALYTICS_SURFACE.VIDEO_SUBTITLES
+      : ANALYTICS_SURFACE.SELECTION_TOOLBAR
 
   return (
     <SelectionToolbarFooterContent
@@ -25,7 +30,12 @@ export function CustomActionPanelFooter({ run }: { run: CustomActionRun }) {
     >
       {action && (
         <>
-          <SaveToNotebaseButton action={action} isRunning={run.isRunning} result={run.result} />
+          <SaveToNotebaseButton
+            action={action}
+            isRunning={run.isRunning}
+            result={run.result}
+            surface={saveSurface}
+          />
           <CustomActionToolButton action={action} />
         </>
       )}
