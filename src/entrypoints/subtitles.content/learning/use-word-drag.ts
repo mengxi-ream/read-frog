@@ -111,11 +111,11 @@ export function useWordDrag(
       }
     }
 
-    window.addEventListener("pointerup", finishDrag)
-    window.addEventListener("pointercancel", cancelDrag)
+    window.addEventListener("pointerup", finishDrag, true)
+    window.addEventListener("pointercancel", cancelDrag, true)
     return () => {
-      window.removeEventListener("pointerup", finishDrag)
-      window.removeEventListener("pointercancel", cancelDrag)
+      window.removeEventListener("pointerup", finishDrag, true)
+      window.removeEventListener("pointercancel", cancelDrag, true)
       if (dragRef.current) {
         clearDrag()
       }

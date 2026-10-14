@@ -83,6 +83,22 @@ describe("SubtitleWordTokens", () => {
     expect(releasePointerCapture).toHaveBeenCalledWith(7)
   })
 
+  it("finishes the drag even when the page stops the release from bubbling", () => {
+    const words = renderLine("You can see the blood run from their face.")
+    const pageControl = document.createElement("div")
+    pageControl.addEventListener("pointerup", (event) => event.stopPropagation())
+    document.body.append(pageControl)
+
+    fireEvent.pointerDown(words[0]!, { button: 0 })
+    fireEvent.pointerEnter(words[1]!)
+    act(() => {
+      pageControl.dispatchEvent(new PointerEvent("pointerup", { bubbles: true }))
+    })
+
+    expect(subtitlesStore.get(customActionRequestAtom)).toMatchObject({ selectionText: "You can" })
+    pageControl.remove()
+  })
+
   it("drops the drag when the browser cancels the pointer", () => {
     const words = renderLine("You can see the blood run from their face.")
 
@@ -229,6 +245,7 @@ describe("SubtitleWordTokens", () => {
     const words = renderLine("You can see the blood run from their face.")
 
     expect(words[0]!.parentElement?.className).not.toContain("select-none")
+    expect(words[0]!.className).not.toContain("touch-none")
 
     fireEvent.pointerDown(words[0]!, { button: 0 })
     fireEvent.pointerEnter(words[1]!)

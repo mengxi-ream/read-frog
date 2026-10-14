@@ -45,7 +45,8 @@ export function SubtitleWordTokens() {
             data-slot="subtitle-word"
             data-index={index}
             className={cn(
-              "cursor-pointer touch-none rounded-sm transition-colors hover:bg-white/25",
+              "cursor-pointer rounded-sm transition-colors hover:bg-white/25",
+              dragEnabled && "touch-none",
               isWithin(lookup, index) && "bg-amber-300 text-amber-950",
               isWithin(dragRange, index) && "bg-sky-300 text-sky-950",
             )}
