@@ -57,7 +57,11 @@ function unionRect(rects: DOMRect[]): Rect {
   return { top, left, width: right - left, height: bottom - top }
 }
 
-export function useWordDrag(tokens: WordToken[], lineRef: RefObject<HTMLElement | null>) {
+export function useWordDrag(
+  tokens: WordToken[],
+  lineRef: RefObject<HTMLElement | null>,
+  dragEnabled: boolean,
+) {
   const cueStart = useAtomValue(displaySubtitleAtom)?.start ?? -1
   const openLookup = useSetAtom(openWordLookupAtom)
   const setDragRange = useSetAtom(dragRangeAtom)
@@ -83,6 +87,10 @@ export function useWordDrag(tokens: WordToken[], lineRef: RefObject<HTMLElement 
 
       const start = Math.min(drag.anchorIndex, drag.focusIndex)
       const end = Math.max(drag.anchorIndex, drag.focusIndex)
+      if (!dragEnabled && start !== end) {
+        clearDrag()
+        return
+      }
       const wordRects = getWordRects(line, start, end)
       if (wordRects.length === 0) {
         setDragRange(null)
@@ -112,13 +120,15 @@ export function useWordDrag(tokens: WordToken[], lineRef: RefObject<HTMLElement 
         clearDrag()
       }
     }
-  }, [cueStart, lineRef, openLookup, setDragRange, tokens])
+  }, [cueStart, dragEnabled, lineRef, openLookup, setDragRange, tokens])
 
   const startDrag = (event: PointerEvent<HTMLElement>, index: number) => {
     if (event.button !== 0 || dragRef.current) {
       return
     }
-    event.preventDefault()
+    if (dragEnabled) {
+      event.preventDefault()
+    }
     event.stopPropagation()
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId)
@@ -138,6 +148,9 @@ export function useWordDrag(tokens: WordToken[], lineRef: RefObject<HTMLElement 
       return
     }
     drag.focusIndex = index
+    if (!dragEnabled) {
+      return
+    }
     setDragRange({
       cueStart,
       start: Math.min(drag.anchorIndex, index),

@@ -214,6 +214,44 @@ describe("SubtitleWordTokens", () => {
     expect(subtitlesStore.get(customActionRequestAtom)).toBeNull()
   })
 
+  it("keeps the line selectable and runs no action for a drag when drag lookup is disabled", () => {
+    const { builtInActions } = DEFAULT_CONFIG.selectionToolbar
+    subtitlesStore.set(configAtom, {
+      ...DEFAULT_CONFIG,
+      selectionToolbar: {
+        ...DEFAULT_CONFIG.selectionToolbar,
+        builtInActions: {
+          ...builtInActions,
+          sentenceAnalysis: { ...builtInActions.sentenceAnalysis, enabled: false },
+        },
+      },
+    })
+    const words = renderLine("You can see the blood run from their face.")
+
+    expect(words[0]!.parentElement?.className).not.toContain("select-none")
+
+    fireEvent.pointerDown(words[0]!, { button: 0 })
+    fireEvent.pointerEnter(words[1]!)
+
+    expect(subtitlesStore.get(dragRangeAtom)).toBeNull()
+
+    act(() => {
+      window.dispatchEvent(new PointerEvent("pointerup"))
+    })
+
+    expect(subtitlesStore.get(customActionRequestAtom)).toBeNull()
+
+    fireEvent.pointerDown(words[2]!, { button: 0 })
+    act(() => {
+      window.dispatchEvent(new PointerEvent("pointerup"))
+    })
+
+    expect(subtitlesStore.get(customActionRequestAtom)).toMatchObject({
+      actionId: "default-dictionary",
+      selectionText: "see",
+    })
+  })
+
   it("treats a drag that returns to its first word as a click on that word", () => {
     const words = renderLine("You can see the blood run from their face.")
 

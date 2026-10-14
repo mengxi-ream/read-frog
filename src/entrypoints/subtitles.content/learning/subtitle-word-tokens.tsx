@@ -23,14 +23,12 @@ export function SubtitleWordTokens() {
   const text = cue?.text ?? ""
   const tokens = useMemo(() => segmentWords(text, locale ?? undefined), [locale, text])
   const lineRef = useRef<HTMLSpanElement>(null)
-  const { startDrag, extendDrag } = useWordDrag(tokens, lineRef)
+  const clickEnabled = resolveClickLookupAction(config).enabled !== false
+  const dragEnabled = resolveDragLookupAction(config).enabled !== false
+  const { startDrag, extendDrag } = useWordDrag(tokens, lineRef, dragEnabled)
   const cueStart = cue?.start ?? -1
 
-  const canLookUp = [resolveClickLookupAction, resolveDragLookupAction].some(
-    (resolve) => resolve(config).enabled !== false,
-  )
-
-  if (!canLookUp) {
+  if (!clickEnabled && !dragEnabled) {
     return text
   }
 
@@ -38,7 +36,7 @@ export function SubtitleWordTokens() {
     range?.cueStart === cueStart && index >= range.start && index <= range.end
 
   return (
-    <span ref={lineRef} data-slot="subtitle-line" className="select-none">
+    <span ref={lineRef} data-slot="subtitle-line" className={cn(dragEnabled && "select-none")}>
       {tokens.map((token, index) =>
         token.isWord ? (
           <span
