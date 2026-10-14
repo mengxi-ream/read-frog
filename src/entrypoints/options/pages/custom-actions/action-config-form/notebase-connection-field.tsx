@@ -20,7 +20,7 @@ import { useCallback, useEffect, useMemo } from "react"
 import { useAutosaveContext } from "@/components/form/use-autosave"
 import { Alert, AlertAction, AlertDescription, AlertTitle } from "@/components/ui/base-ui/alert"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/base-ui/avatar"
-import { Button } from "@/components/ui/base-ui/button"
+import { Button, buttonVariants } from "@/components/ui/base-ui/button"
 import { Field, FieldGroup, FieldTitle } from "@/components/ui/base-ui/field"
 import {
   Select,
@@ -50,6 +50,7 @@ import {
   validateNotebaseMappings,
 } from "@/utils/notebase/mapping"
 import { orpc } from "@/utils/orpc/client"
+import { cn } from "@/utils/styles/utils"
 import { withForm } from "./form"
 
 type NotebaseItem = NotebaseListOutput[number]
@@ -462,23 +463,18 @@ export const NotebaseConnectionField = withForm({
                 <FieldTitle>{t("tableLabel")}</FieldTitle>
                 <div className="flex items-center gap-2">
                   {isOwnedConnection && !!sanitizedConnection?.notebaseId && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      render={
-                        <a
-                          href={new URL(
-                            `/notebase/${encodeURIComponent(sanitizedConnection.notebaseId)}`,
-                            env.WXT_WEBSITE_URL,
-                          ).toString()}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        />
-                      }
+                    <a
+                      href={new URL(
+                        `/notebase/${encodeURIComponent(sanitizedConnection.notebaseId)}`,
+                        env.WXT_WEBSITE_URL,
+                      ).toString()}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
                     >
                       <IconExternalLink />
                       {t("openNotebaseAction")}
-                    </Button>
+                    </a>
                   )}
                   <Button
                     type="button"
