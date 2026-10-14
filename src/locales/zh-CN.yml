@@ -537,8 +537,9 @@ options:
       title: 字幕翻译
       description: 打开或关闭视频的翻译字幕。
     nodeTranslation:
-      title: 段落翻译
+      title: 悬停翻译
       description: 悬停或长按段落，只翻译这一段。
+      customDescription: 悬停在段落上时按下这组按键，即可翻译这一段。
     translationHub:
       title: 翻译中心
       description: 在新标签页中打开翻译中心。
@@ -549,6 +550,7 @@ options:
       title: "AI 指令"
       description: "对选中的文本运行 AI 指令。自定义指令默认没有快捷键，在这里设置即可。"
     turnedOff: "该功能已关闭，重新开启前快捷键不会生效。"
+    turnOn: "去开启"
     clash: "与「$1」的快捷键相同，请修改其中一个。"
     taken: "$1 已被「$2」使用。"
   overlayTools:
@@ -1719,6 +1721,7 @@ hotkey:
   shift: Shift
   backtick: 反引号
   clickAndHold: 点击并按住
+  custom: 自定义快捷键
 translationHub:
   searchLanguages: 搜索语言...
   noLanguagesFound: 未找到语言

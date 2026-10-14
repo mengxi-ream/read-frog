@@ -17,11 +17,12 @@ export function getActionShortcutId(actionId: string) {
 
 /**
  * Every key combination Read Frog listens for on a page. They all hear the same keystrokes, so
- * two of them on one key would both run. Paragraph translation is left out: it is a modifier
- * held while hovering, not a combination.
+ * two of them on one key would both run. Hover translation is in only while it uses a custom
+ * shortcut: its other hotkeys are a single key or a long press, not a combination.
  */
 export function getShortcutBindings(config: Config): ShortcutBinding[] {
   const { features } = config.selectionToolbar
+  const { node } = config.pageTranslation
   return [
     {
       id: "page-translation-shortcut",
@@ -48,6 +49,15 @@ export function getShortcutBindings(config: Config): ShortcutBinding[] {
       title: i18n.t("options.shortcuts.subtitlesToggle.title"),
       shortcut: config.videoSubtitles.toggleShortcut,
     },
+    ...(node.hotkey === "custom"
+      ? [
+          {
+            id: "node-translation-shortcut",
+            title: i18n.t("options.shortcuts.nodeTranslation.title"),
+            shortcut: node.shortcut,
+          },
+        ]
+      : []),
     {
       id: "translation-hub-shortcut",
       title: i18n.t("options.shortcuts.translationHub.title"),
