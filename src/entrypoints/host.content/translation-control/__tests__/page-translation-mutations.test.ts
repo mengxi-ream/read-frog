@@ -549,6 +549,7 @@ describe("pageTranslationManager mutation re-walk", () => {
       oldBox.replaceWith(newBox)
       await flushDomUpdates()
       expect(boxObserver!.observe).toHaveBeenCalledWith(newBox)
+      expect(boxObserver!.unobserve).toHaveBeenCalledWith(oldBox)
 
       await boxObserver!.triggerIntersect(newBox)
       await flushDomUpdates()
@@ -648,6 +649,67 @@ describe("pageTranslationManager mutation re-walk", () => {
       const translated = mockTranslateWalkedElement.mock.calls.map((call) => call[0])
       expect(translated).toContain(outer)
       expect(translated).toContain(nested)
+    } finally {
+      if (manager.isActive) manager.stop()
+    }
+  })
+
+  it("stops gating a unit on its old box once it gains a box of its own and is re-walked", async () => {
+    document.body.innerHTML = `<div id="bubble"><div id="message">A message that will get its own box</div></div>`
+    const bubble = document.getElementById("bubble") as HTMLElement
+    const message = document.getElementById("message") as HTMLElement
+    giveBox(bubble)
+
+    const manager = new PageTranslationManager()
+    try {
+      await manager.start()
+      await flushDomUpdates()
+      const [unitObserver, boxObserver] = intersectionObservers
+      expect(boxObserver!.observe).toHaveBeenCalledWith(bubble)
+
+      // The site switches it to display: block and puts it back.
+      giveBox(message)
+      bubble.append(message)
+      await flushDomUpdates()
+      expect(unitObserver!.observe).toHaveBeenCalledWith(message)
+
+      // Its old gate and its own box fire in the same rendering update.
+      await boxObserver!.triggerIntersect(bubble)
+      await unitObserver!.triggerIntersect(message)
+      await flushDomUpdates()
+
+      expect(mockTranslateWalkedElement.mock.calls.map((call) => call[0])).toEqual([message])
+    } finally {
+      if (manager.isActive) manager.stop()
+    }
+  })
+
+  it("counts a scrolling list inside a box-less unit when deciding whether to split it", async () => {
+    // The list shows 300px but holds 20,000px of history. Measured by its box
+    // alone, the unit would pass as short and translate whole.
+    document.body.innerHTML = `<div id="wrapper"><div id="list"><p id="first">First paragraph</p><p id="last">Last paragraph</p></div></div>`
+    const wrapper = document.getElementById("wrapper") as HTMLElement
+    const list = document.getElementById("list") as HTMLElement
+    const first = document.getElementById("first") as HTMLElement
+    const last = document.getElementById("last") as HTMLElement
+    // The mock walk labels by direct text only; the real one labels this too.
+    wrapper.setAttribute("data-read-frog-paragraph", "")
+    giveBox(list, { bottom: 300, height: 300 })
+    Object.defineProperty(list, "scrollHeight", { value: 20_000 })
+    giveBox(first)
+    giveBox(last)
+
+    const manager = new PageTranslationManager()
+    try {
+      await manager.start()
+      await flushDomUpdates()
+
+      const observed = intersectionObservers[0]!.observe.mock.calls.map((call) => call[0])
+      expect(observed).toContain(first)
+      expect(observed).toContain(last)
+      expect(observed).not.toContain(wrapper)
+      // Split, so nothing was left to gate through its boxes.
+      expect(intersectionObservers).toHaveLength(1)
     } finally {
       if (manager.isActive) manager.stop()
     }

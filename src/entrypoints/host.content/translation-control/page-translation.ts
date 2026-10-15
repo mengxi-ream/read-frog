@@ -142,9 +142,10 @@ function layoutExtent(box: Element): number {
 
 /**
  * Height used by the giant-unit split. A box-less unit is measured across the
- * boxes it renders through; its own 0×0 rect would let a tall one pass as
- * short and translate whole on the first intersection (#1881). Units with a
- * box keep their own height, zero included.
+ * boxes it renders through, counting what each lays out (a scrolling list
+ * inside it holds its whole history); its own 0×0 rect would let a tall one
+ * pass as short and translate whole on the first intersection (#1881). Units
+ * with a box keep their own height, zero included.
  */
 function renderedHeight(unit: HTMLElement): number {
   const { height } = unit.getBoundingClientRect()
@@ -155,7 +156,7 @@ function renderedHeight(unit: HTMLElement): number {
   for (const box of collectRenderedBoxes(unit)) {
     const rect = box.getBoundingClientRect()
     top = Math.min(top, rect.top)
-    bottom = Math.max(bottom, rect.bottom)
+    bottom = Math.max(bottom, rect.top + layoutExtent(box))
   }
   return bottom > top ? bottom - top : 0
 }
@@ -959,6 +960,9 @@ export class PageTranslationManager implements IPageTranslationManager {
     maxUnitHeight: number,
   ): void {
     if (hasBox(unit)) {
+      // It may have been box-less when first registered; its old gate must not
+      // translate it a second time.
+      this.pendingBoxlessUnits.delete(unit)
       observer.observe(unit)
       return
     }
@@ -1025,14 +1029,16 @@ export class PageTranslationManager implements IPageTranslationManager {
   }
 
   /**
-   * Content added under a pending box-less unit brings boxes of its own. Watch
-   * them too: a unit gated on its inner boxes would otherwise be stranded when
-   * the site replaces those boxes before they intersect. Whichever box fires,
-   * takePendingUnitsAt finds the unit by walking up from it.
+   * Content replaced under a pending box-less unit changes which boxes can fire
+   * for it. Watch the added ones: a unit gated on its inner boxes would
+   * otherwise be stranded when the site replaces them before they intersect.
+   * Whichever box fires, takePendingUnitsAt finds the unit by walking up from
+   * it. Stop watching the removed ones, so a re-rendered unit does not keep
+   * detached subtrees observed.
    */
-  private watchBoxesAddedToPendingUnit(record: MutationRecord): void {
+  private updatePendingUnitGates(record: MutationRecord): void {
     const observer = this.boxlessUnitObserver
-    if (!observer || record.addedNodes.length === 0) return
+    if (!observer || (record.addedNodes.length === 0 && record.removedNodes.length === 0)) return
     let element: Element | null =
       record.target instanceof ShadowRoot
         ? record.target.host
@@ -1043,6 +1049,10 @@ export class PageTranslationManager implements IPageTranslationManager {
       element = parentElementAcrossShadow(element)
     }
     if (!element) return
+    for (const node of record.removedNodes) {
+      if (!isHTMLElement(node)) continue
+      for (const removed of deepQueryAllSelector(node, () => true)) observer.unobserve(removed)
+    }
     for (const node of record.addedNodes) {
       if (!(node instanceof Element)) continue
       for (const box of hasBox(node) ? [node] : collectRenderedBoxes(node)) observer.observe(box)
@@ -1438,7 +1448,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     const traversalRecords = revealedRoot ? [] : hostRecords
     for (const rec of traversalRecords) {
       if (rec.type === "childList") {
-        this.watchBoxesAddedToPendingUnit(rec)
+        this.updatePendingUnitGates(rec)
         // A node added inside an already-registered bilingual source is that
         // source's business, never a translation unit of its own. Walking it as
         // a fresh walk root recomputes "top-level paragraph" relative to the
