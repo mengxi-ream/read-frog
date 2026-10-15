@@ -2208,6 +2208,8 @@ describe("paragraph unit observation helpers", () => {
     const outer = document.createElement("div")
     const gate = document.createElement("span")
     const otherUnit = document.createElement("section")
+    const formerUnit = document.createElement("div")
+    outer.append(gate)
     const triggers = new Map<HTMLElement, HTMLElement>()
 
     registerIntersectionTrigger(triggers, gate, outer)
@@ -2218,9 +2220,17 @@ describe("paragraph unit observation helpers", () => {
     registerIntersectionTrigger(triggers, gate, otherUnit)
     expect(triggers.get(gate)).toBe(outer)
 
-    // Once the gate is observed as a unit of its own, the hop to the stale
-    // (possibly detached) outer unit has to go — otherwise a hit on the element
-    // on screen would translate something else.
+    // Reordered inside that same unit: the outer unit is still the right target,
+    // and dropping the mapping here would leave the outer unit's own text with no
+    // target left at all.
+    registerIntersectionTrigger(triggers, gate, gate)
+    expect(triggers.get(gate)).toBe(outer)
+
+    // Once the element is observed as its own unit and no longer sits inside the
+    // mapped unit, the stale hop to the (possibly detached) old unit has to go —
+    // otherwise a hit on the element on screen would translate something else.
+    triggers.clear()
+    registerIntersectionTrigger(triggers, gate, formerUnit)
     registerIntersectionTrigger(triggers, gate, gate)
     expect(triggers.has(gate)).toBe(false)
   })

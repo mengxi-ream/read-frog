@@ -172,7 +172,16 @@ export function registerIntersectionTrigger(
   unit: HTMLElement,
 ): void {
   if (trigger === unit) {
-    triggers.delete(unit)
+    // Watching this element for itself — but only drop the mapping when it has
+    // really left the unit it gates. A proxy merely reordered inside the same
+    // still-connected boxless unit keeps the outer unit as its target:
+    // translating the outer covers this element's text too, while dropping the
+    // mapping would translate the child alone and leave the outer unit's own
+    // text with no target at all.
+    const mappedUnit = triggers.get(trigger)
+    if (mappedUnit && !mappedUnit.contains(trigger)) {
+      triggers.delete(trigger)
+    }
     return
   }
   if (!triggers.has(trigger)) {
