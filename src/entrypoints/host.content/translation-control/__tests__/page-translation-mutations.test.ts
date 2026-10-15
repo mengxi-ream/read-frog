@@ -558,6 +558,43 @@ describe("pageTranslationManager mutation re-walk", () => {
     }
   })
 
+  it("does not gate display: contents units on a scrolling list whose content is too tall", async () => {
+    // The list's own box is a 400px viewport over 10,000px of history. Taking
+    // every unit in it on its first intersection would enqueue the history at
+    // once, so each unit falls back to its own boxes (or direct observation).
+    document.body.innerHTML = `
+      <div id="list">
+        <div id="plain">An older message in plain text</div>
+        <div id="rich">A newer message with <b id="bold">formatting</b></div>
+      </div>
+    `
+    const list = document.getElementById("list") as HTMLElement
+    const plain = document.getElementById("plain") as HTMLElement
+    const rich = document.getElementById("rich") as HTMLElement
+    const bold = document.getElementById("bold") as HTMLElement
+    giveBox(list, { bottom: 400, height: 400 })
+    Object.defineProperty(list, "scrollHeight", { value: 10_000 })
+    giveBox(bold)
+
+    const manager = new PageTranslationManager()
+    try {
+      await manager.start()
+      await flushDomUpdates()
+
+      const [unitObserver, boxObserver] = intersectionObservers
+      expect(boxObserver!.observe).not.toHaveBeenCalledWith(list)
+      expect(boxObserver!.observe).toHaveBeenCalledWith(bold)
+      expect(unitObserver!.observe).toHaveBeenCalledWith(plain)
+
+      await boxObserver!.triggerIntersect(bold)
+      await flushDomUpdates()
+
+      expect(mockTranslateWalkedElement.mock.calls.map((call) => call[0])).toEqual([rich])
+    } finally {
+      if (manager.isActive) manager.stop()
+    }
+  })
+
   it("splits a tall display: contents unit by the extent of its boxes", async () => {
     // Its own rect is 0×0, but what it renders spans 5000px — past the split
     // cap, so its paragraphs must be gated one by one instead of all at once.

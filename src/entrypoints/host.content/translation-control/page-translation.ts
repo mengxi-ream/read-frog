@@ -131,6 +131,15 @@ function findLayoutBox(element: Element): Element | null {
 }
 
 /**
+ * How tall everything laid out in `box` is. A scroll container's own box is
+ * only its viewport, but all the units inside it are taken together when it
+ * intersects, so its scroll extent is what has to fit a split-sized unit.
+ */
+function layoutExtent(box: Element): number {
+  return Math.max(box.getBoundingClientRect().height, box.scrollHeight)
+}
+
+/**
  * Height used by the giant-unit split. A box-less unit is measured across the
  * boxes it renders through; its own 0×0 rect would let a tall one pass as
  * short and translate whole on the first intersection (#1881). Units with a
@@ -938,8 +947,9 @@ export class PageTranslationManager implements IPageTranslationManager {
    * (`display: contents`; Telegram web wraps every message in one) can never
    * intersect, so it would never translate. It is gated on boxes instead:
    * preferably the box its content is laid out in, which covers all of it,
-   * plain text included; when that box is taller than a split-sized unit, the
-   * unit's own inner boxes. A unit with neither keeps the direct observation.
+   * plain text included; when what that box lays out is taller than a
+   * split-sized unit (a long column, a scrolling message list), the unit's own
+   * inner boxes. A unit with neither keeps the direct observation.
    */
   private observeUnit(
     observer: IntersectionObserver,
@@ -953,7 +963,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     }
     const layoutBox = findLayoutBox(unit)
     const boxes =
-      layoutBox && layoutBox.getBoundingClientRect().height <= maxUnitHeight
+      layoutBox && layoutExtent(layoutBox) <= maxUnitHeight
         ? [layoutBox]
         : collectRenderedBoxes(unit)
     if (boxes.length === 0) {
@@ -981,7 +991,7 @@ export class PageTranslationManager implements IPageTranslationManager {
   /**
    * The pending box-less units an intersecting box speaks for: those it renders
    * part of (its ancestors) and those laid out inside it (its descendants; a
-   * layout box is only watched when it is no taller than a split-sized unit).
+   * layout box is only watched when what it lays out fits a split-sized unit).
    * Both are read from the live DOM, through shadow roots, rather than from a
    * box→unit map recorded at observe time, so the answer stays right after the
    * site moves nodes or the walk re-registers one as a unit of its own.
