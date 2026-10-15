@@ -16,7 +16,11 @@ import {
   type BilingualTranslationState,
   type VirtualParagraphGroup,
 } from "@/utils/host/translate/core/translation-state"
-import { PageTranslationManager } from "../page-translation"
+import {
+  measureUnitHeight,
+  PageTranslationManager,
+  registerIntersectionTrigger,
+} from "../page-translation"
 
 const {
   mockDeepQueryTopLevelSelector,
@@ -369,6 +373,51 @@ describe("pageTranslationManager mutation re-walk", () => {
       )
     } finally {
       if (manager.isActive) manager.stop()
+    }
+  })
+
+  it("splits a tall boxless paragraph before handing out a proxy for it", async () => {
+    document.body.innerHTML = `
+      <div id="host"><b id="decor"></b><span id="inner">Message body</span></div>
+    `
+    const host = document.getElementById("host") as HTMLElement
+    const decor = document.getElementById("decor") as HTMLElement
+    const inner = document.getElementById("inner") as HTMLElement
+
+    // The real walker labels a container whose children are inline; the mock in
+    // this file labels by tag / direct text only, so state it explicitly.
+    host.setAttribute("data-read-frog-paragraph", "")
+
+    // `display: contents` shape: the unit has no box of its own, its content
+    // box is tall, and its descendants do have boxes.
+    host.getBoundingClientRect = () => ({ height: 0 }) as DOMRect
+    Object.defineProperty(host, "getClientRects", { value: () => [] })
+    decor.getBoundingClientRect = () => ({ height: 3200 }) as DOMRect
+    Object.defineProperty(decor, "getClientRects", { value: () => [{ width: 10, height: 3200 }] })
+    inner.getBoundingClientRect = () => ({ height: 20 }) as DOMRect
+    Object.defineProperty(inner, "getClientRects", { value: () => [{ width: 120, height: 20 }] })
+
+    const originalCreateRange = document.createRange.bind(document)
+    document.createRange = () =>
+      ({
+        getBoundingClientRect: () => ({ height: 3200 }),
+        selectNodeContents: () => {},
+      }) as unknown as Range
+
+    const manager = new PageTranslationManager()
+    try {
+      await manager.start()
+      await flushDomUpdates()
+
+      const observed = intersectionObservers[0]!.observe.mock.calls.map((call) => call[0])
+      // Tall enough to be split: the inner paragraph is observed as its own unit
+      // rather than one proxy standing in for the whole boxless container, which
+      // would translate all of its nested paragraphs off a single intersection.
+      expect(observed).toContain(inner)
+      expect(observed).not.toContain(decor)
+    } finally {
+      if (manager.isActive) manager.stop()
+      document.createRange = originalCreateRange
     }
   })
 
@@ -2115,5 +2164,64 @@ describe("pageTranslationManager mutation re-walk", () => {
 
     manager.stop()
     document.body.removeAttribute("data-read-frog-paragraph")
+  })
+})
+
+describe("paragraph unit observation helpers", () => {
+  beforeEach(() => {
+    document.head.innerHTML = ""
+    document.body.innerHTML = ""
+  })
+
+  it("measures a boxless unit through its content box instead of reporting 0", () => {
+    const boxless = document.createElement("div")
+    const boxed = document.createElement("p")
+    document.body.append(boxless, boxed)
+
+    // jsdom has no layout, so every element reports 0 unless stubbed — which is
+    // exactly what a `display: contents` wrapper reports in a real browser.
+    boxless.getBoundingClientRect = () => ({ height: 0 }) as DOMRect
+    boxed.getBoundingClientRect = () => ({ height: 3200 }) as DOMRect
+
+    const originalCreateRange = document.createRange.bind(document)
+    document.createRange = () =>
+      ({
+        getBoundingClientRect: () => ({ height: 3200 }),
+        selectNodeContents: () => {},
+      }) as unknown as Range
+    try {
+      // The tall content box is what decides the giant split, not the unit's own
+      // empty box — a boxless article wrapper must not look "short".
+      expect(measureUnitHeight(boxless)).toBe(3200)
+      // Boxed units never pay for the Range measurement.
+      expect(measureUnitHeight(boxed)).toBe(3200)
+    } finally {
+      document.createRange = originalCreateRange
+    }
+
+    // Unmeasurable (jsdom's Range has no getBoundingClientRect) keeps the old
+    // behavior rather than throwing.
+    expect(measureUnitHeight(boxless)).toBe(0)
+  })
+
+  it("keeps proxy bookkeeping honest when a trigger becomes a unit", () => {
+    const outer = document.createElement("div")
+    const gate = document.createElement("span")
+    const otherUnit = document.createElement("section")
+    const triggers = new Map<HTMLElement, HTMLElement>()
+
+    registerIntersectionTrigger(triggers, gate, outer)
+    expect(triggers.get(gate)).toBe(outer)
+
+    // A second boxless unit claiming the same gate must not steal it: the first
+    // unit's translation already covers the text inside.
+    registerIntersectionTrigger(triggers, gate, otherUnit)
+    expect(triggers.get(gate)).toBe(outer)
+
+    // Once the gate is observed as a unit of its own, the hop to the stale
+    // (possibly detached) outer unit has to go — otherwise a hit on the element
+    // on screen would translate something else.
+    registerIntersectionTrigger(triggers, gate, gate)
+    expect(triggers.has(gate)).toBe(false)
   })
 })

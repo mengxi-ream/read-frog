@@ -125,6 +125,61 @@ function findIntersectionTrigger(unit: HTMLElement): HTMLElement {
   return unit
 }
 
+/**
+ * Layout height of a paragraph unit, measured through its content box when the
+ * unit itself has no box.
+ *
+ * A `display: contents` wrapper reports 0 for `getBoundingClientRect()`, which
+ * would make every boxless unit look like a short one to the giant-unit check
+ * in observeParagraphUnit — and a tall boxless article wrapper would then be
+ * translated whole off a single descendant's intersection, exactly the burst
+ * that check exists to prevent (#1881). A Range over the unit's contents is the
+ * only thing with a box here, so it supplies the extent that decides the split.
+ * Boxed units never pay for it, and an unmeasurable one (jsdom, no layout) keeps
+ * the previous behavior.
+ */
+export function measureUnitHeight(unit: HTMLElement): number {
+  const ownHeight = unit.getBoundingClientRect().height
+  if (ownHeight > 0) return ownHeight
+
+  try {
+    const range = unit.ownerDocument.createRange()
+    range.selectNodeContents(unit)
+    const contentHeight = range.getBoundingClientRect().height
+    return contentHeight > 0 ? contentHeight : ownHeight
+  } catch {
+    return ownHeight
+  }
+}
+
+/**
+ * Proxy bookkeeping for one observation.
+ *
+ * `trigger` is the element actually handed to the observer for `unit`, which is
+ * the unit itself whenever it has a box. Two rules:
+ *  - a unit that has its own box must NOT stay registered as a proxy for an
+ *    earlier boxless unit (the callback resolves the map first, so a stale entry
+ *    would translate that — often detached — unit instead of the one on screen);
+ *  - a trigger already promised to another unit keeps the first claim, since the
+ *    outer unit's translation covers the inner one's text anyway.
+ *
+ * Exported for tests: the reparenting sequence that produces a stale entry needs
+ * a mutation-driven re-walk, which is impractical to stage in jsdom.
+ */
+export function registerIntersectionTrigger(
+  triggers: Map<HTMLElement, HTMLElement>,
+  trigger: HTMLElement,
+  unit: HTMLElement,
+): void {
+  if (trigger === unit) {
+    triggers.delete(unit)
+    return
+  }
+  if (!triggers.has(trigger)) {
+    triggers.set(trigger, unit)
+  }
+}
+
 interface IPageTranslationManager {
   /**
    * Indicates whether the page translation is currently active
@@ -869,10 +924,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     const maxUnitHeight =
       Math.max(window.innerHeight, GIANT_PARAGRAPH_SPLIT_MIN_VIEWPORT_PX) *
       GIANT_PARAGRAPH_SPLIT_VIEWPORT_MULTIPLIER
-    if (
-      depth >= GIANT_PARAGRAPH_MAX_SPLIT_DEPTH ||
-      element.getBoundingClientRect().height <= maxUnitHeight
-    ) {
+    if (depth >= GIANT_PARAGRAPH_MAX_SPLIT_DEPTH || measureUnitHeight(element) <= maxUnitHeight) {
       this.observeUnit(observer, element)
       return
     }
@@ -936,9 +988,7 @@ export class PageTranslationManager implements IPageTranslationManager {
    */
   private observeUnit(observer: IntersectionObserver, unit: HTMLElement): void {
     const trigger = findIntersectionTrigger(unit)
-    if (trigger !== unit && !this.intersectionTriggers.has(trigger)) {
-      this.intersectionTriggers.set(trigger, unit)
-    }
+    registerIntersectionTrigger(this.intersectionTriggers, trigger, unit)
     observer.observe(trigger)
   }
 
