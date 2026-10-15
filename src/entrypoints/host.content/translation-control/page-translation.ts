@@ -87,6 +87,58 @@ interface RetranslationBudget {
   passes: number
 }
 
+/**
+ * Whether IntersectionObserver can see `element` at all. A `display: contents`
+ * element generates no box: its rect is 0×0 and the observer reports it once
+ * as not intersecting, then never again.
+ */
+function hasBox(element: Element): boolean {
+  return element.getClientRects().length > 0
+}
+
+/**
+ * The boxes a box-less element is rendered through: its nearest descendants
+ * that have a box, reached through box-less descendants only.
+ */
+function collectRenderedBoxes(element: Element, boxes: Element[] = []): Element[] {
+  for (const child of element.children) {
+    if (hasBox(child)) boxes.push(child)
+    else collectRenderedBoxes(child, boxes)
+  }
+  return boxes
+}
+
+/**
+ * The box a box-less element's content is laid out in: its nearest ancestor
+ * that has a box.
+ */
+function findLayoutBox(element: Element): Element | null {
+  for (let ancestor = element.parentElement; ancestor; ancestor = ancestor.parentElement) {
+    if (hasBox(ancestor)) return ancestor
+  }
+  return null
+}
+
+/**
+ * Height used by the giant-unit split. A box-less unit is measured across the
+ * boxes it renders through; its own 0×0 rect would let a tall one pass as
+ * short and translate whole on the first intersection (#1881). Units with a
+ * box keep their own height, zero included.
+ */
+function renderedHeight(unit: HTMLElement): number {
+  const { height } = unit.getBoundingClientRect()
+  if (height > 0 || hasBox(unit)) return height
+
+  let top = Infinity
+  let bottom = -Infinity
+  for (const box of collectRenderedBoxes(unit)) {
+    const rect = box.getBoundingClientRect()
+    top = Math.min(top, rect.top)
+    bottom = Math.max(bottom, rect.bottom)
+  }
+  return bottom > top ? bottom - top : 0
+}
+
 interface IPageTranslationManager {
   /**
    * Indicates whether the page translation is currently active
@@ -153,6 +205,13 @@ export class PageTranslationManager implements IPageTranslationManager {
   /** Non-null while a start() is between its guard and activation; see start(). */
   private pendingStart: symbol | null = null
   private intersectionObserver: IntersectionObserver | null = null
+  /**
+   * Gates box-less units on the boxes they render through (see observeUnit).
+   * Created for the first such unit, so most pages never get one.
+   */
+  private boxlessUnitObserver: IntersectionObserver | null = null
+  /** Box-less units still waiting for one of their boxes to intersect. */
+  private pendingBoxlessUnits = new WeakSet<HTMLElement>()
   private mutationObservers: MutationObserver[] = []
   private observedMutationRoots = new WeakSet<Node>()
   private walkId: string | null = null
@@ -372,25 +431,7 @@ export class PageTranslationManager implements IPageTranslationManager {
             targets.push(entry.target)
           }
         }
-        if (targets.length === 0) return
-        void (async () => {
-          // One config read per callback batch — a dense first intersection
-          // can deliver hundreds of entries at once (#1881).
-          const currentConfig = await getLocalConfig()
-          if (!currentConfig) {
-            logger.error("Global config is not initialized")
-            return
-          }
-          if (this.walkId !== walkId) return
-          // One shared pacer bounds the batch's synchronous expansion work;
-          // the liveness check stops paced expansion promptly if the user
-          // cancels mid-flight (#1881).
-          const pacer = createWorkPacer()
-          const isWalkCurrent = () => this.walkId === walkId
-          for (const target of targets) {
-            void translateWalkedElement(target, walkId, currentConfig, false, pacer, isWalkCurrent)
-          }
-        })()
+        this.translateIntersectedUnits(targets, walkId)
       }, this.intersectionOptions)
 
       // Observe mutations BEFORE the chunked walk: page JS runs between walk
@@ -538,6 +579,11 @@ export class PageTranslationManager implements IPageTranslationManager {
       this.intersectionObserver.disconnect()
       this.intersectionObserver = null
     }
+    if (this.boxlessUnitObserver) {
+      this.boxlessUnitObserver.disconnect()
+      this.boxlessUnitObserver = null
+    }
+    this.pendingBoxlessUnits = new WeakSet()
     this.mutationObservers.forEach((observer) => observer.disconnect())
     this.mutationObservers = []
     this.observedMutationRoots = new WeakSet()
@@ -819,11 +865,8 @@ export class PageTranslationManager implements IPageTranslationManager {
     const maxUnitHeight =
       Math.max(window.innerHeight, GIANT_PARAGRAPH_SPLIT_MIN_VIEWPORT_PX) *
       GIANT_PARAGRAPH_SPLIT_VIEWPORT_MULTIPLIER
-    if (
-      depth >= GIANT_PARAGRAPH_MAX_SPLIT_DEPTH ||
-      element.getBoundingClientRect().height <= maxUnitHeight
-    ) {
-      observer.observe(element)
+    if (depth >= GIANT_PARAGRAPH_MAX_SPLIT_DEPTH || renderedHeight(element) <= maxUnitHeight) {
+      this.observeUnit(observer, element, walkId, maxUnitHeight)
       return
     }
 
@@ -838,7 +881,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     )
     if (innerTopLevelParagraphs.length === 0) {
       // Unsplittable giant (no nested paragraphs) — observe it whole.
-      observer.observe(element)
+      this.observeUnit(observer, element, walkId, maxUnitHeight)
       return
     }
     if (
@@ -854,7 +897,7 @@ export class PageTranslationManager implements IPageTranslationManager {
       element !== element.ownerDocument.body &&
       !canSplitGiantWithoutStrandingOwnText(element)
     ) {
-      observer.observe(element)
+      this.observeUnit(observer, element, walkId, maxUnitHeight)
       return
     }
     if (!canSplitParagraphIntoDescendants(element, innerTopLevelParagraphs, config)) {
@@ -869,12 +912,105 @@ export class PageTranslationManager implements IPageTranslationManager {
       // rather than here: bilingual can interleave a wrapper at any boundary,
       // while translationOnly has to cut the units apart into whole nodes and
       // therefore keeps per-span observation for the plans it cannot express.
-      observer.observe(element)
+      this.observeUnit(observer, element, walkId, maxUnitHeight)
       return
     }
     for (const paragraph of innerTopLevelParagraphs) {
       this.observeParagraphUnit(paragraph, walkId, config, depth + 1)
     }
+  }
+
+  /**
+   * Hand one paragraph unit to the viewport gate.
+   *
+   * A unit with a box is observed directly, as before. A box-less unit
+   * (`display: contents`; Telegram web wraps every message in one) can never
+   * intersect, so it would never translate. It is gated on boxes instead:
+   * preferably the box its content is laid out in, which covers all of it,
+   * plain text included; when that box is taller than a split-sized unit, the
+   * unit's own inner boxes. A unit with neither keeps the direct observation.
+   */
+  private observeUnit(
+    observer: IntersectionObserver,
+    unit: HTMLElement,
+    walkId: string,
+    maxUnitHeight: number,
+  ): void {
+    if (hasBox(unit)) {
+      observer.observe(unit)
+      return
+    }
+    const layoutBox = findLayoutBox(unit)
+    const boxes =
+      layoutBox && layoutBox.getBoundingClientRect().height <= maxUnitHeight
+        ? [layoutBox]
+        : collectRenderedBoxes(unit)
+    if (boxes.length === 0) {
+      observer.observe(unit)
+      return
+    }
+    this.pendingBoxlessUnits.add(unit)
+    const boxlessUnitObserver = this.getBoxlessUnitObserver(walkId)
+    for (const box of boxes) boxlessUnitObserver.observe(box)
+  }
+
+  private getBoxlessUnitObserver(walkId: string): IntersectionObserver {
+    this.boxlessUnitObserver ??= new IntersectionObserver((entries, observer) => {
+      const units: HTMLElement[] = []
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue
+        observer.unobserve(entry.target)
+        units.push(...this.takePendingUnitsAt(entry.target))
+      }
+      this.translateIntersectedUnits(units, walkId)
+    }, this.intersectionOptions)
+    return this.boxlessUnitObserver
+  }
+
+  /**
+   * The pending box-less units an intersecting box speaks for: those it renders
+   * part of (its ancestors) and those laid out inside it (its descendants; a
+   * layout box is only watched when it is no taller than a split-sized unit).
+   * Both are read from the live DOM rather than from a box→unit map recorded at
+   * observe time, so the answer stays right after the site moves nodes or the
+   * walk re-registers one as a unit of its own. delete() lets each unit go once.
+   */
+  private takePendingUnitsAt(box: Element): HTMLElement[] {
+    const units: HTMLElement[] = []
+    const take = (element: Element) => {
+      if (
+        isHTMLElement(element) &&
+        this.pendingBoxlessUnits.delete(element) &&
+        !element.closest(`.${CONTENT_WRAPPER_CLASS}`)
+      ) {
+        units.push(element)
+      }
+    }
+    for (let element = box.parentElement; element; element = element.parentElement) take(element)
+    box.querySelectorAll("[data-read-frog-paragraph]").forEach(take)
+    return units
+  }
+
+  private translateIntersectedUnits(units: HTMLElement[], walkId: string): void {
+    if (units.length === 0) return
+    void (async () => {
+      // One config read per callback batch — a dense first intersection
+      // can deliver hundreds of entries at once (#1881).
+      const currentConfig = await getLocalConfig()
+      if (!currentConfig) {
+        logger.error("Global config is not initialized")
+        return
+      }
+      if (this.walkId !== walkId) return
+      // One shared pacer bounds the batch's synchronous expansion work;
+      // the liveness check stops paced expansion promptly if the user
+      // cancels mid-flight (#1881).
+      const pacer = createWorkPacer()
+      const isWalkCurrent = () => this.walkId === walkId
+      for (const unit of units) {
+        void translateWalkedElement(unit, walkId, currentConfig, false, pacer, isWalkCurrent)
+      }
+    })()
   }
 
   /**

@@ -145,13 +145,13 @@ class MockIntersectionObserver {
   }
 
   async triggerIntersect(target: Element): Promise<void> {
+    await this.triggerIntersectAll([target])
+  }
+
+  /** Deliver several intersections in one callback batch, as the browser does. */
+  async triggerIntersectAll(targets: Element[]): Promise<void> {
     this.callback(
-      [
-        {
-          isIntersecting: true,
-          target,
-        } as IntersectionObserverEntry,
-      ],
+      targets.map((target) => ({ isIntersecting: true, target }) as IntersectionObserverEntry),
       this as unknown as IntersectionObserver,
     )
   }
@@ -161,6 +161,25 @@ async function flushDomUpdates(): Promise<void> {
   await Promise.resolve()
   await new Promise((resolve) => setTimeout(resolve, 0))
   await Promise.resolve()
+}
+
+/**
+ * jsdom has no layout: every element reports an empty rect list, which is
+ * exactly how a `display: contents` element looks in a real browser. Give an
+ * element a box so it reads as rendered.
+ */
+function giveBox(element: Element, rect: Partial<DOMRect> = {}): void {
+  const box = {
+    top: 0,
+    bottom: 20,
+    left: 0,
+    right: 100,
+    width: 100,
+    height: 20,
+    ...rect,
+  } as DOMRect
+  element.getClientRects = () => [box] as unknown as DOMRectList
+  element.getBoundingClientRect = () => box
 }
 
 function deepQueryTopLevelSelectorImpl(
@@ -330,6 +349,182 @@ describe("pageTranslationManager mutation re-walk", () => {
     } finally {
       if (manager.isActive) manager.stop()
       readerRoot.remove()
+    }
+  })
+
+  // A `display: contents` unit has no box, so observing it directly never
+  // fires and the unit never translates (Telegram web wraps every message in
+  // one). In these tests the unit is left box-less and its surroundings get boxes.
+  it("gates display: contents units on the box their content is laid out in", async () => {
+    document.body.innerHTML = `
+      <div id="plain-bubble"><div id="plain">Thanks, I will test it this afternoon.</div></div>
+      <div id="rich-bubble"><div id="rich">Hey there, <b id="bold">welcome</b> to the team!</div></div>
+    `
+    const plainBubble = document.getElementById("plain-bubble") as HTMLElement
+    const richBubble = document.getElementById("rich-bubble") as HTMLElement
+    const plain = document.getElementById("plain") as HTMLElement
+    const rich = document.getElementById("rich") as HTMLElement
+    const bold = document.getElementById("bold") as HTMLElement
+    giveBox(plainBubble)
+    giveBox(richBubble)
+    giveBox(bold)
+
+    const manager = new PageTranslationManager()
+    try {
+      await manager.start()
+      await flushDomUpdates()
+
+      const [unitObserver, boxObserver] = intersectionObservers
+      expect(unitObserver!.observe).not.toHaveBeenCalledWith(plain)
+      expect(unitObserver!.observe).not.toHaveBeenCalledWith(rich)
+      // Plain text has no box of its own; the bubble it is laid out in covers it.
+      expect(boxObserver!.observe).toHaveBeenCalledWith(plainBubble)
+      expect(boxObserver!.observe).toHaveBeenCalledWith(richBubble)
+
+      await boxObserver!.triggerIntersectAll([plainBubble, richBubble])
+      await flushDomUpdates()
+      // A box that intersects again has nothing left to hand over.
+      await boxObserver!.triggerIntersect(richBubble)
+      await flushDomUpdates()
+
+      const translated = mockTranslateWalkedElement.mock.calls.map((call) => call[0])
+      expect(translated).toEqual([plain, rich])
+      expect(mockTranslateWalkedElement).toHaveBeenCalledWith(
+        plain,
+        "walk-id",
+        DEFAULT_CONFIG,
+        false,
+        expect.anything(),
+        expect.anything(),
+      )
+    } finally {
+      if (manager.isActive) manager.stop()
+    }
+  })
+
+  it("gates a display: contents unit on its own boxes when its layout box is too tall", async () => {
+    // The column holds the whole page, so its intersection says nothing about
+    // where this message is. The message's inline boxes do.
+    document.body.innerHTML = `<section id="column"><div id="message">Hey there, <b id="first">welcome</b> to the <i id="second">community</i>!</div></section>`
+    const column = document.getElementById("column") as HTMLElement
+    const message = document.getElementById("message") as HTMLElement
+    const first = document.getElementById("first") as HTMLElement
+    const second = document.getElementById("second") as HTMLElement
+    giveBox(column, { bottom: 100_000, height: 100_000 })
+    giveBox(first)
+    giveBox(second)
+
+    const manager = new PageTranslationManager()
+    try {
+      await manager.start()
+      await flushDomUpdates()
+
+      const boxObserver = intersectionObservers[1]
+      expect(boxObserver!.observe).not.toHaveBeenCalledWith(column)
+      expect(boxObserver!.observe).toHaveBeenCalledWith(first)
+      expect(boxObserver!.observe).toHaveBeenCalledWith(second)
+
+      // Boxes on one line usually intersect in the same batch.
+      await boxObserver!.triggerIntersectAll([first, second])
+      await flushDomUpdates()
+
+      expect(mockTranslateWalkedElement).toHaveBeenCalledTimes(1)
+      expect(mockTranslateWalkedElement.mock.calls[0]![0]).toBe(message)
+    } finally {
+      if (manager.isActive) manager.stop()
+    }
+  })
+
+  it("still translates a display: contents unit after a box inside it is re-walked as a unit of its own", async () => {
+    document.body.innerHTML = `<div id="bubble"><div id="message">Hey there, <b id="first">welcome</b>!</div></div>`
+    const bubble = document.getElementById("bubble") as HTMLElement
+    const message = document.getElementById("message") as HTMLElement
+    const first = document.getElementById("first") as HTMLElement
+    giveBox(bubble)
+    giveBox(first)
+
+    const manager = new PageTranslationManager()
+    try {
+      await manager.start()
+      await flushDomUpdates()
+
+      const [unitObserver, boxObserver] = intersectionObservers
+      expect(boxObserver!.observe).toHaveBeenCalledWith(bubble)
+
+      // Re-inserting a box before it was ever seen makes the mutation walk
+      // register it as a unit too. That must not take the message's gate away.
+      message.append(first)
+      await flushDomUpdates()
+      expect(unitObserver!.observe).toHaveBeenCalledWith(first)
+
+      await unitObserver!.triggerIntersect(first)
+      await boxObserver!.triggerIntersect(bubble)
+      await flushDomUpdates()
+
+      const translated = mockTranslateWalkedElement.mock.calls.map((call) => call[0])
+      expect(translated).toContain(first)
+      expect(translated).toContain(message)
+    } finally {
+      if (manager.isActive) manager.stop()
+    }
+  })
+
+  it("translates the display: contents unit the site rebuilt, not the one it removed", async () => {
+    document.body.innerHTML = `<div id="bubble"><div id="old">Old <b id="first">welcome</b></div></div>`
+    const bubble = document.getElementById("bubble") as HTMLElement
+    const oldMessage = document.getElementById("old") as HTMLElement
+    const first = document.getElementById("first") as HTMLElement
+    giveBox(bubble)
+    giveBox(first)
+
+    const manager = new PageTranslationManager()
+    try {
+      await manager.start()
+      await flushDomUpdates()
+      const boxObserver = intersectionObservers[1]
+
+      // The site rebuilds the message around the same box before it is seen.
+      const newMessage = document.createElement("div")
+      newMessage.append("New ", first)
+      oldMessage.replaceWith(newMessage)
+      await flushDomUpdates()
+
+      await boxObserver!.triggerIntersect(bubble)
+      await flushDomUpdates()
+
+      const translated = mockTranslateWalkedElement.mock.calls.map((call) => call[0])
+      expect(translated).toContain(newMessage)
+      expect(translated).not.toContain(oldMessage)
+    } finally {
+      if (manager.isActive) manager.stop()
+    }
+  })
+
+  it("splits a tall display: contents unit by the extent of its boxes", async () => {
+    // Its own rect is 0×0, but what it renders spans 5000px — past the split
+    // cap, so its paragraphs must be gated one by one instead of all at once.
+    document.body.innerHTML = `<div id="wrapper"><p id="top">First paragraph</p><p id="bottom">Last paragraph</p></div>`
+    const wrapper = document.getElementById("wrapper") as HTMLElement
+    const top = document.getElementById("top") as HTMLElement
+    const bottom = document.getElementById("bottom") as HTMLElement
+    // The mock walk labels by direct text only; the real one labels this too.
+    wrapper.setAttribute("data-read-frog-paragraph", "")
+    giveBox(top, { top: 0, bottom: 20 })
+    giveBox(bottom, { top: 5000, bottom: 5020 })
+
+    const manager = new PageTranslationManager()
+    try {
+      await manager.start()
+      await flushDomUpdates()
+
+      const observed = intersectionObservers[0]!.observe.mock.calls.map((call) => call[0])
+      expect(observed).toContain(top)
+      expect(observed).toContain(bottom)
+      expect(observed).not.toContain(wrapper)
+      // Split, so nothing was left to gate through its boxes.
+      expect(intersectionObservers).toHaveLength(1)
+    } finally {
+      if (manager.isActive) manager.stop()
     }
   })
 
