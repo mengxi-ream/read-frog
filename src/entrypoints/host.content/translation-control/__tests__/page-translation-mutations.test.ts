@@ -78,7 +78,8 @@ vi.mock("@/utils/host/dom/filter", () => ({
     node instanceof HTMLElement && node.classList.contains("read-frog-translated-content-wrapper"),
 }))
 
-vi.mock("@/utils/host/dom/find", () => ({
+vi.mock("@/utils/host/dom/find", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/utils/host/dom/find")>()),
   deepQueryTopLevelSelector: mockDeepQueryTopLevelSelector,
 }))
 
@@ -590,6 +591,63 @@ describe("pageTranslationManager mutation re-walk", () => {
       await flushDomUpdates()
 
       expect(mockTranslateWalkedElement.mock.calls.map((call) => call[0])).toEqual([rich])
+    } finally {
+      if (manager.isActive) manager.stop()
+    }
+  })
+
+  it("falls back to a box inside a display: contents shadow host when the layout box is too tall", async () => {
+    document.body.innerHTML = `<section id="column"><div id="message">Hello <span id="chip"></span></div></section>`
+    const message = document.getElementById("message") as HTMLElement
+    const chip = document.getElementById("chip") as HTMLElement
+    // The chip is box-less too; what it renders lives in its shadow tree.
+    chip.attachShadow({ mode: "open" }).innerHTML = `<b id="inner">world</b>`
+    const inner = chip.shadowRoot!.getElementById("inner") as HTMLElement
+    giveBox(document.getElementById("column")!, { bottom: 100_000, height: 100_000 })
+    giveBox(inner)
+
+    const manager = new PageTranslationManager()
+    try {
+      await manager.start()
+      await flushDomUpdates()
+
+      const boxObserver = intersectionObservers[1]
+      expect(boxObserver!.observe).toHaveBeenCalledWith(inner)
+
+      await boxObserver!.triggerIntersect(inner)
+      await flushDomUpdates()
+
+      expect(mockTranslateWalkedElement.mock.calls.map((call) => call[0])).toContain(message)
+    } finally {
+      if (manager.isActive) manager.stop()
+    }
+  })
+
+  it("takes every pending unit laid out in a shared box, nested ones included", async () => {
+    // The inner unit sits at the top of a shadow root inside the outer one, so
+    // both are top-level units, and both are laid out in the same bubble.
+    document.body.innerHTML = `<div id="bubble"><div id="outer">Outer text <span id="host"></span></div></div>`
+    const bubble = document.getElementById("bubble") as HTMLElement
+    const outer = document.getElementById("outer") as HTMLElement
+    const host = document.getElementById("host") as HTMLElement
+    host.attachShadow({ mode: "open" }).innerHTML = `<div id="nested">Nested text</div>`
+    const nested = host.shadowRoot!.getElementById("nested") as HTMLElement
+    giveBox(bubble)
+
+    const manager = new PageTranslationManager()
+    try {
+      await manager.start()
+      await flushDomUpdates()
+
+      const boxObserver = intersectionObservers[1]
+      expect(boxObserver!.observe).toHaveBeenCalledWith(bubble)
+
+      await boxObserver!.triggerIntersect(bubble)
+      await flushDomUpdates()
+
+      const translated = mockTranslateWalkedElement.mock.calls.map((call) => call[0])
+      expect(translated).toContain(outer)
+      expect(translated).toContain(nested)
     } finally {
       if (manager.isActive) manager.stop()
     }

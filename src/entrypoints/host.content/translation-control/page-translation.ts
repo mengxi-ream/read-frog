@@ -29,7 +29,7 @@ import {
   isHTMLElement,
   isWalkBlockedElement as isWalkBlockedElementFilter,
 } from "@/utils/host/dom/filter"
-import { deepQueryTopLevelSelector } from "@/utils/host/dom/find"
+import { deepQueryAllSelector, deepQueryTopLevelSelector } from "@/utils/host/dom/find"
 import { isLatexmlTextBoxReflowRecord } from "@/utils/host/dom/latexml-text-box"
 import {
   canSplitGiantWithoutStrandingOwnText,
@@ -98,10 +98,11 @@ function hasBox(element: Element): boolean {
 
 /**
  * The boxes a box-less element is rendered through: its nearest descendants
- * that have a box, reached through box-less descendants only.
+ * that have a box, reached through box-less descendants only, shadow roots
+ * included (a `display: contents` custom element renders its shadow tree).
  */
 function collectRenderedBoxes(element: Element, boxes: Element[] = []): Element[] {
-  for (const child of element.children) {
+  for (const child of [...element.children, ...(element.shadowRoot?.children ?? [])]) {
     if (hasBox(child)) boxes.push(child)
     else collectRenderedBoxes(child, boxes)
   }
@@ -1015,10 +1016,10 @@ export class PageTranslationManager implements IPageTranslationManager {
     ) {
       take(element)
     }
+    // Every match, nested ones included: the box is unobserved after this, so a
+    // pending unit left inside another one would have nothing left to fire it.
     if (isHTMLElement(box)) {
-      deepQueryTopLevelSelector(box, (element) => this.pendingBoxlessUnits.has(element)).forEach(
-        take,
-      )
+      deepQueryAllSelector(box, (element) => this.pendingBoxlessUnits.has(element)).forEach(take)
     }
     return units
   }
