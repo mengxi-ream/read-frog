@@ -13,13 +13,13 @@
   </a>
 </p>
 
-一款开源的 AI 驱动的浏览器语言学习扩展。<br/>
-支持沉浸式翻译、文章分析、多种 AI 模型等功能。<br/>
+一款用 AI 学语言的浏览器扩展，也是沉浸式翻译的开源替代品。<br/>
+翻译网页、选中的句子，以及 YouTube、X 和 Netflix 上的视频字幕，再把遇到的生词存下来，按 FSRS 记忆算法做成闪卡复习。<br/>
 在浏览器中利用 AI 轻松深入地掌握语言。
 
 [![English][english-shield]](../README.md) [![简体中文][chinese-shield]](./README.zh-CN.md) [![繁體中文][traditional-chinese-shield]](./README.zh-TW.md) [![日本語][japanese-shield]](./README.ja.md) [![한국어][korean-shield]](./README.ko.md) [![Español][spanish-shield]](./README.es.md) [![Русский][russian-shield]](./README.ru.md) [![Türkçe][turkish-shield]](./README.tr.md) [![Tiếng Việt][vietnamese-shield]](./README.vi.md)
 
-[官方网站](https://readfrog.app) · [教程](https://www.readfrog.app/zh/docs) · [更新日志][github-release-link] · [博客](https://www.readfrog.app/zh/blog)
+[官方网站](https://www.readfrog.app/zh) · [全部功能](https://www.readfrog.app/zh/features) · [教程](https://www.readfrog.app/zh/docs) · [更新日志][github-release-link] · [博客](https://www.readfrog.app/zh/blog) · [vs 沉浸式翻译](https://www.readfrog.app/zh/compare/immersive-translate)
 
 <!-- SHIELD GROUP -->
 
@@ -49,6 +49,8 @@
   - [下载](#下载)
   - [社区](#社区)
 - [✨ 功能](#-功能)
+  - [🪄 自定义 AI 指令](#-自定义-ai-指令)
+  - [🧠 闪卡与间隔重复](#-闪卡与间隔重复)
   - [🔄 双语 / 仅译文](#-双语--仅译文)
   - [✨ 划词翻译](#-划词翻译)
   - [🧠 上下文感知翻译](#-上下文感知翻译)
@@ -122,7 +124,7 @@ Read Frog 的愿景是为各个级别的语言学习者提供易于使用、智�
 
 借助 Read Frog 的强大功能，将您的日常网页阅读转变为沉浸式语言学习之旅。
 
-### 🪄 [自定义 AI 指令][docs-tutorial]
+### 🪄 [自定义 AI 指令][docs-custom-actions]
 
 把选中的文字变成符合你阅读和学习习惯的可复用 AI 工具。你可以自定义提示词和结构化输出字段，选择提供商、模型与图标，然后直接从划词工具栏运行，用于查词、改写、总结、解释或任何自定义工作流。
 
@@ -134,7 +136,7 @@ Read Frog 的愿景是为各个级别的语言学习者提供易于使用、智�
 
 </div>
 
-### 🧠 [闪卡与间隔重复][docs-tutorial]
+### 🧠 [闪卡与间隔重复][docs-learning]
 
 将阅读中遇到的词汇、释义、例句、翻译和笔记保存到 Notebase，再通过可自定义的卡片模板生成闪卡。阅读时发现的内容可以自然地变成学习材料，不会打断阅读流程。
 
@@ -148,7 +150,7 @@ Read Frog 的愿景是为各个级别的语言学习者提供易于使用、智�
 
 <!-- ![][image-feat-bilingual] -->
 
-### 🔄 [双语 / 仅译文][docs-tutorial]
+### 🔄 [双语 / 仅译文][docs-page-translation]
 
 在两种翻译显示模式之间无缝切换。**双语模式**将原文与译文并排显示，非常适合学习和对比。**仅译文模式**完全替换原文，提供更简洁的阅读体验。
 
@@ -162,7 +164,7 @@ Read Frog 的愿景是为各个级别的语言学习者提供易于使用、智�
 
 <!-- ![][image-feat-selection] -->
 
-### ✨ [划词翻译][docs-tutorial]
+### ✨ [划词翻译][docs-selection-translation]
 
 在网页上选择任何文本即可显示智能工具栏。**翻译**实时流式输出翻译结果。**解释**根据您的语言水平提供详细解释。**朗读**使用文字转语音功能朗读文本。
 
@@ -176,7 +178,7 @@ Read Frog 的愿景是为各个级别的语言学习者提供易于使用、智�
 
 <!-- ![][image-feat-context] -->
 
-### 🧠 [上下文感知翻译][docs-tutorial]
+### 🧠 [上下文感知翻译][blog-context-translation]
 
 让 AI 理解您正在阅读内容的完整上下文。启用后，Read Frog 会提取页面标题和简洁的 Markdown 页面内容，将此上下文提供给 AI，以获得更准确、更符合语境的翻译。
 
@@ -190,9 +192,9 @@ Read Frog 的愿景是为各个级别的语言学习者提供易于使用、智�
 
 <!-- ![][image-feat-subtitle] -->
 
-### 🎬 [字幕翻译][docs-tutorial]
+### 🎬 [字幕翻译][video-subtitles]
 
-直接在视频播放器中翻译 YouTube 字幕。观看外语内容时，翻译会与原始字幕一起显示，让视频内容成为语言学习的好帮手。
+直接在播放器里翻译 YouTube、X 和 Netflix 的视频字幕，译文与原文字幕一起显示，跟视频同步。没有字幕的 YouTube 视频，也可以让 AI 转写音频，生成同样的双语字幕（Pro 和 Ultra 套餐包含）。在字幕里选中任意单词，就能查词并存下来复习。
 
 <div align="right">
 
@@ -202,9 +204,9 @@ Read Frog 的愿景是为各个级别的语言学习者提供易于使用、智�
 
 <!-- ![][image-feat-tts] -->
 
-### 🔊 [文字转语音 (TTS)][docs-tutorial]
+### 🔊 [文字转语音 (TTS)][docs-tts]
 
-使用高质量 AI 语音朗读任何选中的文本。由 **Edge TTS** 驱动——完全免费，提供 150+ 种语音，覆盖 80+ 种语言，包括中文、英文、日文、韩文等。可自由调节语速、音调和音量。
+使用高质量 AI 语音朗读任何选中的文本。完全免费，提供 300+ 种语音，覆盖 70+ 种语言，包括中文、英文、日文、韩文等。可自由调节语速、音调和音量。
 
 自动语言检测（基础模式或 LLM 驱动）与按语言映射语音，确保每种语言使用最合适的语音。智能的句子感知分块功能处理长文本时会在自然边界处分割，并预取下一个片段以实现无缝播放。非常适合发音练习和听力学习。
 
@@ -216,7 +218,7 @@ Read Frog 的愿景是为各个级别的语言学习者提供易于使用、智�
 
 <!-- ![][image-feat-batch] -->
 
-### 📦 [批量请求][docs-tutorial]
+### 📦 [批量请求][docs-request-control]
 
 通过智能请求批处理节省高达 70% 的 API 成本。Read Frog 将多个翻译请求合并为单次 API 调用，在保持翻译质量的同时减少开销和令牌使用。
 
@@ -230,7 +232,7 @@ Read Frog 的愿景是为各个级别的语言学习者提供易于使用、智�
 
 <!-- ![][image-feat-providers] -->
 
-### 🤖 [20+ AI 服务商][docs-tutorial]
+### 🤖 [20+ AI 服务商][docs-providers]
 
 通过 Vercel AI SDK 连接 20+ AI 服务商：OpenAI、DeepSeek、Anthropic Claude、Google Gemini、xAI Grok、Groq、Mistral、Ollama 等。为每个服务商配置自定义端点、API 密钥和模型设置。
 
@@ -254,7 +256,7 @@ Read Frog 的愿景是为各个级别的语言学习者提供易于使用、智�
 
 通过 AI 了解项目：[DeepWiki](https://deepwiki.com/mengxi-ream/read-frog)
 
-查看[贡献指南](https://readfrog.app/zh/docs/code-contribution/contribution-guide)了解更多详情。
+查看[贡献指南](https://www.readfrog.app/zh/docs/contributing)了解更多详情。
 
 ReadFrog 采用 GPLv3 和商业许可双重授权。
 
@@ -354,10 +356,18 @@ ReadFrog 采用 GPLv3 和商业许可双重授权。
 [traditional-chinese-shield]: https://img.shields.io/badge/%E7%B9%81%E9%AB%94%E4%B8%AD%E6%96%87-gray?style=flat-square
 [turkish-shield]: https://img.shields.io/badge/T%C3%BCrk%C3%A7e-gray?style=flat-square
 [vietnamese-shield]: https://img.shields.io/badge/Ti%E1%BA%BFng%20Vi%E1%BB%87t-gray?style=flat-square
-[website]: https://readfrog.app
+[website]: https://www.readfrog.app/zh
 [wechat-link]: ../assets/wechat-account.jpg
 [wechat-shield-badge]: https://img.shields.io/badge/聊天-微信-07C160?style=for-the-badge&logo=wechat&logoColor=white&labelColor=black
 
-<!-- Feature docs link -->
+<!-- Feature links -->
 
-[docs-tutorial]: https://readfrog.app/zh/docs
+[blog-context-translation]: https://www.readfrog.app/zh/blog/smart-context-translation
+[docs-custom-actions]: https://www.readfrog.app/zh/docs/custom-actions
+[docs-learning]: https://www.readfrog.app/zh/docs/learning
+[docs-page-translation]: https://www.readfrog.app/zh/docs/page-translation
+[docs-providers]: https://www.readfrog.app/zh/docs/providers/overview
+[docs-request-control]: https://www.readfrog.app/zh/docs/request-control
+[docs-selection-translation]: https://www.readfrog.app/zh/docs/selection-translation
+[docs-tts]: https://www.readfrog.app/zh/docs/tts
+[video-subtitles]: https://www.readfrog.app/zh/features/youtube-subtitles

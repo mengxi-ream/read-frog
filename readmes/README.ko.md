@@ -13,13 +13,13 @@
   </a>
 </p>
 
-브라우저용 오픈소스 AI 언어 학습 확장 프로그램입니다.<br/>
-몰입형 번역, 문서 분석, 여러 AI 모델 등을 지원합니다.<br/>
+AI로 언어를 배우는 브라우저 확장 프로그램이자, Immersive Translate의 오픈소스 대안입니다.<br/>
+웹페이지와 선택한 문장, YouTube·X·Netflix 자막을 번역하세요. 만난 단어는 저장해 두고 FSRS 일정에 따라 플래시카드로 복습합니다.<br/>
 브라우저에서 AI와 함께 더 쉽고 깊게 언어를 학습하세요.
 
 [![English][english-shield]](../README.md) [![简体中文][chinese-shield]](./README.zh-CN.md) [![繁體中文][traditional-chinese-shield]](./README.zh-TW.md) [![日本語][japanese-shield]](./README.ja.md) [![한국어][korean-shield]](./README.ko.md) [![Español][spanish-shield]](./README.es.md) [![Русский][russian-shield]](./README.ru.md) [![Türkçe][turkish-shield]](./README.tr.md) [![Tiếng Việt][vietnamese-shield]](./README.vi.md)
 
-[공식 웹사이트](https://readfrog.app) · [튜토리얼](https://www.readfrog.app/docs) · [변경 내역][github-release-link] · [블로그](https://www.readfrog.app/blog)
+[공식 웹사이트](https://www.readfrog.app/ko) · [모든 기능](https://www.readfrog.app/ko/features) · [튜토리얼](https://www.readfrog.app/ko/docs) · [변경 내역][github-release-link] · [블로그](https://www.readfrog.app/ko/blog) · [vs Immersive Translate (영어)](https://www.readfrog.app/en/compare/immersive-translate)
 
 <!-- SHIELD GROUP -->
 
@@ -49,6 +49,8 @@
   - [다운로드](#다운로드)
   - [커뮤니티](#커뮤니티)
 - [✨ 기능](#-기능)
+  - [🪄 사용자 정의 AI 액션](#-사용자-정의-ai-액션)
+  - [🧠 플래시카드와 간격 반복](#-플래시카드와-간격-반복)
   - [🔄 이중 언어 / 번역만 보기](#-이중-언어--번역만-보기)
   - [✨ 선택 번역](#-선택-번역)
   - [🧠 문맥 인식 번역](#-문맥-인식-번역)
@@ -115,53 +117,53 @@ Read Frog의 목표는 모든 수준의 언어 학습자에게 쉽고 지능적�
 
 Read Frog의 강력한 기능으로 일상적인 웹 읽기를 몰입형 언어 학습 경험으로 바꿀 수 있습니다.
 
-### 🪄 [사용자 정의 AI 액션][docs-tutorial]
+### 🪄 [사용자 정의 AI 액션][docs-custom-actions]
 
 선택한 텍스트를 자신의 읽기와 학습 방식에 맞는 재사용 가능한 AI 도구로 만들 수 있습니다. 프롬프트와 구조화된 출력 필드를 정의하고 제공자, 모델, 아이콘을 선택한 뒤 사전 검색, 다시 쓰기, 요약, 설명 등 원하는 작업을 선택 도구 모음에서 바로 실행하세요.
 
 기본 제공되는 **사전** 및 **글쓰기 개선** 템플릿으로 시작하거나 처음부터 직접 만들 수 있습니다. 구조화된 결과를 Notebase에 매핑해 저장하고 나중에 학습할 수도 있습니다.
 
-### 🧠 [플래시카드와 간격 반복][docs-tutorial]
+### 🧠 [플래시카드와 간격 반복][docs-learning]
 
 어휘, 정의, 예문, 번역, 읽기 노트를 Notebase에 저장한 뒤 맞춤형 카드 템플릿으로 플래시카드를 만드세요. 읽는 중에 발견한 내용을 흐름을 끊지 않고 학습 자료로 바꿀 수 있습니다.
 
 온라인에서 복습할 카드를 확인하고 **다시**, **어려움**, **좋음**, **쉬움**으로 평가하세요. Read Frog의 간격 반복 스케줄러가 피드백을 바탕으로 각 카드가 잊힐 무렵 다시 나타나도록 일정을 정합니다.
 
-### 🔄 [이중 언어 / 번역만 보기][docs-tutorial]
+### 🔄 [이중 언어 / 번역만 보기][docs-page-translation]
 
 두 가지 번역 표시 모드를 부드럽게 전환할 수 있습니다. **이중 언어 모드**는 원문과 번역을 함께 보여 주어 학습과 비교에 적합합니다. **번역만 보기 모드**는 원문을 번역문으로 대체해 더 깔끔한 읽기 경험을 제공합니다.
 
 번역이 활성화된 상태에서 모드를 바꾸면 표시 중인 모든 내용을 자동으로 다시 번역하므로 페이지를 새로 고칠 필요가 없습니다.
 
-### ✨ [선택 번역][docs-tutorial]
+### ✨ [선택 번역][docs-selection-translation]
 
 웹페이지의 텍스트를 선택하면 스마트 도구 모음이 나타납니다. **번역**은 실시간으로 결과를 스트리밍하고, **설명**은 사용자의 언어 수준에 맞춰 자세한 해설을 제공하며, **읽기**는 TTS로 텍스트를 들려줍니다.
 
 도구 모음은 화면 안에 머물도록 자동 배치되고 드래그를 지원하며, 모든 웹사이트에서 사용할 수 있습니다.
 
-### 🧠 [문맥 인식 번역][docs-tutorial]
+### 🧠 [문맥 인식 번역][blog-context-translation]
 
 AI가 읽고 있는 내용의 전체 문맥을 이해하도록 합니다. 활성화하면 Read Frog가 페이지 제목과 간결한 Markdown 형태의 페이지 내용을 추출하여 AI에 전달하고, 더 정확하고 문맥에 맞는 번역을 제공합니다.
 
 전문 용어는 해당 분야에 맞게 번역되고, 문학적 표현은 뉘앙스를 유지하며, 모호한 표현은 주변 문맥에 따라 해석됩니다.
 
-### 🎬 [자막 번역][docs-tutorial]
+### 🎬 [자막 번역][video-subtitles]
 
-YouTube 자막을 동영상 플레이어 안에서 직접 번역합니다. 외국어 콘텐츠를 볼 때 원문 자막과 번역을 함께 표시하여 영상을 학습 자료로 만들 수 있습니다.
+YouTube, X, Netflix 자막을 동영상 플레이어 안에서 바로 번역합니다. 번역은 원문 자막과 함께 영상에 맞춰 표시됩니다. 자막이 없는 YouTube 영상은 AI가 음성을 받아써서 같은 이중 언어 자막으로 보여 줍니다(Pro, Ultra 요금제에 포함). 자막에서 단어를 선택하면 바로 뜻을 찾아보고 복습용으로 저장할 수 있습니다.
 
-### 🔊 [텍스트 음성 변환 (TTS)][docs-tutorial]
+### 🔊 [텍스트 음성 변환 (TTS)][docs-tts]
 
-선택한 텍스트를 고품질 AI 음성으로 들을 수 있습니다. **Edge TTS** 기반으로 완전히 무료이며, 중국어, 영어, 일본어, 한국어 등 80+ 언어와 150+ 음성을 지원합니다. 속도, 피치, 볼륨도 조정할 수 있습니다.
+선택한 텍스트를 고품질 AI 음성으로 들을 수 있습니다. 완전히 무료이며, 중국어, 영어, 일본어, 한국어 등 70+ 언어와 300+ 음성을 지원합니다. 속도, 피치, 볼륨도 조정할 수 있습니다.
 
 자동 언어 감지와 언어별 음성 매핑으로 각 언어에 적합한 음성을 사용할 수 있습니다. 긴 텍스트는 자연스러운 문장 경계에서 나누고 다음 조각을 미리 불러와 부드럽게 재생합니다.
 
-### 📦 [배치 요청][docs-tutorial]
+### 📦 [배치 요청][docs-request-control]
 
 지능형 요청 배치로 API 비용을 최대 70% 절감할 수 있습니다. Read Frog는 여러 번역 요청을 하나의 API 호출로 묶어 번역 품질을 유지하면서 오버헤드와 token 사용량을 줄입니다.
 
 시스템은 지수 백오프 재시도와 배치 실패 시 개별 요청으로 자동 전환하는 기능을 포함합니다.
 
-### 🤖 [20+ AI 제공업체][docs-tutorial]
+### 🤖 [20+ AI 제공업체][docs-providers]
 
 Vercel AI SDK를 통해 OpenAI, DeepSeek, Anthropic Claude, Google Gemini, xAI Grok, Groq, Mistral, Ollama 등 20+ AI 제공업체에 연결할 수 있습니다. 각 제공업체별로 커스텀 엔드포인트, API 키, 모델 설정을 구성할 수 있습니다.
 
@@ -187,7 +189,7 @@ Google Translate, Microsoft Translate, DeepLX 같은 무료 기본 번역 옵션
 
 AI로 프로젝트 이해하기: [Dosu](https://app.dosu.dev/29569286-71ba-47dd-b038-c7ab1b9d0df7/documents)
 
-자세한 내용은 [Contribution Guide](https://readfrog.app/en/docs/code-contribution/contribution-guide)를 확인하세요.
+자세한 내용은 [기여 가이드](https://www.readfrog.app/ko/docs/contributing)를 확인하세요.
 
 ReadFrog는 GPLv3와 상업 라이선스의 듀얼 라이선스를 사용합니다.
 
@@ -261,10 +263,18 @@ ReadFrog는 GPLv3와 상업 라이선스의 듀얼 라이선스를 사용합니�
 [traditional-chinese-shield]: https://img.shields.io/badge/%E7%B9%81%E9%AB%94%E4%B8%AD%E6%96%87-gray?style=flat-square
 [turkish-shield]: https://img.shields.io/badge/T%C3%BCrk%C3%A7e-gray?style=flat-square
 [vietnamese-shield]: https://img.shields.io/badge/Ti%E1%BA%BFng%20Vi%E1%BB%87t-gray?style=flat-square
-[website]: https://readfrog.app
+[website]: https://www.readfrog.app/ko
 [wechat-link]: ../assets/wechat-account.jpg
 [wechat-shield-badge]: https://img.shields.io/badge/chat-WeChat-07C160?style=for-the-badge&logo=wechat&logoColor=white&labelColor=black
 
-<!-- Feature docs link -->
+<!-- Feature links -->
 
-[docs-tutorial]: https://readfrog.app/docs
+[blog-context-translation]: https://www.readfrog.app/ko/blog/smart-context-translation
+[docs-custom-actions]: https://www.readfrog.app/ko/docs/custom-actions
+[docs-learning]: https://www.readfrog.app/ko/docs/learning
+[docs-page-translation]: https://www.readfrog.app/ko/docs/page-translation
+[docs-providers]: https://www.readfrog.app/ko/docs/providers/overview
+[docs-request-control]: https://www.readfrog.app/ko/docs/request-control
+[docs-selection-translation]: https://www.readfrog.app/ko/docs/selection-translation
+[docs-tts]: https://www.readfrog.app/ko/docs/tts
+[video-subtitles]: https://www.readfrog.app/ko/docs/video-subtitles
