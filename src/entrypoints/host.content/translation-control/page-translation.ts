@@ -161,6 +161,14 @@ function renderedHeight(unit: HTMLElement): number {
   return bottom > top ? bottom - top : 0
 }
 
+/** The tallest unit translated in one go; taller ones are split first (#1881). */
+function maxUnitHeight(): number {
+  return (
+    Math.max(window.innerHeight, GIANT_PARAGRAPH_SPLIT_MIN_VIEWPORT_PX) *
+    GIANT_PARAGRAPH_SPLIT_VIEWPORT_MULTIPLIER
+  )
+}
+
 interface IPageTranslationManager {
   /**
    * Indicates whether the page translation is currently active
@@ -234,6 +242,8 @@ export class PageTranslationManager implements IPageTranslationManager {
   private boxlessUnitObserver: IntersectionObserver | null = null
   /** Box-less units still waiting for one of their boxes to intersect. */
   private pendingBoxlessUnits = new WeakSet<HTMLElement>()
+  /** Boxes watched on behalf of box-less units. */
+  private boxlessUnitGates = new WeakSet<Element>()
   private mutationObservers: MutationObserver[] = []
   private observedMutationRoots = new WeakSet<Node>()
   private walkId: string | null = null
@@ -606,6 +616,7 @@ export class PageTranslationManager implements IPageTranslationManager {
       this.boxlessUnitObserver = null
     }
     this.pendingBoxlessUnits = new WeakSet()
+    this.boxlessUnitGates = new WeakSet()
     this.mutationObservers.forEach((observer) => observer.disconnect())
     this.mutationObservers = []
     this.observedMutationRoots = new WeakSet()
@@ -884,11 +895,8 @@ export class PageTranslationManager implements IPageTranslationManager {
     const observer = this.intersectionObserver
     if (!observer) return
 
-    const maxUnitHeight =
-      Math.max(window.innerHeight, GIANT_PARAGRAPH_SPLIT_MIN_VIEWPORT_PX) *
-      GIANT_PARAGRAPH_SPLIT_VIEWPORT_MULTIPLIER
-    if (depth >= GIANT_PARAGRAPH_MAX_SPLIT_DEPTH || renderedHeight(element) <= maxUnitHeight) {
-      this.observeUnit(observer, element, walkId, maxUnitHeight)
+    if (depth >= GIANT_PARAGRAPH_MAX_SPLIT_DEPTH || renderedHeight(element) <= maxUnitHeight()) {
+      this.observeUnit(observer, element, walkId)
       return
     }
 
@@ -903,7 +911,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     )
     if (innerTopLevelParagraphs.length === 0) {
       // Unsplittable giant (no nested paragraphs) — observe it whole.
-      this.observeUnit(observer, element, walkId, maxUnitHeight)
+      this.observeUnit(observer, element, walkId)
       return
     }
     if (
@@ -919,7 +927,7 @@ export class PageTranslationManager implements IPageTranslationManager {
       element !== element.ownerDocument.body &&
       !canSplitGiantWithoutStrandingOwnText(element)
     ) {
-      this.observeUnit(observer, element, walkId, maxUnitHeight)
+      this.observeUnit(observer, element, walkId)
       return
     }
     if (!canSplitParagraphIntoDescendants(element, innerTopLevelParagraphs, config)) {
@@ -934,7 +942,7 @@ export class PageTranslationManager implements IPageTranslationManager {
       // rather than here: bilingual can interleave a wrapper at any boundary,
       // while translationOnly has to cut the units apart into whole nodes and
       // therefore keeps per-span observation for the plans it cannot express.
-      this.observeUnit(observer, element, walkId, maxUnitHeight)
+      this.observeUnit(observer, element, walkId)
       return
     }
     for (const paragraph of innerTopLevelParagraphs) {
@@ -953,12 +961,7 @@ export class PageTranslationManager implements IPageTranslationManager {
    * split-sized unit (a long column, a scrolling message list), the unit's own
    * inner boxes. A unit with neither keeps the direct observation.
    */
-  private observeUnit(
-    observer: IntersectionObserver,
-    unit: HTMLElement,
-    walkId: string,
-    maxUnitHeight: number,
-  ): void {
+  private observeUnit(observer: IntersectionObserver, unit: HTMLElement, walkId: string): void {
     if (hasBox(unit)) {
       // It may have been box-less when first registered; its old gate must not
       // translate it a second time.
@@ -968,7 +971,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     }
     const layoutBox = findLayoutBox(unit)
     const boxes =
-      layoutBox && layoutExtent(layoutBox) <= maxUnitHeight
+      layoutBox && layoutExtent(layoutBox) <= maxUnitHeight()
         ? [layoutBox]
         : collectRenderedBoxes(unit)
     if (boxes.length === 0) {
@@ -977,7 +980,17 @@ export class PageTranslationManager implements IPageTranslationManager {
     }
     this.pendingBoxlessUnits.add(unit)
     const boxlessUnitObserver = this.getBoxlessUnitObserver(walkId)
-    for (const box of boxes) boxlessUnitObserver.observe(box)
+    for (const box of boxes) {
+      this.boxlessUnitGates.add(box)
+      boxlessUnitObserver.observe(box)
+    }
+  }
+
+  /** Run a pending unit's registration again against the page as it is now. */
+  private registerUnitAgain(unit: HTMLElement): void {
+    if (this.intersectionObserver && this.walkId) {
+      this.observeUnit(this.intersectionObserver, unit, this.walkId)
+    }
   }
 
   private getBoxlessUnitObserver(walkId: string): IntersectionObserver {
@@ -1022,40 +1035,52 @@ export class PageTranslationManager implements IPageTranslationManager {
     }
     // Every match, nested ones included: the box is unobserved after this, so a
     // pending unit left inside another one would have nothing left to fire it.
+    // Taking them together is only safe while all of it fits a split-sized
+    // unit; a box that grew past that since it was chosen (history loaded in
+    // while it was off-screen) gives each unit a gate of its own instead.
     if (isHTMLElement(box)) {
-      deepQueryAllSelector(box, (element) => this.pendingBoxlessUnits.has(element)).forEach(take)
+      const inside = deepQueryAllSelector(box, (element) => this.pendingBoxlessUnits.has(element))
+      if (layoutExtent(box) <= maxUnitHeight()) inside.forEach(take)
+      else inside.forEach((unit) => this.registerUnitAgain(unit))
     }
     return units
   }
 
   /**
-   * Content replaced under a pending box-less unit changes which boxes can fire
-   * for it. Watch the added ones: a unit gated on its inner boxes would
-   * otherwise be stranded when the site replaces them before they intersect.
-   * Whichever box fires, takePendingUnitsAt finds the unit by walking up from
-   * it. Stop watching the removed ones, so a re-rendered unit does not keep
-   * detached subtrees observed.
+   * Keep box-less gates in step with the page. Removed subtrees are unobserved
+   * whether or not they held a pending unit, so virtualized content does not
+   * stay observed after it is gone. A change inside a pending unit (content
+   * swapped, a gate losing its box through class or style, the unit gaining a
+   * box) runs that unit's registration again, and so does a watched box that
+   * changes, for the units gated on it.
    */
   private updatePendingUnitGates(record: MutationRecord): void {
     const observer = this.boxlessUnitObserver
-    if (!observer || (record.addedNodes.length === 0 && record.removedNodes.length === 0)) return
-    let element: Element | null =
-      record.target instanceof ShadowRoot
-        ? record.target.host
-        : record.target instanceof Element
-          ? record.target
-          : null
-    while (element && !(isHTMLElement(element) && this.pendingBoxlessUnits.has(element))) {
-      element = parentElementAcrossShadow(element)
-    }
-    if (!element) return
+    if (!observer) return
     for (const node of record.removedNodes) {
       if (!isHTMLElement(node)) continue
       for (const removed of deepQueryAllSelector(node, () => true)) observer.unobserve(removed)
     }
-    for (const node of record.addedNodes) {
-      if (!(node instanceof Element)) continue
-      for (const box of hasBox(node) ? [node] : collectRenderedBoxes(node)) observer.observe(box)
+    const target = record.target instanceof ShadowRoot ? record.target.host : record.target
+    if (!(target instanceof Element)) return
+    for (
+      let element: Element | null = target;
+      element;
+      element = parentElementAcrossShadow(element)
+    ) {
+      if (isHTMLElement(element) && this.pendingBoxlessUnits.has(element)) {
+        this.registerUnitAgain(element)
+        break
+      }
+    }
+    if (
+      record.type === "attributes" &&
+      isHTMLElement(target) &&
+      this.boxlessUnitGates.has(target)
+    ) {
+      deepQueryAllSelector(target, (element) => this.pendingBoxlessUnits.has(element)).forEach(
+        (unit) => this.registerUnitAgain(unit),
+      )
     }
   }
 
@@ -1477,6 +1502,7 @@ export class PageTranslationManager implements IPageTranslationManager {
           }
         })
       } else if (this.isWalkabilityAttributeMutation(rec)) {
+        this.updatePendingUnitGates(rec)
         const el = rec.target
         if (!isHTMLElement(el)) continue
         for (const unblocked of this.collectNewlyWalkableSubtrees(el, config)) {
