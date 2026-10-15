@@ -262,8 +262,6 @@ export class PageTranslationManager implements IPageTranslationManager {
   private boxlessUnitObserver: IntersectionObserver | null = null
   /** Box-less units still waiting for one of their boxes to intersect. */
   private pendingBoxlessUnits = new WeakSet<HTMLElement>()
-  /** Boxes watched on behalf of box-less units. */
-  private boxlessUnitGates = new WeakSet<Element>()
   private mutationObservers: MutationObserver[] = []
   private observedMutationRoots = new WeakSet<Node>()
   private walkId: string | null = null
@@ -636,7 +634,6 @@ export class PageTranslationManager implements IPageTranslationManager {
       this.boxlessUnitObserver = null
     }
     this.pendingBoxlessUnits = new WeakSet()
-    this.boxlessUnitGates = new WeakSet()
     this.mutationObservers.forEach((observer) => observer.disconnect())
     this.mutationObservers = []
     this.observedMutationRoots = new WeakSet()
@@ -998,10 +995,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     }
     this.pendingBoxlessUnits.add(unit)
     const boxlessUnitObserver = this.getBoxlessUnitObserver(walkId)
-    for (const box of boxes) {
-      this.boxlessUnitGates.add(box)
-      boxlessUnitObserver.observe(box)
-    }
+    for (const box of boxes) boxlessUnitObserver.observe(box)
   }
 
   /** Run a pending unit's registration again against the page as it is now. */
@@ -1065,40 +1059,15 @@ export class PageTranslationManager implements IPageTranslationManager {
   }
 
   /**
-   * Keep box-less gates in step with the page. Removed subtrees are unobserved
-   * whether or not they held a pending unit, so virtualized content does not
-   * stay observed after it is gone. A change inside a pending unit (content
-   * swapped, a gate losing its box through class or style, the unit gaining a
-   * box) runs that unit's registration again, and so does a watched box that
-   * changes, for the units gated on it.
+   * Removed subtrees are unobserved whether or not they held a pending unit, so
+   * virtualized or re-rendered content does not stay observed after it is gone.
    */
-  private updatePendingUnitGates(record: MutationRecord): void {
+  private unobserveRemovedGates(record: MutationRecord): void {
     const observer = this.boxlessUnitObserver
     if (!observer) return
     for (const node of record.removedNodes) {
       if (!isHTMLElement(node)) continue
       for (const removed of deepQueryAllSelector(node, () => true)) observer.unobserve(removed)
-    }
-    const target = record.target instanceof ShadowRoot ? record.target.host : record.target
-    if (!(target instanceof Element)) return
-    for (
-      let element: Element | null = target;
-      element;
-      element = parentElementAcrossShadow(element)
-    ) {
-      if (isHTMLElement(element) && this.pendingBoxlessUnits.has(element)) {
-        this.registerUnitAgain(element)
-        break
-      }
-    }
-    if (
-      record.type === "attributes" &&
-      isHTMLElement(target) &&
-      this.boxlessUnitGates.has(target)
-    ) {
-      deepQueryAllSelector(target, (element) => this.pendingBoxlessUnits.has(element)).forEach(
-        (unit) => this.registerUnitAgain(unit),
-      )
     }
   }
 
@@ -1491,7 +1460,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     const traversalRecords = revealedRoot ? [] : hostRecords
     for (const rec of traversalRecords) {
       if (rec.type === "childList") {
-        this.updatePendingUnitGates(rec)
+        this.unobserveRemovedGates(rec)
         // A node added inside an already-registered bilingual source is that
         // source's business, never a translation unit of its own. Walking it as
         // a fresh walk root recomputes "top-level paragraph" relative to the
@@ -1520,7 +1489,6 @@ export class PageTranslationManager implements IPageTranslationManager {
           }
         })
       } else if (this.isWalkabilityAttributeMutation(rec)) {
-        this.updatePendingUnitGates(rec)
         const el = rec.target
         if (!isHTMLElement(el)) continue
         for (const unblocked of this.collectNewlyWalkableSubtrees(el, config)) {

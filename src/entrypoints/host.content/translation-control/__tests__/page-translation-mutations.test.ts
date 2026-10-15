@@ -528,38 +528,6 @@ describe("pageTranslationManager mutation re-walk", () => {
     }
   })
 
-  it("keeps gating a display: contents unit whose inner boxes are replaced before they intersect", async () => {
-    document.body.innerHTML = `<section id="column"><div id="message">Hello <b id="old">world</b></div></section>`
-    const message = document.getElementById("message") as HTMLElement
-    const oldBox = document.getElementById("old") as HTMLElement
-    giveBox(document.getElementById("column")!, { bottom: 100_000, height: 100_000 })
-    giveBox(oldBox)
-
-    const manager = new PageTranslationManager()
-    try {
-      await manager.start()
-      await flushDomUpdates()
-      const boxObserver = intersectionObservers[1]
-      expect(boxObserver!.observe).toHaveBeenCalledWith(oldBox)
-
-      // The site swaps the only box the message was gated on.
-      const newBox = document.createElement("b")
-      newBox.textContent = "world"
-      giveBox(newBox)
-      oldBox.replaceWith(newBox)
-      await flushDomUpdates()
-      expect(boxObserver!.observe).toHaveBeenCalledWith(newBox)
-      expect(boxObserver!.unobserve).toHaveBeenCalledWith(oldBox)
-
-      await boxObserver!.triggerIntersect(newBox)
-      await flushDomUpdates()
-
-      expect(mockTranslateWalkedElement.mock.calls.map((call) => call[0])).toContain(message)
-    } finally {
-      if (manager.isActive) manager.stop()
-    }
-  })
-
   it("does not gate display: contents units on a scrolling list whose content is too tall", async () => {
     // The list's own box is a 400px viewport over 10,000px of history. Taking
     // every unit in it on its first intersection would enqueue the history at
@@ -750,64 +718,6 @@ describe("pageTranslationManager mutation re-walk", () => {
       await boxObserver!.triggerIntersect(secondBox)
       await flushDomUpdates()
       expect(mockTranslateWalkedElement.mock.calls.map((call) => call[0])).toEqual([second])
-    } finally {
-      if (manager.isActive) manager.stop()
-    }
-  })
-
-  it("re-gates a unit when one of its inner gates loses its box through a class change", async () => {
-    document.body.innerHTML = `<section id="column"><div id="message">Hello <span id="gate"><b id="inner">world</b></span></div></section>`
-    const message = document.getElementById("message") as HTMLElement
-    const gate = document.getElementById("gate") as HTMLElement
-    const inner = document.getElementById("inner") as HTMLElement
-    giveBox(document.getElementById("column")!, { bottom: 100_000, height: 100_000 })
-    giveBox(gate)
-
-    const manager = new PageTranslationManager()
-    try {
-      await manager.start()
-      await flushDomUpdates()
-      const boxObserver = intersectionObservers[1]
-      expect(boxObserver!.observe).toHaveBeenCalledWith(gate)
-
-      // The site turns the span into display: contents; its child now has the box.
-      gate.getClientRects = () => [] as unknown as DOMRectList
-      giveBox(inner)
-      gate.className = "contents"
-      await flushDomUpdates()
-      expect(boxObserver!.observe).toHaveBeenCalledWith(inner)
-
-      await boxObserver!.triggerIntersect(inner)
-      await flushDomUpdates()
-      expect(mockTranslateWalkedElement.mock.calls.map((call) => call[0])).toContain(message)
-    } finally {
-      if (manager.isActive) manager.stop()
-    }
-  })
-
-  it("re-gates the units laid out in a layout box that loses its box through a class change", async () => {
-    document.body.innerHTML = `<div id="card"><div id="bubble"><div id="message">Plain message text</div></div></div>`
-    const card = document.getElementById("card") as HTMLElement
-    const bubble = document.getElementById("bubble") as HTMLElement
-    const message = document.getElementById("message") as HTMLElement
-    giveBox(card)
-    giveBox(bubble)
-
-    const manager = new PageTranslationManager()
-    try {
-      await manager.start()
-      await flushDomUpdates()
-      const boxObserver = intersectionObservers[1]
-      expect(boxObserver!.observe).toHaveBeenCalledWith(bubble)
-
-      bubble.getClientRects = () => [] as unknown as DOMRectList
-      bubble.className = "contents"
-      await flushDomUpdates()
-      expect(boxObserver!.observe).toHaveBeenCalledWith(card)
-
-      await boxObserver!.triggerIntersect(card)
-      await flushDomUpdates()
-      expect(mockTranslateWalkedElement.mock.calls.map((call) => call[0])).toEqual([message])
     } finally {
       if (manager.isActive) manager.stop()
     }
