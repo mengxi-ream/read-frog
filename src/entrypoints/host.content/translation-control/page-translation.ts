@@ -169,6 +169,26 @@ function maxUnitHeight(): number {
   )
 }
 
+/** The same cap across, for content laid out side by side. */
+function maxUnitWidth(): number {
+  return (
+    Math.max(window.innerWidth, GIANT_PARAGRAPH_SPLIT_MIN_VIEWPORT_PX) *
+    GIANT_PARAGRAPH_SPLIT_VIEWPORT_MULTIPLIER
+  )
+}
+
+/**
+ * Whether everything laid out in `box` may be taken in one go when it
+ * intersects. Its scroll extent counts in both directions: a short list can
+ * hold a long history, and a narrow one a long row.
+ */
+function layoutFitsSplitCap(box: Element): boolean {
+  const rect = box.getBoundingClientRect()
+  return (
+    layoutExtent(box) <= maxUnitHeight() && Math.max(rect.width, box.scrollWidth) <= maxUnitWidth()
+  )
+}
+
 interface IPageTranslationManager {
   /**
    * Indicates whether the page translation is currently active
@@ -957,8 +977,8 @@ export class PageTranslationManager implements IPageTranslationManager {
    * (`display: contents`; Telegram web wraps every message in one) can never
    * intersect, so it would never translate. It is gated on boxes instead:
    * preferably the box its content is laid out in, which covers all of it,
-   * plain text included; when what that box lays out is taller than a
-   * split-sized unit (a long column, a scrolling message list), the unit's own
+   * plain text included; when what that box lays out is larger than a
+   * split-sized unit (a long column, a scrolling list or row), the unit's own
    * inner boxes. A unit with neither keeps the direct observation.
    */
   private observeUnit(observer: IntersectionObserver, unit: HTMLElement, walkId: string): void {
@@ -971,9 +991,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     }
     const layoutBox = findLayoutBox(unit)
     const boxes =
-      layoutBox && layoutExtent(layoutBox) <= maxUnitHeight()
-        ? [layoutBox]
-        : collectRenderedBoxes(unit)
+      layoutBox && layoutFitsSplitCap(layoutBox) ? [layoutBox] : collectRenderedBoxes(unit)
     if (boxes.length === 0) {
       observer.observe(unit)
       return
@@ -1040,7 +1058,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     // while it was off-screen) gives each unit a gate of its own instead.
     if (isHTMLElement(box)) {
       const inside = deepQueryAllSelector(box, (element) => this.pendingBoxlessUnits.has(element))
-      if (layoutExtent(box) <= maxUnitHeight()) inside.forEach(take)
+      if (layoutFitsSplitCap(box)) inside.forEach(take)
       else inside.forEach((unit) => this.registerUnitAgain(unit))
     }
     return units

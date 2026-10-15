@@ -836,6 +836,41 @@ describe("pageTranslationManager mutation re-walk", () => {
     }
   })
 
+  it("does not gate display: contents units on a row that scrolls far sideways", async () => {
+    // 100px tall and 400px wide, over 50,000px of cards to scroll through.
+    document.body.innerHTML = `
+      <div id="row">
+        <div id="first">First card with <b id="first-box">formatting</b></div>
+        <div id="second">Second card with <b id="second-box">formatting</b></div>
+      </div>
+    `
+    const row = document.getElementById("row") as HTMLElement
+    const second = document.getElementById("second") as HTMLElement
+    const firstBox = document.getElementById("first-box") as HTMLElement
+    const secondBox = document.getElementById("second-box") as HTMLElement
+    giveBox(row, { bottom: 100, height: 100, right: 400, width: 400 })
+    Object.defineProperty(row, "scrollWidth", { value: 50_000 })
+    giveBox(firstBox)
+    giveBox(secondBox)
+
+    const manager = new PageTranslationManager()
+    try {
+      await manager.start()
+      await flushDomUpdates()
+
+      const boxObserver = intersectionObservers[1]
+      expect(boxObserver!.observe).not.toHaveBeenCalledWith(row)
+      expect(boxObserver!.observe).toHaveBeenCalledWith(firstBox)
+      expect(boxObserver!.observe).toHaveBeenCalledWith(secondBox)
+
+      await boxObserver!.triggerIntersect(secondBox)
+      await flushDomUpdates()
+      expect(mockTranslateWalkedElement.mock.calls.map((call) => call[0])).toEqual([second])
+    } finally {
+      if (manager.isActive) manager.stop()
+    }
+  })
+
   it("splits a tall display: contents unit by the extent of its boxes", async () => {
     // Its own rect is 0×0, but what it renders spans 5000px — past the split
     // cap, so its paragraphs must be gated one by one instead of all at once.
