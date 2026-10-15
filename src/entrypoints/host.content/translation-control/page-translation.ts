@@ -108,12 +108,23 @@ function collectRenderedBoxes(element: Element, boxes: Element[] = []): Element[
   return boxes
 }
 
+/** The parent element, continuing from the top of a shadow root to its host. */
+function parentElementAcrossShadow(element: Element): Element | null {
+  const root = element.getRootNode()
+  return element.parentElement ?? (root instanceof ShadowRoot ? root.host : null)
+}
+
 /**
  * The box a box-less element's content is laid out in: its nearest ancestor
- * that has a box.
+ * that has a box, through shadow roots (a plain-text unit at the top of one is
+ * laid out in its host).
  */
 function findLayoutBox(element: Element): Element | null {
-  for (let ancestor = element.parentElement; ancestor; ancestor = ancestor.parentElement) {
+  for (
+    let ancestor = parentElementAcrossShadow(element);
+    ancestor;
+    ancestor = parentElementAcrossShadow(ancestor)
+  ) {
     if (hasBox(ancestor)) return ancestor
   }
   return null
@@ -971,9 +982,10 @@ export class PageTranslationManager implements IPageTranslationManager {
    * The pending box-less units an intersecting box speaks for: those it renders
    * part of (its ancestors) and those laid out inside it (its descendants; a
    * layout box is only watched when it is no taller than a split-sized unit).
-   * Both are read from the live DOM rather than from a box→unit map recorded at
-   * observe time, so the answer stays right after the site moves nodes or the
-   * walk re-registers one as a unit of its own. delete() lets each unit go once.
+   * Both are read from the live DOM, through shadow roots, rather than from a
+   * box→unit map recorded at observe time, so the answer stays right after the
+   * site moves nodes or the walk re-registers one as a unit of its own.
+   * delete() lets each unit go once.
    */
   private takePendingUnitsAt(box: Element): HTMLElement[] {
     const units: HTMLElement[] = []
@@ -986,9 +998,44 @@ export class PageTranslationManager implements IPageTranslationManager {
         units.push(element)
       }
     }
-    for (let element = box.parentElement; element; element = element.parentElement) take(element)
-    box.querySelectorAll("[data-read-frog-paragraph]").forEach(take)
+    for (
+      let element = parentElementAcrossShadow(box);
+      element;
+      element = parentElementAcrossShadow(element)
+    ) {
+      take(element)
+    }
+    if (isHTMLElement(box)) {
+      deepQueryTopLevelSelector(box, (element) => this.pendingBoxlessUnits.has(element)).forEach(
+        take,
+      )
+    }
     return units
+  }
+
+  /**
+   * Content added under a pending box-less unit brings boxes of its own. Watch
+   * them too: a unit gated on its inner boxes would otherwise be stranded when
+   * the site replaces those boxes before they intersect. Whichever box fires,
+   * takePendingUnitsAt finds the unit by walking up from it.
+   */
+  private watchBoxesAddedToPendingUnit(record: MutationRecord): void {
+    const observer = this.boxlessUnitObserver
+    if (!observer || record.addedNodes.length === 0) return
+    let element: Element | null =
+      record.target instanceof ShadowRoot
+        ? record.target.host
+        : record.target instanceof Element
+          ? record.target
+          : null
+    while (element && !(isHTMLElement(element) && this.pendingBoxlessUnits.has(element))) {
+      element = parentElementAcrossShadow(element)
+    }
+    if (!element) return
+    for (const node of record.addedNodes) {
+      if (!(node instanceof Element)) continue
+      for (const box of hasBox(node) ? [node] : collectRenderedBoxes(node)) observer.observe(box)
+    }
   }
 
   private translateIntersectedUnits(units: HTMLElement[], walkId: string): void {
@@ -1380,6 +1427,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     const traversalRecords = revealedRoot ? [] : hostRecords
     for (const rec of traversalRecords) {
       if (rec.type === "childList") {
+        this.watchBoxesAddedToPendingUnit(rec)
         // A node added inside an already-registered bilingual source is that
         // source's business, never a translation unit of its own. Walking it as
         // a fresh walk root recomputes "top-level paragraph" relative to the

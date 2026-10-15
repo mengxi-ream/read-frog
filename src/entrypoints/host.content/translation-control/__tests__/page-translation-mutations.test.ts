@@ -500,6 +500,64 @@ describe("pageTranslationManager mutation re-walk", () => {
     }
   })
 
+  it("gates a plain-text display: contents unit at the top of a shadow root on its host", async () => {
+    document.body.innerHTML = `<div id="host"></div>`
+    const host = document.getElementById("host") as HTMLElement
+    host.attachShadow({
+      mode: "open",
+    }).innerHTML = `<div id="message">Plain text inside a shadow root</div>`
+    const message = host.shadowRoot!.getElementById("message") as HTMLElement
+    giveBox(host)
+
+    const manager = new PageTranslationManager()
+    try {
+      await manager.start()
+      await flushDomUpdates()
+
+      // parentElement stops at the shadow root; the text is laid out in the host.
+      const boxObserver = intersectionObservers[1]
+      expect(boxObserver!.observe).toHaveBeenCalledWith(host)
+
+      await boxObserver!.triggerIntersect(host)
+      await flushDomUpdates()
+
+      expect(mockTranslateWalkedElement.mock.calls.map((call) => call[0])).toEqual([message])
+    } finally {
+      if (manager.isActive) manager.stop()
+    }
+  })
+
+  it("keeps gating a display: contents unit whose inner boxes are replaced before they intersect", async () => {
+    document.body.innerHTML = `<section id="column"><div id="message">Hello <b id="old">world</b></div></section>`
+    const message = document.getElementById("message") as HTMLElement
+    const oldBox = document.getElementById("old") as HTMLElement
+    giveBox(document.getElementById("column")!, { bottom: 100_000, height: 100_000 })
+    giveBox(oldBox)
+
+    const manager = new PageTranslationManager()
+    try {
+      await manager.start()
+      await flushDomUpdates()
+      const boxObserver = intersectionObservers[1]
+      expect(boxObserver!.observe).toHaveBeenCalledWith(oldBox)
+
+      // The site swaps the only box the message was gated on.
+      const newBox = document.createElement("b")
+      newBox.textContent = "world"
+      giveBox(newBox)
+      oldBox.replaceWith(newBox)
+      await flushDomUpdates()
+      expect(boxObserver!.observe).toHaveBeenCalledWith(newBox)
+
+      await boxObserver!.triggerIntersect(newBox)
+      await flushDomUpdates()
+
+      expect(mockTranslateWalkedElement.mock.calls.map((call) => call[0])).toContain(message)
+    } finally {
+      if (manager.isActive) manager.stop()
+    }
+  })
+
   it("splits a tall display: contents unit by the extent of its boxes", async () => {
     // Its own rect is 0×0, but what it renders spans 5000px — past the split
     // cap, so its paragraphs must be gated one by one instead of all at once.
