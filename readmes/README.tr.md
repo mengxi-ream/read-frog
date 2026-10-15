@@ -13,13 +13,13 @@
   </a>
 </p>
 
-Tarayıcılar için açık kaynaklı, AI destekli bir dil öğrenme eklentisi.<br/>
-Sürükleyici çeviri, makale analizi, çoklu AI modelleri ve daha fazlasını destekler.<br/>
+AI ile dil öğrenmenizi sağlayan bir tarayıcı eklentisi ve Immersive Translate'e açık kaynaklı bir alternatif.<br/>
+Web sayfalarını, seçtiğiniz cümleleri ve YouTube, X ve Netflix altyazılarını çevirin. Karşılaştığınız kelimeleri kaydedin ve FSRS takvimiyle bilgi kartı olarak tekrar edin.<br/>
 AI ile dilleri doğrudan tarayıcınızda daha kolay ve derin öğrenin.
 
 [![English][english-shield]](../README.md) [![简体中文][chinese-shield]](./README.zh-CN.md) [![繁體中文][traditional-chinese-shield]](./README.zh-TW.md) [![日本語][japanese-shield]](./README.ja.md) [![한국어][korean-shield]](./README.ko.md) [![Español][spanish-shield]](./README.es.md) [![Русский][russian-shield]](./README.ru.md) [![Türkçe][turkish-shield]](./README.tr.md) [![Tiếng Việt][vietnamese-shield]](./README.vi.md)
 
-[Resmi web sitesi](https://readfrog.app) · [Rehber](https://www.readfrog.app/docs) · [Sürümler][github-release-link] · [Blog](https://www.readfrog.app/blog)
+[Resmi web sitesi](https://www.readfrog.app/tr) · [Tüm özellikler](https://www.readfrog.app/tr/features) · [Rehber](https://www.readfrog.app/tr/docs) · [Sürümler][github-release-link] · [Blog](https://www.readfrog.app/tr/blog) · [vs Immersive Translate (İngilizce)](https://www.readfrog.app/en/compare/immersive-translate)
 
 <!-- SHIELD GROUP -->
 
@@ -49,6 +49,8 @@ AI ile dilleri doğrudan tarayıcınızda daha kolay ve derin öğrenin.
   - [İndir](#i̇ndir)
   - [Topluluk](#topluluk)
 - [✨ Özellikler](#-özellikler)
+  - [🪄 Özel AI Eylemleri](#-özel-ai-eylemleri)
+  - [🧠 Bilgi kartları ve aralıklı tekrar](#-bilgi-kartları-ve-aralıklı-tekrar)
   - [🔄 İki dilli / Yalnızca çeviri](#-i̇ki-dilli--yalnızca-çeviri)
   - [✨ Seçili metin çevirisi](#-seçili-metin-çevirisi)
   - [🧠 Bağlama duyarlı çeviri](#-bağlama-duyarlı-çeviri)
@@ -115,53 +117,53 @@ Kullanıcı ya da geliştirici olmanız fark etmez; Read Frog bu vizyona giden y
 
 Read Frog'un güçlü özellikleriyle günlük web okumalarınızı sürükleyici bir dil öğrenme deneyimine dönüştürün.
 
-### 🪄 [Özel AI Eylemleri][docs-tutorial]
+### 🪄 [Özel AI Eylemleri][docs-custom-actions]
 
 Seçtiğiniz metni okuma ve öğrenme biçiminize uygun, yeniden kullanılabilir AI araçlarına dönüştürün. Kendi istemlerinizi ve yapılandırılmış çıktı alanlarınızı tanımlayın; sağlayıcı, model ve simgeyi seçin; ardından sözlük arama, yeniden yazma, özetleme, açıklama veya tasarladığınız herhangi bir iş akışını seçim araç çubuğundan çalıştırın.
 
 Yerleşik **Sözlük** ve **Yazıyı İyileştir** şablonlarıyla başlayabilir ya da sıfırdan bir eylem oluşturabilirsiniz. Yapılandırılmış sonuçları daha sonra çalışmak üzere Notebase alanlarına eşleyip kaydedebilirsiniz.
 
-### 🧠 [Bilgi kartları ve aralıklı tekrar][docs-tutorial]
+### 🧠 [Bilgi kartları ve aralıklı tekrar][docs-learning]
 
 Kelimeleri, tanımları, örnek cümleleri, çevirileri ve okuma notlarını Notebase'e kaydedin; ardından özelleştirilebilir kart şablonlarıyla bilgi kartlarına dönüştürün. Okurken keşfettiğiniz içerik, akışınızı bozmadan çalışma materyaline dönüşür.
 
 Zamanı gelen kartları çevrimiçi gözden geçirin ve her birini **Tekrar**, **Zor**, **İyi** veya **Kolay** olarak değerlendirin. Read Frog'un aralıklı tekrar planlayıcısı, geri bildiriminize göre her kartı unutmanızdan hemen önce yeniden gösterir.
 
-### 🔄 [İki dilli / Yalnızca çeviri][docs-tutorial]
+### 🔄 [İki dilli / Yalnızca çeviri][docs-page-translation]
 
 İki çeviri görüntüleme modu arasında kolayca geçiş yapın. **İki dilli mod**, orijinal metni çeviriyle birlikte gösterir ve öğrenme ile karşılaştırma için idealdir. **Yalnızca çeviri modu**, orijinal metni çeviriyle değiştirerek daha sade bir okuma deneyimi sunar.
 
 Çeviri aktifken mod değiştirdiğinizde uzantı görünen tüm içeriği otomatik olarak yeniden çevirir; sayfayı yenilemeniz gerekmez.
 
-### ✨ [Seçili metin çevirisi][docs-tutorial]
+### ✨ [Seçili metin çevirisi][docs-selection-translation]
 
 Web sayfasındaki herhangi bir metni seçtiğinizde akıllı bir araç çubuğu açılır. **Çevir** sonucu gerçek zamanlı gösterir, **Açıkla** seviyenize göre ayrıntılı açıklama verir, **Seslendir** ise metni TTS ile okur.
 
 Araç çubuğu görünüm alanı içinde kalacak şekilde konumlanır, sürüklenebilir ve tüm web sitelerinde çalışır.
 
-### 🧠 [Bağlama duyarlı çeviri][docs-tutorial]
+### 🧠 [Bağlama duyarlı çeviri][blog-context-translation]
 
 AI'nin okuduğunuz içeriğin tam bağlamını anlamasını sağlayın. Read Frog sayfa başlığını ve sayfa içeriğinin kısa bir Markdown sürümünü çıkarır, daha doğru ve bağlama uygun çeviri için AI'ye iletir.
 
 Teknik terimler alanına göre doğru çevrilir, edebi ifadeler nüansını korur ve belirsiz ifadeler çevredeki içeriğe göre yorumlanır.
 
-### 🎬 [Altyazı çevirisi][docs-tutorial]
+### 🎬 [Altyazı çevirisi][video-subtitles]
 
-YouTube altyazılarını doğrudan video oynatıcıda çevirin. Yabancı dilde içerik izlerken çeviri orijinal altyazıyla birlikte gösterilir.
+YouTube, X ve Netflix altyazılarını doğrudan video oynatıcıda çevirin. Çeviri, orijinal satırla birlikte ve videoyla eş zamanlı gösterilir. Altyazısı olmayan YouTube videolarında AI, sesi yazıya döküp aynı iki dilli altyazıyı gösterebilir (Pro ve Ultra planlarına dahildir). Altyazıdaki herhangi bir kelimeyi seçerek anlamına bakabilir ve tekrar için kaydedebilirsiniz.
 
-### 🔊 [Metinden sese (TTS)][docs-tutorial]
+### 🔊 [Metinden sese (TTS)][docs-tts]
 
-Seçili metni yüksek kaliteli AI sesleriyle dinleyin. **Edge TTS** tarafından desteklenir, tamamen ücretsizdir ve 80+ dilde 150+ ses sunar. Hız, perde ve ses düzeyini ayarlayabilirsiniz.
+Seçili metni yüksek kaliteli AI sesleriyle dinleyin. Tamamen ücretsizdir ve 70+ dilde 300+ ses sunar. Hız, perde ve ses düzeyini ayarlayabilirsiniz.
 
 Otomatik dil algılama ve dile göre ses eşleme, her dil için doğru sesi seçmeye yardımcı olur. Uzun metinler doğal cümle sınırlarında bölünür ve sonraki parça önceden yüklenir.
 
-### 📦 [Toplu istekler][docs-tutorial]
+### 📦 [Toplu istekler][docs-request-control]
 
 Akıllı istek toplama ile API maliyetlerinde %70'e kadar tasarruf edin. Read Frog birden çok çeviri isteğini tek API çağrısında birleştirerek kaliteyi korurken overhead ve token kullanımını azaltır.
 
 Sistem üstel geri çekilmeli yeniden deneme ve toplu işlem başarısız olduğunda tekil isteklere otomatik dönüş içerir.
 
-### 🤖 [20+ AI sağlayıcısı][docs-tutorial]
+### 🤖 [20+ AI sağlayıcısı][docs-providers]
 
 Vercel AI SDK üzerinden OpenAI, DeepSeek, Anthropic Claude, Google Gemini, xAI Grok, Groq, Mistral, Ollama ve daha fazlası dahil 20+ AI sağlayıcısına bağlanın. Her sağlayıcı için özel endpoint, API key ve model ayarları yapılandırabilirsiniz.
 
@@ -187,7 +189,7 @@ Proje yapısı: [DeepWiki](https://deepwiki.com/mengxi-ream/read-frog)
 
 AI ile projeyi anlama: [Dosu](https://app.dosu.dev/29569286-71ba-47dd-b038-c7ab1b9d0df7/documents)
 
-Daha fazla bilgi için [Contribution Guide](https://readfrog.app/en/docs/code-contribution/contribution-guide) bölümüne bakın.
+Daha fazla bilgi için [Katkı Kılavuzu](https://www.readfrog.app/tr/docs/contributing) sayfasına bakın.
 
 ReadFrog, GPLv3 ve ticari lisans ile çift lisanslıdır.
 
@@ -261,10 +263,18 @@ Her bağış daha iyi bir dil öğrenme deneyimi oluşturmamıza yardımcı olur
 [traditional-chinese-shield]: https://img.shields.io/badge/%E7%B9%81%E9%AB%94%E4%B8%AD%E6%96%87-gray?style=flat-square
 [turkish-shield]: https://img.shields.io/badge/T%C3%BCrk%C3%A7e-gray?style=flat-square
 [vietnamese-shield]: https://img.shields.io/badge/Ti%E1%BA%BFng%20Vi%E1%BB%87t-gray?style=flat-square
-[website]: https://readfrog.app
+[website]: https://www.readfrog.app/tr
 [wechat-link]: ../assets/wechat-account.jpg
 [wechat-shield-badge]: https://img.shields.io/badge/chat-WeChat-07C160?style=for-the-badge&logo=wechat&logoColor=white&labelColor=black
 
-<!-- Feature docs link -->
+<!-- Feature links -->
 
-[docs-tutorial]: https://readfrog.app/docs
+[blog-context-translation]: https://www.readfrog.app/tr/blog/smart-context-translation
+[docs-custom-actions]: https://www.readfrog.app/tr/docs/custom-actions
+[docs-learning]: https://www.readfrog.app/tr/docs/learning
+[docs-page-translation]: https://www.readfrog.app/tr/docs/page-translation
+[docs-providers]: https://www.readfrog.app/tr/docs/providers/overview
+[docs-request-control]: https://www.readfrog.app/tr/docs/request-control
+[docs-selection-translation]: https://www.readfrog.app/tr/docs/selection-translation
+[docs-tts]: https://www.readfrog.app/tr/docs/tts
+[video-subtitles]: https://www.readfrog.app/tr/docs/video-subtitles

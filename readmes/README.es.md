@@ -13,13 +13,13 @@
   </a>
 </p>
 
-Una extensión de navegador open source para aprender idiomas con IA.<br/>
-Compatible con traducción inmersiva, análisis de artículos, múltiples modelos de IA y más.<br/>
+Una extensión de navegador para aprender idiomas con IA y una alternativa de código abierto a Immersive Translate.<br/>
+Traduce páginas web, las frases que seleccionas y los subtítulos de YouTube, X y Netflix. Luego guarda las palabras que encuentras y repásalas como tarjetas con un calendario FSRS.<br/>
 Domina idiomas con más facilidad y profundidad usando IA directamente en tu navegador.
 
 [![English][english-shield]](../README.md) [![简体中文][chinese-shield]](./README.zh-CN.md) [![繁體中文][traditional-chinese-shield]](./README.zh-TW.md) [![日本語][japanese-shield]](./README.ja.md) [![한국어][korean-shield]](./README.ko.md) [![Español][spanish-shield]](./README.es.md) [![Русский][russian-shield]](./README.ru.md) [![Türkçe][turkish-shield]](./README.tr.md) [![Tiếng Việt][vietnamese-shield]](./README.vi.md)
 
-[Sitio oficial](https://readfrog.app) · [Tutorial](https://www.readfrog.app/docs) · [Cambios][github-release-link] · [Blog](https://www.readfrog.app/blog)
+[Sitio oficial](https://www.readfrog.app/es) · [Todas las funciones](https://www.readfrog.app/es/features) · [Tutorial](https://www.readfrog.app/es/docs) · [Cambios][github-release-link] · [Blog](https://www.readfrog.app/es/blog) · [vs Immersive Translate (en inglés)](https://www.readfrog.app/en/compare/immersive-translate)
 
 <!-- SHIELD GROUP -->
 
@@ -49,6 +49,8 @@ Domina idiomas con más facilidad y profundidad usando IA directamente en tu nav
   - [Descarga](#descarga)
   - [Comunidad](#comunidad)
 - [✨ Funciones](#-funciones)
+  - [🪄 Acciones AI personalizadas](#-acciones-ai-personalizadas)
+  - [🧠 Tarjetas y repetición espaciada](#-tarjetas-y-repetición-espaciada)
   - [🔄 Bilingüe / Solo traducción](#-bilingüe--solo-traducción)
   - [✨ Traducción de selección](#-traducción-de-selección)
   - [🧠 Traducción con contexto](#-traducción-con-contexto)
@@ -115,53 +117,53 @@ Tanto si eres usuario como desarrollador, Read Frog puede ser una parte importan
 
 Convierte tu lectura diaria en la web en una experiencia inmersiva de aprendizaje de idiomas con Read Frog.
 
-### 🪄 [Acciones AI personalizadas][docs-tutorial]
+### 🪄 [Acciones AI personalizadas][docs-custom-actions]
 
 Convierte el texto seleccionado en herramientas de IA reutilizables que se adapten a tu forma de leer y aprender. Define tus propios prompts y campos de salida estructurados, elige proveedor, modelo e icono, y ejecuta la acción desde la barra de selección para consultar palabras, reescribir, resumir, explicar o crear cualquier flujo de trabajo.
 
 Empieza con las plantillas integradas de **Diccionario** y **Mejorar escritura**, o crea una acción desde cero. También puedes asignar y guardar los resultados estructurados en Notebase para estudiarlos después.
 
-### 🧠 [Tarjetas y repetición espaciada][docs-tutorial]
+### 🧠 [Tarjetas y repetición espaciada][docs-learning]
 
 Guarda vocabulario, definiciones, ejemplos, traducciones y notas de lectura en Notebase, y conviértelos en tarjetas con plantillas personalizables. Lo que descubres mientras lees se transforma en material de estudio sin interrumpir tu lectura.
 
 Repasa en línea las tarjetas pendientes y califica cada una como **Otra vez**, **Difícil**, **Bien** o **Fácil**. El planificador de repetición espaciada de Read Frog usa tus respuestas para mostrar cada tarjeta de nuevo justo antes de que la olvides.
 
-### 🔄 [Bilingüe / Solo traducción][docs-tutorial]
+### 🔄 [Bilingüe / Solo traducción][docs-page-translation]
 
 Cambia sin fricción entre dos modos de traducción. El **modo bilingüe** muestra el texto original junto a su traducción, ideal para aprender y comparar. El modo **solo traducción** reemplaza el texto original para una lectura más limpia.
 
 Si cambias de modo mientras la traducción está activa, la extensión vuelve a traducir automáticamente todo el contenido visible sin recargar la página.
 
-### ✨ [Traducción de selección][docs-tutorial]
+### ✨ [Traducción de selección][docs-selection-translation]
 
 Selecciona cualquier texto en una página para abrir una barra de herramientas inteligente. **Traducir** muestra el resultado en streaming, **Explicar** ofrece una explicación adaptada a tu nivel y **Leer** reproduce el texto con TTS.
 
 La barra se coloca automáticamente dentro de la ventana, se puede arrastrar y funciona en cualquier sitio web.
 
-### 🧠 [Traducción con contexto][docs-tutorial]
+### 🧠 [Traducción con contexto][blog-context-translation]
 
 Permite que la IA entienda el contexto completo de lo que lees. Read Frog extrae el título de la página y una versión Markdown concisa del contenido para generar traducciones más precisas y adecuadas al contexto.
 
 Así los términos técnicos se traducen correctamente, las expresiones literarias conservan matices y las frases ambiguas se interpretan según el contenido que las rodea.
 
-### 🎬 [Traducción de subtítulos][docs-tutorial]
+### 🎬 [Traducción de subtítulos][video-subtitles]
 
-Traduce subtítulos de YouTube directamente en el reproductor. Puedes ver contenido en otros idiomas con la traducción junto al subtítulo original.
+Traduce los subtítulos de YouTube, X y Netflix directamente en el reproductor. La traducción aparece junto a la línea original, sincronizada con el vídeo. En los vídeos de YouTube sin subtítulos, la IA puede transcribir el audio y mostrarlo con los mismos subtítulos bilingües (incluido en Pro y Ultra). Selecciona cualquier palabra de los subtítulos para consultarla y guardarla para repasar.
 
-### 🔊 [Texto a voz (TTS)][docs-tutorial]
+### 🔊 [Texto a voz (TTS)][docs-tts]
 
-Escucha cualquier texto seleccionado con voces de IA de alta calidad. Funciona con **Edge TTS**, es completamente gratis y ofrece más de 150 voces en más de 80 idiomas. Puedes ajustar velocidad, tono y volumen.
+Escucha cualquier texto seleccionado con voces de IA de alta calidad. Es completamente gratis y ofrece más de 300 voces en más de 70 idiomas. Puedes ajustar velocidad, tono y volumen.
 
 La detección automática de idioma y el mapeo de voces por idioma ayudan a elegir la voz adecuada. El texto largo se divide en límites naturales y se precarga el siguiente fragmento para una reproducción fluida.
 
-### 📦 [Solicitudes por lotes][docs-tutorial]
+### 📦 [Solicitudes por lotes][docs-request-control]
 
 Ahorra hasta un 70% en costes de API con agrupación inteligente de solicitudes. Read Frog combina varias traducciones en una sola llamada, reduciendo overhead y uso de tokens sin sacrificar calidad.
 
 Incluye reintentos con backoff exponencial y fallback automático a solicitudes individuales si falla el procesamiento por lotes.
 
-### 🤖 [Más de 20 proveedores de IA][docs-tutorial]
+### 🤖 [Más de 20 proveedores de IA][docs-providers]
 
 Conecta con más de 20 proveedores mediante Vercel AI SDK: OpenAI, DeepSeek, Anthropic Claude, Google Gemini, xAI Grok, Groq, Mistral, Ollama y muchos más. Configura endpoints, API keys y modelos por proveedor.
 
@@ -187,7 +189,7 @@ Estructura del proyecto: [DeepWiki](https://deepwiki.com/mengxi-ream/read-frog)
 
 Pide a la IA que entienda el proyecto: [Dosu](https://app.dosu.dev/29569286-71ba-47dd-b038-c7ab1b9d0df7/documents)
 
-Consulta la [guía de contribución](https://readfrog.app/en/docs/code-contribution/contribution-guide) para más detalles.
+Consulta la [guía de contribución](https://www.readfrog.app/es/docs/contributing) para más detalles.
 
 ReadFrog tiene doble licencia: GPLv3 y licencia comercial.
 
@@ -261,10 +263,18 @@ Cada donación nos ayuda a crear una mejor experiencia de aprendizaje de idiomas
 [traditional-chinese-shield]: https://img.shields.io/badge/%E7%B9%81%E9%AB%94%E4%B8%AD%E6%96%87-gray?style=flat-square
 [turkish-shield]: https://img.shields.io/badge/T%C3%BCrk%C3%A7e-gray?style=flat-square
 [vietnamese-shield]: https://img.shields.io/badge/Ti%E1%BA%BFng%20Vi%E1%BB%87t-gray?style=flat-square
-[website]: https://readfrog.app
+[website]: https://www.readfrog.app/es
 [wechat-link]: ../assets/wechat-account.jpg
 [wechat-shield-badge]: https://img.shields.io/badge/chat-WeChat-07C160?style=for-the-badge&logo=wechat&logoColor=white&labelColor=black
 
-<!-- Feature docs link -->
+<!-- Feature links -->
 
-[docs-tutorial]: https://readfrog.app/docs
+[blog-context-translation]: https://www.readfrog.app/es/blog/smart-context-translation
+[docs-custom-actions]: https://www.readfrog.app/es/docs/custom-actions
+[docs-learning]: https://www.readfrog.app/es/docs/learning
+[docs-page-translation]: https://www.readfrog.app/es/docs/page-translation
+[docs-providers]: https://www.readfrog.app/es/docs/providers/overview
+[docs-request-control]: https://www.readfrog.app/es/docs/request-control
+[docs-selection-translation]: https://www.readfrog.app/es/docs/selection-translation
+[docs-tts]: https://www.readfrog.app/es/docs/tts
+[video-subtitles]: https://www.readfrog.app/es/docs/video-subtitles

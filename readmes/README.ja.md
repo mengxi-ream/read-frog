@@ -13,13 +13,13 @@
   </a>
 </p>
 
-ブラウザ向けのオープンソース AI 言語学習拡張機能です。<br/>
-没入型翻訳、記事分析、複数の AI モデルなどに対応しています。<br/>
+AI で言語を学べるブラウザ拡張機能で、Immersive Translate のオープンソース代替としても使えます。<br/>
+ウェブページ、選んだ文、YouTube・X・Netflix の字幕を翻訳。出会った単語を保存して、FSRS のスケジュールでフラッシュカードとして復習します。<br/>
 ブラウザ上で AI を使い、言語を手軽に、深く学べます。
 
 [![English][english-shield]](../README.md) [![简体中文][chinese-shield]](./README.zh-CN.md) [![繁體中文][traditional-chinese-shield]](./README.zh-TW.md) [![日本語][japanese-shield]](./README.ja.md) [![한국어][korean-shield]](./README.ko.md) [![Español][spanish-shield]](./README.es.md) [![Русский][russian-shield]](./README.ru.md) [![Türkçe][turkish-shield]](./README.tr.md) [![Tiếng Việt][vietnamese-shield]](./README.vi.md)
 
-[公式サイト](https://readfrog.app) · [チュートリアル](https://www.readfrog.app/docs) · [更新履歴][github-release-link] · [ブログ](https://www.readfrog.app/blog)
+[公式サイト](https://www.readfrog.app/ja) · [すべての機能](https://www.readfrog.app/ja/features) · [チュートリアル](https://www.readfrog.app/ja/docs) · [更新履歴][github-release-link] · [ブログ](https://www.readfrog.app/ja/blog) · [vs Immersive Translate（英語）](https://www.readfrog.app/en/compare/immersive-translate)
 
 <!-- SHIELD GROUP -->
 
@@ -49,6 +49,8 @@
   - [ダウンロード](#ダウンロード)
   - [コミュニティ](#コミュニティ)
 - [✨ 機能](#-機能)
+  - [🪄 カスタムAIアクション](#-カスタムaiアクション)
+  - [🧠 フラッシュカードと間隔反復](#-フラッシュカードと間隔反復)
   - [🔄 バイリンガル / 翻訳のみ](#-バイリンガル--翻訳のみ)
   - [✨ 選択テキスト翻訳](#-選択テキスト翻訳)
   - [🧠 文脈対応翻訳](#-文脈対応翻訳)
@@ -115,53 +117,53 @@ Read Frog のビジョンは、あらゆるレベルの言語学習者に、使�
 
 Read Frog の機能で、毎日の Web 読書を没入型の言語学習体験に変えられます。
 
-### 🪄 [カスタムAIアクション][docs-tutorial]
+### 🪄 [カスタムAIアクション][docs-custom-actions]
 
 選択したテキストを、自分の読み方や学び方に合った再利用可能な AI ツールへ変えられます。プロンプトと構造化出力フィールドを定義し、プロバイダー、モデル、アイコンを選んで、辞書検索、書き換え、要約、解説などの独自ワークフローを選択ツールバーから直接実行できます。
 
 組み込みの**辞書**や**文章改善**テンプレートから始めることも、ゼロから作成することもできます。構造化された結果は Notebase にマッピングして保存し、後で学習に利用できます。
 
-### 🧠 [フラッシュカードと間隔反復][docs-tutorial]
+### 🧠 [フラッシュカードと間隔反復][docs-learning]
 
 語彙、定義、例文、翻訳、読書メモを Notebase に保存し、カスタマイズ可能なカードテンプレートからフラッシュカードを作成できます。読書中に見つけた内容を、流れを止めずに学習教材へ変えられます。
 
 期限が来たカードをオンラインで復習し、**もう一度**、**難しい**、**良い**、**簡単**で評価します。Read Frog の間隔反復スケジューラーが評価をもとに、忘れそうになる直前の最適なタイミングでカードを再表示します。
 
-### 🔄 [バイリンガル / 翻訳のみ][docs-tutorial]
+### 🔄 [バイリンガル / 翻訳のみ][docs-page-translation]
 
 2 つの翻訳表示モードをスムーズに切り替えられます。**バイリンガルモード**は原文と翻訳を並べて表示し、学習や比較に適しています。**翻訳のみモード**は原文を置き換え、よりすっきり読めます。
 
 翻訳中にモードを切り替えると、表示中の内容を自動で再翻訳するため、ページを更新せずに自然に切り替えられます。
 
-### ✨ [選択テキスト翻訳][docs-tutorial]
+### ✨ [選択テキスト翻訳][docs-selection-translation]
 
 Web ページ上の任意のテキストを選択すると、便利なツールバーが表示されます。**翻訳**はリアルタイムに結果をストリーミングし、**解説**はあなたのレベルに合わせて詳しく説明し、**読み上げ**は TTS で音声化します。
 
 ツールバーは画面内に収まるよう自動配置され、ドラッグ操作にも対応し、あらゆるサイトで利用できます。
 
-### 🧠 [文脈対応翻訳][docs-tutorial]
+### 🧠 [文脈対応翻訳][blog-context-translation]
 
 読んでいる内容の文脈を AI に理解させます。有効にすると、Read Frog はページタイトルと簡潔な Markdown 版の本文を抽出し、より正確で文脈に合った翻訳のために AI へ渡します。
 
 専門用語は分野に応じて正しく訳され、文学的表現はニュアンスを保ち、曖昧な表現も周囲の文脈に基づいて解釈されます。
 
-### 🎬 [字幕翻訳][docs-tutorial]
+### 🎬 [字幕翻訳][video-subtitles]
 
-YouTube 字幕を動画プレイヤー内で直接翻訳できます。外国語コンテンツを視聴しながら、原字幕と翻訳を並べて確認できます。
+YouTube・X・Netflix の字幕を動画プレイヤー内で直接翻訳できます。訳文は原文の字幕と一緒に、動画に合わせて表示されます。字幕のない YouTube 動画でも、AI が音声を文字起こしして同じ二言語字幕を表示できます（Pro・Ultra プランに含まれます）。字幕の単語を選択すれば、その場で意味を調べて復習用に保存できます。
 
-### 🔊 [テキスト読み上げ (TTS)][docs-tutorial]
+### 🔊 [テキスト読み上げ (TTS)][docs-tts]
 
-選択したテキストを高品質な AI 音声で聞けます。**Edge TTS** により完全無料で、150+ 種類の音声と 80+ 言語に対応しています。速度、ピッチ、音量も調整できます。
+選択したテキストを高品質な AI 音声で聞けます。完全無料で、300+ 種類の音声と 70+ 言語に対応しています。速度、ピッチ、音量も調整できます。
 
 自動言語検出と言語別の音声マッピングにより、各言語に適した音声を選べます。長文は自然な区切りで分割し、次の部分を先読みするため、発音練習やリスニング学習に適しています。
 
-### 📦 [バッチリクエスト][docs-tutorial]
+### 📦 [バッチリクエスト][docs-request-control]
 
 複数の翻訳リクエストをまとめて 1 回の API 呼び出しにすることで、API コストを最大 70% 削減できます。翻訳品質を保ちながらオーバーヘッドと token 使用量を減らします。
 
 指数バックオフ付きの再試行と、バッチ処理失敗時の個別リクエストへの自動フォールバックも備えています。
 
-### 🤖 [20+ AI プロバイダー][docs-tutorial]
+### 🤖 [20+ AI プロバイダー][docs-providers]
 
 Vercel AI SDK を通じて OpenAI、DeepSeek、Anthropic Claude、Google Gemini、xAI Grok、Groq、Mistral、Ollama など 20+ の AI プロバイダーに接続できます。各プロバイダーごとにエンドポイント、API キー、モデル設定を調整できます。
 
@@ -187,7 +189,7 @@ Vercel AI SDK を通じて OpenAI、DeepSeek、Anthropic Claude、Google Gemini�
 
 AI にプロジェクトを理解させる：[Dosu](https://app.dosu.dev/29569286-71ba-47dd-b038-c7ab1b9d0df7/documents)
 
-詳しくは [Contribution Guide](https://readfrog.app/en/docs/code-contribution/contribution-guide) を確認してください。
+詳しくは[貢献ガイド](https://www.readfrog.app/ja/docs/contributing)を確認してください。
 
 ReadFrog は GPLv3 と商用ライセンスのデュアルライセンスです。
 
@@ -261,10 +263,18 @@ ReadFrog は GPLv3 と商用ライセンスのデュアルライセンスです�
 [traditional-chinese-shield]: https://img.shields.io/badge/%E7%B9%81%E9%AB%94%E4%B8%AD%E6%96%87-gray?style=flat-square
 [turkish-shield]: https://img.shields.io/badge/T%C3%BCrk%C3%A7e-gray?style=flat-square
 [vietnamese-shield]: https://img.shields.io/badge/Ti%E1%BA%BFng%20Vi%E1%BB%87t-gray?style=flat-square
-[website]: https://readfrog.app
+[website]: https://www.readfrog.app/ja
 [wechat-link]: ../assets/wechat-account.jpg
 [wechat-shield-badge]: https://img.shields.io/badge/chat-WeChat-07C160?style=for-the-badge&logo=wechat&logoColor=white&labelColor=black
 
-<!-- Feature docs link -->
+<!-- Feature links -->
 
-[docs-tutorial]: https://readfrog.app/docs
+[blog-context-translation]: https://www.readfrog.app/ja/blog/smart-context-translation
+[docs-custom-actions]: https://www.readfrog.app/ja/docs/custom-actions
+[docs-learning]: https://www.readfrog.app/ja/docs/learning
+[docs-page-translation]: https://www.readfrog.app/ja/docs/page-translation
+[docs-providers]: https://www.readfrog.app/ja/docs/providers/overview
+[docs-request-control]: https://www.readfrog.app/ja/docs/request-control
+[docs-selection-translation]: https://www.readfrog.app/ja/docs/selection-translation
+[docs-tts]: https://www.readfrog.app/ja/docs/tts
+[video-subtitles]: https://www.readfrog.app/ja/docs/video-subtitles

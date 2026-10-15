@@ -13,13 +13,13 @@
   </a>
 </p>
 
-Một tiện ích mở rộng trình duyệt mã nguồn mở hỗ trợ học ngôn ngữ bằng AI.<br/>
-Hỗ trợ dịch nhập vai, phân tích bài viết, nhiều mô hình AI và nhiều tính năng khác.<br/>
+Tiện ích mở rộng trình duyệt giúp học ngôn ngữ bằng AI, và là lựa chọn thay thế mã nguồn mở cho Immersive Translate.<br/>
+Dịch trang web, câu bạn chọn và phụ đề trên YouTube, X và Netflix. Sau đó lưu từ mới và ôn tập bằng flashcard theo lịch FSRS.<br/>
 Học ngôn ngữ dễ hơn và sâu hơn ngay trong trình duyệt của bạn.
 
 [![English][english-shield]](../README.md) [![简体中文][chinese-shield]](./README.zh-CN.md) [![繁體中文][traditional-chinese-shield]](./README.zh-TW.md) [![日本語][japanese-shield]](./README.ja.md) [![한국어][korean-shield]](./README.ko.md) [![Español][spanish-shield]](./README.es.md) [![Русский][russian-shield]](./README.ru.md) [![Türkçe][turkish-shield]](./README.tr.md) [![Tiếng Việt][vietnamese-shield]](./README.vi.md)
 
-[Trang chính thức](https://readfrog.app) · [Hướng dẫn](https://www.readfrog.app/docs) · [Nhật ký phát hành][github-release-link] · [Blog](https://www.readfrog.app/blog)
+[Trang chính thức](https://www.readfrog.app/vi) · [Tất cả tính năng](https://www.readfrog.app/vi/features) · [Hướng dẫn](https://www.readfrog.app/vi/docs) · [Nhật ký phát hành][github-release-link] · [Blog](https://www.readfrog.app/vi/blog) · [vs Immersive Translate (tiếng Anh)](https://www.readfrog.app/en/compare/immersive-translate)
 
 <!-- SHIELD GROUP -->
 
@@ -49,6 +49,8 @@ Học ngôn ngữ dễ hơn và sâu hơn ngay trong trình duyệt của bạn.
   - [Tải xuống](#tải-xuống)
   - [Cộng đồng](#cộng-đồng)
 - [✨ Tính năng](#-tính-năng)
+  - [🪄 Hành động AI tùy chỉnh](#-hành-động-ai-tùy-chỉnh)
+  - [🧠 Thẻ ghi nhớ và lặp lại ngắt quãng](#-thẻ-ghi-nhớ-và-lặp-lại-ngắt-quãng)
   - [🔄 Song ngữ / Chỉ bản dịch](#-song-ngữ--chỉ-bản-dịch)
   - [✨ Dịch văn bản đã chọn](#-dịch-văn-bản-đã-chọn)
   - [🧠 Dịch theo ngữ cảnh](#-dịch-theo-ngữ-cảnh)
@@ -115,53 +117,53 @@ Dù bạn là người dùng hay nhà phát triển, Read Frog có thể là m�
 
 Biến việc đọc web hằng ngày thành trải nghiệm học ngôn ngữ nhập vai với các tính năng của Read Frog.
 
-### 🪄 [Hành động AI tùy chỉnh][docs-tutorial]
+### 🪄 [Hành động AI tùy chỉnh][docs-custom-actions]
 
 Biến văn bản đã chọn thành công cụ AI có thể tái sử dụng, phù hợp với cách bạn đọc và học. Tự định nghĩa prompt và các trường đầu ra có cấu trúc, chọn nhà cung cấp, mô hình và biểu tượng, rồi chạy tác vụ ngay từ thanh công cụ để tra từ, viết lại, tóm tắt, giải thích hoặc thực hiện quy trình riêng.
 
 Bắt đầu với mẫu **Từ điển** và **Cải thiện bài viết** có sẵn, hoặc tạo tác vụ từ đầu. Bạn cũng có thể ánh xạ và lưu kết quả có cấu trúc vào Notebase để học sau.
 
-### 🧠 [Thẻ ghi nhớ và lặp lại ngắt quãng][docs-tutorial]
+### 🧠 [Thẻ ghi nhớ và lặp lại ngắt quãng][docs-learning]
 
 Lưu từ vựng, định nghĩa, câu ví dụ, bản dịch và ghi chú đọc vào Notebase, sau đó biến chúng thành thẻ ghi nhớ bằng các mẫu thẻ có thể tùy chỉnh. Nội dung bạn bắt gặp khi đọc trở thành tài liệu học mà không làm gián đoạn mạch đọc.
 
 Ôn các thẻ đến hạn trực tuyến và đánh giá từng thẻ là **Lại**, **Khó**, **Tốt** hoặc **Dễ**. Bộ lập lịch lặp lại ngắt quãng của Read Frog dùng phản hồi này để đưa mỗi thẻ trở lại ngay trước khi bạn có thể quên.
 
-### 🔄 [Song ngữ / Chỉ bản dịch][docs-tutorial]
+### 🔄 [Song ngữ / Chỉ bản dịch][docs-page-translation]
 
 Chuyển đổi mượt mà giữa hai chế độ hiển thị bản dịch. **Chế độ song ngữ** hiển thị văn bản gốc cùng bản dịch, phù hợp để học và so sánh. **Chỉ bản dịch** thay thế văn bản gốc để trải nghiệm đọc gọn gàng hơn.
 
 Khi đang dịch, việc đổi chế độ sẽ tự động dịch lại toàn bộ nội dung đang hiển thị mà không cần tải lại trang.
 
-### ✨ [Dịch văn bản đã chọn][docs-tutorial]
+### ✨ [Dịch văn bản đã chọn][docs-selection-translation]
 
 Chọn bất kỳ đoạn văn bản nào trên trang để mở thanh công cụ thông minh. **Dịch** hiển thị kết quả theo thời gian thực, **Giải thích** đưa ra phần giải thích phù hợp với trình độ của bạn, còn **Đọc** phát âm văn bản bằng TTS.
 
 Thanh công cụ tự đặt vị trí trong khung nhìn, hỗ trợ kéo thả và hoạt động trên mọi website.
 
-### 🧠 [Dịch theo ngữ cảnh][docs-tutorial]
+### 🧠 [Dịch theo ngữ cảnh][blog-context-translation]
 
 Cho phép AI hiểu đầy đủ ngữ cảnh của nội dung bạn đang đọc. Read Frog trích xuất tiêu đề trang và phiên bản Markdown ngắn gọn của nội dung để AI tạo bản dịch chính xác và phù hợp ngữ cảnh hơn.
 
 Thuật ngữ kỹ thuật được dịch đúng trong lĩnh vực của nó, cách diễn đạt văn học giữ được sắc thái, còn những cụm từ mơ hồ được hiểu dựa trên nội dung xung quanh.
 
-### 🎬 [Dịch phụ đề][docs-tutorial]
+### 🎬 [Dịch phụ đề][video-subtitles]
 
-Dịch phụ đề YouTube trực tiếp trong trình phát video. Khi xem nội dung nước ngoài, bản dịch sẽ hiển thị cùng phụ đề gốc để biến video thành tài liệu học ngôn ngữ.
+Dịch phụ đề YouTube, X và Netflix ngay trong trình phát video. Bản dịch hiển thị cùng dòng phụ đề gốc và khớp theo video. Với video YouTube không có phụ đề, AI có thể chép lời từ âm thanh rồi hiển thị thành phụ đề song ngữ như trên (có trong gói Pro và Ultra). Chọn bất kỳ từ nào trong phụ đề để tra nghĩa và lưu lại để ôn tập.
 
-### 🔊 [Chuyển văn bản thành giọng nói (TTS)][docs-tutorial]
+### 🔊 [Chuyển văn bản thành giọng nói (TTS)][docs-tts]
 
-Nghe văn bản đã chọn bằng giọng AI chất lượng cao. Được hỗ trợ bởi **Edge TTS**, hoàn toàn miễn phí, có hơn 150 giọng trên hơn 80 ngôn ngữ, gồm tiếng Trung, tiếng Anh, tiếng Nhật, tiếng Hàn và nhiều ngôn ngữ khác. Bạn có thể chỉnh tốc độ, cao độ và âm lượng.
+Nghe văn bản đã chọn bằng giọng AI chất lượng cao. Hoàn toàn miễn phí, có hơn 300 giọng trên hơn 70 ngôn ngữ, gồm tiếng Trung, tiếng Anh, tiếng Nhật, tiếng Hàn và nhiều ngôn ngữ khác. Bạn có thể chỉnh tốc độ, cao độ và âm lượng.
 
 Tự động phát hiện ngôn ngữ và ánh xạ giọng nói theo từng ngôn ngữ giúp chọn đúng giọng. Văn bản dài được chia theo ranh giới câu tự nhiên và tải trước đoạn tiếp theo để phát mượt mà.
 
-### 📦 [Yêu cầu theo lô][docs-tutorial]
+### 📦 [Yêu cầu theo lô][docs-request-control]
 
 Tiết kiệm tới 70% chi phí API bằng cách gom yêu cầu thông minh. Read Frog nhóm nhiều yêu cầu dịch thành một lệnh gọi API duy nhất, giảm overhead và lượng token sử dụng mà vẫn giữ chất lượng dịch.
 
 Hệ thống có cơ chế retry với exponential backoff và tự động fallback về yêu cầu riêng lẻ nếu xử lý theo lô thất bại.
 
-### 🤖 [Hơn 20 nhà cung cấp AI][docs-tutorial]
+### 🤖 [Hơn 20 nhà cung cấp AI][docs-providers]
 
 Kết nối với hơn 20 nhà cung cấp AI qua Vercel AI SDK: OpenAI, DeepSeek, Anthropic Claude, Google Gemini, xAI Grok, Groq, Mistral, Ollama và nhiều hơn nữa. Bạn có thể cấu hình endpoint, API key và model cho từng nhà cung cấp.
 
@@ -187,7 +189,7 @@ Cấu trúc dự án: [DeepWiki](https://deepwiki.com/mengxi-ream/read-frog)
 
 Yêu cầu AI hiểu dự án: [Dosu](https://app.dosu.dev/29569286-71ba-47dd-b038-c7ab1b9d0df7/documents)
 
-Xem [Contribution Guide](https://readfrog.app/en/docs/code-contribution/contribution-guide) để biết thêm chi tiết.
+Xem [Hướng dẫn đóng góp](https://www.readfrog.app/vi/docs/contributing) để biết thêm chi tiết.
 
 ReadFrog được cấp phép kép theo GPLv3 và giấy phép thương mại.
 
@@ -261,10 +263,18 @@ Mỗi khoản đóng góp giúp chúng tôi xây dựng trải nghiệm học ng
 [traditional-chinese-shield]: https://img.shields.io/badge/%E7%B9%81%E9%AB%94%E4%B8%AD%E6%96%87-gray?style=flat-square
 [turkish-shield]: https://img.shields.io/badge/T%C3%BCrk%C3%A7e-gray?style=flat-square
 [vietnamese-shield]: https://img.shields.io/badge/Ti%E1%BA%BFng%20Vi%E1%BB%87t-gray?style=flat-square
-[website]: https://readfrog.app
+[website]: https://www.readfrog.app/vi
 [wechat-link]: ../assets/wechat-account.jpg
 [wechat-shield-badge]: https://img.shields.io/badge/chat-WeChat-07C160?style=for-the-badge&logo=wechat&logoColor=white&labelColor=black
 
-<!-- Feature docs link -->
+<!-- Feature links -->
 
-[docs-tutorial]: https://readfrog.app/docs
+[blog-context-translation]: https://www.readfrog.app/vi/blog/smart-context-translation
+[docs-custom-actions]: https://www.readfrog.app/vi/docs/custom-actions
+[docs-learning]: https://www.readfrog.app/vi/docs/learning
+[docs-page-translation]: https://www.readfrog.app/vi/docs/page-translation
+[docs-providers]: https://www.readfrog.app/vi/docs/providers/overview
+[docs-request-control]: https://www.readfrog.app/vi/docs/request-control
+[docs-selection-translation]: https://www.readfrog.app/vi/docs/selection-translation
+[docs-tts]: https://www.readfrog.app/vi/docs/tts
+[video-subtitles]: https://www.readfrog.app/vi/docs/video-subtitles

@@ -13,13 +13,13 @@
   </a>
 </p>
 
-An open-source AI-powered language learning extension for browsers.<br/>
-Supports immersive translation, article analysis, multiple AI models, and more.<br/>
+An AI language-learning extension for browsers, and an open-source alternative to Immersive Translate.<br/>
+Translate web pages, the sentences you select, and subtitles on YouTube, X, and Netflix. Then save the words you meet and review them as flashcards on an FSRS schedule.<br/>
 Master languages effortlessly and deeply with AI, right in your browser.
 
 [![English][english-shield]](./README.md) [![简体中文][chinese-shield]](./readmes/README.zh-CN.md) [![繁體中文][traditional-chinese-shield]](./readmes/README.zh-TW.md) [![日本語][japanese-shield]](./readmes/README.ja.md) [![한국어][korean-shield]](./readmes/README.ko.md) [![Español][spanish-shield]](./readmes/README.es.md) [![Русский][russian-shield]](./readmes/README.ru.md) [![Türkçe][turkish-shield]](./readmes/README.tr.md) [![Tiếng Việt][vietnamese-shield]](./readmes/README.vi.md)
 
-[Official Website](https://readfrog.app) · [Tutorial](https://www.readfrog.app/docs) · [Changelog][github-release-link] · [Blog](https://www.readfrog.app/blog)
+[Official Website](https://www.readfrog.app/en) · [All Features](https://www.readfrog.app/en/features) · [Tutorial](https://www.readfrog.app/en/docs) · [Changelog][github-release-link] · [Blog](https://www.readfrog.app/en/blog) · [vs Immersive Translate](https://www.readfrog.app/en/compare/immersive-translate)
 
 <!-- SHIELD GROUP -->
 
@@ -49,6 +49,8 @@ Master languages effortlessly and deeply with AI, right in your browser.
   - [Download](#download)
   - [Community](#community)
 - [✨ Features](#-features)
+  - [🪄 Custom AI Actions](#-custom-ai-actions)
+  - [🧠 Flashcards \& Spaced Repetition](#-flashcards--spaced-repetition)
   - [🔄 Bilingual / Translation Only](#-bilingual--translation-only)
   - [✨ Selection Translation](#-selection-translation)
   - [🧠 Context-Aware Translation](#-context-aware-translation)
@@ -122,7 +124,7 @@ Whether you are a user or a developer, Read Frog will be an important part of yo
 
 Transform your everyday web reading into an immersive language learning journey with Read Frog's powerful features.
 
-### 🪄 [Custom AI Actions][docs-tutorial]
+### 🪄 [Custom AI Actions][docs-custom-actions]
 
 Turn selected text into reusable AI tools that match the way you read and learn. Define your own prompts and structured output fields, choose a provider, model, and icon, then run the action directly from the selection toolbar for dictionary lookups, rewriting, summaries, explanations, or any workflow you design.
 
@@ -134,7 +136,7 @@ Start with the built-in **Dictionary** and **Improve Writing** templates, or bui
 
 </div>
 
-### 🧠 [Flashcards & Spaced Repetition][docs-tutorial]
+### 🧠 [Flashcards & Spaced Repetition][docs-learning]
 
 Save vocabulary, definitions, example sentences, translations, and reading notes to Notebase, then turn them into flashcards with customizable card templates. Content you discover while reading becomes study material without interrupting your flow.
 
@@ -148,7 +150,7 @@ Review due cards online and rate each one **Again**, **Hard**, **Good**, or **Ea
 
 <!-- ![][image-feat-bilingual] -->
 
-### 🔄 [Bilingual / Translation Only][docs-tutorial]
+### 🔄 [Bilingual / Translation Only][docs-page-translation]
 
 Switch seamlessly between two translation display modes. **Bilingual mode** shows the original text alongside its translation, perfect for learning and comparison. **Translation-only mode** replaces the original text entirely for a cleaner reading experience.
 
@@ -162,7 +164,7 @@ The extension automatically re-translates all visible content when you switch mo
 
 <!-- ![][image-feat-selection] -->
 
-### ✨ [Selection Translation][docs-tutorial]
+### ✨ [Selection Translation][docs-selection-translation]
 
 Select any text on a webpage to reveal a smart toolbar with powerful options. **Translate** streams the translation in real-time. **Explain** provides detailed explanations tailored to your language level. **Speak** reads the text aloud using text-to-speech.
 
@@ -176,7 +178,7 @@ The toolbar intelligently positions itself to stay within the viewport, supports
 
 <!-- ![][image-feat-context] -->
 
-### 🧠 [Context-Aware Translation][docs-tutorial]
+### 🧠 [Context-Aware Translation][blog-context-translation]
 
 Enable AI to understand the full context of what you're reading. When activated, Read Frog extracts the page title and a concise Markdown version of the page content, providing this context to the AI for more accurate, contextually-appropriate translations.
 
@@ -190,9 +192,9 @@ This means technical terms get translated correctly within their domain, literar
 
 <!-- ![][image-feat-subtitle] -->
 
-### 🎬 [Subtitle Translation][docs-tutorial]
+### 🎬 [Subtitle Translation][video-subtitles]
 
-Translate YouTube subtitles directly in the video player. Watch foreign language content with translations displayed alongside the original subtitles, making video content accessible for language learning.
+Translate subtitles on YouTube, X, and Netflix right in the video player. The translation appears with the original line, in sync with the video. For YouTube videos without captions, AI can transcribe the audio and show the result as the same bilingual subtitles (included in Pro and Ultra). Select any word in the subtitles to look it up and save it for review.
 
 <div align="right">
 
@@ -202,9 +204,9 @@ Translate YouTube subtitles directly in the video player. Watch foreign language
 
 <!-- ![][image-feat-tts] -->
 
-### 🔊 [Text-to-Speech (TTS)][docs-tutorial]
+### 🔊 [Text-to-Speech (TTS)][docs-tts]
 
-Listen to any selected text with high-quality AI voices. Powered by **Edge TTS** — completely free, with 150+ voices across 80+ languages including Chinese, English, Japanese, Korean, and many more. Adjust rate, pitch, and volume to your preference.
+Listen to any selected text with high-quality AI voices. It is completely free, with 300+ voices across 70+ languages including Chinese, English, Japanese, Korean, and many more. Adjust rate, pitch, and volume to your preference.
 
 Automatic language detection (basic or LLM-powered) with per-language voice mapping ensures the right voice for every language. Smart sentence-aware chunking handles long text by splitting at natural boundaries and prefetching the next chunk for seamless playback. Perfect for pronunciation practice and auditory learning.
 
@@ -216,7 +218,7 @@ Automatic language detection (basic or LLM-powered) with per-language voice mapp
 
 <!-- ![][image-feat-batch] -->
 
-### 📦 [Batch Requests][docs-tutorial]
+### 📦 [Batch Requests][docs-request-control]
 
 Save up to 70% on API costs with intelligent request batching. Read Frog groups multiple translation requests into single API calls, reducing overhead and token usage while maintaining translation quality.
 
@@ -230,7 +232,7 @@ The system includes smart retry logic with exponential backoff and automatic fal
 
 <!-- ![][image-feat-providers] -->
 
-### 🤖 [20+ AI Providers][docs-tutorial]
+### 🤖 [20+ AI Providers][docs-providers]
 
 Connect to 20+ AI providers through Vercel AI SDK: OpenAI, DeepSeek, Anthropic Claude, Google Gemini, xAI Grok, Groq, Mistral, Ollama, and many more. Configure custom endpoints, API keys, and model settings for each provider.
 
@@ -256,7 +258,7 @@ Project Structure: [DeepWiki](https://deepwiki.com/mengxi-ream/read-frog)
 
 Ask AI to understand the project: [Dosu](https://app.dosu.dev/29569286-71ba-47dd-b038-c7ab1b9d0df7/documents)
 
-Check out the [Contribution Guide](https://readfrog.app/en/docs/code-contribution/contribution-guide) for more details.
+Check out the [Contribution Guide](https://www.readfrog.app/en/docs/contributing) for more details.
 
 ReadFrog is dual-licensed under GPLv3 and a commercial license.
 
@@ -356,10 +358,18 @@ Every donation helps us build a better language learning experience. Thank you f
 [traditional-chinese-shield]: https://img.shields.io/badge/%E7%B9%81%E9%AB%94%E4%B8%AD%E6%96%87-gray?style=flat-square
 [turkish-shield]: https://img.shields.io/badge/T%C3%BCrk%C3%A7e-gray?style=flat-square
 [vietnamese-shield]: https://img.shields.io/badge/Ti%E1%BA%BFng%20Vi%E1%BB%87t-gray?style=flat-square
-[website]: https://readfrog.app
+[website]: https://www.readfrog.app/en
 [wechat-link]: ./assets/wechat-account.jpg
 [wechat-shield-badge]: https://img.shields.io/badge/chat-WeChat-07C160?style=for-the-badge&logo=wechat&logoColor=white&labelColor=black
 
-<!-- Feature docs link -->
+<!-- Feature links -->
 
-[docs-tutorial]: https://readfrog.app/docs
+[blog-context-translation]: https://www.readfrog.app/en/blog/smart-context-translation
+[docs-custom-actions]: https://www.readfrog.app/en/docs/custom-actions
+[docs-learning]: https://www.readfrog.app/en/docs/learning
+[docs-page-translation]: https://www.readfrog.app/en/docs/page-translation
+[docs-providers]: https://www.readfrog.app/en/docs/providers/overview
+[docs-request-control]: https://www.readfrog.app/en/docs/request-control
+[docs-selection-translation]: https://www.readfrog.app/en/docs/selection-translation
+[docs-tts]: https://www.readfrog.app/en/docs/tts
+[video-subtitles]: https://www.readfrog.app/en/features/youtube-subtitles
