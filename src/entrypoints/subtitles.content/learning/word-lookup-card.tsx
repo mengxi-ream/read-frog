@@ -1,5 +1,5 @@
 import { useAtomValue, useSetAtom } from "jotai"
-import { use, useLayoutEffect, useState } from "react"
+import { useState } from "react"
 import { customActionRequestAtom } from "@/components/custom-action/atoms"
 import { CustomActionPanel } from "@/components/custom-action/custom-action-panel"
 import { isSaveToNotebaseDialogOpenAtom } from "@/components/custom-action/save-to-notebase-dialog-atom"
@@ -10,28 +10,7 @@ import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-ho
 import { closeWordLookupAtom, wordLookupAtom } from "./atoms"
 import { isFromSubtitleLine } from "./page-events"
 import { useLookupPlayback } from "./use-lookup-playback"
-
-function useCardLayer() {
-  const shadowWrapper = use(ShadowWrapperContext)
-  const [layer] = useState(() => {
-    const element = document.createElement("div")
-    element.style.position = "absolute"
-    element.style.inset = "0"
-    element.style.pointerEvents = "none"
-    return element
-  })
-
-  useLayoutEffect(() => {
-    const root = shadowWrapper?.getRootNode()
-    if (!(root instanceof ShadowRoot)) {
-      return undefined
-    }
-    root.appendChild(layer)
-    return () => layer.remove()
-  }, [layer, shadowWrapper])
-
-  return layer
-}
+import { useTopLayerPortalContainer } from "./use-top-layer-portal-container"
 
 interface PinnedLayout {
   anchor: { x: number; y: number } | null
@@ -43,8 +22,9 @@ export function WordLookupCard() {
   const request = useAtomValue(customActionRequestAtom)
   const closeLookup = useSetAtom(closeWordLookupAtom)
   const isSaveToNotebaseDialogOpen = useAtomValue(isSaveToNotebaseDialogOpenAtom)
-  const layer = useCardLayer()
   const open = lookup !== null
+  const cardOrDialogOpen = open || isSaveToNotebaseDialogOpen
+  const container = useTopLayerPortalContainer(cardOrDialogOpen)
   const [pinnedLayout, setPinnedLayout] = useState<PinnedLayout | null>(null)
   if (!open && pinnedLayout) {
     setPinnedLayout(null)
@@ -53,8 +33,8 @@ export function WordLookupCard() {
   useLookupPlayback()
 
   return (
-    <ShadowWrapperContext value={layer}>
-      <ThemeProvider container={layer}>
+    <ShadowWrapperContext value={container}>
+      <ThemeProvider container={container}>
         <SelectionPopover.Root
           open={open}
           onOpenChange={(nextOpen) => {
@@ -84,12 +64,12 @@ export function WordLookupCard() {
         >
           <SelectionPopover.Content
             key={pinnedLayout?.sessionKey ?? request?.sessionKey ?? 0}
-            container={layer}
+            container={container}
           >
             <CustomActionPanel />
           </SelectionPopover.Content>
         </SelectionPopover.Root>
-        {(open || isSaveToNotebaseDialogOpen) && <SaveToNotebaseDialogHost />}
+        {cardOrDialogOpen && <SaveToNotebaseDialogHost />}
       </ThemeProvider>
     </ShadowWrapperContext>
   )
