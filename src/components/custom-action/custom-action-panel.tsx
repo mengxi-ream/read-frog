@@ -1,6 +1,4 @@
-import type { CustomActionRequest } from "./atoms"
-import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
-import type { CustomActionProviderRef } from "@/utils/providers/provider-registry"
+import type { ComponentProps } from "react"
 import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { useEffect, useMemo, useRef } from "react"
 import { useHostedAiProviderOptions } from "@/components/llm-providers/use-hosted-ai-provider-options"
@@ -28,6 +26,20 @@ import {
   useCustomActionExecution,
   useCustomActionWebPageContext,
 } from "./use-custom-action-execution"
+
+/**
+ * Keeps the hosted-status hook inside SelectionPopover.Content, which stays
+ * unmounted until the popover first opens — the selection app mounts on every
+ * page, and merely loading a page must not fire hosted-AI session/status
+ * requests.
+ */
+function CustomActionFooterContent({
+  providers,
+  ...props
+}: ComponentProps<typeof SelectionToolbarFooterContent>) {
+  const customActionProviders = useHostedAiProviderOptions("customAction", providers)
+  return <SelectionToolbarFooterContent providers={customActionProviders} {...props} />
+}
 
 export function CustomActionPanel() {
   const bodyRef = useRef<HTMLDivElement>(null)
@@ -130,6 +142,11 @@ export function CustomActionPanel() {
   // same sources those tokens are built from.
   const layoutSelection = executionContext?.promptTokens.selection ?? selectionText
   const layoutTargetCode = executionContext?.targetCode ?? language.targetCode
+  const titleText = (webPageContext?.webTitle ?? getSourceDocumentTitle()) || null
+  const saveSurface =
+    request.surface === ANALYTICS_SURFACE.VIDEO_SUBTITLES
+      ? ANALYTICS_SURFACE.VIDEO_SUBTITLES
+      : ANALYTICS_SURFACE.SELECTION_TOOLBAR
 
   return (
     <>
@@ -157,77 +174,26 @@ export function CustomActionPanel() {
         <SelectionToolbarErrorAlert error={error} />
       </SelectionPopover.Body>
       <ReviewDueTab source="extension_custom_ai_action" />
-      <CustomActionPanelFooter
-        action={action}
-        provider={provider}
+      <CustomActionFooterContent
+        paragraphsText={request.contextText}
         providers={providers}
-        contextText={request.contextText}
-        titleText={(webPageContext?.webTitle ?? getSourceDocumentTitle()) || null}
-        isRunning={isRunning}
-        result={result}
-        surface={request.surface}
+        titleText={titleText}
+        value={provider?.id ?? ""}
         onProviderChange={changeProvider}
         onRegenerate={regenerate}
-      />
+      >
+        {action && (
+          <>
+            <SaveToNotebaseButton
+              action={action}
+              isRunning={isRunning}
+              result={result}
+              surface={saveSurface}
+            />
+            <CustomActionToolButton action={action} />
+          </>
+        )}
+      </CustomActionFooterContent>
     </>
-  )
-}
-
-/**
- * Keeps the hosted-status hook inside SelectionPopover.Content, which stays
- * unmounted until the popover first opens — the selection app mounts on every
- * page, and merely loading a page must not fire hosted-AI session/status
- * requests.
- */
-function CustomActionPanelFooter({
-  action,
-  provider,
-  providers,
-  contextText,
-  titleText,
-  isRunning,
-  result,
-  surface,
-  onProviderChange,
-  onRegenerate,
-}: {
-  action: SelectionToolbarCustomAction | null
-  provider: CustomActionProviderRef | null
-  providers: ReturnType<typeof getSelectableProvidersForCapability>
-  contextText: string
-  titleText: string | null
-  isRunning: boolean
-  result: Record<string, unknown> | null
-  surface: CustomActionRequest["surface"]
-  onProviderChange: (providerId: string) => void
-  onRegenerate: () => void
-}) {
-  const hostedProviders = useHostedAiProviderOptions("customAction", providers)
-  const saveSurface =
-    surface === ANALYTICS_SURFACE.VIDEO_SUBTITLES
-      ? ANALYTICS_SURFACE.VIDEO_SUBTITLES
-      : ANALYTICS_SURFACE.SELECTION_TOOLBAR
-
-  return (
-    <SelectionToolbarFooterContent
-      paragraphsText={contextText}
-      providers={hostedProviders}
-      titleText={titleText}
-      value={provider?.id ?? ""}
-      onProviderChange={onProviderChange}
-      onRegenerate={onRegenerate}
-    >
-      {action && (
-        <>
-          <SaveToNotebaseButton
-            action={action}
-            isRunning={isRunning}
-            result={result}
-            surface={saveSurface}
-          />
-          <CustomActionToolButton action={action} />
-        </>
-      )}
-    </SelectionToolbarFooterContent>
   )
 }
