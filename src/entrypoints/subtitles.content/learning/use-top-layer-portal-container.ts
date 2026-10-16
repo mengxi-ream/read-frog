@@ -1,26 +1,36 @@
-import { use, useLayoutEffect, useState } from "react"
-import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-host"
+import { useLayoutEffect, useState } from "react"
+import themeCSS from "@/assets/styles/theme.css?inline"
+import { REACT_SHADOW_HOST_CLASS } from "@/utils/constants/dom-labels"
+import { ShadowHostBuilder } from "@/utils/react-shadow-host/shadow-host-builder"
 
 const TOP_LAYER_CONTAINER_CLASS =
   "pointer-events-none fixed inset-0 m-0 size-full max-h-none max-w-none overflow-visible border-0 bg-transparent p-0 text-inherit"
 
-export function useTopLayerPortalContainer(active: boolean) {
-  const shadowWrapper = use(ShadowWrapperContext)
-  const [container] = useState(() => {
-    const element = document.createElement("div")
-    element.setAttribute("popover", "manual")
-    element.className = TOP_LAYER_CONTAINER_CLASS
-    return element
+function createTopLayerHost() {
+  const host = document.createElement("div")
+  host.classList.add(REACT_SHADOW_HOST_CLASS)
+  const hostBuilder = new ShadowHostBuilder(host.attachShadow({ mode: "open" }), {
+    position: "block",
+    cssContent: [themeCSS],
+    inheritStyles: false,
   })
+  const container = document.createElement("div")
+  container.setAttribute("popover", "manual")
+  container.className = TOP_LAYER_CONTAINER_CLASS
+  hostBuilder.build().append(container)
+  return { host, hostBuilder, container }
+}
+
+export function useTopLayerPortalContainer(active: boolean) {
+  const [{ host, hostBuilder, container }] = useState(createTopLayerHost)
 
   useLayoutEffect(() => {
-    const shadowRoot = shadowWrapper?.getRootNode()
-    if (!(shadowRoot instanceof ShadowRoot)) {
-      return undefined
+    document.body.append(host)
+    return () => {
+      host.remove()
+      hostBuilder.cleanup()
     }
-    shadowRoot.appendChild(container)
-    return () => container.remove()
-  }, [container, shadowWrapper])
+  }, [host, hostBuilder])
 
   useLayoutEffect(() => {
     if (!active || !container.isConnected) {
