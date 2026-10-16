@@ -640,6 +640,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
       void this.switchSubtitlesFetcher(SUBTITLES_SOURCE.NATIVE, analyticsContext)
     } else {
       this.subtitlesScheduler?.hide()
+      subtitlesStore.set(closeWordLookupAtom)
       this.showNativeSubtitles()
       this.translationCoordinator?.stop()
     }
