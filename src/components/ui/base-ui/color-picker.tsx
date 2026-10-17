@@ -1417,6 +1417,7 @@ function ColorPickerPopover({
   const valueLabel = parsed
     ? rgbToHexStr(parsed.r, parsed.g, parsed.b, 1).slice(1).toUpperCase()
     : currentValue
+  const swatchOnly = !triggerLabel && !triggerShowValue
 
   return (
     <Popover.Root
@@ -1432,10 +1433,15 @@ function ColorPickerPopover({
     >
       <div className="inline-flex">
         <Popover.Trigger
+          // With nothing printed, the value becomes the button's name.
+          aria-label={swatchOnly ? `Color ${valueLabel}` : undefined}
           className={cn(
             "flex cursor-pointer items-center gap-2 border border-border px-2 text-[13px] font-medium hover:bg-muted",
             CONTROL_CLASS,
             SHAPE.input,
+            // A lone swatch sits in a square box, so the gap around it is the same on all four
+            // sides whatever height the caller picks.
+            swatchOnly && "aspect-square justify-center px-0",
             triggerClassName,
           )}
         >
