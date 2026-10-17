@@ -66,7 +66,9 @@ interface Rgba extends Rgb {
  * S=0 / V=0, so dragging to black and back doesn't reset the hue. `oklchH` does the same for
  * the OKLCH hue channel: it holds the user's stated H across the lossy RGB round-trip (so the
  * displayed H doesn't drift after release) and across achromatic colours (where an
- * RGB-derived H collapses to 0). The hue slider, hex and RGB edits, and HSL hue edits clear it.
+ * RGB-derived H collapses to 0). It only describes the colour it was stated for, so `update`
+ * drops it whenever h, s or v move, except on an OKLCH channel edit, which sets it. Alpha
+ * edits keep it.
  */
 interface ColorState {
   h: number
@@ -891,6 +893,8 @@ function ChannelTooltip({ label, children }: { label: string; children: ReactNod
 function HexInput({ value, onCommit }: { value: string; onCommit: (next: string) => void }) {
   const [draft, setDraft] = useState(value)
   const editingRef = useRef(false)
+  // Escape blurs before its reset renders, so the blur handler still sees the typed draft.
+  const cancelledRef = useRef(false)
 
   useEffect(() => {
     if (!editingRef.current) setDraft(value)
@@ -908,12 +912,14 @@ function HexInput({ value, onCommit }: { value: string; onCommit: (next: string)
         }}
         onBlur={() => {
           editingRef.current = false
-          if (draft !== value) onCommit(draft)
+          if (cancelledRef.current) cancelledRef.current = false
+          else if (draft !== value) onCommit(draft)
         }}
         onKeyDown={(e) => {
           if (e.key === "Enter") {
             e.currentTarget.blur()
           } else if (e.key === "Escape") {
+            cancelledRef.current = true
             setDraft(value)
             e.currentTarget.blur()
           }
@@ -964,6 +970,8 @@ function ScrubInput({
   // Set on pointerdown inside the scrub area (capture phase, before Base UI focuses the
   // input for scrubbing) so onFocus can tell scrub-focus from keyboard focus.
   const pointerDownRef = useRef(false)
+  // Set by Escape: the blur that follows drops the typed text instead of committing it.
+  const cancelledRef = useRef(false)
 
   const format = useMemo(() => {
     const f: Intl.NumberFormatOptions = { useGrouping: false }
@@ -994,6 +1002,12 @@ function ScrubInput({
         // blur land the final value. Nudges, scrubbing and wheel commit immediately.
         const reason = eventDetails.reason
         if (reason === "input-change" || reason === "input-paste" || reason === "input-clear") {
+          return
+        }
+        // Cancelling the blur commit leaves the controlled value alone, and NumberField then
+        // reprints it in place of the typed text.
+        if (reason === "input-blur" && cancelledRef.current) {
+          eventDetails.cancel()
           return
         }
         // Hue-style wrap: NumberField won't wrap natively, so shim it here (361 → 1, -1 → 359).
@@ -1056,6 +1070,7 @@ function ScrubInput({
             if (editing) e.stopPropagation()
           }}
           onFocus={(e) => {
+            cancelledRef.current = false
             if (pointerDownRef.current) return // scrub-initiated focus
             setEditing(true)
             e.currentTarget.select()
@@ -1066,22 +1081,10 @@ function ScrubInput({
               e.currentTarget.blur()
               return
             }
-            if (e.key !== "Escape") return
-            // Restore the committed value's text before blurring, so the blur commit is a
-            // no-op. Goes through the native setter because NumberField owns the value.
-            const input = e.currentTarget
-            // eslint-disable-next-line typescript/unbound-method -- invoked via .call below
-            const setter = Object.getOwnPropertyDescriptor(
-              window.HTMLInputElement.prototype,
-              "value",
-            )?.set
-            if (setter) {
-              const restored =
-                decimals === undefined ? String(Math.round(value)) : value.toFixed(decimals)
-              setter.call(input, percent ? `${restored}%` : restored)
-              input.dispatchEvent(new Event("input", { bubbles: true }))
+            if (e.key === "Escape") {
+              cancelledRef.current = true
+              e.currentTarget.blur()
             }
-            input.blur()
           }}
           className={cn(INPUT_TEXT_CLASS, "text-center", !editing && "pointer-events-none")}
         />
@@ -1115,7 +1118,7 @@ const CHANNEL_MODELS: Record<Exclude<ColorFormat, "hex">, ChannelModel> = {
     read: ({ r, g, b }) => [r, g, b],
     write: (index, n, { r, g, b }, color) => {
       const next = { r: index === 0 ? n : r, g: index === 1 ? n : g, b: index === 2 ? n : b }
-      return { ...rgbToHsvKeepingHue(next, color.h), oklchH: null }
+      return rgbToHsvKeepingHue(next, color.h)
     },
   },
   hsl: {
@@ -1133,8 +1136,7 @@ const CHANNEL_MODELS: Record<Exclude<ColorFormat, "hex">, ChannelModel> = {
       const h = index === 0 ? n : hsl.h
       const s = index === 1 ? n / 100 : hsl.s
       const l = index === 2 ? n / 100 : hsl.l
-      const hsv = rgbToHsvKeepingHue(hslToRgb(h, clamp01(s), clamp01(l)), h)
-      return index === 0 ? { ...hsv, oklchH: null } : hsv
+      return rgbToHsvKeepingHue(hslToRgb(h, clamp01(s), clamp01(l)), h)
     },
   },
   oklch: {
@@ -1269,7 +1271,9 @@ function ColorPicker({
   }
 
   const update = (patch: Partial<ColorState>) => {
-    const next = { ...color, ...patch }
+    const merged = { ...color, ...patch }
+    const moved = merged.h !== color.h || merged.s !== color.s || merged.v !== color.v
+    const next = moved && !("oklchH" in patch) ? { ...merged, oklchH: null } : merged
     // Slider steps and repeated commits often land on the colour we already have.
     if (isSameState(next, color)) return
     setColor(next)
@@ -1285,7 +1289,7 @@ function ColorPicker({
   const commitColor = (input: string) => {
     const p = parseColor(input)
     if (!p) return
-    update({ ...rgbToHsvKeepingHue(p, color.h), a: p.a, oklchH: null })
+    update({ ...rgbToHsvKeepingHue(p, color.h), a: p.a })
   }
 
   const rgb = roundedRgb(color)
@@ -1317,7 +1321,7 @@ function ColorPicker({
       />
 
       <div className="flex flex-col gap-1">
-        <HueSlider h={color.h} onChange={(h) => update({ h, oklchH: null })} />
+        <HueSlider h={color.h} onChange={(h) => update({ h })} />
         <AlphaSlider a={color.a} rgb={rgb} onChange={(a) => update({ a })} />
       </div>
 

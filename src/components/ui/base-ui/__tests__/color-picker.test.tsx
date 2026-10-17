@@ -1,0 +1,115 @@
+// @vitest-environment jsdom
+import { act, fireEvent, render, screen } from "@testing-library/react"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import { ColorPicker } from "@/components/ui/base-ui/color-picker"
+
+class NoopResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+
+beforeEach(() => {
+  vi.stubGlobal("ResizeObserver", NoopResizeObserver)
+})
+
+afterEach(() => {
+  vi.unstubAllGlobals()
+})
+
+function type(input: HTMLElement, text: string) {
+  act(() => input.focus())
+  fireEvent.change(input, { target: { value: text } })
+}
+
+function press(element: HTMLElement, key: string, init: KeyboardEventInit = {}) {
+  act(() => {
+    fireEvent.keyDown(element, { key, ...init })
+  })
+}
+
+function channel(name: string) {
+  return screen.getByRole<HTMLInputElement>("textbox", { name })
+}
+
+describe("ColorPicker", () => {
+  describe("hex field", () => {
+    it("commits the typed colour on Enter", () => {
+      const onValueChange = vi.fn<(value: string) => void>()
+      render(<ColorPicker defaultValue="#6B97FF" hideEyedropper onValueChange={onValueChange} />)
+
+      type(channel("Hex value"), "FF0000")
+      press(channel("Hex value"), "Enter")
+
+      expect(onValueChange).toHaveBeenLastCalledWith("#ff0000")
+      expect(channel("Hex value").value).toBe("FF0000")
+    })
+
+    it("puts the last colour back on Escape", () => {
+      const onValueChange = vi.fn<(value: string) => void>()
+      render(<ColorPicker defaultValue="#6B97FF" hideEyedropper onValueChange={onValueChange} />)
+
+      type(channel("Hex value"), "FF0000")
+      press(channel("Hex value"), "Escape")
+
+      expect(onValueChange).not.toHaveBeenCalled()
+      expect(channel("Hex value").value).toBe("6B97FF")
+    })
+  })
+
+  describe("numeric channels", () => {
+    it("commit the typed number on Enter", () => {
+      const onValueChange = vi.fn<(value: string) => void>()
+      render(<ColorPicker defaultValue="#6B97FF" hideEyedropper onValueChange={onValueChange} />)
+
+      type(channel("Alpha"), "40")
+      press(channel("Alpha"), "Enter")
+
+      expect(onValueChange).toHaveBeenLastCalledWith("#6b97ff66")
+      expect(channel("Alpha").value).toBe("40%")
+    })
+
+    it("put the last value back on Escape", () => {
+      const onValueChange = vi.fn<(value: string) => void>()
+      render(<ColorPicker defaultValue="#6B97FF" hideEyedropper onValueChange={onValueChange} />)
+
+      type(channel("Alpha"), "40")
+      press(channel("Alpha"), "Escape")
+
+      expect(onValueChange).not.toHaveBeenCalled()
+      expect(channel("Alpha").value).toBe("100%")
+    })
+  })
+
+  describe("OKLCH hue", () => {
+    // Black has no hue, so the typed one can only live in the sticky state.
+    function renderBlackWithStatedHue() {
+      render(<ColorPicker defaultValue="#000000" defaultFormat="oklch" hideEyedropper />)
+      type(channel("Hue"), "200")
+      press(channel("Hue"), "Enter")
+      expect(channel("Hue").value).toBe("200")
+    }
+
+    it("follows the colour once the square moves it", () => {
+      renderBlackWithStatedHue()
+
+      // Up to HSV (0, 50%, 50%): a dark red, whose OKLCH hue is about 22°.
+      const square = screen.getByRole("application", { name: "Saturation and brightness" })
+      for (let i = 0; i < 5; i++) {
+        press(square, "ArrowUp", { shiftKey: true })
+        press(square, "ArrowRight", { shiftKey: true })
+      }
+
+      expect(Number(channel("Hue").value)).toBeLessThan(40)
+    })
+
+    it("keeps the stated hue across alpha edits", () => {
+      renderBlackWithStatedHue()
+
+      type(channel("Alpha"), "50")
+      press(channel("Alpha"), "Enter")
+
+      expect(channel("Hue").value).toBe("200")
+    })
+  })
+})
