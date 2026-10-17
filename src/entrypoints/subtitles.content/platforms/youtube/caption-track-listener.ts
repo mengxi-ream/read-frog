@@ -76,6 +76,20 @@ class YoutubeCaptionTrackListener {
     void this.initializeObservers()
   }
 
+  stop() {
+    if (!this.started) {
+      return
+    }
+
+    this.started = false
+    // Invalidates a waitForElement still in flight; initializeObservers checks it on resume.
+    this.bindAttempt++
+    window.removeEventListener(YOUTUBE_NAVIGATE_FINISH_EVENT, this.handleNavigateFinish)
+    this.disconnectButtonObserver()
+    this.disconnectMenuObserver()
+    this.resetTrackedSelection()
+  }
+
   getCurrentTrackKey() {
     return this.lastTrackedSelection?.trackKey ?? null
   }
