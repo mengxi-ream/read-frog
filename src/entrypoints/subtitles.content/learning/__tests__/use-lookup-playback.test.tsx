@@ -29,7 +29,7 @@ function setOpen(open: boolean) {
   act(() => {
     subtitlesStore.set(
       wordLookupAtom,
-      open ? { cueStart: 0, tokenIndex: 0, anchor: { x: 0, y: 0 } } : null,
+      open ? { cueStart: 0, start: 0, end: 0, anchor: { x: 0, y: 0 } } : null,
     )
   })
 }

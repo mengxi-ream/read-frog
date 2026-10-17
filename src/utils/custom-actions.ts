@@ -78,6 +78,43 @@ export function findSelectionToolbarAction(
   return selectionToolbar.customActions.find((action) => action.id === actionId)
 }
 
+function resolveEnabledAction(
+  config: Config,
+  actionId: string,
+  fallbackId: BuiltInActionId,
+): SelectionToolbarCustomAction {
+  const action = findSelectionToolbarAction(config.selectionToolbar, actionId)
+  if (action && action.enabled !== false) {
+    return action
+  }
+  return getBuiltInAction(config.selectionToolbar, fallbackId)
+}
+
+export function resolveClickLookupAction(config: Config): SelectionToolbarCustomAction {
+  return resolveEnabledAction(
+    config,
+    config.wordLookup.clickActionId,
+    BUILT_IN_DICTIONARY_ACTION_ID,
+  )
+}
+
+export function resolveDragLookupAction(config: Config): SelectionToolbarCustomAction {
+  return resolveEnabledAction(
+    config,
+    config.wordLookup.dragActionId,
+    BUILT_IN_SENTENCE_ANALYSIS_ACTION_ID,
+  )
+}
+
+export function getLookupActionChoices(
+  selectionToolbar: SelectionToolbarConfig,
+  selectedActionId: string,
+): SelectionToolbarCustomAction[] {
+  return getSelectionToolbarActions(selectionToolbar).filter(
+    (action) => action.enabled !== false || action.id === selectedActionId,
+  )
+}
+
 export function resolveNoteSuggestionAction(
   selectionToolbar: SelectionToolbarConfig,
 ): SelectionToolbarCustomAction {

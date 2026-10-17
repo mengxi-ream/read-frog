@@ -5,6 +5,7 @@ import { i18n } from "@/utils/i18n"
 import { ConfigItem } from "../../../components/config-item"
 import { ConfigSection } from "../../../components/config-section"
 import { ShortcutLink } from "../../../components/shortcut-link"
+import { WordLookupActionItems } from "./word-lookup-action-items"
 
 /**
  * Whether subtitles get translated at all, when that starts, and whether AI re-cuts the lines
@@ -58,6 +59,7 @@ export function PreferenceSection() {
           }}
         />
       </ConfigItem>
+      <WordLookupActionItems />
     </ConfigSection>
   )
 }
