@@ -175,7 +175,7 @@ function TextStyleGroup({
           value={textStyle.color}
           onCommit={(color) => onChange({ color })}
           triggerShowValue={false}
-          triggerClassName="h-7 px-1.5"
+          triggerClassName="h-7"
           container={portalContainer}
         />
       </SettingRow>

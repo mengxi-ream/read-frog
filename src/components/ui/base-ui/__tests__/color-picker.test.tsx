@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import { ColorPicker } from "@/components/ui/base-ui/color-picker"
+import { ColorPicker, ColorPickerPopover } from "@/components/ui/base-ui/color-picker"
 
 class NoopResizeObserver {
   observe() {}
@@ -110,6 +110,20 @@ describe("ColorPicker", () => {
       press(channel("Alpha"), "Enter")
 
       expect(channel("Hue").value).toBe("200")
+    })
+  })
+
+  describe("popover trigger", () => {
+    it("names a swatch-only trigger after its color", () => {
+      render(<ColorPickerPopover value="#6B97FF" triggerShowValue={false} />)
+
+      expect(screen.getByRole("button", { name: "Color 6B97FF" })).toBeInTheDocument()
+    })
+
+    it("lets the printed value name the trigger otherwise", () => {
+      render(<ColorPickerPopover value="#6B97FF" />)
+
+      expect(screen.getByRole("button", { name: "6B97FF" })).not.toHaveAttribute("aria-label")
     })
   })
 })
