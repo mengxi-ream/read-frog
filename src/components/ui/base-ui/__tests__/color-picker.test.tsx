@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { act, fireEvent, render, screen } from "@testing-library/react"
+import { useState } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { ColorPicker, ColorPickerPopover } from "@/components/ui/base-ui/color-picker"
 
@@ -78,6 +79,65 @@ describe("ColorPicker", () => {
 
       expect(onValueChange).not.toHaveBeenCalled()
       expect(channel("Alpha").value).toBe("100%")
+    })
+  })
+
+  describe("controlled value", () => {
+    function Controlled() {
+      const [value, setValue] = useState("#ff0000")
+      return (
+        <>
+          <button type="button" onClick={() => setValue("#00ff00")}>
+            green
+          </button>
+          <button type="button" onClick={() => setValue("#0000ff")}>
+            blue
+          </button>
+          <ColorPicker value={value} onValueChange={setValue} hideEyedropper />
+        </>
+      )
+    }
+
+    it("applies an outside change back to a value the picker emitted", () => {
+      render(<Controlled />)
+
+      type(channel("Hex value"), "0000FF")
+      press(channel("Hex value"), "Enter")
+      fireEvent.click(screen.getByRole("button", { name: "green" }))
+      expect(channel("Hex value").value).toBe("00FF00")
+
+      // An undo: the parent restores the exact string the picker emitted earlier.
+      fireEvent.click(screen.getByRole("button", { name: "blue" }))
+      expect(channel("Hex value").value).toBe("0000FF")
+    })
+  })
+
+  describe("saturation square", () => {
+    it("stops dragging when it loses the pointer capture", () => {
+      const onValueChange = vi.fn<(value: string) => void>()
+      render(<ColorPicker defaultValue="#6B97FF" hideEyedropper onValueChange={onValueChange} />)
+      const square = screen.getByRole("application", { name: "Saturation and brightness" })
+      vi.spyOn(square, "getBoundingClientRect").mockReturnValue({
+        x: 0,
+        y: 0,
+        left: 0,
+        top: 0,
+        right: 100,
+        bottom: 100,
+        width: 100,
+        height: 100,
+        toJSON: () => ({}),
+      })
+      // jsdom has no pointer capture.
+      square.setPointerCapture = () => {}
+
+      fireEvent.pointerDown(square, { pointerId: 1, button: 0, clientX: 50, clientY: 50 })
+      // The drag ends without a pointerup on the square, e.g. a pointercancel.
+      fireEvent.lostPointerCapture(square, { pointerId: 1 })
+      onValueChange.mockClear()
+      fireEvent.pointerMove(square, { pointerId: 1, clientX: 10, clientY: 90 })
+
+      expect(onValueChange).not.toHaveBeenCalled()
     })
   })
 

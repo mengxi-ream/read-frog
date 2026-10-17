@@ -506,6 +506,9 @@ function SaturationSquare({ h, s, v, color, onChange }: SaturationSquareProps) {
         if (dragging) onChange(p.x, 1 - p.y)
       }}
       onPointerUp={() => setDragging(false)}
+      // A drag can also end without a pointerup (pointercancel, capture taken away); a stale
+      // flag would then let a plain hover move the colour.
+      onLostPointerCapture={() => setDragging(false)}
       onKeyDown={onKeyDown}
       className={cn(
         "relative w-full cursor-none touch-none outline-none select-none focus-visible:ring-2 focus-visible:ring-ring",
@@ -1253,11 +1256,16 @@ function ColorPicker({
     return { ...rgbToHsvKeepingHue(p, 0), a: p.a, oklchH: null }
   })
 
-  // External sync — when a controlled value changes from outside, re-seed the state. Values
-  // we emitted ourselves are skipped, since they'd otherwise round-trip and fight the drag.
-  const lastEmittedRef = useRef<string>("")
+  // External sync — when a controlled value changes from outside, re-seed the state. Our own
+  // value coming back is skipped, since it would round-trip and fight the drag; the marker is
+  // spent on that echo, so a later outside change back to the same string (an undo) applies.
+  const lastEmittedRef = useRef<string | null>(null)
   useEffect(() => {
-    if (value === undefined || value === lastEmittedRef.current) return
+    if (value === undefined) return
+    if (value === lastEmittedRef.current) {
+      lastEmittedRef.current = null
+      return
+    }
     const p = parseColor(value)
     if (!p) return
     // oxlint-disable-next-line react/set-state-in-effect -- syncs the internal state with the controlled value prop
