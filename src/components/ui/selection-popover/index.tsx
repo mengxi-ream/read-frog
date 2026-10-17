@@ -101,6 +101,7 @@ function SelectionPopoverRoot({
   actionsRef,
   onAnchorChange,
   onOpenChange,
+  onOpenChangeRequest,
   onPinnedChange,
   onReuseRequest,
 }: {
@@ -114,6 +115,10 @@ function SelectionPopoverRoot({
   actionsRef?: React.RefObject<SelectionPopoverActions | null>
   onAnchorChange?: (anchor: SelectionPopoverPosition | null) => void
   onOpenChange?: (open: boolean) => void
+  onOpenChangeRequest?: (
+    open: boolean,
+    eventDetails: DialogPrimitive.Root.ChangeEventDetails,
+  ) => void
   onPinnedChange?: (pinned: boolean) => void
   onReuseRequest?: (details: { anchor: SelectionPopoverPosition | null }) => void
 }) {
@@ -263,7 +268,11 @@ function SelectionPopoverRoot({
     <SelectionPopoverRootContext value={contextValue}>
       <DialogPrimitive.Root
         open={open}
-        onOpenChange={(nextOpen) => {
+        onOpenChange={(nextOpen, eventDetails) => {
+          onOpenChangeRequest?.(nextOpen, eventDetails)
+          if (eventDetails.isCanceled) {
+            return
+          }
           setOpen(nextOpen)
         }}
         disablePointerDismissal={pinned || disablePointerDismissal}

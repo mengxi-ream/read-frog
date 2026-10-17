@@ -1,7 +1,7 @@
 import type { NotebaseRowCreateInput, NotebaseRowCreateManyInput } from "@read-frog/api-contract"
 import type { NoteSaveSurface } from "@read-frog/definitions"
 import type { SaveToNotebaseAnalyticsSource } from "./save-to-notebase-dialog-atom"
-import type { AnalyticsFailureReason } from "@/types/analytics"
+import type { AnalyticsFailureReason, SurfaceByFeature } from "@/types/analytics"
 import type {
   SelectionToolbarCustomAction,
   SelectionToolbarCustomActionNotebaseAccount,
@@ -11,6 +11,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useAtom, useSetAtom } from "jotai"
 import { useRef, useState } from "react"
 import { toastManager } from "@/components/ui/base-ui/toast"
+import { ANALYTICS_SURFACE } from "@/types/analytics"
 import { classifyFailureReason } from "@/utils/analytics-failure-reason"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { authClient } from "@/utils/auth/auth-client"
@@ -54,10 +55,12 @@ export interface SaveToNotebaseRequest {
   /** One record per note, keyed by output-field name. */
   results: Array<Record<string, unknown>>
   analyticsSource?: SaveToNotebaseAnalyticsSource
+  surface?: SurfaceByFeature["note_save"]
 }
 
 /** One direct save, as reported to the server (request header) and to analytics. */
 interface DirectNoteSaveAttempt {
+  surface: SurfaceByFeature["note_save"]
   saveSource: NoteSaveSurface
   isGuide: boolean
   noteCount: number
@@ -235,14 +238,19 @@ export function useSaveToNotebase() {
   }
 
   const save = async (request: SaveToNotebaseRequest): Promise<SaveToNotebaseOutcome> => {
-    const { action, results, analyticsSource } = request
+    const {
+      action,
+      results,
+      analyticsSource,
+      surface = ANALYTICS_SURFACE.SELECTION_TOOLBAR,
+    } = request
     if (results.length === 0) {
       return "failed"
     }
 
     const startedAt = Date.now()
     const saveSource: NoteSaveSurface = analyticsSource ?? "custom_action"
-    trackNoteSaveRequested({ saveSource, noteCount: results.length })
+    trackNoteSaveRequested({ surface, saveSource, noteCount: results.length })
 
     // A failure before the row write ends the request here, so it reports a
     // completion too: a request without one should only mean an abandoned login.
@@ -251,6 +259,7 @@ export function useSaveToNotebase() {
         const trackingLookup = getGuideDictionaryNotebaseTracking(action.id)
         const tracking = trackingLookup ? await trackingLookup.catch(() => null) : null
         trackNoteSaveCompleted({
+          surface,
           saveSource,
           isGuide: tracking !== null,
           noteCount: results.length,
@@ -270,6 +279,7 @@ export function useSaveToNotebase() {
         pendingNotebaseSave: createPendingNotebaseSave(action, results, startedAt, {
           guideDictionaryNotebaseTracking: guideDictionaryNotebaseTracking ?? undefined,
           saveSource,
+          analyticsSurface: surface,
         }),
       })
       return "dialog_opened" as const
@@ -286,6 +296,7 @@ export function useSaveToNotebase() {
         pendingNotebaseSave: createPendingNotebaseSave(action, results, startedAt, {
           guideDictionaryNotebaseTracking: guideDictionaryNotebaseTracking ?? undefined,
           saveSource,
+          analyticsSurface: surface,
         }),
         connectedAccount,
       })
@@ -312,6 +323,7 @@ export function useSaveToNotebase() {
         {
           guideDictionaryNotebaseTracking: guideDictionaryNotebaseTracking ?? undefined,
           saveSource,
+          analyticsSurface: surface,
         },
       )
       setSaveToNotebaseDialog({
@@ -376,6 +388,7 @@ export function useSaveToNotebase() {
       const trackingLookup = getGuideDictionaryNotebaseTracking(action.id)
       savingGuideTrackingRef.current = trackingLookup ? await trackingLookup : null
       const attempt: DirectNoteSaveAttempt = {
+        surface,
         saveSource,
         isGuide: savingGuideTrackingRef.current !== null,
         noteCount: cellsList.length,

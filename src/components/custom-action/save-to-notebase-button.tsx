@@ -1,3 +1,4 @@
+import type { SurfaceByFeature } from "@/types/analytics"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import { IconBookmarkPlus } from "@tabler/icons-react"
 import { Button } from "@/components/ui/base-ui/button"
@@ -12,10 +13,12 @@ export function SaveToNotebaseButton({
   action,
   isRunning,
   result,
+  surface,
 }: {
   action: SelectionToolbarCustomAction
   isRunning: boolean
   result: Record<string, unknown> | null
+  surface?: SurfaceByFeature["note_save"]
 }) {
   const connection = sanitizeCustomActionNotebaseConnection(
     action.notebaseConnection,
@@ -29,7 +32,7 @@ export function SaveToNotebaseButton({
       return
     }
 
-    void save({ action, results: [result] })
+    void save({ action, results: [result], surface })
   }
 
   const isDisabled = connection
