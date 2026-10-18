@@ -45,6 +45,12 @@ export const subtitlesStyleSchema = z.object({
   customCSS: z.string().max(MAX_CUSTOM_CSS_LENGTH, "Custom CSS cannot exceed 8KB").nullable(),
 })
 
+/** The players subtitles get translated on. */
+export const subtitlesPlatformSchema = z.enum(["youtube", "xcom", "netflix"])
+
+/** Per platform, whether subtitles start translating as soon as a video loads. */
+export const subtitlesAutoStartSchema = z.record(subtitlesPlatformSchema, z.boolean())
+
 export const subtitlePositionSchema = z.object({
   percent: z.number().min(0).max(100),
   anchor: z.enum(["top", "bottom"]),
@@ -52,7 +58,7 @@ export const subtitlePositionSchema = z.object({
 
 export const videoSubtitlesSchema = z.object({
   enabled: z.boolean(),
-  autoStart: z.boolean(),
+  autoStart: subtitlesAutoStartSchema,
   toggleShortcut: shortcutSchema,
   providerId: z.string().nonempty(),
   style: subtitlesStyleSchema,
@@ -69,5 +75,7 @@ export type SubtitlesFontFamily = z.infer<typeof subtitlesFontFamilySchema>
 export type SubtitleTextStyle = z.infer<typeof subtitleTextStyleSchema>
 export type SubtitleContainerStyle = z.infer<typeof subtitleContainerStyleSchema>
 export type SubtitlesStyle = z.infer<typeof subtitlesStyleSchema>
+export type SubtitlesPlatform = z.infer<typeof subtitlesPlatformSchema>
+export type SubtitlesAutoStart = z.infer<typeof subtitlesAutoStartSchema>
 export type SubtitlePosition = z.infer<typeof subtitlePositionSchema>
 export type VideoSubtitles = z.infer<typeof videoSubtitlesSchema>

@@ -640,7 +640,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
   private async tryAutoStartSubtitles() {
     const config = await getLocalConfig()
     if (this.destroyed) return
-    const autoStart = config?.videoSubtitles?.autoStart ?? false
+    const autoStart = config?.videoSubtitles?.autoStart?.[this.config.platform] ?? false
 
     const learningOpen = subtitlesStore.get(subtitlesSidebarOpenAtom)
 

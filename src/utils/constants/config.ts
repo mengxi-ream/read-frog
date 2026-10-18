@@ -75,7 +75,7 @@ export const GOOGLE_DRIVE_TOKEN_STORAGE_KEY = "__googleDriveToken"
 
 export const THEME_STORAGE_KEY = "theme"
 export const DEFAULT_DETECTED_CODE = "eng" as const
-export const CONFIG_SCHEMA_VERSION = 112
+export const CONFIG_SCHEMA_VERSION = 113
 
 export const DEFAULT_FLOATING_BUTTON_POSITION = 0.66
 export const DEFAULT_FLOATING_BUTTON_SIDE: FloatingButtonSide = "right"
@@ -288,7 +288,7 @@ export const DEFAULT_CONFIG: Config = {
   },
   videoSubtitles: {
     enabled: true,
-    autoStart: false,
+    autoStart: { youtube: false, xcom: false, netflix: false },
     toggleShortcut: DEFAULT_SUBTITLES_TOGGLE_SHORTCUT_KEY,
     providerId: MICROSOFT_TRANSLATE_PROVIDER_ID,
     style: {

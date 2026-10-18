@@ -62,6 +62,7 @@ function createDownloader(fragments: SubtitlesFragment[], preSegmented = true) {
   }
   return {
     downloader: new TranslatedSubtitlesDownloader(() => fetcher, {
+      platform: "youtube",
       selectors: {
         video: "video",
         playerContainer: ".player",

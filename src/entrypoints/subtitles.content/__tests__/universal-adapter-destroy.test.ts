@@ -53,6 +53,7 @@ function createAdapter() {
 
   const adapter = new UniversalVideoAdapter({
     config: {
+      platform: "youtube",
       selectors: {
         video: "video",
         playerContainer: ".player",
@@ -74,7 +75,10 @@ describe("universalVideoAdapter destroy", () => {
     mocks.getLocalConfig.mockResolvedValue({
       language: {},
       providersConfig: [],
-      videoSubtitles: { autoStart: false, providerId: null },
+      videoSubtitles: {
+        autoStart: { youtube: false, xcom: false, netflix: false },
+        providerId: null,
+      },
     })
   })
 
