@@ -208,6 +208,24 @@ describe("includeSelectors whitelist", () => {
     expect(document.querySelector("#user-link")!.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(false)
   })
 
+  // Regression: the current issue list renders titles as
+  // <a data-testid="issue-listitem-title-link"> with no hovercard attribute,
+  // so only a testid include selector brings them into the whitelist.
+  it("labels github issue-list titles that only carry the issue-listitem testid", () => {
+    setHost("github.com")
+    document.body.innerHTML = `
+      <ul>
+        <li>
+          <h3><a data-testid="issue-listitem-title-link" href="/HakanSeven12/OpenCADStudio/issues/1878" id="issue-title"><span><span data-component="Text">[REQ] OsnapZ Replace Z value with current elevation</span></span></a></h3>
+        </li>
+      </ul>
+    `
+
+    walkAndLabelElement(document.body, "w1", structuredClone(DEFAULT_CONFIG))
+
+    expect(document.querySelector("#issue-title")!.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(true)
+  })
+
   it("keeps X usernames excluded when a nested span matches a broad include selector", () => {
     setHost("x.com")
     document.body.innerHTML = `

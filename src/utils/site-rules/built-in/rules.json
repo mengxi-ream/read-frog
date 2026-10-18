@@ -567,6 +567,7 @@
       "[app-name='blackbird-search'] [data-hpc='true']",
       ".topic-box > a > p:nth-of-type(2)",
       "[data-testid=\"listitem-title-link\"]",
+      "[data-testid=\"issue-listitem-title-link\"]",
       "#repo-content-turbo-frame p",
       "#repo-content-turbo-frame h4",
       "[aria-label=\"card content\"] .flex-column > div:nth-child(2)",
