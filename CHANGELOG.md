@@ -1,5 +1,27 @@
 # @read-frog/extension
 
+## 1.51.1
+
+### Patch Changes
+
+- [#2355](https://github.com/mengxi-ream/read-frog/pull/2355) [`f2e7218`](https://github.com/mengxi-ream/read-frog/commit/f2e72180008812358b501e105b6a5ca66ff53b4e) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(page-translation): translate paragraphs wrapped in display: contents
+
+- [#2344](https://github.com/mengxi-ream/read-frog/pull/2344) [`1308e8d`](https://github.com/mengxi-ream/read-frog/commit/1308e8d1be455d08ec4e907eb2c8966998abca0b) Thanks [@1thomasdavison](https://github.com/1thomasdavison)! - fix(page-translation): translate arXiv LaTeXML SVG text boxes in bilingual and translation-only modes without clipping their contents
+
+- [#2362](https://github.com/mengxi-ream/read-frog/pull/2362) [`b7a63b7`](https://github.com/mengxi-ream/read-frog/commit/b7a63b77c3d7391905a83dd13e5e78ea651a8e11) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(subtitles): apply restored color picker values and end lost square drags
+
+- [#2360](https://github.com/mengxi-ream/read-frog/pull/2360) [`e84a013`](https://github.com/mengxi-ream/read-frog/commit/e84a01336e8ad8f5b2e2d1e1c2d8fd8ed5f36d85) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(subtitles): let Escape cancel a color picker edit, and keep the OKLCH hue in step with the color
+
+- [#2361](https://github.com/mengxi-ream/read-frog/pull/2361) [`d729781`](https://github.com/mengxi-ream/read-frog/commit/d729781780d15e550cb630750a5af6f149d3f529) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(subtitles): give the swatch-only color picker trigger even padding
+
+- [#2364](https://github.com/mengxi-ream/read-frog/pull/2364) [`2d75da8`](https://github.com/mengxi-ream/read-frog/commit/2d75da8976c16d28dc93484ea68e603450a3a09c) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(site-rules): translate issue titles on GitHub's updated issue list
+
+- [#2350](https://github.com/mengxi-ream/read-frog/pull/2350) [`2f5c46c`](https://github.com/mengxi-ream/read-frog/commit/2f5c46cf0aa7e29e17d0a18db100ac6b1adc3ae9) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(page-translation): let hover translation use a custom key combination
+
+- [#2363](https://github.com/mengxi-ream/read-frog/pull/2363) [`97347ff`](https://github.com/mengxi-ream/read-frog/commit/97347ff85c357bbd565ef24ced07e7b2c8b5dc1d) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(subtitles): mount the YouTube Shorts subtitle button when Shorts is reached from another YouTube page, and rebuild the watch page UI when leaving Shorts
+
+- [#2351](https://github.com/mengxi-ream/read-frog/pull/2351) [`f3f1806`](https://github.com/mengxi-ream/read-frog/commit/f3f1806b4255b31863dc1246b808bf6c416dc709) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(options): open sidebar groups with their pages, and turn expand arrows when open
+
 ## 1.51.0
 
 ### Minor Changes
