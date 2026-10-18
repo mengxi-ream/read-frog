@@ -13,7 +13,8 @@ function getActiveReel(): HTMLElement | null {
   )
 }
 
-export function watchShortsActiveReel(onActiveReelChanged: () => void) {
+/** Returns a function that stops watching and drops any change still debouncing. */
+export function watchShortsActiveReel(onActiveReelChanged: () => void): () => void {
   let lastReel = getActiveReel()
   const trigger = debounce(onActiveReelChanged, ACTIVE_REEL_CHANGE_DEBOUNCE_MS)
 
@@ -29,4 +30,9 @@ export function watchShortsActiveReel(onActiveReelChanged: () => void) {
   })
 
   observer.observe(root, { childList: true, subtree: true })
+
+  return () => {
+    observer.disconnect()
+    trigger.clear()
+  }
 }

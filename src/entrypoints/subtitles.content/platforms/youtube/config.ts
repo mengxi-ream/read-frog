@@ -8,7 +8,7 @@ import {
 import { requestPlayerData } from "@/utils/subtitles/fetchers/youtube"
 import { getYoutubeVideoId } from "@/utils/subtitles/video-id"
 
-type YoutubeMode = "watch" | "embed" | "shorts"
+export type YoutubeMode = "watch" | "embed" | "shorts"
 
 interface YoutubeConfigOptions {
   mode?: YoutubeMode

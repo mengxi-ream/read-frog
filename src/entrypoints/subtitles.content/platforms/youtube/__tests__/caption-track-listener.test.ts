@@ -71,6 +71,32 @@ describe("youtube caption track listener", () => {
     expect(onTrackChanged).not.toHaveBeenCalled()
   })
 
+  it("stops forwarding changes and rebinding on navigation after stop", async () => {
+    renderSettingsMenu({
+      summary: "英语 >> 中文",
+    })
+
+    const onTrackChanged = vi.fn<(...args: any[]) => any>()
+    const listener = createYoutubeCaptionTrackListener({
+      playerContainerSelector: "#movie_player",
+      onTrackChanged,
+    })
+
+    listener.start()
+    await flushObserver()
+
+    listener.stop()
+    getSummaryNode()!.textContent = "英语 >> 日语"
+    await flushObserver()
+    window.dispatchEvent(new Event(YOUTUBE_NAVIGATE_FINISH_EVENT))
+    await flushObserver()
+    getSummaryNode()!.textContent = "英语 >> 法语"
+    await flushObserver()
+
+    expect(onTrackChanged).not.toHaveBeenCalled()
+    expect(listener.getCurrentTrackKey()).toBeNull()
+  })
+
   it("forwards changes when the subtitle summary text changes", async () => {
     renderSettingsMenu({
       summary: "英语 >> 中文",
