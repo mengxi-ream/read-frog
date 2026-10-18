@@ -118,6 +118,7 @@ describe("summary panel navigation", () => {
     )
     adapter = new UniversalVideoAdapter({
       config: {
+        platform: "youtube",
         selectors: { video: "video", playerContainer: ".player", nativeSubtitles: ".captions" },
         events: {},
         getVideoId: () => videoId,

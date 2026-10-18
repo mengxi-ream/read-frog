@@ -42,7 +42,11 @@ function loadRequests() {
 // Subtitles are on, so every Netflix poll tick reaches the fetcher's track check.
 function createNetflixAdapter() {
   const adapter = new UniversalVideoAdapter({
-    config: { selectors: { video: "video", playerContainer: ".player" }, events: {} },
+    config: {
+      platform: "netflix",
+      selectors: { video: "video", playerContainer: ".player" },
+      events: {},
+    },
     fetchers: { native: () => new NetflixSubtitlesFetcher() },
   })
   const scheduler = {
