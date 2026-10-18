@@ -1,5 +1,11 @@
 # @read-frog/extension
 
+## 1.52.0
+
+### Minor Changes
+
+- [#2367](https://github.com/mengxi-ream/read-frog/pull/2367) [`71e8750`](https://github.com/mengxi-ream/read-frog/commit/71e875043fda7f63e3c632e367ddde8d51540c3a) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(subtitles): turn translate-on-open on or off per platform (YouTube, X, Netflix) from its own page in the video subtitles settings
+
 ## 1.51.1
 
 ### Patch Changes
