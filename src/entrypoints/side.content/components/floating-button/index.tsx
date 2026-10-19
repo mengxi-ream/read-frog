@@ -23,7 +23,7 @@ import { sendMessage } from "@/utils/message"
 import { cn } from "@/utils/styles/utils"
 import { urlMatchesPattern } from "@/utils/url-pattern"
 import { enablePageTranslationAtom, isDraggingButtonAtom } from "../../atoms"
-import { shadowWrapper } from "../../index"
+import { shadowWrapper } from "../../main"
 import HiddenButton from "./components/hidden-button"
 import TranslateButton from "./translate-button"
 

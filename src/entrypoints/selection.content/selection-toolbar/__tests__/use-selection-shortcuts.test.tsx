@@ -9,7 +9,7 @@ const ownUi = vi.hoisted(() => ({ wrapper: null as HTMLElement | null }))
 
 // The extension's own UI: the wrapper the selection content script renders
 // into, inside its shadow root.
-vi.mock("../..", () => ({
+vi.mock("../../main", () => ({
   get shadowWrapper() {
     return ownUi.wrapper
   },

@@ -69,7 +69,7 @@ import { DEFAULT_TRANSLATION_HUB_SHORTCUT_KEY } from "./translation-hub"
 import { TRANSLATION_NODE_STYLE_ON_INSTALLED } from "./translation-node-style"
 import { DEFAULT_TTS_CONFIG } from "./tts"
 
-export const CONFIG_STORAGE_KEY = "config"
+export { CONFIG_STORAGE_KEY } from "./config-storage-key"
 export const LAST_SYNCED_CONFIG_STORAGE_KEY = "lastSyncedConfig"
 export const GOOGLE_DRIVE_TOKEN_STORAGE_KEY = "__googleDriveToken"
 

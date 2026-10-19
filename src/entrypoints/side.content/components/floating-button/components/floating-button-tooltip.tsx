@@ -1,7 +1,7 @@
 import type { ReactElement, ReactNode } from "react"
 import type { FloatingButtonSide } from "@/types/config/floating-button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
-import { shadowWrapper } from "../../.."
+import { shadowWrapper } from "../../../main"
 
 interface FloatingButtonTooltipProps extends Pick<
   React.ComponentProps<typeof Tooltip>,

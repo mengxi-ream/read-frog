@@ -44,7 +44,7 @@ import {
   setSelectionToolbarItemPinned,
 } from "@/utils/selection-toolbar-items"
 import { cn } from "@/utils/styles/utils"
-import { shadowWrapper } from ".."
+import { shadowWrapper } from "../main"
 import { SELECTION_CONTENT_OVERLAY_LAYERS } from "../overlay-layers"
 import { DropEvent } from "./close-button"
 import { useSelectionCustomActionPopover } from "./custom-action-button/provider"
