@@ -1,6 +1,7 @@
 import type { YoutubeTimedText } from "../fetchers/youtube/types"
 import { describe, expect, it } from "vitest"
 import { filterNoiseFromEvents } from "../fetchers/youtube/noise-filter"
+import { parseStandardSubtitles } from "../fetchers/youtube/parser"
 
 describe("noise Filter", () => {
   describe("filterNoiseFromEvents", () => {
@@ -48,7 +49,7 @@ describe("noise Filter", () => {
       expect(result[2]!.segs![0]!.utf8).toBe("♪ I might hate myself tomorrow ♪\n")
     })
 
-    it("should keep note segs that sit next to lyric segs in the same event", () => {
+    it("should give a lyric split from its note segs the event's screen time", () => {
       const events: YoutubeTimedText[] = [
         {
           tStartMs: 0,
@@ -57,13 +58,9 @@ describe("noise Filter", () => {
         },
         { tStartMs: 1000, dDurationMs: 1000, segs: [{ utf8: "♪" }, { utf8: "[Music]" }] },
       ]
-      const result = filterNoiseFromEvents(events)
-      expect(result[0]!.segs!.map((seg) => seg.utf8)).toEqual([
-        "♪ ",
-        "I caught the edge of a knife",
-        " ♪",
+      expect(parseStandardSubtitles(filterNoiseFromEvents(events))).toEqual([
+        { text: "I caught the edge of a knife", start: 0, end: 1000 },
       ])
-      expect(result[1]!.segs).toHaveLength(0)
     })
 
     it("should keep text after removing speaker annotation", () => {

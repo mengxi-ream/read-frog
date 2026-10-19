@@ -9,7 +9,7 @@ const NOISE_PATTERNS = [
   /\(.*?\)/g, // (Music), (Applause), etc.
 ]
 
-// Music notes wrap sung lyrics ("♪ lyric line ♪"), so only an event made of notes alone is noise.
+// Music notes wrap sung lyrics ("♪ lyric line ♪"), so only a seg made of notes alone is noise.
 const MUSIC_NOTES_PATTERN = /[♪🎵🎶]/gu
 
 function filterNoiseText(text: string): string {
@@ -28,15 +28,14 @@ export function filterNoiseFromEvents(events: YoutubeTimedText[]): YoutubeTimedT
   return events.map((event) => {
     if (!event.segs) return event
 
-    const cleanedSegs = event.segs
+    const filteredSegs = event.segs
       .map((seg) => ({
         ...seg,
         utf8: filterNoiseText(seg.utf8),
       }))
-      .filter((seg) => seg.utf8.trim().length > 0)
-
-    // Note-only segs beside sung text are kept: a leading ♪ marks where the lyric line starts.
-    const filteredSegs = cleanedSegs.some((seg) => hasSpeechText(seg.utf8)) ? cleanedSegs : []
+      // Also drop note-only segs beside a lyric: the parser times each seg on its own,
+      // so a kept trailing " ♪" would take the lyric's screen time.
+      .filter((seg) => hasSpeechText(seg.utf8))
 
     return { ...event, segs: filteredSegs }
   })
