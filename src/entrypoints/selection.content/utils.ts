@@ -58,6 +58,9 @@ const NON_CONTENT_ELEMENT_NAMES = new Set([
 const RUBY_ANNOTATION_ELEMENT_NAMES = new Set(["rp", "rt"])
 const RUBY_ANNOTATION_SELECTOR = "rp, rt"
 const NEWLINE_PADDING_REGEX = / *\n */g
+const NON_NEWLINE_WHITESPACE_REGEX = /[^\S\n]+/g
+// white-space values that render the line breaks written in the source.
+const LINE_BREAK_PRESERVING_WHITE_SPACE = new Set(["break-spaces", "pre", "pre-line", "pre-wrap"])
 const PARAGRAPH_LIKE_TAGS = new Set([
   "P",
   "LI",
@@ -322,7 +325,8 @@ function doesRangeIncludeRubyAnnotation(rangeSnapshot: SelectionRangeSnapshot) {
 }
 
 // Close to what Selection.toString() gives for ordinary page text: whitespace
-// collapses, and text in another paragraph starts on a new line.
+// collapses unless the page keeps its line breaks, and a <br> or text in another
+// paragraph starts a new line.
 function readRangeTextWithoutRubyAnnotations(rangeSnapshot: SelectionRangeSnapshot) {
   let liveRange: Range
   try {
@@ -338,11 +342,15 @@ function readRangeTextWithoutRubyAnnotations(rangeSnapshot: SelectionRangeSnapsh
       acceptNode(node) {
         if (node instanceof Element) {
           // Hidden text is left out of the browser's selection text as well.
-          return !doesRangeIntersectNode(liveRange, node) ||
+          if (
+            !doesRangeIntersectNode(liveRange, node) ||
             isSkippedTextElement(node) ||
             window.getComputedStyle(node).display === "none"
-            ? NodeFilter.FILTER_REJECT
-            : NodeFilter.FILTER_SKIP
+          ) {
+            return NodeFilter.FILTER_REJECT
+          }
+
+          return node.localName === "br" ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP
         }
 
         return NodeFilter.FILTER_ACCEPT
@@ -354,7 +362,10 @@ function readRangeTextWithoutRubyAnnotations(rangeSnapshot: SelectionRangeSnapsh
   let previousOwner: ParagraphOwner | null | undefined
   let currentNode = walker.nextNode()
   while (currentNode) {
-    if (currentNode instanceof Text && doesRangeIntersectNode(liveRange, currentNode)) {
+    // The only element the walker accepts is <br>.
+    if (currentNode instanceof Element) {
+      textParts.push("\n")
+    } else if (currentNode instanceof Text && doesRangeIntersectNode(liveRange, currentNode)) {
       const start = currentNode === liveRange.startContainer ? liveRange.startOffset : 0
       const end =
         currentNode === liveRange.endContainer ? liveRange.endOffset : currentNode.data.length
@@ -362,7 +373,7 @@ function readRangeTextWithoutRubyAnnotations(rangeSnapshot: SelectionRangeSnapsh
       if (previousOwner !== undefined && owner !== previousOwner) {
         textParts.push("\n")
       }
-      textParts.push(currentNode.data.slice(start, end).replace(WHITESPACE_REGEX, " "))
+      textParts.push(collapseSelectedWhitespace(currentNode, currentNode.data.slice(start, end)))
       previousOwner = owner
     }
 
@@ -370,6 +381,14 @@ function readRangeTextWithoutRubyAnnotations(rangeSnapshot: SelectionRangeSnapsh
   }
 
   return textParts.join("").replace(NEWLINE_PADDING_REGEX, "\n")
+}
+
+function collapseSelectedWhitespace(textNode: Text, value: string) {
+  const parent = textNode.parentElement
+  const keepsLineBreaks =
+    parent !== null &&
+    LINE_BREAK_PRESERVING_WHITE_SPACE.has(window.getComputedStyle(parent).whiteSpace)
+  return value.replace(keepsLineBreaks ? NON_NEWLINE_WHITESPACE_REGEX : WHITESPACE_REGEX, " ")
 }
 
 function getCommonAncestorNode(startContainer: Node, endContainer: Node) {

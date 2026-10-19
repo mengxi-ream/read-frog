@@ -647,6 +647,22 @@ describe("ruby annotations", () => {
     )
   })
 
+  it("keeps line breaks from <br> and from white-space that preserves them", () => {
+    document.body.innerHTML = `
+      <p id="br"><ruby>雪<rt>ゆき</rt></ruby>が降る<br><ruby>風<rt>かぜ</rt></ruby>が吹く</p>
+      <div id="pre-line" style="white-space: pre-line"><ruby>春<rt>はる</rt></ruby>の海
+<ruby>夏<rt>なつ</rt></ruby>の山</div>
+    `
+
+    const brRange = document.createRange()
+    brRange.selectNodeContents(document.getElementById("br")!)
+    expect(readSelectionSnapshot(createRangeSelection(brRange))?.text).toBe("雪が降る\n風が吹く")
+
+    const preLineRange = document.createRange()
+    preLineRange.selectNodeContents(document.getElementById("pre-line")!)
+    expect(readSelectionSnapshot(createRangeSelection(preLineRange))?.text).toBe("春の海\n夏の山")
+  })
+
   it("leaves hidden text out, as the browser does", () => {
     document.body.innerHTML = `<p id="paragraph"><ruby>漢字<rt>かんじ</rt></ruby><span style="display: none">hidden</span>です</p>`
 
