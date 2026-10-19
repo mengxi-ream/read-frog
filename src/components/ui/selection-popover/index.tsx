@@ -371,6 +371,11 @@ function SelectionPopoverShell({
       maxHeight="100vh"
       dragHandleClassName={SELECTION_POPOVER_DRAG_HANDLE_CLASS}
       cancel={SELECTION_POPOVER_NO_DRAG_SELECTOR}
+      // react-draggable's hack clears the page's selection a frame after a drag
+      // ends or the popover unmounts. Closing the popover by selecting other
+      // text then wiped that new selection. The drag handle is `select-none`, so
+      // a drag starts no selection to clear.
+      enableUserSelectHack={false}
       enableResizing={SELECTION_POPOVER_RESIZE_HANDLES}
       resizeHandleStyles={SELECTION_POPOVER_RESIZE_HANDLE_STYLES}
       onMouseDown={
