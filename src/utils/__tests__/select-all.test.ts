@@ -58,6 +58,11 @@ describe("protectSelectAllShadowRoot", () => {
     vi.unstubAllGlobals()
     ;(document.activeElement as HTMLElement | null)?.blur()
     window.getSelection()?.removeAllRanges()
+    document.head.replaceChildren()
+    for (const child of [...document.documentElement.children]) {
+      if (child !== document.head && child !== document.body) child.remove()
+    }
+    document.body.className = ""
     document.body.replaceChildren()
   })
 
@@ -115,6 +120,32 @@ describe("protectSelectAllShadowRoot", () => {
     const range = window.getSelection()!.getRangeAt(0)
     expect(event.defaultPrevented).toBe(true)
     expect(range.intersectsNode(article)).toBe(true)
+    expect(range.intersectsNode(toolbar.shadowHost)).toBe(false)
+    expect(range.intersectsNode(floatingButton.shadowHost)).toBe(false)
+  })
+
+  it("selects a reader mode's content beside a hidden <body> (#2370)", () => {
+    // SimpRead hides <body> with a class and shows its copy of the article
+    // under <html>; keepShadowHostRendered moves the hosts there too.
+    const readerStyle = document.createElement("style")
+    readerStyle.textContent = ".simpread-hidden { display: none; }"
+    document.head.append(readerStyle)
+    document.body.classList.add("simpread-hidden")
+    const reader = document.createElement("sr-read")
+    reader.textContent = "Reader text"
+    const toolbar = createHost("read-frog-selection")
+    const floatingButton = createHost("read-frog")
+    document.documentElement.append(reader, toolbar.shadowHost, floatingButton.shadowHost)
+    protect(toolbar)
+    protect(floatingButton)
+
+    const event = pressSelectAll()
+
+    const range = window.getSelection()!.getRangeAt(0)
+    expect(event.defaultPrevented).toBe(true)
+    expect(range.intersectsNode(reader)).toBe(true)
+    expect(range.intersectsNode(article)).toBe(false)
+    expect(range.intersectsNode(document.head)).toBe(false)
     expect(range.intersectsNode(toolbar.shadowHost)).toBe(false)
     expect(range.intersectsNode(floatingButton.shadowHost)).toBe(false)
   })

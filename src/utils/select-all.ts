@@ -1,3 +1,5 @@
+import { isBodyRendered } from "@/utils/shadow-root"
+
 // 选区工具栏和悬浮按钮各在一个 content script 里注册自己的 host，监听器互不相通。
 // 所以每个监听器都只看 DOM：用这个属性找到所有 Read Frog 组件，用 :hover 判断鼠标在哪个组件上，
 // 这样不管哪个监听器先跑，结果都一样。
@@ -113,15 +115,22 @@ function selectAllInside(root: HTMLElement) {
 }
 
 // 选中整个页面，但跳过所有组件的 shadow host。
+// “整个页面”通常是 <body>；阅读模式（如简悦）隐藏 <body>、把正文放在它旁边时，
+// 是 <html> 里 <body> 之后的部分，组件这时也挂在 <html> 下 (#2370)。
 // 每个 host 把页面切成前后两段。Chrome 只保留第一个 range，Firefox 全部保留；
-// 组件都挂在 <body> 末尾，所以第一段已经是组件之前的整个页面。
+// 组件都挂在页面末尾，所以第一段已经是组件之前的整个页面。
 function rebuildSelectionWithoutHosts() {
   const sel = window.getSelection()
   if (!sel) return
   sel.removeAllRanges()
 
   const rest = document.createRange()
-  rest.selectNodeContents(document.body)
+  if (isBodyRendered()) {
+    rest.selectNodeContents(document.body)
+  } else {
+    rest.selectNodeContents(document.documentElement)
+    if (document.body) rest.setStartAfter(document.body)
+  }
 
   const ranges: Range[] = []
   for (const host of getProtectedHosts()) {
