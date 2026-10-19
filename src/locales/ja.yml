@@ -1400,7 +1400,7 @@ options:
         description: 動画の読み込みが終わり次第、ボタンを押さなくても字幕の翻訳を始めます。
       aiSegmentation:
         title: AI スマート区切り
-        description: AI が字幕を文として読める形に切り直します。タイミングも AI が決めるため、字幕がずれることがあります。LLM 翻訳プロバイダーが必要です。
+        description: AI が字幕を文単位に切り直します。翻訳の応答が遅くなります。高性能な LLM が必要です。性能の低いモデルでは字幕の欠落やずれが起きることがあります。
     aiQuota:
       title: AI字幕の利用枠
       description: AIの音声認識で、どんな動画にも正確な字幕を生成します

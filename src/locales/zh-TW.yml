@@ -1410,7 +1410,7 @@ options:
         description: 影片載入完成後自動開始翻譯字幕，不用再點按鈕。
       aiSegmentation:
         title: AI 智慧斷句
-        description: 讓 AI 把字幕重新切成讀起來完整的句子。時間軸也由 AI 判斷，可能出現錯位。需要設定 LLM 翻譯服務。
+        description: 讓 AI 把字幕重新切成完整句子，會增加翻譯回應時間。需要較強的 LLM，弱模型可能漏句或錯位。
     aiQuota:
       title: AI 字幕額度
       description: AI 利用語音轉文字技術取得任何影片的準確字幕
