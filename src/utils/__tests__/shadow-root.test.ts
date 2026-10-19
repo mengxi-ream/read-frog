@@ -195,6 +195,38 @@ describe("keepShadowHostRendered", () => {
     expect(shadowHost.parentElement).toBe(hiddenBody)
   })
 
+  it.each([
+    ["in the page's light DOM", false],
+    ["inside a page component's shadow root", true],
+  ])("leaves a host moved into a modal dialog %s where it is", async (_where, inShadowRoot) => {
+    const { shadowHost } = mountHost()
+    keep(shadowHost)
+
+    // What createModalDialogHostController does for a selection in an open modal.
+    const dialog = document.createElement("dialog")
+    const slot = document.createElement("read-frog-modal-dialog-host-slot")
+    dialog.append(slot)
+    if (inShadowRoot) {
+      const component = document.createElement("page-modal")
+      component.attachShadow({ mode: "open" }).append(dialog)
+      document.body.append(component)
+    } else {
+      document.body.append(dialog)
+    }
+    slot.append(shadowHost)
+
+    document.body.classList.add("modal-open")
+    document.documentElement.classList.add("dark")
+    await Promise.resolve()
+    expect(shadowHost.parentElement).toBe(slot)
+
+    document.body.classList.add("simpread-hidden")
+    await Promise.resolve()
+    expect(shadowHost.parentElement).toBe(slot)
+
+    document.documentElement.classList.remove("dark")
+  })
+
   it("preserves the mounted UI across body replacements and stops after cleanup", async () => {
     const shadowHost = document.createElement("read-frog-selection")
     const shadowRoot = shadowHost.attachShadow({ mode: "open" })

@@ -34,6 +34,15 @@ export function isBodyRendered(): boolean {
   return !!body && getComputedStyle(body).display !== "none"
 }
 
+/** Whether `node` is inside `container`, following shadow roots up to their hosts. */
+function isWithin(node: Node, container: Node): boolean {
+  for (let current: Node | null = node; current;) {
+    if (current === container) return true
+    current = current instanceof ShadowRoot ? current.host : current.parentNode
+  }
+  return false
+}
+
 /**
  * Keep an overlay host where the browser draws it, without remounting its UI,
  * so its React state survives.
@@ -42,6 +51,10 @@ export function isBodyRendered(): boolean {
  * replaces <body>. While <body> does not render, the host waits under <html>
  * instead: nothing inside a `display: none` element is drawn, not even a fixed
  * shadow tree with the top z-index. It moves back once <body> renders again.
+ *
+ * A host placed deeper inside <body>, as the selection toolbar is in a page's
+ * open modal <dialog> (possibly across shadow roots), is left where it is: its
+ * placement belongs to whatever put it there.
  */
 export function keepShadowHostRendered(shadowHost: HTMLElement): () => void {
   const observer = new MutationObserver(() => place())
@@ -55,7 +68,9 @@ export function keepShadowHostRendered(shadowHost: HTMLElement): () => void {
     }
 
     const parent = body && isBodyRendered() ? body : document.documentElement
-    if (shadowHost.parentElement !== parent) parent.append(shadowHost)
+    if (shadowHost.parentElement === parent) return
+    if (body && shadowHost.parentElement !== body && isWithin(shadowHost, body)) return
+    parent.append(shadowHost)
   }
 
   // Only <html>'s own children and the class or style of <html> and <body> can
