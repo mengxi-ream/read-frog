@@ -3,9 +3,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import * as configStorage from "@/utils/config/storage"
 import {
   MAX_FETCH_RETRIES,
+  MAX_PLAYER_RESPONSE_WAIT_ATTEMPTS,
   MAX_PLAYER_WAIT_ATTEMPTS,
   PLAYER_DATA_REQUEST_TYPE,
   PLAYER_DATA_RESPONSE_TYPE,
+  PLAYER_RESPONSE_PENDING_ERROR,
 } from "@/utils/constants/subtitles"
 import { OverlaySubtitlesError } from "@/utils/subtitles/errors"
 import { YoutubeSubtitlesFetcher } from "../fetchers/youtube"
@@ -126,6 +128,57 @@ describe("youtube subtitles availability lookup", () => {
 
     expect(await result).toMatchObject({ message: "subtitles.errors.fetchSubTimeout" })
     expect(requestPlayerDataSpy).toHaveBeenCalledTimes(MAX_PLAYER_WAIT_ATTEMPTS)
+  })
+
+  // AdGuard can hold the player response for seconds on a cold load while the player is
+  // already on this video.
+  it("keeps waiting past the usual cap while the player's response is on the way", async () => {
+    const fetcher = new YoutubeSubtitlesFetcher()
+    const pendingAnswers = MAX_PLAYER_WAIT_ATTEMPTS + 30
+    let calls = 0
+    const requestPlayerDataSpy = vi
+      .spyOn(fetcher as any, "requestPlayerData")
+      .mockImplementation(async () =>
+        ++calls <= pendingAnswers
+          ? { success: false, error: PLAYER_RESPONSE_PENDING_ERROR }
+          : { success: true, data: playerData },
+      )
+
+    const result = fetcher.hasAvailableSubtitles()
+    await vi.runAllTimersAsync()
+
+    await expect(result).resolves.toBe(true)
+    expect(requestPlayerDataSpy).toHaveBeenCalledTimes(pendingAnswers + 1)
+  })
+
+  it("gives up on a player response that never arrives after the longer wait", async () => {
+    const fetcher = new YoutubeSubtitlesFetcher()
+    const requestPlayerDataSpy = vi
+      .spyOn(fetcher as any, "requestPlayerData")
+      .mockResolvedValue({ success: false, error: PLAYER_RESPONSE_PENDING_ERROR })
+
+    const result = fetcher.hasAvailableSubtitles().catch((error: unknown) => error)
+    await vi.runAllTimersAsync()
+
+    expect(await result).toMatchObject({ message: "subtitles.errors.fetchSubTimeout" })
+    expect(requestPlayerDataSpy).toHaveBeenCalledTimes(MAX_PLAYER_RESPONSE_WAIT_ATTEMPTS)
+  })
+
+  it("stops waiting once the fetcher is cleaned up", async () => {
+    const fetcher = new YoutubeSubtitlesFetcher()
+    let calls = 0
+    const requestPlayerDataSpy = vi
+      .spyOn(fetcher as any, "requestPlayerData")
+      .mockImplementation(async () => {
+        if (++calls === 3) fetcher.cleanup()
+        return { success: false, error: PLAYER_RESPONSE_PENDING_ERROR }
+      })
+
+    const result = fetcher.hasAvailableSubtitles().catch((error: unknown) => error)
+    await vi.runAllTimersAsync()
+
+    expect(await result).toMatchObject({ message: "subtitles.errors.fetchSubTimeout" })
+    expect(requestPlayerDataSpy).toHaveBeenCalledTimes(3)
   })
 
   it("does not repeat a request the page never answered", async () => {

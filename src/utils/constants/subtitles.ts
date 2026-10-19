@@ -43,6 +43,8 @@ export const YOUTUBE_NAVIGATE_FINISH_EVENT = "yt-navigate-finish"
 export const YOUTUBE_NATIVE_SUBTITLES_CLASS = ".ytp-caption-window-container"
 export const PLAYER_DATA_REQUEST_TYPE = "READ_FROG_GET_PLAYER_DATA"
 export const PLAYER_DATA_RESPONSE_TYPE = "READ_FROG_PLAYER_DATA"
+// The player is on the requested video but has not received its player response yet.
+export const PLAYER_RESPONSE_PENDING_ERROR = "PLAYER_RESPONSE_PENDING"
 export const WAIT_TIMEDTEXT_REQUEST_TYPE = "READ_FROG_WAIT_TIMEDTEXT"
 export const WAIT_TIMEDTEXT_RESPONSE_TYPE = "READ_FROG_TIMEDTEXT_READY"
 export const TIMEDTEXT_WAIT_TIMEOUT_MS = 5000
@@ -91,6 +93,9 @@ export const NETFLIX_TRANSLATE_BUTTON_ZOOM = 1.4
 // YouTube player wait constants
 export const MAX_PLAYER_WAIT_ATTEMPTS = 50
 export const PLAYER_WAIT_INTERVAL_MS = 100
+// AdGuard's YouTube rules make a cold load fetch the player response again, which can take
+// well over the wait above; a player already on the video gets this much longer.
+export const MAX_PLAYER_RESPONSE_WAIT_ATTEMPTS = 300
 export const MAX_STATE_WAIT_ATTEMPTS = 20
 export const STATE_WAIT_INTERVAL_MS = 300
 export const MAX_FETCH_RETRIES = 5

@@ -4,6 +4,7 @@ import {
   ENSURE_SUBTITLES_RESPONSE_TYPE,
   PLAYER_DATA_REQUEST_TYPE,
   PLAYER_DATA_RESPONSE_TYPE,
+  PLAYER_RESPONSE_PENDING_ERROR,
   TIMEDTEXT_WAIT_TIMEOUT_MS,
   WAIT_TIMEDTEXT_REQUEST_TYPE,
   WAIT_TIMEDTEXT_RESPONSE_TYPE,
@@ -28,6 +29,7 @@ interface PlayerDataRequest {
 
 interface YouTubePlayer extends HTMLElement {
   getPlayerResponse?: () => any
+  getVideoData?: () => any
   getAudioTrack?: () => any
   getPlayerState?: () => number
   getWebPlayerContextConfig?: () => any
@@ -58,6 +60,15 @@ function getPlayerVideoId(player: YouTubePlayer): string | null {
   }
 }
 
+// The video the player is on, which can be ahead of the response it has received for it.
+function getLoadedVideoId(player: YouTubePlayer): string | null {
+  try {
+    return player.getVideoData?.()?.video_id ?? null
+  } catch {
+    return null
+  }
+}
+
 /**
  * Hovering a home or search thumbnail leaves `#inline-preview-player` on the page for good,
  * paused on another video, so while the watch player is still unstarted the first playing or
@@ -70,9 +81,13 @@ function findYoutubePlayer(expectedVideoId?: string): YouTubePlayer | null {
       document.querySelector<YouTubePlayer>("#movie_player"),
       ...document.querySelectorAll<YouTubePlayer>(".html5-video-player"),
     ]
-    const matched = candidates.find(
-      (player) => player !== null && getPlayerVideoId(player) === expectedVideoId,
-    )
+    // A content blocker can make a cold load re-request the player response, leaving the watch
+    // player on our video for seconds before its response says so; that player still counts.
+    const matched =
+      candidates.find(
+        (player) => player !== null && getPlayerVideoId(player) === expectedVideoId,
+      ) ??
+      candidates.find((player) => player !== null && getLoadedVideoId(player) === expectedVideoId)
     if (matched) return matched
   }
 
@@ -146,8 +161,11 @@ function getPlayerData(request: PlayerDataRequest): PlayerDataResponse {
     const captionTracks = normalizeTracks(tracks)
     const selectedTrack = getSelectedTrackSnapshot(player, captionTracks)
 
-    if (!videoId || videoId !== expectedVideoId)
-      return errorResponse(requestId, "VIDEO_ID_MISMATCH")
+    if (!videoId || videoId !== expectedVideoId) {
+      // On our video already, with its data still on the way, is worth a longer wait.
+      const pending = getLoadedVideoId(player) === expectedVideoId
+      return errorResponse(requestId, pending ? PLAYER_RESPONSE_PENDING_ERROR : "VIDEO_ID_MISMATCH")
+    }
 
     return {
       type: PLAYER_DATA_RESPONSE_TYPE,
