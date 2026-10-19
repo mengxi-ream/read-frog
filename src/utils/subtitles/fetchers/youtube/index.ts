@@ -427,10 +427,12 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
           }
         }
 
-        const data = await response.json()
+        // Without a valid POT YouTube answers 200 with an empty body, which is not JSON at all.
+        // The parser's own message ("Unexpected end of JSON input") would land on the player.
+        const data = await response.json().catch(() => null)
         const parsed = youtubeSubtitlesResponseSchema.safeParse(data)
         if (!parsed.success) {
-          throw new Error("Invalid response format")
+          throw new Error(i18n.t("subtitles.errors.invalidResponse"))
         }
 
         return parsed.data.events

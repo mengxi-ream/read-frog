@@ -2,10 +2,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import * as configStorage from "@/utils/config/storage"
 import {
+  MAX_FETCH_RETRIES,
   MAX_PLAYER_WAIT_ATTEMPTS,
   PLAYER_DATA_REQUEST_TYPE,
   PLAYER_DATA_RESPONSE_TYPE,
 } from "@/utils/constants/subtitles"
+import { OverlaySubtitlesError } from "@/utils/subtitles/errors"
 import { YoutubeSubtitlesFetcher } from "../fetchers/youtube"
 
 function setWatchLocation(videoId: string) {
@@ -20,6 +22,51 @@ function setWatchLocation(videoId: string) {
     writable: true,
   })
 }
+
+describe("youtube caption download", () => {
+  const url = "https://www.youtube.com/api/timedtext?v=test123&lang=ja&kind=asr&fmt=json3"
+
+  beforeEach(() => {
+    vi.useFakeTimers()
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+    vi.unstubAllGlobals()
+    vi.restoreAllMocks()
+  })
+
+  // YouTube answers a caption request without a valid POT with 200 and an empty body.
+  it("reports an empty caption body as an invalid response, not the parser's message", async () => {
+    const fetchMock = vi.fn<typeof fetch>(async () => new Response("", { status: 200 }))
+    vi.stubGlobal("fetch", fetchMock)
+    const fetcher = new YoutubeSubtitlesFetcher()
+
+    const result = (fetcher as any).fetchWithRetry(url).catch((error: unknown) => error)
+    await vi.runAllTimersAsync()
+    const error = await result
+
+    expect(error).toBeInstanceOf(OverlaySubtitlesError)
+    expect(error).toMatchObject({ message: "subtitles.errors.invalidResponse" })
+    expect(fetchMock).toHaveBeenCalledTimes(MAX_FETCH_RETRIES)
+  })
+
+  it("still retries an empty body and returns the events once a real one arrives", async () => {
+    const events = [{ tStartMs: 0, dDurationMs: 500, segs: [{ utf8: "こんにちは" }] }]
+    const fetchMock = vi
+      .fn<typeof fetch>()
+      .mockImplementationOnce(async () => new Response("", { status: 200 }))
+      .mockImplementation(async () => Response.json({ events }))
+    vi.stubGlobal("fetch", fetchMock)
+    const fetcher = new YoutubeSubtitlesFetcher()
+
+    const result = (fetcher as any).fetchWithRetry(url)
+    await vi.runAllTimersAsync()
+
+    await expect(result).resolves.toEqual(events)
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+  })
+})
 
 describe("youtube subtitles availability lookup", () => {
   const playerData = {
