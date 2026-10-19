@@ -2,6 +2,7 @@ import { IconBook, IconLoader2 } from "@tabler/icons-react"
 import { useAtom, useAtomValue } from "jotai"
 import { useEffect, useRef, useState } from "react"
 import { i18n } from "@/utils/i18n"
+import { OverlaySubtitlesError } from "@/utils/subtitles/errors"
 import { showAnchoredSubtitlesToast } from "@/utils/subtitles/toast"
 import {
   currentVideoIdAtom,
@@ -71,9 +72,14 @@ export function SubtitlesSidebarItem() {
         return
       }
       openPanel()
-    } catch {
+    } catch (error) {
       if (isCurrent()) {
-        showAnchoredSubtitlesToast(i18n.t("subtitles.sidebar.summary.failedTitle"), anchor.current)
+        // A lookup that never reached the player explains itself; anything else stays generic.
+        const message =
+          error instanceof OverlaySubtitlesError
+            ? error.message
+            : i18n.t("subtitles.sidebar.summary.failedTitle")
+        showAnchoredSubtitlesToast(message, anchor.current)
       }
     } finally {
       if (requestId === openRequestId.current) {
