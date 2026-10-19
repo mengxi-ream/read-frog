@@ -856,6 +856,8 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
     let targetLanguage: Config["language"]["targetCode"] | undefined
     const operationId = this.switchOperationId
     this.adOverlappedLoad = subtitlesStore.get(adPlayingAtom)
+    // Only the caption load is what an ad can break; a failure after it is the translation's own.
+    let loadingSource = false
 
     try {
       const analyticsConfig = await getLocalConfig()
@@ -910,7 +912,9 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
 
       this.subtitlesScheduler?.setState("loading", { message: LOADING_MESSAGE[this.source] })
 
+      loadingSource = true
       await this.getOrLoadSourceSubtitles()
+      loadingSource = false
       if (this.destroyed) return false
       this.sessionSubtitles = this.sourceSubtitles
 
@@ -946,7 +950,13 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
         return false
       }
 
-      if (this.source === SUBTITLES_SOURCE.NATIVE && this.adOverlappedLoad) {
+      // A superseded load failing late must not take the retry slot from the current one.
+      if (
+        loadingSource &&
+        operationId === this.switchOperationId &&
+        this.source === SUBTITLES_SOURCE.NATIVE &&
+        this.adOverlappedLoad
+      ) {
         this.retryAfterAdOperationId = operationId
         // The ad already ended while this load was running, so retry now instead of reporting.
         if (!subtitlesStore.get(adPlayingAtom)) {

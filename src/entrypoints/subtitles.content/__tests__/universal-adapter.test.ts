@@ -204,10 +204,10 @@ describe("universalVideoAdapter", () => {
       )
 
       // The retry is spent: a later ad break has no failed load left to retry.
+      const laterRetry = vi.spyOn(adapter as any, "switchSubtitlesFetcher")
       setAdPlaying(adapter, true)
       setAdPlaying(adapter, false)
-      await Promise.resolve()
-      expect(subtitlesFetcher.fetch).toHaveBeenCalledTimes(2)
+      expect(laterRetry).not.toHaveBeenCalled()
     })
 
     it("retries right away when the ad ended before the load gave up", async () => {
@@ -241,9 +241,10 @@ describe("universalVideoAdapter", () => {
       await (adapter as any).switchSubtitlesFetcher(SUBTITLES_SOURCE.NATIVE)
       adapter.toggleSubtitlesManually(false)
       scheduler.isActive.mockReturnValue(false)
+      const retry = vi.spyOn(adapter as any, "switchSubtitlesFetcher")
       setAdPlaying(adapter, false)
-      await Promise.resolve()
 
+      expect(retry).not.toHaveBeenCalled()
       expect(subtitlesFetcher.fetch).toHaveBeenCalledTimes(1)
     })
 
@@ -253,11 +254,54 @@ describe("universalVideoAdapter", () => {
       subtitlesFetcher.fetch.mockRejectedValueOnce(lookupFailure())
 
       await (adapter as any).switchSubtitlesFetcher(SUBTITLES_SOURCE.NATIVE)
+      const retry = vi.spyOn(adapter as any, "switchSubtitlesFetcher")
       setAdPlaying(adapter, true)
       setAdPlaying(adapter, false)
-      await Promise.resolve()
 
+      expect(retry).not.toHaveBeenCalled()
       expect(subtitlesFetcher.fetch).toHaveBeenCalledTimes(1)
+    })
+
+    // The captions loaded fine; whatever broke afterwards was not the ad's doing.
+    it("does not retry a failure after the captions loaded", async () => {
+      const { adapter, subtitlesFetcher } = createAdapter([{ text: "hello", start: 0, end: 500 }])
+      const scheduler = prepareLoads(adapter)
+      vi.mocked((adapter as any).processTranslatedSubtitles).mockRejectedValueOnce(
+        new OverlaySubtitlesError("provider rejected"),
+      )
+      setAdPlaying(adapter, true)
+
+      await (adapter as any).switchSubtitlesFetcher(SUBTITLES_SOURCE.NATIVE)
+      const retry = vi.spyOn(adapter as any, "switchSubtitlesFetcher")
+      setAdPlaying(adapter, false)
+
+      expect(retry).not.toHaveBeenCalled()
+      expect(subtitlesFetcher.fetch).toHaveBeenCalledTimes(1)
+      expect(scheduler.setState).toHaveBeenCalledWith("error", { message: "provider rejected" })
+    })
+
+    it("keeps the current load's retry when an older load fails after it", async () => {
+      const { adapter, subtitlesFetcher } = createAdapter([{ text: "hello", start: 0, end: 500 }])
+      prepareLoads(adapter)
+      let failOlderLoad: (error: unknown) => void = () => {}
+      subtitlesFetcher.fetch
+        .mockImplementationOnce(
+          () =>
+            new Promise((_resolve, reject) => {
+              failOlderLoad = reject
+            }),
+        )
+        .mockRejectedValueOnce(lookupFailure())
+      setAdPlaying(adapter, true)
+
+      const olderLoad = (adapter as any).switchSubtitlesFetcher(SUBTITLES_SOURCE.NATIVE)
+      await vi.waitFor(() => expect(subtitlesFetcher.fetch).toHaveBeenCalledTimes(1))
+      await (adapter as any).switchSubtitlesFetcher(SUBTITLES_SOURCE.NATIVE)
+      failOlderLoad(lookupFailure())
+      await olderLoad
+      setAdPlaying(adapter, false)
+
+      await vi.waitFor(() => expect(subtitlesFetcher.fetch).toHaveBeenCalledTimes(3))
     })
   })
 
