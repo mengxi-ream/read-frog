@@ -20,16 +20,32 @@ describe("noise Filter", () => {
       expect(result[0]!.segs).toHaveLength(0)
     })
 
-    it("should filter out music note annotations", () => {
+    it("should filter out segs made of music notes only", () => {
       const events: YoutubeTimedText[] = [
-        { tStartMs: 0, dDurationMs: 1000, segs: [{ utf8: "♪ Music ♪" }] },
-        { tStartMs: 1000, dDurationMs: 1000, segs: [{ utf8: "🎵 Song 🎵" }] },
-        { tStartMs: 2000, dDurationMs: 1000, segs: [{ utf8: "🎶 Melody 🎶" }] },
+        { tStartMs: 0, dDurationMs: 1000, segs: [{ utf8: "♪♪" }] },
+        { tStartMs: 1000, dDurationMs: 1000, segs: [{ utf8: "🎵 🎵" }] },
+        { tStartMs: 2000, dDurationMs: 1000, segs: [{ utf8: " 🎶 " }] },
       ]
       const result = filterNoiseFromEvents(events)
       expect(result[0]!.segs).toHaveLength(0)
       expect(result[1]!.segs).toHaveLength(0)
       expect(result[2]!.segs).toHaveLength(0)
+    })
+
+    it("should keep lyrics wrapped in music notes", () => {
+      const events: YoutubeTimedText[] = [
+        { tStartMs: 0, dDurationMs: 1000, segs: [{ utf8: "♪ I caught the edge of a knife ♪" }] },
+        { tStartMs: 1000, dDurationMs: 1000, segs: [{ utf8: "🎵 Let's be lonely together 🎵" }] },
+        {
+          tStartMs: 2000,
+          dDurationMs: 1000,
+          segs: [{ utf8: "♪ I might hate myself tomorrow ♪\n(upbeat rhythmic music)" }],
+        },
+      ]
+      const result = filterNoiseFromEvents(events)
+      expect(result[0]!.segs![0]!.utf8).toBe("♪ I caught the edge of a knife ♪")
+      expect(result[1]!.segs![0]!.utf8).toBe("🎵 Let's be lonely together 🎵")
+      expect(result[2]!.segs![0]!.utf8).toBe("♪ I might hate myself tomorrow ♪\n")
     })
 
     it("should keep text after removing speaker annotation", () => {
