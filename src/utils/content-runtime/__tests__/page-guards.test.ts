@@ -28,8 +28,17 @@ describe("page guards", () => {
   it("skips the legacy challenge form", () => {
     const form = document.createElement("form")
     form.id = "challenge-form"
+    form.action = "/article?__cf_chl_f_tk=abc"
     document.body.append(form)
     expect(isCloudflareChallenge(document)).toBe(true)
+  })
+
+  it("runs on a page whose own form is called challenge-form", () => {
+    const form = document.createElement("form")
+    form.id = "challenge-form"
+    form.action = "/quiz/answer"
+    document.body.append(form)
+    expect(isCloudflareChallenge(document)).toBe(false)
   })
 
   it("runs on a page that only carries Cloudflare's bot detection script", () => {

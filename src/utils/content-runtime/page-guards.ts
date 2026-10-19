@@ -3,11 +3,13 @@
 
 // Interstitials that reload into the real page once they pass. The orchestrate
 // script only appears on challenge pages; Cloudflare's bot detection script on
-// ordinary pages lives under /cdn-cgi/challenge-platform/scripts/ instead.
+// ordinary pages lives under /cdn-cgi/challenge-platform/scripts/ instead. The
+// older challenge form posts a `__cf_chl_…` token; its id alone is too common.
 export function isCloudflareChallenge(doc: Document) {
   return (
-    doc.getElementById("challenge-form") !== null ||
-    doc.querySelector('script[src*="/cdn-cgi/challenge-platform/"][src*="/orchestrate/"]') !== null
+    doc.querySelector(
+      'script[src*="/cdn-cgi/challenge-platform/"][src*="/orchestrate/"], form#challenge-form[action*="__cf_chl"]',
+    ) !== null
   )
 }
 
