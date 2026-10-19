@@ -4,6 +4,7 @@ import { ToastProvider } from "@/components/ui/base-ui/toast"
 import { NOTRANSLATE_CLASS, REACT_SHADOW_HOST_CLASS } from "@/utils/constants/dom-labels"
 import { LocaleBoundary } from "@/utils/i18n/locale-boundary"
 import { ShadowHostBuilder } from "@/utils/react-shadow-host/shadow-host-builder"
+import { keepShadowHostRendered } from "@/utils/shadow-root"
 
 export function mountHostToast(): () => void {
   const target = document.body ?? document.documentElement
@@ -35,6 +36,7 @@ export function mountHostToast(): () => void {
   )
 
   target.appendChild(shadowHost)
+  const stopKeepingRendered = keepShadowHostRendered(shadowHost)
 
   let cleaned = false
 
@@ -42,6 +44,7 @@ export function mountHostToast(): () => void {
     if (cleaned) return
 
     cleaned = true
+    stopKeepingRendered()
     root.unmount()
     hostBuilder.cleanup()
     shadowHost.remove()

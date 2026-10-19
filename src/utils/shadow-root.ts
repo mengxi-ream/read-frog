@@ -24,18 +24,49 @@ export function insertShadowRootUIWrapperInto(container: HTMLElement, shadowHost
   return wrapper
 }
 
-/** Keep an existing UI and its React state when a client router replaces <body>. */
-export function reattachShadowHostOnBodySwap(shadowHost: HTMLElement): () => void {
-  let currentBody = document.body
-  const observer = new MutationObserver(() => {
-    const nextBody = document.body
-    if (!nextBody || nextBody === currentBody) return
+/**
+ * Whether <body> renders. Reader modes such as SimpRead hide it with a class
+ * that sets `display: none` and show their own copy of the article beside it,
+ * under <html> (#2370).
+ */
+export function isBodyRendered(): boolean {
+  const body = document.body
+  return !!body && getComputedStyle(body).display !== "none"
+}
 
-    currentBody = nextBody
-    if (shadowHost.parentElement !== nextBody) nextBody.append(shadowHost)
+/**
+ * Keep an overlay host where the browser draws it, without remounting its UI,
+ * so its React state survives.
+ *
+ * The host belongs in <body>, and goes into the new one when a client router
+ * replaces <body>. While <body> does not render, the host waits under <html>
+ * instead: nothing inside a `display: none` element is drawn, not even a fixed
+ * shadow tree with the top z-index. It moves back once <body> renders again.
+ */
+export function keepShadowHostRendered(shadowHost: HTMLElement): () => void {
+  const observer = new MutationObserver(() => place())
+  let observedBody: HTMLElement | null = null
+
+  function place() {
+    const body = document.body
+    if (body && body !== observedBody) {
+      observedBody = body
+      observer.observe(body, { attributes: true, attributeFilter: ["class", "style", "hidden"] })
+    }
+
+    const parent = body && isBodyRendered() ? body : document.documentElement
+    if (shadowHost.parentElement !== parent) parent.append(shadowHost)
+  }
+
+  // Only <html>'s own children and the class or style of <html> and <body> can
+  // hide <body> or swap it, so changes inside <body> never trigger this.
+  observer.observe(document.documentElement, {
+    childList: true,
+    attributes: true,
+    attributeFilter: ["class", "style"],
   })
+  // A reader mode that opens on page load hides <body> before we mount.
+  place()
 
-  // Only direct children of <html> matter. Changes inside <body> cannot trigger this observer.
-  observer.observe(document.documentElement, { childList: true })
   return () => observer.disconnect()
 }

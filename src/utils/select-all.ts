@@ -1,3 +1,5 @@
+import { isBodyRendered } from "@/utils/shadow-root"
+
 export function protectSelectAllShadowRoot(shadowHost: HTMLElement, wrapper: HTMLElement) {
   // ① 追踪鼠标是否在组件上
   let pointerInside = false
@@ -96,18 +98,31 @@ function selectAllInside(root: HTMLElement) {
 }
 
 // 选中整个页面，但跳过你的 shadow host 组件。
+// “整个页面”通常是 <body>；阅读模式（如简悦）隐藏 <body>、把正文放在它旁边时，
+// 是 <html> 里 <body> 之后的部分 (#2370)。
 function rebuildSelectionWithoutHost(shadowHost: HTMLElement) {
   const sel = window.getSelection()
   if (!sel) return
   sel.removeAllRanges()
 
-  const before = document.createRange()
-  before.setStart(document.body, 0)
+  const page = document.createRange()
+  if (isBodyRendered()) {
+    page.selectNodeContents(document.body)
+  } else {
+    page.selectNodeContents(document.documentElement)
+    if (document.body) page.setStartAfter(document.body)
+  }
+
+  if (!page.intersectsNode(shadowHost)) {
+    sel.addRange(page)
+    return
+  }
+
+  const before = page.cloneRange()
   before.setEndBefore(shadowHost)
 
-  const after = document.createRange()
+  const after = page.cloneRange()
   after.setStartAfter(shadowHost)
-  after.setEnd(document.body, document.body.childNodes.length)
 
   sel.addRange(before)
   sel.addRange(after)

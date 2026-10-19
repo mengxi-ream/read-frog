@@ -20,8 +20,8 @@ import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-ho
 import { protectSelectAllShadowRoot } from "@/utils/select-all"
 import {
   insertShadowRootUIWrapperInto,
+  keepShadowHostRendered,
   OVERLAY_SHADOW_ROOT_CSS,
-  reattachShadowHostOnBodySwap,
 } from "@/utils/shadow-root"
 import {
   clearEffectiveSiteControlUrl,
@@ -96,7 +96,7 @@ async function mountSelectionUI(ctx: ContentScriptContext) {
   })
 
   ui.mount()
-  ctx.onInvalidated(reattachShadowHostOnBodySwap(ui.shadowHost))
+  ctx.onInvalidated(keepShadowHostRendered(ui.shadowHost))
 }
 
 export default defineContentScript({
