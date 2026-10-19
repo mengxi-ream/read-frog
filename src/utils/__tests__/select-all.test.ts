@@ -2,15 +2,31 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { protectSelectAllShadowRoot } from "../select-all"
 
-// Each call adds a window listener that outlives its test, so every test
-// mounts a new host and the newest listener's rebuild runs last.
-function mountProtectedHost(parent: HTMLElement) {
-  const shadowHost = document.createElement("read-frog-selection")
+// Each call adds a window listener that outlives its test, so every test mounts
+// new hosts. The selection toolbar and the floating button each protect their
+// own host, from separate content scripts, so most tests protect two.
+function createHost(tagName: string) {
+  const shadowHost = document.createElement(tagName)
   const wrapper = document.createElement("div")
+  const label = document.createElement("p")
+  label.textContent = `${tagName} text`
+  const button = document.createElement("button")
+  const input = document.createElement("input")
+  wrapper.append(label, button, input)
   shadowHost.attachShadow({ mode: "open" }).append(wrapper)
-  parent.append(shadowHost)
-  protectSelectAllShadowRoot(shadowHost, wrapper)
-  return shadowHost
+  document.body.append(shadowHost)
+  return { shadowHost, wrapper, button, input }
+}
+
+function protect(host: ReturnType<typeof createHost>) {
+  protectSelectAllShadowRoot(host.shadowHost, host.wrapper)
+}
+
+function hover({ shadowHost }: ReturnType<typeof createHost>) {
+  const matches = shadowHost.matches.bind(shadowHost)
+  vi.spyOn(shadowHost, "matches").mockImplementation(
+    (selector) => selector === ":hover" || matches(selector),
+  )
 }
 
 function pressSelectAll() {
@@ -25,22 +41,24 @@ function pressSelectAll() {
 }
 
 describe("protectSelectAllShadowRoot", () => {
-  let readerStyle: HTMLStyleElement
+  let article: HTMLElement
 
   beforeEach(() => {
     vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => {
       callback(0)
       return 0
     })
-    readerStyle = document.createElement("style")
-    readerStyle.textContent = ".simpread-hidden { display: none; }"
-    document.head.append(readerStyle)
+    article = document.createElement("article")
+    article.textContent = "Article text"
+    document.body.append(article)
   })
 
   afterEach(() => {
+    vi.restoreAllMocks()
     vi.unstubAllGlobals()
+    ;(document.activeElement as HTMLElement | null)?.blur()
     window.getSelection()?.removeAllRanges()
-    readerStyle.remove()
+    document.head.replaceChildren()
     for (const child of [...document.documentElement.children]) {
       if (child !== document.head && child !== document.body) child.remove()
     }
@@ -48,37 +66,108 @@ describe("protectSelectAllShadowRoot", () => {
     document.body.replaceChildren()
   })
 
-  it("selects the page body but not the extension UI", () => {
-    const article = document.createElement("article")
-    article.textContent = "Article text"
-    document.body.append(article)
-    const shadowHost = mountProtectedHost(document.body)
+  it.each([
+    ["the toolbar's listener runs first", false],
+    ["the floating button's listener runs first", true],
+  ])("selects the page without any Read Frog UI when %s", (_, floatingButtonFirst) => {
+    const toolbar = createHost("read-frog-selection")
+    const floatingButton = createHost("read-frog")
+    for (const host of floatingButtonFirst
+      ? [floatingButton, toolbar]
+      : [toolbar, floatingButton]) {
+      protect(host)
+    }
+
+    const event = pressSelectAll()
+
+    const selection = window.getSelection()!
+    const range = selection.getRangeAt(0)
+    expect(event.defaultPrevented).toBe(true)
+    expect(range.intersectsNode(article)).toBe(true)
+    expect(range.intersectsNode(toolbar.shadowHost)).toBe(false)
+    expect(range.intersectsNode(floatingButton.shadowHost)).toBe(false)
+  })
+
+  it("selects only the Read Frog UI under the pointer, whichever listener runs last", () => {
+    const toolbar = createHost("read-frog-selection")
+    const floatingButton = createHost("read-frog")
+    protect(toolbar)
+    protect(floatingButton)
+    hover(toolbar)
+    // jsdom drops a range inside a shadow root, as the spec says; Chrome keeps it.
+    const addRange = vi.spyOn(Selection.prototype, "addRange")
+
+    const event = pressSelectAll()
+
+    expect(event.defaultPrevented).toBe(true)
+    expect(addRange).toHaveBeenCalledTimes(1)
+    const range = addRange.mock.calls[0]![0]
+    expect(range.startContainer).toBe(toolbar.wrapper)
+    expect(range.toString()).toBe("read-frog-selection text")
+  })
+
+  // Opening the translation card puts the focus on one of its buttons.
+  it("selects the page without any Read Frog UI while a button in it has the focus", () => {
+    const toolbar = createHost("read-frog-selection")
+    const floatingButton = createHost("read-frog")
+    protect(toolbar)
+    protect(floatingButton)
+    toolbar.button.focus()
+    expect(document.activeElement).toBe(toolbar.shadowHost)
 
     const event = pressSelectAll()
 
     const range = window.getSelection()!.getRangeAt(0)
     expect(event.defaultPrevented).toBe(true)
-    expect(range.startContainer).toBe(document.body)
     expect(range.intersectsNode(article)).toBe(true)
-    expect(range.intersectsNode(shadowHost)).toBe(false)
+    expect(range.intersectsNode(toolbar.shadowHost)).toBe(false)
+    expect(range.intersectsNode(floatingButton.shadowHost)).toBe(false)
   })
 
   it("selects a reader mode's content beside a hidden <body> (#2370)", () => {
-    const original = document.createElement("article")
-    original.textContent = "Original page"
-    document.body.append(original)
+    // SimpRead hides <body> with a class and shows its copy of the article
+    // under <html>; keepShadowHostRendered moves the hosts there too.
+    const readerStyle = document.createElement("style")
+    readerStyle.textContent = ".simpread-hidden { display: none; }"
+    document.head.append(readerStyle)
     document.body.classList.add("simpread-hidden")
     const reader = document.createElement("sr-read")
     reader.textContent = "Reader text"
-    document.documentElement.append(reader)
-    const shadowHost = mountProtectedHost(document.documentElement)
+    const toolbar = createHost("read-frog-selection")
+    const floatingButton = createHost("read-frog")
+    document.documentElement.append(reader, toolbar.shadowHost, floatingButton.shadowHost)
+    protect(toolbar)
+    protect(floatingButton)
 
-    pressSelectAll()
+    const event = pressSelectAll()
 
     const range = window.getSelection()!.getRangeAt(0)
+    expect(event.defaultPrevented).toBe(true)
     expect(range.intersectsNode(reader)).toBe(true)
-    expect(range.intersectsNode(original)).toBe(false)
+    expect(range.intersectsNode(article)).toBe(false)
     expect(range.intersectsNode(document.head)).toBe(false)
-    expect(range.intersectsNode(shadowHost)).toBe(false)
+    expect(range.intersectsNode(toolbar.shadowHost)).toBe(false)
+    expect(range.intersectsNode(floatingButton.shadowHost)).toBe(false)
+  })
+
+  it("leaves Ctrl+A to a text field in Read Frog UI", () => {
+    const toolbar = createHost("read-frog-selection")
+    const floatingButton = createHost("read-frog")
+    protect(toolbar)
+    protect(floatingButton)
+    toolbar.input.focus()
+
+    expect(pressSelectAll().defaultPrevented).toBe(false)
+  })
+
+  it("leaves Ctrl+A to a text field on the page", () => {
+    const toolbar = createHost("read-frog-selection")
+    protect(toolbar)
+    hover(toolbar)
+    const input = document.createElement("input")
+    document.body.prepend(input)
+    input.focus()
+
+    expect(pressSelectAll().defaultPrevented).toBe(false)
   })
 })

@@ -51,6 +51,16 @@ const NON_CONTENT_ELEMENT_NAMES = new Set([
   "textarea",
   "title",
 ])
+// Furigana (<rt>) and its fallback parentheses (<rp>). The browser's selection
+// text reads them alongside the base text (漢字かんじ), so speech says each word
+// twice and translation gets the reading as noise. Page translation skips them
+// for the same reason (DONT_WALK_AND_TRANSLATE_TAGS).
+const RUBY_ANNOTATION_ELEMENT_NAMES = new Set(["rp", "rt"])
+const RUBY_ANNOTATION_SELECTOR = "rp, rt"
+const NEWLINE_PADDING_REGEX = / *\n */g
+const NON_NEWLINE_WHITESPACE_REGEX = /[^\S\n]+/g
+// white-space values that render the line breaks written in the source.
+const LINE_BREAK_PRESERVING_WHITE_SPACE = new Set(["break-spaces", "pre", "pre-line", "pre-wrap"])
 const PARAGRAPH_LIKE_TAGS = new Set([
   "P",
   "LI",
@@ -273,7 +283,112 @@ export function readSelectionSnapshot(selection: Selection | null): SelectionSna
 
   const textControl = readTextControlSelection()
 
-  return textControl ? { text, ranges, textControl } : { text, ranges }
+  return textControl
+    ? { text, ranges, textControl }
+    : { text: removeRubyAnnotationsFromSelectedText(text, ranges), ranges }
+}
+
+// Rebuilds the selected text without furigana, but only when the selection holds
+// some: every other selection keeps the browser's own text. A selection of
+// nothing but furigana keeps it too, since there is nothing else to read.
+function removeRubyAnnotationsFromSelectedText(text: string, ranges: SelectionRangeSnapshot[]) {
+  if (!ranges.some(doesRangeIncludeRubyAnnotation)) {
+    return text
+  }
+
+  const textWithoutAnnotations = normalizeSelectedText(
+    ranges.map(readRangeTextWithoutRubyAnnotations).join("\n"),
+  )
+  return textWithoutAnnotations === "" ? text : textWithoutAnnotations
+}
+
+function doesRangeIncludeRubyAnnotation(rangeSnapshot: SelectionRangeSnapshot) {
+  let liveRange: Range
+  try {
+    liveRange = toLiveRange(rangeSnapshot)
+  } catch {
+    return false
+  }
+
+  const root = getTraversalRoot(rangeSnapshot)
+  if (getNearestParentElement(root)?.closest(RUBY_ANNOTATION_SELECTOR)) {
+    return true
+  }
+
+  if (!(root instanceof Element || root instanceof Document || root instanceof DocumentFragment)) {
+    return false
+  }
+
+  return [...root.querySelectorAll(RUBY_ANNOTATION_SELECTOR)].some((annotation) =>
+    doesRangeIntersectNode(liveRange, annotation),
+  )
+}
+
+// Close to what Selection.toString() gives for ordinary page text: whitespace
+// collapses unless the page keeps its line breaks, and a <br> or text in another
+// paragraph starts a new line.
+function readRangeTextWithoutRubyAnnotations(rangeSnapshot: SelectionRangeSnapshot) {
+  let liveRange: Range
+  try {
+    liveRange = toLiveRange(rangeSnapshot)
+  } catch {
+    return ""
+  }
+
+  const walker = document.createTreeWalker(
+    getTraversalRoot(rangeSnapshot),
+    NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT,
+    {
+      acceptNode(node) {
+        if (node instanceof Element) {
+          // Hidden text is left out of the browser's selection text as well.
+          if (
+            !doesRangeIntersectNode(liveRange, node) ||
+            isSkippedTextElement(node) ||
+            window.getComputedStyle(node).display === "none"
+          ) {
+            return NodeFilter.FILTER_REJECT
+          }
+
+          return node.localName === "br" ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP
+        }
+
+        return NodeFilter.FILTER_ACCEPT
+      },
+    },
+  )
+
+  const textParts: string[] = []
+  let previousOwner: ParagraphOwner | null | undefined
+  let currentNode = walker.nextNode()
+  while (currentNode) {
+    // The only element the walker accepts is <br>.
+    if (currentNode instanceof Element) {
+      textParts.push("\n")
+    } else if (currentNode instanceof Text && doesRangeIntersectNode(liveRange, currentNode)) {
+      const start = currentNode === liveRange.startContainer ? liveRange.startOffset : 0
+      const end =
+        currentNode === liveRange.endContainer ? liveRange.endOffset : currentNode.data.length
+      const owner = findParagraphOwner(currentNode)
+      if (previousOwner !== undefined && owner !== previousOwner) {
+        textParts.push("\n")
+      }
+      textParts.push(collapseSelectedWhitespace(currentNode, currentNode.data.slice(start, end)))
+      previousOwner = owner
+    }
+
+    currentNode = walker.nextNode()
+  }
+
+  return textParts.join("").replace(NEWLINE_PADDING_REGEX, "\n")
+}
+
+function collapseSelectedWhitespace(textNode: Text, value: string) {
+  const parent = textNode.parentElement
+  const keepsLineBreaks =
+    parent !== null &&
+    LINE_BREAK_PRESERVING_WHITE_SPACE.has(window.getComputedStyle(parent).whiteSpace)
+  return value.replace(keepsLineBreaks ? NON_NEWLINE_WHITESPACE_REGEX : WHITESPACE_REGEX, " ")
 }
 
 function getCommonAncestorNode(startContainer: Node, endContainer: Node) {
@@ -366,13 +481,19 @@ function findParagraphOwner(node: Node | null): ParagraphOwner | null {
   return semanticFallback
 }
 
+// Neither page content nor something a reader means to have selected.
+function isSkippedTextElement(element: Element) {
+  return (
+    NON_CONTENT_ELEMENT_NAMES.has(element.localName) ||
+    RUBY_ANNOTATION_ELEMENT_NAMES.has(element.localName)
+  )
+}
+
 function createContentTextWalker(root: Node) {
   return document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT, {
     acceptNode(node) {
       if (node instanceof Element) {
-        return NON_CONTENT_ELEMENT_NAMES.has(node.localName)
-          ? NodeFilter.FILTER_REJECT
-          : NodeFilter.FILTER_SKIP
+        return isSkippedTextElement(node) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_SKIP
       }
 
       return normalizeParagraphText(node.textContent ?? "") === ""
