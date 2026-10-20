@@ -50,7 +50,8 @@ async function captureRequest(config: LLMProviderConfig, includeImage = false) {
   expect(fetchMock).toHaveBeenCalledTimes(1)
   const [url, init] = fetchMock.mock.calls[0]!
   expect(new Headers(init?.headers).get("authorization")).toBe("Bearer test-key")
-  return { url: String(url), body: JSON.parse(init!.body as string) }
+  const requestURL = typeof url === "string" ? url : url instanceof URL ? url.href : url.url
+  return { url: requestURL, body: JSON.parse(init!.body as string) }
 }
 
 afterEach(() => vi.unstubAllGlobals())
@@ -169,7 +170,7 @@ describe("MiniMax HTTP request compatibility", () => {
       expect(url).toBe("https://openrouter.ai/api/v1/chat/completions")
       expect(body.model).toBe(model)
       expect(body).not.toHaveProperty("output_config")
-      if (model.includes("flash")) expect(body).not.toHaveProperty("thinking")
+      expect(body.thinking).toEqual(model.includes("flash") ? undefined : { type: "disabled" })
     },
   )
 
