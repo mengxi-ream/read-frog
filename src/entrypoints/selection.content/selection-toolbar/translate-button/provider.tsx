@@ -57,7 +57,7 @@ import { getProviderOptionsWithOverride } from "@/utils/providers/options"
 import { checkProviderAvailability } from "@/utils/providers/provider-ref"
 import { getSelectableProvidersForCapability } from "@/utils/providers/provider-registry"
 import { getTopLevelReasoning } from "@/utils/providers/reasoning"
-import { shadowWrapper } from "../.."
+import { shadowWrapper } from "../../main"
 import { normalizeSelectedText } from "../../utils"
 import {
   isSelectionToolbarOpenAtom,

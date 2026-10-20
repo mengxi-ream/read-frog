@@ -55,7 +55,7 @@ vi.mock("../../../atoms", () => ({
   isSideOpenAtom: atom(false),
 }))
 
-vi.mock("../../../index", () => ({
+vi.mock("../../../main", () => ({
   shadowWrapper: document.body,
 }))
 

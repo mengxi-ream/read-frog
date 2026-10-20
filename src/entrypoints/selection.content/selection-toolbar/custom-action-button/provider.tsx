@@ -35,7 +35,7 @@ import {
   getSelectableProvidersForCapability,
   resolveProviderRefForCapability,
 } from "@/utils/providers/provider-registry"
-import { shadowWrapper } from "../.."
+import { shadowWrapper } from "../../main"
 import { normalizeSelectedText } from "../../utils"
 import {
   contextAtom,

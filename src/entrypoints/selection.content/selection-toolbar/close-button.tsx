@@ -10,7 +10,7 @@ import {
 import { SELECTION_CONTENT_OVERLAY_LAYERS } from "@/entrypoints/selection.content/overlay-layers"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
-import { shadowWrapper } from ".."
+import { shadowWrapper } from "../main"
 
 export const DropEvent = "rf-dropdown-change"
 
