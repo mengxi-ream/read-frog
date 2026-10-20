@@ -19,7 +19,7 @@ AI로 언어를 배우는 브라우저 확장 프로그램이자, Immersive Tran
 
 [![English][english-shield]](../README.md) [![简体中文][chinese-shield]](./README.zh-CN.md) [![繁體中文][traditional-chinese-shield]](./README.zh-TW.md) [![日本語][japanese-shield]](./README.ja.md) [![한국어][korean-shield]](./README.ko.md) [![Español][spanish-shield]](./README.es.md) [![Русский][russian-shield]](./README.ru.md) [![Türkçe][turkish-shield]](./README.tr.md) [![Tiếng Việt][vietnamese-shield]](./README.vi.md)
 
-[공식 웹사이트](https://www.readfrog.app/ko) · [모든 기능](https://www.readfrog.app/ko/features) · [튜토리얼](https://www.readfrog.app/ko/docs) · [변경 내역][github-release-link] · [블로그](https://www.readfrog.app/ko/blog) · [vs Immersive Translate (영어)](https://www.readfrog.app/en/compare/immersive-translate)
+[공식 웹사이트](https://www.readfrog.app/ko?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=ko) · [모든 기능](https://www.readfrog.app/ko/features?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=ko) · [튜토리얼](https://www.readfrog.app/ko/docs?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=ko) · [변경 내역][github-release-link] · [블로그](https://www.readfrog.app/ko/blog?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=ko) · [vs Immersive Translate (영어)](https://www.readfrog.app/en/compare/immersive-translate?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=ko)
 
 <!-- SHIELD GROUP -->
 
@@ -189,7 +189,7 @@ Google Translate, Microsoft Translate, DeepLX 같은 무료 기본 번역 옵션
 
 AI로 프로젝트 이해하기: [Dosu](https://app.dosu.dev/29569286-71ba-47dd-b038-c7ab1b9d0df7/documents)
 
-자세한 내용은 [기여 가이드](https://www.readfrog.app/ko/docs/contributing)를 확인하세요.
+자세한 내용은 [기여 가이드](https://www.readfrog.app/ko/docs/contributing?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=ko)를 확인하세요.
 
 ReadFrog는 GPLv3와 상업 라이선스의 듀얼 라이선스를 사용합니다.
 
@@ -263,18 +263,18 @@ ReadFrog는 GPLv3와 상업 라이선스의 듀얼 라이선스를 사용합니�
 [traditional-chinese-shield]: https://img.shields.io/badge/%E7%B9%81%E9%AB%94%E4%B8%AD%E6%96%87-gray?style=flat-square
 [turkish-shield]: https://img.shields.io/badge/T%C3%BCrk%C3%A7e-gray?style=flat-square
 [vietnamese-shield]: https://img.shields.io/badge/Ti%E1%BA%BFng%20Vi%E1%BB%87t-gray?style=flat-square
-[website]: https://www.readfrog.app/ko
+[website]: https://www.readfrog.app/ko?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=ko
 [wechat-link]: ../assets/wechat-account.jpg
 [wechat-shield-badge]: https://img.shields.io/badge/chat-WeChat-07C160?style=for-the-badge&logo=wechat&logoColor=white&labelColor=black
 
 <!-- Feature links -->
 
-[blog-context-translation]: https://www.readfrog.app/ko/blog/smart-context-translation
-[docs-custom-actions]: https://www.readfrog.app/ko/docs/custom-actions
-[docs-learning]: https://www.readfrog.app/ko/docs/learning
-[docs-page-translation]: https://www.readfrog.app/ko/docs/page-translation
-[docs-providers]: https://www.readfrog.app/ko/docs/providers/overview
-[docs-request-control]: https://www.readfrog.app/ko/docs/request-control
-[docs-selection-translation]: https://www.readfrog.app/ko/docs/selection-translation
-[docs-tts]: https://www.readfrog.app/ko/docs/tts
-[video-subtitles]: https://www.readfrog.app/ko/docs/video-subtitles
+[blog-context-translation]: https://www.readfrog.app/ko/blog/smart-context-translation?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=ko
+[docs-custom-actions]: https://www.readfrog.app/ko/docs/custom-actions?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=ko
+[docs-learning]: https://www.readfrog.app/ko/docs/learning?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=ko
+[docs-page-translation]: https://www.readfrog.app/ko/docs/page-translation?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=ko
+[docs-providers]: https://www.readfrog.app/ko/docs/providers/overview?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=ko
+[docs-request-control]: https://www.readfrog.app/ko/docs/request-control?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=ko
+[docs-selection-translation]: https://www.readfrog.app/ko/docs/selection-translation?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=ko
+[docs-tts]: https://www.readfrog.app/ko/docs/tts?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=ko
+[video-subtitles]: https://www.readfrog.app/ko/docs/video-subtitles?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=ko
