@@ -13,14 +13,25 @@ export const CONTENT_LOADER_SCRIPT_FILE = "/content-scripts/loader.js" as const
 export const CONTENT_RUNTIME_MODULE_FILE = "/content-runtime.js" as const
 
 // The background writes the parts an iframe needs here before it injects the
-// loader; without it the loader runs every part, which only the top frame gets
-// from the manifest.
+// loader. The manifest injects only the top frame, which runs every part.
 export const CONTENT_RUNTIME_PARTS_WINDOW_KEY = "__READ_FROG_CONTENT_PARTS__" as const
 
-declare global {
-  interface Window {
-    __READ_FROG_CONTENT_PARTS__?: ContentRuntimePart[]
-  }
+/**
+ * The parts this loader should run, taken so a later loader in the frame does
+ * not run them again. An iframe whose parts an earlier loader already took
+ * gets none: falling back to every part would mount the top-frame-only side UI.
+ *
+ * Read from the content script's global, where the background's setter wrote
+ * them. In Firefox that is the extension's sandbox, not `window`.
+ */
+export function takeRequestedParts(
+  scriptGlobal: Record<string, unknown>,
+  isTopFrame: boolean,
+): readonly ContentRuntimePart[] {
+  const requested = scriptGlobal[CONTENT_RUNTIME_PARTS_WINDOW_KEY]
+  delete scriptGlobal[CONTENT_RUNTIME_PARTS_WINDOW_KEY]
+  if (Array.isArray(requested)) return requested as ContentRuntimePart[]
+  return isTopFrame ? CONTENT_RUNTIME_PARTS : []
 }
 
 export interface ContentRuntime {

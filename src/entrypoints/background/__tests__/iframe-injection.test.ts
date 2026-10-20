@@ -636,6 +636,34 @@ describe("setupIframeInjection", () => {
     )
   })
 
+  it("merges the parts of overlapping injections into one frame", async () => {
+    const { onCompleted } = await setupSubject()
+    await onCompleted(createDetails())
+    const [{ func }] = executeScriptMock.mock.calls[0] as [{ func: (...args: unknown[]) => void }]
+    const frameGlobal = globalThis as Record<string, unknown>
+
+    try {
+      // Host-only injection, then selection activation, before either loader ran
+      func(
+        SITE_CONTROL_URL_WINDOW_KEY,
+        "https://example.com/frame",
+        CONTENT_RUNTIME_PARTS_WINDOW_KEY,
+        ["host"],
+      )
+      func(
+        SITE_CONTROL_URL_WINDOW_KEY,
+        "https://example.com/frame",
+        CONTENT_RUNTIME_PARTS_WINDOW_KEY,
+        ["selection"],
+      )
+
+      expect(frameGlobal[CONTENT_RUNTIME_PARTS_WINDOW_KEY]).toEqual(["host", "selection"])
+    } finally {
+      delete frameGlobal[CONTENT_RUNTIME_PARTS_WINDOW_KEY]
+      delete frameGlobal[SITE_CONTROL_URL_WINDOW_KEY]
+    }
+  })
+
   it("injects each document once and targets documentIds when available", async () => {
     const { onCompleted } = await setupSubject()
     const details = createDetails()

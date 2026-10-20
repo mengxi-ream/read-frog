@@ -3,11 +3,7 @@ import type { ContentRuntime } from "@/utils/content-runtime/parts"
 import { browser, defineContentScript } from "#imports"
 import { CONFIG_STORAGE_KEY } from "@/utils/constants/config-storage-key"
 import { shouldSkipDocument } from "@/utils/content-runtime/page-guards"
-import {
-  CONTENT_RUNTIME_MODULE_FILE,
-  CONTENT_RUNTIME_PARTS,
-  CONTENT_RUNTIME_PARTS_WINDOW_KEY,
-} from "@/utils/content-runtime/parts"
+import { CONTENT_RUNTIME_MODULE_FILE, takeRequestedParts } from "@/utils/content-runtime/parts"
 import { getEffectiveSiteControlUrl, isSiteEnabled } from "@/utils/site-control"
 
 // A first look at site control, from the stored config as it is. Each part
@@ -29,10 +25,7 @@ async function isSiteEnabledByStoredConfig() {
 export default defineContentScript({
   matches: ["*://*/*", "file:///*"],
   async main() {
-    // The manifest injects the top frame, which runs every part. The
-    // background names the parts an iframe needs before injecting it.
-    const parts = window[CONTENT_RUNTIME_PARTS_WINDOW_KEY] ?? CONTENT_RUNTIME_PARTS
-    delete window[CONTENT_RUNTIME_PARTS_WINDOW_KEY]
+    const parts = takeRequestedParts(globalThis, window === window.top)
 
     if (parts.length === 0 || shouldSkipDocument(document)) return
     if (!(await isSiteEnabledByStoredConfig())) return

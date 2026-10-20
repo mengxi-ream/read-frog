@@ -98,15 +98,21 @@ function getParentFrameIdHint(details: object): number | undefined {
   return undefined
 }
 
-// Runs in the frame before the loader, which reads both values
+// Runs in the frame before the loader, which takes the parts. Overlapping
+// injections into one frame (host-only, then selection) add to the parts
+// still waiting rather than replace them; the first loader runs them all.
 function setInjectedLoaderContext(
   siteControlUrlPropertyName: string,
   siteControlUrl: string,
   partsPropertyName: string,
   parts: string[],
 ) {
-  ;(globalThis as Record<string, unknown>)[siteControlUrlPropertyName] = siteControlUrl
-  ;(globalThis as Record<string, unknown>)[partsPropertyName] = parts
+  const frameGlobal = globalThis as Record<string, unknown>
+  const waiting = frameGlobal[partsPropertyName]
+  frameGlobal[siteControlUrlPropertyName] = siteControlUrl
+  frameGlobal[partsPropertyName] = [
+    ...new Set([...(Array.isArray(waiting) ? waiting : []), ...parts]),
+  ]
 }
 
 function getInjectionTarget(details: FrameInjectionDetails) {
