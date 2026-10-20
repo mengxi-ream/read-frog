@@ -13,8 +13,8 @@ import {
   isCustomModelOnlyProvider,
   isLLMProviderConfig,
   isProtocolCompatibleLLMProviderConfig,
-  LLM_PROVIDER_MODELS,
 } from "@/types/config/provider"
+import { getSelectableProviderModels } from "@/utils/constants/models"
 import { i18n } from "@/utils/i18n"
 import { resolveModelId } from "@/utils/providers/model-id"
 import { ModelSuggestionButton } from "./components/model-suggestion-button"
@@ -84,11 +84,13 @@ export const TranslateModelSelector = withForm({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    {LLM_PROVIDER_MODELS[providerConfig.provider].map((modelOption) => (
-                      <SelectItem key={modelOption} value={modelOption}>
-                        {modelOption}
-                      </SelectItem>
-                    ))}
+                    {getSelectableProviderModels(providerConfig.provider, model ?? undefined).map(
+                      (modelOption) => (
+                        <SelectItem key={modelOption} value={modelOption}>
+                          {modelOption}
+                        </SelectItem>
+                      ),
+                    )}
                   </SelectGroup>
                 </SelectContent>
               </field.SelectFieldAutoSave>
