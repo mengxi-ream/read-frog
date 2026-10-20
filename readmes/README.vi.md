@@ -19,7 +19,7 @@ Học ngôn ngữ dễ hơn và sâu hơn ngay trong trình duyệt của bạn.
 
 [![English][english-shield]](../README.md) [![简体中文][chinese-shield]](./README.zh-CN.md) [![繁體中文][traditional-chinese-shield]](./README.zh-TW.md) [![日本語][japanese-shield]](./README.ja.md) [![한국어][korean-shield]](./README.ko.md) [![Español][spanish-shield]](./README.es.md) [![Русский][russian-shield]](./README.ru.md) [![Türkçe][turkish-shield]](./README.tr.md) [![Tiếng Việt][vietnamese-shield]](./README.vi.md)
 
-[Trang chính thức](https://www.readfrog.app/vi) · [Tất cả tính năng](https://www.readfrog.app/vi/features) · [Hướng dẫn](https://www.readfrog.app/vi/docs) · [Nhật ký phát hành][github-release-link] · [Blog](https://www.readfrog.app/vi/blog) · [vs Immersive Translate (tiếng Anh)](https://www.readfrog.app/en/compare/immersive-translate)
+[Trang chính thức](https://www.readfrog.app/vi?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=vi) · [Tất cả tính năng](https://www.readfrog.app/vi/features?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=vi) · [Hướng dẫn](https://www.readfrog.app/vi/docs?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=vi) · [Nhật ký phát hành][github-release-link] · [Blog](https://www.readfrog.app/vi/blog?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=vi) · [vs Immersive Translate (tiếng Anh)](https://www.readfrog.app/en/compare/immersive-translate?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=vi)
 
 <!-- SHIELD GROUP -->
 
@@ -189,7 +189,7 @@ Cấu trúc dự án: [DeepWiki](https://deepwiki.com/mengxi-ream/read-frog)
 
 Yêu cầu AI hiểu dự án: [Dosu](https://app.dosu.dev/29569286-71ba-47dd-b038-c7ab1b9d0df7/documents)
 
-Xem [Hướng dẫn đóng góp](https://www.readfrog.app/vi/docs/contributing) để biết thêm chi tiết.
+Xem [Hướng dẫn đóng góp](https://www.readfrog.app/vi/docs/contributing?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=vi) để biết thêm chi tiết.
 
 ReadFrog được cấp phép kép theo GPLv3 và giấy phép thương mại.
 
@@ -263,18 +263,18 @@ Mỗi khoản đóng góp giúp chúng tôi xây dựng trải nghiệm học ng
 [traditional-chinese-shield]: https://img.shields.io/badge/%E7%B9%81%E9%AB%94%E4%B8%AD%E6%96%87-gray?style=flat-square
 [turkish-shield]: https://img.shields.io/badge/T%C3%BCrk%C3%A7e-gray?style=flat-square
 [vietnamese-shield]: https://img.shields.io/badge/Ti%E1%BA%BFng%20Vi%E1%BB%87t-gray?style=flat-square
-[website]: https://www.readfrog.app/vi
+[website]: https://www.readfrog.app/vi?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=vi
 [wechat-link]: ../assets/wechat-account.jpg
 [wechat-shield-badge]: https://img.shields.io/badge/chat-WeChat-07C160?style=for-the-badge&logo=wechat&logoColor=white&labelColor=black
 
 <!-- Feature links -->
 
-[blog-context-translation]: https://www.readfrog.app/vi/blog/smart-context-translation
-[docs-custom-actions]: https://www.readfrog.app/vi/docs/custom-actions
-[docs-learning]: https://www.readfrog.app/vi/docs/learning
-[docs-page-translation]: https://www.readfrog.app/vi/docs/page-translation
-[docs-providers]: https://www.readfrog.app/vi/docs/providers/overview
-[docs-request-control]: https://www.readfrog.app/vi/docs/request-control
-[docs-selection-translation]: https://www.readfrog.app/vi/docs/selection-translation
-[docs-tts]: https://www.readfrog.app/vi/docs/tts
-[video-subtitles]: https://www.readfrog.app/vi/docs/video-subtitles
+[blog-context-translation]: https://www.readfrog.app/vi/blog/smart-context-translation?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=vi
+[docs-custom-actions]: https://www.readfrog.app/vi/docs/custom-actions?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=vi
+[docs-learning]: https://www.readfrog.app/vi/docs/learning?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=vi
+[docs-page-translation]: https://www.readfrog.app/vi/docs/page-translation?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=vi
+[docs-providers]: https://www.readfrog.app/vi/docs/providers/overview?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=vi
+[docs-request-control]: https://www.readfrog.app/vi/docs/request-control?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=vi
+[docs-selection-translation]: https://www.readfrog.app/vi/docs/selection-translation?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=vi
+[docs-tts]: https://www.readfrog.app/vi/docs/tts?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=vi
+[video-subtitles]: https://www.readfrog.app/vi/docs/video-subtitles?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=vi

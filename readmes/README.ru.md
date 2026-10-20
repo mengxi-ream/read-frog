@@ -19,7 +19,7 @@
 
 [![English][english-shield]](../README.md) [![简体中文][chinese-shield]](./README.zh-CN.md) [![繁體中文][traditional-chinese-shield]](./README.zh-TW.md) [![日本語][japanese-shield]](./README.ja.md) [![한국어][korean-shield]](./README.ko.md) [![Español][spanish-shield]](./README.es.md) [![Русский][russian-shield]](./README.ru.md) [![Türkçe][turkish-shield]](./README.tr.md) [![Tiếng Việt][vietnamese-shield]](./README.vi.md)
 
-[Официальный сайт](https://www.readfrog.app/ru) · [Все возможности](https://www.readfrog.app/ru/features) · [Руководство](https://www.readfrog.app/ru/docs) · [Релизы][github-release-link] · [Блог](https://www.readfrog.app/ru/blog) · [vs Immersive Translate (на английском)](https://www.readfrog.app/en/compare/immersive-translate)
+[Официальный сайт](https://www.readfrog.app/ru?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=ru) · [Все возможности](https://www.readfrog.app/ru/features?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=ru) · [Руководство](https://www.readfrog.app/ru/docs?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=ru) · [Релизы][github-release-link] · [Блог](https://www.readfrog.app/ru/blog?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=ru) · [vs Immersive Translate (на английском)](https://www.readfrog.app/en/compare/immersive-translate?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=ru)
 
 <!-- SHIELD GROUP -->
 
@@ -189,7 +189,7 @@ Read Frog превращает обычное чтение в интернете
 
 Попросить ИИ изучить проект: [Dosu](https://app.dosu.dev/29569286-71ba-47dd-b038-c7ab1b9d0df7/documents)
 
-Подробнее см. [руководство по вкладу](https://www.readfrog.app/ru/docs/contributing).
+Подробнее см. [руководство по вкладу](https://www.readfrog.app/ru/docs/contributing?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=ru).
 
 ReadFrog распространяется по двойной лицензии: GPLv3 и коммерческой.
 
@@ -263,18 +263,18 @@ ReadFrog распространяется по двойной лицензии: 
 [traditional-chinese-shield]: https://img.shields.io/badge/%E7%B9%81%E9%AB%94%E4%B8%AD%E6%96%87-gray?style=flat-square
 [turkish-shield]: https://img.shields.io/badge/T%C3%BCrk%C3%A7e-gray?style=flat-square
 [vietnamese-shield]: https://img.shields.io/badge/Ti%E1%BA%BFng%20Vi%E1%BB%87t-gray?style=flat-square
-[website]: https://www.readfrog.app/ru
+[website]: https://www.readfrog.app/ru?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=ru
 [wechat-link]: ../assets/wechat-account.jpg
 [wechat-shield-badge]: https://img.shields.io/badge/chat-WeChat-07C160?style=for-the-badge&logo=wechat&logoColor=white&labelColor=black
 
 <!-- Feature links -->
 
-[blog-context-translation]: https://www.readfrog.app/ru/blog/smart-context-translation
-[docs-custom-actions]: https://www.readfrog.app/ru/docs/custom-actions
-[docs-learning]: https://www.readfrog.app/ru/docs/learning
-[docs-page-translation]: https://www.readfrog.app/ru/docs/page-translation
-[docs-providers]: https://www.readfrog.app/ru/docs/providers/overview
-[docs-request-control]: https://www.readfrog.app/ru/docs/request-control
-[docs-selection-translation]: https://www.readfrog.app/ru/docs/selection-translation
-[docs-tts]: https://www.readfrog.app/ru/docs/tts
-[video-subtitles]: https://www.readfrog.app/ru/docs/video-subtitles
+[blog-context-translation]: https://www.readfrog.app/ru/blog/smart-context-translation?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=ru
+[docs-custom-actions]: https://www.readfrog.app/ru/docs/custom-actions?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=ru
+[docs-learning]: https://www.readfrog.app/ru/docs/learning?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=ru
+[docs-page-translation]: https://www.readfrog.app/ru/docs/page-translation?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=ru
+[docs-providers]: https://www.readfrog.app/ru/docs/providers/overview?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=ru
+[docs-request-control]: https://www.readfrog.app/ru/docs/request-control?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=ru
+[docs-selection-translation]: https://www.readfrog.app/ru/docs/selection-translation?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=ru
+[docs-tts]: https://www.readfrog.app/ru/docs/tts?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=ru
+[video-subtitles]: https://www.readfrog.app/ru/docs/video-subtitles?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=ru

@@ -19,7 +19,7 @@
 
 [![English][english-shield]](../README.md) [![简体中文][chinese-shield]](./README.zh-CN.md) [![繁體中文][traditional-chinese-shield]](./README.zh-TW.md) [![日本語][japanese-shield]](./README.ja.md) [![한국어][korean-shield]](./README.ko.md) [![Español][spanish-shield]](./README.es.md) [![Русский][russian-shield]](./README.ru.md) [![Türkçe][turkish-shield]](./README.tr.md) [![Tiếng Việt][vietnamese-shield]](./README.vi.md)
 
-[官方网站](https://www.readfrog.app/zh) · [全部功能](https://www.readfrog.app/zh/features) · [教程](https://www.readfrog.app/zh/docs) · [更新日志][github-release-link] · [博客](https://www.readfrog.app/zh/blog) · [vs 沉浸式翻译](https://www.readfrog.app/zh/compare/immersive-translate)
+[官方网站](https://www.readfrog.app/zh?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=zh-CN) · [全部功能](https://www.readfrog.app/zh/features?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=zh-CN) · [教程](https://www.readfrog.app/zh/docs?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=zh-CN) · [更新日志][github-release-link] · [博客](https://www.readfrog.app/zh/blog?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=zh-CN) · [vs 沉浸式翻译](https://www.readfrog.app/zh/compare/immersive-translate?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=zh-CN)
 
 <!-- SHIELD GROUP -->
 
@@ -256,7 +256,7 @@ Read Frog 的愿景是为各个级别的语言学习者提供易于使用、智�
 
 通过 AI 了解项目：[DeepWiki](https://deepwiki.com/mengxi-ream/read-frog)
 
-查看[贡献指南](https://www.readfrog.app/zh/docs/contributing)了解更多详情。
+查看[贡献指南](https://www.readfrog.app/zh/docs/contributing?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=zh-CN)了解更多详情。
 
 ReadFrog 采用 GPLv3 和商业许可双重授权。
 
@@ -356,18 +356,18 @@ ReadFrog 采用 GPLv3 和商业许可双重授权。
 [traditional-chinese-shield]: https://img.shields.io/badge/%E7%B9%81%E9%AB%94%E4%B8%AD%E6%96%87-gray?style=flat-square
 [turkish-shield]: https://img.shields.io/badge/T%C3%BCrk%C3%A7e-gray?style=flat-square
 [vietnamese-shield]: https://img.shields.io/badge/Ti%E1%BA%BFng%20Vi%E1%BB%87t-gray?style=flat-square
-[website]: https://www.readfrog.app/zh
+[website]: https://www.readfrog.app/zh?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=zh-CN
 [wechat-link]: ../assets/wechat-account.jpg
 [wechat-shield-badge]: https://img.shields.io/badge/聊天-微信-07C160?style=for-the-badge&logo=wechat&logoColor=white&labelColor=black
 
 <!-- Feature links -->
 
-[blog-context-translation]: https://www.readfrog.app/zh/blog/smart-context-translation
-[docs-custom-actions]: https://www.readfrog.app/zh/docs/custom-actions
-[docs-learning]: https://www.readfrog.app/zh/docs/learning
-[docs-page-translation]: https://www.readfrog.app/zh/docs/page-translation
-[docs-providers]: https://www.readfrog.app/zh/docs/providers/overview
-[docs-request-control]: https://www.readfrog.app/zh/docs/request-control
-[docs-selection-translation]: https://www.readfrog.app/zh/docs/selection-translation
-[docs-tts]: https://www.readfrog.app/zh/docs/tts
-[video-subtitles]: https://www.readfrog.app/zh/features/youtube-subtitles
+[blog-context-translation]: https://www.readfrog.app/zh/blog/smart-context-translation?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=zh-CN
+[docs-custom-actions]: https://www.readfrog.app/zh/docs/custom-actions?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=zh-CN
+[docs-learning]: https://www.readfrog.app/zh/docs/learning?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=zh-CN
+[docs-page-translation]: https://www.readfrog.app/zh/docs/page-translation?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=zh-CN
+[docs-providers]: https://www.readfrog.app/zh/docs/providers/overview?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=zh-CN
+[docs-request-control]: https://www.readfrog.app/zh/docs/request-control?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=zh-CN
+[docs-selection-translation]: https://www.readfrog.app/zh/docs/selection-translation?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=zh-CN
+[docs-tts]: https://www.readfrog.app/zh/docs/tts?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=zh-CN
+[video-subtitles]: https://www.readfrog.app/zh/features/youtube-subtitles?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=zh-CN
