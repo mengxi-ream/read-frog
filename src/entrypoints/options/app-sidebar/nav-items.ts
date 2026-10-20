@@ -29,6 +29,7 @@ export const ROUTE_DEFS = [
   { path: "/page-translation/translation-control/never-auto-translate-websites" },
   { path: "/page-translation/translation-control/site-rules" },
   { path: "/page-translation/translation-queue" },
+  { path: "/video-subtitles/auto-start" },
   { path: "/video-subtitles/style" },
   { path: "/video-subtitles/style/custom-css" },
   { path: "/video-subtitles/prompts" },

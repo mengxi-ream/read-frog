@@ -1547,7 +1547,7 @@ options:
         description: Start translating as soon as a video loads, without pressing the button.
       aiSegmentation:
         title: AI smart segmentation
-        description: Lets AI re-cut the subtitles into lines that read as sentences. It sets their timing too, so lines can drift out of sync. Needs an LLM translation provider.
+        description: Lets AI re-cut the subtitles into sentences. Translations take longer. Needs a strong LLM; weaker models may drop or misalign lines.
       clickLookupAction:
         title: Word lookup action
         description: The AI action that answers a click on a word in the subtitles. Dictionary unless you pick one of your own.

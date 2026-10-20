@@ -5,19 +5,14 @@ import type { TestSeriesObject } from "./types"
  * spreads the previous version is not a snapshot, because editing v112 would
  * silently change what v113 asserts.
  *
- * Delta from v112: top-level `wordLookup` is added in every series, with the
- * built-in Dictionary answering a click — the action word lookup ran before it
- * was configurable — and the built-in Sentence Analysis answering a drag.
+ * Delta from v112: `videoSubtitles.autoStart` becomes one switch per
+ * platform. Every series had it off, so every platform is off.
  */
 
 export const testSeries: TestSeriesObject = {
   "complex-config-from-v020": {
     description: "Adds opacity to selection toolbar",
     config: {
-      wordLookup: {
-        clickActionId: "default-dictionary",
-        dragActionId: "default-sentence-analysis",
-      },
       translationHub: {
         shortcut: "Alt+Shift+H",
         selectedProviderIds: null,
@@ -423,7 +418,11 @@ export const testSeries: TestSeriesObject = {
       },
       videoSubtitles: {
         enabled: false,
-        autoStart: false,
+        autoStart: {
+          youtube: false,
+          xcom: false,
+          netflix: false,
+        },
         providerId: "openai-default",
         style: {
           displayMode: "bilingual",
@@ -491,10 +490,6 @@ export const testSeries: TestSeriesObject = {
     description:
       "Single provider, LLM detection mode; features get enabled toggles and speak added",
     config: {
-      wordLookup: {
-        clickActionId: "default-dictionary",
-        dragActionId: "default-sentence-analysis",
-      },
       translationHub: {
         shortcut: "Alt+Shift+H",
         selectedProviderIds: null,
@@ -843,7 +838,11 @@ export const testSeries: TestSeriesObject = {
       },
       videoSubtitles: {
         enabled: false,
-        autoStart: false,
+        autoStart: {
+          youtube: false,
+          xcom: false,
+          netflix: false,
+        },
         providerId: "google-default",
         style: {
           displayMode: "bilingual",
@@ -911,10 +910,6 @@ export const testSeries: TestSeriesObject = {
     description:
       "Covers legacy prompt token migration for translate, custom actions, and video subtitles",
     config: {
-      wordLookup: {
-        clickActionId: "default-dictionary",
-        dragActionId: "default-sentence-analysis",
-      },
       translationHub: {
         shortcut: "Alt+Shift+H",
         selectedProviderIds: null,
@@ -1357,7 +1352,11 @@ export const testSeries: TestSeriesObject = {
       },
       videoSubtitles: {
         enabled: false,
-        autoStart: false,
+        autoStart: {
+          youtube: false,
+          xcom: false,
+          netflix: false,
+        },
         providerId: "google-default",
         style: {
           displayMode: "bilingual",
@@ -1433,10 +1432,6 @@ export const testSeries: TestSeriesObject = {
   "default-dictionary-wording": {
     description: "Renames dictionary wording from context to paragraphs",
     config: {
-      wordLookup: {
-        clickActionId: "default-dictionary",
-        dragActionId: "default-sentence-analysis",
-      },
       translationHub: {
         shortcut: "Alt+Shift+H",
         selectedProviderIds: null,
@@ -1785,7 +1780,11 @@ export const testSeries: TestSeriesObject = {
       },
       videoSubtitles: {
         enabled: false,
-        autoStart: false,
+        autoStart: {
+          youtube: false,
+          xcom: false,
+          netflix: false,
+        },
         providerId: "google-default",
         style: {
           displayMode: "bilingual",
@@ -1853,10 +1852,6 @@ export const testSeries: TestSeriesObject = {
     description:
       "v103 only: a custom action with a hand-written layout using bracket refs, CJK field names and an escaped %",
     config: {
-      wordLookup: {
-        clickActionId: "default-dictionary",
-        dragActionId: "default-sentence-analysis",
-      },
       translationHub: {
         shortcut: "Alt+Shift+H",
         selectedProviderIds: null,
@@ -2260,7 +2255,11 @@ export const testSeries: TestSeriesObject = {
       },
       videoSubtitles: {
         enabled: false,
-        autoStart: false,
+        autoStart: {
+          youtube: false,
+          xcom: false,
+          netflix: false,
+        },
         providerId: "google-default",
         style: {
           displayMode: "bilingual",

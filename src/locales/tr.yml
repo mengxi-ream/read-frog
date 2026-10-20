@@ -1400,7 +1400,7 @@ options:
         description: Video yüklenir yüklenmez, düğmeye basmadan altyazıları çevirmeye başlar.
       aiSegmentation:
         title: AI akıllı bölümlendirme
-        description: Yapay zekâ altyazıları cümle gibi okunan satırlara yeniden böler. Zamanlamayı da kendisi belirlediği için satırlar kayabilir. LLM çeviri sağlayıcısı gerekir.
+        description: Yapay zekâ altyazıları cümlelere yeniden böler. Çeviriler daha geç gelir. Güçlü bir LLM gerekir; zayıf modeller satırları atlayabilir veya kaydırabilir.
       clickLookupAction:
         title: Sözcük arama eylemi
         description: Altyazıdaki bir sözcüğe tıklandığında çalışan yapay zeka eylemi. Varsayılan sözlüktür; kendi eyleminizi seçebilirsiniz.

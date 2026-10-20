@@ -1,7 +1,7 @@
 import type { APIProviderTypes } from "@/types/config/provider"
 import ProviderIcon from "@/components/provider-icon"
 import { useTheme } from "@/components/providers/theme-provider"
-import { Button } from "@/components/ui/base-ui/button"
+import { buttonVariants } from "@/components/ui/base-ui/button"
 import { env } from "@/env"
 import {
   PROVIDER_GROUPS,
@@ -10,6 +10,7 @@ import {
   getProviderItemName,
 } from "@/utils/constants/providers"
 import { i18n } from "@/utils/i18n"
+import { cn } from "@/utils/styles/utils"
 
 export function ConfigHeader({
   providerType,
@@ -44,13 +45,14 @@ export function ConfigHeader({
         />
       </a>
       {shouldShowSponsorCTA ? (
-        <Button
-          variant="accent"
-          size="sm"
-          render={<a href={sponsorReferUrl} target="_blank" rel="noreferrer" />}
+        <a
+          href={sponsorReferUrl}
+          target="_blank"
+          rel="noreferrer"
+          className={cn(buttonVariants({ variant: "accent", size: "sm" }))}
         >
           {i18n.t((sponsor?.ctaI18nKey ?? "options.apiProviders.sponsorCta") as never)}
-        </Button>
+        </a>
       ) : (
         tutorialUrl && (
           <a

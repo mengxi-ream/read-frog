@@ -7,6 +7,7 @@ import { getCurrentXcomVideoId } from "./dom"
 
 export function getXcomConfig(): PlatformConfig {
   return {
+    platform: "xcom",
     embedded: true,
     selectors: {
       video: `${XCOM_PLAYER_CONTAINER_SELECTOR} video`,

@@ -9,6 +9,7 @@ import { getNetflixMovieId } from "@/utils/subtitles/video-id"
 
 export function getNetflixConfig(): PlatformConfig {
   return {
+    platform: "netflix",
     selectors: {
       video: `${NETFLIX_PLAYER_SELECTOR} video`,
       playerContainer: NETFLIX_PLAYER_SELECTOR,

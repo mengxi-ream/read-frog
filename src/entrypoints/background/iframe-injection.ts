@@ -1,8 +1,13 @@
 import type { FrameInfoForSiteControl } from "./iframe-injection-utils"
 import type { Config } from "@/types/config/config"
+import type { ContentRuntimePart } from "@/utils/content-runtime/parts"
 import { browser } from "#imports"
 import { getLocalConfig } from "@/utils/config/storage"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import {
+  CONTENT_LOADER_SCRIPT_FILE,
+  CONTENT_RUNTIME_PARTS_WINDOW_KEY,
+} from "@/utils/content-runtime/parts"
 import { logger } from "@/utils/logger"
 import { onMessage } from "@/utils/message"
 import { isSiteEnabled, SITE_CONTROL_URL_WINDOW_KEY } from "@/utils/site-control"
@@ -11,12 +16,8 @@ import { urlMatchesPattern } from "@/utils/url-pattern"
 import { isSameOriginIframeSender, resolveSiteControlUrl } from "./iframe-injection-utils"
 import { getPageTranslationEnabled } from "./page-translation-state"
 
-const HOST_CONTENT_SCRIPT_FILE = "/content-scripts/host.js" as const
-const SELECTION_CONTENT_SCRIPT_FILE = "/content-scripts/selection.js" as const
-
-type IframeContentScriptFile =
-  | typeof HOST_CONTENT_SCRIPT_FILE
-  | typeof SELECTION_CONTENT_SCRIPT_FILE
+// The parts of the content runtime an iframe can get; the side UI is top-frame only
+type IframeContentPart = Extract<ContentRuntimePart, "host" | "selection">
 
 const pendingScriptDocumentKeys = new Set<string>()
 const injectedDocumentKeysByFrameAndScript = new Map<string, string>()
@@ -45,15 +46,12 @@ function getFrameInjectionKey(details: { tabId: number; frameId: number }) {
   return `${details.tabId}:${details.frameId}`
 }
 
-function getScriptDocumentInjectionKey(
-  details: FrameInjectionDetails,
-  file: IframeContentScriptFile,
-) {
-  return `${getDocumentInjectionKey(details)}:${file}`
+function getScriptDocumentInjectionKey(details: FrameInjectionDetails, part: IframeContentPart) {
+  return `${getDocumentInjectionKey(details)}:${part}`
 }
 
-function getScriptFrameInjectionKey(details: FrameInjectionDetails, file: IframeContentScriptFile) {
-  return `${getFrameInjectionKey(details)}:${file}`
+function getScriptFrameInjectionKey(details: FrameInjectionDetails, part: IframeContentPart) {
+  return `${getFrameInjectionKey(details)}:${part}`
 }
 
 function clearTabDocumentState(tabId: number) {
@@ -100,8 +98,21 @@ function getParentFrameIdHint(details: object): number | undefined {
   return undefined
 }
 
-function setInjectedSiteControlUrl(propertyName: string, siteControlUrl: string) {
-  ;(globalThis as Record<string, unknown>)[propertyName] = siteControlUrl
+// Runs in the frame before the loader, which takes the parts. Overlapping
+// injections into one frame (host-only, then selection) add to the parts
+// still waiting rather than replace them; the first loader runs them all.
+function setInjectedLoaderContext(
+  siteControlUrlPropertyName: string,
+  siteControlUrl: string,
+  partsPropertyName: string,
+  parts: string[],
+) {
+  const frameGlobal = globalThis as Record<string, unknown>
+  const waiting = frameGlobal[partsPropertyName]
+  frameGlobal[siteControlUrlPropertyName] = siteControlUrl
+  frameGlobal[partsPropertyName] = [
+    ...new Set([...(Array.isArray(waiting) ? waiting : []), ...parts]),
+  ]
 }
 
 function getInjectionTarget(details: FrameInjectionDetails) {
@@ -122,12 +133,10 @@ function isFullRuntimeAutoInjectUrl(url: string | undefined, config: Config | nu
   return getEffectiveSiteRule(config ?? DEFAULT_CONFIG, url).injectIntoIframes === true
 }
 
-function getIframeContentScriptFiles(
+function getIframeContentParts(
   options: InjectHostContentIntoTabIframesOptions,
-): IframeContentScriptFile[] {
-  return options.includeSelectionContent
-    ? [HOST_CONTENT_SCRIPT_FILE, SELECTION_CONTENT_SCRIPT_FILE]
-    : [HOST_CONTENT_SCRIPT_FILE]
+): IframeContentPart[] {
+  return options.includeSelectionContent ? ["host", "selection"] : ["host"]
 }
 
 async function getShouldInjectHostContentIntoTabIframes(
@@ -154,21 +163,21 @@ async function injectHostContentIntoFrame(
   options: InjectHostContentIntoTabIframesOptions = {},
 ) {
   const documentKey = getDocumentInjectionKey(details)
-  const filesToInject = getIframeContentScriptFiles(options).filter((file) => {
-    const scriptDocumentKey = getScriptDocumentInjectionKey(details, file)
-    const scriptFrameKey = getScriptFrameInjectionKey(details, file)
+  const partsToInject = getIframeContentParts(options).filter((part) => {
+    const scriptDocumentKey = getScriptDocumentInjectionKey(details, part)
+    const scriptFrameKey = getScriptFrameInjectionKey(details, part)
     return (
       !pendingScriptDocumentKeys.has(scriptDocumentKey) &&
       injectedDocumentKeysByFrameAndScript.get(scriptFrameKey) !== documentKey
     )
   })
 
-  if (filesToInject.length === 0) {
+  if (partsToInject.length === 0) {
     return
   }
 
-  for (const file of filesToInject) {
-    pendingScriptDocumentKeys.add(getScriptDocumentInjectionKey(details, file))
+  for (const part of partsToInject) {
+    pendingScriptDocumentKeys.add(getScriptDocumentInjectionKey(details, part))
   }
 
   try {
@@ -210,18 +219,22 @@ async function injectHostContentIntoFrame(
 
       await browser.scripting.executeScript({
         target,
-        func: setInjectedSiteControlUrl,
-        args: [SITE_CONTROL_URL_WINDOW_KEY, siteControlUrl],
+        func: setInjectedLoaderContext,
+        args: [
+          SITE_CONTROL_URL_WINDOW_KEY,
+          siteControlUrl,
+          CONTENT_RUNTIME_PARTS_WINDOW_KEY,
+          partsToInject,
+        ],
+      })
+      await browser.scripting.executeScript({
+        target,
+        files: [CONTENT_LOADER_SCRIPT_FILE],
       })
 
-      for (const file of filesToInject) {
-        await browser.scripting.executeScript({
-          target,
-          files: [file],
-        })
-
+      for (const part of partsToInject) {
         injectedDocumentKeysByFrameAndScript.set(
-          getScriptFrameInjectionKey(details, file),
+          getScriptFrameInjectionKey(details, part),
           documentKey,
         )
       }
@@ -229,8 +242,8 @@ async function injectHostContentIntoFrame(
       logger.warn("[Background][IframeInjection] Failed to inject iframe content scripts", error)
     }
   } finally {
-    for (const file of filesToInject) {
-      pendingScriptDocumentKeys.delete(getScriptDocumentInjectionKey(details, file))
+    for (const part of partsToInject) {
+      pendingScriptDocumentKeys.delete(getScriptDocumentInjectionKey(details, part))
     }
   }
 }
@@ -336,11 +349,11 @@ export function setupIframeInjection() {
       })
       // An eager rule may already be injecting this document. Its ready event
       // will replay the gesture once React is mounted.
-      return getIframeContentScriptFiles({ includeSelectionContent: true }).every(
-        (file) =>
-          injectedDocumentKeysByFrameAndScript.get(getScriptFrameInjectionKey(details, file)) ===
+      return getIframeContentParts({ includeSelectionContent: true }).every(
+        (part) =>
+          injectedDocumentKeysByFrameAndScript.get(getScriptFrameInjectionKey(details, part)) ===
             getDocumentInjectionKey(details) ||
-          pendingScriptDocumentKeys.has(getScriptDocumentInjectionKey(details, file)),
+          pendingScriptDocumentKeys.has(getScriptDocumentInjectionKey(details, part)),
       )
     } catch (error) {
       logger.warn(
