@@ -587,3 +587,118 @@ describe("readSelectionSnapshot", () => {
     expect(getRangeAt).toHaveBeenCalledWith(0)
   })
 })
+
+// https://github.com/mengxi-ream/read-frog/issues/2371
+describe("ruby annotations", () => {
+  // Like the browser's selection text, Range.toString() keeps the furigana.
+  function createRangeSelection(range: Range): Selection {
+    return {
+      toString: () => range.toString(),
+      anchorNode: range.startContainer,
+      focusNode: range.endContainer,
+      rangeCount: 1,
+      getRangeAt: () => range,
+    } as unknown as Selection
+  }
+
+  function getTextNode(id: string) {
+    const node = document.getElementById(id)?.firstChild
+    if (!(node instanceof Text)) {
+      throw new Error(`Text node #${id} not found`)
+    }
+    return node
+  }
+
+  it("leaves furigana and its fallback parentheses out of the selected text", () => {
+    document.body.innerHTML = `<p id="paragraph"><ruby>漢字<rt>かんじ</rt></ruby>を<ruby>勉強<rp>(</rp><rt>べんきょう</rt><rp>)</rp></ruby>する</p>`
+
+    const range = document.createRange()
+    range.selectNodeContents(document.getElementById("paragraph")!)
+    expect(range.toString()).toBe("漢字かんじを勉強(べんきょう)する")
+
+    expect(readSelectionSnapshot(createRangeSelection(range))?.text).toBe("漢字を勉強する")
+  })
+
+  it("keeps only the selected part of the base text", () => {
+    document.body.innerHTML = `<p><ruby id="start">東京<rt>とうきょう</rt></ruby>で<ruby>雪<rt>ゆき</rt></ruby><span id="end">が降りました</span></p>`
+
+    const range = document.createRange()
+    range.setStart(getTextNode("start"), 1)
+    range.setEnd(getTextNode("end"), 2)
+
+    expect(readSelectionSnapshot(createRangeSelection(range))?.text).toBe("京で雪が降")
+  })
+
+  it("starts each selected paragraph on a new line and collapses whitespace", () => {
+    document.body.innerHTML = `
+      <article>
+        <p id="first"><ruby>今日<rt>きょう</rt></ruby>は
+          <ruby>雪<rt>ゆき</rt></ruby>です。</p>
+        <p id="second"><ruby>電車<rt>でんしゃ</rt></ruby>が<ruby>遅<rt>おく</rt></ruby>れます。</p>
+      </article>
+    `
+
+    const range = document.createRange()
+    range.setStart(document.getElementById("first")!, 0)
+    range.setEnd(document.getElementById("second")!, 4)
+
+    expect(readSelectionSnapshot(createRangeSelection(range))?.text).toBe(
+      "今日は 雪です。\n\n電車が遅れます。",
+    )
+  })
+
+  it("keeps line breaks from <br> and from white-space that preserves them", () => {
+    document.body.innerHTML = `
+      <p id="br"><ruby>雪<rt>ゆき</rt></ruby>が降る<br><ruby>風<rt>かぜ</rt></ruby>が吹く</p>
+      <div id="pre-line" style="white-space: pre-line"><ruby>春<rt>はる</rt></ruby>の海
+<ruby>夏<rt>なつ</rt></ruby>の山</div>
+    `
+
+    const brRange = document.createRange()
+    brRange.selectNodeContents(document.getElementById("br")!)
+    expect(readSelectionSnapshot(createRangeSelection(brRange))?.text).toBe("雪が降る\n風が吹く")
+
+    const preLineRange = document.createRange()
+    preLineRange.selectNodeContents(document.getElementById("pre-line")!)
+    expect(readSelectionSnapshot(createRangeSelection(preLineRange))?.text).toBe("春の海\n夏の山")
+  })
+
+  it("leaves hidden text out, as the browser does", () => {
+    document.body.innerHTML = `<p id="paragraph"><ruby>漢字<rt>かんじ</rt></ruby><span style="display: none">hidden</span>です</p>`
+
+    const range = document.createRange()
+    range.selectNodeContents(document.getElementById("paragraph")!)
+
+    expect(readSelectionSnapshot(createRangeSelection(range))?.text).toBe("漢字です")
+  })
+
+  it("keeps the furigana when nothing else is selected", () => {
+    document.body.innerHTML = `<p><ruby>漢字<rt id="reading">かんじ</rt></ruby>です</p>`
+
+    const range = document.createRange()
+    range.selectNodeContents(getTextNode("reading"))
+
+    expect(readSelectionSnapshot(createRangeSelection(range))?.text).toBe("かんじ")
+  })
+
+  it("keeps the browser's text for a selection without furigana in a paragraph that has some", () => {
+    document.body.innerHTML = `<p><ruby>漢字<rt>かんじ</rt></ruby>を<span id="plain">勉強  する</span></p>`
+
+    const range = document.createRange()
+    range.selectNodeContents(getTextNode("plain"))
+
+    expect(readSelectionSnapshot(createRangeSelection(range))?.text).toBe("勉強  する")
+  })
+
+  it("leaves furigana out of the paragraph context", () => {
+    document.body.innerHTML = `<p id="paragraph"><ruby>漢字<rt>かんじ</rt></ruby>を<ruby id="selected">勉強<rp>(</rp><rt>べんきょう</rt><rp>)</rp></ruby>する</p>`
+
+    const range = document.createRange()
+    range.selectNodeContents(getTextNode("selected"))
+
+    expect(buildContextSnapshot(createSelectionSnapshot(range))).toEqual({
+      text: "漢字を勉強する",
+      paragraphs: ["漢字を勉強する"],
+    })
+  })
+})

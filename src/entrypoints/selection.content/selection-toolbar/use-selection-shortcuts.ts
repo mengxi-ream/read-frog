@@ -5,7 +5,7 @@ import { useAtomValue } from "jotai"
 import { useEffect, useEffectEvent } from "react"
 import { SELECTION_SHORTCUT_CLAIMED_EVENT } from "@/utils/constants/selection"
 import { isShortcutEmpty, isValidShortcut } from "@/utils/shortcut"
-import { shadowWrapper } from ".."
+import { shadowWrapper } from "../main"
 import { buildContextSnapshot, readSelectionSnapshot } from "../utils"
 import { createSelectionSession, selectionSessionAtom } from "./atoms"
 

@@ -38,6 +38,7 @@ function setup() {
   }
   const adapter = new UniversalVideoAdapter({
     config: {
+      platform: "youtube",
       selectors: {
         video: "video",
         playerContainer: ".player",

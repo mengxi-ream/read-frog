@@ -13,7 +13,6 @@ import { useAtom } from "jotai"
 import { Activity, use, useEffect, useState } from "react"
 import { DebouncedColorPicker } from "@/components/debounced-color-picker"
 import { Button } from "@/components/ui/base-ui/button"
-import { ColorPickerPortalContainer } from "@/components/ui/base-ui/color-picker"
 import {
   Select,
   SelectContent,
@@ -170,16 +169,15 @@ function TextStyleGroup({
       />
 
       <SettingRow label={i18n.t("options.videoSubtitles.style.color")}>
-        {/* Every layer the picker portals — popover, format menu, channel tooltips — has to
-            land inside the shadow root, or it renders outside the reach of our styles. */}
-        <ColorPickerPortalContainer value={portalContainer}>
-          <DebouncedColorPicker
-            value={textStyle.color}
-            onCommit={(color) => onChange({ color })}
-            triggerShowValue={false}
-            triggerClassName="h-7 px-1.5"
-          />
-        </ColorPickerPortalContainer>
+        {/* The popover has to land inside the shadow root, or it renders outside the reach
+            of our styles; its format menu and tooltips then mount inside the panel. */}
+        <DebouncedColorPicker
+          value={textStyle.color}
+          onCommit={(color) => onChange({ color })}
+          triggerShowValue={false}
+          triggerClassName="h-7"
+          container={portalContainer}
+        />
       </SettingRow>
 
       <SettingRow label={i18n.t("options.videoSubtitles.style.fontFamily")}>

@@ -1405,7 +1405,7 @@ options:
         description: Düyməyə basmadan video yüklənən kimi tərcüməyə başlayın.
       aiSegmentation:
         title: Süni intellektlə ağıllı seqmentləşdirmə
-        description: Süni intellekt subtitrləri cümlə kimi oxunan sətirlərə yenidən bölür. Vaxtları da təyin etdiyindən sətirlər sinxrondan çıxa bilər. LLM tərcümə provayderi tələb olunur.
+        description: Süni intellekt subtitrləri cümlələrə yenidən bölür. Tərcümələr daha gec gəlir. Güclü LLM tələb olunur; zəif modellər sətirləri buraxa və ya sürüşdürə bilər.
     aiQuota:
       title: Süni intellekt subtitrlərinin kvotası
       description: Süni intellektlə nitqin tanınması istənilən video üçün dəqiq subtitrlər yaradır

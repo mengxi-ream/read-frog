@@ -8,11 +8,16 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { CustomPromptsSection } from "../custom-prompts"
 import { PreferenceSection } from "../preference"
+import { SubtitlesAutoStartPage } from "../preference/auto-start-page"
 import { SubtitlesStyleSection } from "../subtitles-style"
+
+type VideoSubtitlesUpdate =
+  | Partial<Config["videoSubtitles"]>
+  | ((current: Config["videoSubtitles"]) => Partial<Config["videoSubtitles"]>)
 
 const { videoSubtitlesAtom, setVideoSubtitlesMock, testState } = vi.hoisted(() => ({
   videoSubtitlesAtom: {},
-  setVideoSubtitlesMock: vi.fn<(value: Partial<Config["videoSubtitles"]>) => Promise<void>>(),
+  setVideoSubtitlesMock: vi.fn<(value: VideoSubtitlesUpdate) => Promise<void>>(),
   testState: {
     videoSubtitles: null as Config["videoSubtitles"] | null,
   },
@@ -56,18 +61,40 @@ describe("video subtitles page sections", () => {
     expect(screen.getByRole("link")).toHaveAttribute("href", "/video-subtitles/prompts")
   })
 
-  it("writes each switch on its own, leaving the other two alone", () => {
+  it("sends the translate-on-open row to the page that holds the platform switches", () => {
     renderInRouter(<PreferenceSection />)
 
-    const [enable, autoStart, aiSegmentation] = screen.getAllByRole("switch")
+    expect(screen.getByRole("link", { name: /preference\.autoStart\.title/ })).toHaveAttribute(
+      "href",
+      "/video-subtitles/auto-start",
+    )
+  })
 
-    fireEvent.click(autoStart!)
-    expect(setVideoSubtitlesMock).toHaveBeenCalledWith({ autoStart: true })
+  it("writes each switch on its own, leaving the other alone", () => {
+    renderInRouter(<PreferenceSection />)
+
+    const [enable, aiSegmentation] = screen.getAllByRole("switch")
 
     fireEvent.click(enable!)
     expect(setVideoSubtitlesMock).toHaveBeenCalledWith({ enabled: false })
 
     fireEvent.click(aiSegmentation!)
     expect(setVideoSubtitlesMock).toHaveBeenCalledWith({ aiSegmentation: true })
+  })
+
+  it("turns translate-on-open on for one platform only", () => {
+    testState.videoSubtitles!.autoStart = { youtube: true, xcom: false, netflix: false }
+    renderInRouter(<SubtitlesAutoStartPage />)
+
+    expect(screen.getByRole("switch", { name: "YouTube" })).toBeChecked()
+    expect(screen.getByRole("switch", { name: "Netflix" })).not.toBeChecked()
+
+    fireEvent.click(screen.getByRole("switch", { name: "X" }))
+
+    const update = setVideoSubtitlesMock.mock.lastCall?.[0]
+    expect(typeof update).toBe("function")
+    expect(typeof update === "function" && update(testState.videoSubtitles!)).toEqual({
+      autoStart: { youtube: true, xcom: true, netflix: false },
+    })
   })
 })

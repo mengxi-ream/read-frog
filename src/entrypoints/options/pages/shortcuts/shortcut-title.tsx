@@ -1,9 +1,10 @@
 import type { ReactNode } from "react"
 import type { To } from "react-router"
 import { Link } from "react-router"
-import { Button } from "@/components/ui/base-ui/button"
+import { buttonVariants } from "@/components/ui/base-ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
 import { i18n } from "@/utils/i18n"
+import { cn } from "@/utils/styles/utils"
 
 /**
  * A shortcut row's title. While the feature the key belongs to is switched off, `turnOn` is where
@@ -20,11 +21,12 @@ export function ShortcutTitle({ title, turnOn }: { title: ReactNode; turnOn?: To
       <Tooltip>
         <TooltipTrigger
           render={
-            <Button
-              variant="outline"
-              size="xs"
-              className="h-5 px-1.5 font-normal"
-              render={<Link to={turnOn} />}
+            <Link
+              to={turnOn}
+              className={cn(
+                buttonVariants({ variant: "outline", size: "xs" }),
+                "h-5 px-1.5 font-normal",
+              )}
             />
           }
         >

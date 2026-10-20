@@ -1,11 +1,11 @@
-import type { CSSProperties, HTMLAttributes, Ref, ReactNode } from "react"
+import type { CSSProperties, HTMLAttributes, ReactNode, Ref } from "react"
 import type { SliderValue } from "@/components/ui/base-ui/slider"
 import { Menu } from "@base-ui/react/menu"
 import { NumberField } from "@base-ui/react/number-field"
 import { Popover } from "@base-ui/react/popover"
-import { IconChevronDown, IconColorPicker, IconX } from "@tabler/icons-react"
+import { IconChevronDown, IconColorPicker } from "@tabler/icons-react"
 import { AnimatePresence, motion } from "motion/react"
-import { createContext, use, useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { createContext, use, useEffect, useMemo, useRef, useState } from "react"
 import { Slider } from "@/components/ui/base-ui/slider"
 import {
   Tooltip,
@@ -14,17 +14,16 @@ import {
   TooltipTrigger,
 } from "@/components/ui/base-ui/tooltip"
 import { useProximityHover } from "@/hooks/use-proximity-hover"
-import { spring } from "@/utils/styles/springs"
+import { exitFallbackMs, spring } from "@/utils/styles/springs"
 import { cn } from "@/utils/styles/utils"
 
 /**
  * A port of fluidfunctionalism.com/docs/color-picker — a HEX/RGB/HSL/OKLCH picker with an
- * alpha channel, a saturation/brightness square, scrubbable channel inputs, optional preset
- * swatches, and the native eyedropper. Replaces the `<input type="color">` we used for
- * subtitle colours, which gave us the OS picker (unthemed, unreachable from a content
- * script's shadow DOM, and hex-only).
+ * alpha channel, a saturation/brightness square, scrubbable channel inputs, and the native
+ * eyedropper. Replaces the `<input type="color">` we used for subtitle colours, which gave us
+ * the OS picker (unthemed, unreachable from a content script's shadow DOM, and hex-only).
  *
- * Adapted to this codebase in four places, since the source ships against its own design
+ * Adapted to this codebase in three places, since the source ships against its own design
  * system rather than shadcn tokens:
  *
  *  - **Surfaces.** The source paints popups from an 8-level `bg-surface-N`/`shadow-surface-N`
@@ -41,77 +40,62 @@ import { cn } from "@/utils/styles/utils"
  * The hue and alpha tracks are the exception: our `Slider` is a port of the same registry
  * slider this picker is written against, so they use it directly.
  *
- * Portalled layers (popover, format menu, channel tooltips) all take their container from
- * {@link ColorPickerPortalContainer}. Content scripts must wrap in it — a portal defaulting
- * to `document.body` lands outside the shadow root, where none of our styles reach.
+ * `ColorPickerPopover` takes a `container` for its portal, like `SelectContent` does. Content
+ * scripts must pass one — a portal defaulting to `document.body` lands outside the shadow
+ * root, where none of our styles reach. The format menu and channel tooltips then mount
+ * inside the panel, so they follow it rather than the page.
  */
 
 type ColorFormat = "hex" | "rgb" | "hsl" | "oklch"
 
-/**
- * Where portalled layers mount. Consumers set it to a node inside their shadow root;
- * `ColorPickerPopover` re-provides its own panel so the format menu and tooltips track the
- * panel rather than the page.
- */
-const ColorPickerPortalContainerContext = createContext<HTMLElement | null>(null)
+/** Where the panel's own portalled layers (format menu, channel tooltips) mount. */
+const PortalContainerContext = createContext<HTMLElement | null>(null)
 
-function ColorPickerPortalContainer({
-  value,
-  children,
-}: {
-  value: HTMLElement | null
-  children: ReactNode
-}) {
-  return (
-    <ColorPickerPortalContainerContext value={value}>{children}</ColorPickerPortalContainerContext>
-  )
+interface Rgb {
+  r: number
+  g: number
+  b: number
 }
 
-interface ParsedColor {
-  // HSV (canonical, 0..360 / 0..1 / 0..1)
+interface Rgba extends Rgb {
+  a: number
+}
+
+/**
+ * The picker's canonical state: HSV (0..360 / 0..1 / 0..1) plus alpha. `h` is kept across
+ * S=0 / V=0, so dragging to black and back doesn't reset the hue. `oklchH` does the same for
+ * the OKLCH hue channel: it holds the user's stated H across the lossy RGB round-trip (so the
+ * displayed H doesn't drift after release) and across achromatic colours (where an
+ * RGB-derived H collapses to 0). It only describes the colour it was stated for, so `update`
+ * drops it whenever h, s or v move, except on an OKLCH channel edit, which sets it. Alpha
+ * edits keep it.
+ */
+interface ColorState {
   h: number
   s: number
   v: number
   a: number
-  // sRGB 0..255
-  r: number
-  g: number
-  b: number
-  // Formatted strings
-  hex: string
-  rgb: string
-  hsl: string
-  oklch: string
+  oklchH: number | null
 }
 
-interface ColorPickerProps extends Omit<
-  HTMLAttributes<HTMLDivElement>,
-  "onChange" | "defaultValue"
-> {
+interface ColorPickerValueProps {
   value?: string
   defaultValue?: string
-  onValueChange?: (value: string, parsed: ParsedColor) => void
+  onValueChange?: (value: string) => void
   format?: ColorFormat
   defaultFormat?: ColorFormat
   onFormatChange?: (format: ColorFormat) => void
-  swatches?: string[]
   hideEyedropper?: boolean
-  /**
-   * Controls the format dropdown's open state. When provided, the dropdown is fully
-   * controlled and ignores user toggles.
-   */
-  formatOpen?: boolean
-  /** Initial open state for the format dropdown (uncontrolled). */
-  defaultFormatOpen?: boolean
+}
+
+interface ColorPickerProps
+  extends ColorPickerValueProps, Omit<HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue"> {
   ref?: Ref<HTMLDivElement>
 }
 
-interface ColorPickerPopoverProps extends ColorPickerProps {
+interface ColorPickerPopoverProps extends ColorPickerValueProps {
   triggerLabel?: string
-  triggerLabelPosition?: "left" | "right"
   triggerShowValue?: boolean
-  triggerShowRemove?: boolean
-  onTriggerRemove?: () => void
   triggerClassName?: string
   /**
    * Controls the popover's open state. When provided, the popover is fully controlled and
@@ -122,13 +106,8 @@ interface ColorPickerPopoverProps extends ColorPickerProps {
   defaultOpen?: boolean
   /** Called when the open state would change (fires even when controlled). */
   onOpenChange?: (open: boolean) => void
-}
-
-interface ColorSwatchProps extends Omit<HTMLAttributes<HTMLButtonElement>, "color"> {
-  color: string
-  size?: number
-  selected?: boolean
-  ref?: Ref<HTMLButtonElement>
+  /** Where the popover mounts. Content scripts pass a node inside their shadow root. */
+  container?: HTMLElement | null
 }
 
 // ---------------------------------------------------------------------------
@@ -143,34 +122,43 @@ function clamp255(n: number) {
   return Math.max(0, Math.min(255, n))
 }
 
-function hsvToRgb(h: number, s: number, v: number): { r: number; g: number; b: number } {
-  const c = v * s
+/**
+ * The hue-sector step HSV and HSL share on the way to RGB: `c` is the chroma and `m` the
+ * amount added to every channel.
+ */
+function hueToRgb(h: number, c: number, m: number): Rgb {
   const hh = (((h % 360) + 360) % 360) / 60
   const x = c * (1 - Math.abs((hh % 2) - 1))
-  let r = 0
-  let g = 0
-  let b = 0
-  if (hh < 1) {
-    r = c
-    g = x
-  } else if (hh < 2) {
-    r = x
-    g = c
-  } else if (hh < 3) {
-    g = c
-    b = x
-  } else if (hh < 4) {
-    g = x
-    b = c
-  } else if (hh < 5) {
-    r = x
-    b = c
-  } else {
-    r = c
-    b = x
-  }
-  const m = v - c
+  const [r, g, b] =
+    hh < 1
+      ? [c, x, 0]
+      : hh < 2
+        ? [x, c, 0]
+        : hh < 3
+          ? [0, c, x]
+          : hh < 4
+            ? [0, x, c]
+            : hh < 5
+              ? [x, 0, c]
+              : [c, 0, x]
   return { r: (r + m) * 255, g: (g + m) * 255, b: (b + m) * 255 }
+}
+
+function hsvToRgb(h: number, s: number, v: number): Rgb {
+  const c = v * s
+  return hueToRgb(h, c, v - c)
+}
+
+function hslToRgb(h: number, s: number, l: number): Rgb {
+  const c = (1 - Math.abs(2 * l - 1)) * s
+  return hueToRgb(h, c, l - c / 2)
+}
+
+/** The hue HSV and HSL share, from 0..1 channels with their max and max − min. 0 for greys. */
+function hueOf(r: number, g: number, b: number, max: number, d: number): number {
+  if (d === 0) return 0
+  const h = 60 * (max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4)
+  return h < 0 ? h + 360 : h
 }
 
 function rgbToHsv(r: number, g: number, b: number): { h: number; s: number; v: number } {
@@ -178,19 +166,8 @@ function rgbToHsv(r: number, g: number, b: number): { h: number; s: number; v: n
   g /= 255
   b /= 255
   const max = Math.max(r, g, b)
-  const min = Math.min(r, g, b)
-  const v = max
-  const d = max - min
-  const s = max === 0 ? 0 : d / max
-  let h = 0
-  if (d > 0) {
-    if (max === r) h = ((g - b) / d) % 6
-    else if (max === g) h = (b - r) / d + 2
-    else h = (r - g) / d + 4
-    h *= 60
-    if (h < 0) h += 360
-  }
-  return { h, s, v }
+  const d = max - Math.min(r, g, b)
+  return { h: hueOf(r, g, b, max, d), s: max === 0 ? 0 : d / max, v: max }
 }
 
 function rgbToHsl(r: number, g: number, b: number): { h: number; s: number; l: number } {
@@ -201,47 +178,14 @@ function rgbToHsl(r: number, g: number, b: number): { h: number; s: number; l: n
   const min = Math.min(r, g, b)
   const l = (max + min) / 2
   const d = max - min
-  let h = 0
-  let s = 0
-  if (d > 0) {
-    s = l > 0.5 ? d / (2 - max - min) : d / (max + min)
-    if (max === r) h = ((g - b) / d) % 6
-    else if (max === g) h = (b - r) / d + 2
-    else h = (r - g) / d + 4
-    h *= 60
-    if (h < 0) h += 360
-  }
-  return { h, s, l }
+  const s = d === 0 ? 0 : l > 0.5 ? d / (2 - max - min) : d / (max + min)
+  return { h: hueOf(r, g, b, max, d), s, l }
 }
 
-function hslToRgb(h: number, s: number, l: number): { r: number; g: number; b: number } {
-  const c = (1 - Math.abs(2 * l - 1)) * s
-  const hh = (((h % 360) + 360) % 360) / 60
-  const x = c * (1 - Math.abs((hh % 2) - 1))
-  let r = 0
-  let g = 0
-  let b = 0
-  if (hh < 1) {
-    r = c
-    g = x
-  } else if (hh < 2) {
-    r = x
-    g = c
-  } else if (hh < 3) {
-    g = c
-    b = x
-  } else if (hh < 4) {
-    g = x
-    b = c
-  } else if (hh < 5) {
-    r = x
-    b = c
-  } else {
-    r = c
-    b = x
-  }
-  const m = l - c / 2
-  return { r: (r + m) * 255, g: (g + m) * 255, b: (b + m) * 255 }
+/** RGB → HSV, keeping `fallbackH` for greys, where the RGB-derived hue collapses to 0. */
+function rgbToHsvKeepingHue({ r, g, b }: Rgb, fallbackH: number) {
+  const hsv = rgbToHsv(r, g, b)
+  return { h: hsv.s === 0 ? fallbackH : hsv.h, s: hsv.s, v: hsv.v }
 }
 
 function srgbToLinear(c: number): number {
@@ -268,7 +212,7 @@ function linearRgbToOklab(r: number, g: number, b: number): { L: number; a: numb
   }
 }
 
-function oklabToLinearRgb(L: number, a: number, b: number): { r: number; g: number; b: number } {
+function oklabToLinearRgb(L: number, a: number, b: number): Rgb {
   const lRoot = L + 0.3963377774 * a + 0.2158037573 * b
   const mRoot = L - 0.1055613458 * a - 0.0638541728 * b
   const sRoot = L - 0.0894841775 * a - 1.291485548 * b
@@ -290,7 +234,7 @@ function rgbToOklch(r: number, g: number, b: number): { L: number; C: number; H:
   return { L: lab.L, C, H }
 }
 
-function oklchToRgb(L: number, C: number, H: number): { r: number; g: number; b: number } {
+function oklchToRgb(L: number, C: number, H: number): Rgb {
   const a = C * Math.cos((H * Math.PI) / 180)
   const b = C * Math.sin((H * Math.PI) / 180)
   const lin = oklabToLinearRgb(L, a, b)
@@ -321,27 +265,13 @@ function expandShortHex(h: string): string {
   return h
 }
 
-function parseHex(input: string): { r: number; g: number; b: number; a: number } | null {
+function parseHex(input: string): Rgba | null {
   const m = input.trim().match(/^#?([0-9a-f]{3,8})$/i)
   if (!m?.[1]) return null
   const h = expandShortHex(m[1])
-  if (h.length === 6) {
-    return {
-      r: Number.parseInt(h.slice(0, 2), 16),
-      g: Number.parseInt(h.slice(2, 4), 16),
-      b: Number.parseInt(h.slice(4, 6), 16),
-      a: 1,
-    }
-  }
-  if (h.length === 8) {
-    return {
-      r: Number.parseInt(h.slice(0, 2), 16),
-      g: Number.parseInt(h.slice(2, 4), 16),
-      b: Number.parseInt(h.slice(4, 6), 16),
-      a: Number.parseInt(h.slice(6, 8), 16) / 255,
-    }
-  }
-  return null
+  if (h.length !== 6 && h.length !== 8) return null
+  const byte = (i: number) => Number.parseInt(h.slice(i, i + 2), 16)
+  return { r: byte(0), g: byte(2), b: byte(4), a: h.length === 8 ? byte(6) / 255 : 1 }
 }
 
 function parsePart(part: string): number {
@@ -359,7 +289,7 @@ function splitParts(body: string): [string, string, string, string | undefined] 
   return [first, second, third, alpha]
 }
 
-function parseColor(input: string): { r: number; g: number; b: number; a: number } | null {
+function parseColor(input: string): Rgba | null {
   const s = input.trim()
   if (!s) return null
   if (s.startsWith("#") || /^[0-9a-f]{3,8}$/i.test(s)) return parseHex(s)
@@ -405,87 +335,45 @@ function parseColor(input: string): { r: number; g: number; b: number; a: number
   return null
 }
 
-/**
- * Browser-assisted fallback for colours the manual parser doesn't cover — named CSS colours
- * like "red" or "tomato". A canvas 2d context round-trips any valid CSS colour through
- * `fillStyle`, which serialises to something {@link parseColor} understands.
- *
- * Only call from event handlers or effects, never during render.
- */
-let cssColorCtx: CanvasRenderingContext2D | null = null
-
-function resolveCssColor(input: string): { r: number; g: number; b: number; a: number } | null {
-  const direct = parseColor(input)
-  if (direct) return direct
-  const s = input.trim()
-  if (!s || typeof document === "undefined") return null
-  if (!cssColorCtx) {
-    cssColorCtx = document.createElement("canvas").getContext("2d")
-    if (!cssColorCtx) return null
-  }
-  const ctx = cssColorCtx
-  // An invalid assignment leaves fillStyle untouched, so round-trip from two different
-  // starting values to tell rejection apart from a real colour.
-  ctx.fillStyle = "#000000"
-  ctx.fillStyle = s
-  const first = ctx.fillStyle
-  ctx.fillStyle = "#ffffff"
-  ctx.fillStyle = s
-  const second = ctx.fillStyle
-  if (first !== second) return null
-  return parseColor(first)
-}
-
-function buildParsed(h: number, s: number, v: number, a: number): ParsedColor {
+/** The RGB the inputs display and edit against: whole channels. */
+function roundedRgb({ h, s, v }: ColorState): Rgb {
   const { r, g, b } = hsvToRgb(h, s, v)
-  const hsl = rgbToHsl(r, g, b)
-  const oklch = rgbToOklch(r, g, b)
-  const hex = rgbToHexStr(r, g, b, a)
-  const rgbStr =
-    a >= 1
-      ? `rgb(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)})`
-      : `rgba(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)}, ${Number(a.toFixed(3))})`
-  const hslStr =
-    a >= 1
-      ? `hsl(${Math.round(hsl.h)}, ${Math.round(hsl.s * 100)}%, ${Math.round(hsl.l * 100)}%)`
-      : `hsla(${Math.round(hsl.h)}, ${Math.round(hsl.s * 100)}%, ${Math.round(hsl.l * 100)}%, ${Number(a.toFixed(3))})`
-  const oklchStr =
-    a >= 1
-      ? `oklch(${(oklch.L * 100).toFixed(1)}% ${oklch.C.toFixed(3)} ${oklch.H.toFixed(1)})`
-      : `oklch(${(oklch.L * 100).toFixed(1)}% ${oklch.C.toFixed(3)} ${oklch.H.toFixed(1)} / ${Number(a.toFixed(3))})`
-  return {
-    h,
-    s,
-    v,
-    a,
-    r: Math.round(r),
-    g: Math.round(g),
-    b: Math.round(b),
-    hex,
-    rgb: rgbStr,
-    hsl: hslStr,
-    oklch: oklchStr,
+  return { r: Math.round(r), g: Math.round(g), b: Math.round(b) }
+}
+
+/** Serialises the state in one format. HSL and OKLCH start from the unrounded RGB. */
+function formatColor({ h, s, v, a }: ColorState, format: ColorFormat): string {
+  const { r, g, b } = hsvToRgb(h, s, v)
+  const alpha = a >= 1 ? null : Number(a.toFixed(3))
+  switch (format) {
+    case "rgb": {
+      const body = `${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)}`
+      return alpha === null ? `rgb(${body})` : `rgba(${body}, ${alpha})`
+    }
+    case "hsl": {
+      const hsl = rgbToHsl(r, g, b)
+      const body = `${Math.round(hsl.h)}, ${Math.round(hsl.s * 100)}%, ${Math.round(hsl.l * 100)}%`
+      return alpha === null ? `hsl(${body})` : `hsla(${body}, ${alpha})`
+    }
+    case "oklch": {
+      const oklch = rgbToOklch(r, g, b)
+      const body = `${(oklch.L * 100).toFixed(1)}% ${oklch.C.toFixed(3)} ${oklch.H.toFixed(1)}`
+      return alpha === null ? `oklch(${body})` : `oklch(${body} / ${alpha})`
+    }
+    default:
+      return rgbToHexStr(r, g, b, a)
   }
 }
 
-function formatValueByFormat(parsed: ParsedColor, fmt: ColorFormat): string {
-  switch (fmt) {
-    case "rgb":
-      return parsed.rgb
-    case "hsl":
-      return parsed.hsl
-    case "oklch":
-      return parsed.oklch
-    case "hex":
-    default:
-      return parsed.hex
-  }
+function isSameState(a: ColorState, b: ColorState) {
+  return a.h === b.h && a.s === b.s && a.v === b.v && a.a === b.a && a.oklchH === b.oklchH
 }
 
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
 
+const DEFAULT_VALUE = "#6B97FF"
 const PANEL_WIDTH = 280
 const SQUARE_HEIGHT = 156
 
@@ -520,87 +408,81 @@ const SELECTED_TINT = "bg-foreground/[0.09]"
 const CONTROL_CLASS =
   "h-9 bg-transparent transition-colors duration-75 outline-none focus-visible:ring-1 focus-visible:ring-ring"
 
+const POPUP_HIDDEN = { opacity: 0, y: -4, scaleY: 0.96 }
+const POPUP_SHOWN = { opacity: 1, y: 0, scaleY: 1 }
+
+/**
+ * The spring open/close shared by the popover and the format menu. Base UI unmounts a popup
+ * only when told to through `actionsRef`, so the motion wrapper releases it once the exit
+ * tween has played; the timer is the fallback for throttled tabs, where rAF-driven animation
+ * callbacks stall.
+ */
+function useSpringPopup(open: boolean, tier: (typeof spring)[keyof typeof spring]) {
+  const actionsRef = useRef<{ unmount: () => void; close: () => void }>(null)
+
+  useEffect(() => {
+    if (open) return undefined
+    const id = setTimeout(() => actionsRef.current?.unmount(), exitFallbackMs(tier))
+    return () => clearTimeout(id)
+  }, [open, tier])
+
+  return {
+    actionsRef,
+    motionProps: {
+      initial: POPUP_HIDDEN,
+      animate: open ? POPUP_SHOWN : POPUP_HIDDEN,
+      transition: open ? tier : tier.exit,
+      onAnimationComplete: () => {
+        if (!open) actionsRef.current?.unmount()
+      },
+    },
+  }
+}
+
 // ---------------------------------------------------------------------------
 // SaturationSquare
 // ---------------------------------------------------------------------------
+
+/** Arrow-key nudges for the square, as [Δs, Δv] in steps. */
+const ARROW_NUDGE: Record<string, [number, number]> = {
+  ArrowLeft: [-1, 0],
+  ArrowRight: [1, 0],
+  ArrowUp: [0, 1],
+  ArrowDown: [0, -1],
+}
 
 interface SaturationSquareProps {
   h: number
   s: number
   v: number
+  color: string
   onChange: (s: number, v: number) => void
 }
 
-function SaturationSquare({ h, s, v, onChange }: SaturationSquareProps) {
+function SaturationSquare({ h, s, v, color, onChange }: SaturationSquareProps) {
   const ref = useRef<HTMLDivElement>(null)
   // State, not a ref: this gates the ghost hover cursor during render, and a ref mutation
   // wouldn't re-render, leaving the ghost stuck on screen.
   const [dragging, setDragging] = useState(false)
-  const [focused, setFocused] = useState(false)
-  const [hovered, setHovered] = useState(false)
+  // Where the pointer hovers, in percent of the square; null while it is outside.
   const [cursorPos, setCursorPos] = useState<{ x: number; y: number } | null>(null)
 
-  const updateFromPointer = useCallback(
-    (clientX: number, clientY: number) => {
-      const rect = ref.current?.getBoundingClientRect()
-      if (!rect) return
-      const x = clamp01((clientX - rect.left) / rect.width)
-      const y = clamp01((clientY - rect.top) / rect.height)
-      onChange(x, 1 - y)
-    },
-    [onChange],
-  )
-
-  const updateCursorPos = useCallback((clientX: number, clientY: number) => {
+  const pointerRatio = (e: React.PointerEvent<HTMLDivElement>) => {
     const rect = ref.current?.getBoundingClientRect()
-    if (!rect) return
-    setCursorPos({
-      x: clamp01((clientX - rect.left) / rect.width) * 100,
-      y: clamp01((clientY - rect.top) / rect.height) * 100,
-    })
-  }, [])
+    if (!rect) return null
+    return {
+      x: clamp01((e.clientX - rect.left) / rect.width),
+      y: clamp01((e.clientY - rect.top) / rect.height),
+    }
+  }
 
-  const onPointerDown = useCallback(
-    (e: React.PointerEvent<HTMLDivElement>) => {
-      if (e.pointerType === "mouse" && e.button !== 0) return
-      e.preventDefault()
-      setDragging(true)
-      e.currentTarget.setPointerCapture(e.pointerId)
-      updateFromPointer(e.clientX, e.clientY)
-    },
-    [updateFromPointer],
-  )
-
-  const onPointerMove = useCallback(
-    (e: React.PointerEvent<HTMLDivElement>) => {
-      updateCursorPos(e.clientX, e.clientY)
-      if (!dragging) return
-      updateFromPointer(e.clientX, e.clientY)
-    },
-    [dragging, updateFromPointer, updateCursorPos],
-  )
-
-  const onKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLDivElement>) => {
-      const step = e.shiftKey ? 0.1 : 0.01
-      let nextS = s
-      let nextV = v
-      let handled = true
-      if (e.key === "ArrowLeft") nextS = clamp01(s - step)
-      else if (e.key === "ArrowRight") nextS = clamp01(s + step)
-      else if (e.key === "ArrowUp") nextV = clamp01(v + step)
-      else if (e.key === "ArrowDown") nextV = clamp01(v - step)
-      else handled = false
-      if (handled) {
-        e.preventDefault()
-        onChange(nextS, nextV)
-      }
-    },
-    [onChange, s, v],
-  )
-
-  const { r, g, b } = hsvToRgb(h, s, v)
-  const thumbColor = `rgb(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)})`
+  const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const nudge = ARROW_NUDGE[e.key]
+    if (!nudge) return
+    e.preventDefault()
+    const step = e.shiftKey ? 0.1 : 0.01
+    onChange(clamp01(s + nudge[0] * step), clamp01(v + nudge[1] * step))
+  }
 
   return (
     <div
@@ -608,23 +490,29 @@ function SaturationSquare({ h, s, v, onChange }: SaturationSquareProps) {
       role="application"
       aria-label="Saturation and brightness"
       tabIndex={0}
-      onFocus={(e) => {
-        if (e.currentTarget.matches(":focus-visible")) setFocused(true)
+      onPointerLeave={() => setCursorPos(null)}
+      onPointerDown={(e) => {
+        if (e.pointerType === "mouse" && e.button !== 0) return
+        e.preventDefault()
+        setDragging(true)
+        e.currentTarget.setPointerCapture(e.pointerId)
+        const p = pointerRatio(e)
+        if (p) onChange(p.x, 1 - p.y)
       }}
-      onBlur={() => setFocused(false)}
-      onPointerEnter={() => setHovered(true)}
-      onPointerLeave={() => {
-        setHovered(false)
-        setCursorPos(null)
+      onPointerMove={(e) => {
+        const p = pointerRatio(e)
+        if (!p) return
+        setCursorPos({ x: p.x * 100, y: p.y * 100 })
+        if (dragging) onChange(p.x, 1 - p.y)
       }}
-      onPointerDown={onPointerDown}
-      onPointerMove={onPointerMove}
       onPointerUp={() => setDragging(false)}
+      // A drag can also end without a pointerup (pointercancel, capture taken away); a stale
+      // flag would then let a plain hover move the colour.
+      onLostPointerCapture={() => setDragging(false)}
       onKeyDown={onKeyDown}
       className={cn(
-        "relative w-full cursor-none touch-none outline-none select-none",
+        "relative w-full cursor-none touch-none outline-none select-none focus-visible:ring-2 focus-visible:ring-ring",
         SHAPE.bg,
-        focused && "ring-2 ring-ring",
       )}
       style={{ height: SQUARE_HEIGHT }}
     >
@@ -634,27 +522,22 @@ function SaturationSquare({ h, s, v, onChange }: SaturationSquareProps) {
           background: `linear-gradient(to top, #000, transparent), linear-gradient(to right, #fff, hsl(${h}, 100%, 50%))`,
         }}
       />
-      <motion.div
-        className="pointer-events-none absolute rounded-full"
-        initial={false}
-        animate={{ left: `${s * 100}%`, top: `${(1 - v) * 100}%`, width: 18, height: 18 }}
-        transition={{ duration: 0 }}
+      <div
+        className="pointer-events-none absolute size-[18px] -translate-1/2 rounded-full"
         style={{
-          transform: "translate(-50%, -50%)",
+          left: `${s * 100}%`,
+          top: `${(1 - v) * 100}%`,
           border: "1px solid white",
           boxShadow: "0 0 0 1px rgba(0,0,0,1)",
-          backgroundColor: thumbColor,
+          backgroundColor: color,
         }}
       />
-      {hovered && !dragging && cursorPos && (
+      {!dragging && cursorPos && (
         <div
-          className="pointer-events-none absolute rounded-full"
+          className="pointer-events-none absolute size-[18px] -translate-1/2 rounded-full"
           style={{
             left: `${cursorPos.x}%`,
             top: `${cursorPos.y}%`,
-            width: 18,
-            height: 18,
-            transform: "translate(-50%, -50%)",
             border: "2px solid rgba(255, 255, 255, 0.55)",
             boxShadow: "0 0 0 1px rgba(0, 0, 0, 0.2)",
           }}
@@ -699,24 +582,11 @@ function HueSlider({ h, onChange }: { h: number; onChange: (h: number) => void }
   )
 }
 
-function AlphaSlider({
-  a,
-  solidColor,
-  solidR,
-  solidG,
-  solidB,
-  onChange,
-}: {
-  a: number
-  solidColor: string
-  solidR: number
-  solidG: number
-  solidB: number
-  onChange: (a: number) => void
-}) {
+function AlphaSlider({ a, rgb, onChange }: { a: number; rgb: Rgb; onChange: (a: number) => void }) {
+  const solid = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`
   // A colour-aware transparent stop (same channels, alpha 0) keeps the gradient
   // chromatically consistent and reaches fully opaque with no edge gap.
-  const transparentColor = `rgba(${solidR}, ${solidG}, ${solidB}, 0)`
+  const transparent = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0)`
   return (
     <Slider
       value={Math.round(a * 100)}
@@ -726,11 +596,11 @@ function AlphaSlider({
       step={1}
       showValue={false}
       hideFill
-      thumbColor={solidColor}
+      thumbColor={solid}
       thumbBorderColor="rgba(255,255,255,0.9)"
       aria-label="Alpha"
       trackStyle={{
-        backgroundImage: `linear-gradient(to right, ${transparentColor} 0%, ${solidColor} 98%), ${CHECKER_BG.backgroundImage}`,
+        backgroundImage: `linear-gradient(to right, ${transparent} 0%, ${solid} 98%), ${CHECKER_BG.backgroundImage}`,
         backgroundSize: `100% 100%, ${CHECKER_BG.backgroundSize}`,
         borderWidth: 0,
       }}
@@ -743,8 +613,7 @@ function AlphaSlider({
 //
 // Base UI's Menu owns trigger wiring, positioning, dismissal, roving highlight and
 // typeahead; RadioGroup/RadioItem carry the radio semantics. This layer adds the
-// proximity-hover overlays and the spring open/close animation, releasing Base UI's
-// deferred unmount only once the exit tween has played (same pattern as select.tsx).
+// proximity-hover overlays and the spring open/close animation.
 // ---------------------------------------------------------------------------
 
 const FORMAT_LABELS: Record<ColorFormat, string> = {
@@ -759,7 +628,6 @@ const FORMATS = ["hex", "rgb", "hsl", "oklch"] as const
 interface FormatMenuContextValue {
   registerItem: (index: number, element: HTMLElement | null) => void
   activeIndex: number | null
-  checkedIndex?: number
 }
 
 const FormatMenuContext = createContext<FormatMenuContextValue | null>(null)
@@ -767,21 +635,21 @@ const FormatMenuContext = createContext<FormatMenuContextValue | null>(null)
 function FormatItem({
   index,
   value,
-  label,
   checked,
 }: {
   index: number
   value: ColorFormat
-  label: string
   checked: boolean
 }) {
   const ref = useRef<HTMLDivElement>(null)
   const menuCtx = use(FormatMenuContext)
+  const registerItem = menuCtx?.registerItem
+  const label = FORMAT_LABELS[value]
 
   useEffect(() => {
-    menuCtx?.registerItem(index, ref.current)
-    return () => menuCtx?.registerItem(index, null)
-  }, [index, menuCtx])
+    registerItem?.(index, ref.current)
+    return () => registerItem?.(index, null)
+  }, [index, registerItem])
 
   const isActive = menuCtx?.activeIndex === index
 
@@ -824,63 +692,31 @@ function FormatItem({
 function FormatDropdown({
   value,
   onChange,
-  open: openProp,
-  defaultOpen = false,
 }: {
   value: ColorFormat
   onChange: (f: ColorFormat) => void
-  open?: boolean
-  defaultOpen?: boolean
 }) {
-  const [internalOpen, setInternalOpen] = useState(defaultOpen)
-  const isControlled = openProp !== undefined
-  const open = isControlled ? openProp : internalOpen
-  const actionsRef = useRef<{ unmount: () => void; close: () => void }>(null)
-  const portalContainer = use(ColorPickerPortalContainerContext)
+  const [open, setOpen] = useState(false)
+  const { actionsRef, motionProps } = useSpringPopup(open, spring.fast)
+  const portalContainer = use(PortalContainerContext)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  const { activeIndex, setActiveIndex, itemRects, session, handlers, registerItem, measureItems } =
+  // Items register on mount, which schedules their measurement; no extra pass on open.
+  const { activeIndex, setActiveIndex, itemRects, session, handlers, registerItem } =
     useProximityHover(containerRef)
 
   const [focusedIndex, setFocusedIndex] = useState<number | null>(null)
-
-  // Release Base UI's deferred unmount once the exit tween has played. onAnimationComplete
-  // is the primary signal; this timeout is the fallback for throttled tabs where rAF-driven
-  // animation callbacks stall (spring.fast.exit is 60ms — 120ms covers it with margin).
-  useEffect(() => {
-    if (open) return undefined
-    const id = setTimeout(() => actionsRef.current?.unmount(), 120)
-    return () => clearTimeout(id)
-  }, [open])
-
-  // Measure once the popup has mounted: first frame waits for React's commit, second for layout.
-  useEffect(() => {
-    if (!open) return undefined
-    let inner: number
-    const outer = requestAnimationFrame(() => {
-      inner = requestAnimationFrame(() => measureItems())
-    })
-    return () => {
-      cancelAnimationFrame(outer)
-      cancelAnimationFrame(inner)
-    }
-  }, [open, measureItems])
 
   const checkedIndex = FORMATS.indexOf(value)
   const activeRect = activeIndex !== null ? itemRects[activeIndex] : null
   const checkedRect = checkedIndex !== -1 ? itemRects[checkedIndex] : null
   const focusRect = focusedIndex !== null ? itemRects[focusedIndex] : null
-  const menuCtx = useMemo(
-    () => ({ registerItem, activeIndex, checkedIndex }),
-    [registerItem, activeIndex, checkedIndex],
-  )
+  const menuCtx = useMemo(() => ({ registerItem, activeIndex }), [registerItem, activeIndex])
 
   return (
     <Menu.Root
       open={open}
-      onOpenChange={(next) => {
-        if (!isControlled) setInternalOpen(next)
-      }}
+      onOpenChange={setOpen}
       actionsRef={actionsRef}
       // Non-modal: the page keeps scrolling and the Positioner tracks the anchor, so the
       // popup follows its trigger instead of detaching.
@@ -911,19 +747,10 @@ function FormatDropdown({
           sideOffset={6}
           className="pointer-events-auto z-60 outline-none"
         >
-          <motion.div
-            initial={{ opacity: 0, y: -4, scaleY: 0.96 }}
-            animate={open ? { opacity: 1, y: 0, scaleY: 1 } : { opacity: 0, y: -4, scaleY: 0.96 }}
-            transition={open ? spring.fast : spring.fast.exit}
-            style={{ transformOrigin: "top center" }}
-            onAnimationComplete={() => {
-              if (!open) actionsRef.current?.unmount()
-            }}
-          >
+          <motion.div {...motionProps} style={{ transformOrigin: "top center" }}>
             <FormatMenuContext value={menuCtx}>
               <Menu.Popup
                 ref={containerRef}
-                data-slot="color-picker-format-content"
                 onMouseEnter={() => {
                   handlers.onMouseEnter()
                   setFocusedIndex(null)
@@ -1026,13 +853,7 @@ function FormatDropdown({
                   className="contents"
                 >
                   {FORMATS.map((fmt, i) => (
-                    <FormatItem
-                      key={fmt}
-                      index={i}
-                      value={fmt}
-                      label={FORMAT_LABELS[fmt]}
-                      checked={value === fmt}
-                    />
+                    <FormatItem key={fmt} index={i} value={fmt} checked={value === fmt} />
                   ))}
                 </Menu.RadioGroup>
               </Menu.Popup>
@@ -1045,166 +866,115 @@ function FormatDropdown({
 }
 
 // ---------------------------------------------------------------------------
-// ColorInput
+// Channel inputs
 //
-// Two internal variants behind one API:
-//  - TextColorInput: draft-based text input (hex).
-//  - ScrubColorInput: numeric channels on Base UI's NumberField, whose ScrubArea provides
+//  - HexInput: a draft-based text input that commits on blur.
+//  - ScrubInput: a numeric channel on Base UI's NumberField, whose ScrubArea provides
 //    pointer-lock scrubbing with a virtual cursor.
 // ---------------------------------------------------------------------------
-
-interface ColorInputProps {
-  value: string
-  onCommit: (next: string) => void
-  ariaLabel: string
-  className?: string
-  inputClassName?: string
-  align?: "left" | "center" | "right"
-  prefix?: ReactNode
-  inputMode?: "numeric" | "decimal" | "text"
-  nudgeStep?: number
-  nudgeShiftStep?: number
-  hasPercent?: boolean
-  decimals?: number
-  scrubbable?: boolean
-  min?: number
-  max?: number
-  /** With min and max, wrap (modulo) instead of clamping. For angular values like hue. */
-  wrap?: boolean
-}
 
 const INPUT_SHELL_CLASS =
   "flex items-center bg-transparent transition-colors duration-75 hover:bg-muted active:bg-muted focus-within:ring-1 focus-within:ring-ring select-none h-9"
 
-function boundValue(n: number, min?: number, max?: number, wrap = false): number {
-  if (wrap && min !== undefined && max !== undefined) {
-    if (n < min || n > max) {
-      const range = max - min
-      return ((((n - min) % range) + range) % range) + min
-    }
-    return n
-  }
-  let bounded = n
-  if (min !== undefined) bounded = Math.max(min, bounded)
-  if (max !== undefined) bounded = Math.min(max, bounded)
-  return bounded
+const INPUT_TEXT_CLASS =
+  "min-w-0 flex-1 bg-transparent text-[13px] font-medium text-foreground tabular-nums outline-none"
+
+function ChannelTooltip({ label, children }: { label: string; children: ReactNode }) {
+  const portalContainer = use(PortalContainerContext)
+  return (
+    // Own provider per channel so the delay is per-input, as upstream had it — these labels
+    // are hints, and skipping the wait while sweeping across the row would make them flicker.
+    <TooltipProvider delay={300}>
+      <Tooltip>
+        <TooltipTrigger render={<div />}>{children}</TooltipTrigger>
+        <TooltipContent container={portalContainer}>{label}</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  )
 }
 
-function TextColorInput({
-  value,
-  onCommit,
-  ariaLabel,
-  className,
-  inputClassName,
-  align = "left",
-  prefix,
-  inputMode = "text",
-  nudgeStep,
-  nudgeShiftStep,
-  hasPercent = false,
-  decimals,
-  min,
-  max,
-  wrap = false,
-}: ColorInputProps) {
+function HexInput({ value, onCommit }: { value: string; onCommit: (next: string) => void }) {
   const [draft, setDraft] = useState(value)
-  const interactingRef = useRef(false)
+  const editingRef = useRef(false)
+  // Escape blurs before its reset renders, so the blur handler still sees the typed draft.
+  const cancelledRef = useRef(false)
 
   useEffect(() => {
-    if (!interactingRef.current) setDraft(value)
+    if (!editingRef.current) setDraft(value)
   }, [value])
 
-  const commitNumber = (n: number) => {
-    const bounded = boundValue(n, min, max, wrap)
-    const formatted =
-      decimals !== undefined ? bounded.toFixed(decimals) : String(Math.round(bounded))
-    const withSuffix = hasPercent ? `${formatted}%` : formatted
-    setDraft(withSuffix)
-    onCommit(withSuffix)
-  }
-
-  const nudge = (direction: 1 | -1, shift: boolean) => {
-    const baseStep = shift ? (nudgeShiftStep ?? 10) : (nudgeStep ?? 1)
-    const cur = Number.parseFloat(draft.replace("%", ""))
-    if (Number.isNaN(cur)) return
-    commitNumber(cur + direction * baseStep)
-  }
-
   return (
-    <div className={cn(INPUT_SHELL_CLASS, "px-2", SHAPE.input, className)}>
-      {prefix && (
-        <span className="mr-1 text-[12px] text-muted-foreground select-none">{prefix}</span>
-      )}
+    <div className={cn(INPUT_SHELL_CLASS, "px-2", SHAPE.input)}>
+      <span className="mr-1 text-[12px] text-muted-foreground select-none">#</span>
       <input
         value={draft}
         onChange={(e) => setDraft(e.target.value)}
         onFocus={(e) => {
-          interactingRef.current = true
+          editingRef.current = true
           e.currentTarget.select()
         }}
         onBlur={() => {
-          interactingRef.current = false
-          if (draft === value) {
-            setDraft(value)
-            return
-          }
-          const numeric = Number.parseFloat(draft.replace("%", ""))
-          if (!Number.isNaN(numeric) && (min !== undefined || max !== undefined))
-            commitNumber(numeric)
-          else onCommit(draft)
+          editingRef.current = false
+          if (cancelledRef.current) cancelledRef.current = false
+          else if (draft !== value) onCommit(draft)
         }}
         onKeyDown={(e) => {
           if (e.key === "Enter") {
             e.currentTarget.blur()
           } else if (e.key === "Escape") {
+            cancelledRef.current = true
             setDraft(value)
             e.currentTarget.blur()
-          } else if (
-            (nudgeStep !== undefined || nudgeShiftStep !== undefined) &&
-            (e.key === "ArrowUp" || e.key === "ArrowDown")
-          ) {
-            e.preventDefault()
-            nudge(e.key === "ArrowUp" ? 1 : -1, e.shiftKey)
           }
         }}
-        inputMode={inputMode}
-        aria-label={ariaLabel}
-        className={cn(
-          "min-w-0 flex-1 bg-transparent text-[13px] font-medium text-foreground tabular-nums outline-none",
-          align === "center" && "text-center",
-          align === "right" && "text-right",
-          inputClassName,
-        )}
+        inputMode="text"
+        aria-label="Hex value"
+        className={INPUT_TEXT_CLASS}
       />
     </div>
   )
 }
 
-function ScrubColorInput({
-  value,
-  onCommit,
-  ariaLabel,
-  className,
-  inputClassName,
-  align = "left",
-  prefix,
-  inputMode = "numeric",
-  nudgeStep,
-  nudgeShiftStep,
-  hasPercent = false,
-  decimals,
+interface ChannelSpec {
+  label: string
+  min: number
+  max: number
+  /** Wrap (modulo) instead of clamping. For angular values like hue. */
+  wrap?: boolean
+  decimals?: number
+  step?: number
+  largeStep?: number
+  percent?: boolean
+  inputMode?: "numeric" | "decimal"
+}
+
+function boundValue(n: number, min: number, max: number, wrap: boolean): number {
+  if (!wrap) return Math.min(max, Math.max(min, n))
+  if (n >= min && n <= max) return n
+  const range = max - min
+  return ((((n - min) % range) + range) % range) + min
+}
+
+function ScrubInput({
+  label,
   min,
   max,
   wrap = false,
-}: ColorInputProps) {
+  decimals,
+  step = 1,
+  largeStep = 10,
+  percent = false,
+  inputMode = "numeric",
+  value,
+  onCommit,
+}: ChannelSpec & { value: number; onCommit: (n: number) => void }) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [editing, setEditing] = useState(false)
   // Set on pointerdown inside the scrub area (capture phase, before Base UI focuses the
   // input for scrubbing) so onFocus can tell scrub-focus from keyboard focus.
   const pointerDownRef = useRef(false)
-
-  const numeric = Number.parseFloat(value.replace("%", ""))
-  const fieldValue = Number.isNaN(numeric) ? null : numeric
+  // Set by Escape: the blur that follows drops the typed text instead of committing it.
+  const cancelledRef = useRef(false)
 
   const format = useMemo(() => {
     const f: Intl.NumberFormatOptions = { useGrouping: false }
@@ -1214,29 +984,21 @@ function ScrubColorInput({
     } else {
       f.maximumFractionDigits = 0
     }
-    if (hasPercent) {
+    if (percent) {
       // style "unit" + unit "percent" renders "50%" while keeping the numeric value on the
       // 0..100 scale (unlike style "percent", which would divide by 100).
       f.style = "unit"
       f.unit = "percent"
     }
     return f
-  }, [decimals, hasPercent])
+  }, [decimals, percent])
 
-  const commit = useCallback(
-    (n: number) => {
-      // Hue-style wrap: NumberField won't wrap natively, so shim it here (361 → 1, -1 → 359).
-      const bounded = boundValue(n, min, max, wrap)
-      const formatted =
-        decimals !== undefined ? bounded.toFixed(decimals) : String(Math.round(bounded))
-      onCommit(hasPercent ? `${formatted}%` : formatted)
-    },
-    [wrap, min, max, decimals, hasPercent, onCommit],
-  )
+  const round = (n: number) =>
+    decimals === undefined ? Math.round(n) : Number(n.toFixed(decimals))
 
   return (
     <NumberField.Root
-      value={fieldValue}
+      value={value}
       onValueChange={(next, eventDetails) => {
         if (next === null) return
         // Keep commit-on-blur typing semantics: ignore per-keystroke parses and let the
@@ -1245,7 +1007,14 @@ function ScrubColorInput({
         if (reason === "input-change" || reason === "input-paste" || reason === "input-clear") {
           return
         }
-        commit(next)
+        // Cancelling the blur commit leaves the controlled value alone, and NumberField then
+        // reprints it in place of the typed text.
+        if (reason === "input-blur" && cancelledRef.current) {
+          eventDetails.cancel()
+          return
+        }
+        // Hue-style wrap: NumberField won't wrap natively, so shim it here (361 → 1, -1 → 359).
+        onCommit(round(boundValue(next, min, max, wrap)))
       }}
       onValueCommitted={(_, eventDetails) => {
         // After a scrub ends, drop the focus Base UI placed on the input so the field
@@ -1258,10 +1027,10 @@ function ScrubColorInput({
       }}
       min={wrap ? undefined : min}
       max={wrap ? undefined : max}
-      step={nudgeStep ?? 1}
-      largeStep={nudgeShiftStep ?? 10}
+      step={step}
+      largeStep={largeStep}
       format={format}
-      className={cn(INPUT_SHELL_CLASS, SHAPE.input, className)}
+      className={cn(INPUT_SHELL_CLASS, SHAPE.input)}
     >
       <NumberField.ScrubArea
         direction="horizontal"
@@ -1295,18 +1064,16 @@ function ScrubColorInput({
             <path d="M0.5 7l5-5v3.5h13V2l5 5-5 5V8.5h-13V12l-5-5z" />
           </svg>
         </NumberField.ScrubAreaCursor>
-        {prefix && (
-          <span className="mr-1 text-[12px] text-muted-foreground select-none">{prefix}</span>
-        )}
         <NumberField.Input
           ref={inputRef}
-          aria-label={ariaLabel}
+          aria-label={label}
           inputMode={inputMode}
           onPointerDown={(e) => {
             // While editing, let the input place the caret instead of starting a scrub.
             if (editing) e.stopPropagation()
           }}
           onFocus={(e) => {
+            cancelledRef.current = false
             if (pointerDownRef.current) return // scrub-initiated focus
             setEditing(true)
             e.currentTarget.select()
@@ -1317,40 +1084,106 @@ function ScrubColorInput({
               e.currentTarget.blur()
               return
             }
-            if (e.key !== "Escape") return
-            // Restore the committed value's text before blurring, so the blur commit is a
-            // no-op. Goes through the native setter because NumberField owns the value.
-            const input = e.currentTarget
-            // eslint-disable-next-line typescript/unbound-method -- invoked via .call below
-            const setter = Object.getOwnPropertyDescriptor(
-              window.HTMLInputElement.prototype,
-              "value",
-            )?.set
-            if (setter && fieldValue !== null) {
-              const restored =
-                decimals !== undefined
-                  ? fieldValue.toFixed(decimals)
-                  : String(Math.round(fieldValue))
-              setter.call(input, hasPercent ? `${restored}%` : restored)
-              input.dispatchEvent(new Event("input", { bubbles: true }))
+            if (e.key === "Escape") {
+              cancelledRef.current = true
+              e.currentTarget.blur()
             }
-            input.blur()
           }}
-          className={cn(
-            "min-w-0 flex-1 bg-transparent text-[13px] font-medium text-foreground tabular-nums outline-none",
-            align === "center" && "text-center",
-            align === "right" && "text-right",
-            !editing && "pointer-events-none",
-            inputClassName,
-          )}
+          className={cn(INPUT_TEXT_CLASS, "text-center", !editing && "pointer-events-none")}
         />
       </NumberField.ScrubArea>
     </NumberField.Root>
   )
 }
 
-function ColorInput({ scrubbable = false, ...props }: ColorInputProps) {
-  return scrubbable ? <ScrubColorInput {...props} /> : <TextColorInput {...props} />
+/**
+ * The three numeric channels of each non-hex format. `read` gives them as the inputs show
+ * them, from the rounded RGB; `write` turns one committed channel back into a state patch,
+ * keeping the other two at full precision.
+ */
+interface ChannelModel {
+  channels: [ChannelSpec, ChannelSpec, ChannelSpec]
+  read: (rgb: Rgb, color: ColorState) => [number, number, number]
+  write: (index: number, n: number, rgb: Rgb, color: ColorState) => Partial<ColorState>
+}
+
+const BYTE = { min: 0, max: 255 }
+const PERCENT = { min: 0, max: 100 }
+const DEGREES = { min: 0, max: 360, wrap: true }
+
+const CHANNEL_MODELS: Record<Exclude<ColorFormat, "hex">, ChannelModel> = {
+  rgb: {
+    channels: [
+      { label: "Red", ...BYTE },
+      { label: "Green", ...BYTE },
+      { label: "Blue", ...BYTE },
+    ],
+    read: ({ r, g, b }) => [r, g, b],
+    write: (index, n, { r, g, b }, color) => {
+      const next = { r: index === 0 ? n : r, g: index === 1 ? n : g, b: index === 2 ? n : b }
+      return rgbToHsvKeepingHue(next, color.h)
+    },
+  },
+  hsl: {
+    channels: [
+      { label: "Hue", ...DEGREES },
+      { label: "Saturation", ...PERCENT },
+      { label: "Lightness", ...PERCENT },
+    ],
+    read: ({ r, g, b }) => {
+      const hsl = rgbToHsl(r, g, b)
+      return [Math.round(hsl.h), Math.round(hsl.s * 100), Math.round(hsl.l * 100)]
+    },
+    write: (index, n, { r, g, b }) => {
+      const hsl = rgbToHsl(r, g, b)
+      const h = index === 0 ? n : hsl.h
+      const s = index === 1 ? n / 100 : hsl.s
+      const l = index === 2 ? n / 100 : hsl.l
+      return rgbToHsvKeepingHue(hslToRgb(h, clamp01(s), clamp01(l)), h)
+    },
+  },
+  oklch: {
+    channels: [
+      { label: "Lightness", ...PERCENT, inputMode: "decimal" },
+      {
+        label: "Chroma",
+        min: 0,
+        max: 0.4,
+        decimals: 2,
+        step: 0.01,
+        largeStep: 0.1,
+        inputMode: "decimal",
+      },
+      { label: "Hue", ...DEGREES },
+    ],
+    read: ({ r, g, b }, color) => {
+      const oklch = rgbToOklch(r, g, b)
+      return [
+        Number((oklch.L * 100).toFixed(0)),
+        Number(oklch.C.toFixed(2)),
+        Number((color.oklchH ?? oklch.H).toFixed(0)),
+      ]
+    },
+    write: (index, n, { r, g, b }, color) => {
+      const cur = rgbToOklch(r, g, b)
+      const L = index === 0 ? n / 100 : cur.L
+      const C = index === 1 ? n : cur.C
+      // L and C edits anchor on the user's last stated H, so hue doesn't drift along with them.
+      const H = index === 2 ? n : (color.oklchH ?? cur.H)
+      const rgb = oklchToRgb(clamp01(L), Math.max(0, C), H)
+      return { ...rgbToHsvKeepingHue(rgb, color.h), oklchH: H }
+    },
+  },
+}
+
+const ALPHA_CHANNEL: ChannelSpec = { label: "Alpha", ...PERCENT, percent: true }
+
+function ChannelInput(props: ChannelSpec & { value: number; onCommit: (n: number) => void }) {
+  return (
+    <ChannelTooltip label={props.label}>
+      <ScrubInput {...props} />
+    </ChannelTooltip>
+  )
 }
 
 // ---------------------------------------------------------------------------
@@ -1398,240 +1231,83 @@ function EyeDropperButton({ onPick }: { onPick: (hex: string) => void }) {
 }
 
 // ---------------------------------------------------------------------------
-// ColorTile / ColorSwatch
-// ---------------------------------------------------------------------------
-
-interface ColorTileProps {
-  color: string
-  size?: number
-  className?: string
-  style?: CSSProperties
-}
-
-function ColorTile({ color, size = 24, className, style }: ColorTileProps) {
-  return (
-    <span
-      className={cn("relative inline-block shrink-0 overflow-hidden", SHAPE.bg, className)}
-      style={{
-        width: size,
-        height: size,
-        ...CHECKER_BG,
-        boxShadow: "inset 0 0 0 1px rgba(127,127,127,0.25)",
-        ...style,
-      }}
-    >
-      <span className="absolute inset-0" style={{ backgroundColor: color }} />
-    </span>
-  )
-}
-
-function ColorSwatch({
-  color,
-  size = 28,
-  selected,
-  className,
-  onMouseEnter,
-  onMouseLeave,
-  ref,
-  ...props
-}: ColorSwatchProps) {
-  const [hovered, setHovered] = useState(false)
-  const ring = selected
-    ? "inset 0 0 0 1px rgba(127,127,127,0.25), 0 0 0 2px var(--color-popover), 0 0 0 4px var(--color-ring)"
-    : hovered
-      ? "inset 0 0 0 1px rgba(127,127,127,0.25), 0 0 0 2px var(--color-popover), 0 0 0 4px rgba(127,127,127,0.4)"
-      : "inset 0 0 0 1px rgba(127,127,127,0.25)"
-  return (
-    <button
-      ref={ref}
-      type="button"
-      aria-label={`Select color ${color}`}
-      className={cn(
-        "relative shrink-0 cursor-pointer overflow-hidden transition-shadow duration-100 outline-none",
-        SHAPE.bg,
-        className,
-      )}
-      style={{ width: size, height: size, ...CHECKER_BG, boxShadow: ring }}
-      onMouseEnter={(e) => {
-        setHovered(true)
-        onMouseEnter?.(e)
-      }}
-      onMouseLeave={(e) => {
-        setHovered(false)
-        onMouseLeave?.(e)
-      }}
-      {...props}
-    >
-      <span className="absolute inset-0" style={{ backgroundColor: color }} />
-    </button>
-  )
-}
-
-function SwatchStrip({
-  swatches,
-  current,
-  onPick,
-}: {
-  swatches: string[]
-  current: string
-  onPick: (color: string) => void
-}) {
-  const normalizedCurrent = useMemo(() => {
-    const p = parseColor(current)
-    return p ? rgbToHexStr(p.r, p.g, p.b, p.a).toLowerCase() : ""
-  }, [current])
-
-  // Named CSS colours ("red", "tomato") need the browser to normalise them before the
-  // selected-state comparison can match. Resolved in an effect so render never touches the DOM.
-  const [resolvedSwatches, setResolvedSwatches] = useState<Record<string, string>>({})
-  useEffect(() => {
-    const next: Record<string, string> = {}
-    for (const sw of swatches) {
-      if (parseColor(sw)) continue
-      const p = resolveCssColor(sw)
-      if (p) next[sw] = rgbToHexStr(p.r, p.g, p.b, p.a).toLowerCase()
-    }
-    // oxlint-disable-next-line react/set-state-in-effect -- swatches resolve against the DOM, so they can only be computed after paint
-    setResolvedSwatches(next)
-  }, [swatches])
-
-  return (
-    <div className="flex flex-wrap gap-2">
-      {swatches.map((sw, i) => {
-        const parsed = parseColor(sw)
-        const normalized = parsed
-          ? rgbToHexStr(parsed.r, parsed.g, parsed.b, parsed.a).toLowerCase()
-          : (resolvedSwatches[sw] ?? sw.toLowerCase())
-        return (
-          <ColorSwatch
-            // eslint-disable-next-line react/no-array-index-key -- swatches may repeat a colour
-            key={`${sw}-${i}`}
-            color={sw}
-            size={28}
-            selected={normalized === normalizedCurrent}
-            onClick={() => onPick(sw)}
-          />
-        )
-      })}
-    </div>
-  )
-}
-
-// ---------------------------------------------------------------------------
 // ColorPicker (panel)
 // ---------------------------------------------------------------------------
 
 function ColorPicker({
   value,
-  defaultValue = "#6B97FF",
+  defaultValue = DEFAULT_VALUE,
   onValueChange,
   format,
   defaultFormat = "hex",
   onFormatChange,
-  swatches,
   hideEyedropper,
-  formatOpen,
-  defaultFormatOpen,
   className,
   ref,
   ...props
 }: ColorPickerProps) {
-  const isControlled = value !== undefined
-  const [internalValue, setInternalValue] = useState(value ?? defaultValue)
-  const currentRawValue = isControlled ? value : internalValue
-
-  const isFormatControlled = format !== undefined
   const [internalFormat, setInternalFormat] = useState<ColorFormat>(defaultFormat)
-  const currentFormat = isFormatControlled ? format : internalFormat
+  const currentFormat = format ?? internalFormat
 
-  // HSV is the canonical internal state; H is preserved across S=0 / V=0 transitions so
-  // dragging to black and back doesn't reset the hue. Seeded from the initial value only.
-  const [hsv, setHsv] = useState(() => {
-    const p = parseColor(currentRawValue)
-    if (!p) return { h: 0, s: 1, v: 1, a: 1 }
-    const initial = rgbToHsv(p.r, p.g, p.b)
-    return { h: initial.s === 0 ? 0 : initial.h, s: initial.s, v: initial.v, a: p.a }
+  // Seeded from the initial value only; later controlled values arrive through the effect.
+  const [color, setColor] = useState<ColorState>(() => {
+    const p = parseColor(value ?? defaultValue)
+    if (!p) return { h: 0, s: 1, v: 1, a: 1, oklchH: null }
+    return { ...rgbToHsvKeepingHue(p, 0), a: p.a, oklchH: null }
   })
 
-  // Sticky OKLCH hue: preserves the user's stated H across the lossy RGB round-trip (so the
-  // displayed H doesn't drift after release) and across achromatic colours (where an
-  // RGB-derived H collapses to 0). Cleared whenever a non-OKLCH channel drives the change.
-  const oklchHueRef = useRef<number | null>(null)
-
-  // External sync — when a controlled value changes from outside, re-seed HSV. Values we
-  // emitted ourselves are skipped, since they'd otherwise round-trip and fight the drag.
-  const lastEmittedRef = useRef<string>("")
+  // External sync — when a controlled value changes from outside, re-seed the state. Our own
+  // value coming back is skipped, since it would round-trip and fight the drag; the marker is
+  // spent on that echo, so a later outside change back to the same string (an undo) applies.
+  const lastEmittedRef = useRef<string | null>(null)
   useEffect(() => {
-    if (!isControlled) return
-    if (value === lastEmittedRef.current) return
+    if (value === undefined) return
+    if (value === lastEmittedRef.current) {
+      lastEmittedRef.current = null
+      return
+    }
     const p = parseColor(value)
     if (!p) return
-    oklchHueRef.current = null
-    const next = rgbToHsv(p.r, p.g, p.b)
-    // oxlint-disable-next-line react/set-state-in-effect -- syncs the internal hsv draft with the controlled value prop
-    setHsv((prev) => ({
-      h: next.s === 0 ? prev.h : next.h,
-      s: next.s,
-      v: next.v,
-      a: p.a,
-    }))
-  }, [value, isControlled])
+    // oxlint-disable-next-line react/set-state-in-effect -- syncs the internal state with the controlled value prop
+    setColor((prev) => ({ ...rgbToHsvKeepingHue(p, prev.h), a: p.a, oklchH: null }))
+  }, [value])
 
-  const parsed = useMemo(() => buildParsed(hsv.h, hsv.s, hsv.v, hsv.a), [hsv])
+  const emit = (next: ColorState, fmt: ColorFormat) => {
+    const formatted = formatColor(next, fmt)
+    lastEmittedRef.current = formatted
+    onValueChange?.(formatted)
+  }
 
-  const emit = useCallback(
-    (next: ParsedColor, fmt: ColorFormat) => {
-      const formatted = formatValueByFormat(next, fmt)
-      lastEmittedRef.current = formatted
-      if (!isControlled) setInternalValue(formatted)
-      onValueChange?.(formatted, next)
-    },
-    [isControlled, onValueChange],
+  const update = (patch: Partial<ColorState>) => {
+    const merged = { ...color, ...patch }
+    const moved = merged.h !== color.h || merged.s !== color.s || merged.v !== color.v
+    const next = moved && !("oklchH" in patch) ? { ...merged, oklchH: null } : merged
+    // Slider steps and repeated commits often land on the colour we already have.
+    if (isSameState(next, color)) return
+    setColor(next)
+    emit(next, currentFormat)
+  }
+
+  const handleFormatChange = (f: ColorFormat) => {
+    if (format === undefined) setInternalFormat(f)
+    onFormatChange?.(f)
+    emit(color, f)
+  }
+
+  const commitColor = (input: string) => {
+    const p = parseColor(input)
+    if (!p) return
+    update({ ...rgbToHsvKeepingHue(p, color.h), a: p.a })
+  }
+
+  const rgb = roundedRgb(color)
+  const alpha = (
+    <ChannelInput
+      {...ALPHA_CHANNEL}
+      value={Math.round(color.a * 100)}
+      onCommit={(n) => update({ a: clamp01(n / 100) })}
+    />
   )
-
-  const updateHsv = useCallback(
-    (next: { h?: number; s?: number; v?: number; a?: number }) => {
-      const merged = { ...hsv, ...next }
-      setHsv(merged)
-      emit(buildParsed(merged.h, merged.s, merged.v, merged.a), currentFormat)
-    },
-    [hsv, currentFormat, emit],
-  )
-
-  const handleFormatChange = useCallback(
-    (f: ColorFormat) => {
-      if (!isFormatControlled) setInternalFormat(f)
-      onFormatChange?.(f)
-      emit(parsed, f)
-    },
-    [isFormatControlled, onFormatChange, emit, parsed],
-  )
-
-  const handleHexCommit = useCallback(
-    (input: string) => {
-      // resolveCssColor falls back to browser normalisation, so named CSS colours from
-      // swatches or the hex field work too. Safe here: only ever runs in event handlers.
-      const p = resolveCssColor(input)
-      if (!p) return
-      oklchHueRef.current = null
-      const next = rgbToHsv(p.r, p.g, p.b)
-      const merged = {
-        h: next.s === 0 ? hsv.h : next.h,
-        s: next.s,
-        v: next.v,
-        a: p.a,
-      }
-      setHsv(merged)
-      emit(buildParsed(merged.h, merged.s, merged.v, merged.a), currentFormat)
-    },
-    [hsv.h, currentFormat, emit],
-  )
-
-  const solidHueRgb = useMemo(() => hsvToRgb(hsv.h, hsv.s, hsv.v), [hsv.h, hsv.s, hsv.v])
-  const solidR = Math.round(solidHueRgb.r)
-  const solidG = Math.round(solidHueRgb.g)
-  const solidB = Math.round(solidHueRgb.b)
-  const solidColorString = `rgb(${solidR}, ${solidG}, ${solidB})`
 
   return (
     <div
@@ -1644,286 +1320,71 @@ function ColorPicker({
       style={{ width: PANEL_WIDTH }}
       {...props}
     >
-      <SaturationSquare h={hsv.h} s={hsv.s} v={hsv.v} onChange={(s, v) => updateHsv({ s, v })} />
+      <SaturationSquare
+        h={color.h}
+        s={color.s}
+        v={color.v}
+        color={`rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`}
+        onChange={(s, v) => update({ s, v })}
+      />
 
       <div className="flex flex-col gap-1">
-        <HueSlider
-          h={hsv.h}
-          onChange={(h) => {
-            oklchHueRef.current = null
-            updateHsv({ h })
-          }}
-        />
-        <AlphaSlider
-          a={hsv.a}
-          solidColor={solidColorString}
-          solidR={solidR}
-          solidG={solidG}
-          solidB={solidB}
-          onChange={(a) => updateHsv({ a })}
-        />
+        <HueSlider h={color.h} onChange={(h) => update({ h })} />
+        <AlphaSlider a={color.a} rgb={rgb} onChange={(a) => update({ a })} />
       </div>
 
       <div className="grid grid-cols-2 gap-2">
-        <FormatDropdown
-          value={currentFormat}
-          onChange={handleFormatChange}
-          open={formatOpen}
-          defaultOpen={defaultFormatOpen}
-        />
-        {!hideEyedropper && <EyeDropperButton onPick={handleHexCommit} />}
+        <FormatDropdown value={currentFormat} onChange={handleFormatChange} />
+        {!hideEyedropper && <EyeDropperButton onPick={commitColor} />}
       </div>
 
-      <ColorInputsRow
-        parsed={parsed}
-        format={currentFormat}
-        // oxlint-disable-next-line react/refs -- the hue ref carries the last non-achromatic hue so the wheel does not jump on greys
-        oklchHue={oklchHueRef.current}
-        onChannelChange={(channel, channelValue) => {
-          const p = parsed
-          switch (channel) {
-            case "hex": {
-              handleHexCommit(channelValue)
-              return
-            }
-            case "r":
-            case "g":
-            case "b": {
-              oklchHueRef.current = null
-              const r = channel === "r" ? Number(channelValue) : p.r
-              const g = channel === "g" ? Number(channelValue) : p.g
-              const b = channel === "b" ? Number(channelValue) : p.b
-              const next = rgbToHsv(r, g, b)
-              updateHsv({ h: next.s === 0 ? hsv.h : next.h, s: next.s, v: next.v })
-              return
-            }
-            case "hSL":
-            case "sSL":
-            case "lSL": {
-              if (channel === "hSL") oklchHueRef.current = null
-              const hsl = rgbToHsl(p.r, p.g, p.b)
-              const h2 = channel === "hSL" ? Number(channelValue) : hsl.h
-              const s2 = channel === "sSL" ? Number(channelValue) / 100 : hsl.s
-              const l2 = channel === "lSL" ? Number(channelValue) / 100 : hsl.l
-              const rgb = hslToRgb(h2, clamp01(s2), clamp01(l2))
-              const next = rgbToHsv(rgb.r, rgb.g, rgb.b)
-              updateHsv({ h: next.s === 0 ? h2 : next.h, s: next.s, v: next.v })
-              return
-            }
-            case "L":
-            case "C":
-            case "H": {
-              const cur = rgbToOklch(p.r, p.g, p.b)
-              // For L/C edits, anchor on the user's last stated H so hue doesn't drift
-              // along with chroma changes.
-              const baseH = oklchHueRef.current ?? cur.H
-              const L = channel === "L" ? Number(channelValue) / 100 : cur.L
-              const C = channel === "C" ? Number(channelValue) : cur.C
-              const H = channel === "H" ? Number(channelValue) : baseH
-              oklchHueRef.current = H
-              const rgb = oklchToRgb(clamp01(L), Math.max(0, C), H)
-              const next = rgbToHsv(rgb.r, rgb.g, rgb.b)
-              updateHsv({ h: next.s === 0 ? hsv.h : next.h, s: next.s, v: next.v })
-              return
-            }
-            case "alphaPercent":
-            default: {
-              updateHsv({ a: clamp01(Number(channelValue) / 100) })
-            }
-          }
-        }}
-      />
-
-      {swatches && swatches.length > 0 && (
-        <SwatchStrip swatches={swatches} current={parsed.hex} onPick={handleHexCommit} />
+      {currentFormat === "hex" ? (
+        <div className="grid grid-cols-2 gap-2">
+          <ChannelTooltip label="Hex">
+            <HexInput
+              value={rgbToHexStr(rgb.r, rgb.g, rgb.b, color.a).slice(1).toUpperCase()}
+              onCommit={(next) => commitColor(next.startsWith("#") ? next : `#${next}`)}
+            />
+          </ChannelTooltip>
+          {alpha}
+        </div>
+      ) : (
+        <ChannelRow
+          model={CHANNEL_MODELS[currentFormat]}
+          rgb={rgb}
+          color={color}
+          onPatch={update}
+          alpha={alpha}
+        />
       )}
     </div>
   )
 }
 
-// ---------------------------------------------------------------------------
-// ColorInputsRow — adapts inputs to format
-// ---------------------------------------------------------------------------
-
-type ChannelKey = "hex" | "r" | "g" | "b" | "hSL" | "sSL" | "lSL" | "L" | "C" | "H" | "alphaPercent"
-
-function ChannelTooltip({ label, children }: { label: string; children: ReactNode }) {
-  const portalContainer = use(ColorPickerPortalContainerContext)
-  return (
-    // Own provider per channel so the delay is per-input, as upstream had it — these labels
-    // are hints, and skipping the wait while sweeping across the row would make them flicker.
-    <TooltipProvider delay={300}>
-      <Tooltip>
-        <TooltipTrigger render={<div />}>{children}</TooltipTrigger>
-        <TooltipContent container={portalContainer}>{label}</TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
-  )
-}
-
-function ChannelInput({
-  label,
-  value,
-  onCommit,
-  ...props
-}: { label: string } & Omit<ColorInputProps, "ariaLabel">) {
-  return (
-    <ChannelTooltip label={label}>
-      <ColorInput
-        value={value}
-        onCommit={onCommit}
-        ariaLabel={label}
-        align="center"
-        scrubbable
-        nudgeStep={1}
-        nudgeShiftStep={10}
-        {...props}
-      />
-    </ChannelTooltip>
-  )
-}
-
-function AlphaInput({ value, onCommit }: { value: number; onCommit: (n: number) => void }) {
-  return (
-    <ChannelInput
-      label="Alpha"
-      value={`${value}%`}
-      onCommit={(input) => {
-        const n = Number.parseFloat(input.replace("%", ""))
-        if (Number.isNaN(n)) return
-        onCommit(Math.max(0, Math.min(100, Math.round(n))))
-      }}
-      inputMode="numeric"
-      hasPercent
-      min={0}
-      max={100}
-    />
-  )
-}
-
-function ColorInputsRow({
-  parsed,
-  format,
-  oklchHue,
-  onChannelChange,
+function ChannelRow({
+  model,
+  rgb,
+  color,
+  onPatch,
+  alpha,
 }: {
-  parsed: ParsedColor
-  format: ColorFormat
-  /** Sticky OKLCH hue override for display, preserving the stated H across round-trip drift. */
-  oklchHue?: number | null
-  onChannelChange: (key: ChannelKey, value: string) => void
+  model: ChannelModel
+  rgb: Rgb
+  color: ColorState
+  onPatch: (patch: Partial<ColorState>) => void
+  alpha: ReactNode
 }) {
-  const alphaPct = Math.round(parsed.a * 100)
-  const alpha = (
-    <AlphaInput value={alphaPct} onCommit={(n) => onChannelChange("alphaPercent", String(n))} />
-  )
-
-  if (format === "hex") {
-    return (
-      <div className="grid grid-cols-2 gap-2">
-        <ChannelTooltip label="Hex">
-          <ColorInput
-            value={parsed.hex.replace(/^#/, "").toUpperCase()}
-            onCommit={(next) => onChannelChange("hex", next.startsWith("#") ? next : `#${next}`)}
-            ariaLabel="Hex value"
-            prefix="#"
-          />
-        </ChannelTooltip>
-        {alpha}
-      </div>
-    )
-  }
-
-  if (format === "rgb") {
-    return (
-      <div className="grid grid-cols-4 gap-1">
-        <ChannelInput
-          label="Red"
-          value={String(parsed.r)}
-          onCommit={(n) => onChannelChange("r", n)}
-          min={0}
-          max={255}
-        />
-        <ChannelInput
-          label="Green"
-          value={String(parsed.g)}
-          onCommit={(n) => onChannelChange("g", n)}
-          min={0}
-          max={255}
-        />
-        <ChannelInput
-          label="Blue"
-          value={String(parsed.b)}
-          onCommit={(n) => onChannelChange("b", n)}
-          min={0}
-          max={255}
-        />
-        {alpha}
-      </div>
-    )
-  }
-
-  if (format === "hsl") {
-    const hsl = rgbToHsl(parsed.r, parsed.g, parsed.b)
-    return (
-      <div className="grid grid-cols-4 gap-1">
-        <ChannelInput
-          label="Hue"
-          value={String(Math.round(hsl.h))}
-          onCommit={(n) => onChannelChange("hSL", n)}
-          min={0}
-          max={360}
-          wrap
-        />
-        <ChannelInput
-          label="Saturation"
-          value={String(Math.round(hsl.s * 100))}
-          onCommit={(n) => onChannelChange("sSL", n)}
-          min={0}
-          max={100}
-        />
-        <ChannelInput
-          label="Lightness"
-          value={String(Math.round(hsl.l * 100))}
-          onCommit={(n) => onChannelChange("lSL", n)}
-          min={0}
-          max={100}
-        />
-        {alpha}
-      </div>
-    )
-  }
-
-  const oklch = rgbToOklch(parsed.r, parsed.g, parsed.b)
+  const values = model.read(rgb, color)
   return (
     <div className="grid grid-cols-4 gap-1">
-      <ChannelInput
-        label="Lightness"
-        value={(oklch.L * 100).toFixed(0)}
-        onCommit={(n) => onChannelChange("L", n)}
-        inputMode="decimal"
-        min={0}
-        max={100}
-      />
-      <ChannelInput
-        label="Chroma"
-        value={oklch.C.toFixed(2)}
-        onCommit={(n) => onChannelChange("C", n)}
-        inputMode="decimal"
-        nudgeStep={0.01}
-        nudgeShiftStep={0.1}
-        decimals={2}
-        min={0}
-        max={0.4}
-      />
-      <ChannelInput
-        label="Hue"
-        value={(oklchHue ?? oklch.H).toFixed(0)}
-        onCommit={(n) => onChannelChange("H", n)}
-        min={0}
-        max={360}
-        wrap
-      />
+      {model.channels.map((channel, i) => (
+        <ChannelInput
+          key={channel.label}
+          {...channel}
+          value={values[i]!}
+          onCommit={(n) => onPatch(model.write(i, n, rgb, color))}
+        />
+      ))}
       {alpha}
     </div>
   )
@@ -1933,118 +1394,77 @@ function ColorInputsRow({
 // ColorPickerPopover (trigger button + popover panel)
 //
 // Base UI's Popover owns positioning (anchor tracking + collision flipping), dismissal and
-// focus management. The spring open/close survives via the same deferred-unmount pattern
-// the format menu uses.
+// focus management; `useSpringPopup` adds the spring open/close.
 // ---------------------------------------------------------------------------
 
 function ColorPickerPopover({
   triggerLabel,
-  triggerLabelPosition = "left",
   triggerShowValue = true,
-  triggerShowRemove = false,
-  onTriggerRemove,
   triggerClassName,
   open: openProp,
   defaultOpen = false,
   onOpenChange,
-  ref,
+  container,
+  value,
+  defaultValue = DEFAULT_VALUE,
+  onValueChange,
   ...pickerProps
 }: ColorPickerPopoverProps) {
-  const isOpenControlled = openProp !== undefined
   const [internalOpen, setInternalOpen] = useState(defaultOpen)
-  const open = isOpenControlled ? openProp : internalOpen
-  const actionsRef = useRef<{ unmount: () => void; close: () => void }>(null)
+  const open = openProp ?? internalOpen
+  const { actionsRef, motionProps } = useSpringPopup(open, spring.moderate)
   const [panelEl, setPanelEl] = useState<HTMLDivElement | null>(null)
-  // The popover itself mounts into the ambient container (a shadow root, in content
-  // scripts); layers inside the panel re-anchor to the panel below.
-  const outerContainer = use(ColorPickerPortalContainerContext)
 
-  const handleOpenChange = useCallback(
-    (next: boolean) => {
-      if (!isOpenControlled) setInternalOpen(next)
-      onOpenChange?.(next)
-    },
-    [isOpenControlled, onOpenChange],
-  )
-
-  const isControlled = pickerProps.value !== undefined
-  const [internalValue, setInternalValue] = useState(
-    pickerProps.value ?? pickerProps.defaultValue ?? "#6B97FF",
-  )
-  const currentValue = isControlled ? pickerProps.value! : internalValue
-
-  const onPickerValueChange = pickerProps.onValueChange
-  const handleValueChange = useCallback(
-    (v: string, parsed: ParsedColor) => {
-      if (!isControlled) setInternalValue(v)
-      onPickerValueChange?.(v, parsed)
-    },
-    [isControlled, onPickerValueChange],
-  )
-
-  // Release Base UI's deferred unmount once the exit tween has played; the timeout is the
-  // fallback for throttled tabs (spring.moderate.exit is 120ms — 150ms covers it).
-  useEffect(() => {
-    if (open) return undefined
-    const id = setTimeout(() => actionsRef.current?.unmount(), 150)
-    return () => clearTimeout(id)
-  }, [open])
+  // The trigger swatch needs the current value too, so the popover keeps its own copy when
+  // uncontrolled and hands the panel a controlled value.
+  const [internalValue, setInternalValue] = useState(defaultValue)
+  const currentValue = value ?? internalValue
 
   const parsed = useMemo(() => parseColor(currentValue), [currentValue])
   const swatchColor = parsed ? rgbToHexStr(parsed.r, parsed.g, parsed.b, parsed.a) : currentValue
   const valueLabel = parsed
-    ? rgbToHexStr(parsed.r, parsed.g, parsed.b, 1).replace(/^#/, "").toUpperCase()
+    ? rgbToHexStr(parsed.r, parsed.g, parsed.b, 1).slice(1).toUpperCase()
     : currentValue
+  const swatchOnly = !triggerLabel && !triggerShowValue
 
   return (
     <Popover.Root
       open={open}
-      onOpenChange={handleOpenChange}
+      onOpenChange={(next) => {
+        if (openProp === undefined) setInternalOpen(next)
+        onOpenChange?.(next)
+      }}
       actionsRef={actionsRef}
       // Non-modal: the page keeps scrolling and the Positioner tracks the anchor, so the
       // panel follows its trigger instead of detaching.
       modal={false}
     >
-      <div ref={ref} className="inline-flex">
+      <div className="inline-flex">
         <Popover.Trigger
+          // With nothing printed, the value becomes the button's name.
+          aria-label={swatchOnly ? `Color ${valueLabel}` : undefined}
           className={cn(
             "flex cursor-pointer items-center gap-2 border border-border px-2 text-[13px] font-medium hover:bg-muted",
             CONTROL_CLASS,
             SHAPE.input,
+            // A lone swatch sits in a square box, so the gap around it is the same on all four
+            // sides whatever height the caller picks.
+            swatchOnly && "aspect-square justify-center px-0",
             triggerClassName,
           )}
         >
-          {triggerLabel && triggerLabelPosition === "left" && (
+          {triggerLabel && (
             <span className="px-1 text-muted-foreground select-none">{triggerLabel}</span>
           )}
-          <ColorTile color={swatchColor} size={20} />
+          <span
+            className={cn("relative inline-block size-5 shrink-0 overflow-hidden", SHAPE.bg)}
+            style={{ ...CHECKER_BG, boxShadow: "inset 0 0 0 1px rgba(127,127,127,0.25)" }}
+          >
+            <span className="absolute inset-0" style={{ backgroundColor: swatchColor }} />
+          </span>
           {triggerShowValue && <span className="text-foreground tabular-nums">{valueLabel}</span>}
-          {triggerLabel && triggerLabelPosition === "right" && (
-            <span className="px-1 text-muted-foreground select-none">{triggerLabel}</span>
-          )}
-          {triggerShowRemove && (
-            <span
-              role="button"
-              aria-label="Remove color"
-              tabIndex={0}
-              onClick={(e) => {
-                e.stopPropagation()
-                onTriggerRemove?.()
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.stopPropagation()
-                  e.preventDefault()
-                  onTriggerRemove?.()
-                }
-              }}
-              className="ml-1 flex cursor-pointer items-center text-muted-foreground hover:text-foreground"
-            >
-              <IconX className="size-3.5" />
-            </span>
-          )}
         </Popover.Trigger>
-        <Popover.Portal container={outerContainer ?? undefined}>
+        <Popover.Portal container={container ?? undefined}>
           {/* pointer-events-auto: see the format menu's positioner — the subtitles panel's
               shadow host is pointer-events:none so clicks fall through to the video. */}
           <Popover.Positioner
@@ -2053,28 +1473,23 @@ function ColorPickerPopover({
             sideOffset={6}
             className="pointer-events-auto z-50 outline-none"
           >
-            <motion.div
-              initial={{ opacity: 0, y: -4, scaleY: 0.96 }}
-              animate={open ? { opacity: 1, y: 0, scaleY: 1 } : { opacity: 0, y: -4, scaleY: 0.96 }}
-              transition={open ? spring.moderate : spring.moderate.exit}
-              style={{ transformOrigin: "top left" }}
-              onAnimationComplete={() => {
-                if (!open) actionsRef.current?.unmount()
-              }}
-            >
+            <motion.div {...motionProps} style={{ transformOrigin: "top left" }}>
               <Popover.Popup
                 ref={setPanelEl}
                 data-slot="color-picker-content"
                 className="outline-none"
               >
-                <ColorPickerPortalContainer value={panelEl}>
+                <PortalContainerContext value={panelEl}>
                   <ColorPicker
                     {...pickerProps}
                     value={currentValue}
-                    onValueChange={handleValueChange}
-                    className={cn("shadow-lg", pickerProps.className)}
+                    onValueChange={(v) => {
+                      if (value === undefined) setInternalValue(v)
+                      onValueChange?.(v)
+                    }}
+                    className="shadow-lg"
                   />
-                </ColorPickerPortalContainer>
+                </PortalContainerContext>
               </Popover.Popup>
             </motion.div>
           </Popover.Positioner>
@@ -2084,20 +1499,6 @@ function ColorPickerPopover({
   )
 }
 
-export {
-  buildParsed,
-  ColorPicker,
-  ColorPickerPopover,
-  ColorPickerPortalContainer,
-  ColorSwatch,
-  ColorTile,
-  parseColor,
-}
+export { ColorPicker, ColorPickerPopover }
 
-export type {
-  ColorFormat,
-  ColorPickerPopoverProps,
-  ColorPickerProps,
-  ColorSwatchProps,
-  ParsedColor,
-}
+export type { ColorFormat, ColorPickerPopoverProps, ColorPickerProps }

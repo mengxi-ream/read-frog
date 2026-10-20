@@ -50,7 +50,7 @@ export function BuiltInRuleRow({ rule }: { rule: SiteRule }) {
         <CollapsibleTrigger className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 text-left">
           <Icon
             icon="tabler:chevron-right"
-            className="size-4 shrink-0 text-muted-foreground transition-transform duration-200 group-data-[state=open]/site-rule:rotate-90"
+            className="size-4 shrink-0 text-muted-foreground transition-transform duration-200 group-data-open/site-rule:rotate-90"
           />
           <code className="shrink-0 text-xs">{rule.id}</code>
           {rule.description && (

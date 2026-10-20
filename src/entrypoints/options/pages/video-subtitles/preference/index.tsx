@@ -1,14 +1,19 @@
 import { useAtom } from "jotai"
 import { Switch } from "@/components/ui/base-ui/switch"
+import { subtitlesPlatformSchema } from "@/types/config/subtitles"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
 import { ConfigItem } from "../../../components/config-item"
+import { ConfigNavItem } from "../../../components/config-nav-item"
 import { ConfigSection } from "../../../components/config-section"
 import { ShortcutLink } from "../../../components/shortcut-link"
+import { SubtitlesPlatformIcon } from "./platform-icon"
 
 /**
  * Whether subtitles get translated at all, when that starts, and whether AI re-cuts the lines
- * first — the three switches every other section on the page only matters under.
+ * first — the settings every other section on the page only matters under. When translating
+ * starts is set per platform, on the page the middle row opens; the logos on that row name the
+ * platforms it covers.
  */
 export function PreferenceSection() {
   const [videoSubtitlesConfig, setVideoSubtitlesConfig] = useAtom(
@@ -34,18 +39,20 @@ export function PreferenceSection() {
           }}
         />
       </ConfigItem>
-      <ConfigItem
-        id="subtitles-auto-start"
-        title={i18n.t("options.videoSubtitles.preference.autoStart.title")}
+      <ConfigNavItem
+        to="/video-subtitles/auto-start"
+        title={
+          <span className="flex items-center gap-2">
+            {i18n.t("options.videoSubtitles.preference.autoStart.title")}
+            <span className="flex items-center gap-1.5">
+              {subtitlesPlatformSchema.options.map((platform) => (
+                <SubtitlesPlatformIcon key={platform} platform={platform} className="size-3.5" />
+              ))}
+            </span>
+          </span>
+        }
         description={i18n.t("options.videoSubtitles.preference.autoStart.description")}
-      >
-        <Switch
-          checked={videoSubtitlesConfig.autoStart}
-          onCheckedChange={(autoStart) => {
-            void setVideoSubtitlesConfig({ autoStart })
-          }}
-        />
-      </ConfigItem>
+      />
       <ConfigItem
         id="subtitles-ai-segmentation"
         title={i18n.t("options.videoSubtitles.preference.aiSegmentation.title")}

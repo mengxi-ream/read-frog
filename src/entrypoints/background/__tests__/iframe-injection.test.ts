@@ -2,10 +2,16 @@ import type { Config } from "@/types/config/config"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { browser, storage } from "#imports"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import {
+  CONTENT_LOADER_SCRIPT_FILE,
+  CONTENT_RUNTIME_PARTS_WINDOW_KEY,
+} from "@/utils/content-runtime/parts"
 import { SITE_CONTROL_URL_WINDOW_KEY } from "@/utils/site-control"
 
-const HOST_CONTENT_SCRIPT_FILE = "/content-scripts/host.js"
-const SELECTION_CONTENT_SCRIPT_FILE = "/content-scripts/selection.js"
+// What the background writes into a frame before it injects the loader
+function loaderContextArgs(siteControlUrl: string, parts: string[]) {
+  return [SITE_CONTROL_URL_WINDOW_KEY, siteControlUrl, CONTENT_RUNTIME_PARTS_WINDOW_KEY, parts]
+}
 
 const tabsOnRemovedAddListenerMock = vi.fn<(...args: any[]) => any>()
 const webNavigationOnBeforeNavigateAddListenerMock = vi.fn<(...args: any[]) => any>()
@@ -169,10 +175,16 @@ describe("setupIframeInjection", () => {
         },
       }),
     ).toBe(true)
-    expect(executeScriptMock).toHaveBeenCalledTimes(3)
+    expect(executeScriptMock).toHaveBeenCalledTimes(2)
     expect(executeScriptMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        files: [SELECTION_CONTENT_SCRIPT_FILE],
+        args: loaderContextArgs("https://example.com/app", ["host", "selection"]),
+        target: { tabId: currentTabId, documentIds: ["doc-1"] },
+      }),
+    )
+    expect(executeScriptMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        files: [CONTENT_LOADER_SCRIPT_FILE],
         target: { tabId: currentTabId, documentIds: ["doc-1"] },
       }),
     )
@@ -274,12 +286,13 @@ describe("setupIframeInjection", () => {
       2,
       expect.objectContaining({
         target: { tabId: currentTabId, documentIds: ["doc-1"] },
-        files: [HOST_CONTENT_SCRIPT_FILE],
+        files: [CONTENT_LOADER_SCRIPT_FILE],
       }),
     )
-    expect(executeScriptMock).not.toHaveBeenCalledWith(
+    expect(executeScriptMock).toHaveBeenNthCalledWith(
+      1,
       expect.objectContaining({
-        files: [SELECTION_CONTENT_SCRIPT_FILE],
+        args: loaderContextArgs("https://example.com/frame", ["host"]),
       }),
     )
   })
@@ -297,30 +310,23 @@ describe("setupIframeInjection", () => {
       }),
     )
 
-    expect(executeScriptMock).toHaveBeenCalledTimes(3)
+    expect(executeScriptMock).toHaveBeenCalledTimes(2)
     expect(executeScriptMock).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({
         target: { tabId: currentTabId, documentIds: ["doc-1"] },
         func: expect.any(Function),
-        args: [
-          SITE_CONTROL_URL_WINDOW_KEY,
+        args: loaderContextArgs(
           "https://reader.example/content/wikipedia_en_all_maxi_2026-02/A/Computer_science",
-        ],
+          ["host", "selection"],
+        ),
       }),
     )
     expect(executeScriptMock).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({
         target: { tabId: currentTabId, documentIds: ["doc-1"] },
-        files: [HOST_CONTENT_SCRIPT_FILE],
-      }),
-    )
-    expect(executeScriptMock).toHaveBeenNthCalledWith(
-      3,
-      expect.objectContaining({
-        target: { tabId: currentTabId, documentIds: ["doc-1"] },
-        files: [SELECTION_CONTENT_SCRIPT_FILE],
+        files: [CONTENT_LOADER_SCRIPT_FILE],
       }),
     )
   })
@@ -346,26 +352,19 @@ describe("setupIframeInjection", () => {
       }),
     )
 
-    expect(executeScriptMock).toHaveBeenCalledTimes(3)
+    expect(executeScriptMock).toHaveBeenCalledTimes(2)
     expect(executeScriptMock).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({
         target: { tabId: currentTabId, frameIds: [2] },
-        args: [SITE_CONTROL_URL_WINDOW_KEY, "https://reader.example/viewer"],
+        args: loaderContextArgs("https://reader.example/viewer", ["host", "selection"]),
       }),
     )
     expect(executeScriptMock).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({
         target: { tabId: currentTabId, frameIds: [2] },
-        files: [HOST_CONTENT_SCRIPT_FILE],
-      }),
-    )
-    expect(executeScriptMock).toHaveBeenNthCalledWith(
-      3,
-      expect.objectContaining({
-        target: { tabId: currentTabId, frameIds: [2] },
-        files: [SELECTION_CONTENT_SCRIPT_FILE],
+        files: [CONTENT_LOADER_SCRIPT_FILE],
       }),
     )
 
@@ -383,26 +382,19 @@ describe("setupIframeInjection", () => {
       }),
     )
 
-    expect(executeScriptMock).toHaveBeenCalledTimes(3)
+    expect(executeScriptMock).toHaveBeenCalledTimes(2)
     expect(executeScriptMock).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({
         target: { tabId: currentTabId, documentIds: ["doc-late"] },
-        args: [SITE_CONTROL_URL_WINDOW_KEY, "https://reader.example/viewer"],
+        args: loaderContextArgs("https://reader.example/viewer", ["host", "selection"]),
       }),
     )
     expect(executeScriptMock).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({
         target: { tabId: currentTabId, documentIds: ["doc-late"] },
-        files: [HOST_CONTENT_SCRIPT_FILE],
-      }),
-    )
-    expect(executeScriptMock).toHaveBeenNthCalledWith(
-      3,
-      expect.objectContaining({
-        target: { tabId: currentTabId, documentIds: ["doc-late"] },
-        files: [SELECTION_CONTENT_SCRIPT_FILE],
+        files: [CONTENT_LOADER_SCRIPT_FILE],
       }),
     )
   })
@@ -459,23 +451,23 @@ describe("setupIframeInjection", () => {
     expect(executeScriptMock).toHaveBeenCalledWith(
       expect.objectContaining({
         target: { tabId: currentTabId, frameIds: [2] },
-        files: [SELECTION_CONTENT_SCRIPT_FILE],
+        args: loaderContextArgs(topUrl, ["host", "selection"]),
       }),
     )
 
     executeScriptMock.mockClear()
     getAllFramesMock.mockResolvedValue([createFrame(0, topUrl, -1), createFrame(4, "about:srcdoc")])
     await onCompleted(createDetails({ frameId: 4, documentId: "late-doc", url: "about:srcdoc" }))
-    expect(executeScriptMock).toHaveBeenCalledTimes(3)
+    expect(executeScriptMock).toHaveBeenCalledTimes(2)
     expect(executeScriptMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        args: [SITE_CONTROL_URL_WINDOW_KEY, topUrl],
+        args: loaderContextArgs(topUrl, ["host", "selection"]),
       }),
     )
     expect(executeScriptMock).toHaveBeenCalledWith(
       expect.objectContaining({
         target: { tabId: currentTabId, documentIds: ["late-doc"] },
-        files: [SELECTION_CONTENT_SCRIPT_FILE],
+        files: [CONTENT_LOADER_SCRIPT_FILE],
       }),
     )
   })
@@ -494,7 +486,7 @@ describe("setupIframeInjection", () => {
       onCompleted(createDetails({ frameId: 0, url })),
       onCompleted(createDetails({ url: `${url}attachments/sandbox-1/` })),
     ])
-    expect(executeScriptMock).toHaveBeenCalledTimes(3)
+    expect(executeScriptMock).toHaveBeenCalledTimes(2)
     for (const [call] of executeScriptMock.mock.calls) {
       expect(call.target).toEqual({ tabId: currentTabId, documentIds: ["doc-1"] })
     }
@@ -508,12 +500,7 @@ describe("setupIframeInjection", () => {
     await onCompleted(createDetails({ url: "https://other.example/frame" }))
     expect(executeScriptMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        files: [SELECTION_CONTENT_SCRIPT_FILE],
-      }),
-    )
-    expect(executeScriptMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        args: [SITE_CONTROL_URL_WINDOW_KEY, "https://reader.example/viewer"],
+        args: loaderContextArgs("https://reader.example/viewer", ["host", "selection"]),
       }),
     )
   })
@@ -621,7 +608,7 @@ describe("setupIframeInjection", () => {
       2,
       expect.objectContaining({
         target: { tabId: currentTabId, frameIds: [2] },
-        files: [HOST_CONTENT_SCRIPT_FILE],
+        files: [CONTENT_LOADER_SCRIPT_FILE],
       }),
     )
 
@@ -637,21 +624,44 @@ describe("setupIframeInjection", () => {
       1,
       expect.objectContaining({
         target: { tabId: currentTabId, frameIds: [2] },
-        args: [SITE_CONTROL_URL_WINDOW_KEY, "https://reader.example/content/article"],
+        args: loaderContextArgs("https://reader.example/content/article", ["selection"]),
       }),
     )
     expect(executeScriptMock).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({
         target: { tabId: currentTabId, frameIds: [2] },
-        files: [SELECTION_CONTENT_SCRIPT_FILE],
+        files: [CONTENT_LOADER_SCRIPT_FILE],
       }),
     )
-    expect(executeScriptMock).not.toHaveBeenCalledWith(
-      expect.objectContaining({
-        files: [HOST_CONTENT_SCRIPT_FILE],
-      }),
-    )
+  })
+
+  it("merges the parts of overlapping injections into one frame", async () => {
+    const { onCompleted } = await setupSubject()
+    await onCompleted(createDetails())
+    const [{ func }] = executeScriptMock.mock.calls[0] as [{ func: (...args: unknown[]) => void }]
+    const frameGlobal = globalThis as Record<string, unknown>
+
+    try {
+      // Host-only injection, then selection activation, before either loader ran
+      func(
+        SITE_CONTROL_URL_WINDOW_KEY,
+        "https://example.com/frame",
+        CONTENT_RUNTIME_PARTS_WINDOW_KEY,
+        ["host"],
+      )
+      func(
+        SITE_CONTROL_URL_WINDOW_KEY,
+        "https://example.com/frame",
+        CONTENT_RUNTIME_PARTS_WINDOW_KEY,
+        ["selection"],
+      )
+
+      expect(frameGlobal[CONTENT_RUNTIME_PARTS_WINDOW_KEY]).toEqual(["host", "selection"])
+    } finally {
+      delete frameGlobal[CONTENT_RUNTIME_PARTS_WINDOW_KEY]
+      delete frameGlobal[SITE_CONTROL_URL_WINDOW_KEY]
+    }
   })
 
   it("injects each document once and targets documentIds when available", async () => {
@@ -667,7 +677,7 @@ describe("setupIframeInjection", () => {
       expect.objectContaining({
         target: { tabId: currentTabId, documentIds: ["doc-1"] },
         func: expect.any(Function),
-        args: [SITE_CONTROL_URL_WINDOW_KEY, "https://example.com/frame"],
+        args: loaderContextArgs("https://example.com/frame", ["host"]),
       }),
     )
 
@@ -744,7 +754,7 @@ describe("setupIframeInjection", () => {
     expect(executeScriptMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
         target: { tabId: currentTabId, documentIds: ["doc-stale"] },
-        files: [HOST_CONTENT_SCRIPT_FILE],
+        files: [CONTENT_LOADER_SCRIPT_FILE],
       }),
     )
   })
@@ -786,7 +796,7 @@ describe("setupIframeInjection", () => {
         expect.objectContaining({
           target: { tabId: currentTabId, frameIds: [2] },
           func: expect.any(Function),
-          args: [SITE_CONTROL_URL_WINDOW_KEY, "https://example.com/frame-a"],
+          args: loaderContextArgs("https://example.com/frame-a", ["host"]),
         }),
       ]),
     )
@@ -794,7 +804,7 @@ describe("setupIframeInjection", () => {
       expect.arrayContaining([
         expect.objectContaining({
           target: { tabId: currentTabId, frameIds: [2] },
-          files: [HOST_CONTENT_SCRIPT_FILE],
+          files: [CONTENT_LOADER_SCRIPT_FILE],
         }),
       ]),
     )
@@ -803,7 +813,7 @@ describe("setupIframeInjection", () => {
         expect.objectContaining({
           target: { tabId: currentTabId, frameIds: [3] },
           func: expect.any(Function),
-          args: [SITE_CONTROL_URL_WINDOW_KEY, "https://example.com/frame-b"],
+          args: loaderContextArgs("https://example.com/frame-b", ["host"]),
         }),
       ]),
     )
@@ -811,7 +821,7 @@ describe("setupIframeInjection", () => {
       expect.arrayContaining([
         expect.objectContaining({
           target: { tabId: currentTabId, frameIds: [3] },
-          files: [HOST_CONTENT_SCRIPT_FILE],
+          files: [CONTENT_LOADER_SCRIPT_FILE],
         }),
       ]),
     )

@@ -1400,7 +1400,7 @@ options:
         description: 영상이 로드되면 버튼을 누르지 않아도 자막 번역을 시작합니다.
       aiSegmentation:
         title: AI 스마트 분할
-        description: AI가 자막을 문장처럼 읽히도록 다시 나눕니다. 타이밍도 AI가 정하므로 싱크가 어긋날 수 있습니다. LLM 번역 공급자가 필요합니다.
+        description: AI가 자막을 문장 단위로 다시 나눕니다. 번역 응답이 느려집니다. 성능 좋은 LLM이 필요하며, 약한 모델은 줄이 빠지거나 어긋날 수 있습니다.
     aiQuota:
       title: AI 자막 사용량
       description: AI 음성 인식으로 모든 동영상에 정확한 자막을 만들어 줍니다
