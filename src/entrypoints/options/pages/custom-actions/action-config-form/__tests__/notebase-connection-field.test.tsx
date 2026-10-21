@@ -12,7 +12,6 @@ import { TooltipProvider } from "@/components/ui/base-ui/tooltip"
 import { configSchema } from "@/types/config/config"
 import { configAtom } from "@/utils/atoms/config"
 import { CONFIG_STORAGE_KEY, DEFAULT_CONFIG } from "@/utils/constants/config"
-import { formatUiList } from "@/utils/i18n"
 import { CustomActionConfigForm } from ".."
 import { customActionEditorTabAtom, selectedCustomActionIdAtom } from "../../atoms"
 
@@ -140,17 +139,18 @@ async function setup(action: SelectionToolbarCustomAction) {
   await screen.findAllByText("phonetic")
 }
 
-async function pickNotebase(currentName: string, name: string) {
-  const trigger = (await screen.findAllByRole("combobox")).find((element) =>
-    element.textContent?.startsWith(currentName),
-  )!
+const SKIP_LABEL = "options.selectionToolbar.customActions.form.notebase.skipFieldOption"
+const UNDECIDED_LABEL =
+  "options.selectionToolbar.customActions.form.notebase.undecidedFieldPlaceholder"
+
+async function pick(trigger: HTMLElement, optionText: string) {
   await act(async () => {
     for (const type of ["pointerdown", "mousedown", "click"]) {
       trigger.dispatchEvent(new MouseEvent(type, { bubbles: true, button: 0 }))
     }
   })
   const option = (await screen.findAllByRole("option")).find(
-    (element) => element.textContent === name,
+    (element) => element.textContent === optionText,
   )!
   await act(async () => {
     for (const type of ["pointerdown", "mousedown", "pointerup", "mouseup", "click"]) {
@@ -159,10 +159,29 @@ async function pickNotebase(currentName: string, name: string) {
   })
 }
 
-async function getPersistedMappings() {
+async function pickNotebase(currentName: string, name: string) {
+  const trigger = (await screen.findAllByRole("combobox")).find((element) =>
+    element.textContent?.startsWith(currentName),
+  )!
+  await pick(trigger, name)
+}
+
+/** The column select on a field's row: the row is the field's name and its select. */
+function fieldTrigger(fieldName: string) {
+  const label = screen
+    .getAllByText(fieldName, { exact: true })
+    .find((element) => element.parentElement?.querySelector('[role="combobox"]'))!
+  return label.parentElement!.querySelector<HTMLElement>('[role="combobox"]')!
+}
+
+async function getPersistedConnection() {
   const stored = await fakeBrowser.storage.local.get(CONFIG_STORAGE_KEY)
   const action = configSchema.parse(stored[CONFIG_STORAGE_KEY]).selectionToolbar.customActions[0]!
-  return action.notebaseConnection?.mappings.map(({ localFieldId, notebaseColumnId }) => ({
+  return action.notebaseConnection
+}
+
+async function getPersistedMappings() {
+  return (await getPersistedConnection())?.mappings.map(({ localFieldId, notebaseColumnId }) => ({
     localFieldId,
     notebaseColumnId,
   }))
@@ -212,12 +231,48 @@ describe("notebase connection field", () => {
         { localFieldId: "field-meaning", notebaseColumnId: "reading-meaning" },
       ]),
     )
-    // The field no column is named after is named in a warning, not guessed.
-    expect(
-      await screen.findByText(
-        "options.selectionToolbar.customActions.form.notebase.unmappedFieldsTitle",
-      ),
-    ).toBeInTheDocument()
-    expect(vi.mocked(formatUiList)).toHaveBeenLastCalledWith(["phonetic"])
+    // The field no column is named after is left undecided, not guessed.
+    await waitFor(() => expect(fieldTrigger("phonetic").textContent).toContain(UNDECIDED_LABEL))
+    expect((await getPersistedConnection())?.skippedFieldIds).toBeUndefined()
+  })
+
+  it("saves a field to a column, or not at all, from its row", async () => {
+    const action = createAction()
+    action.notebaseConnection = {
+      notebaseId: "reading",
+      notebaseNameSnapshot: "Reading",
+      connectedAccount: reader,
+      mappings: [
+        ["term", "reading-term", "Term"],
+        ["meaning", "reading-meaning", " meaning "],
+      ].map(([name, notebaseColumnId, columnName]) => ({
+        id: `mapping-${name}`,
+        localFieldId: `field-${name}`,
+        notebaseColumnId: notebaseColumnId!,
+        notebaseColumnNameSnapshot: columnName!,
+      })),
+    }
+    await setup(action)
+    // The rows render once the Notebase's columns have loaded.
+    await waitFor(() => expect(fieldTrigger("phonetic").textContent).toContain(UNDECIDED_LABEL))
+
+    await pick(fieldTrigger("phonetic"), "IPA")
+    await waitFor(async () =>
+      expect(await getPersistedMappings()).toContainEqual({
+        localFieldId: "field-phonetic",
+        notebaseColumnId: "reading-ipa",
+      }),
+    )
+
+    await pick(fieldTrigger("phonetic"), SKIP_LABEL)
+    await waitFor(async () => {
+      const connection = await getPersistedConnection()
+      expect(connection?.skippedFieldIds).toEqual(["field-phonetic"])
+      expect(connection?.mappings.map((mapping) => mapping.localFieldId)).toEqual([
+        "field-term",
+        "field-meaning",
+      ])
+    })
+    expect(fieldTrigger("phonetic").textContent).toContain(SKIP_LABEL)
   })
 })

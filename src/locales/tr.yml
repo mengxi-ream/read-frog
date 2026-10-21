@@ -814,18 +814,14 @@ options:
           schemaErrorDescription: Kısa süre sonra yeniden yenilemeyi deneyin.
           schemaLoading: notebase şeması yükleniyor...
           mappingsLabel: Alan eşlemeleri
-          mappingsEmpty: Henüz eşleme yok. Alanları kaydetmeye hazır olduğunuzda bir tane ekleyin.
-          addMappingAction: Eşleme ekle
-          removeMappingAction: Eşlemeyi kaldır
           localFieldLabel: Eylem alanı
-          localFieldPlaceholder: Bir eylem alanı seçin
           remoteFieldLabel: Notebase alanı
-          remoteFieldPlaceholder: Bir notebase alanı seçin
           columnUnavailableOption: silinmiş
           invalidMappingsTitle: Bazı eşlemeler ilgi gerektiriyor
           invalidMappingsDescription: Geçersiz eşlemeler korunur. Notebase'e kaydetmeden önce düzeltin.
-          unmappedFieldsTitle: "Bazı alanlar kaydedilmeyecek"
-          unmappedFieldsDescription: "Bu alanların eşlemesi yok: $1. Notlarınızda olmasını istediklerinize eşleme ekleyin."
+          mappingSummary: "Kaydedilen $1 · Atlanan $2 · Kararsız $3"
+          skipFieldOption: "Kaydetme"
+          undecidedFieldPlaceholder: "Bir Notebase alanı seçin ya da kaydetmeyin"
           mappingMissingLocal: Eşlenen eylem alanı artık yok.
           mappingMissingRemote: Eşlenen notebase alanı artık yok.
           mappingMissingSchema: Bu eşlemeyi doğrulamak için notebase şemasını yenileyin.
@@ -1581,8 +1577,8 @@ action:
   saveToNotebaseTableUnavailable: Seçilen Notebase artık kullanılamıyor
   saveToNotebaseConnectionInvalid: Bu Notebase bağlantısı güncel değil. Custom AI Actions içinde yenileyin ve eşlemeleri düzeltin.
   saveToNotebaseInvalidContent: "Yapay zekâ yanıtında biçimi hatalı bir değer var, bu yüzden kaydedilmedi. Eylemi yeniden çalıştırıp sonra kaydedin."
-  saveToNotebaseSavedWithUnmapped: "Notebase'e kaydedildi, ancak bazı alanlar kaydedilmedi"
-  saveToNotebaseUnmappedFields: "Eşleme olmadığı için kaydedilmedi: $1"
+  saveToNotebaseUndecidedTitle: "Kaydedildi. Bu alanları kaydedip kaydetmeyeceğinize henüz karar vermediniz"
+  saveToNotebaseSkipUndecided: "Hiçbirini kaydetme"
   saveToNotebaseNoMappings: Kaydetmeden önce en az bir geçerli eşleme ekleyin
   saveToNotebaseCreateTitle: Bir Notebase oluşturulsun mu?
   saveToNotebaseCreateDescription: Bu Custom Action çıktı alanlarıyla eşleşen sütunlara sahip bir Notebase oluşturur ve bu sonucu ilk not olarak kaydeder.

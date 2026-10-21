@@ -820,18 +820,14 @@ options:
           schemaErrorDescription: 請稍後再試一次重新整理。
           schemaLoading: 正在載入筆記庫 schema…
           mappingsLabel: 欄位對應
-          mappingsEmpty: 尚未建立對應，準備好後即可新增。
-          addMappingAction: 新增對應
-          removeMappingAction: 移除對應
           localFieldLabel: 指令欄位
-          localFieldPlaceholder: 選擇一個指令欄位
           remoteFieldLabel: 筆記庫欄位
-          remoteFieldPlaceholder: 選擇一個筆記庫欄位
           columnUnavailableOption: 已刪除
           invalidMappingsTitle: 有些對應需要處理
           invalidMappingsDescription: 無效對應會被保留。儲存到筆記庫前請先修復它們。
-          unmappedFieldsTitle: "有些欄位不會存進筆記庫"
-          unmappedFieldsDescription: "這些欄位沒有對應：$1。想儲存哪個，就為它新增對應。"
+          mappingSummary: "存 $1 · 不存 $2 · 待定 $3"
+          skipFieldOption: "不儲存"
+          undecidedFieldPlaceholder: "選擇筆記庫欄位或不儲存"
           mappingMissingLocal: 對應的指令欄位已不存在。
           mappingMissingRemote: 對應的筆記庫欄位已不存在。
           mappingMissingSchema: 重新整理筆記庫 schema 後才能驗證這個對應。
@@ -1591,8 +1587,8 @@ action:
   saveToNotebaseTableUnavailable: 所選筆記庫已無法使用
   saveToNotebaseConnectionInvalid: 目前的筆記庫連線已過期，請到自訂 AI 指令重新整理並修復對應
   saveToNotebaseInvalidContent: "AI 回傳的內容格式不對，沒有儲存。請重新執行一次再儲存。"
-  saveToNotebaseSavedWithUnmapped: "已儲存到筆記庫，但有些欄位沒存"
-  saveToNotebaseUnmappedFields: "沒有對應，所以沒存：$1"
+  saveToNotebaseUndecidedTitle: "已儲存。這些欄位還沒決定存不存"
+  saveToNotebaseSkipUndecided: "都不儲存"
   saveToNotebaseNoMappings: 至少新增一個有效對應後才能儲存
   saveToNotebaseCreateTitle: 建立筆記庫？
   saveToNotebaseCreateDescription: 建立一個筆記庫，欄位會對應此自訂 AI 指令的輸出欄位，並將目前結果儲存為第一則筆記。

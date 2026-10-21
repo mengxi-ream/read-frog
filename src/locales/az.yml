@@ -815,18 +815,14 @@ options:
           schemaErrorDescription: Bir qədər sonra sxemi yenidən yeniləməyə çalışın.
           schemaLoading: Notebase sxemi yüklənir...
           mappingsLabel: Sahə uyğunlaşdırmaları
-          mappingsEmpty: Hələ uyğunlaşdırma yoxdur. Sahələri saxlamağa hazır olduqda əlavə edin.
-          addMappingAction: Uyğunlaşdırma əlavə et
-          removeMappingAction: Uyğunlaşdırmanı sil
           localFieldLabel: Əməliyyat sahəsi
-          localFieldPlaceholder: Əməliyyat sahəsi seçin
           remoteFieldLabel: Notebase sahəsi
-          remoteFieldPlaceholder: Notebase sahəsi seçin
           columnUnavailableOption: silinib
           invalidMappingsTitle: Bəzi uyğunlaşdırmaları yoxlamaq lazımdır
           invalidMappingsDescription: Yanlış uyğunlaşdırmalar saxlanılır. Notebase daxilində yadda saxlamazdan əvvəl onları düzəldin.
-          unmappedFieldsTitle: "Bəzi sahələr yadda saxlanılmayacaq"
-          unmappedFieldsDescription: "Bu sahələrin uyğunlaşdırması yoxdur: $1. Qeydlərdə olmasını istədiklərinizə uyğunlaşdırma əlavə edin."
+          mappingSummary: "Saxlanılır $1 · Ötürülür $2 · Qərarsız $3"
+          skipFieldOption: "Saxlama"
+          undecidedFieldPlaceholder: "Notebase sahəsi seçin və ya saxlamayın"
           mappingMissingLocal: Uyğunlaşdırılmış əməliyyat sahəsi artıq mövcud deyil.
           mappingMissingRemote: Uyğunlaşdırılmış Notebase sahəsi artıq mövcud deyil.
           mappingMissingSchema: Bu uyğunlaşdırmanı yoxlamaq üçün Notebase sxemini yeniləyin.
@@ -1586,8 +1582,8 @@ action:
   saveToNotebaseTableUnavailable: Seçilmiş Notebase artıq əlçatan deyil
   saveToNotebaseConnectionInvalid: Bu Notebase qoşulması köhnəlib. Fərdi süni intellekt əməliyyatlarında onu yeniləyin və uyğunlaşdırmaları düzəldin.
   saveToNotebaseInvalidContent: "Süni intellektin cavabında formatı səhv olan dəyər var, ona görə yadda saxlanılmadı. Əməliyyatı yenidən işə salın, sonra yadda saxlayın."
-  saveToNotebaseSavedWithUnmapped: "Notebase daxilində yadda saxlanıldı, lakin bəzi sahələr saxlanılmadı"
-  saveToNotebaseUnmappedFields: "Uyğunlaşdırma olmadığı üçün saxlanılmadı: $1"
+  saveToNotebaseUndecidedTitle: "Yadda saxlanıldı. Bu sahələri saxlayıb-saxlamamağa hələ qərar verməmisiniz"
+  saveToNotebaseSkipUndecided: "Heç birini saxlama"
   saveToNotebaseNoMappings: Yadda saxlamazdan əvvəl ən azı bir düzgün uyğunlaşdırma əlavə edin
   saveToNotebaseCreateTitle: Notebase yaradılsın?
   saveToNotebaseCreateDescription: Bu fərdi əməliyyata uyğun sütunlarla yeni Notebase yaradın, sonra bu nəticəni ilk qeyd kimi saxlayın.

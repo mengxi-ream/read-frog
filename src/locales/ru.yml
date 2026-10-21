@@ -814,18 +814,14 @@ options:
           schemaErrorDescription: Попробуйте обновить схему ещё раз чуть позже.
           schemaLoading: Загрузка схемы notebase...
           mappingsLabel: Сопоставления полей
-          mappingsEmpty: Сопоставлений пока нет. Добавьте хотя бы одно, когда будете готовы сохранять поля.
-          addMappingAction: Добавить сопоставление
-          removeMappingAction: Удалить сопоставление
           localFieldLabel: Поле действия
-          localFieldPlaceholder: Выберите поле действия
           remoteFieldLabel: Поле Notebase
-          remoteFieldPlaceholder: Выберите поле notebase
           columnUnavailableOption: удалено
           invalidMappingsTitle: Некоторые сопоставления требуют внимания
           invalidMappingsDescription: Некорректные сопоставления сохранены. Исправьте их перед сохранением в Notebase.
-          unmappedFieldsTitle: "Некоторые поля не будут сохранены"
-          unmappedFieldsDescription: "У этих полей нет сопоставления: $1. Добавьте сопоставление для тех, что нужны в заметках."
+          mappingSummary: "Сохраняются: $1 · Пропущены: $2 · Не решено: $3"
+          skipFieldOption: "Не сохранять"
+          undecidedFieldPlaceholder: "Выберите поле Notebase или не сохраняйте"
           mappingMissingLocal: Сопоставленное поле действия больше не существует.
           mappingMissingRemote: Сопоставленное поле notebase больше не существует.
           mappingMissingSchema: Обновите схему notebase, чтобы проверить это сопоставление.
@@ -1581,8 +1577,8 @@ action:
   saveToNotebaseTableUnavailable: Выбранная Notebase больше недоступна
   saveToNotebaseConnectionInvalid: Это подключение Notebase устарело. Обновите его в Custom AI Actions и исправьте сопоставления.
   saveToNotebaseInvalidContent: "В ответе ИИ есть значение в неверном формате, поэтому он не сохранён. Запустите действие ещё раз и сохраните."
-  saveToNotebaseSavedWithUnmapped: "Сохранено в Notebase, но не все поля"
-  saveToNotebaseUnmappedFields: "Нет сопоставления, не сохранены: $1"
+  saveToNotebaseUndecidedTitle: "Сохранено. Вы ещё не решили, сохранять ли эти поля"
+  saveToNotebaseSkipUndecided: "Не сохранять их"
   saveToNotebaseNoMappings: Добавьте хотя бы одно корректное сопоставление перед сохранением
   saveToNotebaseCreateTitle: Создать Notebase?
   saveToNotebaseCreateDescription: Создать Notebase с колонками из этого Custom Action и сохранить текущий результат как первую заметку.

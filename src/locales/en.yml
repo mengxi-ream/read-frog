@@ -820,18 +820,14 @@ options:
           schemaErrorDescription: Try refreshing the schema again in a moment.
           schemaLoading: Loading notebase schema...
           mappingsLabel: Field mappings
-          mappingsEmpty: No mappings yet. Add one when you are ready to save fields.
-          addMappingAction: Add mapping
-          removeMappingAction: Remove mapping
           localFieldLabel: Action field
-          localFieldPlaceholder: Select an action field
           remoteFieldLabel: Notebase field
-          remoteFieldPlaceholder: Select a notebase field
           columnUnavailableOption: removed
           invalidMappingsTitle: Some mappings need attention
           invalidMappingsDescription: Invalid mappings are preserved. Fix them before saving to Notebase.
-          unmappedFieldsTitle: "Some fields will not be saved"
-          unmappedFieldsDescription: "These fields have no mapping: $1. Add a mapping for any you want in your notes."
+          mappingSummary: "Saved $1 · Skipped $2 · Undecided $3"
+          skipFieldOption: "Don't save"
+          undecidedFieldPlaceholder: "Pick a notebase field or don't save"
           mappingMissingLocal: The mapped action field no longer exists.
           mappingMissingRemote: The mapped notebase field no longer exists.
           mappingMissingSchema: Refresh the notebase schema to validate this mapping.
@@ -1728,8 +1724,8 @@ action:
   saveToNotebaseTableUnavailable: The selected Notebase is no longer available
   saveToNotebaseConnectionInvalid: This Notebase connection is out of date. Refresh it in Custom AI Actions and fix the mappings.
   saveToNotebaseInvalidContent: "The AI answer has a value in the wrong format, so it was not saved. Run the action again, then save."
-  saveToNotebaseSavedWithUnmapped: "Saved to Notebase without some fields"
-  saveToNotebaseUnmappedFields: "No mapping, not saved: $1"
+  saveToNotebaseUndecidedTitle: "Saved. You haven't decided whether to save these fields"
+  saveToNotebaseSkipUndecided: "Don't save them"
   saveToNotebaseNoMappings: Add at least one valid mapping before saving
   saveToNotebaseCreateTitle: Create a Notebase?
   saveToNotebaseCreateDescription: Create a new Notebase with columns matching this Custom Action, then save this result as the first note.

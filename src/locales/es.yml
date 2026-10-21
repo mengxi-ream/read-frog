@@ -815,18 +815,14 @@ options:
           schemaErrorDescription: Intenta actualizar el esquema de nuevo en un momento.
           schemaLoading: Cargando esquema de la Notebase...
           mappingsLabel: Asignaciones de campos
-          mappingsEmpty: Aún no hay asignaciones. Añade una cuando estés listo para guardar campos.
-          addMappingAction: Añadir asignación
-          removeMappingAction: Eliminar asignación
           localFieldLabel: Campo de acción
-          localFieldPlaceholder: Selecciona un campo de acción
           remoteFieldLabel: Campo de Notebase
-          remoteFieldPlaceholder: Selecciona un campo de Notebase
           columnUnavailableOption: eliminado
           invalidMappingsTitle: Algunas asignaciones requieren atención
           invalidMappingsDescription: Las asignaciones no válidas se conservan. Corrígelas antes de guardar en Notebase.
-          unmappedFieldsTitle: "Algunos campos no se guardarán"
-          unmappedFieldsDescription: "Estos campos no tienen asignación: $1. Añade una asignación para los que quieras en tus notas."
+          mappingSummary: "Se guardan $1 · Omitidos $2 · Sin decidir $3"
+          skipFieldOption: "No guardar"
+          undecidedFieldPlaceholder: "Elige un campo de Notebase o no guardar"
           mappingMissingLocal: El campo de acción asignado ya no existe.
           mappingMissingRemote: El campo de Notebase asignado ya no existe.
           mappingMissingSchema: Actualiza el esquema de la Notebase para validar esta asignación.
@@ -1586,8 +1582,8 @@ action:
   saveToNotebaseTableUnavailable: La Notebase seleccionada ya no está disponible
   saveToNotebaseConnectionInvalid: Esta conexión de Notebase está desactualizada. Actualízala en Acciones AI personalizadas y corrige las asignaciones.
   saveToNotebaseInvalidContent: "La respuesta de la IA tiene un valor con un formato incorrecto, así que no se guardó. Vuelve a ejecutar la acción y luego guarda."
-  saveToNotebaseSavedWithUnmapped: "Guardado en Notebase sin algunos campos"
-  saveToNotebaseUnmappedFields: "Sin asignación, no se guardaron: $1"
+  saveToNotebaseUndecidedTitle: "Guardado. Aún no has decidido si guardar estos campos"
+  saveToNotebaseSkipUndecided: "No guardarlos"
   saveToNotebaseNoMappings: Añade al menos una asignación válida antes de guardar
   saveToNotebaseCreateTitle: ¿Crear una Notebase?
   saveToNotebaseCreateDescription: Crea una Notebase con columnas que coinciden con esta acción personalizada y guarda este resultado como la primera nota.

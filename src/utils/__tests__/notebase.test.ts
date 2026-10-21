@@ -3,14 +3,20 @@ import type { SelectionToolbarCustomAction } from "@/types/config/selection-tool
 import { describe, expect, it } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { getBuiltInDictionaryAction } from "@/utils/custom-actions"
-import { sanitizeSelectionToolbarCustomAction } from "../notebase/connection"
+import {
+  sanitizeCustomActionNotebaseConnection,
+  sanitizeSelectionToolbarCustomAction,
+} from "../notebase/connection"
 import {
   buildNotebaseRowCells,
   createNameMatchedNotebaseMappings,
   createNotebaseMapping,
-  getUnmappedOutputFields,
+  getUndecidedOutputFields,
   isNotebaseMappingCompatible,
+  mapNotebaseField,
+  markNotebaseFieldsReminded,
   resolveNotebaseMappings,
+  skipNotebaseFields,
 } from "../notebase/mapping"
 
 type NotebaseColumn = Parameters<typeof createNameMatchedNotebaseMappings>[1][number]
@@ -319,34 +325,106 @@ describe("notebase utils", () => {
     expect(mappings.map((mapping) => mapping.localFieldId)).toEqual(["field-a"])
   })
 
-  it("lists the fields no valid mapping saves", () => {
-    const action: SelectionToolbarCustomAction = {
-      ...createAction(),
-      notebaseConnection: {
-        notebaseId: "notebase-1",
-        notebaseNameSnapshot: "Articles",
-        connectedAccount,
-        mappings: [createNotebaseMapping("field-summary", "column-summary", "Summary")],
-      },
+  describe("field decisions", () => {
+    const outputSchema = [
+      ...createAction().outputSchema,
+      { id: "field-notes", name: "notes", type: "string" as const, description: "" },
+    ]
+    const connection = {
+      notebaseId: "notebase-1",
+      notebaseNameSnapshot: "Articles",
+      connectedAccount,
+      mappings: [createNotebaseMapping("field-summary", "column-summary", "Summary")],
     }
-    const schema = {
-      id: "notebase-1",
-      name: "Articles",
-      updatedAt: new Date(),
-      notebaseColumns: [
-        createColumn("column-summary", "Summary", { type: "string" }),
-        createColumn("column-score", "Score", { type: "number", decimal: 0, format: "number" }),
-      ],
-    }
+    const withConnection = (
+      notebaseConnection: SelectionToolbarCustomAction["notebaseConnection"],
+    ): SelectionToolbarCustomAction => ({ ...createAction(), outputSchema, notebaseConnection })
+    const ids = (fields: { id: string }[]) => fields.map((field) => field.id)
 
-    expect(getUnmappedOutputFields(action, schema).map((field) => field.id)).toEqual([
-      "field-score",
-    ])
+    it("counts a field as undecided until it is mapped or skipped", () => {
+      // An older connection has no skipped list: everything unmapped is undecided.
+      expect(ids(getUndecidedOutputFields(withConnection(connection)))).toEqual([
+        "field-score",
+        "field-notes",
+      ])
+      expect(
+        ids(
+          getUndecidedOutputFields(
+            withConnection({ ...connection, skippedFieldIds: ["field-notes"] }),
+          ),
+        ),
+      ).toEqual(["field-score"])
+      expect(getUndecidedOutputFields(withConnection(undefined))).toEqual([])
+    })
 
-    // A mapping whose column is gone saves nothing either.
-    expect(
-      getUnmappedOutputFields(action, { ...schema, notebaseColumns: [] }).map((field) => field.id),
-    ).toEqual(["field-summary", "field-score"])
+    it("does not count a field whose column is gone as undecided", () => {
+      // The mapping is invalid instead, which blocks the save until it is fixed.
+      const action = withConnection(connection)
+      expect(ids(getUndecidedOutputFields(action))).not.toContain("field-summary")
+    })
+
+    it("maps a field and forgets it was skipped or reminded about", () => {
+      const next = mapNotebaseField(
+        { ...connection, skippedFieldIds: ["field-score"], remindedFieldIds: ["field-notes"] },
+        "field-score",
+        { id: "column-score", name: "Score" },
+      )
+
+      expect(
+        next.mappings.map((mapping) => [mapping.localFieldId, mapping.notebaseColumnId]),
+      ).toEqual([
+        ["field-summary", "column-summary"],
+        ["field-score", "column-score"],
+      ])
+      expect(next.skippedFieldIds).toEqual([])
+      expect(next.remindedFieldIds).toEqual(["field-notes"])
+
+      const moved = mapNotebaseField(next, "field-summary", { id: "column-notes", name: "Notes" })
+      expect(moved.mappings).toHaveLength(2)
+      expect(moved.mappings[0]).toMatchObject({
+        id: connection.mappings[0]!.id,
+        notebaseColumnId: "column-notes",
+        notebaseColumnNameSnapshot: "Notes",
+      })
+    })
+
+    it("skips fields, dropping their mappings and reminders", () => {
+      const next = skipNotebaseFields({ ...connection, remindedFieldIds: ["field-notes"] }, [
+        "field-summary",
+        "field-notes",
+      ])
+
+      expect(next.mappings).toEqual([])
+      expect(next.skippedFieldIds).toEqual(["field-summary", "field-notes"])
+      expect(next.remindedFieldIds).toEqual([])
+    })
+
+    it("records reminded fields once", () => {
+      const once = markNotebaseFieldsReminded(connection, ["field-score"])
+      expect(
+        markNotebaseFieldsReminded(once, ["field-score", "field-notes"]).remindedFieldIds,
+      ).toEqual(["field-score", "field-notes"])
+    })
+
+    it("keeps only lists that still name unmapped fields of the action", () => {
+      const sanitized = sanitizeCustomActionNotebaseConnection(
+        {
+          ...connection,
+          // Mapped, gone from the action, and duplicated ids all drop out.
+          skippedFieldIds: ["field-summary", "field-gone", "field-score", "field-score"],
+          // A skipped field is not undecided, so it is not "reminded" either.
+          remindedFieldIds: ["field-score", "field-notes"],
+        },
+        outputSchema,
+      )
+
+      expect(sanitized?.skippedFieldIds).toEqual(["field-score"])
+      expect(sanitized?.remindedFieldIds).toEqual(["field-notes"])
+      // A connection without the lists reads exactly as before.
+      expect(sanitizeCustomActionNotebaseConnection(connection, outputSchema)).not.toHaveProperty(
+        "skippedFieldIds",
+      )
+    })
   })
 
   it("only allows string and number columns", () => {

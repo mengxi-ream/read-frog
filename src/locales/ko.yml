@@ -814,18 +814,14 @@ options:
           schemaErrorDescription: 잠시 후 다시 새로고침해 보세요.
           schemaLoading: notebase 스키마를 불러오는 중...
           mappingsLabel: 필드 매핑
-          mappingsEmpty: 아직 매핑이 없습니다. 필드를 저장할 준비가 되면 추가하세요.
-          addMappingAction: 매핑 추가
-          removeMappingAction: 매핑 제거
           localFieldLabel: 액션 필드
-          localFieldPlaceholder: 액션 필드 선택
           remoteFieldLabel: Notebase 필드
-          remoteFieldPlaceholder: notebase 필드 선택
           columnUnavailableOption: 삭제됨
           invalidMappingsTitle: 일부 매핑을 확인해야 합니다
           invalidMappingsDescription: 잘못된 매핑은 유지됩니다. Notebase에 저장하기 전에 수정하세요.
-          unmappedFieldsTitle: "일부 필드는 저장되지 않습니다"
-          unmappedFieldsDescription: "다음 필드에 매핑이 없습니다: $1. 노트에 저장하려는 필드에 매핑을 추가하세요."
+          mappingSummary: "저장 $1 · 저장 안 함 $2 · 미정 $3"
+          skipFieldOption: "저장 안 함"
+          undecidedFieldPlaceholder: "Notebase 필드를 고르거나 저장 안 함"
           mappingMissingLocal: 매핑된 액션 필드가 더 이상 존재하지 않습니다.
           mappingMissingRemote: 매핑된 notebase 필드가 더 이상 존재하지 않습니다.
           mappingMissingSchema: 이 매핑을 검증하려면 notebase 스키마를 새로고침하세요.
@@ -1581,8 +1577,8 @@ action:
   saveToNotebaseTableUnavailable: 선택한 Notebase를 더 이상 사용할 수 없습니다
   saveToNotebaseConnectionInvalid: 현재 Notebase 연결이 오래되었습니다. Custom AI Actions에서 새로고침하고 매핑을 수정하세요.
   saveToNotebaseInvalidContent: "AI 응답에 형식이 맞지 않는 값이 있어 저장하지 않았습니다. 다시 실행한 뒤 저장하세요."
-  saveToNotebaseSavedWithUnmapped: "Notebase에 저장했지만 일부 필드는 저장되지 않았습니다"
-  saveToNotebaseUnmappedFields: "매핑이 없어 저장되지 않음: $1"
+  saveToNotebaseUndecidedTitle: "저장했습니다. 다음 필드는 저장할지 아직 정하지 않았습니다"
+  saveToNotebaseSkipUndecided: "모두 저장 안 함"
   saveToNotebaseNoMappings: 저장하기 전에 유효한 매핑을 하나 이상 추가하세요
   saveToNotebaseCreateTitle: Notebase를 만들까요?
   saveToNotebaseCreateDescription: 이 Custom Action 출력 필드와 일치하는 열로 새 Notebase를 만들고, 현재 결과를 첫 노트로 저장합니다.

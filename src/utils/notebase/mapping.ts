@@ -6,6 +6,7 @@ import type {
 import type { NotebaseColumnConfig } from "@read-frog/definitions"
 import type {
   SelectionToolbarCustomAction,
+  SelectionToolbarCustomActionNotebaseConnection,
   SelectionToolbarCustomActionNotebaseMapping,
   SelectionToolbarCustomActionOutputField,
   SelectionToolbarCustomActionOutputType,
@@ -171,18 +172,74 @@ export function validateNotebaseMappings(
   return { kind: "valid", resolvedMappings }
 }
 
-/** The action's fields no valid mapping writes: a save leaves them out of the note. */
-export function getUnmappedOutputFields(
+/**
+ * The action's fields the reader has not decided about: neither mapped to a
+ * column nor marked "don't save". A save leaves them out like a skipped field,
+ * but reminds the reader about them once. A mapping whose column is gone is
+ * not undecided; it is invalid, and blocks the save until it is fixed.
+ */
+export function getUndecidedOutputFields(
   action: SelectionToolbarCustomAction,
-  schema: NotebaseGetSchemaOutput,
 ): SelectionToolbarCustomActionOutputField[] {
-  const mappedFieldIds = new Set(
-    resolveNotebaseMappings(action, schema)
-      .filter((resolvedMapping) => resolvedMapping.status === "valid")
-      .map((resolvedMapping) => resolvedMapping.mapping.localFieldId),
+  const connection = sanitizeCustomActionNotebaseConnection(
+    action.notebaseConnection,
+    action.outputSchema,
   )
+  if (!connection) {
+    return []
+  }
 
-  return action.outputSchema.filter((field) => !mappedFieldIds.has(field.id))
+  const decidedFieldIds = new Set([
+    ...connection.mappings.map((mapping) => mapping.localFieldId),
+    ...(connection.skippedFieldIds ?? []),
+  ])
+  return action.outputSchema.filter((field) => !decidedFieldIds.has(field.id))
+}
+
+/** The connection with `fieldId` saved to `column`, replacing what it was before. */
+export function mapNotebaseField(
+  connection: SelectionToolbarCustomActionNotebaseConnection,
+  fieldId: string,
+  column: Pick<NotebaseColumn, "id" | "name">,
+): SelectionToolbarCustomActionNotebaseConnection {
+  const existing = connection.mappings.find((mapping) => mapping.localFieldId === fieldId)
+  const mapping = existing
+    ? { ...existing, notebaseColumnId: column.id, notebaseColumnNameSnapshot: column.name }
+    : createNotebaseMapping(fieldId, column.id, column.name)
+
+  return {
+    ...connection,
+    mappings: existing
+      ? connection.mappings.map((item) => (item === existing ? mapping : item))
+      : [...connection.mappings, mapping],
+    skippedFieldIds: connection.skippedFieldIds?.filter((id) => id !== fieldId),
+    remindedFieldIds: connection.remindedFieldIds?.filter((id) => id !== fieldId),
+  }
+}
+
+/** The connection with these fields marked "don't save" (and their mappings removed). */
+export function skipNotebaseFields(
+  connection: SelectionToolbarCustomActionNotebaseConnection,
+  fieldIds: readonly string[],
+): SelectionToolbarCustomActionNotebaseConnection {
+  const skipped = new Set(fieldIds)
+  return {
+    ...connection,
+    mappings: connection.mappings.filter((mapping) => !skipped.has(mapping.localFieldId)),
+    skippedFieldIds: [...new Set([...(connection.skippedFieldIds ?? []), ...fieldIds])],
+    remindedFieldIds: connection.remindedFieldIds?.filter((id) => !skipped.has(id)),
+  }
+}
+
+/** The connection with these undecided fields recorded as already reminded about. */
+export function markNotebaseFieldsReminded(
+  connection: SelectionToolbarCustomActionNotebaseConnection,
+  fieldIds: readonly string[],
+): SelectionToolbarCustomActionNotebaseConnection {
+  return {
+    ...connection,
+    remindedFieldIds: [...new Set([...(connection.remindedFieldIds ?? []), ...fieldIds])],
+  }
 }
 
 export function buildNotebaseRowCells(

@@ -814,18 +814,14 @@ options:
           schemaErrorDescription: Hãy thử làm mới lại sau ít phút nữa.
           schemaLoading: Đang tải schema notebase...
           mappingsLabel: Ánh xạ trường
-          mappingsEmpty: Chưa có ánh xạ nào. Hãy thêm một ánh xạ khi bạn sẵn sàng lưu các trường.
-          addMappingAction: Thêm ánh xạ
-          removeMappingAction: Xóa ánh xạ
           localFieldLabel: Trường của hành động
-          localFieldPlaceholder: Chọn một trường của hành động
           remoteFieldLabel: Trường Notebase
-          remoteFieldPlaceholder: Chọn một trường notebase
           columnUnavailableOption: đã xóa
           invalidMappingsTitle: Một số ánh xạ cần được xử lý
           invalidMappingsDescription: Các ánh xạ không hợp lệ vẫn được giữ lại. Hãy sửa chúng trước khi lưu vào Notebase.
-          unmappedFieldsTitle: "Một số trường sẽ không được lưu"
-          unmappedFieldsDescription: "Các trường này chưa có ánh xạ: $1. Hãy thêm ánh xạ cho trường bạn muốn lưu vào ghi chú."
+          mappingSummary: "Lưu $1 · Bỏ qua $2 · Chưa quyết định $3"
+          skipFieldOption: "Không lưu"
+          undecidedFieldPlaceholder: "Chọn một trường Notebase hoặc không lưu"
           mappingMissingLocal: Trường của hành động đã ánh xạ không còn tồn tại.
           mappingMissingRemote: Trường notebase đã ánh xạ không còn tồn tại.
           mappingMissingSchema: Hãy làm mới schema notebase để xác thực ánh xạ này.
@@ -1581,8 +1577,8 @@ action:
   saveToNotebaseTableUnavailable: Notebase đã chọn không còn khả dụng
   saveToNotebaseConnectionInvalid: Kết nối Notebase này đã lỗi thời. Hãy làm mới trong Custom AI Actions và sửa các ánh xạ.
   saveToNotebaseInvalidContent: "Câu trả lời của AI có giá trị sai định dạng nên chưa được lưu. Hãy chạy lại thao tác rồi lưu."
-  saveToNotebaseSavedWithUnmapped: "Đã lưu vào Notebase nhưng thiếu một số trường"
-  saveToNotebaseUnmappedFields: "Chưa có ánh xạ nên chưa lưu: $1"
+  saveToNotebaseUndecidedTitle: "Đã lưu. Bạn chưa quyết định có lưu các trường này không"
+  saveToNotebaseSkipUndecided: "Không lưu các trường này"
   saveToNotebaseNoMappings: Hãy thêm ít nhất một ánh xạ hợp lệ trước khi lưu
   saveToNotebaseCreateTitle: Tạo Notebase?
   saveToNotebaseCreateDescription: Tạo một Notebase có các cột khớp với Custom Action này, rồi lưu kết quả hiện tại làm ghi chú đầu tiên.
