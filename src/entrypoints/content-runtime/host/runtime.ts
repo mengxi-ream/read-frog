@@ -24,7 +24,7 @@ export async function bootstrapHostContent(
   ensurePresetStyles(document)
 
   // No toast surface of its own: the selection UI renders the content
-  // runtime's toasts (see selection.content/app.tsx).
+  // runtime's toasts (see content-runtime/selection/app.tsx).
   const cleanupUrlListener = setupUrlChangeListener()
 
   const teardownNodeTranslation = registerNodeTranslationTriggers()

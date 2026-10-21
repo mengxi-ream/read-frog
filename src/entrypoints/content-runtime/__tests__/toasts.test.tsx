@@ -5,38 +5,38 @@ import { act, render } from "@testing-library/react"
 import { atom } from "jotai"
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { toastManager } from "@/components/ui/base-ui/toast"
-import SelectionApp from "../../selection.content/app"
-import SideApp from "../../side.content/app"
+import SelectionApp from "../selection/app"
+import SideApp from "../side/app"
 
 vi.mock("@/utils/atoms/config", () => ({
   configFieldsAtomMap: { selectionToolbar: atom({ opacity: 100 }) },
 }))
 
-vi.mock("../../selection.content/input-translation", () => ({
+vi.mock("../selection/input-translation", () => ({
   useInputTranslation: () => {},
 }))
 
-vi.mock("../../selection.content/use-context-menu-read-aloud", () => ({
+vi.mock("../selection/use-context-menu-read-aloud", () => ({
   useContextMenuReadAloud: () => {},
 }))
 
-vi.mock("../../selection.content/selection-toolbar", () => ({
+vi.mock("../selection/selection-toolbar", () => ({
   SelectionToolbar: () => null,
 }))
 
-vi.mock("../../selection.content/selection-toolbar/custom-action-button/provider", () => ({
+vi.mock("../selection/selection-toolbar/custom-action-button/provider", () => ({
   SelectionCustomActionProvider: ({ children }: { children: ReactNode }) => children,
 }))
 
-vi.mock("../../selection.content/selection-toolbar/speak-button", () => ({
+vi.mock("../selection/selection-toolbar/speak-button", () => ({
   SelectionSpeechProvider: ({ children }: { children: ReactNode }) => children,
 }))
 
-vi.mock("../../selection.content/selection-toolbar/translate-button/provider", () => ({
+vi.mock("../selection/selection-toolbar/translate-button/provider", () => ({
   SelectionTranslationProvider: ({ children }: { children: ReactNode }) => children,
 }))
 
-vi.mock("../../side.content/components/floating-button", () => ({
+vi.mock("../side/components/floating-button", () => ({
   default: () => null,
 }))
 
