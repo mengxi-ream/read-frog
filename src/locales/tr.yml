@@ -824,6 +824,8 @@ options:
           columnUnavailableOption: silinmiş
           invalidMappingsTitle: Bazı eşlemeler ilgi gerektiriyor
           invalidMappingsDescription: Geçersiz eşlemeler korunur. Notebase'e kaydetmeden önce düzeltin.
+          unmappedFieldsTitle: "Bazı alanlar kaydedilmeyecek"
+          unmappedFieldsDescription: "Bu alanların eşlemesi yok: $1. Notlarınızda olmasını istediklerinize eşleme ekleyin."
           mappingMissingLocal: Eşlenen eylem alanı artık yok.
           mappingMissingRemote: Eşlenen notebase alanı artık yok.
           mappingMissingSchema: Bu eşlemeyi doğrulamak için notebase şemasını yenileyin.
@@ -1578,6 +1580,9 @@ action:
   saveToNotebaseLimitExceeded: Daha fazla Notebase notu kaydetmek için yükseltme gerekir
   saveToNotebaseTableUnavailable: Seçilen Notebase artık kullanılamıyor
   saveToNotebaseConnectionInvalid: Bu Notebase bağlantısı güncel değil. Custom AI Actions içinde yenileyin ve eşlemeleri düzeltin.
+  saveToNotebaseInvalidContent: "Yapay zekâ yanıtında biçimi hatalı bir değer var, bu yüzden kaydedilmedi. Eylemi yeniden çalıştırıp sonra kaydedin."
+  saveToNotebaseSavedWithUnmapped: "Notebase'e kaydedildi, ancak bazı alanlar kaydedilmedi"
+  saveToNotebaseUnmappedFields: "Eşleme olmadığı için kaydedilmedi: $1"
   saveToNotebaseNoMappings: Kaydetmeden önce en az bir geçerli eşleme ekleyin
   saveToNotebaseCreateTitle: Bir Notebase oluşturulsun mu?
   saveToNotebaseCreateDescription: Bu Custom Action çıktı alanlarıyla eşleşen sütunlara sahip bir Notebase oluşturur ve bu sonucu ilk not olarak kaydeder.

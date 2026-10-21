@@ -824,6 +824,8 @@ options:
           columnUnavailableOption: удалено
           invalidMappingsTitle: Некоторые сопоставления требуют внимания
           invalidMappingsDescription: Некорректные сопоставления сохранены. Исправьте их перед сохранением в Notebase.
+          unmappedFieldsTitle: "Некоторые поля не будут сохранены"
+          unmappedFieldsDescription: "У этих полей нет сопоставления: $1. Добавьте сопоставление для тех, что нужны в заметках."
           mappingMissingLocal: Сопоставленное поле действия больше не существует.
           mappingMissingRemote: Сопоставленное поле notebase больше не существует.
           mappingMissingSchema: Обновите схему notebase, чтобы проверить это сопоставление.
@@ -1578,6 +1580,9 @@ action:
   saveToNotebaseLimitExceeded: Для сохранения большего числа заметок Notebase требуется апгрейд
   saveToNotebaseTableUnavailable: Выбранная Notebase больше недоступна
   saveToNotebaseConnectionInvalid: Это подключение Notebase устарело. Обновите его в Custom AI Actions и исправьте сопоставления.
+  saveToNotebaseInvalidContent: "В ответе ИИ есть значение в неверном формате, поэтому он не сохранён. Запустите действие ещё раз и сохраните."
+  saveToNotebaseSavedWithUnmapped: "Сохранено в Notebase, но не все поля"
+  saveToNotebaseUnmappedFields: "Нет сопоставления, не сохранены: $1"
   saveToNotebaseNoMappings: Добавьте хотя бы одно корректное сопоставление перед сохранением
   saveToNotebaseCreateTitle: Создать Notebase?
   saveToNotebaseCreateDescription: Создать Notebase с колонками из этого Custom Action и сохранить текущий результат как первую заметку.

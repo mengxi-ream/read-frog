@@ -11,8 +11,9 @@ import { env } from "@/env"
 import { configAtom } from "@/utils/atoms/config"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { getBuiltInDictionaryAction } from "@/utils/custom-actions"
-import { i18n } from "@/utils/i18n"
+import { formatUiList, i18n } from "@/utils/i18n"
 import { sendMessage } from "@/utils/message"
+import { buildCustomActionOptionsRoute } from "@/utils/navigation"
 import { orpcClient } from "@/utils/orpc/client"
 import { SaveToNotebaseButton } from "../save-to-notebase-button"
 import { SaveToNotebaseDialogHost } from "../save-to-notebase-dialog-host"
@@ -230,7 +231,11 @@ function getNoteSaveCompletions() {
     .map(([, data]) => data)
 }
 
-function renderButton(config: Config, action: SelectionToolbarCustomAction) {
+function renderButton(
+  config: Config,
+  action: SelectionToolbarCustomAction,
+  { failed = false }: { failed?: boolean } = {},
+) {
   const store = createStore()
   store.set(configAtom, config)
   const queryClient = new QueryClient({
@@ -246,6 +251,7 @@ function renderButton(config: Config, action: SelectionToolbarCustomAction) {
       <Provider store={store}>
         <SaveToNotebaseButton
           action={action}
+          failed={failed}
           isRunning={false}
           result={{ summary: "A short summary" }}
         />
@@ -800,6 +806,71 @@ describe("saveToNotebaseButton notebase availability", () => {
     expect(toastManagerMock.close).toHaveBeenCalledWith("toast-id")
     expect(sendMessage).toHaveBeenCalledWith("openOptionsPage", {
       route: "/custom-actions?actionId=action-1&tab=notebase",
+    })
+  })
+
+  it("keeps the part of a failed run that streamed before the error out of the Notebase", () => {
+    const config = cloneConfig(DEFAULT_CONFIG)
+    config.betaExperience.enabled = true
+    renderButton(config, createConnectedAction(), { failed: true })
+
+    expect(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") })).toBeDisabled()
+  })
+
+  it("says which fields a save left out and opens the mappings from the toast", async () => {
+    const config = cloneConfig(DEFAULT_CONFIG)
+    config.betaExperience.enabled = true
+    const action = createConnectedDictionaryAction()
+    // Only the term is still mapped, as on a connection that lost the rest.
+    action.notebaseConnection!.mappings = action.notebaseConnection!.mappings.slice(0, 1)
+    vi.mocked(orpcClient.notebase.getSchema).mockResolvedValueOnce(createSchemaForAction(action))
+    renderButton(config, action)
+
+    fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
+
+    await waitFor(() => {
+      expect(toastManagerMock.add).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "warning",
+          title: i18n.t("action.saveToNotebaseSavedWithUnmapped"),
+          description: i18n.t("action.saveToNotebaseUnmappedFields", ["unused"]),
+          actionProps: expect.objectContaining({
+            children: i18n.t("action.saveToNotebaseGoConfigure"),
+          }),
+        }),
+      )
+    })
+    expect(vi.mocked(formatUiList)).toHaveBeenLastCalledWith(
+      action.outputSchema.slice(1).map((field) => field.name),
+    )
+    expect(notebaseRowCreateMock).toHaveBeenCalledTimes(1)
+
+    const toastOptions = toastManagerMock.add.mock.calls[0]?.[0] as
+      | { actionProps?: { onClick?: () => void } }
+      | undefined
+    toastOptions?.actionProps?.onClick?.()
+
+    expect(toastManagerMock.close).toHaveBeenCalledWith("toast-id")
+    expect(sendMessage).toHaveBeenCalledWith("openOptionsPage", {
+      route: buildCustomActionOptionsRoute(action.id, { tab: "notebase" }),
+    })
+  })
+
+  it("blames the answer, not the connection, when the server rejects a cell", async () => {
+    const config = cloneConfig(DEFAULT_CONFIG)
+    config.betaExperience.enabled = true
+    notebaseRowCreateMock.mockRejectedValueOnce(
+      new ORPCError("CELL_VALIDATION_FAILED", { status: 422 }),
+    )
+    renderButton(config, createConnectedAction())
+
+    fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
+
+    await waitFor(() => {
+      expect(toastManagerMock.add).toHaveBeenCalledWith({
+        type: "error",
+        title: i18n.t("action.saveToNotebaseInvalidContent"),
+      })
     })
   })
 

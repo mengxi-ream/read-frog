@@ -824,6 +824,8 @@ options:
           columnUnavailableOption: 削除済み
           invalidMappingsTitle: 一部のマッピングに対応が必要です
           invalidMappingsDescription: 無効なマッピングは保持されます。Notebase に保存する前に修正してください。
+          unmappedFieldsTitle: "一部のフィールドは保存されません"
+          unmappedFieldsDescription: "次のフィールドにはマッピングがありません：$1。ノートに残したいものはマッピングを追加してください。"
           mappingMissingLocal: マッピングされたアクションフィールドは存在しなくなりました。
           mappingMissingRemote: マッピングされた notebase フィールドは存在しなくなりました。
           mappingMissingSchema: このマッピングを検証するには、notebase スキーマを更新してください。
@@ -1578,6 +1580,9 @@ action:
   saveToNotebaseLimitExceeded: さらに Notebase ノートを保存するにはアップグレードが必要です
   saveToNotebaseTableUnavailable: 選択した Notebase は利用できなくなりました
   saveToNotebaseConnectionInvalid: この Notebase 接続は古くなっています。Custom AI Actions で更新し、マッピングを修正してください。
+  saveToNotebaseInvalidContent: "AI の回答に形式の合わない値があったため、保存しませんでした。もう一度実行してから保存してください。"
+  saveToNotebaseSavedWithUnmapped: "Notebase に保存しましたが、一部のフィールドは保存されていません"
+  saveToNotebaseUnmappedFields: "マッピングがないため未保存：$1"
   saveToNotebaseNoMappings: 保存する前に、少なくとも1つの有効なマッピングを追加してください
   saveToNotebaseCreateTitle: Notebase を作成しますか？
   saveToNotebaseCreateDescription: この Custom Action の出力フィールドに合わせた列を持つ Notebase を作成し、現在の結果を最初のノートとして保存します。

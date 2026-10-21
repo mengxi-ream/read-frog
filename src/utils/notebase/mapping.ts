@@ -68,6 +68,41 @@ export function isNotebaseMappingCompatible(
   )
 }
 
+function normalizeMappingName(name: string) {
+  return name.normalize("NFKC").trim().toLowerCase()
+}
+
+/**
+ * Maps each field to the free column with the same name (ignoring case and
+ * surrounding spaces) that can hold its type. A name is all an action and a
+ * Notebase share: one created from the action took its column names from the
+ * fields, so it maps whole, while fields of a hand-made Notebase that match no
+ * column stay unmapped for the reader to pick instead of being guessed.
+ */
+export function createNameMatchedNotebaseMappings(
+  outputSchema: readonly SelectionToolbarCustomActionOutputField[],
+  notebaseColumns: readonly NotebaseColumn[],
+): SelectionToolbarCustomActionNotebaseMapping[] {
+  const usedColumnIds = new Set<string>()
+  const mappings: SelectionToolbarCustomActionNotebaseMapping[] = []
+
+  for (const field of outputSchema) {
+    const fieldName = normalizeMappingName(field.name)
+    const column = notebaseColumns.find(
+      (candidate) =>
+        !usedColumnIds.has(candidate.id) &&
+        isNotebaseMappingCompatible(field.type, candidate.config) &&
+        normalizeMappingName(candidate.name) === fieldName,
+    )
+    if (column) {
+      usedColumnIds.add(column.id)
+      mappings.push(createNotebaseMapping(field.id, column.id, column.name))
+    }
+  }
+
+  return mappings
+}
+
 export function resolveNotebaseMappings(
   action: SelectionToolbarCustomAction,
   schema: NotebaseGetSchemaOutput | null | undefined,
@@ -134,6 +169,20 @@ export function validateNotebaseMappings(
   }
 
   return { kind: "valid", resolvedMappings }
+}
+
+/** The action's fields no valid mapping writes: a save leaves them out of the note. */
+export function getUnmappedOutputFields(
+  action: SelectionToolbarCustomAction,
+  schema: NotebaseGetSchemaOutput,
+): SelectionToolbarCustomActionOutputField[] {
+  const mappedFieldIds = new Set(
+    resolveNotebaseMappings(action, schema)
+      .filter((resolvedMapping) => resolvedMapping.status === "valid")
+      .map((resolvedMapping) => resolvedMapping.mapping.localFieldId),
+  )
+
+  return action.outputSchema.filter((field) => !mappedFieldIds.has(field.id))
 }
 
 export function buildNotebaseRowCells(

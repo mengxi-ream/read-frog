@@ -113,6 +113,11 @@ export function getUiLocale(): SupportedUiLocale {
     : DEFAULT_UI_LOCALE
 }
 
+/** Names joined as a list in the UI language: "A、B、C" in Chinese, "A, B, C" in English. */
+export function formatUiList(items: readonly string[]): string {
+  return new Intl.ListFormat(getUiLocale(), { type: "conjunction", style: "narrow" }).format(items)
+}
+
 /**
  * `i18n.t` in `locale` instead of the UI language, for text that follows another
  * language setting: a result card's words follow the target language, like the

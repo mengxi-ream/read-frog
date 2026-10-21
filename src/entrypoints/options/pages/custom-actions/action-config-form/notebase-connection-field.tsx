@@ -16,7 +16,7 @@ import {
 import { useQuery } from "@tanstack/react-query"
 import { useSelector } from "@tanstack/react-store"
 import { dequal } from "dequal"
-import { useCallback, useEffect, useMemo } from "react"
+import { useCallback, useEffect, useMemo, useRef } from "react"
 import { useAutosaveContext } from "@/components/form/use-autosave"
 import { Alert, AlertAction, AlertDescription, AlertTitle } from "@/components/ui/base-ui/alert"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/base-ui/avatar"
@@ -32,7 +32,7 @@ import {
 } from "@/components/ui/base-ui/select"
 import { env } from "@/env"
 import { authClient } from "@/utils/auth/auth-client"
-import { i18n } from "@/utils/i18n"
+import { formatUiList, i18n } from "@/utils/i18n"
 import {
   classifyConnectedNotebaseOwnership,
   createNotebaseConnectedAccountSnapshot,
@@ -43,7 +43,9 @@ import {
 } from "@/utils/notebase/connection"
 import { isORPCForbiddenError } from "@/utils/notebase/errors"
 import {
+  createNameMatchedNotebaseMappings,
   createNotebaseMapping,
+  getUnmappedOutputFields,
   isNotebaseMappingCompatible,
   isSupportedNotebaseColumnConfig,
   resolveNotebaseMappings,
@@ -61,8 +63,9 @@ interface SelectItemData<T> {
   label: string
 }
 
-function t(key: string) {
-  return i18n.t(`options.selectionToolbar.customActions.form.notebase.${key}` as never)
+function t(key: string, substitutions?: string[]) {
+  const translate = i18n.t as (key: string, substitutions?: string[]) => string
+  return translate(`options.selectionToolbar.customActions.form.notebase.${key}`, substitutions)
 }
 
 function getAccountFallback(
@@ -169,6 +172,16 @@ function getNextDefaultMapping(
   const usedRemoteColumnIds = new Set(
     connection.mappings.map((mapping) => mapping.notebaseColumnId),
   )
+
+  // A free column named like a free field first; otherwise the first column
+  // that can hold the next field, for the reader to change.
+  const [nameMatchedMapping] = createNameMatchedNotebaseMappings(
+    outputSchema.filter((field) => !usedLocalFieldIds.has(field.id)),
+    notebaseColumns.filter((column) => !usedRemoteColumnIds.has(column.id)),
+  )
+  if (nameMatchedMapping) {
+    return nameMatchedMapping
+  }
 
   for (const localField of outputSchema) {
     if (usedLocalFieldIds.has(localField.id)) {
@@ -295,6 +308,32 @@ export const NotebaseConnectionField = withForm({
       }),
     )
 
+    // The Notebase just picked in the select. Once its columns load, the fields
+    // that share a column's name are mapped to it, unless the reader has added
+    // a mapping meanwhile.
+    const autoMapNotebaseIdRef = useRef<string | null>(null)
+    useEffect(() => {
+      const schema = schemaQuery.data
+      if (
+        !schema ||
+        !sanitizedConnection ||
+        autoMapNotebaseIdRef.current !== schema.id ||
+        sanitizedConnection.notebaseId !== schema.id
+      ) {
+        return
+      }
+
+      autoMapNotebaseIdRef.current = null
+      if (sanitizedConnection.mappings.length > 0) {
+        return
+      }
+
+      const mappings = createNameMatchedNotebaseMappings(outputSchema, schema.notebaseColumns)
+      if (mappings.length > 0) {
+        updateConnection({ ...sanitizedConnection, mappings })
+      }
+    }, [outputSchema, sanitizedConnection, schemaQuery.data, updateConnection])
+
     useEffect(() => {
       if (!isOwnedConnection || !sanitizedConnection || !currentAccount) {
         return
@@ -337,6 +376,16 @@ export const NotebaseConnectionField = withForm({
     )
 
     const hasInvalidMappings = mappingValidation?.kind === "invalid"
+    const unmappedFields = useMemo(
+      () =>
+        schemaQuery.data && sanitizedConnection && sanitizedConnection.mappings.length > 0
+          ? getUnmappedOutputFields(
+              { ...action, notebaseConnection: sanitizedConnection },
+              schemaQuery.data,
+            )
+          : [],
+      [action, sanitizedConnection, schemaQuery.data],
+    )
     const selectableNotebaseItems = useMemo(
       () => getNotebaseSelectItems(listQuery.data),
       [listQuery.data],
@@ -358,7 +407,15 @@ export const NotebaseConnectionField = withForm({
         return
       }
 
+      // Select reports every pick, not only a change, so picking the connected
+      // Notebase again must not touch its mappings: readers did that to
+      // "refresh" a connection and lost all but the one they then re-added.
+      if (isOwnedConnection && sanitizedConnection?.notebaseId === notebaseId) {
+        return
+      }
+
       const notebase = listQuery.data?.find((item: NotebaseItem) => item.id === notebaseId)
+      autoMapNotebaseIdRef.current = notebaseId
       updateConnection({
         notebaseId,
         notebaseNameSnapshot:
@@ -626,6 +683,19 @@ export const NotebaseConnectionField = withForm({
                   <Alert variant="destructive">
                     <AlertTitle>{t("invalidMappingsTitle")}</AlertTitle>
                     <AlertDescription>{t("invalidMappingsDescription")}</AlertDescription>
+                  </Alert>
+                )}
+
+                {unmappedFields.length > 0 && (
+                  <Alert variant="warning">
+                    <AlertTitle>
+                      {t("unmappedFieldsTitle", [String(unmappedFields.length)])}
+                    </AlertTitle>
+                    <AlertDescription>
+                      {t("unmappedFieldsDescription", [
+                        formatUiList(unmappedFields.map((field) => field.name)),
+                      ])}
+                    </AlertDescription>
                   </Alert>
                 )}
 

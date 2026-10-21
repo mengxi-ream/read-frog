@@ -830,6 +830,8 @@ options:
           columnUnavailableOption: removed
           invalidMappingsTitle: Some mappings need attention
           invalidMappingsDescription: Invalid mappings are preserved. Fix them before saving to Notebase.
+          unmappedFieldsTitle: "Some fields will not be saved"
+          unmappedFieldsDescription: "These fields have no mapping: $1. Add a mapping for any you want in your notes."
           mappingMissingLocal: The mapped action field no longer exists.
           mappingMissingRemote: The mapped notebase field no longer exists.
           mappingMissingSchema: Refresh the notebase schema to validate this mapping.
@@ -1725,6 +1727,9 @@ action:
   saveToNotebaseLimitExceeded: Upgrade is required to save more Notebase notes
   saveToNotebaseTableUnavailable: The selected Notebase is no longer available
   saveToNotebaseConnectionInvalid: This Notebase connection is out of date. Refresh it in Custom AI Actions and fix the mappings.
+  saveToNotebaseInvalidContent: "The AI answer has a value in the wrong format, so it was not saved. Run the action again, then save."
+  saveToNotebaseSavedWithUnmapped: "Saved to Notebase without some fields"
+  saveToNotebaseUnmappedFields: "No mapping, not saved: $1"
   saveToNotebaseNoMappings: Add at least one valid mapping before saving
   saveToNotebaseCreateTitle: Create a Notebase?
   saveToNotebaseCreateDescription: Create a new Notebase with columns matching this Custom Action, then save this result as the first note.

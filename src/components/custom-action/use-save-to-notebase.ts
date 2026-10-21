@@ -19,7 +19,7 @@ import {
   canUseGuideDictionaryNotebaseTracking,
   getActiveGuideDictionaryNotebaseTrackingForAction,
 } from "@/utils/guide/dictionary-notebase"
-import { i18n } from "@/utils/i18n"
+import { formatUiList, i18n } from "@/utils/i18n"
 import { sendMessage } from "@/utils/message"
 import { buildCustomActionOptionsRoute } from "@/utils/navigation"
 import { trackNoteSaveCompleted, trackNoteSaveRequested } from "@/utils/note-save/analytics"
@@ -37,7 +37,11 @@ import {
   isORPCUnauthorizedError,
   isORPCValidationError,
 } from "@/utils/notebase/errors"
-import { buildNotebaseRowCells, validateNotebaseMappings } from "@/utils/notebase/mapping"
+import {
+  buildNotebaseRowCells,
+  getUnmappedOutputFields,
+  validateNotebaseMappings,
+} from "@/utils/notebase/mapping"
 import {
   createPendingConnectedNotebaseSave,
   createPendingNotebaseSave,
@@ -90,6 +94,7 @@ export function useSaveToNotebase() {
   const [isPreparingSave, setIsPreparingSave] = useState(false)
   const savingNotebaseNameRef = useRef<string | undefined>(undefined)
   const savingGuideTrackingRef = useRef<GuideDictionaryNotebaseTracking | null>(null)
+  const savingUnmappedFieldsRef = useRef<{ actionId: string; fieldNames: string[] } | null>(null)
 
   const completeGuideDictionaryNotebase = (
     tracking: GuideDictionaryNotebaseTracking,
@@ -114,6 +119,29 @@ export function useSaveToNotebase() {
     savingGuideTrackingRef.current = null
     if (guideTracking) {
       completeGuideDictionaryNotebase(guideTracking, notebaseId)
+    }
+    const unmapped = savingUnmappedFieldsRef.current
+    savingUnmappedFieldsRef.current = null
+    if (unmapped) {
+      // Says which fields the note lacks, so a connection that lost mappings
+      // shows on the first save rather than in a Notebase of bare terms.
+      const warningToastId = toastManager.add({
+        type: "warning",
+        title: i18n.t("action.saveToNotebaseSavedWithUnmapped"),
+        description: i18n.t("action.saveToNotebaseUnmappedFields", [
+          formatUiList(unmapped.fieldNames),
+        ]),
+        actionProps: {
+          children: i18n.t("action.saveToNotebaseGoConfigure"),
+          onClick: () => {
+            toastManager.close(warningToastId)
+            void sendMessage("openOptionsPage", {
+              route: buildCustomActionOptionsRoute(unmapped.actionId, { tab: "notebase" }),
+            })
+          },
+        },
+      })
+      return
     }
     const toastId = toastManager.add({
       type: "success",
@@ -155,6 +183,7 @@ export function useSaveToNotebase() {
       failureReason: classifyFailureReason(error),
     })
     savingGuideTrackingRef.current = null
+    savingUnmappedFieldsRef.current = null
     if (isORPCUnauthorizedError(error)) {
       toastManager.add({ type: "error", title: i18n.t("action.saveToNotebaseLoginRequired") })
       return
@@ -178,10 +207,13 @@ export function useSaveToNotebase() {
       return
     }
 
+    // The mappings were checked against a fresh schema just before the write,
+    // so a cell the server rejects holds a value the column cannot take: the
+    // answer is at fault, not the connection.
     if (isORPCValidationError(error)) {
       toastManager.add({
         type: "error",
-        title: i18n.t("action.saveToNotebaseConnectionInvalid"),
+        title: i18n.t("action.saveToNotebaseInvalidContent"),
       })
       return
     }
@@ -373,6 +405,11 @@ export function useSaveToNotebase() {
         (result) => buildNotebaseRowCells(actionWithRefreshedConnection, schema, result).cells,
       )
       savingNotebaseNameRef.current = refreshedConnection.notebaseNameSnapshot
+      const unmappedFields = getUnmappedOutputFields(actionWithRefreshedConnection, schema)
+      savingUnmappedFieldsRef.current =
+        unmappedFields.length > 0
+          ? { actionId: action.id, fieldNames: unmappedFields.map((field) => field.name) }
+          : null
       const trackingLookup = getGuideDictionaryNotebaseTracking(action.id)
       savingGuideTrackingRef.current = trackingLookup ? await trackingLookup : null
       const attempt: DirectNoteSaveAttempt = {

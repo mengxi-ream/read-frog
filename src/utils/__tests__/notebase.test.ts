@@ -6,10 +6,29 @@ import { getBuiltInDictionaryAction } from "@/utils/custom-actions"
 import { sanitizeSelectionToolbarCustomAction } from "../notebase/connection"
 import {
   buildNotebaseRowCells,
+  createNameMatchedNotebaseMappings,
   createNotebaseMapping,
+  getUnmappedOutputFields,
   isNotebaseMappingCompatible,
   resolveNotebaseMappings,
 } from "../notebase/mapping"
+
+type NotebaseColumn = Parameters<typeof createNameMatchedNotebaseMappings>[1][number]
+
+function createColumn(id: string, name: string, config: NotebaseColumn["config"]): NotebaseColumn {
+  return {
+    id,
+    notebaseId: "notebase-1",
+    name,
+    config,
+    position: 0,
+    isPrimary: false,
+    wrap: false,
+    width: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  }
+}
 
 function createAction(): SelectionToolbarCustomAction {
   return {
@@ -249,6 +268,85 @@ describe("notebase utils", () => {
       "column-paragraphs": "The selected term appears in this sentence.",
       "column-paragraphs-translation": "所选词语出现在这个句子中。",
     })
+  })
+
+  it("maps fields to the columns that share their name and can hold their type", () => {
+    const outputSchema = [
+      ...createAction().outputSchema,
+      { id: "field-notes", name: "notes", type: "string" as const, description: "" },
+      { id: "field-tags", name: "tags", type: "string" as const, description: "" },
+    ]
+    const mappings = createNameMatchedNotebaseMappings(outputSchema, [
+      // Names match ignoring case and surrounding spaces.
+      createColumn("column-summary", " Summary ", { type: "string" }),
+      // Same name, but a string column cannot hold a number.
+      createColumn("column-score-text", "score", { type: "string" }),
+      createColumn("column-score", "Score", { type: "number", decimal: 0, format: "number" }),
+      // A column the reader named differently is left for them, not guessed.
+      createColumn("column-remarks", "Remarks", { type: "string" }),
+      createColumn("column-tags", "tags", { type: "select", options: [] }),
+    ])
+
+    expect(
+      mappings.map(({ localFieldId, notebaseColumnId, notebaseColumnNameSnapshot }) => ({
+        localFieldId,
+        notebaseColumnId,
+        notebaseColumnNameSnapshot,
+      })),
+    ).toEqual([
+      {
+        localFieldId: "field-summary",
+        notebaseColumnId: "column-summary",
+        notebaseColumnNameSnapshot: " Summary ",
+      },
+      {
+        localFieldId: "field-score",
+        notebaseColumnId: "column-score",
+        notebaseColumnNameSnapshot: "Score",
+      },
+    ])
+  })
+
+  it("maps each column to one field only", () => {
+    const outputSchema = [
+      { id: "field-a", name: "Word", type: "string" as const, description: "" },
+      { id: "field-b", name: "word", type: "string" as const, description: "" },
+    ]
+    const mappings = createNameMatchedNotebaseMappings(outputSchema, [
+      createColumn("column-word", "Word", { type: "string" }),
+    ])
+
+    expect(mappings.map((mapping) => mapping.localFieldId)).toEqual(["field-a"])
+  })
+
+  it("lists the fields no valid mapping saves", () => {
+    const action: SelectionToolbarCustomAction = {
+      ...createAction(),
+      notebaseConnection: {
+        notebaseId: "notebase-1",
+        notebaseNameSnapshot: "Articles",
+        connectedAccount,
+        mappings: [createNotebaseMapping("field-summary", "column-summary", "Summary")],
+      },
+    }
+    const schema = {
+      id: "notebase-1",
+      name: "Articles",
+      updatedAt: new Date(),
+      notebaseColumns: [
+        createColumn("column-summary", "Summary", { type: "string" }),
+        createColumn("column-score", "Score", { type: "number", decimal: 0, format: "number" }),
+      ],
+    }
+
+    expect(getUnmappedOutputFields(action, schema).map((field) => field.id)).toEqual([
+      "field-score",
+    ])
+
+    // A mapping whose column is gone saves nothing either.
+    expect(
+      getUnmappedOutputFields(action, { ...schema, notebaseColumns: [] }).map((field) => field.id),
+    ).toEqual(["field-summary", "field-score"])
   })
 
   it("only allows string and number columns", () => {
