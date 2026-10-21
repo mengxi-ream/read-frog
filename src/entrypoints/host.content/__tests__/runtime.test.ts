@@ -1,8 +1,10 @@
 // @vitest-environment jsdom
 
 import type { ContentScriptContext } from "#imports"
+import { act } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { storage } from "#imports"
+import { toastManager } from "@/components/ui/base-ui/toast"
 import { CONFIG_STORAGE_KEY, DEFAULT_CONFIG } from "@/utils/constants/config"
 import { bootstrapHostContent } from "../runtime"
 
@@ -13,7 +15,6 @@ const {
   mockClearEffectiveSiteControlUrl,
   mockDetectPageLanguageLightweight,
   mockEnsurePresetStyles,
-  mockMountHostToast,
   mockOnMessage,
   mockRegisterNodeTranslationTriggers,
   mockSendMessage,
@@ -33,7 +34,6 @@ const {
   mockClearEffectiveSiteControlUrl: vi.fn<(...args: any[]) => any>(),
   mockDetectPageLanguageLightweight: vi.fn<(...args: any[]) => any>(),
   mockEnsurePresetStyles: vi.fn<(...args: any[]) => any>(),
-  mockMountHostToast: vi.fn<(...args: any[]) => any>(),
   mockOnMessage: vi.fn<(...args: any[]) => any>(),
   mockRegisterNodeTranslationTriggers: vi.fn<(...args: any[]) => any>(),
   mockSendMessage: vi.fn<(...args: any[]) => any>(),
@@ -67,10 +67,6 @@ vi.mock("@/utils/site-control", () => ({
 
 vi.mock("../listen", () => ({
   setupUrlChangeListener: mockSetupUrlChangeListener,
-}))
-
-vi.mock("../mount-host-toast", () => ({
-  mountHostToast: mockMountHostToast,
 }))
 
 vi.mock("../translation-control/bind-translation-shortcut", () => ({
@@ -138,7 +134,6 @@ describe("bootstrapHostContent URL changes", () => {
     managerInstances.length = 0
 
     mockSetupUrlChangeListener.mockReturnValue(vi.fn<(...args: any[]) => any>())
-    mockMountHostToast.mockReturnValue(vi.fn<(...args: any[]) => any>())
     mockRegisterNodeTranslationTriggers.mockReturnValue(vi.fn<(...args: any[]) => any>())
     mockBindTranslationShortcutKey.mockResolvedValue(vi.fn<(...args: any[]) => any>())
     mockOnMessage.mockImplementation((name: string, handler: (msg?: any) => any) => {
@@ -297,6 +292,27 @@ describe("bootstrapHostContent URL changes", () => {
 
     expect(manager?.getDetectedPageLanguage?.(oldUrl)).toBeUndefined()
     expect(manager?.getDetectedPageLanguage?.(newUrl)).toBe("jpn")
+    invalidate()
+  })
+
+  // The content runtime's parts share one toastManager, and the selection UI
+  // already renders every toast it gets; a surface here would show each twice.
+  it("mounts no toast surface of its own", async () => {
+    const { ctx, invalidate } = createContentScriptContext()
+    await bootstrapHostContent(ctx, null)
+    await act(flushAsyncWork)
+
+    act(() => {
+      toastManager.add({ title: "Source and target language are the same" })
+    })
+    await act(flushAsyncWork)
+
+    const toastHosts = [...document.body.querySelectorAll("*")].filter((element) =>
+      element.shadowRoot?.querySelector('[data-slot="toast"]'),
+    )
+    expect(toastHosts).toEqual([])
+
+    act(() => toastManager.close())
     invalidate()
   })
 })
