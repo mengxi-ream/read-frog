@@ -123,6 +123,10 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
   private subtitlesSummaryContextHash: string | null = null
   private adObserver: MutationObserver | null = null
   private observedAdPlayer: HTMLElement | null = null
+  // While an ad plays the player hands out the ad's audio track and caption tokens, so a native
+  // load that overlapped one can fail for the video itself. It gets one more try after the ad.
+  private adOverlappedLoad = false
+  private retryAfterAdOperationId: number | null = null
   // Set by destroy(); async work that resumes afterwards backs out instead of touching the page.
   private destroyed = false
 
@@ -422,8 +426,13 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
       return this.sourceSubtitles
     }
 
-    const hasSubtitles = await fetcher.hasAvailableSubtitles()
-    assertCurrent()
+    let hasSubtitles: boolean
+    try {
+      hasSubtitles = await fetcher.hasAvailableSubtitles()
+    } finally {
+      // A lookup that failed after its video was left reports as superseded, not as its failure.
+      assertCurrent()
+    }
     if (!hasSubtitles) {
       throw new OverlaySubtitlesError(i18n.t("subtitles.errors.noSubtitlesFound"))
     }
@@ -598,11 +607,31 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
 
     subtitlesStore.set(adPlayingAtom, playing)
 
-    // Resync content time when the ad ends so the next cue is correct immediately.
-    if (!playing) {
-      this.subtitlesScheduler?.resyncFromVideo()
-      this.translationCoordinator?.requestTick()
+    if (playing) {
+      this.adOverlappedLoad = true
+      return
     }
+
+    // Resync content time when the ad ends so the next cue is correct immediately.
+    this.subtitlesScheduler?.resyncFromVideo()
+    this.translationCoordinator?.requestTick()
+    this.runRetryAfterAd()
+  }
+
+  private runRetryAfterAd() {
+    const operationId = this.retryAfterAdOperationId
+    this.retryAfterAdOperationId = null
+    // Anything newer, or subtitles turned off since, means the failed load no longer stands.
+    if (
+      operationId === null ||
+      operationId !== this.switchOperationId ||
+      this.destroyed ||
+      !this.subtitlesScheduler?.isActive()
+    ) {
+      return
+    }
+
+    void this.switchSubtitlesFetcher(SUBTITLES_SOURCE.NATIVE)
   }
 
   private async renderTranslateButton() {
@@ -825,6 +854,10 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
   private async startTranslation(analyticsContext?: FeatureUsageContext<"video_subtitles">) {
     let providerAnalytics = UNKNOWN_FEATURE_PROVIDER
     let targetLanguage: Config["language"]["targetCode"] | undefined
+    const operationId = this.switchOperationId
+    this.adOverlappedLoad = subtitlesStore.get(adPlayingAtom)
+    // Only the caption load is what an ad can break; a failure after it is the translation's own.
+    let loadingSource = false
 
     try {
       const analyticsConfig = await getLocalConfig()
@@ -879,7 +912,9 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
 
       this.subtitlesScheduler?.setState("loading", { message: LOADING_MESSAGE[this.source] })
 
+      loadingSource = true
       await this.getOrLoadSourceSubtitles()
+      loadingSource = false
       if (this.destroyed) return false
       this.sessionSubtitles = this.sourceSubtitles
 
@@ -913,6 +948,21 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
       // "Aborted", which would otherwise be painted onto the player untranslated.
       if (error instanceof DOMException && error.name === "AbortError") {
         return false
+      }
+
+      // A superseded load failing late must not take the retry slot from the current one.
+      if (
+        loadingSource &&
+        operationId === this.switchOperationId &&
+        this.source === SUBTITLES_SOURCE.NATIVE &&
+        this.adOverlappedLoad
+      ) {
+        this.retryAfterAdOperationId = operationId
+        // The ad already ended while this load was running, so retry now instead of reporting.
+        if (!subtitlesStore.get(adPlayingAtom)) {
+          this.runRetryAfterAd()
+          return false
+        }
       }
 
       const errorMessage = error instanceof Error ? error.message : String(error)

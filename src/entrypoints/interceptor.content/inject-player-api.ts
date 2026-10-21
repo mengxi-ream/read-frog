@@ -4,6 +4,7 @@ import {
   ENSURE_SUBTITLES_RESPONSE_TYPE,
   PLAYER_DATA_REQUEST_TYPE,
   PLAYER_DATA_RESPONSE_TYPE,
+  PLAYER_RESPONSE_PENDING_ERROR,
   TIMEDTEXT_WAIT_TIMEOUT_MS,
   WAIT_TIMEDTEXT_REQUEST_TYPE,
   WAIT_TIMEDTEXT_RESPONSE_TYPE,
@@ -28,6 +29,7 @@ interface PlayerDataRequest {
 
 interface YouTubePlayer extends HTMLElement {
   getPlayerResponse?: () => any
+  getVideoData?: () => any
   getAudioTrack?: () => any
   getPlayerState?: () => number
   getWebPlayerContextConfig?: () => any
@@ -48,10 +50,48 @@ interface SelectedTrackSnapshot {
   vssId: string | null
 }
 
-function findYoutubePlayer(): YouTubePlayer | null {
-  const shortsActive = document.querySelector<YouTubePlayer>(
-    "#reel-overlay-container .html5-video-player",
-  )
+const SHORTS_PLAYER_SELECTOR = "#reel-overlay-container .html5-video-player"
+
+function getPlayerVideoId(player: YouTubePlayer): string | null {
+  try {
+    return player.getPlayerResponse?.()?.videoDetails?.videoId ?? null
+  } catch {
+    return null
+  }
+}
+
+// The video the player is on, which can be ahead of the response it has received for it.
+function getLoadedVideoId(player: YouTubePlayer): string | null {
+  try {
+    return player.getVideoData?.()?.video_id ?? null
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Hovering a home or search thumbnail leaves `#inline-preview-player` on the page for good,
+ * paused on another video, so while the watch player is still unstarted the first playing or
+ * paused player is the preview. A caller that knows its video gets the player holding it.
+ */
+function findYoutubePlayer(expectedVideoId?: string): YouTubePlayer | null {
+  if (expectedVideoId) {
+    const candidates = [
+      document.querySelector<YouTubePlayer>(SHORTS_PLAYER_SELECTOR),
+      document.querySelector<YouTubePlayer>("#movie_player"),
+      ...document.querySelectorAll<YouTubePlayer>(".html5-video-player"),
+    ]
+    // A content blocker can make a cold load re-request the player response, leaving the watch
+    // player on our video for seconds before its response says so; that player still counts.
+    const matched =
+      candidates.find(
+        (player) => player !== null && getPlayerVideoId(player) === expectedVideoId,
+      ) ??
+      candidates.find((player) => player !== null && getLoadedVideoId(player) === expectedVideoId)
+    if (matched) return matched
+  }
+
+  const shortsActive = document.querySelector<YouTubePlayer>(SHORTS_PLAYER_SELECTOR)
   if (shortsActive) return shortsActive
 
   return (
@@ -94,8 +134,8 @@ function handleMessage(event: MessageEvent): void {
   }
 
   if (event.data?.type === ENSURE_SUBTITLES_REQUEST_TYPE) {
-    const { requestId } = event.data
-    ensureSubtitlesEnabled()
+    const { requestId, videoId } = event.data
+    ensureSubtitlesEnabled(videoId)
     window.postMessage(
       {
         type: ENSURE_SUBTITLES_RESPONSE_TYPE,
@@ -110,7 +150,7 @@ function getPlayerData(request: PlayerDataRequest): PlayerDataResponse {
   const { requestId, expectedVideoId } = request
 
   try {
-    const player = findYoutubePlayer()
+    const player = findYoutubePlayer(expectedVideoId)
 
     if (!player) return errorResponse(requestId, "PLAYER_NOT_FOUND")
 
@@ -121,8 +161,11 @@ function getPlayerData(request: PlayerDataRequest): PlayerDataResponse {
     const captionTracks = normalizeTracks(tracks)
     const selectedTrack = getSelectedTrackSnapshot(player, captionTracks)
 
-    if (!videoId || videoId !== expectedVideoId)
-      return errorResponse(requestId, "VIDEO_ID_MISMATCH")
+    if (!videoId || videoId !== expectedVideoId) {
+      // On our video already, with its data still on the way, is worth a longer wait.
+      const pending = getLoadedVideoId(player) === expectedVideoId
+      return errorResponse(requestId, pending ? PLAYER_RESPONSE_PENDING_ERROR : "VIDEO_ID_MISMATCH")
+    }
 
     return {
       type: PLAYER_DATA_RESPONSE_TYPE,
@@ -150,13 +193,15 @@ function getPlayerData(request: PlayerDataRequest): PlayerDataResponse {
   }
 }
 
-function ensureSubtitlesEnabled(): void {
-  const button = document.querySelector(".ytp-subtitles-button")
+function ensureSubtitlesEnabled(videoId?: string): void {
+  const player = findYoutubePlayer(videoId)
+  // Every player carries its own CC button, and the preview's may be pressed when ours is not.
+  const button =
+    player?.querySelector(".ytp-subtitles-button") ??
+    document.querySelector(".ytp-subtitles-button")
   if (!button) return
 
   if (button.getAttribute("aria-pressed") === "true") return
-
-  const player = findYoutubePlayer()
 
   if (player?.toggleSubtitles) {
     player.toggleSubtitles()
