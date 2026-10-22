@@ -12,7 +12,6 @@ import { clearEffectiveSiteControlUrl } from "@/utils/site-control"
 import { areSamePageTranslationOrigin } from "@/utils/url"
 import { bindTranslationHubShortcutKey } from "./bind-translation-hub-shortcut"
 import { setupUrlChangeListener } from "./listen"
-import { mountHostToast } from "./mount-host-toast"
 import { bindTranslationModeShortcutKey } from "./translation-control/bind-translation-mode-shortcut"
 import { bindTranslationShortcutKey } from "./translation-control/bind-translation-shortcut"
 import { registerNodeTranslationTriggers } from "./translation-control/node-translation"
@@ -24,9 +23,9 @@ export async function bootstrapHostContent(
 ) {
   ensurePresetStyles(document)
 
+  // No toast surface of its own: the selection UI renders the content
+  // runtime's toasts (see selection.content/app.tsx).
   const cleanupUrlListener = setupUrlChangeListener()
-
-  const removeHostToast = window === window.top ? mountHostToast() : () => {}
 
   const teardownNodeTranslation = registerNodeTranslationTriggers()
 
@@ -153,7 +152,6 @@ export async function bootstrapHostContent(
       : () => {}
 
   ctx.onInvalidated(() => {
-    removeHostToast()
     cleanupUrlListener()
     teardownNodeTranslation()
     cleanupPageTranslationTriggers()

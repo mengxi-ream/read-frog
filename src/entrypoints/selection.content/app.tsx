@@ -32,6 +32,11 @@ export default function App({
     }
   }, [opacity, uiContainer])
 
+  // The content runtime's one corner-toast surface. Its parts share one module
+  // instance, so one `toastManager`, and each ToastProvider would render every
+  // toast: page translation and the floating button raise theirs here too.
+  // This UI runs in the top frame with every part and in each iframe that gets
+  // the toolbar, and a click on a toast in its overlay root keeps the toolbar open.
   return (
     <ToastProvider
       portalProps={{ container: portalContainer }}
