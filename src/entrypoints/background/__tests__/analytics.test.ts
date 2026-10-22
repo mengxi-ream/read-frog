@@ -552,10 +552,16 @@ describe("background analytics", () => {
     await captureFeatureUsedEventInBackground({ ...completed, path: "teleport" as never })
     await captureFeatureUsedEventInBackground({ ...requested, save_source: "popup" as never })
     await captureFeatureUsedEventInBackground({ ...requested, action_id: "save_maybe" as never })
+    await captureFeatureUsedEventInBackground({ ...requested, surface: "video_subtitles" })
+    await captureFeatureUsedEventInBackground({ ...requested, surface: "popup" as never })
 
-    expect(posthogCaptureMock).toHaveBeenCalledTimes(2)
+    expect(posthogCaptureMock).toHaveBeenCalledTimes(3)
     expect(posthogCaptureMock).toHaveBeenNthCalledWith(1, "feature_used", requested)
     expect(posthogCaptureMock).toHaveBeenNthCalledWith(2, "feature_used", completed)
+    expect(posthogCaptureMock).toHaveBeenNthCalledWith(3, "feature_used", {
+      ...requested,
+      surface: "video_subtitles",
+    })
     expect(cache.getLastReportedDay).not.toHaveBeenCalled()
   })
 

@@ -40,6 +40,7 @@ import {
   adPlayingAtom,
   currentTimeMsAtom,
   currentVideoIdAtom,
+  sourceLanguageAtom,
   sourceTrackAtom,
   translatedTrackAtom,
   videoSummaryPartialAtom,
@@ -51,6 +52,7 @@ import {
   subtitlesStore,
   subtitlesVisibleAtom,
 } from "./atoms"
+import { closeWordLookupAtom } from "./learning/atoms"
 import { renderSubtitlesTranslateButton } from "./renderer/render-translate-button"
 import { SegmentationPipeline } from "./segmentation-pipeline"
 import { SubtitlesScheduler } from "./subtitles-scheduler"
@@ -86,6 +88,7 @@ export interface SubtitlesProvidersAdapter {
   hasSubtitlesAvailable: () => Promise<boolean>
   ensureSourceTrackPublished: () => Promise<void>
   seekTo: (seconds: number) => void
+  getVideoElement: () => HTMLVideoElement | null
   toggleSubtitlesManually: (enabled: boolean) => void
   toggleSubtitlesByShortcut: (enabled: boolean) => void
   requestAiSubtitles: () => Promise<void>
@@ -310,6 +313,8 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
     }
   }
 
+  getVideoElement = () => this.subtitlesScheduler?.getVideoElement() ?? null
+
   downloadSourceSubtitles = async () => {
     await this.getOrLoadSourceSubtitles()
 
@@ -373,6 +378,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
     subtitlesStore.set(subtitlesSourceAtom, SUBTITLES_SOURCE.NATIVE)
     subtitlesStore.set(subtitlesSettingsPanelOpenAtom, false)
     subtitlesStore.set(subtitlesSettingsPanelViewAtom, ROOT_VIEW)
+    subtitlesStore.set(closeWordLookupAtom)
     this.showNativeSubtitles()
     void this.restorePosition()
     // Keep the sidebar open, but publish the next query only after old state is cleared.
@@ -489,6 +495,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
     this.segmentationPipeline?.stop()
     subtitlesStore.set(subtitlesSettingsPanelOpenAtom, false)
     subtitlesStore.set(subtitlesSettingsPanelViewAtom, ROOT_VIEW)
+    subtitlesStore.set(closeWordLookupAtom)
     this.showNativeSubtitles()
   }
 
@@ -715,6 +722,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
       void this.switchSubtitlesFetcher(SUBTITLES_SOURCE.NATIVE, analyticsContext)
     } else {
       this.subtitlesScheduler?.hide()
+      subtitlesStore.set(closeWordLookupAtom)
       this.showNativeSubtitles()
       this.translationCoordinator?.stop()
     }
@@ -1016,6 +1024,10 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
       subtitlesStore.set(currentTimeMsAtom, video.currentTime * 1000)
     }
     subtitlesStore.set(sourceTrackAtom, [...fragments])
+    subtitlesStore.set(
+      sourceLanguageAtom,
+      resolveLanguageCodeFromLocale(this.fetcher.getSourceLanguage()) ?? null,
+    )
   }
 
   private replaceSourceTrackWindow(

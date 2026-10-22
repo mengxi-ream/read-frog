@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import { createNoteSaveCompletedEvent } from "../analytics"
 
 const COMPLETION = {
+  surface: "selection_toolbar" as const,
   saveSource: "custom_action" as const,
   noteCount: 1,
   path: "create_notebase" as const,
@@ -24,6 +25,12 @@ describe("createNoteSaveCompletedEvent", () => {
       is_guide: true,
       outcome: "success",
     })
+  })
+
+  it("reports the surface the save came from", () => {
+    expect(
+      createNoteSaveCompletedEvent({ ...COMPLETION, surface: "video_subtitles" }),
+    ).toMatchObject({ feature: "note_save", surface: "video_subtitles" })
   })
 
   it("carries the failure reason of a save that did not", () => {

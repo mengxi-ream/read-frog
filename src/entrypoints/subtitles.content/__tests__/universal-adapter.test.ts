@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import { customActionRequestAtom } from "@/components/custom-action/atoms"
 import { SUBTITLES_SOURCE } from "@/utils/constants/subtitles"
 import { OverlaySubtitlesError, ToastSubtitlesError } from "@/utils/subtitles/errors"
 import {
@@ -10,6 +11,7 @@ import {
   subtitlesStore,
   translatedTrackAtom,
 } from "../atoms"
+import { openWordLookupAtom, wordLookupAtom } from "../learning/atoms"
 import { TranslationCoordinator } from "../translation-coordinator"
 import { UniversalVideoAdapter } from "../universal-adapter"
 
@@ -615,6 +617,18 @@ describe("universalVideoAdapter", () => {
     await pending
 
     expect(revertSpy).not.toHaveBeenCalled()
+  })
+
+  it("closes an open word lookup when subtitles are turned off by shortcut", () => {
+    const { adapter } = createAdapter([])
+    const scheduler = attachScheduler(adapter, true)
+    ;(scheduler as any).hide = vi.fn<(...args: any[]) => any>()
+    subtitlesStore.set(openWordLookupAtom, { tokenIndex: 0, term: "hello", anchor: { x: 0, y: 0 } })
+
+    adapter.toggleSubtitlesByShortcut(false)
+
+    expect(subtitlesStore.get(wordLookupAtom)).toBeNull()
+    expect(subtitlesStore.get(customActionRequestAtom)).toBeNull()
   })
 
   it("disposes translated subtitle download state when navigation starts", () => {

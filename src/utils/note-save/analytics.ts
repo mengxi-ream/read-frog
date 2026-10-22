@@ -1,11 +1,12 @@
 import type { NoteSaveSurface } from "@read-frog/definitions"
-import type { AnalyticsFailureReason, NoteSavePath } from "@/types/analytics"
+import type { AnalyticsFailureReason, NoteSavePath, SurfaceByFeature } from "@/types/analytics"
 import type { FeatureUsedEventInput } from "@/utils/analytics"
-import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
+import { ANALYTICS_FEATURE } from "@/types/analytics"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
 import { UNKNOWN_FEATURE_PROVIDER } from "@/utils/analytics-provider"
 
 interface NoteSaveDetails {
+  surface: SurfaceByFeature["note_save"]
   saveSource: NoteSaveSurface
   noteCount: number
 }
@@ -20,9 +21,9 @@ export interface NoteSaveCompletion extends NoteSaveDetails {
 }
 
 /** The user asked to save; whether the notes reached the server is reported separately. */
-export function trackNoteSaveRequested({ saveSource, noteCount }: NoteSaveDetails): void {
+export function trackNoteSaveRequested({ surface, saveSource, noteCount }: NoteSaveDetails): void {
   void trackFeatureUsed({
-    ...createFeatureUsageContext(ANALYTICS_FEATURE.NOTE_SAVE, ANALYTICS_SURFACE.SELECTION_TOOLBAR),
+    ...createFeatureUsageContext(ANALYTICS_FEATURE.NOTE_SAVE, surface),
     ...UNKNOWN_FEATURE_PROVIDER,
     action_id: "save_requested",
     save_source: saveSource,
@@ -37,7 +38,7 @@ export function createNoteSaveCompletedEvent(
   const event = {
     ...createFeatureUsageContext(
       ANALYTICS_FEATURE.NOTE_SAVE,
-      ANALYTICS_SURFACE.SELECTION_TOOLBAR,
+      completion.surface,
       completion.startedAt,
     ),
     ...UNKNOWN_FEATURE_PROVIDER,
