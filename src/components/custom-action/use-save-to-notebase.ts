@@ -387,6 +387,15 @@ export function useSaveToNotebase() {
       return openCreateOrConnectDialog()
     }
 
+    // Every field set to "don't save" leaves nothing to write, signed in or
+    // not, and the connection itself is fine: say so rather than ask the
+    // reader to log in for it, or call the connection out of date.
+    if (connection.mappings.length === 0) {
+      trackFailedBeforeWrite("validation")
+      buildConnectionInvalidToast(action.id, i18n.t("action.saveToNotebaseNoFieldSaved"))
+      return "failed"
+    }
+
     if (!isAuthenticated) {
       const trackingLookup = getGuideDictionaryNotebaseTracking(action.id)
       const guideDictionaryNotebaseTracking = trackingLookup ? await trackingLookup : null
@@ -451,14 +460,7 @@ export function useSaveToNotebase() {
       const mappingValidation = validateNotebaseMappings(actionWithRefreshedConnection, schema)
       if (mappingValidation.kind !== "valid") {
         trackFailedBeforeWrite("validation")
-        // Every field set to "don't save" leaves nothing to write, and the
-        // connection itself is fine: say so rather than call it out of date.
-        buildConnectionInvalidToast(
-          action.id,
-          mappingValidation.kind === "empty"
-            ? i18n.t("action.saveToNotebaseNoFieldSaved")
-            : undefined,
-        )
+        buildConnectionInvalidToast(action.id)
         return "failed"
       }
 

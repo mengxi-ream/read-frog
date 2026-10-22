@@ -967,17 +967,24 @@ describe("saveToNotebaseButton notebase availability", () => {
       })
     })
 
-    it("says no field is saved, not that the connection is out of date, when every field is skipped", async () => {
+    it.each([
+      ["signed in", true],
+      ["signed out", false],
+    ])("says no field is saved when every field is skipped (%s)", async (_label, signedIn) => {
+      if (!signedIn) {
+        mockAuthState.session = null as unknown as typeof mockAuthState.session
+      }
       const action = createConnectedDictionaryAction()
       action.notebaseConnection!.mappings = []
       action.notebaseConnection!.skippedFieldIds = action.outputSchema.map((field) => field.id)
       const config = cloneConfig(DEFAULT_CONFIG)
       config.betaExperience.enabled = true
-      vi.mocked(orpcClient.notebase.getSchema).mockResolvedValueOnce(createSchemaForAction(action))
       renderButton(config, action)
 
       fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
 
+      // Not "the connection is out of date", and no login for a save that
+      // could not write anything.
       await waitFor(() =>
         expect(toastManagerMock.add).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -986,6 +993,8 @@ describe("saveToNotebaseButton notebase availability", () => {
           }),
         ),
       )
+      expect(screen.queryByText(i18n.t("action.saveToNotebaseLoginConnectedTitle"))).toBeNull()
+      expect(orpcClient.notebase.getSchema).not.toHaveBeenCalled()
       expect(notebaseRowCreateMock).not.toHaveBeenCalled()
     })
 
