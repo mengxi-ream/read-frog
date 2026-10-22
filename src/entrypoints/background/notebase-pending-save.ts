@@ -615,8 +615,11 @@ async function processConnectedPendingSave(
     return
   }
 
+  // The current connection, not the snapshot: validation checked that its
+  // Notebase and mappings still match, and fields the reader set to "don't
+  // save" since the click must not be written back as undecided.
   const refreshedConnection = refreshNotebaseConnectionAccountSnapshot(
-    pendingNotebaseSave.connectionSnapshot,
+    validation.action.notebaseConnection ?? pendingNotebaseSave.connectionSnapshot,
     connectedAccount,
     schema.name,
   )
