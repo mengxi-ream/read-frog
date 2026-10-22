@@ -701,14 +701,16 @@ async function processConnectedPendingSave(
       return
     }
 
+    // The mappings were checked against a fresh schema just before the write,
+    // so a rejected cell is a value in the answer. Opening the mappings would
+    // send the reader to change a connection that works.
     if (isORPCValidationError(error)) {
-      await clearConnectedPendingAndOpenActionOptions(
-        deps,
-        pendingNotebaseSave,
-        "[NotebasePendingSave] Cleared connected pending save after row validation error",
+      await deps.clearPendingNotebaseSave()
+      reportPendingSaveOutcome(deps, pendingNotebaseSave, error)
+      deps.log.warn(
+        "[NotebasePendingSave] Cleared connected pending save after the server rejected a cell",
         error,
       )
-      reportPendingSaveOutcome(deps, pendingNotebaseSave, error)
       return
     }
 

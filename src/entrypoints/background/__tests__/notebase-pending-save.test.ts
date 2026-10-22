@@ -666,6 +666,27 @@ describe("notebase pending save processor", () => {
     )
   })
 
+  it("drops a connected pending save the server rejects a cell of without opening the mappings", async () => {
+    const action = createConnectedAction()
+    const pending = createPendingConnectedNotebaseSave(
+      action,
+      action.notebaseConnection!,
+      [{ summary: "A short summary" }],
+      1_000,
+    )
+    const deps = createDeps({ pending, config: createConfig(action), authenticated: true })
+    deps.getSchema.mockResolvedValue(createConnectedSchema())
+    deps.createRow.mockRejectedValue(new ORPCError("CELL_VALIDATION_FAILED", { status: 422 }))
+
+    await createNotebasePendingSaveProcessor(deps)("auth-cookie-change")
+
+    expect(deps.clearPendingNotebaseSave).toHaveBeenCalledTimes(1)
+    expect(deps.openActionOptions).not.toHaveBeenCalled()
+    expect(deps.reportNoteSave).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({ path: "after_login", failureReason: "validation" }),
+    )
+  })
+
   it("reports a rejected connected row only once its pending save is cleared", async () => {
     const action = createConnectedAction()
     const pending = createPendingConnectedNotebaseSave(

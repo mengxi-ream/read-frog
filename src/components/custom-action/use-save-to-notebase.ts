@@ -99,6 +99,7 @@ export function useSaveToNotebase() {
   const savingGuideTrackingRef = useRef<GuideDictionaryNotebaseTracking | null>(null)
   const savingUndecidedFieldsRef = useRef<{
     actionId: string
+    notebaseId: string
     fieldIds: string[]
     fieldNames: string[]
   } | null>(null)
@@ -106,21 +107,25 @@ export function useSaveToNotebase() {
 
   // Reads the config from the store when it runs: a save has just written the
   // refreshed connection, and a toast's button may run after other saves, so
-  // the config this hook rendered with can already be stale.
-  const updateActionConnection = async (
-    actionId: string,
+  // the config this hook rendered with can already be stale. The field ids
+  // were decided against the Notebase the save wrote to, so nothing changes
+  // once the action is connected to another one.
+  const updateSavedConnection = async (
+    saved: { actionId: string; notebaseId: string },
     update: (
       connection: SelectionToolbarCustomActionNotebaseConnection,
     ) => SelectionToolbarCustomActionNotebaseConnection,
   ) => {
     const config = store.get(configFieldsAtomMap.selectionToolbar)
-    const connection = findSelectionToolbarAction(config, actionId)?.notebaseConnection
-    if (!connection) {
+    const connection = findSelectionToolbarAction(config, saved.actionId)?.notebaseConnection
+    if (connection?.notebaseId !== saved.notebaseId) {
       return
     }
 
     await setSelectionToolbarConfig({
-      ...patchSelectionToolbarAction(config, actionId, { notebaseConnection: update(connection) }),
+      ...patchSelectionToolbarAction(config, saved.actionId, {
+        notebaseConnection: update(connection),
+      }),
     })
   }
 
@@ -155,7 +160,7 @@ export function useSaveToNotebase() {
       // to, once: a connection that lost its mappings shows on the first save
       // rather than in a Notebase of bare terms, and a reader who meant it is
       // not asked again.
-      void updateActionConnection(undecided.actionId, (connection) =>
+      void updateSavedConnection(undecided, (connection) =>
         markNotebaseFieldsReminded(connection, undecided.fieldIds),
       )
       const warningToastId = toastManager.add({
@@ -166,8 +171,16 @@ export function useSaveToNotebase() {
           children: i18n.t("action.saveToNotebaseSkipUndecided"),
           onClick: () => {
             toastManager.close(warningToastId)
-            void updateActionConnection(undecided.actionId, (connection) =>
-              skipNotebaseFields(connection, undecided.fieldIds),
+            // A field mapped since the save is decided; skipping it would
+            // drop the column the reader just picked.
+            void updateSavedConnection(undecided, (connection) =>
+              skipNotebaseFields(
+                connection,
+                undecided.fieldIds.filter(
+                  (fieldId) =>
+                    !connection.mappings.some((mapping) => mapping.localFieldId === fieldId),
+                ),
+              ),
             )
           },
         },
@@ -455,6 +468,7 @@ export function useSaveToNotebase() {
         fieldsToRemind.length > 0
           ? {
               actionId: action.id,
+              notebaseId: refreshedConnection.notebaseId,
               fieldIds: fieldsToRemind.map((field) => field.id),
               fieldNames: fieldsToRemind.map((field) => field.name),
             }

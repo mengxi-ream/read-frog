@@ -1,7 +1,10 @@
 // @vitest-environment jsdom
 import type { NotebaseGetSchemaOutput } from "@read-frog/api-contract"
 import type { Config } from "@/types/config/config"
-import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
+import type {
+  SelectionToolbarCustomAction,
+  SelectionToolbarCustomActionNotebaseConnection,
+} from "@/types/config/selection-toolbar"
 import { ORPCError } from "@orpc/client"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
@@ -14,6 +17,7 @@ import { getBuiltInDictionaryAction } from "@/utils/custom-actions"
 import { formatUiList, i18n } from "@/utils/i18n"
 import { sendMessage } from "@/utils/message"
 import { buildCustomActionOptionsRoute } from "@/utils/navigation"
+import { mapNotebaseField } from "@/utils/notebase/mapping"
 import { orpcClient } from "@/utils/orpc/client"
 import { SaveToNotebaseButton } from "../save-to-notebase-button"
 import { SaveToNotebaseDialogHost } from "../save-to-notebase-dialog-host"
@@ -886,6 +890,59 @@ describe("saveToNotebaseButton notebase availability", () => {
         expect(getStoredDictionaryConnection(store)?.skippedFieldIds).toEqual(undecidedIds),
       )
       expect(getStoredDictionaryConnection(store)?.mappings).toHaveLength(1)
+    })
+
+    // Waits for the save's own reminder write, then changes the connection as
+    // another options tab would.
+    async function changeStoredConnectionAfterSave(
+      store: ReturnType<typeof createStore>,
+      update: (
+        connection: SelectionToolbarCustomActionNotebaseConnection,
+      ) => SelectionToolbarCustomActionNotebaseConnection,
+    ) {
+      await waitFor(() =>
+        expect(getStoredDictionaryConnection(store)?.remindedFieldIds).toBeDefined(),
+      )
+      const config = cloneConfig(store.get(configAtom))
+      const dictionary = config.selectionToolbar.builtInActions.dictionary
+      dictionary.notebaseConnection = update(dictionary.notebaseConnection!)
+      act(() => store.set(configAtom, config))
+    }
+
+    it("leaves a connection to another Notebase alone", async () => {
+      const action = createTermOnlyDictionaryAction()
+      const { store, toast } = await saveAndGetWarning(action)
+      await changeStoredConnectionAfterSave(store, (connection) => ({
+        ...connection,
+        notebaseId: "notebase-2",
+        remindedFieldIds: undefined,
+      }))
+      const before = getStoredDictionaryConnection(store)
+
+      toast.actionProps?.onClick?.()
+
+      await act(async () => {})
+      expect(getStoredDictionaryConnection(store)).toEqual(before)
+    })
+
+    it("does not skip a field mapped after the save", async () => {
+      const action = createTermOnlyDictionaryAction()
+      const [, phonetic, ...rest] = action.outputSchema
+      const { store, toast } = await saveAndGetWarning(action)
+      await changeStoredConnectionAfterSave(store, (connection) =>
+        mapNotebaseField(connection, phonetic!.id, { id: "column-ipa", name: "IPA" }),
+      )
+
+      toast.actionProps?.onClick?.()
+
+      await waitFor(() =>
+        expect(getStoredDictionaryConnection(store)?.skippedFieldIds).toEqual(
+          rest.map((field) => field.id),
+        ),
+      )
+      expect(getStoredDictionaryConnection(store)?.mappings).toContainEqual(
+        expect.objectContaining({ localFieldId: phonetic!.id, notebaseColumnId: "column-ipa" }),
+      )
     })
 
     it("opens the mappings from the toast", async () => {
