@@ -1548,6 +1548,12 @@ options:
       aiSegmentation:
         title: AI smart segmentation
         description: Lets AI re-cut the subtitles into sentences. Translations take longer. Needs a strong LLM; weaker models may drop or misalign lines.
+      clickLookupAction:
+        title: Word lookup action
+        description: The AI action that answers a click on a word in the subtitles. Dictionary unless you pick one of your own.
+      dragLookupAction:
+        title: Drag selection action
+        description: The AI action that answers a drag across several words in the subtitles. Sentence Analysis unless you pick one of your own.
     aiQuota:
       title: AI subtitles quota
       description: AI speech recognition gets you accurate subtitles for any video

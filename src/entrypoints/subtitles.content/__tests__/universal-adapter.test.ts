@@ -623,7 +623,12 @@ describe("universalVideoAdapter", () => {
     const { adapter } = createAdapter([])
     const scheduler = attachScheduler(adapter, true)
     ;(scheduler as any).hide = vi.fn<(...args: any[]) => any>()
-    subtitlesStore.set(openWordLookupAtom, { tokenIndex: 0, term: "hello", anchor: { x: 0, y: 0 } })
+    subtitlesStore.set(openWordLookupAtom, {
+      start: 0,
+      end: 0,
+      text: "hello",
+      anchor: { x: 0, y: 0 },
+    })
 
     adapter.toggleSubtitlesByShortcut(false)
 

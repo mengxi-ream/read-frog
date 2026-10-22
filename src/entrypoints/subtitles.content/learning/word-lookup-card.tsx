@@ -10,6 +10,7 @@ import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-ho
 import { closeWordLookupAtom, wordLookupAtom } from "./atoms"
 import { isFromSubtitleLine } from "./page-events"
 import { useLookupPlayback } from "./use-lookup-playback"
+import { useLookupShortcuts } from "./use-lookup-shortcuts"
 import { useTopLayerPortalContainer } from "./use-top-layer-portal-container"
 
 interface PinnedLayout {
@@ -31,6 +32,7 @@ export function WordLookupCard() {
   }
 
   useLookupPlayback()
+  useLookupShortcuts()
 
   return (
     <ShadowWrapperContext value={container}>
@@ -65,6 +67,7 @@ export function WordLookupCard() {
           <SelectionPopover.Content
             key={pinnedLayout?.sessionKey ?? request?.sessionKey ?? 0}
             container={container}
+            initialFocus={false}
           >
             <CustomActionPanel />
           </SelectionPopover.Content>

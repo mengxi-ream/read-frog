@@ -1,13 +1,14 @@
 import type { MouseEvent } from "react"
-import { useAtomValue, useSetAtom } from "jotai"
-import { useMemo } from "react"
-import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { BUILT_IN_DICTIONARY_ACTION_ID } from "@/utils/constants/custom-action"
-import { findSelectionToolbarAction } from "@/utils/custom-actions"
+import type { CueWordRange } from "./atoms"
+import { useAtomValue } from "jotai"
+import { useMemo, useRef } from "react"
+import { configAtom } from "@/utils/atoms/config"
+import { resolveClickLookupAction, resolveDragLookupAction } from "@/utils/custom-actions"
 import { cn } from "@/utils/styles/utils"
 import { segmentWords } from "@/utils/subtitles/segment-words"
 import { displaySubtitleAtom, sourceLanguageAtom } from "../atoms"
-import { openWordLookupAtom, wordLookupAtom } from "./atoms"
+import { dragRangeAtom, wordLookupAtom } from "./atoms"
+import { useWordDrag } from "./use-word-drag"
 
 function stopPlayerToggle(event: MouseEvent) {
   event.stopPropagation()
@@ -17,41 +18,42 @@ export function SubtitleWordTokens() {
   const locale = useAtomValue(sourceLanguageAtom)
   const cue = useAtomValue(displaySubtitleAtom)
   const lookup = useAtomValue(wordLookupAtom)
-  const selectionToolbar = useAtomValue(configFieldsAtomMap.selectionToolbar)
-  const openLookup = useSetAtom(openWordLookupAtom)
+  const dragRange = useAtomValue(dragRangeAtom)
+  const config = useAtomValue(configAtom)
   const text = cue?.text ?? ""
   const tokens = useMemo(() => segmentWords(text, locale ?? undefined), [locale, text])
-  const dictionary = findSelectionToolbarAction(selectionToolbar, BUILT_IN_DICTIONARY_ACTION_ID)
+  const lineRef = useRef<HTMLSpanElement>(null)
+  const clickEnabled = resolveClickLookupAction(config).enabled !== false
+  const dragEnabled = resolveDragLookupAction(config).enabled !== false
+  const { startDrag, extendDrag } = useWordDrag(tokens, lineRef, dragEnabled)
+  const cueStart = cue?.start ?? -1
 
-  if (!dictionary || dictionary.enabled === false) {
+  if (!clickEnabled && !dragEnabled) {
     return text
   }
 
-  const highlightedIndex = lookup?.cueStart === cue?.start ? lookup?.tokenIndex : null
+  const isWithin = (range: CueWordRange | null, index: number) =>
+    range?.cueStart === cueStart && index >= range.start && index <= range.end
 
   return (
-    <span data-slot="subtitle-line">
+    <span ref={lineRef} data-slot="subtitle-line" className={cn(dragEnabled && "select-none")}>
       {tokens.map((token, index) =>
         token.isWord ? (
           <span
             // oxlint-disable-next-line react/no-array-index-key -- tokens have no identity beyond their position in the line
             key={index}
             data-slot="subtitle-word"
+            data-index={index}
             className={cn(
               "cursor-pointer rounded-sm transition-colors hover:bg-white/25",
-              highlightedIndex === index && "bg-amber-300 text-amber-950",
+              dragEnabled && "touch-none",
+              isWithin(lookup, index) && "bg-amber-300 text-amber-950",
+              isWithin(dragRange, index) && "bg-sky-300 text-sky-950",
             )}
-            onMouseDown={stopPlayerToggle}
+            onPointerDown={(event) => startDrag(event, index)}
+            onPointerEnter={(event) => extendDrag(event, index)}
+            onClick={stopPlayerToggle}
             onDoubleClick={stopPlayerToggle}
-            onClick={(event) => {
-              stopPlayerToggle(event)
-              const wordRect = event.currentTarget.getBoundingClientRect()
-              openLookup({
-                tokenIndex: index,
-                term: token.text,
-                anchor: { x: wordRect.right, y: wordRect.bottom },
-              })
-            }}
           >
             {token.text}
           </span>
