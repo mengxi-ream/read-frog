@@ -825,6 +825,8 @@ options:
           columnUnavailableOption: 已刪除
           invalidMappingsTitle: 有些對應需要處理
           invalidMappingsDescription: 無效對應會被保留。儲存到筆記庫前請先修復它們。
+          noFieldSavedTitle: "沒有欄位會存進這個筆記庫"
+          noFieldSavedDescription: "至少為一個欄位選擇筆記庫欄位，才能儲存筆記。"
           mappingSummary: "存 $1 · 不存 $2 · 待定 $3"
           skipFieldOption: "不儲存"
           undecidedFieldPlaceholder: "選擇筆記庫欄位或不儲存"
@@ -1587,6 +1589,7 @@ action:
   saveToNotebaseTableUnavailable: 所選筆記庫已無法使用
   saveToNotebaseConnectionInvalid: 目前的筆記庫連線已過期，請到自訂 AI 指令重新整理並修復對應
   saveToNotebaseInvalidContent: "AI 回傳的內容格式不對，沒有儲存。請重新執行一次再儲存。"
+  saveToNotebaseNoFieldSaved: "沒有儲存：這個指令沒有要存進筆記庫的欄位，請在設定中至少選一個。"
   saveToNotebaseUndecidedTitle: "已儲存。這些欄位還沒決定存不存"
   saveToNotebaseSkipUndecided: "都不儲存"
   saveToNotebaseNoMappings: 至少新增一個有效對應後才能儲存

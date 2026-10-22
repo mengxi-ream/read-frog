@@ -967,6 +967,28 @@ describe("saveToNotebaseButton notebase availability", () => {
       })
     })
 
+    it("says no field is saved, not that the connection is out of date, when every field is skipped", async () => {
+      const action = createConnectedDictionaryAction()
+      action.notebaseConnection!.mappings = []
+      action.notebaseConnection!.skippedFieldIds = action.outputSchema.map((field) => field.id)
+      const config = cloneConfig(DEFAULT_CONFIG)
+      config.betaExperience.enabled = true
+      vi.mocked(orpcClient.notebase.getSchema).mockResolvedValueOnce(createSchemaForAction(action))
+      renderButton(config, action)
+
+      fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
+
+      await waitFor(() =>
+        expect(toastManagerMock.add).toHaveBeenCalledWith(
+          expect.objectContaining({
+            type: "error",
+            title: i18n.t("action.saveToNotebaseNoFieldSaved"),
+          }),
+        ),
+      )
+      expect(notebaseRowCreateMock).not.toHaveBeenCalled()
+    })
+
     it("does not remind about skipped fields", async () => {
       const action = createTermOnlyDictionaryAction()
       action.notebaseConnection!.skippedFieldIds = action.outputSchema

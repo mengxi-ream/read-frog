@@ -819,6 +819,8 @@ options:
           columnUnavailableOption: silinmiş
           invalidMappingsTitle: Bazı eşlemeler ilgi gerektiriyor
           invalidMappingsDescription: Geçersiz eşlemeler korunur. Notebase'e kaydetmeden önce düzeltin.
+          noFieldSavedTitle: "Bu Notebase'e hiçbir alan kaydedilmiyor"
+          noFieldSavedDescription: "Not kaydetmek için en az bir alana bir Notebase alanı seçin."
           mappingSummary: "Kaydedilen $1 · Atlanan $2 · Kararsız $3"
           skipFieldOption: "Kaydetme"
           undecidedFieldPlaceholder: "Bir Notebase alanı seçin ya da kaydetmeyin"
@@ -1577,6 +1579,7 @@ action:
   saveToNotebaseTableUnavailable: Seçilen Notebase artık kullanılamıyor
   saveToNotebaseConnectionInvalid: Bu Notebase bağlantısı güncel değil. Custom AI Actions içinde yenileyin ve eşlemeleri düzeltin.
   saveToNotebaseInvalidContent: "Yapay zekâ yanıtında biçimi hatalı bir değer var, bu yüzden kaydedilmedi. Eylemi yeniden çalıştırıp sonra kaydedin."
+  saveToNotebaseNoFieldSaved: "Kaydedilmedi: bu eylem Notebase'e hiçbir alan kaydetmiyor. Ayarlarından en az birini seçin."
   saveToNotebaseUndecidedTitle: "Kaydedildi. Bu alanları kaydedip kaydetmeyeceğinize henüz karar vermediniz"
   saveToNotebaseSkipUndecided: "Hiçbirini kaydetme"
   saveToNotebaseNoMappings: Kaydetmeden önce en az bir geçerli eşleme ekleyin

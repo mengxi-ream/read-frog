@@ -819,6 +819,8 @@ options:
           columnUnavailableOption: 삭제됨
           invalidMappingsTitle: 일부 매핑을 확인해야 합니다
           invalidMappingsDescription: 잘못된 매핑은 유지됩니다. Notebase에 저장하기 전에 수정하세요.
+          noFieldSavedTitle: "이 Notebase에 저장되는 필드가 없습니다"
+          noFieldSavedDescription: "노트를 저장하려면 하나 이상의 필드에 Notebase 필드를 고르세요."
           mappingSummary: "저장 $1 · 저장 안 함 $2 · 미정 $3"
           skipFieldOption: "저장 안 함"
           undecidedFieldPlaceholder: "Notebase 필드를 고르거나 저장 안 함"
@@ -1577,6 +1579,7 @@ action:
   saveToNotebaseTableUnavailable: 선택한 Notebase를 더 이상 사용할 수 없습니다
   saveToNotebaseConnectionInvalid: 현재 Notebase 연결이 오래되었습니다. Custom AI Actions에서 새로고침하고 매핑을 수정하세요.
   saveToNotebaseInvalidContent: "AI 응답에 형식이 맞지 않는 값이 있어 저장하지 않았습니다. 다시 실행한 뒤 저장하세요."
+  saveToNotebaseNoFieldSaved: "저장하지 않았습니다: 이 작업에는 Notebase에 저장할 필드가 없습니다. 설정에서 하나 이상 고르세요."
   saveToNotebaseUndecidedTitle: "저장했습니다. 다음 필드는 저장할지 아직 정하지 않았습니다"
   saveToNotebaseSkipUndecided: "모두 저장 안 함"
   saveToNotebaseNoMappings: 저장하기 전에 유효한 매핑을 하나 이상 추가하세요

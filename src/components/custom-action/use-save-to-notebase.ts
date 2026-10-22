@@ -211,10 +211,13 @@ export function useSaveToNotebase() {
     })
   }
 
-  const buildConnectionInvalidToast = (actionId: string) => {
+  const buildConnectionInvalidToast = (
+    actionId: string,
+    title = i18n.t("action.saveToNotebaseConnectionInvalid"),
+  ) => {
     const toastId = toastManager.add({
       type: "error",
-      title: i18n.t("action.saveToNotebaseConnectionInvalid"),
+      title,
       actionProps: {
         children: i18n.t("action.openCustomActions"),
         onClick: () => {
@@ -448,7 +451,14 @@ export function useSaveToNotebase() {
       const mappingValidation = validateNotebaseMappings(actionWithRefreshedConnection, schema)
       if (mappingValidation.kind !== "valid") {
         trackFailedBeforeWrite("validation")
-        buildConnectionInvalidToast(action.id)
+        // Every field set to "don't save" leaves nothing to write, and the
+        // connection itself is fine: say so rather than call it out of date.
+        buildConnectionInvalidToast(
+          action.id,
+          mappingValidation.kind === "empty"
+            ? i18n.t("action.saveToNotebaseNoFieldSaved")
+            : undefined,
+        )
         return "failed"
       }
 
