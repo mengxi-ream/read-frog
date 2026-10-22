@@ -10,8 +10,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { createStore, Provider } from "jotai"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import { fakeBrowser } from "wxt/testing/fake-browser"
 import { env } from "@/env"
-import { configAtom } from "@/utils/atoms/config"
+import { configAtom, configFieldsAtomMap } from "@/utils/atoms/config"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { getBuiltInDictionaryAction } from "@/utils/custom-actions"
 import { formatUiList, i18n } from "@/utils/i18n"
@@ -271,7 +272,10 @@ function getStoredDictionaryConnection(store: ReturnType<typeof createStore>) {
 }
 
 describe("saveToNotebaseButton notebase availability", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
+    // Config writes merge into what storage holds, so one test's connection
+    // must not seed the next.
+    await fakeBrowser.storage.local.clear()
     vi.clearAllMocks()
     toastManagerMock.add.mockReset().mockReturnValue("toast-id")
     toastManagerMock.close.mockReset()
@@ -850,11 +854,11 @@ describe("saveToNotebaseButton notebase availability", () => {
       return { store, toast: toastManagerMock.add.mock.calls[0]?.[0] as WarningToast }
     }
 
-    it("names them once and records that it did", async () => {
+    it("names them with a choice to skip them or configure", async () => {
       const action = createTermOnlyDictionaryAction()
       const undecided = action.outputSchema.slice(1)
 
-      const { store } = await saveAndGetWarning(action)
+      await saveAndGetWarning(action)
 
       expect(toastManagerMock.add).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -871,11 +875,23 @@ describe("saveToNotebaseButton notebase availability", () => {
         }),
       )
       expect(vi.mocked(formatUiList)).toHaveBeenLastCalledWith(undecided.map((field) => field.name))
-      await waitFor(() =>
-        expect(getStoredDictionaryConnection(store)?.remindedFieldIds).toEqual(
-          undecided.map((field) => field.id),
-        ),
+    })
+
+    it("names them again on the next save while they stay undecided", async () => {
+      const action = createTermOnlyDictionaryAction()
+      const undecidedNames = action.outputSchema.slice(1).map((field) => field.name)
+      const { store } = await saveAndGetWarning(action)
+
+      // The reader closes the toast without choosing, and saves again.
+      vi.mocked(orpcClient.notebase.getSchema).mockResolvedValueOnce(createSchemaForAction(action))
+      fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
+
+      await waitFor(() => expect(toastManagerMock.add).toHaveBeenCalledTimes(2))
+      expect(toastManagerMock.add).toHaveBeenLastCalledWith(
+        expect.objectContaining({ type: "warning" }),
       )
+      expect(vi.mocked(formatUiList)).toHaveBeenLastCalledWith(undecidedNames)
+      expect(getStoredDictionaryConnection(store)?.skippedFieldIds).toBeUndefined()
     })
 
     it("marks them don't save from the toast", async () => {
@@ -892,21 +908,17 @@ describe("saveToNotebaseButton notebase availability", () => {
       expect(getStoredDictionaryConnection(store)?.mappings).toHaveLength(1)
     })
 
-    // Waits for the save's own reminder write, then changes the connection as
-    // another options tab would.
+    // Changes the connection after the save, as another options tab would.
     async function changeStoredConnectionAfterSave(
       store: ReturnType<typeof createStore>,
       update: (
         connection: SelectionToolbarCustomActionNotebaseConnection,
       ) => SelectionToolbarCustomActionNotebaseConnection,
     ) {
-      await waitFor(() =>
-        expect(getStoredDictionaryConnection(store)?.remindedFieldIds).toBeDefined(),
-      )
-      const config = cloneConfig(store.get(configAtom))
-      const dictionary = config.selectionToolbar.builtInActions.dictionary
+      const { selectionToolbar } = cloneConfig(store.get(configAtom))
+      const dictionary = selectionToolbar.builtInActions.dictionary
       dictionary.notebaseConnection = update(dictionary.notebaseConnection!)
-      act(() => store.set(configAtom, config))
+      await act(() => store.set(configFieldsAtomMap.selectionToolbar, selectionToolbar))
     }
 
     it("leaves a connection to another Notebase alone", async () => {
@@ -915,7 +927,6 @@ describe("saveToNotebaseButton notebase availability", () => {
       await changeStoredConnectionAfterSave(store, (connection) => ({
         ...connection,
         notebaseId: "notebase-2",
-        remindedFieldIds: undefined,
       }))
       const before = getStoredDictionaryConnection(store)
 
@@ -956,11 +967,11 @@ describe("saveToNotebaseButton notebase availability", () => {
       })
     })
 
-    it("does not remind about fields it already reminded about, or that are skipped", async () => {
+    it("does not remind about skipped fields", async () => {
       const action = createTermOnlyDictionaryAction()
-      const [, phonetic, ...rest] = action.outputSchema
-      action.notebaseConnection!.skippedFieldIds = [phonetic!.id]
-      action.notebaseConnection!.remindedFieldIds = rest.map((field) => field.id)
+      action.notebaseConnection!.skippedFieldIds = action.outputSchema
+        .slice(1)
+        .map((field) => field.id)
 
       await saveAndGetWarning(action)
 

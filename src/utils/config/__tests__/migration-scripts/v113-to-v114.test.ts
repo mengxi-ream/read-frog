@@ -18,7 +18,7 @@ const connection = {
 }
 
 describe("v113-to-v114 migration", () => {
-  it("changes nothing: v114 only allows two new optional lists", () => {
+  it("changes nothing: v114 only allows a new optional list", () => {
     const config = {
       selectionToolbar: { builtInActions: { dictionary: { notebaseConnection: connection } } },
     }
@@ -36,15 +36,13 @@ describe("v113-to-v114 migration", () => {
     const migrated = parsed.data?.selectionToolbar.builtInActions.dictionary.notebaseConnection
     expect(migrated?.mappings).toEqual(connection.mappings)
     expect(migrated?.skippedFieldIds).toBeUndefined()
-    expect(migrated?.remindedFieldIds).toBeUndefined()
   })
 
-  it("accepts the lists a v114 connection carries", () => {
+  it("accepts the list a v114 connection carries", () => {
     const config = structuredClone(DEFAULT_CONFIG)
     config.selectionToolbar.builtInActions.dictionary.notebaseConnection = {
       ...structuredClone(connection),
       skippedFieldIds: ["default-dictionary-difficulty"],
-      remindedFieldIds: ["default-dictionary-phonetic"],
     }
 
     const parsed = configSchema.safeParse(migrate(config))

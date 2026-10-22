@@ -175,7 +175,7 @@ export function validateNotebaseMappings(
 /**
  * The action's fields the reader has not decided about: neither mapped to a
  * column nor marked "don't save". A save leaves them out like a skipped field,
- * but reminds the reader about them once. A mapping whose column is gone is
+ * but reminds the reader about them each time. A mapping whose column is gone is
  * not undecided; it is invalid, and blocks the save until it is fixed.
  */
 export function getUndecidedOutputFields(
@@ -213,7 +213,6 @@ export function mapNotebaseField(
       ? connection.mappings.map((item) => (item === existing ? mapping : item))
       : [...connection.mappings, mapping],
     skippedFieldIds: connection.skippedFieldIds?.filter((id) => id !== fieldId),
-    remindedFieldIds: connection.remindedFieldIds?.filter((id) => id !== fieldId),
   }
 }
 
@@ -227,18 +226,6 @@ export function skipNotebaseFields(
     ...connection,
     mappings: connection.mappings.filter((mapping) => !skipped.has(mapping.localFieldId)),
     skippedFieldIds: [...new Set([...(connection.skippedFieldIds ?? []), ...fieldIds])],
-    remindedFieldIds: connection.remindedFieldIds?.filter((id) => !skipped.has(id)),
-  }
-}
-
-/** The connection with these undecided fields recorded as already reminded about. */
-export function markNotebaseFieldsReminded(
-  connection: SelectionToolbarCustomActionNotebaseConnection,
-  fieldIds: readonly string[],
-): SelectionToolbarCustomActionNotebaseConnection {
-  return {
-    ...connection,
-    remindedFieldIds: [...new Set([...(connection.remindedFieldIds ?? []), ...fieldIds])],
   }
 }
 

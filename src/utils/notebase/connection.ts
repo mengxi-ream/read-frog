@@ -120,18 +120,15 @@ export function sanitizeCustomActionNotebaseConnection(
         mapping.notebaseColumnNameSnapshot.trim() || mapping.notebaseColumnId,
     }))
 
-  // A field leaves both lists once it is mapped, and "reminded" only ever
-  // names undecided fields. Empty lists are left out, so a connection that
-  // never had them reads exactly as it did.
-  const keepUnmapped = (ids: string[] | undefined, exclude: ReadonlySet<string> = new Set()) => [
+  // A field leaves the list once it is mapped. An empty list is left out, so
+  // a connection that never had one reads exactly as it did.
+  const skippedFieldIds = [
     ...new Set(
-      (ids ?? []).filter(
-        (id) => outputFieldIds.has(id) && !localFieldIds.has(id) && !exclude.has(id),
+      (connection.skippedFieldIds ?? []).filter(
+        (id) => outputFieldIds.has(id) && !localFieldIds.has(id),
       ),
     ),
   ]
-  const skippedFieldIds = keepUnmapped(connection.skippedFieldIds)
-  const remindedFieldIds = keepUnmapped(connection.remindedFieldIds, new Set(skippedFieldIds))
 
   return {
     notebaseId,
@@ -139,7 +136,6 @@ export function sanitizeCustomActionNotebaseConnection(
     connectedAccount,
     mappings,
     ...(skippedFieldIds.length > 0 ? { skippedFieldIds } : {}),
-    ...(remindedFieldIds.length > 0 ? { remindedFieldIds } : {}),
   }
 }
 

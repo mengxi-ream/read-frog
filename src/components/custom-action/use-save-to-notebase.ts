@@ -41,7 +41,6 @@ import {
 import {
   buildNotebaseRowCells,
   getUndecidedOutputFields,
-  markNotebaseFieldsReminded,
   skipNotebaseFields,
   validateNotebaseMappings,
 } from "@/utils/notebase/mapping"
@@ -157,12 +156,9 @@ export function useSaveToNotebase() {
     savingUndecidedFieldsRef.current = null
     if (undecided) {
       // Names the fields the note left out without the reader having chosen
-      // to, once: a connection that lost its mappings shows on the first save
-      // rather than in a Notebase of bare terms, and a reader who meant it is
-      // not asked again.
-      void updateSavedConnection(undecided, (connection) =>
-        markNotebaseFieldsReminded(connection, undecided.fieldIds),
-      )
+      // to, on every save until each one is mapped or skipped: a connection
+      // that lost its mappings shows on the first save rather than in a
+      // Notebase of bare terms. Closing the toast decides nothing.
       const warningToastId = toastManager.add({
         type: "warning",
         title: i18n.t("action.saveToNotebaseUndecidedTitle"),
@@ -460,17 +456,14 @@ export function useSaveToNotebase() {
         (result) => buildNotebaseRowCells(actionWithRefreshedConnection, schema, result).cells,
       )
       savingNotebaseNameRef.current = refreshedConnection.notebaseNameSnapshot
-      const remindedFieldIds = new Set(refreshedConnection.remindedFieldIds)
-      const fieldsToRemind = getUndecidedOutputFields(actionWithRefreshedConnection).filter(
-        (field) => !remindedFieldIds.has(field.id),
-      )
+      const undecidedFields = getUndecidedOutputFields(actionWithRefreshedConnection)
       savingUndecidedFieldsRef.current =
-        fieldsToRemind.length > 0
+        undecidedFields.length > 0
           ? {
               actionId: action.id,
               notebaseId: refreshedConnection.notebaseId,
-              fieldIds: fieldsToRemind.map((field) => field.id),
-              fieldNames: fieldsToRemind.map((field) => field.name),
+              fieldIds: undecidedFields.map((field) => field.id),
+              fieldNames: undecidedFields.map((field) => field.name),
             }
           : null
       const trackingLookup = getGuideDictionaryNotebaseTracking(action.id)

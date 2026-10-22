@@ -6,8 +6,7 @@ import type { TestSeriesObject } from "./types"
  * silently change what v114 asserts.
  *
  * No delta from v113: v114 only lets a Notebase connection name the fields
- * the reader chose not to save (`skippedFieldIds`) and the undecided ones a
- * save already reminded them about (`remindedFieldIds`). No series has a
+ * the reader chose not to save (`skippedFieldIds`). No series has a
  * connection, so every config is as it was.
  */
 
