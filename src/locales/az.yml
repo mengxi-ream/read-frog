@@ -820,6 +820,8 @@ options:
           columnUnavailableOption: silinib
           invalidMappingsTitle: Bəzi uyğunlaşdırmaları yoxlamaq lazımdır
           invalidMappingsDescription: Yanlış uyğunlaşdırmalar saxlanılır. Notebase daxilində yadda saxlamazdan əvvəl onları düzəldin.
+          noFieldSavedTitle: "Bu Notebase-ə heç bir sahə yadda saxlanılmır"
+          noFieldSavedDescription: "Qeydləri yadda saxlamaq üçün ən azı bir sahəyə Notebase sahəsi seçin."
           mappingSummary: "Saxlanılır $1 · Ötürülür $2 · Qərarsız $3"
           skipFieldOption: "Saxlama"
           undecidedFieldPlaceholder: "Notebase sahəsi seçin və ya saxlamayın"
@@ -1582,6 +1584,7 @@ action:
   saveToNotebaseTableUnavailable: Seçilmiş Notebase artıq əlçatan deyil
   saveToNotebaseConnectionInvalid: Bu Notebase qoşulması köhnəlib. Fərdi süni intellekt əməliyyatlarında onu yeniləyin və uyğunlaşdırmaları düzəldin.
   saveToNotebaseInvalidContent: "Süni intellektin cavabında formatı səhv olan dəyər var, ona görə yadda saxlanılmadı. Əməliyyatı yenidən işə salın, sonra yadda saxlayın."
+  saveToNotebaseNoFieldSaved: "Yadda saxlanılmadı: bu əməliyyat Notebase-ə heç bir sahə yazmır. Parametrlərində ən azı birini seçin."
   saveToNotebaseUndecidedTitle: "Yadda saxlanıldı. Bu sahələri saxlayıb-saxlamamağa hələ qərar verməmisiniz"
   saveToNotebaseSkipUndecided: "Heç birini saxlama"
   saveToNotebaseNoMappings: Yadda saxlamazdan əvvəl ən azı bir düzgün uyğunlaşdırma əlavə edin

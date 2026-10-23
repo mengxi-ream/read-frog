@@ -14,7 +14,6 @@ import {
   getUndecidedOutputFields,
   isNotebaseMappingCompatible,
   mapNotebaseField,
-  markNotebaseFieldsReminded,
   resolveNotebaseMappings,
   skipNotebaseFields,
 } from "../notebase/mapping"
@@ -363,9 +362,9 @@ describe("notebase utils", () => {
       expect(ids(getUndecidedOutputFields(action))).not.toContain("field-summary")
     })
 
-    it("maps a field and forgets it was skipped or reminded about", () => {
+    it("maps a field and forgets it was skipped", () => {
       const next = mapNotebaseField(
-        { ...connection, skippedFieldIds: ["field-score"], remindedFieldIds: ["field-notes"] },
+        { ...connection, skippedFieldIds: ["field-score", "field-notes"] },
         "field-score",
         { id: "column-score", name: "Score" },
       )
@@ -376,8 +375,7 @@ describe("notebase utils", () => {
         ["field-summary", "column-summary"],
         ["field-score", "column-score"],
       ])
-      expect(next.skippedFieldIds).toEqual([])
-      expect(next.remindedFieldIds).toEqual(["field-notes"])
+      expect(next.skippedFieldIds).toEqual(["field-notes"])
 
       const moved = mapNotebaseField(next, "field-summary", { id: "column-notes", name: "Notes" })
       expect(moved.mappings).toHaveLength(2)
@@ -388,39 +386,28 @@ describe("notebase utils", () => {
       })
     })
 
-    it("skips fields, dropping their mappings and reminders", () => {
-      const next = skipNotebaseFields({ ...connection, remindedFieldIds: ["field-notes"] }, [
+    it("skips fields, dropping their mappings", () => {
+      const next = skipNotebaseFields({ ...connection, skippedFieldIds: ["field-notes"] }, [
         "field-summary",
         "field-notes",
       ])
 
       expect(next.mappings).toEqual([])
-      expect(next.skippedFieldIds).toEqual(["field-summary", "field-notes"])
-      expect(next.remindedFieldIds).toEqual([])
+      expect(next.skippedFieldIds).toEqual(["field-notes", "field-summary"])
     })
 
-    it("records reminded fields once", () => {
-      const once = markNotebaseFieldsReminded(connection, ["field-score"])
-      expect(
-        markNotebaseFieldsReminded(once, ["field-score", "field-notes"]).remindedFieldIds,
-      ).toEqual(["field-score", "field-notes"])
-    })
-
-    it("keeps only lists that still name unmapped fields of the action", () => {
+    it("keeps only skipped ids that still name unmapped fields of the action", () => {
       const sanitized = sanitizeCustomActionNotebaseConnection(
         {
           ...connection,
           // Mapped, gone from the action, and duplicated ids all drop out.
           skippedFieldIds: ["field-summary", "field-gone", "field-score", "field-score"],
-          // A skipped field is not undecided, so it is not "reminded" either.
-          remindedFieldIds: ["field-score", "field-notes"],
         },
         outputSchema,
       )
 
       expect(sanitized?.skippedFieldIds).toEqual(["field-score"])
-      expect(sanitized?.remindedFieldIds).toEqual(["field-notes"])
-      // A connection without the lists reads exactly as before.
+      // A connection without the list reads exactly as before.
       expect(sanitizeCustomActionNotebaseConnection(connection, outputSchema)).not.toHaveProperty(
         "skippedFieldIds",
       )

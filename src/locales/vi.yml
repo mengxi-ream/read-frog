@@ -819,6 +819,8 @@ options:
           columnUnavailableOption: đã xóa
           invalidMappingsTitle: Một số ánh xạ cần được xử lý
           invalidMappingsDescription: Các ánh xạ không hợp lệ vẫn được giữ lại. Hãy sửa chúng trước khi lưu vào Notebase.
+          noFieldSavedTitle: "Không có trường nào được lưu vào Notebase này"
+          noFieldSavedDescription: "Hãy chọn trường Notebase cho ít nhất một trường để lưu ghi chú."
           mappingSummary: "Lưu $1 · Bỏ qua $2 · Chưa quyết định $3"
           skipFieldOption: "Không lưu"
           undecidedFieldPlaceholder: "Chọn một trường Notebase hoặc không lưu"
@@ -1577,6 +1579,7 @@ action:
   saveToNotebaseTableUnavailable: Notebase đã chọn không còn khả dụng
   saveToNotebaseConnectionInvalid: Kết nối Notebase này đã lỗi thời. Hãy làm mới trong Custom AI Actions và sửa các ánh xạ.
   saveToNotebaseInvalidContent: "Câu trả lời của AI có giá trị sai định dạng nên chưa được lưu. Hãy chạy lại thao tác rồi lưu."
+  saveToNotebaseNoFieldSaved: "Chưa lưu: thao tác này không lưu trường nào vào Notebase. Hãy chọn ít nhất một trường trong phần cài đặt."
   saveToNotebaseUndecidedTitle: "Đã lưu. Bạn chưa quyết định có lưu các trường này không"
   saveToNotebaseSkipUndecided: "Không lưu các trường này"
   saveToNotebaseNoMappings: Hãy thêm ít nhất một ánh xạ hợp lệ trước khi lưu

@@ -140,6 +140,8 @@ async function setup(action: SelectionToolbarCustomAction) {
 }
 
 const SKIP_LABEL = "options.selectionToolbar.customActions.form.notebase.skipFieldOption"
+const NO_FIELD_SAVED_LABEL =
+  "options.selectionToolbar.customActions.form.notebase.noFieldSavedTitle"
 const UNDECIDED_LABEL =
   "options.selectionToolbar.customActions.form.notebase.undecidedFieldPlaceholder"
 
@@ -274,5 +276,18 @@ describe("notebase connection field", () => {
       ])
     })
     expect(fieldTrigger("phonetic").textContent).toContain(SKIP_LABEL)
+  })
+
+  it("warns once no field is saved to the Notebase", async () => {
+    await setup(createAction())
+    expect(screen.queryByText(NO_FIELD_SAVED_LABEL)).toBeNull()
+
+    for (const name of ["term", "phonetic", "meaning"]) {
+      // The rows render once the Notebase's columns have loaded.
+      await pick(await waitFor(() => fieldTrigger(name)), SKIP_LABEL)
+    }
+
+    expect(await screen.findByText(NO_FIELD_SAVED_LABEL)).toBeTruthy()
+    await waitFor(async () => expect((await getPersistedConnection())?.mappings).toEqual([]))
   })
 })

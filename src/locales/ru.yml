@@ -819,6 +819,8 @@ options:
           columnUnavailableOption: удалено
           invalidMappingsTitle: Некоторые сопоставления требуют внимания
           invalidMappingsDescription: Некорректные сопоставления сохранены. Исправьте их перед сохранением в Notebase.
+          noFieldSavedTitle: "В этот Notebase не сохраняется ни одно поле"
+          noFieldSavedDescription: "Чтобы сохранять заметки, выберите поле Notebase хотя бы для одного поля."
           mappingSummary: "Сохраняются: $1 · Пропущены: $2 · Не решено: $3"
           skipFieldOption: "Не сохранять"
           undecidedFieldPlaceholder: "Выберите поле Notebase или не сохраняйте"
@@ -1577,6 +1579,7 @@ action:
   saveToNotebaseTableUnavailable: Выбранная Notebase больше недоступна
   saveToNotebaseConnectionInvalid: Это подключение Notebase устарело. Обновите его в Custom AI Actions и исправьте сопоставления.
   saveToNotebaseInvalidContent: "В ответе ИИ есть значение в неверном формате, поэтому он не сохранён. Запустите действие ещё раз и сохраните."
+  saveToNotebaseNoFieldSaved: "Не сохранено: это действие не сохраняет в Notebase ни одного поля. Выберите хотя бы одно в настройках."
   saveToNotebaseUndecidedTitle: "Сохранено. Вы ещё не решили, сохранять ли эти поля"
   saveToNotebaseSkipUndecided: "Не сохранять их"
   saveToNotebaseNoMappings: Добавьте хотя бы одно корректное сопоставление перед сохранением

@@ -825,6 +825,8 @@ options:
           columnUnavailableOption: removed
           invalidMappingsTitle: Some mappings need attention
           invalidMappingsDescription: Invalid mappings are preserved. Fix them before saving to Notebase.
+          noFieldSavedTitle: "No field is saved to this Notebase"
+          noFieldSavedDescription: "Pick a Notebase field for at least one field to save notes here."
           mappingSummary: "Saved $1 · Skipped $2 · Undecided $3"
           skipFieldOption: "Don't save"
           undecidedFieldPlaceholder: "Pick a notebase field or don't save"
@@ -1724,6 +1726,7 @@ action:
   saveToNotebaseTableUnavailable: The selected Notebase is no longer available
   saveToNotebaseConnectionInvalid: This Notebase connection is out of date. Refresh it in Custom AI Actions and fix the mappings.
   saveToNotebaseInvalidContent: "The AI answer has a value in the wrong format, so it was not saved. Run the action again, then save."
+  saveToNotebaseNoFieldSaved: "Not saved: this action saves no field to the Notebase. Pick at least one in its settings."
   saveToNotebaseUndecidedTitle: "Saved. You haven't decided whether to save these fields"
   saveToNotebaseSkipUndecided: "Don't save them"
   saveToNotebaseNoMappings: Add at least one valid mapping before saving

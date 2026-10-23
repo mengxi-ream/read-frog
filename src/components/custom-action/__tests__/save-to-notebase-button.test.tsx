@@ -1,19 +1,24 @@
 // @vitest-environment jsdom
 import type { NotebaseGetSchemaOutput } from "@read-frog/api-contract"
 import type { Config } from "@/types/config/config"
-import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
+import type {
+  SelectionToolbarCustomAction,
+  SelectionToolbarCustomActionNotebaseConnection,
+} from "@/types/config/selection-toolbar"
 import { ORPCError } from "@orpc/client"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { createStore, Provider } from "jotai"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import { fakeBrowser } from "wxt/testing/fake-browser"
 import { env } from "@/env"
-import { configAtom } from "@/utils/atoms/config"
+import { configAtom, configFieldsAtomMap } from "@/utils/atoms/config"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { getBuiltInDictionaryAction } from "@/utils/custom-actions"
 import { formatUiList, i18n } from "@/utils/i18n"
 import { sendMessage } from "@/utils/message"
 import { buildCustomActionOptionsRoute } from "@/utils/navigation"
+import { mapNotebaseField } from "@/utils/notebase/mapping"
 import { orpcClient } from "@/utils/orpc/client"
 import { SaveToNotebaseButton } from "../save-to-notebase-button"
 import { SaveToNotebaseDialogHost } from "../save-to-notebase-dialog-host"
@@ -267,7 +272,10 @@ function getStoredDictionaryConnection(store: ReturnType<typeof createStore>) {
 }
 
 describe("saveToNotebaseButton notebase availability", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
+    // Config writes merge into what storage holds, so one test's connection
+    // must not seed the next.
+    await fakeBrowser.storage.local.clear()
     vi.clearAllMocks()
     toastManagerMock.add.mockReset().mockReturnValue("toast-id")
     toastManagerMock.close.mockReset()
@@ -846,11 +854,11 @@ describe("saveToNotebaseButton notebase availability", () => {
       return { store, toast: toastManagerMock.add.mock.calls[0]?.[0] as WarningToast }
     }
 
-    it("names them once and records that it did", async () => {
+    it("names them with a choice to skip them or configure", async () => {
       const action = createTermOnlyDictionaryAction()
       const undecided = action.outputSchema.slice(1)
 
-      const { store } = await saveAndGetWarning(action)
+      await saveAndGetWarning(action)
 
       expect(toastManagerMock.add).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -867,11 +875,23 @@ describe("saveToNotebaseButton notebase availability", () => {
         }),
       )
       expect(vi.mocked(formatUiList)).toHaveBeenLastCalledWith(undecided.map((field) => field.name))
-      await waitFor(() =>
-        expect(getStoredDictionaryConnection(store)?.remindedFieldIds).toEqual(
-          undecided.map((field) => field.id),
-        ),
+    })
+
+    it("names them again on the next save while they stay undecided", async () => {
+      const action = createTermOnlyDictionaryAction()
+      const undecidedNames = action.outputSchema.slice(1).map((field) => field.name)
+      const { store } = await saveAndGetWarning(action)
+
+      // The reader closes the toast without choosing, and saves again.
+      vi.mocked(orpcClient.notebase.getSchema).mockResolvedValueOnce(createSchemaForAction(action))
+      fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
+
+      await waitFor(() => expect(toastManagerMock.add).toHaveBeenCalledTimes(2))
+      expect(toastManagerMock.add).toHaveBeenLastCalledWith(
+        expect.objectContaining({ type: "warning" }),
       )
+      expect(vi.mocked(formatUiList)).toHaveBeenLastCalledWith(undecidedNames)
+      expect(getStoredDictionaryConnection(store)?.skippedFieldIds).toBeUndefined()
     })
 
     it("marks them don't save from the toast", async () => {
@@ -888,6 +908,54 @@ describe("saveToNotebaseButton notebase availability", () => {
       expect(getStoredDictionaryConnection(store)?.mappings).toHaveLength(1)
     })
 
+    // Changes the connection after the save, as another options tab would.
+    async function changeStoredConnectionAfterSave(
+      store: ReturnType<typeof createStore>,
+      update: (
+        connection: SelectionToolbarCustomActionNotebaseConnection,
+      ) => SelectionToolbarCustomActionNotebaseConnection,
+    ) {
+      const { selectionToolbar } = cloneConfig(store.get(configAtom))
+      const dictionary = selectionToolbar.builtInActions.dictionary
+      dictionary.notebaseConnection = update(dictionary.notebaseConnection!)
+      await act(() => store.set(configFieldsAtomMap.selectionToolbar, selectionToolbar))
+    }
+
+    it("leaves a connection to another Notebase alone", async () => {
+      const action = createTermOnlyDictionaryAction()
+      const { store, toast } = await saveAndGetWarning(action)
+      await changeStoredConnectionAfterSave(store, (connection) => ({
+        ...connection,
+        notebaseId: "notebase-2",
+      }))
+      const before = getStoredDictionaryConnection(store)
+
+      toast.actionProps?.onClick?.()
+
+      await act(async () => {})
+      expect(getStoredDictionaryConnection(store)).toEqual(before)
+    })
+
+    it("does not skip a field mapped after the save", async () => {
+      const action = createTermOnlyDictionaryAction()
+      const [, phonetic, ...rest] = action.outputSchema
+      const { store, toast } = await saveAndGetWarning(action)
+      await changeStoredConnectionAfterSave(store, (connection) =>
+        mapNotebaseField(connection, phonetic!.id, { id: "column-ipa", name: "IPA" }),
+      )
+
+      toast.actionProps?.onClick?.()
+
+      await waitFor(() =>
+        expect(getStoredDictionaryConnection(store)?.skippedFieldIds).toEqual(
+          rest.map((field) => field.id),
+        ),
+      )
+      expect(getStoredDictionaryConnection(store)?.mappings).toContainEqual(
+        expect.objectContaining({ localFieldId: phonetic!.id, notebaseColumnId: "column-ipa" }),
+      )
+    })
+
     it("opens the mappings from the toast", async () => {
       const action = createTermOnlyDictionaryAction()
       const { toast } = await saveAndGetWarning(action)
@@ -899,11 +967,42 @@ describe("saveToNotebaseButton notebase availability", () => {
       })
     })
 
-    it("does not remind about fields it already reminded about, or that are skipped", async () => {
+    it.each([
+      ["signed in", true],
+      ["signed out", false],
+    ])("says no field is saved when every field is skipped (%s)", async (_label, signedIn) => {
+      if (!signedIn) {
+        mockAuthState.session = null as unknown as typeof mockAuthState.session
+      }
+      const action = createConnectedDictionaryAction()
+      action.notebaseConnection!.mappings = []
+      action.notebaseConnection!.skippedFieldIds = action.outputSchema.map((field) => field.id)
+      const config = cloneConfig(DEFAULT_CONFIG)
+      config.betaExperience.enabled = true
+      renderButton(config, action)
+
+      fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
+
+      // Not "the connection is out of date", and no login for a save that
+      // could not write anything.
+      await waitFor(() =>
+        expect(toastManagerMock.add).toHaveBeenCalledWith(
+          expect.objectContaining({
+            type: "error",
+            title: i18n.t("action.saveToNotebaseNoFieldSaved"),
+          }),
+        ),
+      )
+      expect(screen.queryByText(i18n.t("action.saveToNotebaseLoginConnectedTitle"))).toBeNull()
+      expect(orpcClient.notebase.getSchema).not.toHaveBeenCalled()
+      expect(notebaseRowCreateMock).not.toHaveBeenCalled()
+    })
+
+    it("does not remind about skipped fields", async () => {
       const action = createTermOnlyDictionaryAction()
-      const [, phonetic, ...rest] = action.outputSchema
-      action.notebaseConnection!.skippedFieldIds = [phonetic!.id]
-      action.notebaseConnection!.remindedFieldIds = rest.map((field) => field.id)
+      action.notebaseConnection!.skippedFieldIds = action.outputSchema
+        .slice(1)
+        .map((field) => field.id)
 
       await saveAndGetWarning(action)
 

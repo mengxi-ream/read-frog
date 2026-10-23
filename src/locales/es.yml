@@ -820,6 +820,8 @@ options:
           columnUnavailableOption: eliminado
           invalidMappingsTitle: Algunas asignaciones requieren atención
           invalidMappingsDescription: Las asignaciones no válidas se conservan. Corrígelas antes de guardar en Notebase.
+          noFieldSavedTitle: "Ningún campo se guarda en esta Notebase"
+          noFieldSavedDescription: "Elige un campo de Notebase para al menos un campo y así poder guardar notas."
           mappingSummary: "Se guardan $1 · Omitidos $2 · Sin decidir $3"
           skipFieldOption: "No guardar"
           undecidedFieldPlaceholder: "Elige un campo de Notebase o no guardar"
@@ -1582,6 +1584,7 @@ action:
   saveToNotebaseTableUnavailable: La Notebase seleccionada ya no está disponible
   saveToNotebaseConnectionInvalid: Esta conexión de Notebase está desactualizada. Actualízala en Acciones AI personalizadas y corrige las asignaciones.
   saveToNotebaseInvalidContent: "La respuesta de la IA tiene un valor con un formato incorrecto, así que no se guardó. Vuelve a ejecutar la acción y luego guarda."
+  saveToNotebaseNoFieldSaved: "No se guardó: esta acción no guarda ningún campo en la Notebase. Elige al menos uno en su configuración."
   saveToNotebaseUndecidedTitle: "Guardado. Aún no has decidido si guardar estos campos"
   saveToNotebaseSkipUndecided: "No guardarlos"
   saveToNotebaseNoMappings: Añade al menos una asignación válida antes de guardar

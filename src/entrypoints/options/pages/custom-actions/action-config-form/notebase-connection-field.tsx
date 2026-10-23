@@ -565,6 +565,13 @@ export const NotebaseConnectionField = withForm({
                   </Alert>
                 )}
 
+                {mappingValidation?.kind === "empty" && (
+                  <Alert variant="warning">
+                    <AlertTitle>{t("noFieldSavedTitle")}</AlertTitle>
+                    <AlertDescription>{t("noFieldSavedDescription")}</AlertDescription>
+                  </Alert>
+                )}
+
                 <Field className="gap-3">
                   <div className="flex items-center justify-between gap-3">
                     <FieldTitle>{t("mappingsLabel")}</FieldTitle>
