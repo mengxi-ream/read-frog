@@ -1,5 +1,13 @@
 # @read-frog/extension
 
+## 1.52.2
+
+### Patch Changes
+
+- [#2388](https://github.com/mengxi-ream/read-frog/pull/2388) [`2352384`](https://github.com/mengxi-ream/read-frog/commit/23523841690ff640cd55be973495f4deec17bac6) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(notebase): give every field a row to pick its column or "don't save", keep the mappings when the connected Notebase is picked again, and remind about fields still undecided on each save until they are decided
+
+- [#2389](https://github.com/mengxi-ream/read-frog/pull/2389) [`8548cc7`](https://github.com/mengxi-ream/read-frog/commit/8548cc7bcc8c2cb4a9b62ee191c04532d143e744) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(content): show each page toast once instead of three stacked copies
+
 ## 1.52.1
 
 ### Patch Changes
