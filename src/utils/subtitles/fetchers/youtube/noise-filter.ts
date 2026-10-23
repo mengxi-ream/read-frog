@@ -7,10 +7,10 @@ import type { YoutubeTimedText } from "./types"
 const NOISE_PATTERNS = [
   /\[.*?\]/g, // [Music], [Applause], [Speaker 1], etc.
   /\(.*?\)/g, // (Music), (Applause), etc.
-  /♪.*?♪/g, // ♪ Music ♪
-  /🎵.*?🎵/g, // 🎵 Music 🎵
-  /🎶.*?🎶/g, // 🎶 Music 🎶
 ]
+
+// Music notes wrap sung lyrics ("♪ lyric line ♪"), so only a seg made of notes alone is noise.
+const MUSIC_NOTES_PATTERN = /[♪🎵🎶]/gu
 
 function filterNoiseText(text: string): string {
   let result = text
@@ -18,6 +18,10 @@ function filterNoiseText(text: string): string {
     result = result.replace(pattern, "")
   }
   return result
+}
+
+function hasSpeechText(text: string): boolean {
+  return text.replace(MUSIC_NOTES_PATTERN, "").trim().length > 0
 }
 
 export function filterNoiseFromEvents(events: YoutubeTimedText[]): YoutubeTimedText[] {
@@ -29,7 +33,9 @@ export function filterNoiseFromEvents(events: YoutubeTimedText[]): YoutubeTimedT
         ...seg,
         utf8: filterNoiseText(seg.utf8),
       }))
-      .filter((seg) => seg.utf8.trim().length > 0)
+      // Also drop note-only segs beside a lyric: the parser times each seg on its own,
+      // so a kept trailing " ♪" would take the lyric's screen time.
+      .filter((seg) => hasSpeechText(seg.utf8))
 
     return { ...event, segs: filteredSegs }
   })
