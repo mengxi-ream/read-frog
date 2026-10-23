@@ -820,16 +820,16 @@ options:
           schemaErrorDescription: 请稍后再试一次刷新。
           schemaLoading: 正在加载笔记库 schema...
           mappingsLabel: 字段映射
-          mappingsEmpty: 还没有映射，准备好后可以添加。
-          addMappingAction: 添加映射
-          removeMappingAction: 删除映射
           localFieldLabel: 指令字段
-          localFieldPlaceholder: 选择一个指令字段
           remoteFieldLabel: 笔记库字段
-          remoteFieldPlaceholder: 选择一个笔记库字段
           columnUnavailableOption: 已删除
           invalidMappingsTitle: 有些映射需要处理
           invalidMappingsDescription: 无效映射会被保留。保存到笔记库前请先修复它们。
+          noFieldSavedTitle: "没有字段会存进这个笔记库"
+          noFieldSavedDescription: "至少给一个字段选一个笔记库字段，才能保存笔记。"
+          mappingSummary: "存 $1 · 不存 $2 · 待定 $3"
+          skipFieldOption: "不保存"
+          undecidedFieldPlaceholder: "选择笔记库字段或不保存"
           mappingMissingLocal: 映射的指令字段已经不存在。
           mappingMissingRemote: 映射的笔记库字段已经不存在。
           mappingMissingSchema: 刷新笔记库 schema 后才能校验这个映射。
@@ -1588,6 +1588,10 @@ action:
   saveToNotebaseLimitExceeded: 需要升级后才能保存更多笔记库内容
   saveToNotebaseTableUnavailable: 选中的笔记库已不可用
   saveToNotebaseConnectionInvalid: 当前笔记库连接已经过期，请到 Custom AI Actions 中刷新并修复映射
+  saveToNotebaseInvalidContent: "AI 返回的内容格式不对，没有保存。请重新运行一次再保存。"
+  saveToNotebaseNoFieldSaved: "没有保存：这个指令没有要存进笔记库的字段，请在设置里至少选一个。"
+  saveToNotebaseUndecidedTitle: "已保存。这些字段还没决定存不存"
+  saveToNotebaseSkipUndecided: "都不保存"
   saveToNotebaseNoMappings: 至少添加一个有效映射后才能保存
   saveToNotebaseCreateTitle: 创建笔记库？
   saveToNotebaseCreateDescription: 创建一个与此 Custom Action 输出字段匹配的笔记库，并将当前结果保存为第一条笔记。

@@ -3,20 +3,13 @@ import type {
   SelectionToolbarCustomAction,
   SelectionToolbarCustomActionNotebaseAccount,
   SelectionToolbarCustomActionNotebaseConnection,
-  SelectionToolbarCustomActionNotebaseMapping,
   SelectionToolbarCustomActionOutputField,
 } from "@/types/config/selection-toolbar"
-import {
-  IconChevronsRight,
-  IconExternalLink,
-  IconPlus,
-  IconRefresh,
-  IconTrash,
-} from "@tabler/icons-react"
+import { IconChevronsRight, IconExternalLink, IconRefresh } from "@tabler/icons-react"
 import { useQuery } from "@tanstack/react-query"
 import { useSelector } from "@tanstack/react-store"
 import { dequal } from "dequal"
-import { useCallback, useEffect, useMemo } from "react"
+import { useCallback, useEffect, useMemo, useRef } from "react"
 import { useAutosaveContext } from "@/components/form/use-autosave"
 import { Alert, AlertAction, AlertDescription, AlertTitle } from "@/components/ui/base-ui/alert"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/base-ui/avatar"
@@ -43,10 +36,12 @@ import {
 } from "@/utils/notebase/connection"
 import { isORPCForbiddenError } from "@/utils/notebase/errors"
 import {
-  createNotebaseMapping,
+  createNameMatchedNotebaseMappings,
+  getUndecidedOutputFields,
   isNotebaseMappingCompatible,
-  isSupportedNotebaseColumnConfig,
+  mapNotebaseField,
   resolveNotebaseMappings,
+  skipNotebaseFields,
   validateNotebaseMappings,
 } from "@/utils/notebase/mapping"
 import { orpc } from "@/utils/orpc/client"
@@ -61,8 +56,9 @@ interface SelectItemData<T> {
   label: string
 }
 
-function t(key: string) {
-  return i18n.t(`options.selectionToolbar.customActions.form.notebase.${key}` as never)
+function t(key: string, substitutions?: string[]) {
+  const translate = i18n.t as (key: string, substitutions?: string[]) => string
+  return translate(`options.selectionToolbar.customActions.form.notebase.${key}`, substitutions)
 }
 
 function getAccountFallback(
@@ -112,116 +108,31 @@ function getMappingStatusMessage(
   }
 }
 
-function getSelectableLocalFields(
-  outputSchema: SelectionToolbarCustomActionOutputField[],
-  connection: SelectionToolbarCustomActionNotebaseConnection,
-  currentMapping: SelectionToolbarCustomActionNotebaseMapping,
-) {
-  const usedLocalFieldIds = new Set(
-    connection.mappings
-      .filter((mapping) => mapping.id !== currentMapping.id)
-      .map((mapping) => mapping.localFieldId),
-  )
+// The "don't save" choice in a field's column select. Column ids are UUIDs,
+// so it never collides with one.
+const SKIP_FIELD_VALUE = "read-frog:skip-field"
 
-  return outputSchema.filter(
-    (field) => !usedLocalFieldIds.has(field.id) || field.id === currentMapping.localFieldId,
-  )
-}
-
-function getSelectableRemoteColumns(
+// The columns a field can be saved to: those that hold its type and that no
+// other field is saved to.
+function getSelectableColumns(
   connection: SelectionToolbarCustomActionNotebaseConnection,
-  currentLocalField: SelectionToolbarCustomActionOutputField | null,
-  currentMapping: SelectionToolbarCustomActionNotebaseMapping,
+  field: SelectionToolbarCustomActionOutputField,
   notebaseColumns: NotebaseGetSchemaOutput["notebaseColumns"],
 ) {
-  const usedRemoteColumnIds = new Set(
+  const usedByOtherFields = new Set(
     connection.mappings
-      .filter((mapping) => mapping.id !== currentMapping.id)
+      .filter((mapping) => mapping.localFieldId !== field.id)
       .map((mapping) => mapping.notebaseColumnId),
   )
 
-  return notebaseColumns.filter((column) => {
-    if (!isSupportedNotebaseColumnConfig(column.config)) {
-      return false
-    }
-
-    if (usedRemoteColumnIds.has(column.id) && column.id !== currentMapping.notebaseColumnId) {
-      return false
-    }
-
-    if (!currentLocalField) {
-      return column.id === currentMapping.notebaseColumnId
-    }
-
-    return (
-      column.id === currentMapping.notebaseColumnId ||
-      isNotebaseMappingCompatible(currentLocalField.type, column.config)
-    )
-  })
-}
-
-function getNextDefaultMapping(
-  connection: SelectionToolbarCustomActionNotebaseConnection,
-  outputSchema: SelectionToolbarCustomActionOutputField[],
-  notebaseColumns: NotebaseGetSchemaOutput["notebaseColumns"],
-) {
-  const usedLocalFieldIds = new Set(connection.mappings.map((mapping) => mapping.localFieldId))
-  const usedRemoteColumnIds = new Set(
-    connection.mappings.map((mapping) => mapping.notebaseColumnId),
+  return notebaseColumns.filter(
+    (column) =>
+      isNotebaseMappingCompatible(field.type, column.config) && !usedByOtherFields.has(column.id),
   )
-
-  for (const localField of outputSchema) {
-    if (usedLocalFieldIds.has(localField.id)) {
-      continue
-    }
-
-    const notebaseColumn = notebaseColumns.find(
-      (column) =>
-        !usedRemoteColumnIds.has(column.id) &&
-        isSupportedNotebaseColumnConfig(column.config) &&
-        isNotebaseMappingCompatible(localField.type, column.config),
-    )
-
-    if (notebaseColumn) {
-      return createNotebaseMapping(localField.id, notebaseColumn.id, notebaseColumn.name)
-    }
-  }
-
-  return null
 }
 
 function getNotebaseSelectItems(notebases: NotebaseListOutput | undefined) {
   return notebases
-}
-
-function getLocalFieldSelectItems(
-  fields: SelectionToolbarCustomActionOutputField[],
-): SelectItemData<string>[] {
-  return fields.map((field) => ({
-    value: field.id,
-    label: field.name,
-  }))
-}
-
-function getRemoteFieldSelectItems(
-  mapping: SelectionToolbarCustomActionNotebaseMapping,
-  remoteOptions: NotebaseGetSchemaOutput["notebaseColumns"],
-  currentRemoteMissing: boolean,
-): SelectItemData<string>[] {
-  return [
-    ...(currentRemoteMissing
-      ? [
-          {
-            value: mapping.notebaseColumnId,
-            label: `${mapping.notebaseColumnNameSnapshot} (${t("columnUnavailableOption")})`,
-          },
-        ]
-      : []),
-    ...remoteOptions.map((column) => ({
-      value: column.id,
-      label: column.name,
-    })),
-  ]
 }
 
 export const NotebaseConnectionField = withForm({
@@ -295,6 +206,32 @@ export const NotebaseConnectionField = withForm({
       }),
     )
 
+    // The Notebase just picked in the select. Once its columns load, the fields
+    // that share a column's name are mapped to it, unless the reader has added
+    // a mapping meanwhile.
+    const autoMapNotebaseIdRef = useRef<string | null>(null)
+    useEffect(() => {
+      const schema = schemaQuery.data
+      if (
+        !schema ||
+        !sanitizedConnection ||
+        autoMapNotebaseIdRef.current !== schema.id ||
+        sanitizedConnection.notebaseId !== schema.id
+      ) {
+        return
+      }
+
+      autoMapNotebaseIdRef.current = null
+      if (sanitizedConnection.mappings.length > 0) {
+        return
+      }
+
+      const mappings = createNameMatchedNotebaseMappings(outputSchema, schema.notebaseColumns)
+      if (mappings.length > 0) {
+        updateConnection({ ...sanitizedConnection, mappings })
+      }
+    }, [outputSchema, sanitizedConnection, schemaQuery.data, updateConnection])
+
     useEffect(() => {
       if (!isOwnedConnection || !sanitizedConnection || !currentAccount) {
         return
@@ -337,6 +274,17 @@ export const NotebaseConnectionField = withForm({
     )
 
     const hasInvalidMappings = mappingValidation?.kind === "invalid"
+    const undecidedFieldIds = useMemo(
+      () =>
+        new Set(
+          sanitizedConnection
+            ? getUndecidedOutputFields({ ...action, notebaseConnection: sanitizedConnection }).map(
+                (field) => field.id,
+              )
+            : [],
+        ),
+      [action, sanitizedConnection],
+    )
     const selectableNotebaseItems = useMemo(
       () => getNotebaseSelectItems(listQuery.data),
       [listQuery.data],
@@ -358,7 +306,15 @@ export const NotebaseConnectionField = withForm({
         return
       }
 
+      // Select reports every pick, not only a change, so picking the connected
+      // Notebase again must not touch its mappings: readers did that to
+      // "refresh" a connection and lost all but the one they then re-added.
+      if (isOwnedConnection && sanitizedConnection?.notebaseId === notebaseId) {
+        return
+      }
+
       const notebase = listQuery.data?.find((item: NotebaseItem) => item.id === notebaseId)
+      autoMapNotebaseIdRef.current = notebaseId
       updateConnection({
         notebaseId,
         notebaseNameSnapshot:
@@ -389,26 +345,6 @@ export const NotebaseConnectionField = withForm({
               (column: NotebaseColumn) => column.id === mapping.notebaseColumnId,
             )?.name ?? mapping.notebaseColumnNameSnapshot,
         })),
-      })
-    }
-
-    const handleAddMapping = () => {
-      if (!sanitizedConnection || !schemaQuery.data) {
-        return
-      }
-
-      const nextMapping = getNextDefaultMapping(
-        sanitizedConnection,
-        outputSchema,
-        schemaQuery.data.notebaseColumns,
-      )
-      if (!nextMapping) {
-        return
-      }
-
-      updateConnection({
-        ...sanitizedConnection,
-        mappings: [...sanitizedConnection.mappings, nextMapping],
       })
     }
 
@@ -629,178 +565,124 @@ export const NotebaseConnectionField = withForm({
                   </Alert>
                 )}
 
+                {mappingValidation?.kind === "empty" && (
+                  <Alert variant="warning">
+                    <AlertTitle>{t("noFieldSavedTitle")}</AlertTitle>
+                    <AlertDescription>{t("noFieldSavedDescription")}</AlertDescription>
+                  </Alert>
+                )}
+
                 <Field className="gap-3">
                   <div className="flex items-center justify-between gap-3">
                     <FieldTitle>{t("mappingsLabel")}</FieldTitle>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      onClick={handleAddMapping}
-                      disabled={
-                        !getNextDefaultMapping(
-                          sanitizedConnection,
-                          outputSchema,
-                          schemaQuery.data.notebaseColumns,
-                        )
-                      }
-                    >
-                      <IconPlus className="size-4" />
-                      {t("addMappingAction")}
-                    </Button>
+                    <span className="text-xs text-muted-foreground">
+                      {t("mappingSummary", [
+                        String(sanitizedConnection.mappings.length),
+                        String(sanitizedConnection.skippedFieldIds?.length ?? 0),
+                        String(undecidedFieldIds.size),
+                      ])}
+                    </span>
                   </div>
 
-                  {sanitizedConnection.mappings.length === 0 && (
-                    <p className="text-sm text-muted-foreground">{t("mappingsEmpty")}</p>
-                  )}
-
                   <div className="space-y-2">
-                    <div className="hidden gap-2 px-1 text-xs font-medium text-muted-foreground md:grid md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto] md:items-center">
+                    <div className="hidden gap-2 px-1 text-xs font-medium text-muted-foreground md:grid md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] md:items-center">
                       <span>{t("localFieldLabel")}</span>
                       <span />
                       <span>{t("remoteFieldLabel")}</span>
-                      <span />
                     </div>
 
-                    {resolvedMappings.map(({ localField, mapping, notebaseColumn, status }) => {
-                      const localOptions = getSelectableLocalFields(
-                        outputSchema,
-                        sanitizedConnection,
-                        mapping,
+                    {outputSchema.map((field) => {
+                      const resolved = resolvedMappings.find(
+                        ({ mapping }) => mapping.localFieldId === field.id,
                       )
-                      const remoteOptions = getSelectableRemoteColumns(
+                      const mapping = resolved?.mapping
+                      const isSkipped = sanitizedConnection.skippedFieldIds?.includes(field.id)
+                      const isUndecided = undecidedFieldIds.has(field.id)
+                      const columns = getSelectableColumns(
                         sanitizedConnection,
-                        localField,
-                        mapping,
+                        field,
                         schemaQuery.data.notebaseColumns,
                       )
-                      const currentRemoteMissing = !schemaQuery.data.notebaseColumns.some(
-                        (column: NotebaseColumn) => column.id === mapping.notebaseColumnId,
-                      )
-                      const localSelectItems = getLocalFieldSelectItems(localOptions)
-                      const remoteSelectItems = getRemoteFieldSelectItems(
-                        mapping,
-                        remoteOptions,
-                        currentRemoteMissing,
-                      )
+                      const currentColumnMissing =
+                        !!mapping &&
+                        !schemaQuery.data.notebaseColumns.some(
+                          (column: NotebaseColumn) => column.id === mapping.notebaseColumnId,
+                        )
+                      const missingColumnLabel = mapping
+                        ? `${mapping.notebaseColumnNameSnapshot} (${t("columnUnavailableOption")})`
+                        : ""
+                      const items: SelectItemData<string>[] = [
+                        { value: SKIP_FIELD_VALUE, label: t("skipFieldOption") },
+                        ...(currentColumnMissing
+                          ? [{ value: mapping.notebaseColumnId, label: missingColumnLabel }]
+                          : []),
+                        ...columns.map((column) => ({ value: column.id, label: column.name })),
+                      ]
 
                       return (
-                        <div key={mapping.id} className="space-y-1.5">
-                          <div className="grid gap-2 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto] md:items-center">
-                            <Select<string>
-                              value={mapping.localFieldId}
-                              items={localSelectItems}
-                              onValueChange={(value) => {
-                                if (typeof value !== "string") {
-                                  return
-                                }
-
-                                updateConnection({
-                                  ...sanitizedConnection,
-                                  mappings: sanitizedConnection.mappings.map((item) =>
-                                    item.id === mapping.id
-                                      ? { ...item, localFieldId: value }
-                                      : item,
-                                  ),
-                                })
-                              }}
+                        <div key={field.id} className="space-y-1.5">
+                          <div className="grid gap-2 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] md:items-center">
+                            <span
+                              className={cn(
+                                "truncate px-1 text-sm",
+                                isSkipped && "text-muted-foreground",
+                              )}
                             >
-                              <SelectTrigger className="w-full" aria-invalid={status !== "valid"}>
-                                <SelectValue placeholder={t("localFieldPlaceholder")} />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectGroup>
-                                  {localOptions.map((field) => (
-                                    <SelectItem key={field.id} value={field.id}>
-                                      {field.name}
-                                    </SelectItem>
-                                  ))}
-                                </SelectGroup>
-                              </SelectContent>
-                            </Select>
+                              {field.name}
+                            </span>
 
                             <div className="hidden items-center justify-center text-muted-foreground md:flex">
                               <IconChevronsRight className="size-4" />
                             </div>
 
-                            <Select<string>
-                              value={mapping.notebaseColumnId}
-                              items={remoteSelectItems}
+                            <Select<string | null>
+                              value={
+                                mapping?.notebaseColumnId ?? (isSkipped ? SKIP_FIELD_VALUE : null)
+                              }
+                              items={items}
                               onValueChange={(value) => {
-                                if (typeof value !== "string") {
+                                if (value === SKIP_FIELD_VALUE) {
+                                  updateConnection(
+                                    skipNotebaseFields(sanitizedConnection, [field.id]),
+                                  )
                                   return
                                 }
 
-                                const nextNotebaseColumn = schemaQuery.data.notebaseColumns.find(
-                                  (column: NotebaseColumn) => column.id === value,
+                                const column = schemaQuery.data.notebaseColumns.find(
+                                  (item: NotebaseColumn) => item.id === value,
                                 )
-                                updateConnection({
-                                  ...sanitizedConnection,
-                                  mappings: sanitizedConnection.mappings.map((item) =>
-                                    item.id === mapping.id
-                                      ? {
-                                          ...item,
-                                          notebaseColumnId: value,
-                                          notebaseColumnNameSnapshot:
-                                            nextNotebaseColumn?.name ??
-                                            item.notebaseColumnNameSnapshot,
-                                        }
-                                      : item,
-                                  ),
-                                })
+                                if (column) {
+                                  updateConnection(
+                                    mapNotebaseField(sanitizedConnection, field.id, column),
+                                  )
+                                }
                               }}
                             >
-                              <SelectTrigger className="w-full" aria-invalid={status !== "valid"}>
-                                <SelectValue placeholder={t("remoteFieldPlaceholder")}>
-                                  {notebaseColumn?.name ??
-                                    (currentRemoteMissing
-                                      ? `${mapping.notebaseColumnNameSnapshot} (${t("columnUnavailableOption")})`
-                                      : mapping.notebaseColumnNameSnapshot)}
-                                </SelectValue>
+                              <SelectTrigger
+                                className={cn(
+                                  "w-full",
+                                  isUndecided && "border-warning bg-warning/5 text-warning",
+                                  isSkipped && "border-dashed text-muted-foreground",
+                                )}
+                                aria-invalid={!!resolved && resolved.status !== "valid"}
+                              >
+                                <SelectValue placeholder={t("undecidedFieldPlaceholder")} />
                               </SelectTrigger>
                               <SelectContent>
                                 <SelectGroup>
-                                  {currentRemoteMissing && (
-                                    <SelectItem
-                                      key={`${mapping.id}-missing`}
-                                      value={mapping.notebaseColumnId}
-                                    >
-                                      {`${mapping.notebaseColumnNameSnapshot} (${t("columnUnavailableOption")})`}
-                                    </SelectItem>
-                                  )}
-                                  {remoteOptions.map((column) => (
-                                    <SelectItem key={column.id} value={column.id}>
-                                      {column.name}
+                                  {items.map((item) => (
+                                    <SelectItem key={item.value} value={item.value}>
+                                      {item.label}
                                     </SelectItem>
                                   ))}
                                 </SelectGroup>
                               </SelectContent>
                             </Select>
-
-                            <div className="flex justify-end md:justify-start">
-                              <Button
-                                type="button"
-                                size="icon-sm"
-                                variant="ghost"
-                                onClick={() => {
-                                  updateConnection({
-                                    ...sanitizedConnection,
-                                    mappings: sanitizedConnection.mappings.filter(
-                                      (item) => item.id !== mapping.id,
-                                    ),
-                                  })
-                                }}
-                                aria-label={t("removeMappingAction")}
-                                title={t("removeMappingAction")}
-                              >
-                                <IconTrash />
-                              </Button>
-                            </div>
                           </div>
 
-                          {status !== "valid" && (
+                          {resolved && resolved.status !== "valid" && (
                             <p className="px-1 text-xs text-destructive">
-                              {getMappingStatusMessage(status)}
+                              {getMappingStatusMessage(resolved.status)}
                             </p>
                           )}
                         </div>

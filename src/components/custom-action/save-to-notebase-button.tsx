@@ -10,10 +10,13 @@ import { useSaveToNotebase } from "./use-save-to-notebase"
 
 export function SaveToNotebaseButton({
   action,
+  failed,
   isRunning,
   result,
 }: {
   action: SelectionToolbarCustomAction
+  /** The run ended in an error: `result` is only what streamed before it, so it is not saved. */
+  failed: boolean
   isRunning: boolean
   result: Record<string, unknown> | null
 }) {
@@ -35,10 +38,11 @@ export function SaveToNotebaseButton({
   const isDisabled = connection
     ? isSessionPending ||
       isRunning ||
+      failed ||
       !result ||
       (isAuthenticated && !hasCurrentAccount) ||
       isSaving
-    : isSessionPending || isRunning || !result
+    : isSessionPending || isRunning || failed || !result
   const label =
     connection && isSaving ? i18n.t("action.saveToNotebaseSaving") : i18n.t("action.saveToNotebase")
 

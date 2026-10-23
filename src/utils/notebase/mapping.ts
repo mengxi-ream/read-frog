@@ -6,6 +6,7 @@ import type {
 import type { NotebaseColumnConfig } from "@read-frog/definitions"
 import type {
   SelectionToolbarCustomAction,
+  SelectionToolbarCustomActionNotebaseConnection,
   SelectionToolbarCustomActionNotebaseMapping,
   SelectionToolbarCustomActionOutputField,
   SelectionToolbarCustomActionOutputType,
@@ -66,6 +67,41 @@ export function isNotebaseMappingCompatible(
   return (
     isSupportedNotebaseColumnConfig(notebaseColumnConfig) && localType === notebaseColumnConfig.type
   )
+}
+
+function normalizeMappingName(name: string) {
+  return name.normalize("NFKC").trim().toLowerCase()
+}
+
+/**
+ * Maps each field to the free column with the same name (ignoring case and
+ * surrounding spaces) that can hold its type. A name is all an action and a
+ * Notebase share: one created from the action took its column names from the
+ * fields, so it maps whole, while fields of a hand-made Notebase that match no
+ * column stay unmapped for the reader to pick instead of being guessed.
+ */
+export function createNameMatchedNotebaseMappings(
+  outputSchema: readonly SelectionToolbarCustomActionOutputField[],
+  notebaseColumns: readonly NotebaseColumn[],
+): SelectionToolbarCustomActionNotebaseMapping[] {
+  const usedColumnIds = new Set<string>()
+  const mappings: SelectionToolbarCustomActionNotebaseMapping[] = []
+
+  for (const field of outputSchema) {
+    const fieldName = normalizeMappingName(field.name)
+    const column = notebaseColumns.find(
+      (candidate) =>
+        !usedColumnIds.has(candidate.id) &&
+        isNotebaseMappingCompatible(field.type, candidate.config) &&
+        normalizeMappingName(candidate.name) === fieldName,
+    )
+    if (column) {
+      usedColumnIds.add(column.id)
+      mappings.push(createNotebaseMapping(field.id, column.id, column.name))
+    }
+  }
+
+  return mappings
 }
 
 export function resolveNotebaseMappings(
@@ -134,6 +170,63 @@ export function validateNotebaseMappings(
   }
 
   return { kind: "valid", resolvedMappings }
+}
+
+/**
+ * The action's fields the reader has not decided about: neither mapped to a
+ * column nor marked "don't save". A save leaves them out like a skipped field,
+ * but reminds the reader about them each time. A mapping whose column is gone is
+ * not undecided; it is invalid, and blocks the save until it is fixed.
+ */
+export function getUndecidedOutputFields(
+  action: SelectionToolbarCustomAction,
+): SelectionToolbarCustomActionOutputField[] {
+  const connection = sanitizeCustomActionNotebaseConnection(
+    action.notebaseConnection,
+    action.outputSchema,
+  )
+  if (!connection) {
+    return []
+  }
+
+  const decidedFieldIds = new Set([
+    ...connection.mappings.map((mapping) => mapping.localFieldId),
+    ...(connection.skippedFieldIds ?? []),
+  ])
+  return action.outputSchema.filter((field) => !decidedFieldIds.has(field.id))
+}
+
+/** The connection with `fieldId` saved to `column`, replacing what it was before. */
+export function mapNotebaseField(
+  connection: SelectionToolbarCustomActionNotebaseConnection,
+  fieldId: string,
+  column: Pick<NotebaseColumn, "id" | "name">,
+): SelectionToolbarCustomActionNotebaseConnection {
+  const existing = connection.mappings.find((mapping) => mapping.localFieldId === fieldId)
+  const mapping = existing
+    ? { ...existing, notebaseColumnId: column.id, notebaseColumnNameSnapshot: column.name }
+    : createNotebaseMapping(fieldId, column.id, column.name)
+
+  return {
+    ...connection,
+    mappings: existing
+      ? connection.mappings.map((item) => (item === existing ? mapping : item))
+      : [...connection.mappings, mapping],
+    skippedFieldIds: connection.skippedFieldIds?.filter((id) => id !== fieldId),
+  }
+}
+
+/** The connection with these fields marked "don't save" (and their mappings removed). */
+export function skipNotebaseFields(
+  connection: SelectionToolbarCustomActionNotebaseConnection,
+  fieldIds: readonly string[],
+): SelectionToolbarCustomActionNotebaseConnection {
+  const skipped = new Set(fieldIds)
+  return {
+    ...connection,
+    mappings: connection.mappings.filter((mapping) => !skipped.has(mapping.localFieldId)),
+    skippedFieldIds: [...new Set([...(connection.skippedFieldIds ?? []), ...fieldIds])],
+  }
 }
 
 export function buildNotebaseRowCells(

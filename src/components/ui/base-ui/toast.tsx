@@ -23,6 +23,8 @@ type ToastData = {
     "children" | "className" | "swipeDirection" | "toast"
   >
   tooltipStyle?: boolean
+  /** A second button beside `actionProps`'s; with it, both sit under the description. */
+  secondaryAction?: { children: ReactNode; onClick: () => void }
 }
 
 export type ToastPosition =
@@ -97,6 +99,7 @@ function FullToastContent({
   toast: Toast.Root.ToastObject
   stacked?: boolean
 }): ReactElement {
+  const secondaryAction = (toast.data as ToastData | undefined)?.secondaryAction
   return (
     <Toast.Content
       data-slot="toast-content"
@@ -116,8 +119,24 @@ function FullToastContent({
           data-slot="toast-description"
           className="text-sm [overflow-wrap:anywhere] text-muted-foreground"
         />
+        {secondaryAction && toast.actionProps ? (
+          <div className="mt-2 flex flex-wrap gap-2">
+            <Toast.Action data-slot="toast-action" render={ACTION_RENDER}>
+              {toast.actionProps.children}
+            </Toast.Action>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              data-slot="toast-secondary-action"
+              onClick={secondaryAction.onClick}
+            >
+              {secondaryAction.children}
+            </Button>
+          </div>
+        ) : null}
       </div>
-      {toast.actionProps ? (
+      {toast.actionProps && !secondaryAction ? (
         <Toast.Action data-slot="toast-action" render={ACTION_RENDER} className="-mt-1 shrink-0">
           {toast.actionProps.children}
         </Toast.Action>

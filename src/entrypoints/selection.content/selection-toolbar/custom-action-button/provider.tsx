@@ -473,6 +473,7 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
               <>
                 <SaveToNotebaseButton
                   action={activeAction}
+                  failed={!!displayedError}
                   isRunning={displayedIsRunning}
                   result={displayedResult}
                 />

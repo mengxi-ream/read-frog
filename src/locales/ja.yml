@@ -814,16 +814,16 @@ options:
           schemaErrorDescription: 少し待ってからもう一度更新してください。
           schemaLoading: notebase スキーマを読み込み中...
           mappingsLabel: フィールドマッピング
-          mappingsEmpty: まだマッピングはありません。フィールドを保存する準備ができたら追加してください。
-          addMappingAction: マッピングを追加
-          removeMappingAction: マッピングを削除
           localFieldLabel: アクションフィールド
-          localFieldPlaceholder: アクションフィールドを選択
           remoteFieldLabel: Notebase フィールド
-          remoteFieldPlaceholder: notebase フィールドを選択
           columnUnavailableOption: 削除済み
           invalidMappingsTitle: 一部のマッピングに対応が必要です
           invalidMappingsDescription: 無効なマッピングは保持されます。Notebase に保存する前に修正してください。
+          noFieldSavedTitle: "この Notebase に保存されるフィールドがありません"
+          noFieldSavedDescription: "ノートを保存するには、少なくとも 1 つのフィールドに Notebase フィールドを選んでください。"
+          mappingSummary: "保存 $1 · 保存しない $2 · 未決定 $3"
+          skipFieldOption: "保存しない"
+          undecidedFieldPlaceholder: "Notebase フィールドを選ぶか、保存しない"
           mappingMissingLocal: マッピングされたアクションフィールドは存在しなくなりました。
           mappingMissingRemote: マッピングされた notebase フィールドは存在しなくなりました。
           mappingMissingSchema: このマッピングを検証するには、notebase スキーマを更新してください。
@@ -1578,6 +1578,10 @@ action:
   saveToNotebaseLimitExceeded: さらに Notebase ノートを保存するにはアップグレードが必要です
   saveToNotebaseTableUnavailable: 選択した Notebase は利用できなくなりました
   saveToNotebaseConnectionInvalid: この Notebase 接続は古くなっています。Custom AI Actions で更新し、マッピングを修正してください。
+  saveToNotebaseInvalidContent: "AI の回答に形式の合わない値があったため、保存しませんでした。もう一度実行してから保存してください。"
+  saveToNotebaseNoFieldSaved: "保存しませんでした：この操作には Notebase に保存するフィールドがありません。設定で少なくとも 1 つ選んでください。"
+  saveToNotebaseUndecidedTitle: "保存しました。次のフィールドは保存するかまだ決まっていません"
+  saveToNotebaseSkipUndecided: "すべて保存しない"
   saveToNotebaseNoMappings: 保存する前に、少なくとも1つの有効なマッピングを追加してください
   saveToNotebaseCreateTitle: Notebase を作成しますか？
   saveToNotebaseCreateDescription: この Custom Action の出力フィールドに合わせた列を持つ Notebase を作成し、現在の結果を最初のノートとして保存します。

@@ -1,18 +1,24 @@
 // @vitest-environment jsdom
 import type { NotebaseGetSchemaOutput } from "@read-frog/api-contract"
 import type { Config } from "@/types/config/config"
-import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
+import type {
+  SelectionToolbarCustomAction,
+  SelectionToolbarCustomActionNotebaseConnection,
+} from "@/types/config/selection-toolbar"
 import { ORPCError } from "@orpc/client"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { createStore, Provider } from "jotai"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import { fakeBrowser } from "wxt/testing/fake-browser"
 import { env } from "@/env"
-import { configAtom } from "@/utils/atoms/config"
+import { configAtom, configFieldsAtomMap } from "@/utils/atoms/config"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { getBuiltInDictionaryAction } from "@/utils/custom-actions"
-import { i18n } from "@/utils/i18n"
+import { formatUiList, i18n } from "@/utils/i18n"
 import { sendMessage } from "@/utils/message"
+import { buildCustomActionOptionsRoute } from "@/utils/navigation"
+import { mapNotebaseField } from "@/utils/notebase/mapping"
 import { orpcClient } from "@/utils/orpc/client"
 import { SaveToNotebaseButton } from "../save-to-notebase-button"
 import { SaveToNotebaseDialogHost } from "../save-to-notebase-dialog-host"
@@ -230,7 +236,11 @@ function getNoteSaveCompletions() {
     .map(([, data]) => data)
 }
 
-function renderButton(config: Config, action: SelectionToolbarCustomAction) {
+function renderButton(
+  config: Config,
+  action: SelectionToolbarCustomAction,
+  { failed = false }: { failed?: boolean } = {},
+) {
   const store = createStore()
   store.set(configAtom, config)
   const queryClient = new QueryClient({
@@ -241,11 +251,12 @@ function renderButton(config: Config, action: SelectionToolbarCustomAction) {
       },
     },
   })
-  return render(
+  const rendered = render(
     <QueryClientProvider client={queryClient}>
       <Provider store={store}>
         <SaveToNotebaseButton
           action={action}
+          failed={failed}
           isRunning={false}
           result={{ summary: "A short summary" }}
         />
@@ -253,10 +264,18 @@ function renderButton(config: Config, action: SelectionToolbarCustomAction) {
       </Provider>
     </QueryClientProvider>,
   )
+  return { ...rendered, store }
+}
+
+function getStoredDictionaryConnection(store: ReturnType<typeof createStore>) {
+  return store.get(configAtom).selectionToolbar.builtInActions.dictionary.notebaseConnection
 }
 
 describe("saveToNotebaseButton notebase availability", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
+    // Config writes merge into what storage holds, so one test's connection
+    // must not seed the next.
+    await fakeBrowser.storage.local.clear()
     vi.clearAllMocks()
     toastManagerMock.add.mockReset().mockReturnValue("toast-id")
     toastManagerMock.close.mockReset()
@@ -800,6 +819,214 @@ describe("saveToNotebaseButton notebase availability", () => {
     expect(toastManagerMock.close).toHaveBeenCalledWith("toast-id")
     expect(sendMessage).toHaveBeenCalledWith("openOptionsPage", {
       route: "/custom-actions?actionId=action-1&tab=notebase",
+    })
+  })
+
+  it("keeps the part of a failed run that streamed before the error out of the Notebase", () => {
+    const config = cloneConfig(DEFAULT_CONFIG)
+    config.betaExperience.enabled = true
+    renderButton(config, createConnectedAction(), { failed: true })
+
+    expect(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") })).toBeDisabled()
+  })
+
+  describe("undecided fields", () => {
+    // Only the term is mapped, as on a connection that lost the rest.
+    function createTermOnlyDictionaryAction() {
+      const action = createConnectedDictionaryAction()
+      action.notebaseConnection!.mappings = action.notebaseConnection!.mappings.slice(0, 1)
+      return action
+    }
+
+    type WarningToast = {
+      actionProps?: { onClick?: () => void }
+      data?: { secondaryAction?: { onClick: () => void } }
+    }
+
+    async function saveAndGetWarning(action: SelectionToolbarCustomAction) {
+      const config = cloneConfig(DEFAULT_CONFIG)
+      config.betaExperience.enabled = true
+      vi.mocked(orpcClient.notebase.getSchema).mockResolvedValueOnce(createSchemaForAction(action))
+      const { store } = renderButton(config, action)
+      fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
+      await waitFor(() => expect(toastManagerMock.add).toHaveBeenCalled())
+      expect(notebaseRowCreateMock).toHaveBeenCalledTimes(1)
+      return { store, toast: toastManagerMock.add.mock.calls[0]?.[0] as WarningToast }
+    }
+
+    it("names them with a choice to skip them or configure", async () => {
+      const action = createTermOnlyDictionaryAction()
+      const undecided = action.outputSchema.slice(1)
+
+      await saveAndGetWarning(action)
+
+      expect(toastManagerMock.add).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "warning",
+          title: i18n.t("action.saveToNotebaseUndecidedTitle"),
+          actionProps: expect.objectContaining({
+            children: i18n.t("action.saveToNotebaseSkipUndecided"),
+          }),
+          data: {
+            secondaryAction: expect.objectContaining({
+              children: i18n.t("action.saveToNotebaseGoConfigure"),
+            }),
+          },
+        }),
+      )
+      expect(vi.mocked(formatUiList)).toHaveBeenLastCalledWith(undecided.map((field) => field.name))
+    })
+
+    it("names them again on the next save while they stay undecided", async () => {
+      const action = createTermOnlyDictionaryAction()
+      const undecidedNames = action.outputSchema.slice(1).map((field) => field.name)
+      const { store } = await saveAndGetWarning(action)
+
+      // The reader closes the toast without choosing, and saves again.
+      vi.mocked(orpcClient.notebase.getSchema).mockResolvedValueOnce(createSchemaForAction(action))
+      fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
+
+      await waitFor(() => expect(toastManagerMock.add).toHaveBeenCalledTimes(2))
+      expect(toastManagerMock.add).toHaveBeenLastCalledWith(
+        expect.objectContaining({ type: "warning" }),
+      )
+      expect(vi.mocked(formatUiList)).toHaveBeenLastCalledWith(undecidedNames)
+      expect(getStoredDictionaryConnection(store)?.skippedFieldIds).toBeUndefined()
+    })
+
+    it("marks them don't save from the toast", async () => {
+      const action = createTermOnlyDictionaryAction()
+      const undecidedIds = action.outputSchema.slice(1).map((field) => field.id)
+      const { store, toast } = await saveAndGetWarning(action)
+
+      toast.actionProps?.onClick?.()
+
+      expect(toastManagerMock.close).toHaveBeenCalledWith("toast-id")
+      await waitFor(() =>
+        expect(getStoredDictionaryConnection(store)?.skippedFieldIds).toEqual(undecidedIds),
+      )
+      expect(getStoredDictionaryConnection(store)?.mappings).toHaveLength(1)
+    })
+
+    // Changes the connection after the save, as another options tab would.
+    async function changeStoredConnectionAfterSave(
+      store: ReturnType<typeof createStore>,
+      update: (
+        connection: SelectionToolbarCustomActionNotebaseConnection,
+      ) => SelectionToolbarCustomActionNotebaseConnection,
+    ) {
+      const { selectionToolbar } = cloneConfig(store.get(configAtom))
+      const dictionary = selectionToolbar.builtInActions.dictionary
+      dictionary.notebaseConnection = update(dictionary.notebaseConnection!)
+      await act(() => store.set(configFieldsAtomMap.selectionToolbar, selectionToolbar))
+    }
+
+    it("leaves a connection to another Notebase alone", async () => {
+      const action = createTermOnlyDictionaryAction()
+      const { store, toast } = await saveAndGetWarning(action)
+      await changeStoredConnectionAfterSave(store, (connection) => ({
+        ...connection,
+        notebaseId: "notebase-2",
+      }))
+      const before = getStoredDictionaryConnection(store)
+
+      toast.actionProps?.onClick?.()
+
+      await act(async () => {})
+      expect(getStoredDictionaryConnection(store)).toEqual(before)
+    })
+
+    it("does not skip a field mapped after the save", async () => {
+      const action = createTermOnlyDictionaryAction()
+      const [, phonetic, ...rest] = action.outputSchema
+      const { store, toast } = await saveAndGetWarning(action)
+      await changeStoredConnectionAfterSave(store, (connection) =>
+        mapNotebaseField(connection, phonetic!.id, { id: "column-ipa", name: "IPA" }),
+      )
+
+      toast.actionProps?.onClick?.()
+
+      await waitFor(() =>
+        expect(getStoredDictionaryConnection(store)?.skippedFieldIds).toEqual(
+          rest.map((field) => field.id),
+        ),
+      )
+      expect(getStoredDictionaryConnection(store)?.mappings).toContainEqual(
+        expect.objectContaining({ localFieldId: phonetic!.id, notebaseColumnId: "column-ipa" }),
+      )
+    })
+
+    it("opens the mappings from the toast", async () => {
+      const action = createTermOnlyDictionaryAction()
+      const { toast } = await saveAndGetWarning(action)
+
+      toast.data?.secondaryAction?.onClick()
+
+      expect(sendMessage).toHaveBeenCalledWith("openOptionsPage", {
+        route: buildCustomActionOptionsRoute(action.id, { tab: "notebase" }),
+      })
+    })
+
+    it.each([
+      ["signed in", true],
+      ["signed out", false],
+    ])("says no field is saved when every field is skipped (%s)", async (_label, signedIn) => {
+      if (!signedIn) {
+        mockAuthState.session = null as unknown as typeof mockAuthState.session
+      }
+      const action = createConnectedDictionaryAction()
+      action.notebaseConnection!.mappings = []
+      action.notebaseConnection!.skippedFieldIds = action.outputSchema.map((field) => field.id)
+      const config = cloneConfig(DEFAULT_CONFIG)
+      config.betaExperience.enabled = true
+      renderButton(config, action)
+
+      fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
+
+      // Not "the connection is out of date", and no login for a save that
+      // could not write anything.
+      await waitFor(() =>
+        expect(toastManagerMock.add).toHaveBeenCalledWith(
+          expect.objectContaining({
+            type: "error",
+            title: i18n.t("action.saveToNotebaseNoFieldSaved"),
+          }),
+        ),
+      )
+      expect(screen.queryByText(i18n.t("action.saveToNotebaseLoginConnectedTitle"))).toBeNull()
+      expect(orpcClient.notebase.getSchema).not.toHaveBeenCalled()
+      expect(notebaseRowCreateMock).not.toHaveBeenCalled()
+    })
+
+    it("does not remind about skipped fields", async () => {
+      const action = createTermOnlyDictionaryAction()
+      action.notebaseConnection!.skippedFieldIds = action.outputSchema
+        .slice(1)
+        .map((field) => field.id)
+
+      await saveAndGetWarning(action)
+
+      expect(toastManagerMock.add).toHaveBeenCalledWith(
+        expect.objectContaining({ type: "success", title: i18n.t("action.saveToNotebaseSuccess") }),
+      )
+    })
+  })
+
+  it("blames the answer, not the connection, when the server rejects a cell", async () => {
+    const config = cloneConfig(DEFAULT_CONFIG)
+    config.betaExperience.enabled = true
+    notebaseRowCreateMock.mockRejectedValueOnce(
+      new ORPCError("CELL_VALIDATION_FAILED", { status: 422 }),
+    )
+    renderButton(config, createConnectedAction())
+
+    fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
+
+    await waitFor(() => {
+      expect(toastManagerMock.add).toHaveBeenCalledWith({
+        type: "error",
+        title: i18n.t("action.saveToNotebaseInvalidContent"),
+      })
     })
   })
 

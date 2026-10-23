@@ -105,7 +105,12 @@ function toBuiltInState(
   return {
     enabled: action.enabled !== false,
     providerId: action.providerId,
-    notebaseConnection: action.notebaseConnection,
+    // Written whole: an update merges into the stored connection key by key,
+    // so a list this one leaves out would outlive the Notebase it was for.
+    notebaseConnection: action.notebaseConnection && {
+      skippedFieldIds: undefined,
+      ...action.notebaseConnection,
+    },
     ...(keepsDefaultKey ? {} : { shortcut: action.shortcut }),
   }
 }
