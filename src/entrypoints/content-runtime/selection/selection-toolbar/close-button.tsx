@@ -7,8 +7,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/base-ui/dropdown-menu"
-import { SELECTION_CONTENT_OVERLAY_LAYERS } from "@/entrypoints/selection.content/overlay-layers"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { SELECTION_CONTENT_OVERLAY_LAYERS } from "@/utils/constants/selection-overlay-layers"
 import { i18n } from "@/utils/i18n"
 import { shadowWrapper } from "../main"
 

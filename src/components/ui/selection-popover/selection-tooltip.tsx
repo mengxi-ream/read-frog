@@ -2,7 +2,7 @@ import type { ReactNode } from "react"
 import { use, useCallback, useState } from "react"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
 import { useSelectionPopoverOverlayProps } from "@/components/ui/selection-popover"
-import { SELECTION_CONTENT_OVERLAY_LAYERS } from "@/entrypoints/selection.content/overlay-layers"
+import { SELECTION_CONTENT_OVERLAY_LAYERS } from "@/utils/constants/selection-overlay-layers"
 import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-host"
 import { cn } from "@/utils/styles/utils"
 

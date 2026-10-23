@@ -7,11 +7,11 @@ import { IconGripHorizontal, IconPin, IconPinnedFilled, IconX } from "@tabler/ic
 import * as React from "react"
 import { Rnd } from "react-rnd"
 import { Button } from "@/components/ui/base-ui/button"
+import { NOTRANSLATE_CLASS } from "@/utils/constants/dom-labels"
 import {
   SELECTION_CONTENT_OVERLAY_LAYERS,
   SELECTION_CONTENT_OVERLAY_ROOT_ATTRIBUTE,
-} from "@/entrypoints/selection.content/overlay-layers"
-import { NOTRANSLATE_CLASS } from "@/utils/constants/dom-labels"
+} from "@/utils/constants/selection-overlay-layers"
 import { cn } from "@/utils/styles/utils"
 import { usePreventScrollThrough } from "./use-prevent-scroll-through"
 import {

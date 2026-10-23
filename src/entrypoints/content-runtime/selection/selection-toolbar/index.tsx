@@ -6,10 +6,6 @@ import type { ModalDialogHostController } from "./modal-dialog-host"
 import type { DeferredSelectionOpenDetail } from "@/utils/constants/selection"
 import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react"
-import {
-  SELECTION_CONTENT_OVERLAY_LAYERS,
-  SELECTION_CONTENT_OVERLAY_ROOT_ATTRIBUTE,
-} from "@/entrypoints/selection.content/overlay-layers"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { NOTRANSLATE_CLASS } from "@/utils/constants/dom-labels"
 import {
@@ -19,6 +15,10 @@ import {
   MARGIN,
   SELECTION_TOOLBAR_READY_EVENT,
 } from "@/utils/constants/selection"
+import {
+  SELECTION_CONTENT_OVERLAY_LAYERS,
+  SELECTION_CONTENT_OVERLAY_ROOT_ATTRIBUTE,
+} from "@/utils/constants/selection-overlay-layers"
 import { getSelectionToolbarItems } from "@/utils/selection-toolbar-items"
 import { cn } from "@/utils/styles/utils"
 import { urlMatchesPattern } from "@/utils/url-pattern"
