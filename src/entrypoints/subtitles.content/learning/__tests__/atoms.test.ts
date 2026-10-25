@@ -52,12 +52,15 @@ describe("word lookup atoms", () => {
     })
   })
 
-  it("joins a range of words, with the text between them, into one selection", () => {
+  it("runs Sentence Analysis on a range of words, with the text between them", () => {
     showCue()
 
     subtitlesStore.set(lookUpAtom, { start: indexOf("running"), end: indexOf("of") })
 
-    expect(subtitlesStore.get(customActionRequestAtom)?.selectionText).toBe("running out of")
+    expect(subtitlesStore.get(customActionRequestAtom)).toMatchObject({
+      actionId: "default-sentence-analysis",
+      selectionText: "running out of",
+    })
   })
 
   it("gives every lookup a fresh session key so the card remounts", () => {
