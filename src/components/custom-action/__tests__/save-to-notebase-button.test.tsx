@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import type { NotebaseGetSchemaOutput } from "@read-frog/api-contract"
+import type { SurfaceByFeature } from "@/types/analytics"
 import type { Config } from "@/types/config/config"
 import type {
   SelectionToolbarCustomAction,
@@ -239,7 +240,10 @@ function getNoteSaveCompletions() {
 function renderButton(
   config: Config,
   action: SelectionToolbarCustomAction,
-  { failed = false }: { failed?: boolean } = {},
+  {
+    failed = false,
+    surface = "selection_toolbar",
+  }: { failed?: boolean; surface?: SurfaceByFeature["note_save"] } = {},
 ) {
   const store = createStore()
   store.set(configAtom, config)
@@ -259,6 +263,7 @@ function renderButton(
           failed={failed}
           isRunning={false}
           result={{ summary: "A short summary" }}
+          surface={surface}
         />
         <SaveToNotebaseDialogHost />
       </Provider>
@@ -635,6 +640,25 @@ describe("saveToNotebaseButton notebase availability", () => {
         }),
       )
     })
+  })
+
+  it("reports a save from video subtitles under that surface", async () => {
+    const config = cloneConfig(DEFAULT_CONFIG)
+    config.betaExperience.enabled = true
+    renderButton(config, createConnectedAction(), { surface: "video_subtitles" })
+
+    fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
+
+    await waitFor(() => {
+      expect(sendMessage).toHaveBeenCalledWith(
+        "trackFeatureUsedEvent",
+        expect.objectContaining({ action_id: "save_completed", surface: "video_subtitles" }),
+      )
+    })
+    expect(sendMessage).toHaveBeenCalledWith(
+      "trackFeatureUsedEvent",
+      expect.objectContaining({ action_id: "save_requested", surface: "video_subtitles" }),
+    )
   })
 
   it("reports a rejected direct save with its failure reason", async () => {

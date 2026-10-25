@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import { createNoteSaveCompletedEvent } from "../analytics"
 
 const COMPLETION = {
+  surface: "selection_toolbar" as const,
   saveSource: "custom_action" as const,
   noteCount: 1,
   path: "create_notebase" as const,
