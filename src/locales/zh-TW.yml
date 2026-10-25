@@ -157,6 +157,8 @@ options:
       resetsAt: "$1 重置"
       daily: 每日額度
       weekly: 每週額度
+      grant: 贈送額度
+      expiresAt: "$1 到期"
       features:
         pageTranslation: 網頁翻譯
         customAction: 自訂 AI 指令

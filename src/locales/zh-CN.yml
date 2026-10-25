@@ -157,6 +157,8 @@ options:
       resetsAt: "$1 重置"
       daily: 每日额度
       weekly: 每周额度
+      grant: 赠送额度
+      expiresAt: "$1 过期"
       features:
         pageTranslation: 网页翻译
         customAction: 自定义 AI 指令

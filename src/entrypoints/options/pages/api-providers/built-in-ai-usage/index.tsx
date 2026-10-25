@@ -1,4 +1,8 @@
-import type { HostedAiCreditStatus, HostedAiFeature } from "@/utils/hosted-ai/types"
+import type {
+  HostedAiCreditGrantStatus,
+  HostedAiCreditStatus,
+  HostedAiFeature,
+} from "@/utils/hosted-ai/types"
 import { Icon } from "@iconify/react"
 import { useHostedAiStatus } from "@/components/llm-providers/use-hosted-ai-status"
 import { Progress, ProgressLabel } from "@/components/ui/base-ui/progress"
@@ -23,17 +27,27 @@ const PERIOD_LABEL_I18N_KEYS = {
   weekly: "options.apiProviders.builtInAiUsage.weekly",
 } as const satisfies Record<HostedAiCreditStatus["periodKind"], string>
 
-function getRemainingPercent(credit: HostedAiCreditStatus): number {
-  return Math.round(Math.max(0, Math.min(100, 100 - credit.usedPercent)))
+function getRemainingPercent(usedPercent: number): number {
+  return Math.round(Math.max(0, Math.min(100, 100 - usedPercent)))
 }
 
 /**
- * One bar per credit pool. The track is the whole quota and the fill is what is
- * left, growing from the left — so a fresh pool reads as a full bar.
+ * One bar per pool, plan pool or grant. The track is the whole quota and the
+ * fill is what is left, growing from the left — so a fresh pool reads as a full
+ * bar. `kindLabel` names the pool and `timeLabel` says when it resets or ends.
  */
-function CreditPoolUsage({ credit }: { credit: HostedAiCreditStatus }) {
-  const remainingPercent = getRemainingPercent(credit)
-  const formattedResetAt = credit.resetAt ? formatHostedAiResetAtLocal(credit.resetAt) : null
+function PoolUsage({
+  usedPercent,
+  features,
+  kindLabel,
+  timeLabel,
+}: {
+  usedPercent: number
+  features: HostedAiFeature[]
+  kindLabel: string
+  timeLabel: string | null
+}) {
+  const remainingPercent = getRemainingPercent(usedPercent)
 
   return (
     <div className="flex flex-col gap-1.5">
@@ -46,9 +60,7 @@ function CreditPoolUsage({ credit }: { credit: HostedAiCreditStatus }) {
         }
       >
         <ProgressLabel className="flex items-center gap-1.5 text-sm font-medium">
-          {i18n.t("options.apiProviders.builtInAiUsage.supportedFeatures", [
-            credit.features.length,
-          ])}
+          {i18n.t("options.apiProviders.builtInAiUsage.supportedFeatures", [features.length])}
           <Tooltip>
             <TooltipTrigger
               render={
@@ -59,7 +71,7 @@ function CreditPoolUsage({ credit }: { credit: HostedAiCreditStatus }) {
             </TooltipTrigger>
             <TooltipContent>
               <ul className="list-inside list-disc marker:text-green-500">
-                {credit.features.map((feature) => (
+                {features.map((feature) => (
                   <li key={feature}>{i18n.t(FEATURE_LABEL_I18N_KEYS[feature])}</li>
                 ))}
               </ul>
@@ -71,18 +83,51 @@ function CreditPoolUsage({ credit }: { credit: HostedAiCreditStatus }) {
         </span>
       </Progress>
       <div className="flex flex-wrap items-center justify-between gap-x-3 text-xs text-muted-foreground">
-        <span>{i18n.t(PERIOD_LABEL_I18N_KEYS[credit.periodKind])}</span>
-        {formattedResetAt && (
-          <span>{i18n.t("options.apiProviders.builtInAiUsage.resetsAt", [formattedResetAt])}</span>
-        )}
+        <span>{kindLabel}</span>
+        {timeLabel && <span>{timeLabel}</span>}
       </div>
     </div>
+  )
+}
+
+function CreditPoolUsage({ credit }: { credit: HostedAiCreditStatus }) {
+  const formattedResetAt = credit.resetAt ? formatHostedAiResetAtLocal(credit.resetAt) : null
+  return (
+    <PoolUsage
+      usedPercent={credit.usedPercent}
+      features={credit.features}
+      kindLabel={i18n.t(PERIOD_LABEL_I18N_KEYS[credit.periodKind])}
+      timeLabel={
+        formattedResetAt
+          ? i18n.t("options.apiProviders.builtInAiUsage.resetsAt", [formattedResetAt])
+          : null
+      }
+    />
+  )
+}
+
+/** A one-time grant: it never resets, so it shows when it expires instead. */
+function GrantUsage({ grant }: { grant: HostedAiCreditGrantStatus }) {
+  const formattedExpiresAt = formatHostedAiResetAtLocal(grant.expiresAt)
+  return (
+    <PoolUsage
+      usedPercent={grant.usedPercent}
+      features={grant.features}
+      kindLabel={i18n.t("options.apiProviders.builtInAiUsage.grant")}
+      timeLabel={
+        formattedExpiresAt
+          ? i18n.t("options.apiProviders.builtInAiUsage.expiresAt", [formattedExpiresAt])
+          : null
+      }
+    />
   )
 }
 
 export function BuiltInAiUsageConfig() {
   const { status, isSignedIn, isPending, isError } = useHostedAiStatus()
   const credits = status?.credits ?? []
+  // Listed after the plan pools, the order the server draws on them.
+  const grants = status?.grants ?? []
 
   // Guests only hold an ephemeral IP-keyed trial pool — not worth a section.
   if (!isSignedIn) {
@@ -96,17 +141,25 @@ export function BuiltInAiUsageConfig() {
     >
       {isPending ? (
         <Skeleton className="h-13 w-full" />
-      ) : isError || credits.length === 0 ? (
+      ) : isError || (credits.length === 0 && grants.length === 0) ? (
         <p className="text-sm text-muted-foreground">
           {i18n.t("hostedAi.availability.serviceUnavailable")}
         </p>
       ) : (
-        credits.map((credit) => (
-          <CreditPoolUsage
-            key={`${credit.periodKind}-${credit.features.join("-")}`}
-            credit={credit}
-          />
-        ))
+        <>
+          {credits.map((credit) => (
+            <CreditPoolUsage
+              key={`${credit.periodKind}-${credit.features.join("-")}`}
+              credit={credit}
+            />
+          ))}
+          {grants.map((grant) => (
+            <GrantUsage
+              key={`grant-${grant.expiresAt}-${grant.features.join("-")}`}
+              grant={grant}
+            />
+          ))}
+        </>
       )}
     </ConfigSection>
   )

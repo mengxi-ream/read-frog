@@ -157,6 +157,8 @@ options:
       resetsAt: "$1 tarihinde sıfırlanır"
       daily: Günlük kota
       weekly: Haftalık kota
+      grant: Hediye kota
+      expiresAt: "$1 tarihinde sona erer"
       features:
         pageTranslation: Sayfa çevirisi
         customAction: Özel AI eylemleri
