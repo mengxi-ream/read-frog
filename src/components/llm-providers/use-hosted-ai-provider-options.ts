@@ -37,7 +37,7 @@ export function useHostedAiProviderOptions(
     return {
       ...provider,
       disabled: isDurablyUnusableTier(tierStatus),
-      requiresUltra: tierStatus?.requiresUltra === true,
+      upgradeTo: tierStatus?.upgradeTo ?? undefined,
     }
   })
 }

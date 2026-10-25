@@ -1703,11 +1703,13 @@ subtitles:
     translatedExportIncomplete: No se pudieron traducir todas las líneas de subtítulos
     translatedExportSameLanguage: El idioma de origen y el de destino son iguales
 hostedAi:
-  ultraBadge:
-    tooltip: Requiere el plan Ultra · Haz clic en la insignia para obtenerlo
+  planBadge:
+    pro: Requiere el plan Pro o Ultra · Haz clic en la insignia para obtenerlo
+    ultra: Requiere el plan Ultra · Haz clic en la insignia para obtenerlo
   availability:
     authenticationRequired: Inicia sesión para usar este proveedor
     ultraRequired: Se requiere el plan Ultra
+    proRequired: Se requiere el plan Pro o Ultra
     quotaExhausted: Cuota agotada
     serviceUnavailable: No disponible temporalmente
     usedPercent: "Cuota utilizada: $1%"

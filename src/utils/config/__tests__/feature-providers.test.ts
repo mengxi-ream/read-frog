@@ -318,6 +318,7 @@ describe("feature providers", () => {
         accessAllowed: true,
         available: false,
         unavailableReason: "ultra_required",
+        upgradeTo: "ultra",
         requiresUltra: true,
         modelRevision: "r1",
       }
@@ -381,6 +382,7 @@ describe("feature providers", () => {
           accessAllowed: true,
           available: true,
           unavailableReason: null,
+          upgradeTo: null,
           requiresUltra: false,
           modelRevision: "r1",
         })
@@ -404,6 +406,7 @@ describe("feature providers", () => {
           accessAllowed: true,
           available: false,
           unavailableReason: "quota_exhausted",
+          upgradeTo: null,
           requiresUltra: false,
           modelRevision: "r1",
         })

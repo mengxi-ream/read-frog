@@ -36,6 +36,7 @@ function tier(overrides: Partial<HostedAiTierStatus> = {}): HostedAiTierStatus {
     accessAllowed: true,
     available: true,
     unavailableReason: null,
+    upgradeTo: null,
     requiresUltra: false,
     modelRevision: "normal-r7",
     ...overrides,

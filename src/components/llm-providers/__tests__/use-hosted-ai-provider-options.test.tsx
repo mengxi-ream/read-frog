@@ -30,6 +30,7 @@ function tier(overrides: Partial<HostedAiTierStatus> = {}): HostedAiTierStatus {
     accessAllowed: true,
     available: true,
     unavailableReason: null,
+    upgradeTo: null,
     requiresUltra: false,
     modelRevision: "r1",
     ...overrides,
@@ -48,11 +49,17 @@ function tier(overrides: Partial<HostedAiTierStatus> = {}): HostedAiTierStatus {
  */
 function unfundedTiers(): { normal: HostedAiTierStatus; advance: HostedAiTierStatus } {
   return {
-    normal: tier({ available: false, unavailableReason: "ultra_required", requiresUltra: true }),
+    normal: tier({
+      available: false,
+      unavailableReason: "ultra_required",
+      upgradeTo: "ultra",
+      requiresUltra: true,
+    }),
     advance: tier({
       accessAllowed: false,
       available: false,
       unavailableReason: "ultra_required",
+      upgradeTo: "ultra",
       requiresUltra: true,
     }),
   }
@@ -126,7 +133,7 @@ describe("useHostedAiProviderOptions", () => {
     expect(getDisabled(result.current)).toEqual([false, true])
   })
 
-  it("labels Ultra-gated options from the server's requiresUltra flag", () => {
+  it("badges each option with the plan the server says this account lacks", () => {
     hostedAiState.value = {
       isSignedIn: true,
       isPending: false,
@@ -138,7 +145,10 @@ describe("useHostedAiProviderOptions", () => {
             normal: tier({ requiresUltra: true }),
             advance: tier({ requiresUltra: true }),
           },
-          customAction: { normal: tier(), advance: tier({ requiresUltra: true }) },
+          customAction: {
+            normal: tier({ upgradeTo: "pro" }),
+            advance: tier({ upgradeTo: "ultra", requiresUltra: true }),
+          },
           noteSuggestion: {
             normal: tier({ requiresUltra: true }),
             advance: tier({ requiresUltra: true }),
@@ -149,8 +159,35 @@ describe("useHostedAiProviderOptions", () => {
 
     const { result } = renderHook(() => useHostedAiProviderOptions("customAction", PROVIDERS))
 
-    const badges = result.current.map((p) => ("requiresUltra" in p ? p.requiresUltra : undefined))
-    expect(badges).toEqual([false, true])
+    const badges = result.current.map((p) => ("upgradeTo" in p ? p.upgradeTo : undefined))
+    expect(badges).toEqual(["pro", "ultra"])
+  })
+
+  it("leaves an option the account can already run unbadged, whatever the plan fact", () => {
+    // An Ultra account: the tier is Ultra-only as a product fact, but this
+    // account lacks nothing, so the server reports no plan to buy.
+    hostedAiState.value = {
+      isSignedIn: true,
+      isPending: false,
+      isError: false,
+      status: {
+        credits: [customActionDailyCredit()],
+        features: allFeatures({
+          customAction: {
+            normal: tier(),
+            advance: tier({ requiresUltra: true }),
+          },
+        }),
+      },
+    }
+
+    const { result } = renderHook(() => useHostedAiProviderOptions("customAction", PROVIDERS))
+
+    expect(result.current.map((p) => ("upgradeTo" in p ? p.upgradeTo : "absent"))).toEqual([
+      undefined,
+      undefined,
+    ])
+    expect(getDisabled(result.current)).toEqual([false, false])
   })
 
   it("grays out a feature no pool funds for this plan, even with access", () => {
@@ -215,7 +252,7 @@ describe("useHostedAiProviderOptions", () => {
     expect(getDisabled(result.current)).toEqual([true, true])
   })
 
-  it("gates note suggestion options on access and surfaces the requiresUltra flag", () => {
+  it("gates note suggestion options on access and surfaces the plan to buy", () => {
     hostedAiState.value = {
       isSignedIn: true,
       isPending: false,
@@ -229,6 +266,7 @@ describe("useHostedAiProviderOptions", () => {
               accessAllowed: false,
               available: false,
               unavailableReason: "ultra_required",
+              upgradeTo: "ultra",
               requiresUltra: true,
             }),
           },
@@ -239,8 +277,8 @@ describe("useHostedAiProviderOptions", () => {
     const { result } = renderHook(() => useHostedAiProviderOptions("noteSuggestion", PROVIDERS))
 
     expect(getDisabled(result.current)).toEqual([false, true])
-    const badges = result.current.map((p) => ("requiresUltra" in p ? p.requiresUltra : undefined))
-    expect(badges).toEqual([false, true])
+    const badges = result.current.map((p) => ("upgradeTo" in p ? p.upgradeTo : undefined))
+    expect(badges).toEqual([undefined, "ultra"])
   })
 
   it("grays out note suggestion when no pool funds it for this plan", () => {
@@ -301,7 +339,6 @@ describe("useHostedAiProviderOptions", () => {
       expect(result.current[0]).toMatchObject({
         id: BUILT_IN_AI_PROVIDER_ID,
         disabled: expect.any(Boolean),
-        requiresUltra: expect.any(Boolean),
       })
     }
   })

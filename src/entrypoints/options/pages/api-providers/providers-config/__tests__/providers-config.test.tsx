@@ -168,11 +168,11 @@ function makeUltraAccessStatus(accessAllowed: boolean) {
   // flag. The panel locks on the reason, so a fixture without one models a
   // state the wire cannot produce.
   //
-  // `requiresUltra` is left off deliberately. The real wire sets it on every
-  // advance tier, but it renders the Ultra badge inside the row's <label>,
-  // which then becomes part of the switch's accessible name and breaks the
-  // `getByRole("switch", { name })` queries below. These cases are about
-  // locking, not badging — the badge has its own test above.
+  // `upgradeTo` is left off deliberately. The real wire sets it on the advance
+  // tier of every non-Ultra account, but it renders the plan badge inside the
+  // row's <label>, which then becomes part of the switch's accessible name and
+  // breaks the `getByRole("switch", { name })` queries below. These cases are
+  // about locking, not badging — the badge has its own test above.
   const advance = accessAllowed
     ? { accessAllowed: true, available: true, unavailableReason: null }
     : { accessAllowed: false, available: false, unavailableReason: "ultra_required" as const }

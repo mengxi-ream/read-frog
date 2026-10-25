@@ -1698,11 +1698,13 @@ subtitles:
     translatedExportIncomplete: Tüm altyazı satırları çevrilemedi
     translatedExportSameLanguage: Kaynak ve hedef diller aynı
 hostedAi:
-  ultraBadge:
-    tooltip: Ultra plan gerektirir · Planı almak için rozete tıklayın
+  planBadge:
+    pro: Pro veya Ultra plan gerektirir · Planı almak için rozete tıklayın
+    ultra: Ultra plan gerektirir · Planı almak için rozete tıklayın
   availability:
     authenticationRequired: Bu sağlayıcıyı kullanmak için giriş yapın
     ultraRequired: Ultra plan gerekli
+    proRequired: Pro veya Ultra plan gerekli
     quotaExhausted: Kota tükendi
     serviceUnavailable: Geçici olarak kullanılamıyor
     usedPercent: "Kota kullanımı: %$1"

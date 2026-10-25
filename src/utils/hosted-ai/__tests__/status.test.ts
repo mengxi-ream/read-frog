@@ -23,6 +23,7 @@ function tier(overrides: Partial<HostedAiTierStatus> = {}): HostedAiTierStatus {
     accessAllowed: true,
     available: true,
     unavailableReason: null,
+    upgradeTo: null,
     requiresUltra: false,
     modelRevision: "normal-r7",
     ...overrides,
@@ -160,5 +161,13 @@ describe("hosted AI status presentation", () => {
 
     expect(getHostedAiPools(status)).toBe(status.credits)
     expect(getHostedAiPools(undefined)).toEqual([])
+  })
+
+  it("says Pro or Ultra when Pro is the plan a tier asks for", () => {
+    expect(
+      getHostedAiTierDescription(
+        tier({ available: false, unavailableReason: "pro_required", upgradeTo: "pro" }),
+      ),
+    ).toBe("hostedAi.availability.proRequired")
   })
 })

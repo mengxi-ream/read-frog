@@ -1698,11 +1698,13 @@ subtitles:
     translatedExportIncomplete: Không thể dịch tất cả các dòng phụ đề
     translatedExportSameLanguage: Ngôn ngữ nguồn và ngôn ngữ đích giống nhau
 hostedAi:
-  ultraBadge:
-    tooltip: Yêu cầu gói Ultra · Nhấp vào huy hiệu để nhận gói
+  planBadge:
+    pro: Yêu cầu gói Pro hoặc Ultra · Nhấp vào huy hiệu để nhận gói
+    ultra: Yêu cầu gói Ultra · Nhấp vào huy hiệu để nhận gói
   availability:
     authenticationRequired: Đăng nhập để sử dụng nhà cung cấp này
     ultraRequired: Yêu cầu gói Ultra
+    proRequired: Yêu cầu gói Pro hoặc Ultra
     quotaExhausted: Đã hết hạn mức
     serviceUnavailable: Tạm thời không khả dụng
     usedPercent: "Đã dùng hạn mức: $1%"

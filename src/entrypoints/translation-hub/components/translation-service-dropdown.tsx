@@ -1,7 +1,7 @@
 import { IconSettings } from "@tabler/icons-react"
 import { useAtom, useAtomValue } from "jotai"
 import { browser } from "#imports"
-import { PlanBadge } from "@/components/badges/plan-badge"
+import { UpgradePlanBadge } from "@/components/badges/upgrade-plan-badge"
 import { useHostedAiProviderOptions } from "@/components/llm-providers/use-hosted-ai-provider-options"
 import ProviderIcon from "@/components/provider-icon"
 import { useTheme } from "@/components/providers/theme-provider"
@@ -112,12 +112,7 @@ export function TranslationServiceDropdown() {
                       name={provider.name}
                       size="sm"
                     />
-                    {provider.requiresUltra && (
-                      <PlanBadge
-                        plan="ultra"
-                        upgradeTooltip={i18n.t("hostedAi.ultraBadge.tooltip")}
-                      />
-                    )}
+                    {provider.upgradeTo && <UpgradePlanBadge plan={provider.upgradeTo} />}
                   </div>
                 </SelectItem>
               ))}

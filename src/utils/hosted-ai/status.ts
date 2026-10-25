@@ -12,6 +12,7 @@ import { i18n } from "@/utils/i18n"
 const REASON_I18N_KEYS = {
   authentication_required: "hostedAi.availability.authenticationRequired",
   ultra_required: "hostedAi.availability.ultraRequired",
+  pro_required: "hostedAi.availability.proRequired",
   quota_exhausted: "hostedAi.availability.quotaExhausted",
   service_unavailable: "hostedAi.availability.serviceUnavailable",
 } as const satisfies Record<HostedAiUnavailableReason, string>

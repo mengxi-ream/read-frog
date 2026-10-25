@@ -1708,11 +1708,13 @@ subtitles:
     translatedExportIncomplete: 未能翻译所有字幕行
     translatedExportSameLanguage: 源语言和目标语言相同
 hostedAi:
-  ultraBadge:
-    tooltip: 需开通 Ultra 套餐 · 点击徽章获取套餐
+  planBadge:
+    pro: 需开通 Pro 或 Ultra 套餐 · 点击徽章获取套餐
+    ultra: 需开通 Ultra 套餐 · 点击徽章获取套餐
   availability:
     authenticationRequired: 登录后可使用
     ultraRequired: 需要 Ultra 套餐
+    proRequired: 需要 Pro 或 Ultra 套餐
     quotaExhausted: 额度已用完
     serviceUnavailable: 暂时不可用
     usedPercent: "额度已使用 $1%"

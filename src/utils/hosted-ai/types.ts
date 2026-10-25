@@ -11,6 +11,7 @@ export type {
   HostedAiRecurringCreditStatus,
   HostedAiTierStatus,
   HostedAiUnavailableReason,
+  HostedAiUpgradePlan,
 } from "@read-frog/api-contract"
 
 /**
