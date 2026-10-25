@@ -157,7 +157,7 @@ options:
       resetsAt: "$1 vaxtında yenilənir"
       daily: Gündəlik kvota
       weekly: Həftəlik kvota
-      grant: Bonus kvota
+      oneTime: Bonus kvota
       expiresAt: "$1 vaxtında bitir"
       features:
         pageTranslation: Səhifə tərcüməsi

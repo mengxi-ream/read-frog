@@ -157,7 +157,7 @@ options:
       resetsAt: "Сброс: $1"
       daily: Дневная квота
       weekly: Недельная квота
-      grant: Бонусная квота
+      oneTime: Бонусная квота
       expiresAt: "Истекает: $1"
       features:
         pageTranslation: Перевод страницы

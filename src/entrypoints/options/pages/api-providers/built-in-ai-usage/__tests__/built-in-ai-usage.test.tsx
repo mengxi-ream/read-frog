@@ -174,7 +174,7 @@ describe("BuiltInAiUsageConfig", () => {
     expect(bars[1]).toHaveAttribute("aria-valuenow", "95")
   })
 
-  it("lists a grant after the plan pools, with its expiry instead of a reset", () => {
+  it("lists a one-time pool after the recurring ones, with its expiry instead of a reset", () => {
     hostedAiState.value = {
       isSignedIn: true,
       isPending: false,
@@ -203,7 +203,7 @@ describe("BuiltInAiUsageConfig", () => {
     expect(bars[0]).toHaveAttribute("aria-valuenow", "60")
     // 100 - 12.5 rounds to 88.
     expect(bars[1]).toHaveAttribute("aria-valuenow", "88")
-    expect(screen.getByText("options.apiProviders.builtInAiUsage.grant")).toBeInTheDocument()
+    expect(screen.getByText("options.apiProviders.builtInAiUsage.oneTime")).toBeInTheDocument()
     expect(
       screen.getByText("options.apiProviders.builtInAiUsage.supportedFeatures:3"),
     ).toBeInTheDocument()
@@ -214,7 +214,7 @@ describe("BuiltInAiUsageConfig", () => {
     expect(screen.queryByText(/builtInAiUsage\.resetsAt/)).not.toBeInTheDocument()
   })
 
-  it("shows a grant even when no plan pool is reported", () => {
+  it("shows a one-time pool even when no recurring pool is reported", () => {
     hostedAiState.value = {
       isSignedIn: true,
       isPending: false,
@@ -235,7 +235,7 @@ describe("BuiltInAiUsageConfig", () => {
 
     render(<BuiltInAiUsageConfig />)
 
-    // A spent grant is still listed until it expires.
+    // A spent one-time pool is still listed until it expires.
     expect(screen.getByRole("progressbar")).toHaveAttribute("aria-valuenow", "0")
     expect(screen.queryByText("hostedAi.availability.serviceUnavailable")).not.toBeInTheDocument()
   })
@@ -261,12 +261,12 @@ describe("BuiltInAiUsageConfig", () => {
 
     render(<BuiltInAiUsageConfig />)
 
-    expect(screen.getByText("options.apiProviders.builtInAiUsage.grant")).toBeInTheDocument()
+    expect(screen.getByText("options.apiProviders.builtInAiUsage.oneTime")).toBeInTheDocument()
     expect(screen.queryByText(/builtInAiUsage\.expiresAt/)).not.toBeInTheDocument()
   })
 
   // TODO(2026-11-07): delete with the `credits` fallback (mengxi-ream/read-frog-monorepo#710).
-  it("reads the plan's pools from credits when the server predates pools", () => {
+  it("reads the recurring pools from credits when the server predates pools", () => {
     hostedAiState.value = {
       isSignedIn: true,
       isPending: false,

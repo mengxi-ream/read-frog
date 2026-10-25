@@ -126,8 +126,8 @@ describe("hosted AI status presentation", () => {
     ).toBe("hostedAi.availability.ultraRequired")
   })
 
-  it("finds a feature's plan pool in pools and never offers a grant for a tier description", () => {
-    const grant = {
+  it("finds a feature's recurring pool in pools and never offers a one-time pool for a tier description", () => {
+    const oneTime = {
       periodKind: "once" as const,
       usedPercent: 12.5,
       expiresAt: "2026-11-25T00:00:00.000Z",
@@ -141,13 +141,13 @@ describe("hosted AI status presentation", () => {
     }
     const status: HostedAiStatus = {
       credits: [daily],
-      pools: [daily, grant],
+      pools: [daily, oneTime],
       features: featureMap(() => ({ normal: tier(), advance: tier() })),
     }
 
-    expect(getHostedAiPools(status)).toEqual([daily, grant])
+    expect(getHostedAiPools(status)).toEqual([daily, oneTime])
     expect(getHostedAiCreditForFeature(status, "customAction")).toBe(daily)
-    // Only the grant funds page translation, and a grant has no reset to show.
+    // Only the one-time pool funds page translation, and it has no reset to show.
     expect(getHostedAiCreditForFeature(status, "pageTranslation")).toBeUndefined()
   })
 

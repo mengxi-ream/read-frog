@@ -1,7 +1,7 @@
 import type {
   HostedAiCreditPoolStatus,
-  HostedAiCreditStatus,
   HostedAiFeature,
+  HostedAiRecurringCreditStatus,
   HostedAiStatus,
   HostedAiTierStatus,
   HostedAiUnavailableReason,
@@ -18,8 +18,8 @@ const REASON_I18N_KEYS = {
 
 /**
  * Every pool that can pay for Built-in AI, in the order the server draws on
- * them: the plan's pools, then grants. A server that predates `pools` sends
- * only `credits`, the plan's pools, which have the same shape.
+ * them: the plan's recurring pools, then one-time pools. A server that predates
+ * `pools` sends only `credits`, the recurring pools, which have the same shape.
  *
  * TODO(2026-11-07): read `status.pools` alone once the server stops sending
  * `credits` (mengxi-ream/read-frog-monorepo#710).
@@ -29,16 +29,16 @@ export function getHostedAiPools(status: HostedAiStatus | undefined): HostedAiCr
 }
 
 /**
- * The plan's pool a feature draws on, or undefined when the plan funds none.
- * Grants are left out: a tier description shows when the pool resets, and a
- * grant never does.
+ * The recurring pool a feature draws on, or undefined when the plan funds none.
+ * One-time pools are left out: a tier description shows when the pool resets,
+ * and a one-time pool never does.
  */
 export function getHostedAiCreditForFeature(
   status: HostedAiStatus | undefined,
   feature: HostedAiFeature,
-): HostedAiCreditStatus | undefined {
+): HostedAiRecurringCreditStatus | undefined {
   return getHostedAiPools(status).find(
-    (pool): pool is HostedAiCreditStatus =>
+    (pool): pool is HostedAiRecurringCreditStatus =>
       pool.periodKind !== "once" && pool.features.includes(feature),
   )
 }
@@ -66,7 +66,7 @@ export function formatHostedAiResetAtLocal(resetAt: string): string | null {
 
 export function getHostedAiTierDescription(
   status: HostedAiTierStatus | undefined,
-  options: { credit?: HostedAiCreditStatus | null } = {},
+  options: { credit?: HostedAiRecurringCreditStatus | null } = {},
 ): string | undefined {
   if (!status) {
     return i18n.t("hostedAi.availability.serviceUnavailable")

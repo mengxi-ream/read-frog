@@ -1,7 +1,7 @@
 import type {
-  HostedAiCreditGrantStatus,
-  HostedAiCreditStatus,
   HostedAiFeature,
+  HostedAiOneTimeCreditStatus,
+  HostedAiRecurringCreditStatus,
 } from "@/utils/hosted-ai/types"
 import { Icon } from "@iconify/react"
 import { useHostedAiStatus } from "@/components/llm-providers/use-hosted-ai-status"
@@ -25,14 +25,14 @@ const FEATURE_LABEL_I18N_KEYS = {
 const PERIOD_LABEL_I18N_KEYS = {
   daily: "options.apiProviders.builtInAiUsage.daily",
   weekly: "options.apiProviders.builtInAiUsage.weekly",
-} as const satisfies Record<HostedAiCreditStatus["periodKind"], string>
+} as const satisfies Record<HostedAiRecurringCreditStatus["periodKind"], string>
 
 function getRemainingPercent(usedPercent: number): number {
   return Math.round(Math.max(0, Math.min(100, 100 - usedPercent)))
 }
 
 /**
- * One bar per pool, plan pool or grant. The track is the whole quota and the
+ * One bar per pool, recurring or one-time. The track is the whole quota and the
  * fill is what is left, growing from the left — so a fresh pool reads as a full
  * bar. `kindLabel` names the pool and `timeLabel` says when it resets or ends.
  */
@@ -90,7 +90,7 @@ function PoolUsage({
   )
 }
 
-function CreditPoolUsage({ credit }: { credit: HostedAiCreditStatus }) {
+function RecurringCreditUsage({ credit }: { credit: HostedAiRecurringCreditStatus }) {
   const formattedResetAt = credit.resetAt ? formatHostedAiResetAtLocal(credit.resetAt) : null
   return (
     <PoolUsage
@@ -106,14 +106,14 @@ function CreditPoolUsage({ credit }: { credit: HostedAiCreditStatus }) {
   )
 }
 
-/** A one-time grant: it never resets, so it shows when it expires instead. */
-function GrantUsage({ grant }: { grant: HostedAiCreditGrantStatus }) {
-  const formattedExpiresAt = formatHostedAiResetAtLocal(grant.expiresAt)
+/** A one-time pool never resets, so it shows when it expires instead. */
+function OneTimeCreditUsage({ credit }: { credit: HostedAiOneTimeCreditStatus }) {
+  const formattedExpiresAt = formatHostedAiResetAtLocal(credit.expiresAt)
   return (
     <PoolUsage
-      usedPercent={grant.usedPercent}
-      features={grant.features}
-      kindLabel={i18n.t("options.apiProviders.builtInAiUsage.grant")}
+      usedPercent={credit.usedPercent}
+      features={credit.features}
+      kindLabel={i18n.t("options.apiProviders.builtInAiUsage.oneTime")}
       timeLabel={
         formattedExpiresAt
           ? i18n.t("options.apiProviders.builtInAiUsage.expiresAt", [formattedExpiresAt])
@@ -125,7 +125,7 @@ function GrantUsage({ grant }: { grant: HostedAiCreditGrantStatus }) {
 
 export function BuiltInAiUsageConfig() {
   const { status, isSignedIn, isPending, isError } = useHostedAiStatus()
-  // In the order the server draws on them: the plan's pools, then grants.
+  // In the order the server draws on them: recurring pools, then one-time ones.
   const pools = getHostedAiPools(status)
 
   // Guests only hold an ephemeral IP-keyed trial pool — not worth a section.
@@ -147,9 +147,15 @@ export function BuiltInAiUsageConfig() {
       ) : (
         pools.map((pool) =>
           pool.periodKind === "once" ? (
-            <GrantUsage key={`once-${pool.expiresAt}-${pool.features.join("-")}`} grant={pool} />
+            <OneTimeCreditUsage
+              key={`once-${pool.expiresAt}-${pool.features.join("-")}`}
+              credit={pool}
+            />
           ) : (
-            <CreditPoolUsage key={`${pool.periodKind}-${pool.features.join("-")}`} credit={pool} />
+            <RecurringCreditUsage
+              key={`${pool.periodKind}-${pool.features.join("-")}`}
+              credit={pool}
+            />
           ),
         )
       )}
