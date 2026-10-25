@@ -1403,6 +1403,9 @@ options:
       aiSegmentation:
         title: AI スマート区切り
         description: AI が字幕を文単位に切り直します。翻訳の応答が遅くなります。高性能な LLM が必要です。性能の低いモデルでは字幕の欠落やずれが起きることがあります。
+      wordLookupAction:
+        title: 単語クリック時のアクション
+        description: 字幕の単語をクリックしたときに実行する AI アクション。既定は辞書で、自分のアクションにも変更できます。
     aiQuota:
       title: AI字幕の利用枠
       description: AIの音声認識で、どんな動画にも正確な字幕を生成します
