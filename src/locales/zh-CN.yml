@@ -1411,6 +1411,12 @@ options:
       aiSegmentation:
         title: AI 智能断句
         description: 让 AI 把字幕重新切成完整句子，会增加翻译响应时间。需要较强的 LLM，弱模型可能漏句或错位。
+      clickLookupAction:
+        title: 点词查询指令
+        description: 点击字幕里的单词时运行的 AI 指令。默认是词典，也可以换成你自己的指令。
+      dragLookupAction:
+        title: 划词查询指令
+        description: 在字幕上拖选多个词时运行的 AI 指令。默认是长难句分析，也可以换成你自己的指令。
     aiQuota:
       title: AI 字幕额度
       description: AI 利用语音转文字技术获取任何视频的准确字幕

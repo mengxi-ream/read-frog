@@ -1401,6 +1401,12 @@ options:
       aiSegmentation:
         title: AI akıllı bölümlendirme
         description: Yapay zekâ altyazıları cümlelere yeniden böler. Çeviriler daha geç gelir. Güçlü bir LLM gerekir; zayıf modeller satırları atlayabilir veya kaydırabilir.
+      clickLookupAction:
+        title: Sözcük arama eylemi
+        description: Altyazıdaki bir sözcüğe tıklandığında çalışan yapay zeka eylemi. Varsayılan sözlüktür; kendi eyleminizi seçebilirsiniz.
+      dragLookupAction:
+        title: Sürükleyerek seçme eylemi
+        description: Altyazıda birkaç sözcüğün üzerinden sürüklendiğinde çalışan yapay zeka eylemi. Varsayılan cümle analizidir; kendi eyleminizi seçebilirsiniz.
     aiQuota:
       title: Yapay zekâ altyazı kotası
       description: Yapay zeka konuşma tanıma ile her video için doğru altyazı üretir

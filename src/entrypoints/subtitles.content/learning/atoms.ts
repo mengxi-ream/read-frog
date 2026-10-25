@@ -1,10 +1,8 @@
 import { atom } from "jotai"
 import { customActionRequestAtom } from "@/components/custom-action/atoms"
 import { ANALYTICS_SURFACE } from "@/types/analytics"
-import {
-  BUILT_IN_DICTIONARY_ACTION_ID,
-  BUILT_IN_SENTENCE_ANALYSIS_ACTION_ID,
-} from "@/utils/constants/custom-action"
+import { configAtom } from "@/utils/atoms/config"
+import { resolveClickLookupAction, resolveDragLookupAction } from "@/utils/custom-actions"
 import { segmentWords } from "@/utils/subtitles/segment-words"
 import { displaySubtitleAtom, sourceLanguageAtom } from "../atoms"
 
@@ -26,11 +24,15 @@ let nextSessionKey = 0
 
 /**
  * The one way in: every gesture looks up a range of words, and `null` closes
- * the lookup. Also hands the shared AI action card what to run: Dictionary for
- * one word, Sentence Analysis for several.
+ * the lookup. Also hands the shared AI action card what to run: the click
+ * action for one word, the drag action for several, as picked in settings.
  */
 export const lookUpAtom = atom(null, (get, set, range: WordRange | null) => {
-  if (!range) {
+  const config = get(configAtom)
+  const action =
+    range &&
+    (range.start === range.end ? resolveClickLookupAction(config) : resolveDragLookupAction(config))
+  if (!range || !action || action.enabled === false) {
     set(wordLookupAtom, null)
     set(customActionRequestAtom, null)
     return
@@ -46,10 +48,7 @@ export const lookUpAtom = atom(null, (get, set, range: WordRange | null) => {
   nextSessionKey += 1
   set(wordLookupAtom, { cueStart: cue?.start ?? -1, start: range.start, end: range.end })
   set(customActionRequestAtom, {
-    actionId:
-      range.start === range.end
-        ? BUILT_IN_DICTIONARY_ACTION_ID
-        : BUILT_IN_SENTENCE_ANALYSIS_ACTION_ID,
+    actionId: action.id,
     selectionText: text,
     contextText: cue ? [cue.text, cue.translation].filter(Boolean).join("\n\n") : text,
     surface: ANALYTICS_SURFACE.VIDEO_SUBTITLES,
