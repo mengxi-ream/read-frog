@@ -1,10 +1,14 @@
-import type { HostedAiCreditStatus, HostedAiFeature } from "@/utils/hosted-ai/types"
+import type {
+  HostedAiFeature,
+  HostedAiOneTimeCreditStatus,
+  HostedAiRecurringCreditStatus,
+} from "@/utils/hosted-ai/types"
 import { Icon } from "@iconify/react"
 import { useHostedAiStatus } from "@/components/llm-providers/use-hosted-ai-status"
 import { Progress, ProgressLabel } from "@/components/ui/base-ui/progress"
 import { Skeleton } from "@/components/ui/base-ui/skeleton"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
-import { formatHostedAiResetAtLocal } from "@/utils/hosted-ai/status"
+import { formatHostedAiResetAtLocal, getHostedAiPools } from "@/utils/hosted-ai/status"
 import { i18n } from "@/utils/i18n"
 import { ConfigSection } from "../../../components/config-section"
 
@@ -21,19 +25,29 @@ const FEATURE_LABEL_I18N_KEYS = {
 const PERIOD_LABEL_I18N_KEYS = {
   daily: "options.apiProviders.builtInAiUsage.daily",
   weekly: "options.apiProviders.builtInAiUsage.weekly",
-} as const satisfies Record<HostedAiCreditStatus["periodKind"], string>
+} as const satisfies Record<HostedAiRecurringCreditStatus["periodKind"], string>
 
-function getRemainingPercent(credit: HostedAiCreditStatus): number {
-  return Math.round(Math.max(0, Math.min(100, 100 - credit.usedPercent)))
+function getRemainingPercent(usedPercent: number): number {
+  return Math.round(Math.max(0, Math.min(100, 100 - usedPercent)))
 }
 
 /**
- * One bar per credit pool. The track is the whole quota and the fill is what is
- * left, growing from the left — so a fresh pool reads as a full bar.
+ * One bar per pool, recurring or one-time. The track is the whole quota and the
+ * fill is what is left, growing from the left — so a fresh pool reads as a full
+ * bar. `kindLabel` names the pool and `timeLabel` says when it resets or ends.
  */
-function CreditPoolUsage({ credit }: { credit: HostedAiCreditStatus }) {
-  const remainingPercent = getRemainingPercent(credit)
-  const formattedResetAt = credit.resetAt ? formatHostedAiResetAtLocal(credit.resetAt) : null
+function PoolUsage({
+  usedPercent,
+  features,
+  kindLabel,
+  timeLabel,
+}: {
+  usedPercent: number
+  features: HostedAiFeature[]
+  kindLabel: string
+  timeLabel: string | null
+}) {
+  const remainingPercent = getRemainingPercent(usedPercent)
 
   return (
     <div className="flex flex-col gap-1.5">
@@ -46,9 +60,7 @@ function CreditPoolUsage({ credit }: { credit: HostedAiCreditStatus }) {
         }
       >
         <ProgressLabel className="flex items-center gap-1.5 text-sm font-medium">
-          {i18n.t("options.apiProviders.builtInAiUsage.supportedFeatures", [
-            credit.features.length,
-          ])}
+          {i18n.t("options.apiProviders.builtInAiUsage.supportedFeatures", [features.length])}
           <Tooltip>
             <TooltipTrigger
               render={
@@ -59,7 +71,7 @@ function CreditPoolUsage({ credit }: { credit: HostedAiCreditStatus }) {
             </TooltipTrigger>
             <TooltipContent>
               <ul className="list-inside list-disc marker:text-green-500">
-                {credit.features.map((feature) => (
+                {features.map((feature) => (
                   <li key={feature}>{i18n.t(FEATURE_LABEL_I18N_KEYS[feature])}</li>
                 ))}
               </ul>
@@ -71,18 +83,50 @@ function CreditPoolUsage({ credit }: { credit: HostedAiCreditStatus }) {
         </span>
       </Progress>
       <div className="flex flex-wrap items-center justify-between gap-x-3 text-xs text-muted-foreground">
-        <span>{i18n.t(PERIOD_LABEL_I18N_KEYS[credit.periodKind])}</span>
-        {formattedResetAt && (
-          <span>{i18n.t("options.apiProviders.builtInAiUsage.resetsAt", [formattedResetAt])}</span>
-        )}
+        <span>{kindLabel}</span>
+        {timeLabel && <span>{timeLabel}</span>}
       </div>
     </div>
   )
 }
 
+function RecurringCreditUsage({ credit }: { credit: HostedAiRecurringCreditStatus }) {
+  const formattedResetAt = credit.resetAt ? formatHostedAiResetAtLocal(credit.resetAt) : null
+  return (
+    <PoolUsage
+      usedPercent={credit.usedPercent}
+      features={credit.features}
+      kindLabel={i18n.t(PERIOD_LABEL_I18N_KEYS[credit.periodKind])}
+      timeLabel={
+        formattedResetAt
+          ? i18n.t("options.apiProviders.builtInAiUsage.resetsAt", [formattedResetAt])
+          : null
+      }
+    />
+  )
+}
+
+/** A one-time pool never resets, so it shows when it expires instead. */
+function OneTimeCreditUsage({ credit }: { credit: HostedAiOneTimeCreditStatus }) {
+  const formattedExpiresAt = formatHostedAiResetAtLocal(credit.expiresAt)
+  return (
+    <PoolUsage
+      usedPercent={credit.usedPercent}
+      features={credit.features}
+      kindLabel={i18n.t("options.apiProviders.builtInAiUsage.oneTime")}
+      timeLabel={
+        formattedExpiresAt
+          ? i18n.t("options.apiProviders.builtInAiUsage.expiresAt", [formattedExpiresAt])
+          : null
+      }
+    />
+  )
+}
+
 export function BuiltInAiUsageConfig() {
   const { status, isSignedIn, isPending, isError } = useHostedAiStatus()
-  const credits = status?.credits ?? []
+  // In the order the server draws on them: recurring pools, then one-time ones.
+  const pools = getHostedAiPools(status)
 
   // Guests only hold an ephemeral IP-keyed trial pool — not worth a section.
   if (!isSignedIn) {
@@ -96,17 +140,24 @@ export function BuiltInAiUsageConfig() {
     >
       {isPending ? (
         <Skeleton className="h-13 w-full" />
-      ) : isError || credits.length === 0 ? (
+      ) : isError || pools.length === 0 ? (
         <p className="text-sm text-muted-foreground">
           {i18n.t("hostedAi.availability.serviceUnavailable")}
         </p>
       ) : (
-        credits.map((credit) => (
-          <CreditPoolUsage
-            key={`${credit.periodKind}-${credit.features.join("-")}`}
-            credit={credit}
-          />
-        ))
+        pools.map((pool) =>
+          pool.periodKind === "once" ? (
+            <OneTimeCreditUsage
+              key={`once-${pool.expiresAt}-${pool.features.join("-")}`}
+              credit={pool}
+            />
+          ) : (
+            <RecurringCreditUsage
+              key={`${pool.periodKind}-${pool.features.join("-")}`}
+              credit={pool}
+            />
+          ),
+        )
       )}
     </ConfigSection>
   )

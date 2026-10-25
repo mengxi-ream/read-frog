@@ -157,6 +157,8 @@ options:
       resetsAt: "Đặt lại lúc $1"
       daily: Hạn mức mỗi ngày
       weekly: Hạn mức mỗi tuần
+      oneTime: Hạn mức tặng
+      expiresAt: "Hết hạn lúc $1"
       features:
         pageTranslation: Dịch trang
         customAction: Hành động AI tùy chỉnh

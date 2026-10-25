@@ -157,6 +157,8 @@ options:
       resetsAt: "Se restablece el $1"
       daily: Cuota diaria
       weekly: Cuota semanal
+      oneTime: Crédito de regalo
+      expiresAt: "Caduca el $1"
       features:
         pageTranslation: Traducción de página
         customAction: Acciones de IA personalizadas

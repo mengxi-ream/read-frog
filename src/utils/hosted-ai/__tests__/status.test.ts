@@ -11,6 +11,7 @@ vi.mock("@/utils/i18n", () => ({
 import {
   formatHostedAiResetAtLocal,
   getHostedAiCreditForFeature,
+  getHostedAiPools,
   getHostedAiTierDescription,
   getHostedAiTierStatus,
 } from "../status"
@@ -123,5 +124,41 @@ describe("hosted AI status presentation", () => {
         credit,
       }),
     ).toBe("hostedAi.availability.ultraRequired")
+  })
+
+  it("finds a feature's recurring pool in pools and never offers a one-time pool for a tier description", () => {
+    const oneTime = {
+      periodKind: "once" as const,
+      usedPercent: 12.5,
+      expiresAt: "2026-11-25T00:00:00.000Z",
+      features: ALL_FEATURES,
+    }
+    const daily = {
+      periodKind: "daily" as const,
+      usedPercent: 40,
+      resetAt: "2026-08-10T00:00:00.000Z",
+      features: ["customAction" as const],
+    }
+    const status: HostedAiStatus = {
+      credits: [daily],
+      pools: [daily, oneTime],
+      features: featureMap(() => ({ normal: tier(), advance: tier() })),
+    }
+
+    expect(getHostedAiPools(status)).toEqual([daily, oneTime])
+    expect(getHostedAiCreditForFeature(status, "customAction")).toBe(daily)
+    // Only the one-time pool funds page translation, and it has no reset to show.
+    expect(getHostedAiCreditForFeature(status, "pageTranslation")).toBeUndefined()
+  })
+
+  // TODO(2026-11-07): delete with the `credits` fallback (mengxi-ream/read-frog-monorepo#710).
+  it("falls back to credits when the server predates pools", () => {
+    const status: HostedAiStatus = {
+      credits: [{ periodKind: "weekly", usedPercent: 5, resetAt: null, features: ALL_FEATURES }],
+      features: featureMap(() => ({ normal: tier(), advance: tier() })),
+    }
+
+    expect(getHostedAiPools(status)).toBe(status.credits)
+    expect(getHostedAiPools(undefined)).toEqual([])
   })
 })

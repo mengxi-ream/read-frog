@@ -1,6 +1,7 @@
 import type {
-  HostedAiCreditStatus,
+  HostedAiCreditPoolStatus,
   HostedAiFeature,
+  HostedAiRecurringCreditStatus,
   HostedAiStatus,
   HostedAiTierStatus,
   HostedAiUnavailableReason,
@@ -15,12 +16,31 @@ const REASON_I18N_KEYS = {
   service_unavailable: "hostedAi.availability.serviceUnavailable",
 } as const satisfies Record<HostedAiUnavailableReason, string>
 
-/** The pool a feature draws on, or undefined when nothing funds it. */
+/**
+ * Every pool that can pay for Built-in AI, in the order the server draws on
+ * them: the plan's recurring pools, then one-time pools. A server that predates
+ * `pools` sends only `credits`, the recurring pools, which have the same shape.
+ *
+ * TODO(2026-11-07): read `status.pools` alone once the server stops sending
+ * `credits` (mengxi-ream/read-frog-monorepo#710).
+ */
+export function getHostedAiPools(status: HostedAiStatus | undefined): HostedAiCreditPoolStatus[] {
+  return status?.pools ?? status?.credits ?? []
+}
+
+/**
+ * The recurring pool a feature draws on, or undefined when the plan funds none.
+ * One-time pools are left out: a tier description shows when the pool resets,
+ * and a one-time pool never does.
+ */
 export function getHostedAiCreditForFeature(
   status: HostedAiStatus | undefined,
   feature: HostedAiFeature,
-): HostedAiCreditStatus | undefined {
-  return status?.credits.find((credit) => credit.features.includes(feature))
+): HostedAiRecurringCreditStatus | undefined {
+  return getHostedAiPools(status).find(
+    (pool): pool is HostedAiRecurringCreditStatus =>
+      pool.periodKind !== "once" && pool.features.includes(feature),
+  )
 }
 
 /**
@@ -46,7 +66,7 @@ export function formatHostedAiResetAtLocal(resetAt: string): string | null {
 
 export function getHostedAiTierDescription(
   status: HostedAiTierStatus | undefined,
-  options: { credit?: HostedAiCreditStatus | null } = {},
+  options: { credit?: HostedAiRecurringCreditStatus | null } = {},
 ): string | undefined {
   if (!status) {
     return i18n.t("hostedAi.availability.serviceUnavailable")

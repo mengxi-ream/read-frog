@@ -157,6 +157,8 @@ options:
       resetsAt: "$1에 초기화"
       daily: 일일 할당량
       weekly: 주간 할당량
+      oneTime: 보너스 할당량
+      expiresAt: "$1에 만료"
       features:
         pageTranslation: 페이지 번역
         customAction: 사용자 지정 AI 작업

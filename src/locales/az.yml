@@ -157,6 +157,8 @@ options:
       resetsAt: "$1 vaxtında yenilənir"
       daily: Gündəlik kvota
       weekly: Həftəlik kvota
+      oneTime: Bonus kvota
+      expiresAt: "$1 vaxtında bitir"
       features:
         pageTranslation: Səhifə tərcüməsi
         customAction: Fərdi süni intellekt əməliyyatları

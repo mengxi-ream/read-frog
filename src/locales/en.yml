@@ -157,6 +157,8 @@ options:
       resetsAt: "Resets at $1"
       daily: Daily quota
       weekly: Weekly quota
+      oneTime: Bonus quota
+      expiresAt: "Expires at $1"
       features:
         pageTranslation: Page translation
         customAction: Custom AI Actions

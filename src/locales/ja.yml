@@ -157,6 +157,8 @@ options:
       resetsAt: "$1 にリセット"
       daily: 日次クォータ
       weekly: 週間クォータ
+      oneTime: ボーナスクォータ
+      expiresAt: "$1 に期限切れ"
       features:
         pageTranslation: ページ翻訳
         customAction: カスタム AI アクション
