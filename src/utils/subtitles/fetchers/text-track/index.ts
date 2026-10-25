@@ -7,7 +7,7 @@ import {
 } from "@/utils/constants/subtitles"
 import { i18n } from "@/utils/i18n"
 import { pollUntil } from "@/utils/poll"
-import { OverlaySubtitlesError } from "@/utils/subtitles/errors"
+import { NoSubtitlesError, OverlaySubtitlesError } from "@/utils/subtitles/errors"
 import { cuesToFragments } from "./cues"
 
 interface TextTrackFetcherOptions {
@@ -45,7 +45,7 @@ export class TextTrackFetcher implements SubtitlesFetcher {
 
     const track = this.selectTrack(video)
     if (!track) {
-      throw new OverlaySubtitlesError(i18n.t("subtitles.errors.noSubtitlesFound"))
+      throw new NoSubtitlesError()
     }
 
     const trackHash = this.buildTrackHash(track)
@@ -56,7 +56,7 @@ export class TextTrackFetcher implements SubtitlesFetcher {
     this.ensureLoading(track)
     const fragments = cuesToFragments(await this.waitForCues(track))
     if (fragments.length === 0) {
-      throw new OverlaySubtitlesError(i18n.t("subtitles.errors.noSubtitlesFound"))
+      throw new NoSubtitlesError()
     }
 
     this.subtitles = fragments
@@ -193,7 +193,7 @@ export class TextTrackFetcher implements SubtitlesFetcher {
       intervalMs: TEXT_TRACK_CUE_POLL_INTERVAL_MS,
     })
     if (!cues) {
-      throw new OverlaySubtitlesError(i18n.t("subtitles.errors.noSubtitlesFound"))
+      throw new NoSubtitlesError()
     }
     return cues
   }
