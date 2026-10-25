@@ -75,6 +75,12 @@ const TOGGLE_SOURCE_SURFACE: Record<SubtitlesToggleSource, SurfaceByFeature["vid
  */
 const QUIET_AUTO_START_PLATFORMS: ReadonlySet<SubtitlesPlatform> = new Set(["xcom"])
 
+interface SubtitlesStartOptions {
+  analyticsContext?: FeatureUsageContext<"video_subtitles">
+  /** Stay silent when the video has no subtitles; see `QUIET_AUTO_START_PLATFORMS`. */
+  quiet?: boolean
+}
+
 type SubtitlesFetcherFactories = {
   native: () => SubtitlesFetcher
   ai?: () => SubtitlesFetcher
@@ -708,26 +714,21 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
   }
 
   private toggleSubtitlesWithSource(enabled: boolean, source: SubtitlesToggleSource) {
-    this.handleToggleSubtitles(
-      enabled,
-      enabled
+    this.handleToggleSubtitles(enabled, {
+      analyticsContext: enabled
         ? createFeatureUsageContext(
             ANALYTICS_FEATURE.VIDEO_SUBTITLES,
             TOGGLE_SOURCE_SURFACE[source],
           )
         : undefined,
       // Only an automatic start goes quiet: a reader who asked still hears why nothing came.
-      source === "auto" && QUIET_AUTO_START_PLATFORMS.has(this.config.platform),
-    )
+      quiet: source === "auto" && QUIET_AUTO_START_PLATFORMS.has(this.config.platform),
+    })
   }
 
-  private handleToggleSubtitles(
-    enabled: boolean,
-    analyticsContext?: FeatureUsageContext<"video_subtitles">,
-    quiet = false,
-  ) {
+  private handleToggleSubtitles(enabled: boolean, options: SubtitlesStartOptions = {}) {
     if (enabled) {
-      void this.switchSubtitlesFetcher(SUBTITLES_SOURCE.NATIVE, analyticsContext, quiet)
+      void this.switchSubtitlesFetcher(SUBTITLES_SOURCE.NATIVE, options)
     } else {
       this.subtitlesScheduler?.hide()
       this.showNativeSubtitles()
@@ -745,8 +746,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
 
   private async switchSubtitlesFetcher(
     next: SubtitlesSource,
-    analyticsContext?: FeatureUsageContext<"video_subtitles">,
-    quiet = false,
+    options: SubtitlesStartOptions = {},
   ): Promise<void> {
     const make = this.fetchers[next]
     if (!make || this.destroyed) {
@@ -773,7 +773,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
       this.subtitlesScheduler?.setState("loading", { message })
     }
 
-    const succeeded = await this.startTranslation(analyticsContext, quiet)
+    const succeeded = await this.startTranslation(options)
     if (operationId !== this.switchOperationId) {
       return
     }
@@ -869,10 +869,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
     this.isNativeSubtitlesHidden = true
   }
 
-  private async startTranslation(
-    analyticsContext?: FeatureUsageContext<"video_subtitles">,
-    quiet = false,
-  ) {
+  private async startTranslation({ analyticsContext, quiet = false }: SubtitlesStartOptions = {}) {
     let providerAnalytics = UNKNOWN_FEATURE_PROVIDER
     let targetLanguage: Config["language"]["targetCode"] | undefined
     const operationId = this.switchOperationId

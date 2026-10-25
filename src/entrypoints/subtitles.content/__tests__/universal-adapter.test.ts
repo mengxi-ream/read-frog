@@ -873,7 +873,7 @@ describe("universalVideoAdapter", () => {
     it("turns back off without a word when the video has no subtitles", async () => {
       const { adapter, scheduler } = setUpVideoWithoutSubtitles()
 
-      await (adapter as any).switchSubtitlesFetcher(SUBTITLES_SOURCE.NATIVE, undefined, true)
+      await (adapter as any).switchSubtitlesFetcher(SUBTITLES_SOURCE.NATIVE, { quiet: true })
 
       expect(scheduler.setState).not.toHaveBeenCalledWith("loading", expect.anything())
       expect(scheduler.setState).not.toHaveBeenCalledWith("error", expect.anything())
@@ -889,7 +889,7 @@ describe("universalVideoAdapter", () => {
       ;(adapter as any).toggleSubtitlesWithSource(true, "auto")
       adapter.toggleSubtitlesManually(true)
 
-      expect(switchSpy.mock.calls.map((call) => call[2])).toEqual([true, false])
+      expect(switchSpy.mock.calls.map((call) => (call[1] as any).quiet)).toEqual([true, false])
     })
 
     it("still tells a reader who asked that the video has none", async () => {
