@@ -9,6 +9,7 @@ import { SelectionPopover } from "@/components/ui/selection-popover"
 import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-host"
 import { lookUpAtom, wordLookupAtom } from "./atoms"
 import { isFromSubtitleLine } from "./page-events"
+import { useLookupKeys } from "./use-lookup-keys"
 import { useLookupPlayback } from "./use-lookup-playback"
 import { useTopLayerPortalContainer } from "./use-top-layer-portal-container"
 
@@ -52,6 +53,7 @@ export function WordLookupCard() {
   }
 
   useLookupPlayback()
+  useLookupKeys()
 
   return (
     <ShadowWrapperContext value={container}>
@@ -82,6 +84,8 @@ export function WordLookupCard() {
           <SelectionPopover.Content
             key={pinnedLayout?.sessionKey ?? request?.sessionKey ?? 0}
             container={container}
+            // Focus stays on the page, so ←/→ step the lookup right after a click.
+            initialFocus={false}
           >
             <CustomActionPanel />
           </SelectionPopover.Content>
