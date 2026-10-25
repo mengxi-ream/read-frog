@@ -1696,11 +1696,13 @@ subtitles:
     translatedExportIncomplete: Bütün subtitr sətirlərini tərcümə etmək mümkün olmadı
     translatedExportSameLanguage: Mənbə və hədəf dilləri eynidir
 hostedAi:
-  ultraBadge:
-    tooltip: Ultra planı tələb olunur · Əldə etmək üçün nişana klikləyin
+  planBadge:
+    pro: Pro və ya Ultra planı tələb olunur · Əldə etmək üçün nişana klikləyin
+    ultra: Ultra planı tələb olunur · Əldə etmək üçün nişana klikləyin
   availability:
     authenticationRequired: Bu provayderdən istifadə etmək üçün daxil olun
     ultraRequired: Ultra planı tələb olunur
+    proRequired: Pro və ya Ultra planı tələb olunur
     quotaExhausted: Kvota bitib
     serviceUnavailable: Müvəqqəti olaraq əlçatan deyil
     usedPercent: "İstifadə edilmiş kvota: $1%"

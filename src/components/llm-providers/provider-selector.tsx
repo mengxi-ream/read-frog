@@ -1,7 +1,7 @@
 import type { ComponentProps } from "react"
 import type { Theme } from "@/types/config/theme"
 import type { ProviderSelectorOption } from "@/utils/providers/provider-display"
-import { PlanBadge } from "@/components/badges/plan-badge"
+import { UpgradePlanBadge } from "@/components/badges/upgrade-plan-badge"
 import ProviderIcon from "@/components/provider-icon"
 import {
   Select,
@@ -78,9 +78,9 @@ function ProviderOptionContent({
 }: {
   provider: ProviderSelectorOption
   theme: Theme
-  tooltipContainer?: ComponentProps<typeof PlanBadge>["tooltipContainer"]
+  tooltipContainer?: ComponentProps<typeof UpgradePlanBadge>["tooltipContainer"]
 }) {
-  const requiresUltra = isSystemProviderSelectorItem(provider) && provider.requiresUltra === true
+  const upgradeTo = isSystemProviderSelectorItem(provider) ? provider.upgradeTo : undefined
 
   return (
     <div className="flex min-w-0 flex-1 items-center justify-between gap-2">
@@ -89,13 +89,7 @@ function ProviderOptionContent({
         name={getProviderName(provider)}
         size="sm"
       />
-      {requiresUltra && (
-        <PlanBadge
-          plan="ultra"
-          upgradeTooltip={i18n.t("hostedAi.ultraBadge.tooltip")}
-          tooltipContainer={tooltipContainer}
-        />
-      )}
+      {upgradeTo && <UpgradePlanBadge plan={upgradeTo} tooltipContainer={tooltipContainer} />}
     </div>
   )
 }

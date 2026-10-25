@@ -14,6 +14,7 @@ function tier(overrides: Partial<HostedAiTierStatus> = {}): HostedAiTierStatus {
     accessAllowed: true,
     available: true,
     unavailableReason: null,
+    upgradeTo: null,
     requiresUltra: false,
     modelRevision: "r1",
     ...overrides,
@@ -47,6 +48,7 @@ describe("isDurablyUnusableTier", () => {
   it("treats sign-in and plan walls as durable", () => {
     // Both are things the user can act on and that will not resolve on their own.
     expect(isDurablyUnusableTier(tier({ unavailableReason: "authentication_required" }))).toBe(true)
+    expect(isDurablyUnusableTier(tier({ unavailableReason: "pro_required" }))).toBe(true)
     expect(isDurablyUnusableTier(tier({ unavailableReason: "ultra_required" }))).toBe(true)
   })
 

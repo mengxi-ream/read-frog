@@ -1698,11 +1698,13 @@ subtitles:
     translatedExportIncomplete: すべての字幕行を翻訳できませんでした
     translatedExportSameLanguage: 元の言語と翻訳先の言語が同じです
 hostedAi:
-  ultraBadge:
-    tooltip: Ultra プランへの加入が必要です · バッジをクリックしてプランを取得
+  planBadge:
+    pro: Pro または Ultra プランへの加入が必要です · バッジをクリックしてプランを取得
+    ultra: Ultra プランへの加入が必要です · バッジをクリックしてプランを取得
   availability:
     authenticationRequired: ログインすると利用できます
     ultraRequired: Ultra プランが必要です
+    proRequired: Pro または Ultra プランが必要です
     quotaExhausted: 利用枠を使い切りました
     serviceUnavailable: 一時的に利用できません
     usedPercent: "利用枠: $1% 使用済み"

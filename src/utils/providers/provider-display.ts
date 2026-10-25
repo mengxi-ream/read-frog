@@ -1,5 +1,6 @@
 import type { ProviderConfig } from "@/types/config/provider"
 import type { Theme } from "@/types/config/theme"
+import type { HostedAiUpgradePlan } from "@/utils/hosted-ai/types"
 import { PROVIDER_ITEMS } from "@/utils/constants/providers"
 
 export interface SystemProviderSelectorItem {
@@ -8,8 +9,11 @@ export interface SystemProviderSelectorItem {
   logo: (theme: Theme) => string
   name: string
   disabled?: boolean
-  /** Marks an option no non-Ultra account can run, shown as an "Ultra" badge. */
-  requiresUltra?: boolean
+  /**
+   * The cheapest plan this account would need to run the option, shown as a
+   * badge. Absent when it can run it already, or a plan would not help.
+   */
+  upgradeTo?: HostedAiUpgradePlan
 }
 
 export type ProviderSelectorOption = ProviderConfig | SystemProviderSelectorItem

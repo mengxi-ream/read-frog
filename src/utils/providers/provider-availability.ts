@@ -32,15 +32,16 @@ export function getHostedFeatureForCapability(
 
 /**
  * Whether a tier is unusable for a reason the user can act on and that will not
- * change on its own: sign in, or buy Ultra.
+ * change on its own: sign in, or buy a plan (`pro_required` / `ultra_required`).
  *
  * Read off `unavailableReason` rather than recomputed from `accessAllowed` and
  * the `credits` array. The server already separates the two — it reports an
- * unfunded Ultra-gated tier as `ultra_required` ("an upgrade wall, not an
- * outage") and routes every transient condition to `service_unavailable`,
- * including a billing lookup that threw. Deriving durability from an empty
- * `credits` array instead conflates them in both directions: a momentary
- * billing failure empties `credits` for an account that is perfectly entitled.
+ * unfunded plan-gated tier as `pro_required` or `ultra_required` ("an upgrade
+ * wall, not an outage") and routes every transient condition to
+ * `service_unavailable`, including a billing lookup that threw. Deriving
+ * durability from an empty `credits` array instead conflates them in both
+ * directions: a momentary billing failure empties `credits` for an account that
+ * is perfectly entitled.
  *
  * Everything else the server can report — `quota_exhausted`,
  * `service_unavailable` (open circuit, unconfigured model, unreadable quota
@@ -53,6 +54,7 @@ export function getHostedFeatureForCapability(
 export function isDurablyUnusableTier(tier: HostedAiTierStatus | undefined): boolean {
   return (
     tier?.unavailableReason === "authentication_required" ||
+    tier?.unavailableReason === "pro_required" ||
     tier?.unavailableReason === "ultra_required"
   )
 }

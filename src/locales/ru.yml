@@ -1698,11 +1698,13 @@ subtitles:
     translatedExportIncomplete: Не удалось перевести все строки субтитров
     translatedExportSameLanguage: Исходный и целевой языки совпадают
 hostedAi:
-  ultraBadge:
-    tooltip: Требуется план Ultra · Нажмите на значок, чтобы получить его
+  planBadge:
+    pro: Требуется план Pro или Ultra · Нажмите на значок, чтобы получить его
+    ultra: Требуется план Ultra · Нажмите на значок, чтобы получить его
   availability:
     authenticationRequired: Войдите, чтобы использовать этого провайдера
     ultraRequired: Требуется план Ultra
+    proRequired: Требуется план Pro или Ultra
     quotaExhausted: Квота исчерпана
     serviceUnavailable: Временно недоступно
     usedPercent: "Использовано квоты: $1%"

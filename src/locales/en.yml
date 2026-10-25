@@ -1845,11 +1845,13 @@ subtitles:
     translatedExportIncomplete: Failed to translate all subtitle lines
     translatedExportSameLanguage: Source and target languages are the same
 hostedAi:
-  ultraBadge:
-    tooltip: Requires the Ultra plan · Click the badge to get it
+  planBadge:
+    pro: Requires the Pro or Ultra plan · Click the badge to get it
+    ultra: Requires the Ultra plan · Click the badge to get it
   availability:
     authenticationRequired: Log in to use this provider
     ultraRequired: Ultra plan required
+    proRequired: Pro or Ultra plan required
     quotaExhausted: Quota used up
     serviceUnavailable: Temporarily unavailable
     usedPercent: "Quota used: $1%"

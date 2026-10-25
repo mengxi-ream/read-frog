@@ -406,8 +406,8 @@ function BuiltInProviderPanel({ providerId }: { providerId: BuiltInAiProviderId 
   const { status } = useHostedAiStatus()
 
   // Both cards list every hosted-capable feature. Same policy as the provider
-  // dropdowns, and now literally the same predicate: the Ultra badge is the
-  // viewer-independent `requiresUltra` product fact; rows lock only on durable
+  // dropdowns, and now literally the same predicate: the plan badge is the
+  // plan this account lacks (`upgradeTo`); rows lock only on durable
   // account facts (sign-in, plan), never on transient service state (exhausted
   // quota, open circuit, unconfigured model) — those surface at run time. Fail
   // open while status is unknown so one failed fetch never locks the UI.
@@ -415,7 +415,7 @@ function BuiltInProviderPanel({ providerId }: { providerId: BuiltInAiProviderId 
     const tierStatus = getHostedAiTierStatus(status, feature, modelTier)
     return {
       disabled: isDurablyUnusableTier(tierStatus),
-      requiresUltra: tierStatus?.requiresUltra === true,
+      upgradeTo: tierStatus?.upgradeTo ?? undefined,
     }
   }
 
