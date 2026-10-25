@@ -2,9 +2,9 @@ import "@/utils/zod-config"
 import type { ContentRuntime, ContentRuntimePart } from "@/utils/content-runtime/parts"
 import { ContentScriptContext, defineUnlistedScript } from "#imports"
 import { logger } from "@/utils/logger"
-import { runHostContent } from "../host.content/main"
-import { runSelectionContent } from "../selection.content/main"
-import { runSideContent } from "../side.content/main"
+import { runHostContent } from "./host/main"
+import { runSelectionContent } from "./selection/main"
+import { runSideContent } from "./side/main"
 
 // The shared ES module behind every page's content scripts. The manifest only
 // injects the small loader (entrypoints/loader.content.ts); it imports this

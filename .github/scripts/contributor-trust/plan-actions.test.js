@@ -22,7 +22,7 @@ describe("isExcludedChangedLineFile", () => {
       ),
     ).toBe(false)
     expect(isExcludedChangedLineFile("src/utils/config/__tests__/example/types.ts")).toBe(false)
-    expect(isExcludedChangedLineFile("src/entrypoints/host.content/runtime.ts")).toBe(false)
+    expect(isExcludedChangedLineFile("src/entrypoints/content-runtime/host/runtime.ts")).toBe(false)
   })
 
   it("excludes files within src/locales without matching similarly named paths", () => {
@@ -160,7 +160,7 @@ describe("planTrustActions", () => {
         {
           additions: 4,
           deletions: 0,
-          filename: "src/entrypoints/host.content/runtime.ts",
+          filename: "src/entrypoints/content-runtime/host/runtime.ts",
         },
         {
           additions: 3,
@@ -232,7 +232,7 @@ describe("planTrustActions", () => {
             deletions: 0,
           },
           {
-            filename: "src/entrypoints/host.content/runtime.ts",
+            filename: "src/entrypoints/content-runtime/host/runtime.ts",
             additions: 900,
             deletions: changedLines - 900,
           },
