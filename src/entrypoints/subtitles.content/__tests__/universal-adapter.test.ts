@@ -10,6 +10,7 @@ import {
   subtitlesStore,
   translatedTrackAtom,
 } from "../atoms"
+import { wordLookupAtom } from "../learning/atoms"
 import { TranslationCoordinator } from "../translation-coordinator"
 import { UniversalVideoAdapter } from "../universal-adapter"
 
@@ -615,6 +616,15 @@ describe("universalVideoAdapter", () => {
     await pending
 
     expect(revertSpy).not.toHaveBeenCalled()
+  })
+
+  it("closes an open word lookup when subtitles are turned off by shortcut", () => {
+    const { adapter } = createAdapter([])
+    subtitlesStore.set(wordLookupAtom, { cueStart: 0, index: 0 })
+
+    adapter.toggleSubtitlesByShortcut(false)
+
+    expect(subtitlesStore.get(wordLookupAtom)).toBeNull()
   })
 
   it("disposes translated subtitle download state when navigation starts", () => {

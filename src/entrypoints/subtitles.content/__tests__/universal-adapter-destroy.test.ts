@@ -12,6 +12,7 @@ import {
   subtitlesStore,
   subtitlesVisibleAtom,
 } from "../atoms"
+import { wordLookupAtom } from "../learning/atoms"
 import { UniversalVideoAdapter } from "../universal-adapter"
 
 const mocks = vi.hoisted(() => ({
@@ -102,6 +103,7 @@ describe("universalVideoAdapter destroy", () => {
     subtitlesStore.set(subtitlesVisibleAtom, true)
     subtitlesStore.set(subtitlesSettingsPanelOpenAtom, true)
     subtitlesStore.set(currentVideoIdAtom, "video-1")
+    subtitlesStore.set(wordLookupAtom, { cueStart: 0, index: 0 })
     const removeEventListener = vi.spyOn(window, "removeEventListener")
 
     adapter.destroy()
@@ -113,6 +115,7 @@ describe("universalVideoAdapter destroy", () => {
     expect(subtitlesStore.get(subtitlesVisibleAtom)).toBe(false)
     expect(subtitlesStore.get(subtitlesSettingsPanelOpenAtom)).toBe(false)
     expect(subtitlesStore.get(currentVideoIdAtom)).toBeNull()
+    expect(subtitlesStore.get(wordLookupAtom)).toBeNull()
     expect(removeEventListener).toHaveBeenCalledWith(NAVIGATE_START, expect.any(Function))
     expect(removeEventListener).toHaveBeenCalledWith(NAVIGATE_FINISH, expect.any(Function))
 

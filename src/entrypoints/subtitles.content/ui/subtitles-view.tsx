@@ -1,10 +1,11 @@
 import { IconGripHorizontal } from "@tabler/icons-react"
-import { useAtomValue } from "jotai"
-import { Activity } from "react"
+import { useAtomValue, useSetAtom } from "jotai"
+import { Activity, useEffect } from "react"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { SUBTITLES_BOX_CLASS, SUBTITLES_VIEW_CLASS } from "@/utils/constants/subtitles"
 import { cn } from "@/utils/styles/utils"
 import { displaySubtitleAtom } from "../atoms"
+import { subtitlesHoveredAtom } from "../learning/atoms"
 import { MainSubtitle, TranslationSubtitle } from "./subtitle-lines"
 import { useVerticalDrag } from "./use-vertical-drag"
 
@@ -16,6 +17,10 @@ function SubtitlesContent() {
   const subtitle = useAtomValue(displaySubtitleAtom)
   const { style } = useAtomValue(configFieldsAtomMap.videoSubtitles)
   const { displayMode, translationPosition, container } = style
+  const setHovered = useSetAtom(subtitlesHoveredAtom)
+
+  // A box removed under the pointer never sees it leave.
+  useEffect(() => () => setHovered(false), [setHovered])
 
   const translationAbove = translationPosition === "above"
   const showMain = displayMode !== "translationOnly"
@@ -35,6 +40,8 @@ function SubtitlesContent() {
       <div
         className={`${SUBTITLES_BOX_CLASS} pointer-events-auto mx-auto flex w-fit max-w-[90%] cursor-text flex-col gap-2 rounded px-2 py-1.5 text-center text-white select-text`}
         style={containerStyle}
+        onPointerEnter={() => setHovered(true)}
+        onPointerLeave={() => setHovered(false)}
       >
         <Activity mode={showMain ? "visible" : "hidden"}>
           <MainSubtitle className={translationAbove ? "order-2" : "order-1"} />

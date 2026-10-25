@@ -40,6 +40,7 @@ import {
   adPlayingAtom,
   currentTimeMsAtom,
   currentVideoIdAtom,
+  sourceLanguageAtom,
   sourceTrackAtom,
   translatedTrackAtom,
   videoSummaryPartialAtom,
@@ -51,6 +52,7 @@ import {
   subtitlesStore,
   subtitlesVisibleAtom,
 } from "./atoms"
+import { lookUpAtom } from "./learning/atoms"
 import { renderSubtitlesTranslateButton } from "./renderer/render-translate-button"
 import { SegmentationPipeline } from "./segmentation-pipeline"
 import { SubtitlesScheduler } from "./subtitles-scheduler"
@@ -86,6 +88,7 @@ export interface SubtitlesProvidersAdapter {
   hasSubtitlesAvailable: () => Promise<boolean>
   ensureSourceTrackPublished: () => Promise<void>
   seekTo: (seconds: number) => void
+  getVideoElement: () => HTMLVideoElement | null
   toggleSubtitlesManually: (enabled: boolean) => void
   toggleSubtitlesByShortcut: (enabled: boolean) => void
   requestAiSubtitles: () => Promise<void>
@@ -309,6 +312,8 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
       video.currentTime = seconds
     }
   }
+
+  getVideoElement = () => this.subtitlesScheduler?.getVideoElement() ?? null
 
   downloadSourceSubtitles = async () => {
     await this.getOrLoadSourceSubtitles()
@@ -816,6 +821,8 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
   }
 
   private showNativeSubtitles() {
+    // Our subtitles step aside, and a word lookup on them goes too.
+    subtitlesStore.set(lookUpAtom, null)
     this.fetcher.showNativeSubtitles?.()
     if (!this.isNativeSubtitlesHidden) {
       return
@@ -1016,6 +1023,10 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
       subtitlesStore.set(currentTimeMsAtom, video.currentTime * 1000)
     }
     subtitlesStore.set(sourceTrackAtom, [...fragments])
+    subtitlesStore.set(
+      sourceLanguageAtom,
+      resolveLanguageCodeFromLocale(this.fetcher.getSourceLanguage()),
+    )
   }
 
   private replaceSourceTrackWindow(

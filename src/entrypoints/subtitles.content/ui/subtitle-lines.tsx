@@ -8,6 +8,7 @@ import { getLanguageDirectionAndLang } from "@/utils/content/language-direction"
 import { cn } from "@/utils/styles/utils"
 import { isTranslationPending } from "@/utils/subtitles/display-rules"
 import { displaySubtitleAtom } from "../atoms"
+import { SubtitleWordTokens } from "../learning/subtitle-word-tokens"
 import { SubtitlePendingLabel } from "./subtitle-pending-label"
 
 interface SubtitleLineProps {
@@ -31,16 +32,14 @@ function getTextStyleVars(textStyle: SubtitleTextStyle): CSSProperties {
 }
 
 export function MainSubtitle({ content, className }: SubtitleLineProps) {
-  const subtitle = useAtomValue(displaySubtitleAtom)
   const { style } = useAtomValue(configFieldsAtomMap.videoSubtitles)
-  const text = content ?? subtitle?.text ?? ""
 
   return (
     <div
       className={cn("subtitles-main text-xl leading-tight", className)}
       style={getTextStyleVars(style.main)}
     >
-      {text}
+      {content ?? <SubtitleWordTokens />}
     </div>
   )
 }

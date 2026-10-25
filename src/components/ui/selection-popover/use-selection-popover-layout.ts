@@ -1,6 +1,7 @@
 import type { Rnd } from "react-rnd"
 import { useCallback, useEffect, useLayoutEffect, useReducer, useRef, useState } from "react"
 import { flushSync } from "react-dom"
+import { match } from "ts-pattern"
 
 interface Position {
   x: number
@@ -21,7 +22,7 @@ interface LayoutMemory {
 }
 
 interface UseSelectionPopoverLayoutOptions {
-  anchor: Position | null
+  anchor: (Position & { above?: boolean }) | null
   isVisible: boolean
 }
 
@@ -330,10 +331,12 @@ export function useSelectionPopoverLayout({
       }
 
       const preferredX = preferredLayoutRef.current.x ?? popoverRect.rect.left
-      const preferredVertical =
-        getBottomAnchoredLayoutMemory(popoverRect.rect) ??
-        preferredLayoutRef.current.vertical ??
-        createTopVerticalLayoutMemory(popoverRect.rect.top)
+      // A remembered bottom edge wins, so a popover opened above its anchor
+      // keeps growing upward from there rather than being pinned to the
+      // viewport bottom.
+      const preferredVertical = match(preferredLayoutRef.current.vertical)
+        .with({ mode: "bottom" }, (bottom) => bottom)
+        .otherwise((top) => getBottomAnchoredLayoutMemory(popoverRect.rect) ?? top)
       const manualSize = preferredLayoutRef.current.manualSize
       const preferredWidth = manualSize?.width ?? popoverRect.rect.width
       const preferredHeight = manualSize?.height ?? popoverRect.rect.height
@@ -425,9 +428,11 @@ export function useSelectionPopoverLayout({
 
         if (!preferredLayoutRef.current.manualSize) {
           const currentPopoverRect = getPopoverRect(rndRef)
+          // Content grows the popover downward, so one held by its bottom edge
+          // (or pushed past the viewport) moves back before that frame paints.
           if (
-            currentPopoverRect?.rect.bottom &&
-            currentPopoverRect.rect.bottom > window.innerHeight + BOTTOM_EDGE_TOLERANCE
+            preferredLayoutRef.current.vertical?.mode === "bottom" ||
+            (currentPopoverRect?.rect.bottom ?? 0) > window.innerHeight + BOTTOM_EDGE_TOLERANCE
           ) {
             cancelScheduledViewportLayout()
             applyViewportLayout({ immediate: true })
@@ -523,9 +528,14 @@ export function useSelectionPopoverLayout({
 
     ensureResizeObserver()
     scheduleViewportLayout()
-    requestAnimationFrame(() => {
-      syncPreferredPositionFromElement()
-    })
+    if (anchor?.above) {
+      preferredLayoutRef.current.vertical = {
+        mode: "bottom",
+        offset: Math.max(window.innerHeight - anchor.y, 0),
+      }
+    } else {
+      requestAnimationFrame(syncPreferredPositionFromElement)
+    }
   }, [
     // oxlint-disable-next-line react/exhaustive-effect-dependencies -- the dependencies are re-run triggers, not values the effect body reads
     anchor,
