@@ -64,6 +64,9 @@ export const selectionToolbarCustomActionNotebaseConnectionSchema = z.object({
   notebaseNameSnapshot: z.string().trim().min(1),
   connectedAccount: selectionToolbarCustomActionNotebaseAccountSchema,
   mappings: z.array(selectionToolbarCustomActionNotebaseMappingSchema),
+  // Output fields the reader chose not to save. A field neither mapped nor
+  // listed here is undecided, and every save reminds the reader about it.
+  skippedFieldIds: z.array(z.string().nonempty()).optional(),
 })
 
 export const selectionToolbarBuiltInActionStateSchema = z.object({

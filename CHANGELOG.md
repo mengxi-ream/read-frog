@@ -1,5 +1,29 @@
 # @read-frog/extension
 
+## 1.52.1
+
+### Patch Changes
+
+- [#2372](https://github.com/mengxi-ream/read-frog/pull/2372) [`6195b4e`](https://github.com/mengxi-ream/read-frog/commit/6195b4e04f534789ebd7d0af7ee189442b27f52e) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - i18n(subtitles): clarify AI smart segmentation needs a strong LLM and slows translations
+
+- [#2380](https://github.com/mengxi-ream/read-frog/pull/2380) [`3f34aea`](https://github.com/mengxi-ream/read-frog/commit/3f34aea94a63fe4bc098e0cb081243773470694b) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - perf(content): load pages faster by injecting a small loader instead of 8 MB of content scripts; it loads one shared runtime that runs page translation, the selection toolbar and the floating button
+
+- [#2384](https://github.com/mengxi-ream/read-frog/pull/2384) [`78dccd9`](https://github.com/mengxi-ream/read-frog/commit/78dccd928f3ca05b76ebeab44405bd564824101d) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(translation): hide echoed translations that only add or drop spaces between Chinese and English
+
+- [#2378](https://github.com/mengxi-ream/read-frog/pull/2378) [`0f26b21`](https://github.com/mengxi-ream/read-frog/commit/0f26b2132407d71607c1f3581c55519ba0cfade6) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(popup): open the review page of the store Read Frog was installed from
+
+- [#2377](https://github.com/mengxi-ream/read-frog/pull/2377) [`44dad29`](https://github.com/mengxi-ream/read-frog/commit/44dad29c3dd52d1b4220f5ecf1c26bd854be5a27) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(selection): keep the translation card and floating button out of what Cmd/Ctrl+A selects and copies
+
+- [#2377](https://github.com/mengxi-ream/read-frog/pull/2377) [`44dad29`](https://github.com/mengxi-ream/read-frog/commit/44dad29c3dd52d1b4220f5ecf1c26bd854be5a27) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(selection): keep the text you select right after the translation card closes, instead of clearing it and hiding the toolbar
+
+- [#2374](https://github.com/mengxi-ream/read-frog/pull/2374) [`2966a5f`](https://github.com/mengxi-ream/read-frog/commit/2966a5f89bb9a74c837c8a565ebad1ce0aeffc51) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(selection): stop reading furigana twice when speaking or translating a selection
+
+- [#2376](https://github.com/mengxi-ream/read-frog/pull/2376) [`d3c16e0`](https://github.com/mengxi-ream/read-frog/commit/d3c16e0f970b4f27d035e94509d44babf802e44e) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(selection): keep the toolbar and floating button visible in SimpRead reader mode
+
+- [#2379](https://github.com/mengxi-ream/read-frog/pull/2379) [`68bba6e`](https://github.com/mengxi-ream/read-frog/commit/68bba6ec35d91e398c80109c216b42b817e92f76) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(subtitles): show a readable error instead of a JSON parser message when YouTube returns empty captions
+
+- [#2379](https://github.com/mengxi-ream/read-frog/pull/2379) [`68bba6e`](https://github.com/mengxi-ream/read-frog/commit/68bba6ec35d91e398c80109c216b42b817e92f76) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(subtitles): stop reporting "no subtitles" on YouTube videos that have captions
+
 ## 1.52.0
 
 ### Minor Changes

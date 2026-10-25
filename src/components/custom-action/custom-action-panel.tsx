@@ -186,6 +186,7 @@ export function CustomActionPanel() {
           <>
             <SaveToNotebaseButton
               action={action}
+              failed={!!error}
               isRunning={isRunning}
               result={result}
               surface={saveSurface}

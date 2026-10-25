@@ -61,6 +61,8 @@ vi.mock("@/utils/i18n", () => ({
   initI18n: async () => {},
   setUiLanguage: async () => {},
   getUiLocale: () => "en",
+  // A spy, since the mocked `t` drops substitutions: tests read the list off its calls.
+  formatUiList: vi.fn<(items: readonly string[]) => string>((items) => items.join(", ")),
   // Tags the key with the locale asked for, so tests can see which one was.
   translateIn: (locale: string, key: string) => `${key}@${locale}`,
 }))

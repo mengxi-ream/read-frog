@@ -1,8 +1,263 @@
 // @vitest-environment jsdom
-import { afterEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import * as configStorage from "@/utils/config/storage"
-import { PLAYER_DATA_REQUEST_TYPE, PLAYER_DATA_RESPONSE_TYPE } from "@/utils/constants/subtitles"
+import {
+  MAX_FETCH_RETRIES,
+  MAX_PLAYER_RESPONSE_WAIT_ATTEMPTS,
+  MAX_PLAYER_WAIT_ATTEMPTS,
+  PLAYER_DATA_REQUEST_TYPE,
+  PLAYER_DATA_RESPONSE_TYPE,
+  PLAYER_RESPONSE_PENDING_ERROR,
+} from "@/utils/constants/subtitles"
+import { OverlaySubtitlesError } from "@/utils/subtitles/errors"
 import { YoutubeSubtitlesFetcher } from "../fetchers/youtube"
+
+function setWatchLocation(videoId: string) {
+  Object.defineProperty(window, "location", {
+    value: {
+      href: `https://www.youtube.com/watch?v=${videoId}`,
+      search: `?v=${videoId}`,
+      origin: "https://www.youtube.com",
+      pathname: "/watch",
+      hostname: "www.youtube.com",
+    },
+    writable: true,
+  })
+}
+
+describe("youtube caption download", () => {
+  const url = "https://www.youtube.com/api/timedtext?v=test123&lang=ja&kind=asr&fmt=json3"
+
+  beforeEach(() => {
+    vi.useFakeTimers()
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+    vi.unstubAllGlobals()
+    vi.restoreAllMocks()
+  })
+
+  // YouTube answers a caption request without a valid POT with 200 and an empty body.
+  it("reports an empty caption body as an invalid response, not the parser's message", async () => {
+    const fetchMock = vi.fn<typeof fetch>(async () => new Response("", { status: 200 }))
+    vi.stubGlobal("fetch", fetchMock)
+    const fetcher = new YoutubeSubtitlesFetcher()
+
+    const result = (fetcher as any).fetchWithRetry(url).catch((error: unknown) => error)
+    await vi.runAllTimersAsync()
+    const error = await result
+
+    expect(error).toBeInstanceOf(OverlaySubtitlesError)
+    expect(error).toMatchObject({ message: "subtitles.errors.invalidResponse" })
+    expect(fetchMock).toHaveBeenCalledTimes(MAX_FETCH_RETRIES)
+  })
+
+  it("still retries an empty body and returns the events once a real one arrives", async () => {
+    const events = [{ tStartMs: 0, dDurationMs: 500, segs: [{ utf8: "こんにちは" }] }]
+    const fetchMock = vi
+      .fn<typeof fetch>()
+      .mockImplementationOnce(async () => new Response("", { status: 200 }))
+      .mockImplementation(async () => Response.json({ events }))
+    vi.stubGlobal("fetch", fetchMock)
+    const fetcher = new YoutubeSubtitlesFetcher()
+
+    const result = (fetcher as any).fetchWithRetry(url)
+    await vi.runAllTimersAsync()
+
+    await expect(result).resolves.toEqual(events)
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+  })
+})
+
+describe("youtube subtitles availability lookup", () => {
+  const playerData = {
+    videoId: "test123",
+    captionTracks: [
+      {
+        baseUrl: "https://www.youtube.com/api/timedtext?v=test123&lang=ja&kind=asr",
+        languageCode: "ja",
+        kind: "asr",
+        vssId: "a.ja",
+      },
+    ],
+    audioCaptionTracks: [],
+    device: null,
+    cver: null,
+    playerState: 1,
+    selectedTrackLanguageCode: "ja",
+    selectedTrackVssId: "a.ja",
+    defaultCaptionTrackIndex: null,
+    cachedTimedtextUrl: null,
+    isLiveContent: false,
+  }
+
+  beforeEach(() => {
+    vi.useFakeTimers()
+    setWatchLocation("test123")
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+    vi.restoreAllMocks()
+  })
+
+  it("retries until the player catches up to the current video", async () => {
+    const fetcher = new YoutubeSubtitlesFetcher()
+    const requestPlayerDataSpy = vi
+      .spyOn(fetcher as any, "requestPlayerData")
+      .mockResolvedValueOnce({ success: false, error: "VIDEO_ID_MISMATCH" })
+      .mockResolvedValueOnce({ success: false, error: "PLAYER_NOT_FOUND" })
+      .mockResolvedValue({ success: true, data: playerData })
+
+    const result = fetcher.hasAvailableSubtitles()
+    await vi.runAllTimersAsync()
+
+    await expect(result).resolves.toBe(true)
+    expect(requestPlayerDataSpy).toHaveBeenCalledTimes(3)
+  })
+
+  it("reports a player that never reaches this video as a failed lookup, not as no subtitles", async () => {
+    const fetcher = new YoutubeSubtitlesFetcher()
+    const requestPlayerDataSpy = vi
+      .spyOn(fetcher as any, "requestPlayerData")
+      .mockResolvedValue({ success: false, error: "VIDEO_ID_MISMATCH" })
+
+    const result = fetcher.hasAvailableSubtitles().catch((error: unknown) => error)
+    await vi.runAllTimersAsync()
+
+    expect(await result).toMatchObject({ message: "subtitles.errors.fetchSubTimeout" })
+    expect(requestPlayerDataSpy).toHaveBeenCalledTimes(MAX_PLAYER_WAIT_ATTEMPTS)
+  })
+
+  // AdGuard can hold the player response for seconds on a cold load while the player is
+  // already on this video.
+  it("keeps waiting past the usual cap while the player's response is on the way", async () => {
+    const fetcher = new YoutubeSubtitlesFetcher()
+    const pendingAnswers = MAX_PLAYER_WAIT_ATTEMPTS + 30
+    let calls = 0
+    const requestPlayerDataSpy = vi
+      .spyOn(fetcher as any, "requestPlayerData")
+      .mockImplementation(async () =>
+        ++calls <= pendingAnswers
+          ? { success: false, error: PLAYER_RESPONSE_PENDING_ERROR }
+          : { success: true, data: playerData },
+      )
+
+    const result = fetcher.hasAvailableSubtitles()
+    await vi.runAllTimersAsync()
+
+    await expect(result).resolves.toBe(true)
+    expect(requestPlayerDataSpy).toHaveBeenCalledTimes(pendingAnswers + 1)
+  })
+
+  it("gives up on a player response that never arrives after the longer wait", async () => {
+    const fetcher = new YoutubeSubtitlesFetcher()
+    const requestPlayerDataSpy = vi
+      .spyOn(fetcher as any, "requestPlayerData")
+      .mockResolvedValue({ success: false, error: PLAYER_RESPONSE_PENDING_ERROR })
+
+    const result = fetcher.hasAvailableSubtitles().catch((error: unknown) => error)
+    await vi.runAllTimersAsync()
+
+    expect(await result).toMatchObject({ message: "subtitles.errors.fetchSubTimeout" })
+    expect(requestPlayerDataSpy).toHaveBeenCalledTimes(MAX_PLAYER_RESPONSE_WAIT_ATTEMPTS)
+  })
+
+  it("stops waiting once the fetcher is cleaned up", async () => {
+    const fetcher = new YoutubeSubtitlesFetcher()
+    let calls = 0
+    const requestPlayerDataSpy = vi
+      .spyOn(fetcher as any, "requestPlayerData")
+      .mockImplementation(async () => {
+        if (++calls === 3) fetcher.cleanup()
+        return { success: false, error: PLAYER_RESPONSE_PENDING_ERROR }
+      })
+
+    const result = fetcher.hasAvailableSubtitles().catch((error: unknown) => error)
+    await vi.runAllTimersAsync()
+
+    expect(await result).toMatchObject({ message: "subtitles.errors.fetchSubTimeout" })
+    expect(requestPlayerDataSpy).toHaveBeenCalledTimes(3)
+  })
+
+  it("does not repeat a request the page never answered", async () => {
+    const fetcher = new YoutubeSubtitlesFetcher()
+    const requestPlayerDataSpy = vi
+      .spyOn(fetcher as any, "requestPlayerData")
+      .mockResolvedValue({ success: false, error: "TIMEOUT" })
+
+    await expect(fetcher.hasAvailableSubtitles()).rejects.toThrow(
+      "subtitles.errors.fetchSubTimeout",
+    )
+    expect(requestPlayerDataSpy).toHaveBeenCalledTimes(1)
+  })
+
+  it("stops waiting once the page has moved on to another video", async () => {
+    const fetcher = new YoutubeSubtitlesFetcher()
+    const requestPlayerDataSpy = vi
+      .spyOn(fetcher as any, "requestPlayerData")
+      .mockImplementation(async () => {
+        setWatchLocation("next456")
+        return { success: false, error: "VIDEO_ID_MISMATCH" }
+      })
+
+    await expect(fetcher.hasAvailableSubtitles()).rejects.toThrow(
+      "subtitles.errors.fetchSubTimeout",
+    )
+    expect(requestPlayerDataSpy).toHaveBeenCalledTimes(1)
+  })
+
+  it("answers no subtitles only when the player has this video and no caption tracks", async () => {
+    const fetcher = new YoutubeSubtitlesFetcher()
+    vi.spyOn(fetcher as any, "requestPlayerData").mockResolvedValue({
+      success: true,
+      data: { ...playerData, captionTracks: [] },
+    })
+
+    await expect(fetcher.hasAvailableSubtitles()).resolves.toBe(false)
+  })
+
+  // During a pre-roll ad the player's audio track, and every token on it, belongs to the ad.
+  it("keeps waiting for this video's token while only the ad's are on the player", async () => {
+    const fetcher = new YoutubeSubtitlesFetcher()
+    const duringAd = {
+      ...playerData,
+      audioCaptionTracks: [
+        {
+          url: "https://www.youtube.com/api/timedtext?v=adVideo0001&lang=en&pot=AD_POT&potc=1",
+          vssId: ".en",
+          languageCode: "en",
+        },
+      ],
+    }
+    const afterAd = {
+      ...playerData,
+      audioCaptionTracks: [
+        {
+          url: "https://www.youtube.com/api/timedtext?v=test123&lang=ja&kind=asr&pot=OWN_POT&potc=1",
+          vssId: "a.ja",
+          kind: "asr",
+          languageCode: "ja",
+        },
+      ],
+    }
+    vi.spyOn(fetcher as any, "requestPlayerData")
+      .mockResolvedValueOnce({ success: true, data: duringAd })
+      .mockResolvedValueOnce({ success: true, data: duringAd })
+      .mockResolvedValue({ success: true, data: afterAd })
+    vi.spyOn(fetcher as any, "ensureSubtitlesEnabled").mockResolvedValue(undefined)
+    const fetchWithRetrySpy = vi.spyOn(fetcher as any, "fetchWithRetry").mockResolvedValue([])
+
+    const result = (fetcher as any).getPlayerDataWithPot("test123")
+    await vi.runAllTimersAsync()
+    const resolved = await result
+    await (fetcher as any).fetchTrackEvents(playerData.captionTracks[0], resolved)
+
+    expect(resolved).toBe(afterAd)
+    expect(fetchWithRetrySpy.mock.calls[0]?.[0]).toContain("pot=OWN_POT")
+  })
+})
 
 describe("youtube subtitles fetcher", () => {
   afterEach(() => {

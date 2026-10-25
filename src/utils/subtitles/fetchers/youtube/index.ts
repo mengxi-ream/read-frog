@@ -7,11 +7,15 @@ import {
   ENSURE_SUBTITLES_RESPONSE_TYPE,
   FETCH_RETRY_DELAY_MS,
   MAX_FETCH_RETRIES,
+  MAX_PLAYER_RESPONSE_WAIT_ATTEMPTS,
+  MAX_PLAYER_WAIT_ATTEMPTS,
   MAX_POT_WAIT_ATTEMPTS,
   MAX_SELECTED_TRACK_WAIT_ATTEMPTS,
   MAX_STATE_WAIT_ATTEMPTS,
   PLAYER_DATA_REQUEST_TYPE,
   PLAYER_DATA_RESPONSE_TYPE,
+  PLAYER_RESPONSE_PENDING_ERROR,
+  PLAYER_WAIT_INTERVAL_MS,
   POT_WAIT_INTERVAL_MS,
   SELECTED_TRACK_WAIT_INTERVAL_MS,
   STATE_WAIT_INTERVAL_MS,
@@ -64,6 +68,8 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
   private sourceLanguage: string = ""
   private cachedTrackHash: string | null = null
   private preSegmented: boolean = false
+  // Bumped by cleanup() so a player lookup still waiting gives up.
+  private lookupGeneration = 0
 
   async fetch(): Promise<SubtitlesFragment[]> {
     const videoId = getYoutubeVideoId()
@@ -111,6 +117,7 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
     this.sourceLanguage = ""
     this.cachedTrackHash = null
     this.preSegmented = false
+    this.lookupGeneration++
   }
 
   async hasAvailableSubtitles(): Promise<boolean> {
@@ -119,13 +126,42 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
       return false
     }
 
-    const response = await this.requestPlayerData(videoId)
-    return (
-      response.success &&
-      response.data !== null &&
-      response.data !== undefined &&
-      response.data.captionTracks.length > 0
-    )
+    const response = await this.waitForPlayerData(videoId)
+    // A player that never answered for this video says nothing about its captions.
+    if (!response.success || !response.data) {
+      throw new OverlaySubtitlesError(i18n.t("subtitles.errors.fetchSubTimeout"))
+    }
+    return response.data.captionTracks.length > 0
+  }
+
+  /**
+   * Right after a navigation the player can still hold the previous video, or not be on the
+   * page yet, so those answers get retried until it catches up. A player already on this video
+   * whose response is still on the way gets a much longer wait. A request the page never
+   * answered already waited out its own timeout and is not repeated, and the wait ends once the
+   * page moves to another video or the fetcher is cleaned up.
+   */
+  private async waitForPlayerData(videoId: string) {
+    const lookupGeneration = this.lookupGeneration
+    let response = await this.requestPlayerData(videoId)
+    for (let attempt = 1; ; attempt++) {
+      const maxAttempts =
+        response.error === PLAYER_RESPONSE_PENDING_ERROR
+          ? MAX_PLAYER_RESPONSE_WAIT_ATTEMPTS
+          : MAX_PLAYER_WAIT_ATTEMPTS
+      if (
+        response.success ||
+        response.error === "TIMEOUT" ||
+        attempt >= maxAttempts ||
+        getYoutubeVideoId() !== videoId ||
+        lookupGeneration !== this.lookupGeneration
+      ) {
+        return response
+      }
+
+      await sleep(PLAYER_WAIT_INTERVAL_MS)
+      response = await this.requestPlayerData(videoId)
+    }
   }
 
   async shouldUseSameTrack(): Promise<boolean> {
@@ -236,7 +272,7 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
       return playerData
     }
 
-    await this.ensureSubtitlesEnabled()
+    await this.ensureSubtitlesEnabled(videoId)
 
     let latest = playerData
     for (let i = 0; i < MAX_SELECTED_TRACK_WAIT_ATTEMPTS; i++) {
@@ -275,7 +311,7 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
 
     let playerData = response.data
 
-    if (this.hasPotInAudioTracks(playerData) || playerData.cachedTimedtextUrl) {
+    if (this.hasUsablePot(playerData)) {
       return playerData
     }
 
@@ -283,14 +319,14 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
       return playerData
     }
 
-    await this.ensureSubtitlesEnabled()
+    await this.ensureSubtitlesEnabled(videoId)
 
     for (let i = 0; i < MAX_POT_WAIT_ATTEMPTS; i++) {
       await sleep(POT_WAIT_INTERVAL_MS)
       const pollResponse = await this.requestPlayerData(videoId)
       if (pollResponse.success && pollResponse.data) {
         playerData = pollResponse.data
-        if (this.hasPotInAudioTracks(playerData) || playerData.cachedTimedtextUrl) {
+        if (this.hasUsablePot(playerData)) {
           return playerData
         }
       }
@@ -313,14 +349,10 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
     return this.fetchWithRetry(url)
   }
 
-  private hasPotInAudioTracks(playerData: PlayerData): boolean {
-    return playerData.audioCaptionTracks.some((t) => {
-      try {
-        return new URL(t.url).searchParams.has("pot")
-      } catch {
-        return false
-      }
-    })
+  // During an ad the audio tracks carry the ad's tokens, which only count once they are ours.
+  private hasUsablePot(playerData: PlayerData): boolean {
+    const track = this.selectTrack(playerData)
+    return track !== null && extractPotToken(track, playerData).pot !== null
   }
 
   private async waitForTimedtextUrl(videoId: string): Promise<string | null> {
@@ -335,9 +367,10 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
     return requestPlayerData(videoId)
   }
 
-  private async ensureSubtitlesEnabled(): Promise<void> {
+  private async ensureSubtitlesEnabled(videoId: string): Promise<void> {
     await postMessageRequest(ENSURE_SUBTITLES_RESPONSE_TYPE, {
       type: ENSURE_SUBTITLES_REQUEST_TYPE,
+      videoId,
     })
   }
 
@@ -411,10 +444,12 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
           }
         }
 
-        const data = await response.json()
+        // Without a valid POT YouTube answers 200 with an empty body, which is not JSON at all.
+        // The parser's own message ("Unexpected end of JSON input") would land on the player.
+        const data = await response.json().catch(() => null)
         const parsed = youtubeSubtitlesResponseSchema.safeParse(data)
         if (!parsed.success) {
-          throw new Error("Invalid response format")
+          throw new Error(i18n.t("subtitles.errors.invalidResponse"))
         }
 
         return parsed.data.events

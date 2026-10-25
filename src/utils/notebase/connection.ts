@@ -120,11 +120,22 @@ export function sanitizeCustomActionNotebaseConnection(
         mapping.notebaseColumnNameSnapshot.trim() || mapping.notebaseColumnId,
     }))
 
+  // A field leaves the list once it is mapped. An empty list is left out, so
+  // a connection that never had one reads exactly as it did.
+  const skippedFieldIds = [
+    ...new Set(
+      (connection.skippedFieldIds ?? []).filter(
+        (id) => outputFieldIds.has(id) && !localFieldIds.has(id),
+      ),
+    ),
+  ]
+
   return {
     notebaseId,
     notebaseNameSnapshot: connection.notebaseNameSnapshot.trim() || notebaseId,
     connectedAccount,
     mappings,
+    ...(skippedFieldIds.length > 0 ? { skippedFieldIds } : {}),
   }
 }
 

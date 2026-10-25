@@ -620,8 +620,11 @@ async function processConnectedPendingSave(
     return
   }
 
+  // The current connection, not the snapshot: validation checked that its
+  // Notebase and mappings still match, and fields the reader set to "don't
+  // save" since the click must not be written back as undecided.
   const refreshedConnection = refreshNotebaseConnectionAccountSnapshot(
-    pendingNotebaseSave.connectionSnapshot,
+    validation.action.notebaseConnection ?? pendingNotebaseSave.connectionSnapshot,
     connectedAccount,
     schema.name,
   )
@@ -706,14 +709,16 @@ async function processConnectedPendingSave(
       return
     }
 
+    // The mappings were checked against a fresh schema just before the write,
+    // so a rejected cell is a value in the answer. Opening the mappings would
+    // send the reader to change a connection that works.
     if (isORPCValidationError(error)) {
-      await clearConnectedPendingAndOpenActionOptions(
-        deps,
-        pendingNotebaseSave,
-        "[NotebasePendingSave] Cleared connected pending save after row validation error",
+      await deps.clearPendingNotebaseSave()
+      reportPendingSaveOutcome(deps, pendingNotebaseSave, error)
+      deps.log.warn(
+        "[NotebasePendingSave] Cleared connected pending save after the server rejected a cell",
         error,
       )
-      reportPendingSaveOutcome(deps, pendingNotebaseSave, error)
       return
     }
 

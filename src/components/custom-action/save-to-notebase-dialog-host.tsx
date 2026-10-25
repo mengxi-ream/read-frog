@@ -231,10 +231,12 @@ export function SaveToNotebaseDialogHost() {
         return
       }
 
+      // The Notebase was just created from the action, so a rejected cell is
+      // the answer's value, not the connection.
       if (isORPCValidationError(error)) {
         toastManager.add({
           type: "error",
-          title: i18n.t("action.saveToNotebaseConnectionInvalid"),
+          title: i18n.t("action.saveToNotebaseInvalidContent"),
         })
         return
       }
