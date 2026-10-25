@@ -1,4 +1,5 @@
 import type {
+  HostedAiCreditPoolStatus,
   HostedAiCreditStatus,
   HostedAiFeature,
   HostedAiStatus,
@@ -15,12 +16,31 @@ const REASON_I18N_KEYS = {
   service_unavailable: "hostedAi.availability.serviceUnavailable",
 } as const satisfies Record<HostedAiUnavailableReason, string>
 
-/** The pool a feature draws on, or undefined when nothing funds it. */
+/**
+ * Every pool that can pay for Built-in AI, in the order the server draws on
+ * them: the plan's pools, then grants. A server that predates `pools` sends
+ * only `credits`, the plan's pools, which have the same shape.
+ *
+ * TODO(2026-11-07): read `status.pools` alone once the server stops sending
+ * `credits` (mengxi-ream/read-frog-monorepo#710).
+ */
+export function getHostedAiPools(status: HostedAiStatus | undefined): HostedAiCreditPoolStatus[] {
+  return status?.pools ?? status?.credits ?? []
+}
+
+/**
+ * The plan's pool a feature draws on, or undefined when the plan funds none.
+ * Grants are left out: a tier description shows when the pool resets, and a
+ * grant never does.
+ */
 export function getHostedAiCreditForFeature(
   status: HostedAiStatus | undefined,
   feature: HostedAiFeature,
 ): HostedAiCreditStatus | undefined {
-  return status?.credits.find((credit) => credit.features.includes(feature))
+  return getHostedAiPools(status).find(
+    (pool): pool is HostedAiCreditStatus =>
+      pool.periodKind !== "once" && pool.features.includes(feature),
+  )
 }
 
 /**

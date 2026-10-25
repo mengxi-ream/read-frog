@@ -157,7 +157,8 @@ describe("BuiltInAiUsageConfig", () => {
       isPending: false,
       isError: false,
       status: {
-        credits: [
+        credits: [],
+        pools: [
           { periodKind: "daily", usedPercent: 10, resetAt: null, features: ["customAction"] },
           { periodKind: "weekly", usedPercent: 5, resetAt: null, features: ["pageTranslation"] },
         ],
@@ -182,8 +183,10 @@ describe("BuiltInAiUsageConfig", () => {
         credits: [
           { periodKind: "daily", usedPercent: 40, resetAt: null, features: ["customAction"] },
         ],
-        grants: [
+        pools: [
+          { periodKind: "daily", usedPercent: 40, resetAt: null, features: ["customAction"] },
           {
+            periodKind: "once",
             usedPercent: 12.5,
             expiresAt: "2026-11-25T00:00:00.000Z",
             features: ["pageTranslation", "customAction", "videoSubtitles"],
@@ -218,8 +221,13 @@ describe("BuiltInAiUsageConfig", () => {
       isError: false,
       status: {
         credits: [],
-        grants: [
-          { usedPercent: 100, expiresAt: "2026-11-25T00:00:00.000Z", features: ["customAction"] },
+        pools: [
+          {
+            periodKind: "once",
+            usedPercent: 100,
+            expiresAt: "2026-11-25T00:00:00.000Z",
+            features: ["customAction"],
+          },
         ],
         features: {} as never,
       },
@@ -239,7 +247,14 @@ describe("BuiltInAiUsageConfig", () => {
       isError: false,
       status: {
         credits: [],
-        grants: [{ usedPercent: 0, expiresAt: "not-a-date", features: ["customAction"] }],
+        pools: [
+          {
+            periodKind: "once",
+            usedPercent: 0,
+            expiresAt: "not-a-date",
+            features: ["customAction"],
+          },
+        ],
         features: {} as never,
       },
     }
@@ -248,5 +263,25 @@ describe("BuiltInAiUsageConfig", () => {
 
     expect(screen.getByText("options.apiProviders.builtInAiUsage.grant")).toBeInTheDocument()
     expect(screen.queryByText(/builtInAiUsage\.expiresAt/)).not.toBeInTheDocument()
+  })
+
+  // TODO(2026-11-07): delete with the `credits` fallback (mengxi-ream/read-frog-monorepo#710).
+  it("reads the plan's pools from credits when the server predates pools", () => {
+    hostedAiState.value = {
+      isSignedIn: true,
+      isPending: false,
+      isError: false,
+      status: {
+        credits: [
+          { periodKind: "weekly", usedPercent: 25, resetAt: null, features: ["pageTranslation"] },
+        ],
+        features: {} as never,
+      },
+    }
+
+    render(<BuiltInAiUsageConfig />)
+
+    expect(screen.getByRole("progressbar")).toHaveAttribute("aria-valuenow", "75")
+    expect(screen.getByText("options.apiProviders.builtInAiUsage.weekly")).toBeInTheDocument()
   })
 })

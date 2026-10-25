@@ -8,7 +8,7 @@ import { useHostedAiStatus } from "@/components/llm-providers/use-hosted-ai-stat
 import { Progress, ProgressLabel } from "@/components/ui/base-ui/progress"
 import { Skeleton } from "@/components/ui/base-ui/skeleton"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
-import { formatHostedAiResetAtLocal } from "@/utils/hosted-ai/status"
+import { formatHostedAiResetAtLocal, getHostedAiPools } from "@/utils/hosted-ai/status"
 import { i18n } from "@/utils/i18n"
 import { ConfigSection } from "../../../components/config-section"
 
@@ -125,9 +125,8 @@ function GrantUsage({ grant }: { grant: HostedAiCreditGrantStatus }) {
 
 export function BuiltInAiUsageConfig() {
   const { status, isSignedIn, isPending, isError } = useHostedAiStatus()
-  const credits = status?.credits ?? []
-  // Listed after the plan pools, the order the server draws on them.
-  const grants = status?.grants ?? []
+  // In the order the server draws on them: the plan's pools, then grants.
+  const pools = getHostedAiPools(status)
 
   // Guests only hold an ephemeral IP-keyed trial pool — not worth a section.
   if (!isSignedIn) {
@@ -141,25 +140,18 @@ export function BuiltInAiUsageConfig() {
     >
       {isPending ? (
         <Skeleton className="h-13 w-full" />
-      ) : isError || (credits.length === 0 && grants.length === 0) ? (
+      ) : isError || pools.length === 0 ? (
         <p className="text-sm text-muted-foreground">
           {i18n.t("hostedAi.availability.serviceUnavailable")}
         </p>
       ) : (
-        <>
-          {credits.map((credit) => (
-            <CreditPoolUsage
-              key={`${credit.periodKind}-${credit.features.join("-")}`}
-              credit={credit}
-            />
-          ))}
-          {grants.map((grant) => (
-            <GrantUsage
-              key={`grant-${grant.expiresAt}-${grant.features.join("-")}`}
-              grant={grant}
-            />
-          ))}
-        </>
+        pools.map((pool) =>
+          pool.periodKind === "once" ? (
+            <GrantUsage key={`once-${pool.expiresAt}-${pool.features.join("-")}`} grant={pool} />
+          ) : (
+            <CreditPoolUsage key={`${pool.periodKind}-${pool.features.join("-")}`} credit={pool} />
+          ),
+        )
       )}
     </ConfigSection>
   )
