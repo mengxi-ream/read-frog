@@ -5,7 +5,7 @@ import { Provider } from "jotai"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { subtitlesStore } from "../../atoms"
 import { SubtitlesUIContext } from "../../ui/subtitles-ui-context"
-import { closeWordLookupAtom, wordLookupAtom } from "../atoms"
+import { lookUpAtom, wordLookupAtom } from "../atoms"
 import { useLookupPlayback } from "../use-lookup-playback"
 
 function createVideo(initiallyPaused: boolean) {
@@ -27,10 +27,7 @@ function createVideo(initiallyPaused: boolean) {
 
 function setOpen(open: boolean) {
   act(() => {
-    subtitlesStore.set(
-      wordLookupAtom,
-      open ? { cueStart: 0, tokenIndex: 0, anchor: { x: 0, y: 0 } } : null,
-    )
+    subtitlesStore.set(wordLookupAtom, open ? { cueStart: 0, start: 0, end: 0 } : null)
   })
 }
 
@@ -63,7 +60,7 @@ describe("useLookupPlayback", () => {
   })
 
   afterEach(() => {
-    subtitlesStore.set(closeWordLookupAtom)
+    subtitlesStore.set(lookUpAtom, null)
     vi.useRealTimers()
   })
 

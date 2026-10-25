@@ -52,7 +52,7 @@ import {
   subtitlesStore,
   subtitlesVisibleAtom,
 } from "./atoms"
-import { closeWordLookupAtom } from "./learning/atoms"
+import { lookUpAtom } from "./learning/atoms"
 import { renderSubtitlesTranslateButton } from "./renderer/render-translate-button"
 import { SegmentationPipeline } from "./segmentation-pipeline"
 import { SubtitlesScheduler } from "./subtitles-scheduler"
@@ -374,7 +374,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
     subtitlesStore.set(subtitlesSourceAtom, SUBTITLES_SOURCE.NATIVE)
     subtitlesStore.set(subtitlesSettingsPanelOpenAtom, false)
     subtitlesStore.set(subtitlesSettingsPanelViewAtom, ROOT_VIEW)
-    subtitlesStore.set(closeWordLookupAtom)
+    subtitlesStore.set(lookUpAtom, null)
     this.showNativeSubtitles()
     void this.restorePosition()
     // Keep the sidebar open, but publish the next query only after old state is cleared.
@@ -486,7 +486,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
     this.segmentationPipeline?.stop()
     subtitlesStore.set(subtitlesSettingsPanelOpenAtom, false)
     subtitlesStore.set(subtitlesSettingsPanelViewAtom, ROOT_VIEW)
-    subtitlesStore.set(closeWordLookupAtom)
+    subtitlesStore.set(lookUpAtom, null)
     this.showNativeSubtitles()
   }
 
@@ -693,7 +693,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
       void this.switchSubtitlesFetcher(SUBTITLES_SOURCE.NATIVE, analyticsContext)
     } else {
       this.subtitlesScheduler?.hide()
-      subtitlesStore.set(closeWordLookupAtom)
+      subtitlesStore.set(lookUpAtom, null)
       this.showNativeSubtitles()
       this.translationCoordinator?.stop()
     }

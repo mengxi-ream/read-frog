@@ -11,7 +11,7 @@ import {
   subtitlesStore,
   translatedTrackAtom,
 } from "../atoms"
-import { openWordLookupAtom, wordLookupAtom } from "../learning/atoms"
+import { lookUpAtom, wordLookupAtom } from "../learning/atoms"
 import { TranslationCoordinator } from "../translation-coordinator"
 import { UniversalVideoAdapter } from "../universal-adapter"
 
@@ -453,7 +453,7 @@ describe("universalVideoAdapter", () => {
     const { adapter } = createAdapter([])
     const scheduler = attachScheduler(adapter, true)
     ;(scheduler as any).hide = vi.fn<(...args: any[]) => any>()
-    subtitlesStore.set(openWordLookupAtom, { tokenIndex: 0, term: "hello", anchor: { x: 0, y: 0 } })
+    subtitlesStore.set(lookUpAtom, { start: 0, end: 0 })
 
     adapter.toggleSubtitlesByShortcut(false)
 

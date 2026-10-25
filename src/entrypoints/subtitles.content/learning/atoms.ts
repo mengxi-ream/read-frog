@@ -2,38 +2,51 @@ import { atom } from "jotai"
 import { customActionRequestAtom } from "@/components/custom-action/atoms"
 import { ANALYTICS_SURFACE } from "@/types/analytics"
 import { BUILT_IN_DICTIONARY_ACTION_ID } from "@/utils/constants/custom-action"
-import { displaySubtitleAtom } from "../atoms"
+import { segmentWords } from "@/utils/subtitles/segment-words"
+import { displaySubtitleAtom, sourceLanguageAtom } from "../atoms"
 
-interface Point {
-  x: number
-  y: number
+/** A run of tokens in the cue on screen, both ends inclusive. */
+export interface WordRange {
+  start: number
+  end: number
 }
 
-export const wordLookupAtom = atom<{ cueStart: number; tokenIndex: number; anchor: Point } | null>(
-  null,
+/** The words being looked up, and the cue they belong to. The only lookup state. */
+export const wordLookupAtom = atom<(WordRange & { cueStart: number }) | null>(null)
+
+/** The cue on screen, cut into words and the text between them. */
+export const subtitleTokensAtom = atom((get) =>
+  segmentWords(get(displaySubtitleAtom)?.text ?? "", get(sourceLanguageAtom) ?? undefined),
 )
 
 let nextSessionKey = 0
 
-export const openWordLookupAtom = atom(
-  null,
-  (get, set, { tokenIndex, term, anchor }: { tokenIndex: number; term: string; anchor: Point }) => {
-    const cue = get(displaySubtitleAtom)
+/**
+ * The one way in: every gesture looks up a range of words, and `null` closes
+ * the lookup. Also hands the shared AI action card what to run.
+ */
+export const lookUpAtom = atom(null, (get, set, range: WordRange | null) => {
+  if (!range) {
+    set(wordLookupAtom, null)
+    set(customActionRequestAtom, null)
+    return
+  }
 
-    nextSessionKey += 1
-    set(wordLookupAtom, { cueStart: cue?.start ?? -1, tokenIndex, anchor })
-    set(customActionRequestAtom, {
-      actionId: BUILT_IN_DICTIONARY_ACTION_ID,
-      selectionText: term,
-      contextText: cue ? [cue.text, cue.translation].filter(Boolean).join("\n\n") : term,
-      surface: ANALYTICS_SURFACE.VIDEO_SUBTITLES,
-      sessionKey: nextSessionKey,
-      rerunNonce: 0,
-    })
-  },
-)
+  const cue = get(displaySubtitleAtom)
+  const text = get(subtitleTokensAtom)
+    .slice(range.start, range.end + 1)
+    .map((token) => token.text)
+    .join("")
+    .trim()
 
-export const closeWordLookupAtom = atom(null, (_get, set) => {
-  set(wordLookupAtom, null)
-  set(customActionRequestAtom, null)
+  nextSessionKey += 1
+  set(wordLookupAtom, { cueStart: cue?.start ?? -1, start: range.start, end: range.end })
+  set(customActionRequestAtom, {
+    actionId: BUILT_IN_DICTIONARY_ACTION_ID,
+    selectionText: text,
+    contextText: cue ? [cue.text, cue.translation].filter(Boolean).join("\n\n") : text,
+    surface: ANALYTICS_SURFACE.VIDEO_SUBTITLES,
+    sessionKey: nextSessionKey,
+    rerunNonce: 0,
+  })
 })

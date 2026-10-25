@@ -1,5 +1,5 @@
 import { useAtomValue, useSetAtom } from "jotai"
-import { useState } from "react"
+import { use, useMemo, useState } from "react"
 import { customActionRequestAtom } from "@/components/custom-action/atoms"
 import { CustomActionPanel } from "@/components/custom-action/custom-action-panel"
 import { isSaveToNotebaseDialogOpenAtom } from "@/components/custom-action/save-to-notebase-dialog-atom"
@@ -7,20 +7,41 @@ import { SaveToNotebaseDialogHost } from "@/components/custom-action/save-to-not
 import { ThemeProvider } from "@/components/providers/theme-provider"
 import { SelectionPopover } from "@/components/ui/selection-popover"
 import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-host"
-import { closeWordLookupAtom, wordLookupAtom } from "./atoms"
+import { lookUpAtom, wordLookupAtom } from "./atoms"
 import { isFromSubtitleLine } from "./page-events"
 import { useLookupPlayback } from "./use-lookup-playback"
 import { useTopLayerPortalContainer } from "./use-top-layer-portal-container"
 
+interface Point {
+  x: number
+  y: number
+}
+
 interface PinnedLayout {
-  anchor: { x: number; y: number } | null
+  anchor: Point | null
   sessionKey: number
+}
+
+/** The bottom-right corner of a word on screen, where a subtitle selection opens its card. */
+function getWordAnchor(root: ParentNode, index: number): Point | null {
+  const word = root.querySelector(`[data-slot="subtitle-word"][data-index="${index}"]`)
+  if (!word) {
+    return null
+  }
+  const rect = word.getBoundingClientRect()
+  return { x: rect.right, y: rect.bottom }
 }
 
 export function WordLookupCard() {
   const lookup = useAtomValue(wordLookupAtom)
   const request = useAtomValue(customActionRequestAtom)
-  const closeLookup = useSetAtom(closeWordLookupAtom)
+  const lookUp = useSetAtom(lookUpAtom)
+  // The subtitles' own shadow wrapper, read before this card provides its own.
+  const subtitlesRoot = use(ShadowWrapperContext)
+  const anchor = useMemo(
+    () => (lookup ? getWordAnchor(subtitlesRoot ?? document, lookup.end) : null),
+    [lookup, subtitlesRoot],
+  )
   const isSaveToNotebaseDialogOpen = useAtomValue(isSaveToNotebaseDialogOpenAtom)
   const open = lookup !== null
   const cardOrDialogOpen = open || isSaveToNotebaseDialogOpen
@@ -39,7 +60,7 @@ export function WordLookupCard() {
           open={open}
           onOpenChange={(nextOpen) => {
             if (!nextOpen) {
-              closeLookup()
+              lookUp(null)
             }
           }}
           onOpenChangeRequest={(nextOpen, eventDetails) => {
@@ -51,14 +72,10 @@ export function WordLookupCard() {
               eventDetails.cancel()
             }
           }}
-          anchor={pinnedLayout?.anchor ?? lookup?.anchor ?? null}
+          anchor={pinnedLayout?.anchor ?? anchor}
           pinned={pinnedLayout !== null}
           onPinnedChange={(nextPinned) =>
-            setPinnedLayout(
-              nextPinned
-                ? { anchor: lookup?.anchor ?? null, sessionKey: request?.sessionKey ?? 0 }
-                : null,
-            )
+            setPinnedLayout(nextPinned ? { anchor, sessionKey: request?.sessionKey ?? 0 } : null)
           }
           disablePointerDismissal={isSaveToNotebaseDialogOpen}
         >
