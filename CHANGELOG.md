@@ -1,5 +1,21 @@
 # @read-frog/extension
 
+## 1.53.0
+
+### Minor Changes
+
+- [#2395](https://github.com/mengxi-ream/read-frog/pull/2395) [`f7be60f`](https://github.com/mengxi-ream/read-frog/commit/f7be60f7944ea6362614687f9d309da8639e6446) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(built-in-ai): show bonus Built-in AI quota on the usage page, with how much is left and when it expires
+
+- [#2406](https://github.com/mengxi-ream/read-frog/pull/2406) [`91dd9be`](https://github.com/mengxi-ream/read-frog/commit/91dd9bed125c0e3ea2b52775a5e5b52bfd766d88) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(built-in-ai): badge a Built-in AI option only with the plan this account still needs: Pro (read as "Pro or Ultra") or Ultra, and none once its plan or bonus quota already covers it
+
+### Patch Changes
+
+- [#2375](https://github.com/mengxi-ream/read-frog/pull/2375) [`a49fa37`](https://github.com/mengxi-ream/read-frog/commit/a49fa37849f1a9c2f2a50cf04bdd08407b5083eb) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(subtitles): keep YouTube lyric lines wrapped in ♪ instead of dropping them as noise
+
+- [#2388](https://github.com/mengxi-ream/read-frog/pull/2388) [`2352384`](https://github.com/mengxi-ream/read-frog/commit/23523841690ff640cd55be973495f4deec17bac6) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(notebase): give every field a row to pick its column or "don't save", keep the mappings when the connected Notebase is picked again, and remind about fields still undecided on each save until they are decided
+
+- [#2389](https://github.com/mengxi-ream/read-frog/pull/2389) [`8548cc7`](https://github.com/mengxi-ream/read-frog/commit/8548cc7bcc8c2cb4a9b62ee191c04532d143e744) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(content): show each page toast once instead of three stacked copies
+
 ## 1.52.1
 
 ### Patch Changes
