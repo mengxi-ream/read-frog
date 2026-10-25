@@ -22,18 +22,17 @@ function LookupActionItem({
   id,
   title,
   description,
+  actions,
   selectedAction,
   onSelect,
 }: {
   id: string
   title: string
   description: string
+  actions: SelectionToolbarCustomAction[]
   selectedAction: SelectionToolbarCustomAction
   onSelect: (actionId: string) => void
 }) {
-  const config = useAtomValue(configAtom)
-  const actions = getLookupActionChoices(config.selectionToolbar, selectedAction.id)
-
   return (
     <ConfigItem id={id} title={title} description={description}>
       <Select
@@ -64,6 +63,8 @@ function LookupActionItem({
 export function WordLookupActionItems() {
   const config = useAtomValue(configAtom)
   const setWordLookup = useSetAtom(configFieldsAtomMap.wordLookup)
+  const clickAction = resolveClickLookupAction(config)
+  const dragAction = resolveDragLookupAction(config)
 
   return (
     <>
@@ -71,14 +72,16 @@ export function WordLookupActionItems() {
         id="subtitles-click-lookup-action"
         title={i18n.t("options.videoSubtitles.preference.clickLookupAction.title")}
         description={i18n.t("options.videoSubtitles.preference.clickLookupAction.description")}
-        selectedAction={resolveClickLookupAction(config)}
+        actions={getLookupActionChoices(config.selectionToolbar, clickAction.id)}
+        selectedAction={clickAction}
         onSelect={(clickActionId) => void setWordLookup({ clickActionId })}
       />
       <LookupActionItem
         id="subtitles-drag-lookup-action"
         title={i18n.t("options.videoSubtitles.preference.dragLookupAction.title")}
         description={i18n.t("options.videoSubtitles.preference.dragLookupAction.description")}
-        selectedAction={resolveDragLookupAction(config)}
+        actions={getLookupActionChoices(config.selectionToolbar, dragAction.id)}
+        selectedAction={dragAction}
         onSelect={(dragActionId) => void setWordLookup({ dragActionId })}
       />
     </>
