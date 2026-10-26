@@ -1,7 +1,8 @@
 import { atom } from "jotai"
 import { customActionRequestAtom } from "@/components/custom-action/atoms"
 import { ANALYTICS_SURFACE } from "@/types/analytics"
-import { BUILT_IN_DICTIONARY_ACTION_ID } from "@/utils/constants/custom-action"
+import { configAtom } from "@/utils/atoms/config"
+import { resolveWordLookupAction } from "@/utils/custom-actions"
 import { segmentWords } from "@/utils/subtitles/segment-words"
 import { displaySubtitleAtom, sourceLanguageAtom } from "../atoms"
 
@@ -28,12 +29,14 @@ let nextSessionKey = 0
 
 /**
  * The one way in: looks up the word at `index` in the cue on screen, or closes
- * the lookup with `null`. Also hands the shared AI action card what to run.
+ * the lookup with `null`. Also hands the shared AI action card the action
+ * picked for word lookups in settings.
  */
 export const lookUpAtom = atom(null, (get, set, index: number | null) => {
   const cue = get(displaySubtitleAtom)
   const word = index === null ? undefined : get(subtitleTokensAtom)[index]
-  if (!cue || index === null || !word?.isWord) {
+  const action = resolveWordLookupAction(get(configAtom))
+  if (!cue || index === null || !word?.isWord || action.enabled === false) {
     set(wordLookupAtom, null)
     set(customActionRequestAtom, null)
     return
@@ -42,7 +45,7 @@ export const lookUpAtom = atom(null, (get, set, index: number | null) => {
   nextSessionKey += 1
   set(wordLookupAtom, { cueStart: cue.start, index })
   set(customActionRequestAtom, {
-    actionId: BUILT_IN_DICTIONARY_ACTION_ID,
+    actionId: action.id,
     selectionText: word.text,
     cleanSelection: word.text,
     contextText: [cue.text, cue.translation].filter(Boolean).join("\n\n"),

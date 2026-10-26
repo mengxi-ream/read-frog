@@ -78,6 +78,20 @@ export function findSelectionToolbarAction(
   return selectionToolbar.customActions.find((action) => action.id === actionId)
 }
 
+/**
+ * The action a click on a subtitle word runs: the one picked in settings, or
+ * the built-in Dictionary once that one is turned off or deleted.
+ */
+export function resolveWordLookupAction(config: Config): SelectionToolbarCustomAction {
+  const action = findSelectionToolbarAction(
+    config.selectionToolbar,
+    config.videoSubtitles.wordLookupActionId,
+  )
+  return action && action.enabled !== false
+    ? action
+    : getBuiltInDictionaryAction(config.selectionToolbar)
+}
+
 export function resolveNoteSuggestionAction(
   selectionToolbar: SelectionToolbarConfig,
 ): SelectionToolbarCustomAction {

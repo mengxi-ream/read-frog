@@ -1408,6 +1408,9 @@ options:
       aiSegmentation:
         title: Süni intellektlə ağıllı seqmentləşdirmə
         description: Süni intellekt subtitrləri cümlələrə yenidən bölür. Tərcümələr daha gec gəlir. Güclü LLM tələb olunur; zəif modellər sətirləri buraxa və ya sürüşdürə bilər.
+      wordLookupAction:
+        title: Söz axtarışı əməliyyatı
+        description: Altyazıdakı sözə kliklədikdə işə düşən AI əməliyyatı. Standart olaraq lüğətdir; öz əməliyyatınızı seçə bilərsiniz.
     aiQuota:
       title: Süni intellekt subtitrlərinin kvotası
       description: Süni intellektlə nitqin tanınması istənilən video üçün dəqiq subtitrlər yaradır

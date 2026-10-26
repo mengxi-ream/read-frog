@@ -13,9 +13,9 @@ vi.mock("@/utils/i18n", () => ({ i18n: { t: (key: string) => key } }))
 vi.mock("@/utils/atoms/config", async () => {
   const { atom } = await import("jotai")
   return {
+    configAtom: atom(DEFAULT_CONFIG),
     configFieldsAtomMap: {
       language: atom(DEFAULT_CONFIG.language),
-      selectionToolbar: atom(DEFAULT_CONFIG.selectionToolbar),
       videoSubtitles: atom(DEFAULT_CONFIG.videoSubtitles),
     },
   }

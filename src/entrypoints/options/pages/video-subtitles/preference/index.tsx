@@ -8,6 +8,7 @@ import { ConfigNavItem } from "../../../components/config-nav-item"
 import { ConfigSection } from "../../../components/config-section"
 import { ShortcutLink } from "../../../components/shortcut-link"
 import { SubtitlesPlatformIcon } from "./platform-icon"
+import { WordLookupActionItem } from "./word-lookup-action-item"
 
 /**
  * Whether subtitles get translated at all, when that starts, and whether AI re-cuts the lines
@@ -65,6 +66,7 @@ export function PreferenceSection() {
           }}
         />
       </ConfigItem>
+      <WordLookupActionItem />
     </ConfigSection>
   )
 }
