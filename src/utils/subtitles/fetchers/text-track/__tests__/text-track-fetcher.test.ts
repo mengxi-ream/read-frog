@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import {
   TEXT_TRACK_CUE_POLL_INTERVAL_MS,
+  TEXT_TRACK_CUE_WAIT_TIMEOUT_MS,
   TEXT_TRACK_NATIVE_REHIDE_DELAY_MS,
 } from "@/utils/constants/subtitles"
 import { TextTrackFetcher } from ".."
@@ -85,6 +86,45 @@ describe("TextTrackFetcher", () => {
     await vi.advanceTimersByTimeAsync(TEXT_TRACK_CUE_POLL_INTERVAL_MS)
 
     await expect(pending).resolves.toEqual([{ text: "late", start: 0, end: 1000 }])
+  })
+
+  it("checks for subtitles by loading the cues, and fetches from that same load", async () => {
+    const track = new FakeTrack("subtitles", "English", "en", "hidden")
+    const fetcher = createFetcher(videoWith(track))
+    const check = fetcher.hasAvailableSubtitles()
+
+    track.loadCues("late")
+    await vi.advanceTimersByTimeAsync(TEXT_TRACK_CUE_POLL_INTERVAL_MS)
+    await expect(check).resolves.toBe(true)
+
+    track.cues = null
+    await expect(fetcher.fetch()).resolves.toEqual([{ text: "late", start: 0, end: 1000 }])
+  })
+
+  it("reports no subtitles for a track that never gets a cue, or only blank ones", async () => {
+    const check = createFetcher(
+      videoWith(new FakeTrack("subtitles", "English", "en", "hidden")),
+    ).hasAvailableSubtitles()
+    await vi.advanceTimersByTimeAsync(TEXT_TRACK_CUE_WAIT_TIMEOUT_MS)
+    await expect(check).resolves.toBe(false)
+
+    const blank = new FakeTrack("subtitles", "English", "en", "hidden")
+    blank.loadCues(" ")
+    await expect(createFetcher(videoWith(blank)).hasAvailableSubtitles()).resolves.toBe(false)
+  })
+
+  it("keeps to the track the player shows once its captions are hidden", async () => {
+    const shown = new FakeTrack("captions", "English", "en", "showing")
+    shown.loadCues("hello")
+    const fetcher = createFetcher(
+      videoWith(shown, new FakeTrack("subtitles", "Español", "es", "disabled")),
+    )
+
+    await expect(fetcher.hasAvailableSubtitles()).resolves.toBe(true)
+    fetcher.hideNativeSubtitles()
+
+    expect(shown.mode).toBe("hidden")
+    await expect(fetcher.shouldUseSameTrack()).resolves.toBe(true)
   })
 
   it("reuses the same track until the video changes", async () => {

@@ -117,6 +117,7 @@ describe("universalVideoAdapter", () => {
   afterEach(() => {
     subtitlesStore.set(adPlayingAtom, false)
     vi.unstubAllGlobals()
+    vi.useRealTimers()
   })
 
   it("tracks ad state and resyncs subtitles when an ad ends", () => {
@@ -867,17 +868,74 @@ describe("universalVideoAdapter", () => {
         }),
       }
       ;(adapter as any).subtitlesScheduler = scheduler
-      return { adapter, scheduler }
+      const autoStart = () =>
+        (adapter as any).switchSubtitlesFetcher(SUBTITLES_SOURCE.NATIVE, { quiet: true })
+      return { adapter, scheduler, subtitlesFetcher, autoStart }
     }
 
     it("turns back off without a word when the video has no subtitles", async () => {
-      const { adapter, scheduler } = setUpVideoWithoutSubtitles()
+      const { scheduler, autoStart } = setUpVideoWithoutSubtitles()
 
-      await (adapter as any).switchSubtitlesFetcher(SUBTITLES_SOURCE.NATIVE, { quiet: true })
+      await autoStart()
 
+      // Never shown, so the toggle does not flash ON while the video is checked.
+      expect(scheduler.show).not.toHaveBeenCalled()
       expect(scheduler.setState).not.toHaveBeenCalledWith("loading", expect.anything())
       expect(scheduler.setState).not.toHaveBeenCalledWith("error", expect.anything())
       expect(scheduler.isActive()).toBe(false)
+    })
+
+    it("stays quiet when a subtitle track turns out to be empty", async () => {
+      const { scheduler, subtitlesFetcher, autoStart } = setUpVideoWithoutSubtitles()
+      subtitlesFetcher.hasAvailableSubtitles.mockResolvedValue(true)
+
+      await autoStart()
+
+      expect(scheduler.setState).not.toHaveBeenCalledWith("error", expect.anything())
+      expect(scheduler.isActive()).toBe(false)
+    })
+
+    it("turns on once the check finds subtitles", async () => {
+      const { adapter, scheduler, subtitlesFetcher, autoStart } = setUpVideoWithoutSubtitles()
+      subtitlesFetcher.hasAvailableSubtitles.mockResolvedValue(true)
+      const startTranslationSpy = vi
+        .spyOn(adapter as any, "startTranslation")
+        .mockResolvedValue(true)
+
+      await autoStart()
+
+      expect(scheduler.show).toHaveBeenCalled()
+      expect(startTranslationSpy).toHaveBeenCalledWith({ quiet: true })
+    })
+
+    it("keeps a start the reader made while the check ran", async () => {
+      const { adapter, scheduler, subtitlesFetcher, autoStart } = setUpVideoWithoutSubtitles()
+      const check = Promise.withResolvers<boolean>()
+      subtitlesFetcher.hasAvailableSubtitles.mockReturnValueOnce(check.promise)
+      vi.spyOn(adapter as any, "startTranslation").mockResolvedValue(true)
+
+      const quietStart = autoStart()
+      await (adapter as any).switchSubtitlesFetcher(SUBTITLES_SOURCE.NATIVE)
+      check.resolve(false)
+      await quietStart
+
+      expect(scheduler.hide).not.toHaveBeenCalled()
+      expect(scheduler.isActive()).toBe(true)
+    })
+
+    it("drops a check that comes back after a navigation began", async () => {
+      vi.useFakeTimers()
+      const { adapter, subtitlesFetcher, autoStart } = setUpVideoWithoutSubtitles()
+      const check = Promise.withResolvers<boolean>()
+      subtitlesFetcher.hasAvailableSubtitles.mockReturnValue(check.promise)
+      const startTranslationSpy = vi.spyOn(adapter as any, "startTranslation")
+
+      const switching = autoStart()
+      adapter.notifyNavigation()
+      check.resolve(true)
+      await switching
+
+      expect(startTranslationSpy).not.toHaveBeenCalled()
     })
 
     it("only goes quiet for an automatic start", () => {

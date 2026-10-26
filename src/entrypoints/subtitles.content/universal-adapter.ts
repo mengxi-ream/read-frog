@@ -582,6 +582,10 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
     await this.tryAutoStartSubtitles()
   }
 
+  private isSuperseded(operationId: number) {
+    return this.destroyed || operationId !== this.switchOperationId
+  }
+
   private setupAdObserver() {
     if (!this.config.isAdPlaying) {
       return
@@ -766,6 +770,17 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
       this.fetcher = make()
       this.clearSourceCache()
       this.clearRuntimeSession()
+    }
+
+    // Showing first would flash the toggle ON on every captionless video.
+    if (options.quiet) {
+      const hasSubtitles = await this.fetcher.hasAvailableSubtitles()
+      // The check can wait seconds for cues; a toggle or a navigation since then starts its own.
+      if (this.isSuperseded(operationId) || this.hasPendingNavigationReset) return
+      if (!hasSubtitles) {
+        this.handleToggleSubtitles(false)
+        return
+      }
     }
 
     this.subtitlesScheduler?.start()

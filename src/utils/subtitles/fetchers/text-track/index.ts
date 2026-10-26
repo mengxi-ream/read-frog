@@ -70,15 +70,13 @@ export class TextTrackFetcher implements SubtitlesFetcher {
     return this.sourceLanguage
   }
 
+  // A track can be there and never get a cue, so only its cues say whether the video has
+  // subtitles: checking loads them, and `fetch` then reuses that load.
   async hasAvailableSubtitles(): Promise<boolean> {
-    const video = this.options.resolveVideo()
-    const track = video ? this.selectTrack(video) : null
-    if (!track) {
-      return false
-    }
-
-    this.ensureLoading(track)
-    return true
+    return this.fetch().then(
+      () => true,
+      () => false,
+    )
   }
 
   async shouldUseSameTrack(): Promise<boolean> {
@@ -128,7 +126,8 @@ export class TextTrackFetcher implements SubtitlesFetcher {
       (track) => SUBTITLE_KINDS.has(track.kind) && (!isSourceTrack || isSourceTrack(track)),
     )
     return (
-      candidates.find((track) => track.mode === "showing") ??
+      // A track the player shows is still its pick once we hide it under our overlay.
+      candidates.find((track) => (this.playerModes.get(track) ?? track.mode) === "showing") ??
       candidates.find((track) => track.kind === "subtitles") ??
       candidates[0] ??
       null
