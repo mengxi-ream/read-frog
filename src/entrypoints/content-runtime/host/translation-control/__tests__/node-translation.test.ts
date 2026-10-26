@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest"
 import { registerNodeTranslationTriggers } from "../node-translation"
 
 const mocks = vi.hoisted(() => ({
+  block: document.createElement("p"),
   getLocalConfig: vi.fn<(...args: any[]) => any>(),
   removeOrShowNodeTranslation: vi.fn<(...args: any[]) => any>(),
   sendMessage: vi.fn<(...args: any[]) => any>(),
@@ -11,6 +12,10 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("@/utils/config/storage", () => ({
   getLocalConfig: mocks.getLocalConfig,
+}))
+
+vi.mock("@/utils/host/dom/find", () => ({
+  findNearestAncestorBlockNodeAt: () => mocks.block,
 }))
 
 vi.mock("@/utils/host/translate/node-manipulation", () => ({
@@ -66,7 +71,7 @@ describe("registerNodeTranslationTriggers", () => {
 
     await vi.waitFor(() => {
       expect(mocks.removeOrShowNodeTranslation).toHaveBeenCalledWith(
-        { x: 15, y: 25 },
+        mocks.block,
         expect.objectContaining({
           pageTranslation: expect.objectContaining({
             node: expect.objectContaining({ enabled: true }),
