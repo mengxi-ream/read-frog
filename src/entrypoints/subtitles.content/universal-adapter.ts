@@ -764,6 +764,18 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
       this.clearRuntimeSession()
     }
 
+    // Showing first would flash the toggle ON on every captionless video.
+    if (options.quiet) {
+      const hasSubtitles = await this.fetcher.hasAvailableSubtitles()
+      if (operationId !== this.switchOperationId || this.destroyed) {
+        return
+      }
+      if (!hasSubtitles) {
+        this.handleToggleSubtitles(false)
+        return
+      }
+    }
+
     this.subtitlesScheduler?.start()
     this.subtitlesScheduler?.show()
     this.hideNativeSubtitles()

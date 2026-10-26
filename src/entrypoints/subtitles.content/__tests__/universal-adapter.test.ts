@@ -875,7 +875,19 @@ describe("universalVideoAdapter", () => {
 
       await (adapter as any).switchSubtitlesFetcher(SUBTITLES_SOURCE.NATIVE, { quiet: true })
 
+      // Never shown, so the toggle does not flash ON while the video is checked.
+      expect(scheduler.show).not.toHaveBeenCalled()
       expect(scheduler.setState).not.toHaveBeenCalledWith("loading", expect.anything())
+      expect(scheduler.setState).not.toHaveBeenCalledWith("error", expect.anything())
+      expect(scheduler.isActive()).toBe(false)
+    })
+
+    it("stays quiet when a subtitle track turns out to be empty", async () => {
+      const { adapter, scheduler } = setUpVideoWithoutSubtitles()
+      ;(adapter as any).fetcher.hasAvailableSubtitles.mockResolvedValue(true)
+
+      await (adapter as any).switchSubtitlesFetcher(SUBTITLES_SOURCE.NATIVE, { quiet: true })
+
       expect(scheduler.setState).not.toHaveBeenCalledWith("error", expect.anything())
       expect(scheduler.isActive()).toBe(false)
     })
