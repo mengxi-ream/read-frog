@@ -186,6 +186,9 @@ describe("resolveSiteRule", () => {
           atomSelectors: [".formula"],
           "atomSelectors.add": [".formula-added"],
           "atomSelectors.remove": [".formula"],
+          walkHiddenSelectors: [".menu"],
+          "walkHiddenSelectors.add": [".menu-added"],
+          "walkHiddenSelectors.remove": [".menu"],
         }),
       ],
       [],
@@ -198,6 +201,7 @@ describe("resolveSiteRule", () => {
     expect(resolved.forceInlineNodeSelector).toBe(".inline-node-added")
     expect(resolved.forceInlineStyleSelector).toBe(".inline-style-added")
     expect(resolved.atomSelector).toBe(".formula-added")
+    expect(resolved.walkHiddenSelector).toBe(".menu-added")
     // Atom selectors are folded into preserve-text so atoms stop the walk.
     expect(resolved.preserveTextSelector).toBe(".math,.formula-added")
   })

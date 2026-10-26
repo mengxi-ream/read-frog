@@ -251,6 +251,66 @@ describe("isDontWalkIntoAndDontTranslateAsChildElement", () => {
     expect(isInlineAtomElement(katex, DEFAULT_CONFIG)).toBe(true)
   })
 
+  it("should walk a display: none walkHiddenSelectors region but not what it hides on its own", () => {
+    setHost("menu-example.org")
+    const config = configWithSiteRule({
+      id: "css-menu",
+      matches: "menu-example.org",
+      walkHiddenSelectors: [".dropdown"],
+    })
+    document.body.innerHTML = `
+      <div class="dropdown" style="display: none">
+        <a id="item">Down jackets</a>
+        <a id="back" style="display: none">Back</a>
+      </div>
+      <div id="elsewhere" style="display: none">Hidden elsewhere</div>
+    `
+    const dropdown = document.querySelector<HTMLElement>(".dropdown")!
+
+    expect(isDontWalkIntoAndDontTranslateAsChildElement(dropdown, config)).toBe(false)
+    expect(isDontWalkIntoAndDontTranslateAsChildElement(dropdown, DEFAULT_CONFIG)).toBe(true)
+    expect(
+      isDontWalkIntoAndDontTranslateAsChildElement(document.getElementById("item")!, config),
+    ).toBe(false)
+    expect(
+      isDontWalkIntoAndDontTranslateAsChildElement(document.getElementById("back")!, config),
+    ).toBe(true)
+    expect(
+      isDontWalkIntoAndDontTranslateAsChildElement(document.getElementById("elsewhere")!, config),
+    ).toBe(true)
+    document.body.innerHTML = ""
+  })
+
+  it("should waive visibility: hidden inherited from a walkHiddenSelectors region", () => {
+    setHost("menu-example.org")
+    const config = configWithSiteRule({
+      id: "css-menu",
+      matches: "menu-example.org",
+      walkHiddenSelectors: [".dropdown"],
+    })
+    document.body.innerHTML = `
+      <div class="dropdown" style="visibility: hidden">
+        <ul><li id="item">Down jackets</li></ul>
+      </div>
+      <div style="visibility: hidden"><p id="elsewhere">Hidden elsewhere</p></div>
+    `
+    const item = document.getElementById("item")!
+
+    expect(getComputedStyle(item).visibility).toBe("hidden")
+    expect(
+      isDontWalkIntoAndDontTranslateAsChildElement(
+        document.querySelector<HTMLElement>(".dropdown")!,
+        config,
+      ),
+    ).toBe(false)
+    expect(isDontWalkIntoAndDontTranslateAsChildElement(item, config)).toBe(false)
+    expect(isDontWalkIntoAndDontTranslateAsChildElement(item, DEFAULT_CONFIG)).toBe(true)
+    expect(
+      isDontWalkIntoAndDontTranslateAsChildElement(document.getElementById("elsewhere")!, config),
+    ).toBe(true)
+    document.body.innerHTML = ""
+  })
+
   it("should skip top-level <header> in main mode", () => {
     const header = document.createElement("header")
     document.body.appendChild(header)

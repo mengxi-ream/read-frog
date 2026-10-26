@@ -43,6 +43,8 @@ export interface ResolvedSiteRule {
   preserveTextSelector: string | null
   /** Inline atoms only (formula renderers); consumed by bilingual extraction. */
   atomSelector: string | null
+  /** Hidden regions the walk enters anyway; see `walkHiddenSelectors` in the schema. */
+  walkHiddenSelector: string | null
   /**
    * Tag-set families: `null` means no matched rule touched the family, so
    * consumers fall back to the shipped constant Set (hot path unchanged).
@@ -79,6 +81,7 @@ export const EMPTY_RESOLVED_SITE_RULE: ResolvedSiteRule = {
   forceInlineStyleSelector: null,
   preserveTextSelector: null,
   atomSelector: null,
+  walkHiddenSelector: null,
   dontWalkTags: null,
   dontWalkTagsExplicitAdds: null,
   dontWalkButTranslateTags: null,
@@ -366,6 +369,12 @@ export function resolveSiteRule(
     ),
     preserveTextSelector: joinSelectors([...preserveTextSelectors, ...atomSelectors]),
     atomSelector: joinSelectors(atomSelectors),
+    walkHiddenSelector: mergeSelectorDelta(
+      matched,
+      "walkHiddenSelectors",
+      "walkHiddenSelectors.add",
+      "walkHiddenSelectors.remove",
+    ),
     dontWalkTags: mergeTagSetDelta(
       matched,
       "dontWalkTags.add",

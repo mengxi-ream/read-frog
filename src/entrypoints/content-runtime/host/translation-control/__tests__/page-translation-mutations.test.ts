@@ -403,6 +403,38 @@ describe("pageTranslationManager mutation re-walk", () => {
     }
   })
 
+  // A walkHiddenSelectors rule labels closed menus up front. Their units are
+  // box-less only until the site shows them, so gating them on the visible
+  // menu item like a display: contents unit would translate every closed menu
+  // as soon as the header scrolls into view.
+  it("observes a unit in a closed menu directly instead of gating it on the menu item", async () => {
+    document.body.innerHTML = `
+      <section id="menu-item"><div style="display: none"><p id="entry">Down jackets</p></div></section>
+    `
+    const menuItem = document.getElementById("menu-item") as HTMLElement
+    const entry = document.getElementById("entry") as HTMLElement
+    giveBox(menuItem)
+
+    const manager = new PageTranslationManager()
+    try {
+      await manager.start()
+      await flushDomUpdates()
+
+      const [unitObserver, boxObserver] = intersectionObservers
+      expect(unitObserver!.observe).toHaveBeenCalledWith(entry)
+      expect(boxObserver).toBeUndefined()
+      expect(mockTranslateWalkedElement).not.toHaveBeenCalled()
+
+      // The site opens the menu.
+      await unitObserver!.triggerIntersect(entry)
+      await flushDomUpdates()
+
+      expect(mockTranslateWalkedElement.mock.calls.map((call) => call[0])).toEqual([entry])
+    } finally {
+      if (manager.isActive) manager.stop()
+    }
+  })
+
   it("gates a display: contents unit on its own boxes when its layout box is too tall", async () => {
     // The column holds the whole page, so its intersection says nothing about
     // where this message is. The message's inline boxes do.

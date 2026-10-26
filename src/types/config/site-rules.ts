@@ -51,6 +51,13 @@ export const siteRuleSchema = z.object({
   atomSelectors: z.array(z.string()).optional(),
   "atomSelectors.add": z.array(z.string()).optional(),
   "atomSelectors.remove": z.array(z.string()).optional(),
+  // Hidden regions the walk still enters: menus and panels a site shows with
+  // pure CSS (`:hover`, `:checked`) change no DOM when they open, so a walk
+  // that skipped them while hidden would never come back. Their content is
+  // labeled up front and translated through the usual viewport gate.
+  walkHiddenSelectors: z.array(z.string()).optional(),
+  "walkHiddenSelectors.add": z.array(z.string()).optional(),
+  "walkHiddenSelectors.remove": z.array(z.string()).optional(),
   // Tag-NAME lists (not CSS selectors) that patch the built-in DOM tag sets
   // (see DEFAULT_TAG_SETS in utils/constants/dom-rules). Delta-only by design:
   // there is deliberately no bare base key, so a rule can never be misread as
