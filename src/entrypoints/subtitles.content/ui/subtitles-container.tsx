@@ -3,6 +3,7 @@ import { use } from "react"
 import { AnchoredToastProvider } from "@/components/ui/base-ui/toast"
 import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-host"
 import { subtitlesDisplayAtom, subtitlesShowContentAtom, subtitlesShowStateAtom } from "../atoms"
+import { WordLookupCard } from "../learning/word-lookup-card"
 import { StateMessage } from "./state-message"
 import { SubtitlesSettingsPanel } from "./subtitles-settings-panel"
 import { isMenuInControls } from "./subtitles-settings-panel/menu-placement"
@@ -39,6 +40,7 @@ export function SubtitlesContainer() {
         </div>
       )}
 
+      <WordLookupCard />
       <AnchoredToastProvider portalProps={{ container: shadowWrapper }} />
     </div>
   )

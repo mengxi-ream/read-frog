@@ -1,11 +1,12 @@
 import type { RefObject } from "react"
 import type { SubtitlePosition } from "../atoms"
-import { useAtom, useSetAtom } from "jotai"
+import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { useEffect, useEffectEvent, useRef, useState } from "react"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { DEFAULT_SUBTITLE_POSITION } from "@/utils/constants/subtitles"
 import { getContainingShadowRoot } from "@/utils/host/dom/node"
 import { subtitlesPositionAtom } from "../atoms"
+import { subtitlesHeldAtom } from "../learning/atoms"
 import { useSubtitlesUI } from "./subtitles-ui-context"
 import { useControlsInfo } from "./use-controls-visible"
 
@@ -84,7 +85,19 @@ function calculateAnchorPosition(ctx: AnchorPositionContext): SubtitlePosition {
 export function useVerticalDrag() {
   const { controlsConfig, containerShrinkRatio } = useSubtitlesUI()
   const windowRef = useRef<HTMLDivElement>(null)
-  const { controlsVisible, controlsHeight } = useControlsInfo(windowRef, controlsConfig)
+  const { controlsVisible: liveControlsVisible, controlsHeight } = useControlsInfo(
+    windowRef,
+    controlsConfig,
+  )
+  // The box makes room for the player's controls, which show and hide as the
+  // pointer moves, except while the subtitles are held: then it stays where it
+  // was shown, so the words never move out from under the pointer. The pointer
+  // reaching the box often shows the controls in the same render.
+  const held = useAtomValue(subtitlesHeldAtom)
+  const [controlsVisible, setControlsVisible] = useState(liveControlsVisible)
+  if (!held && controlsVisible !== liveControlsVisible) {
+    setControlsVisible(liveControlsVisible)
+  }
   const setVideoSubtitles = useSetAtom(configFieldsAtomMap.videoSubtitles)
   const containerRef = useRef<HTMLDivElement>(null)
   const handleRef = useRef<HTMLDivElement>(null)

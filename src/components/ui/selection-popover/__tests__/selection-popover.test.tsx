@@ -208,6 +208,7 @@ function renderPopover({
   onOpenChange = onOpenChangeSpy,
   triggerRect = buildTriggerRect(),
   contentProps,
+  rootProps,
 }: {
   customTrigger?: boolean
   triggerLabel?: string
@@ -215,9 +216,10 @@ function renderPopover({
   onOpenChange?: typeof onOpenChangeSpy
   triggerRect?: DOMRect
   contentProps?: Partial<React.ComponentProps<typeof SelectionPopover.Content>>
+  rootProps?: Partial<React.ComponentProps<typeof SelectionPopover.Root>>
 } = {}) {
   render(
-    <SelectionPopover.Root onOpenChange={onOpenChange}>
+    <SelectionPopover.Root onOpenChange={onOpenChange} {...rootProps}>
       <SelectionPopover.Trigger
         render={
           customTrigger ? (
@@ -588,6 +590,42 @@ describe("selectionPopover", () => {
 
     expect(onOpenChangeSpy).toHaveBeenLastCalledWith(false)
     expect(screen.queryByTestId("mock-rnd")).not.toBeInTheDocument()
+  })
+
+  it("keeps the popover open when the consumer cancels the outside press", async () => {
+    const onOpenChangeRequest = vi.fn<
+      NonNullable<React.ComponentProps<typeof SelectionPopover.Root>["onOpenChangeRequest"]>
+    >((_open, eventDetails) => {
+      if (eventDetails.reason === "outside-press") {
+        eventDetails.cancel()
+      }
+    })
+    renderPopover({ rootProps: { onOpenChangeRequest } })
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    const mouseDownEvent = new MouseEvent("mousedown", { bubbles: true })
+    Object.defineProperty(mouseDownEvent, "composedPath", {
+      value: () => [document.body, document, window],
+    })
+    const clickEvent = new MouseEvent("click", { bubbles: true })
+    Object.defineProperty(clickEvent, "composedPath", {
+      value: () => [document.body, document, window],
+    })
+
+    act(() => {
+      document.body.dispatchEvent(mouseDownEvent)
+      document.body.dispatchEvent(clickEvent)
+    })
+
+    expect(onOpenChangeRequest).toHaveBeenCalledWith(
+      false,
+      expect.objectContaining({ reason: "outside-press" }),
+    )
+    expect(screen.getByTestId("mock-rnd")).toBeInTheDocument()
+    expect(onOpenChangeSpy).not.toHaveBeenCalledWith(false)
   })
 
   it("keeps the popover open when pointer dismissal is disabled", async () => {
@@ -1004,6 +1042,20 @@ describe("selectionPopover", () => {
     triggerResizeObserver()
 
     expectLatestPosition({ x: 120, y: 540 })
+  })
+
+  it("opens above an anchor that asks for it, and keeps growing upward from there", () => {
+    const { element } = renderPopover({
+      rootProps: { anchor: { x: 120, y: 700, above: true } },
+    })
+
+    expectLatestPosition({ x: 120, y: 480 })
+
+    // Moved within the same frame, so it never shows over what is below it.
+    mockRect(element, { left: 120, top: 480, width: 500, height: 300 })
+    triggerResizeObserver()
+
+    expectLatestPosition({ x: 120, y: 400 })
   })
 
   it("keeps dragging aligned to viewport coordinates when the rnd parent has a vertical offset", async () => {
