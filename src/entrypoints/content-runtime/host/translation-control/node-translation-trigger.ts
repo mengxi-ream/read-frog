@@ -77,10 +77,6 @@ function matchesCustomShortcut(event: KeyboardEvent, config: Config | null): boo
  * translates what the ring shows. Another key, a click or a lost focus in
  * between cancels it. The custom combination is kept from the page, as Read
  * Frog's other shortcuts are.
- *
- * Click-and-hold works the same way, held still: moving the pointer cancels it,
- * so selecting text and dragging still work. Its release translates instead of
- * clicking.
  */
 export function registerNodeTranslationTriggerListeners({
   getConfig,
@@ -137,7 +133,6 @@ export function registerNodeTranslationTriggerListeners({
   // which a quick click can outlast.
   let isPrimaryButtonDown = false
   let isMousePressed = false
-  // Whether the long press is ringing its block
   let clickAndHoldTriggered = false
   let mousePressPosition: Point | null = null
   let clickAndHoldTimerId: ReturnType<typeof setTimeout> | null = null
@@ -172,23 +167,6 @@ export function registerNodeTranslationTriggerListeners({
     if (block) void onTrigger(block, config)
   }
 
-  // A release translates what its ring shows, which can trail the pointer for a moment.
-  const translateFramedBlock = (framedBlock: Element | null, point: Point, config: Config) => {
-    if (framedBlock?.isConnected) void onTrigger(framedBlock, config)
-    else translateBlockAt(point, config)
-  }
-
-  // A long press that translated ends in a click, which would open the link it was on.
-  const swallowNextClick = () => {
-    const swallow = (event: MouseEvent) => {
-      event.preventDefault()
-      event.stopPropagation()
-    }
-    window.addEventListener("click", swallow, { capture: true, once: true, signal })
-    // The click follows its mouseup in the same task, when it comes at all.
-    setTimeout(() => window.removeEventListener("click", swallow, { capture: true }), 0)
-  }
-
   document.addEventListener(
     "mousemove",
     (event) => {
@@ -207,9 +185,8 @@ export function registerNodeTranslationTriggerListeners({
         const deltaX = event.clientX - mousePressPosition.x
         const deltaY = event.clientY - mousePressPosition.y
         if (Math.hypot(deltaX, deltaY) > CLICK_AND_HOLD_MOVE_TOLERANCE) {
-          // Selecting text or dragging, not a long press
-          if (clickAndHoldTriggered) hidePreview()
-          resetClickAndHoldState()
+          isMousePressed = false
+          mousePressPosition = null
           clearClickAndHoldTimer()
         }
       }
@@ -359,8 +336,7 @@ export function registerNodeTranslationTriggerListeners({
             // Let go of or moved while the config was read
             if (!isMousePressed || !mousePressPosition) return
 
-            previewConfig = currentConfig
-            preview?.show(mousePressPosition, currentConfig)
+            translateBlockAt(mousePressPosition, currentConfig)
             clickAndHoldTriggered = true
           })()
         }, NODE_TRANSLATION_HOLD_TRIGGER_MS)
@@ -377,16 +353,8 @@ export function registerNodeTranslationTriggerListeners({
       isPrimaryButtonDown = false
       if (!isMousePressed && !clickAndHoldTimerId) return
 
-      // The ring is still up unless another key or a lost focus took it down.
-      const config = clickAndHoldTriggered ? previewConfig : null
-      const framedBlock = config ? hidePreview() : null
-      const point = mousePressPosition
       resetClickAndHoldState()
       clearClickAndHoldTimer()
-      if (!config || !point) return
-
-      swallowNextClick()
-      translateFramedBlock(framedBlock, point, config)
     },
     { signal },
   )
@@ -479,7 +447,9 @@ export function registerNodeTranslationTriggerListeners({
         resetHotkeySession()
         if (!shouldTranslate || !config) return
 
-        translateFramedBlock(framedBlock, point, config)
+        // A held key translates what its ring shows, which can trail the pointer for a moment.
+        if (framedBlock?.isConnected) void onTrigger(framedBlock, config)
+        else translateBlockAt(point, config)
       })()
     },
     { signal },

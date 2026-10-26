@@ -194,78 +194,34 @@ describe("registerNodeTranslationTriggerListeners", () => {
     })
   })
 
-  it("rings the block on a still long press and translates it on release instead of clicking", async () => {
+  it("triggers click-and-hold node translation after the hold delay", async () => {
     vi.useFakeTimers()
     const onTrigger = vi.fn<(...args: any[]) => any>()
-    const preview = createPreview()
-    const link = document.createElement("a")
-    document.body.append(link)
-    const pageClick = vi.fn<(event: MouseEvent) => void>()
-    link.addEventListener("click", pageClick)
+    const target = document.createElement("div")
+    document.body.append(target)
 
     teardown = registerNodeTranslationTriggerListeners({
       getConfig: () => Promise.resolve(createConfig("clickAndHold")),
       onTrigger,
-      preview,
     })
 
-    dispatchMouseEvent("mousedown", { button: 0, clientX: 30, clientY: 40 }, link)
+    dispatchMouseEvent("mousedown", { button: 0, clientX: 30, clientY: 40 }, target)
+    await Promise.resolve()
     await vi.advanceTimersByTimeAsync(500)
 
-    expect(preview.show).toHaveBeenCalledWith(
-      { x: 30, y: 40 },
+    expect(onTrigger).toHaveBeenCalledWith(
+      blockAt({ x: 30, y: 40 }),
       expect.objectContaining({
         pageTranslation: expect.objectContaining({
           node: expect.objectContaining({ hotkey: "clickAndHold" }),
         }),
       }),
     )
-    expect(onTrigger).not.toHaveBeenCalled()
-
-    dispatchMouseEvent("mouseup", { button: 0, clientX: 30, clientY: 40 }, link)
-    const click = new MouseEvent("click", { bubbles: true, cancelable: true })
-    link.dispatchEvent(click)
-
-    expect(preview.hide).toHaveBeenCalledTimes(1)
-    expect(onTrigger).toHaveBeenCalledWith(blockAt({ x: 30, y: 40 }), expect.anything())
-    expect(click.defaultPrevented).toBe(true)
-    expect(pageClick).not.toHaveBeenCalled()
-
-    // Only that one click: the next is the page's again.
-    await vi.advanceTimersByTimeAsync(0)
-    link.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }))
-    expect(pageClick).toHaveBeenCalledTimes(1)
-  })
-
-  it("cancels a long press that moves, as selecting text does", async () => {
-    vi.useFakeTimers()
-    const onTrigger = vi.fn<(...args: any[]) => any>()
-    const preview = createPreview()
-    const target = document.createElement("p")
-    document.body.append(target)
-
-    teardown = registerNodeTranslationTriggerListeners({
-      getConfig: () => Promise.resolve(createConfig("clickAndHold")),
-      onTrigger,
-      preview,
-    })
-
-    dispatchMouseEvent("mousedown", { button: 0, clientX: 30, clientY: 40 }, target)
-    await vi.advanceTimersByTimeAsync(500)
-    dispatchMouseEvent("mousemove", { clientX: 60, clientY: 40 }, target)
-    dispatchMouseEvent("mouseup", { button: 0, clientX: 60, clientY: 40 }, target)
-    const click = new MouseEvent("click", { bubbles: true, cancelable: true })
-    target.dispatchEvent(click)
-
-    expect(preview.hide).toHaveBeenCalledTimes(1)
-    expect(onTrigger).not.toHaveBeenCalled()
-    expect(click.defaultPrevented).toBe(false)
   })
 
   it("does not start a long press after a click that outlasted the config read", async () => {
     vi.useFakeTimers()
     const onTrigger = vi.fn<(...args: any[]) => any>()
-    const preview = createPreview()
     const target = document.createElement("p")
     document.body.append(target)
     let resolveConfig: (config: Config) => void = () => {}
@@ -273,7 +229,6 @@ describe("registerNodeTranslationTriggerListeners", () => {
     teardown = registerNodeTranslationTriggerListeners({
       getConfig: () => new Promise<Config>((resolve) => (resolveConfig = resolve)),
       onTrigger,
-      preview,
     })
 
     dispatchMouseEvent("mousedown", { button: 0, clientX: 30, clientY: 40 }, target)
@@ -281,7 +236,6 @@ describe("registerNodeTranslationTriggerListeners", () => {
     resolveConfig(createConfig("clickAndHold"))
     await vi.advanceTimersByTimeAsync(1000)
 
-    expect(preview.show).not.toHaveBeenCalled()
     expect(onTrigger).not.toHaveBeenCalled()
   })
 
