@@ -118,10 +118,12 @@ function parentElementAcrossShadow(element: Element): Element | null {
 /**
  * Whether `element` is box-less because it, or an ancestor below its nearest
  * rendered one, is `display: none`: a closed menu a site rule opened to the
- * walk (`walkHiddenSelectors`). Unlike a `display: contents` element, it gets
- * a box of its own once the site shows it.
+ * walk (`walkHiddenSelectors`), where it gets a box of its own once the site
+ * shows it. A `display: contents` element never gets one, open or closed, so
+ * it does not count.
  */
 function isInHiddenRegion(element: Element): boolean {
+  if (window.getComputedStyle(element).display === "contents") return false
   for (
     let current: Element | null = element;
     current && !hasBox(current);
