@@ -41,6 +41,7 @@ import {
   buildNotebaseCreateInputFromPending,
   getNotebaseDetailUrl,
   getPendingNotebaseSaveContext,
+  getPendingNoteSaveAnalyticsSurface,
   setPendingNotebaseSave,
 } from "@/utils/notebase/pending-save"
 import { orpc, orpcClient } from "@/utils/orpc/client"
@@ -134,6 +135,7 @@ export function SaveToNotebaseDialogHost() {
 
     const context = getPendingNotebaseSaveContext(pendingCreateSave)
     trackNoteSaveCompleted({
+      surface: getPendingNoteSaveAnalyticsSurface(pendingCreateSave),
       saveSource: context.surface,
       isGuide: context.isGuide,
       noteCount: pendingCreateSave.rows.length,
