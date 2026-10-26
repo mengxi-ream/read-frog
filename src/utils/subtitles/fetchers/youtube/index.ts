@@ -24,7 +24,7 @@ import {
 } from "@/utils/constants/subtitles"
 import { i18n } from "@/utils/i18n"
 import { sleep } from "@/utils/sleep"
-import { OverlaySubtitlesError } from "@/utils/subtitles/errors"
+import { NoSubtitlesError, OverlaySubtitlesError } from "@/utils/subtitles/errors"
 import { postMessageRequest } from "@/utils/subtitles/fetchers/post-message-request"
 import { getYoutubeVideoId } from "@/utils/subtitles/video-id"
 import { detectFormat } from "./format-detector"
@@ -94,7 +94,7 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
     }
 
     if (!resolvedTrack) {
-      throw new OverlaySubtitlesError(i18n.t("subtitles.errors.noSubtitlesFound"))
+      throw new NoSubtitlesError()
     }
 
     this.sourceLanguage = resolvedTrack.languageCode
@@ -256,7 +256,7 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
     const track = this.selectTrack(playerData) ?? preferredTrack
 
     if (!track) {
-      throw new OverlaySubtitlesError(i18n.t("subtitles.errors.noSubtitlesFound"))
+      throw new NoSubtitlesError()
     }
 
     const events = await this.fetchTrackEvents(track, playerData)

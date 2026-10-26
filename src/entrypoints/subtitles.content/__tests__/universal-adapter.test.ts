@@ -1,6 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { SUBTITLES_SOURCE } from "@/utils/constants/subtitles"
-import { OverlaySubtitlesError, ToastSubtitlesError } from "@/utils/subtitles/errors"
+import {
+  NoSubtitlesError,
+  OverlaySubtitlesError,
+  ToastSubtitlesError,
+} from "@/utils/subtitles/errors"
 import {
   adPlayingAtom,
   currentTimeMsAtom,
@@ -841,6 +845,63 @@ describe("universalVideoAdapter", () => {
     await (adapter as any).tryAutoStartSubtitles()
 
     expect(toggleSpy).not.toHaveBeenCalled()
+  })
+
+  describe("auto-start on X", () => {
+    function setUpVideoWithoutSubtitles() {
+      const { adapter, subtitlesFetcher } = createAdapter([])
+      ;(adapter as any).config.platform = "xcom"
+      // X hides its own captions through the text tracks, not a selector.
+      delete (adapter as any).config.selectors.nativeSubtitles
+      subtitlesFetcher.hasAvailableSubtitles.mockResolvedValue(false)
+      let active = false
+      const scheduler = {
+        ...attachScheduler(adapter, false),
+        isActive: vi.fn<() => boolean>(() => active),
+        start: vi.fn<(...args: any[]) => any>(),
+        show: vi.fn<(...args: any[]) => any>(() => {
+          active = true
+        }),
+        hide: vi.fn<(...args: any[]) => any>(() => {
+          active = false
+        }),
+      }
+      ;(adapter as any).subtitlesScheduler = scheduler
+      return { adapter, scheduler }
+    }
+
+    it("turns back off without a word when the video has no subtitles", async () => {
+      const { adapter, scheduler } = setUpVideoWithoutSubtitles()
+
+      await (adapter as any).switchSubtitlesFetcher(SUBTITLES_SOURCE.NATIVE, { quiet: true })
+
+      expect(scheduler.setState).not.toHaveBeenCalledWith("loading", expect.anything())
+      expect(scheduler.setState).not.toHaveBeenCalledWith("error", expect.anything())
+      expect(scheduler.isActive()).toBe(false)
+    })
+
+    it("only goes quiet for an automatic start", () => {
+      const { adapter } = setUpVideoWithoutSubtitles()
+      const switchSpy = vi
+        .spyOn(adapter as any, "switchSubtitlesFetcher")
+        .mockResolvedValue(undefined)
+
+      ;(adapter as any).toggleSubtitlesWithSource(true, "auto")
+      adapter.toggleSubtitlesManually(true)
+
+      expect(switchSpy.mock.calls.map((call) => (call[1] as any).quiet)).toEqual([true, false])
+    })
+
+    it("still tells a reader who asked that the video has none", async () => {
+      const { adapter, scheduler } = setUpVideoWithoutSubtitles()
+
+      await (adapter as any).switchSubtitlesFetcher(SUBTITLES_SOURCE.NATIVE)
+
+      expect(scheduler.setState).toHaveBeenCalledWith("error", {
+        message: new NoSubtitlesError().message,
+      })
+      expect(scheduler.isActive()).toBe(true)
+    })
   })
 
   it("replaceSourceTrackWindow drops cues that overlap the window by interval", () => {

@@ -8,7 +8,7 @@ import {
   POST_MESSAGE_TIMEOUT_MS,
 } from "@/utils/constants/subtitles"
 import { i18n } from "@/utils/i18n"
-import { OverlaySubtitlesError } from "@/utils/subtitles/errors"
+import { NoSubtitlesError, OverlaySubtitlesError } from "@/utils/subtitles/errors"
 import { postMessageRequest } from "../post-message-request"
 import { parseNetflixTtml } from "./ttml"
 
@@ -71,7 +71,7 @@ export class NetflixSubtitlesFetcher implements SubtitlesFetcher {
       throw new OverlaySubtitlesError(i18n.t("subtitles.errors.fetchSubTimeout"))
     }
     if (!response.translatable) {
-      throw new OverlaySubtitlesError(i18n.t("subtitles.errors.noSubtitlesFound"))
+      throw new NoSubtitlesError()
     }
     // The video has a usable track, but its subtitle file never reached the page script.
     if (!response.ttml) {
@@ -80,7 +80,7 @@ export class NetflixSubtitlesFetcher implements SubtitlesFetcher {
 
     const parsed = parseNetflixTtml(response.ttml)
     if (!parsed.fragments.length) {
-      throw new OverlaySubtitlesError(i18n.t("subtitles.errors.noSubtitlesFound"))
+      throw new NoSubtitlesError()
     }
 
     this.subtitles = parsed.fragments
