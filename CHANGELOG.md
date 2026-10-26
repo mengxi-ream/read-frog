@@ -1,5 +1,30 @@
 # @read-frog/extension
 
+## 1.54.0
+
+### Minor Changes
+
+- [#2410](https://github.com/mengxi-ream/read-frog/pull/2410) [`d0e3eae`](https://github.com/mengxi-ream/read-frog/commit/d0e3eae48f8e5c7874d55e53b9dbe06c07600a29) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(hover-translation): hold the hover translation key or custom shortcut to ring the block it will translate, then let go to translate it; the ring follows the pointer and glides between blocks, a tap still translates on release, and the first tap after another key no longer gets lost
+
+- [#2404](https://github.com/mengxi-ream/read-frog/pull/2404) [`6dba257`](https://github.com/mengxi-ream/read-frog/commit/6dba2570f0807b39000fbf390a17e6eac959fd7b) Thanks [@taiiiyang](https://github.com/taiiiyang)! - feat(subtitles): pick the AI action a click on a subtitle word runs
+
+- [#2403](https://github.com/mengxi-ream/read-frog/pull/2403) [`e622f80`](https://github.com/mengxi-ream/read-frog/commit/e622f8041e87fa7ea8517126a2387dc57d7b739b) Thanks [@taiiiyang](https://github.com/taiiiyang)! - feat(subtitles): pause on hover and click a subtitle word to look it up
+
+### Patch Changes
+
+- [#2407](https://github.com/mengxi-ream/read-frog/pull/2407) [`16e3441`](https://github.com/mengxi-ream/read-frog/commit/16e34417c495fc9564a5722b9b3555047f211065) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(subtitles): stay quiet when auto-started subtitles find none on an X video
+
+- [#2412](https://github.com/mengxi-ream/read-frog/pull/2412) [`543683a`](https://github.com/mengxi-ream/read-frog/commit/543683a70adc5af7d77861d98e4ad0ef618ea3fa) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(site-rules): translate header menus that open with pure CSS
+  
+  Page translation skips content hidden with `display: none` or
+  `visibility: hidden` and only comes back to it when the site changes the DOM
+  to reveal it. Menus that open through CSS alone (`li:hover .dropdown`, or a
+  `:checked` checkbox) change nothing, so their content stayed untranslated,
+  like The North Face Korea's header dropdowns. A new `walkHiddenSelectors`
+  site-rule family names hidden regions the walk enters anyway; their content
+  translates when the menu opens, so closed menus cost nothing up front. The
+  North Face Korea ships with a built-in rule.
+
 ## 1.53.0
 
 ### Minor Changes
