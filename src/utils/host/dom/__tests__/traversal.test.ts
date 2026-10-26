@@ -427,6 +427,39 @@ describe("site rule node selectors", () => {
     expect(host.querySelector("#inline-style")).not.toHaveAttribute(INLINE_ATTRIBUTE)
     host.remove()
   })
+
+  it("labels a CSS-only menu while it is hidden when walkHiddenSelectors names it", () => {
+    const markup = `
+      <ul>
+        <li class="menu-item">
+          <a id="label">Men</a>
+          <div class="dropdown" style="display:none">
+            <ul>
+              <li id="item"><a>Down jackets</a></li>
+              <li id="back" style="display:none"><a>Back</a></li>
+            </ul>
+          </div>
+        </li>
+      </ul>
+    `
+    const ruled = fixture(markup)
+    walkAndLabelElement(
+      ruled,
+      "walk-hidden",
+      configWithSiteRule({ walkHiddenSelectors: [".dropdown"] }),
+    )
+
+    expect(ruled.querySelector("#item")).toHaveAttribute(PARAGRAPH_ATTRIBUTE)
+    expect(ruled.querySelector("#back")).not.toHaveAttribute(WALKED_ATTRIBUTE)
+    ruled.remove()
+
+    const unruled = fixture(markup)
+    walkAndLabelElement(unruled, "walk-hidden-default", DEFAULT_CONFIG)
+
+    expect(unruled.querySelector(".dropdown")).not.toHaveAttribute(WALKED_ATTRIBUTE)
+    expect(unruled.querySelector("#item")).not.toHaveAttribute(PARAGRAPH_ATTRIBUTE)
+    unruled.remove()
+  })
 })
 
 describe("document root labeling guard", () => {

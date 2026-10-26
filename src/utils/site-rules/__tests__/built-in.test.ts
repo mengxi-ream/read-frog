@@ -70,6 +70,9 @@ function allSelectors(rule: (typeof BUILT_IN_SITE_RULES)[number]): string[] {
     ...(rule.atomSelectors ?? []),
     ...(rule["atomSelectors.add"] ?? []),
     ...(rule["atomSelectors.remove"] ?? []),
+    ...(rule.walkHiddenSelectors ?? []),
+    ...(rule["walkHiddenSelectors.add"] ?? []),
+    ...(rule["walkHiddenSelectors.remove"] ?? []),
   ]
 }
 
@@ -648,6 +651,23 @@ describe("built-in site rules", () => {
       ["alibaba-sourcing-rfq"],
     )
     expect(disabled.dontWalkTags).toBeNull()
+  })
+
+  // The header dropdowns open on `li:hover`, so no mutation ever brings the
+  // walk back to them once it skipped them as display: none (Featurebase #141).
+  it("walks The North Face Korea's CSS-only header menus while hidden", () => {
+    for (const url of [
+      "https://www.thenorthfacekorea.co.kr/",
+      "https://thenorthfacekorea.co.kr/mens",
+    ]) {
+      const resolved = resolveSiteRule(url, BUILT_IN_SITE_RULES, [], [])
+
+      expect(resolved.matchedRuleIds).toContain("thenorthfacekorea")
+      expect(resolved.walkHiddenSelector).toBe(".header-gnb .twoDepth_wrap")
+    }
+
+    const elsewhere = resolveSiteRule("https://example.com/", BUILT_IN_SITE_RULES, [], [])
+    expect(elsewhere.walkHiddenSelector).toBeNull()
   })
 
   it("retains independently verified content roots that cover their full match scope", () => {

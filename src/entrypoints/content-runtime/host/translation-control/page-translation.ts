@@ -116,6 +116,25 @@ function parentElementAcrossShadow(element: Element): Element | null {
 }
 
 /**
+ * Whether `element` is box-less because it, or an ancestor below its nearest
+ * rendered one, is `display: none`: a closed menu a site rule opened to the
+ * walk (`walkHiddenSelectors`), where it gets a box of its own once the site
+ * shows it. A `display: contents` element never gets one, open or closed, so
+ * it does not count.
+ */
+function isInHiddenRegion(element: Element): boolean {
+  if (window.getComputedStyle(element).display === "contents") return false
+  for (
+    let current: Element | null = element;
+    current && !hasBox(current);
+    current = parentElementAcrossShadow(current)
+  ) {
+    if (window.getComputedStyle(current).display === "none") return true
+  }
+  return false
+}
+
+/**
  * The box a box-less element's content is laid out in: its nearest ancestor
  * that has a box, through shadow roots (a plain-text unit at the top of one is
  * laid out in its host).
@@ -977,9 +996,14 @@ export class PageTranslationManager implements IPageTranslationManager {
    * plain text included; when what that box lays out is larger than a
    * split-sized unit (a long column, a scrolling list or row), the unit's own
    * inner boxes. A unit with neither keeps the direct observation.
+   *
+   * A unit inside a closed menu is box-less too, but it is observed directly
+   * like a rendered one: it intersects once the site shows it. Gating it on a
+   * visible ancestor would translate every closed menu on the page up front,
+   * ahead of the content on screen.
    */
   private observeUnit(observer: IntersectionObserver, unit: HTMLElement, walkId: string): void {
-    if (hasBox(unit)) {
+    if (hasBox(unit) || isInHiddenRegion(unit)) {
       // It may have been box-less when first registered; its old gate must not
       // translate it a second time.
       this.pendingBoxlessUnits.delete(unit)

@@ -318,10 +318,33 @@ export function isDontWalkIntoAndDontTranslateAsChildElement(
   if (dontWalkCustomElement) return true
 
   const computedStyle = window.getComputedStyle(element)
+  if (usesIconFont(computedStyle.fontFamily)) return true
+  const hidden = computedStyle.display === "none" || computedStyle.visibility === "hidden"
+  return hidden && !isSiteRuleWalkHiddenElement(element, computedStyle, config)
+}
+
+/**
+ * Whether a site rule asks the walk to enter `element` although its computed
+ * style hides it (`walkHiddenSelectors`). The matched element is entered
+ * whatever hides it. Below it, only `visibility: hidden` inherited from that
+ * region is waived: a descendant the site hides on its own (a mobile-only back
+ * button inside a desktop menu) stays out of the walk and of the translated
+ * text.
+ */
+function isSiteRuleWalkHiddenElement(
+  element: HTMLElement,
+  computedStyle: CSSStyleDeclaration,
+  config: Config,
+): boolean {
+  const { walkHiddenSelector } = getEffectiveSiteRule(config, window.location.href)
+  if (walkHiddenSelector === null) return false
+  if (element.matches(walkHiddenSelector)) return true
+  if (computedStyle.display === "none") return false
+  const parent = element.parentElement
   return (
-    usesIconFont(computedStyle.fontFamily) ||
-    computedStyle.display === "none" ||
-    computedStyle.visibility === "hidden"
+    parent !== null &&
+    window.getComputedStyle(parent).visibility === "hidden" &&
+    parent.closest(walkHiddenSelector) !== null
   )
 }
 
