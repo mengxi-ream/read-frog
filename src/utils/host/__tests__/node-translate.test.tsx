@@ -10,6 +10,7 @@ import {
   PARAGRAPH_ATTRIBUTE,
 } from "@/utils/constants/dom-labels"
 import { flushBatchedOperations } from "../dom/batch-dom"
+import { findNearestAncestorBlockNodeAt } from "../dom/find"
 import { removeOrShowNodeTranslation } from "../translate/node-manipulation"
 import {
   expectNodeLabels,
@@ -43,6 +44,12 @@ vi.mock("@/utils/config/languages", () => ({
   getDetectedCodeFromStorage: vi.fn<(...args: any[]) => any>(() => Promise.resolve("eng")),
 }))
 
+// What a hover-translation trigger does: find the block under the pointer, then translate it.
+async function translateAt(point: { x: number; y: number }, config: Config) {
+  const block = findNearestAncestorBlockNodeAt(point, config)
+  if (block) await removeOrShowNodeTranslation(block, config)
+}
+
 describe("node translation", () => {
   const originalGetComputedStyle = window.getComputedStyle
 
@@ -75,7 +82,7 @@ describe("node translation", () => {
       const originalElementFromPoint = Reflect.get(document, "elementFromPoint")
       document.elementFromPoint = vi.fn<(...args: any[]) => any>(() => node)
       await act(async () => {
-        await removeOrShowNodeTranslation({ x: 150, y: 125 }, TEST_CONFIG)
+        await translateAt({ x: 150, y: 125 }, TEST_CONFIG)
         // Flush batched DOM operations to ensure all changes are applied before assertions
         flushBatchedOperations()
       })
@@ -107,7 +114,7 @@ describe("node translation", () => {
       document.elementFromPoint = vi.fn<(...args: any[]) => any>(() => node)
 
       await act(async () => {
-        await removeOrShowNodeTranslation({ x: 150, y: 125 }, config)
+        await translateAt({ x: 150, y: 125 }, config)
         flushBatchedOperations()
       })
 
@@ -119,7 +126,7 @@ describe("node translation", () => {
       const wrapper = node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)
       document.elementFromPoint = vi.fn<(...args: any[]) => any>(() => wrapper as Element)
       await act(async () => {
-        await removeOrShowNodeTranslation({ x: 150, y: 125 }, config)
+        await translateAt({ x: 150, y: 125 }, config)
         flushBatchedOperations()
       })
 
@@ -151,7 +158,7 @@ describe("node translation", () => {
       document.elementFromPoint = vi.fn<(...args: any[]) => any>(() => node)
 
       await act(async () => {
-        await removeOrShowNodeTranslation({ x: 150, y: 125 }, configWithCSS)
+        await translateAt({ x: 150, y: 125 }, configWithCSS)
         flushBatchedOperations()
       })
 
@@ -160,7 +167,7 @@ describe("node translation", () => {
       const wrapper = node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)
       document.elementFromPoint = vi.fn<(...args: any[]) => any>(() => wrapper as Element)
       await act(async () => {
-        await removeOrShowNodeTranslation({ x: 150, y: 125 }, configWithoutCSS)
+        await translateAt({ x: 150, y: 125 }, configWithoutCSS)
         flushBatchedOperations()
       })
 
@@ -176,14 +183,14 @@ describe("node translation", () => {
       const originalElementFromPoint = Reflect.get(document, "elementFromPoint")
       document.elementFromPoint = vi.fn<(...args: any[]) => any>(() => node)
       await act(async () => {
-        await removeOrShowNodeTranslation({ x: 150, y: 125 }, TEST_CONFIG)
+        await translateAt({ x: 150, y: 125 }, TEST_CONFIG)
         flushBatchedOperations()
       })
 
       const translatedContent = node.querySelector(`.${BLOCK_CONTENT_CLASS}`)
       document.elementFromPoint = vi.fn<(...args: any[]) => any>(() => translatedContent as Element)
       await act(async () => {
-        await removeOrShowNodeTranslation({ x: 150, y: 125 }, TEST_CONFIG)
+        await translateAt({ x: 150, y: 125 }, TEST_CONFIG)
         flushBatchedOperations()
       })
 
@@ -198,13 +205,13 @@ describe("node translation", () => {
       const originalElementFromPoint = Reflect.get(document, "elementFromPoint")
       document.elementFromPoint = vi.fn<(...args: any[]) => any>(() => node)
       await act(async () => {
-        await removeOrShowNodeTranslation({ x: 150, y: 125 }, TEST_CONFIG)
+        await translateAt({ x: 150, y: 125 }, TEST_CONFIG)
         flushBatchedOperations()
       })
       const wrapper = node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)
       document.elementFromPoint = vi.fn<(...args: any[]) => any>(() => wrapper as Element)
       await act(async () => {
-        await removeOrShowNodeTranslation({ x: 150, y: 125 }, TEST_CONFIG)
+        await translateAt({ x: 150, y: 125 }, TEST_CONFIG)
         flushBatchedOperations()
       })
 

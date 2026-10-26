@@ -3,6 +3,7 @@ import { getLocalConfig } from "@/utils/config/storage"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { removeOrShowNodeTranslation } from "@/utils/host/translate/node-manipulation"
 import { sendMessage } from "@/utils/message"
+import { createNodeTranslationPreview } from "./node-translation-preview"
 import { registerNodeTranslationTriggerListeners } from "./node-translation-trigger"
 
 /**
@@ -33,26 +34,26 @@ export function registerNodeTranslationTriggers(): () => void {
     )
   }
 
-  const translateNode = async (
-    point: Parameters<typeof removeOrShowNodeTranslation>[0],
-    config: Config,
-  ) => {
-    const didTranslate = await removeOrShowNodeTranslation(point, config)
+  const translateNode = async (block: Element, config: Config) => {
+    const didTranslate = await removeOrShowNodeTranslation(block, config)
     if (didTranslate) {
       requestIframeInjectionAfterSuccessfulTopFrameNodeTranslation()
     }
   }
 
+  const preview = createNodeTranslationPreview()
   const teardownTriggerListeners = registerNodeTranslationTriggerListeners({
     getConfig: getCurrentConfig,
-    onTrigger: (point, config) => {
-      void translateNode(point, config)
+    onTrigger: (block, config) => {
+      void translateNode(block, config)
     },
+    preview,
   })
 
   // Teardown: abort all listeners + cancel pending timers
   return () => {
     ac.abort()
     teardownTriggerListeners()
+    preview.destroy()
   }
 }
