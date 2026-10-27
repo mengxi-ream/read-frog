@@ -254,7 +254,7 @@ options:
         customChatComplete: Custom Chat Complete
         customResponses: Custom Responses
       attribution:
-        builtInAi: Read Frog's hosted standard model. Non-Ultra users can use it only for Custom AI Actions; Ultra members can use it on more features.
+        builtInAi: Read Frog's hosted standard model. Pro and Ultra members can use it on every feature, on a weekly quota; on the free plan it runs Custom AI Actions only.
         builtInAiAdvance: Read Frog's hosted advanced model, exclusive to Ultra members. Runs page translation, Custom AI Actions, and every other Built-in AI feature on a shared weekly quota. Uses up the quota faster than the standard model.
       description:
         openai: Provides models like GPT-4o

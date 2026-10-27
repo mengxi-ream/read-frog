@@ -253,7 +253,7 @@ options:
         customChatComplete: Özel Chat Complete
         customResponses: Özel Responses
       attribution:
-        builtInAi: Read Frog tarafından barındırılan standart model. Ultra olmayan kullanıcılar yalnızca özel AI eylemlerinde kullanabilir; Ultra kullanıcıları daha fazla özellikte kullanabilir.
+        builtInAi: Read Frog tarafından barındırılan standart model. Pro ve Ultra kullanıcıları haftalık kotayla tüm özelliklerde kullanabilir; ücretsiz planda yalnızca özel AI eylemlerinde kullanılabilir.
         builtInAiAdvance: Read Frog tarafından barındırılan gelişmiş model, yalnızca Ultra üyelerine özeldir. Sayfa çevirisi, özel AI eylemleri ve diğer tüm yerleşik AI özelliklerinde çalışır; haftalık kota ortaktır. Kotayı standart modelden daha hızlı tüketir.
       description:
         openai: GPT-4o gibi modeller sağlar
