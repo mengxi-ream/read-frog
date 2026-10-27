@@ -253,7 +253,7 @@ options:
         customChatComplete: Tùy chỉnh Chat Complete
         customResponses: Tùy chỉnh Responses
       attribution:
-        builtInAi: Mô hình tiêu chuẩn do Read Frog lưu trữ. Người dùng không có Ultra chỉ dùng được trong hành động AI tùy chỉnh; người dùng Ultra dùng được ở nhiều tính năng hơn.
+        builtInAi: Mô hình tiêu chuẩn do Read Frog lưu trữ. Người dùng Pro và Ultra dùng được ở mọi tính năng trong hạn mức tuần; ở gói miễn phí chỉ dùng được trong hành động AI tùy chỉnh.
         builtInAiAdvance: Mô hình nâng cao do Read Frog lưu trữ, dành riêng cho thành viên Ultra. Dùng được ở mọi tính năng AI tích hợp — dịch trang, hành động AI tùy chỉnh và hơn nữa — với hạn mức tuần dùng chung. Tiêu hao hạn mức nhanh hơn mô hình tiêu chuẩn.
       description:
         openai: Cung cấp các mô hình như GPT-4o

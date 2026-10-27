@@ -254,7 +254,7 @@ options:
         customChatComplete: Fərdi Chat Complete
         customResponses: Fərdi Responses
       attribution:
-        builtInAi: Read Frog serverlərində işləyən standart model. Ultra abunəliyi olmayan istifadəçilər ondan yalnız fərdi süni intellekt əməliyyatlarında, Ultra üzvləri isə daha çox funksiyada istifadə edə bilər.
+        builtInAi: Read Frog serverlərində işləyən standart model. Pro və Ultra üzvləri ondan həftəlik kvota ilə bütün funksiyalarda istifadə edə bilər; pulsuz planda isə yalnız fərdi süni intellekt əməliyyatlarında işləyir.
         builtInAiAdvance: Yalnız Ultra üzvləri üçün Read Frog serverlərində işləyən təkmil model. Səhifə tərcüməsini, fərdi süni intellekt əməliyyatlarını və bütün digər daxili süni intellekt funksiyalarını ortaq həftəlik kvota ilə icra edir. Kvotanı standart modeldən daha sürətli sərf edir.
       description:
         openai: GPT-4o kimi modellər təqdim edir
