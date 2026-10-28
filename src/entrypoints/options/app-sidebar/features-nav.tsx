@@ -113,11 +113,9 @@ export function FeaturesNav() {
                           rel="noopener noreferrer"
                         />
                       }
-                      className="gap-1"
                     >
                       <span className="truncate">{i18n.t("options.tools.pdfTranslation")}</span>
-                      <NewBadge size="sm" className="ml-auto px-1" />
-                      <Icon icon="tabler:arrow-up-right" aria-hidden="true" />
+                      <NewBadge size="sm" className="ml-auto" />
                     </SidebarMenuSubButton>
                   </SidebarMenuSubItem>
                 </SidebarMenuSub>
