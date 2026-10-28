@@ -26,8 +26,18 @@ function websiteUrl(path: string): string {
   return new URL(path, env.WXT_WEBSITE_URL).toString()
 }
 
-export function pricingUrl(): string {
-  return websiteUrl("/pricing")
+/** Stable website entry IDs. Timestamping happens on arrival, never when an error is created. */
+export type ExtensionPricingEntry =
+  | "extension_upgrade"
+  | "extension_quota_exhausted"
+  | "extension_video_quota"
+  | "extension_plan_badge"
+  | "extension_notebase_limit"
+
+export function pricingUrl(entry: ExtensionPricingEntry = "extension_upgrade"): string {
+  const url = new URL(websiteUrl("/pricing"))
+  url.searchParams.set("entry", entry)
+  return url.toString()
 }
 
 /** Billing lives in the app's settings dialog, not on the marketing page. */
@@ -39,8 +49,8 @@ export function logInUrl(): string {
   return websiteUrl("/log-in")
 }
 
-export function upgradeAction(): ErrorAction {
-  return { label: i18n.t("action.upgrade"), url: pricingUrl() }
+export function upgradeAction(entry: ExtensionPricingEntry = "extension_upgrade"): ErrorAction {
+  return { label: i18n.t("action.upgrade"), url: pricingUrl(entry) }
 }
 
 /**

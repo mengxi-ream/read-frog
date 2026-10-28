@@ -1,5 +1,5 @@
 import { toastManager } from "@/components/ui/base-ui/toast"
-import { env } from "@/env"
+import { pricingUrl } from "@/utils/error-action"
 import { i18n } from "@/utils/i18n"
 import { sendMessage } from "@/utils/message"
 
@@ -12,7 +12,7 @@ export function showNotebaseLimitExceededToast() {
       onClick: () => {
         toastManager.close(toastId)
         void sendMessage("openPage", {
-          url: new URL("/pricing", env.WXT_WEBSITE_URL).toString(),
+          url: pricingUrl("extension_notebase_limit"),
           active: true,
         })
       },

@@ -4,7 +4,7 @@ import type { ComponentProps } from "react"
 import type { badgeVariants } from "@/components/ui/base-ui/badge"
 import { Badge } from "@/components/ui/base-ui/badge"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
-import { env } from "@/env"
+import { pricingUrl } from "@/utils/error-action"
 import { sendMessage } from "@/utils/message"
 import { cn } from "@/utils/styles/utils"
 
@@ -112,7 +112,7 @@ export function PlanBadge({
               event.preventDefault()
               event.stopPropagation()
               void sendMessage("openPage", {
-                url: new URL("/pricing", env.WXT_WEBSITE_URL).toString(),
+                url: pricingUrl("extension_plan_badge"),
                 active: true,
               })
             }}

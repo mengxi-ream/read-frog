@@ -419,7 +419,9 @@ function getHostedAiQuotaExhaustedAction(error: unknown): ErrorAction | undefine
   const parsed = HostedAiQuotaExhaustedDataSchema.safeParse(
     isRecord(error) ? error.data : undefined,
   )
-  return parsed.success && parsed.data.policyId === "ultra-weekly-v1" ? undefined : upgradeAction()
+  return parsed.success && parsed.data.policyId === "ultra-weekly-v1"
+    ? undefined
+    : upgradeAction("extension_quota_exhausted")
 }
 
 /**

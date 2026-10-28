@@ -11,7 +11,10 @@ function promptLogIn(): void {
 }
 
 function promptUpgrade(): void {
-  showAiSubtitlesWallToast(i18n.t("subtitles.errors.aiSubscriptionRequired"), upgradeAction())
+  showAiSubtitlesWallToast(
+    i18n.t("subtitles.errors.aiSubscriptionRequired"),
+    upgradeAction("extension_video_quota"),
+  )
 }
 
 export async function ensureSignedIn(): Promise<boolean> {
@@ -74,7 +77,7 @@ export async function ensureAiSubtitlesEntitled(): Promise<boolean> {
         ? i18n.t("subtitles.errors.aiQuotaExceededWithReset", [resetAt])
         : i18n.t("subtitles.errors.aiQuotaExceeded"),
       // Ultra is the top plan; there is nothing left to sell someone already on it.
-      usage.plan === "ultra" ? undefined : upgradeAction(),
+      usage.plan === "ultra" ? undefined : upgradeAction("extension_video_quota"),
     )
     return false
   }
