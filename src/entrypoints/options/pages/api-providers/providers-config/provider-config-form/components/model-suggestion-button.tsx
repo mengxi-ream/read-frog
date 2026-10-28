@@ -12,7 +12,6 @@ import {
   ComboboxItem,
   ComboboxList,
 } from "@/components/ui/base-ui/combobox"
-import { filterMiniMaxTextModels } from "@/utils/constants/models"
 import { extractErrorMessage } from "@/utils/error/extract-message"
 import { i18n } from "@/utils/i18n"
 import { getProviderConnectionURL } from "@/utils/providers/connection-url"
@@ -54,7 +53,7 @@ export function ModelSuggestionButton({
       }
 
       const data: ModelsResponse = await response.json()
-      return filterMiniMaxTextModels(data.data.map((m) => m.id))
+      return data.data.map((m) => m.id)
     },
   })
 

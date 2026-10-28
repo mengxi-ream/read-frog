@@ -471,36 +471,6 @@ export const LLM_PROVIDER_MODELS = {
   ],
 } as const
 
-/** Filter text suggestions without changing media models or inventing gateway routes. */
-export function filterMiniMaxTextModels(models: readonly string[]): string[] {
-  const isMiniMaxText = (model: string) => /(?:^|\/)minimax-(?:m\d|text-01$)/i.test(model)
-  const choices = models.filter(
-    (model) =>
-      !isMiniMaxText(model) || /(?:^|\/)minimax-m3(?:\.1-flash)?(?::free|-free)?$/i.test(model),
-  )
-  const miniMaxModels = choices
-    .filter(isMiniMaxText)
-    .sort((a, b) => Number(!/m3\.1-flash/i.test(a)) - Number(!/m3\.1-flash/i.test(b)))
-  let miniMaxIndex = 0
-  return choices.map((model) => (isMiniMaxText(model) ? miniMaxModels[miniMaxIndex++]! : model))
-}
-
-/** Keep legacy IDs in the schema, but offer only current MiniMax text models for new selections. */
-export function getSelectableProviderModels(
-  provider: keyof typeof LLM_PROVIDER_MODELS,
-  currentModel?: string,
-): string[] {
-  const models: readonly string[] = LLM_PROVIDER_MODELS[provider]
-  const choices = filterMiniMaxTextModels(models)
-
-  // A saved legacy selection remains visible and valid until the user changes it.
-  if (currentModel && models.includes(currentModel) && !choices.includes(currentModel)) {
-    choices.push(currentModel)
-  }
-
-  return choices
-}
-
 export const NON_API_TRANSLATE_PROVIDERS = ["google-translate", "microsoft-translate"] as const
 export const NON_API_TRANSLATE_PROVIDERS_MAP: Record<
   (typeof NON_API_TRANSLATE_PROVIDERS)[number],

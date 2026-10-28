@@ -1,11 +1,7 @@
 import type { LLMProviderConfig } from "@/types/config/provider"
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { llmProviderConfigItemSchema } from "@/types/config/provider"
-import {
-  filterMiniMaxTextModels,
-  getSelectableProviderModels,
-  LLM_PROVIDER_MODELS,
-} from "@/utils/constants/models"
+import { LLM_PROVIDER_MODELS } from "@/utils/constants/models"
 import { DEFAULT_PROVIDER_CONFIG } from "@/utils/constants/providers"
 import { buildLocalGenerateTextParams } from "../generate-params"
 import { getLanguageModelForConfig } from "../model"
@@ -57,36 +53,8 @@ async function captureRequest(config: LLMProviderConfig, includeImage = false) {
 afterEach(() => vi.unstubAllGlobals())
 
 describe("MiniMax model choices", () => {
-  it("filters fetched suggestions, orders Flash first, and preserves media and other models", () => {
-    expect(
-      filterMiniMaxTextModels([
-        "minimax/minimax-m3",
-        "other-model",
-        "minimax/minimax-m2.7",
-        "MiniMax-Text-01",
-        "minimax/minimax-m3.1-flash:free",
-        "speech-2.8-hd",
-        "MiniMax-Music-2.5",
-        "MiniMax-Hailuo-2.3",
-        "image-01",
-      ]),
-    ).toEqual([
-      "minimax/minimax-m3.1-flash:free",
-      "other-model",
-      "minimax/minimax-m3",
-      "speech-2.8-hd",
-      "MiniMax-Music-2.5",
-      "MiniMax-Hailuo-2.3",
-      "image-01",
-    ])
-    expect(filterMiniMaxTextModels(["minimax-m3.1-flash-free"])).toEqual([
-      "minimax-m3.1-flash-free",
-    ])
-    expect(filterMiniMaxTextModels(["minimax/minimax-m3"])).toEqual(["minimax/minimax-m3"])
-  })
-
-  it("offers Flash first and M3 second without removing saved legacy IDs", () => {
-    expect(getSelectableProviderModels("minimax")).toEqual(["MiniMax-M3.1-Flash", "MiniMax-M3"])
+  it("configures Flash first and M3 second without removing saved legacy IDs", () => {
+    expect(LLM_PROVIDER_MODELS.minimax.slice(0, 2)).toEqual(["MiniMax-M3.1-Flash", "MiniMax-M3"])
     expect(DEFAULT_PROVIDER_CONFIG.minimax.model.model).toBe("MiniMax-M3.1-Flash")
     for (const model of LLM_PROVIDER_MODELS.minimax) {
       const config = {
@@ -94,32 +62,14 @@ describe("MiniMax model choices", () => {
         model: { model, isCustomModel: false, customModel: null },
       }
       expect(llmProviderConfigItemSchema.safeParse(config).success).toBe(true)
-      expect(getSelectableProviderModels("minimax", model)).toContain(model)
     }
   })
 
-  it("filters legacy gateway MiniMax choices while preserving other models and their order", () => {
-    for (const provider of Object.keys(
-      LLM_PROVIDER_MODELS,
-    ) as (keyof typeof LLM_PROVIDER_MODELS)[]) {
-      const choices = getSelectableProviderModels(provider)
-      const isMiniMax = (model: string) => /(?:^|\/)minimax-m/i.test(model)
-      expect(
-        choices
-          .filter(isMiniMax)
-          .every((model) => /(?:^|\/)minimax-m3(?:\.1-flash(?::free)?)?$/i.test(model)),
-      ).toBe(true)
-      expect(choices.filter((model) => !isMiniMax(model))).toEqual(
-        LLM_PROVIDER_MODELS[provider].filter((model) => !isMiniMax(model)),
-      )
-    }
-    expect(
-      getSelectableProviderModels("openrouter").filter((model) => model.startsWith("minimax/")),
-    ).toEqual(["minimax/minimax-m3.1-flash:free", "minimax/minimax-m3"])
-    expect(getSelectableProviderModels("togetherai", "MiniMaxAI/MiniMax-M2.7")).toContain(
-      "MiniMaxAI/MiniMax-M2.7",
-    )
-    expect(getSelectableProviderModels("minimax", "unlisted-model")).not.toContain("unlisted-model")
+  it("configures the verified OpenRouter Flash and M3 routes", () => {
+    expect(LLM_PROVIDER_MODELS.openrouter.slice(-2)).toEqual([
+      "minimax/minimax-m3.1-flash:free",
+      "minimax/minimax-m3",
+    ])
   })
 })
 
