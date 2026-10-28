@@ -1,5 +1,19 @@
 # @read-frog/extension
 
+## 1.54.1
+
+### Patch Changes
+
+- [#2414](https://github.com/mengxi-ream/read-frog/pull/2414) [`a58d653`](https://github.com/mengxi-ream/read-frog/commit/a58d6539deb84b90046c456883f2dd0b617e33f8) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(i18n): say Built-in AI works on every feature for Pro and Ultra, and on Custom AI Actions only for free accounts
+
+- [#2417](https://github.com/mengxi-ream/read-frog/pull/2417) [`f1c143c`](https://github.com/mengxi-ream/read-frog/commit/f1c143c2ba73a665b8c4b661094c623b5f4ba7b5) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(site-rules): translate the guide text on GameFAQs FAQ pages
+
+- [#2417](https://github.com/mengxi-ream/read-frog/pull/2417) [`f1c143c`](https://github.com/mengxi-ream/read-frog/commit/f1c143c2ba73a665b8c4b661094c623b5f4ba7b5) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(translate): stop long plain-text pages from freezing while they translate
+
+- [#2416](https://github.com/mengxi-ream/read-frog/pull/2416) [`23304d0`](https://github.com/mengxi-ream/read-frog/commit/23304d027c57aa0d1f06064baeefe16e42a5ed11) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(options): add PDF translation link to the Translation sidebar
+
+- [#2418](https://github.com/mengxi-ream/read-frog/pull/2418) [`3d768aa`](https://github.com/mengxi-ream/read-frog/commit/3d768aad26791cc2664129d206cbcf39179e0486) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(translate): keep single line breaks in translation-only mode on plain-text pages, so ASCII banners and line-by-line text no longer merge into one wrapped line with Google Translate
+
 ## 1.54.0
 
 ### Minor Changes
