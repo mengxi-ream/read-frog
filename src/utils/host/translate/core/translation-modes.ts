@@ -984,7 +984,14 @@ async function translateTranslationOnlyRun(
     if (!source || (await shouldSkipPageTranslationText(source.filterText, config))) return
 
     const ownerDoc = getOwnerDocument(targetNode)
-    const request = createPageTranslationRequest(source, config, "html", { forceRetranslation })
+    // The translation is swapped into the run's own text nodes, so their
+    // parent's white-space decides whether single newlines render — a
+    // text/plain page's <pre>, a GameFAQs guide, an X tweet. Without the flag
+    // Google returns an ASCII banner and the paragraph under it as one line.
+    const request = createPageTranslationRequest(source, config, "html", {
+      preserveLineBreaks: isNewlinePreservingElement(parentNode),
+      forceRetranslation,
+    })
     if (!request.sourceText) return
 
     // Taken before the provider request; the response handler compares against
