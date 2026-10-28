@@ -3,6 +3,7 @@ import { Icon } from "@iconify/react"
 import { useState } from "react"
 import { Link, useLocation } from "react-router"
 import { browser } from "#imports"
+import { NewBadge } from "@/components/badges/new-badge"
 import {
   Collapsible,
   CollapsibleContent,
@@ -19,12 +20,13 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/base-ui/sidebar"
+import { env } from "@/env"
 import { TRANSLATION_HUB_PAGE_PATH } from "@/utils/constants/translation-hub"
 import { i18n } from "@/utils/i18n"
 
 const OVERLAY_TOOLS_PATHS = ["/floating-button", "/selection-toolbar", "/context-menu"] as const
 /**
- * The three places a translation happens. Grouped because they are one feature
+ * The three in-extension translation pages. Grouped because they are one feature
  * seen in three surfaces — a page, a video, a text box — and listing them flat
  * put three of the eight top-level entries on the same subject.
  *
@@ -100,6 +102,22 @@ export function FeaturesNav() {
                       isActive={pathname === "/input-translation"}
                     >
                       <span>{i18n.t("options.inputTranslation.title")}</span>
+                    </SidebarMenuSubButton>
+                  </SidebarMenuSubItem>
+                  <SidebarMenuSubItem>
+                    <SidebarMenuSubButton
+                      render={
+                        <a
+                          href={`${env.WXT_WEBSITE_URL}/pdf-translation`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        />
+                      }
+                      className="gap-1"
+                    >
+                      <span className="truncate">{i18n.t("options.tools.pdfTranslation")}</span>
+                      <NewBadge size="sm" className="ml-auto px-1" />
+                      <Icon icon="tabler:arrow-up-right" aria-hidden="true" />
                     </SidebarMenuSubButton>
                   </SidebarMenuSubItem>
                 </SidebarMenuSub>

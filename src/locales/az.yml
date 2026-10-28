@@ -115,6 +115,7 @@ options:
     product: Məhsul
   tools:
     translationHub: Tərcümə mərkəzi
+    pdfTranslation: PDF tərcüməsi
   product:
     roadmap: İnkişaf planı
   helpAndCommunity:

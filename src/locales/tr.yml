@@ -115,6 +115,7 @@ options:
     product: Ürün
   tools:
     translationHub: Çeviri Merkezi
+    pdfTranslation: PDF çevirisi
   product:
     roadmap: Yol Haritası
   helpAndCommunity:

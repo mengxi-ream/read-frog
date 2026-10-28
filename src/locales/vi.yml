@@ -115,6 +115,7 @@ options:
     product: Sản phẩm
   tools:
     translationHub: Trung tâm Dịch thuật
+    pdfTranslation: Dịch PDF
   product:
     roadmap: Lộ trình
   helpAndCommunity:

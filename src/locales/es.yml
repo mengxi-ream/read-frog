@@ -115,6 +115,7 @@ options:
     product: Producto
   tools:
     translationHub: Centro de traducción
+    pdfTranslation: Traducción de PDF
   product:
     roadmap: Hoja de ruta
   helpAndCommunity:
