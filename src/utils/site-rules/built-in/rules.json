@@ -4577,6 +4577,12 @@
     "dontWalkTags.remove": ["PRE"]
   },
   {
+    "id": "gamefaqs-guides",
+    "description": "GameFAQs serves a text guide as an HTML page whose entire body is a run of <pre id=\"faqspan-N\"> blocks (about 50k characters each) under #faqtext. PRE is hard-blocked by default for authored code, and the plain-text exemption only covers text/plain documents, so the guide was never walked while the page around it translated. Limited to guide pages, where a <pre> holds the author's prose; its blank lines then split it into one translation per paragraph",
+    "matches": "gamefaqs.gamespot.com/*/faqs/*",
+    "dontWalkTags.remove": ["PRE"]
+  },
+  {
     "id": "readfrog-x-chat",
     "description": "Skip the X Chat message footer (send time + delivery receipt). It renders twice inside the bubble — once as an aria-hidden opacity-0 spacer in the text flow, once in the absolutely positioned overlay — so both copies otherwise land in the message's translation unit. Target the footer root only: excluding its `.absolute.bottom-0.inset-e-0` wrapper too would hide that wrapper from unwrapDeepestOnlyHTMLChild, turning the bubble row into an only-child chain and moving the translation wrapper down into the pre-wrap text block",
     "matches": ["chat.x.com"],
