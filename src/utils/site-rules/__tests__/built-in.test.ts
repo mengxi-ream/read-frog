@@ -653,6 +653,41 @@ describe("built-in site rules", () => {
     expect(disabled.dontWalkTags).toBeNull()
   })
 
+  // A GameFAQs text guide is a text/html page whose whole body is a run of
+  // `<pre id="faqspan-N">` blocks, so the PRE block left nothing to translate
+  // but the page chrome. The plain-text exemption does not apply to text/html.
+  it("un-blocks PRE on GameFAQs guide pages only", () => {
+    for (const url of [
+      "https://gamefaqs.gamespot.com/psp/611279-shin-megami-tensei-persona-2-innocent-sin/faqs/63674",
+      "https://gamefaqs.gamespot.com/psp/611279-shin-megami-tensei-persona-2-innocent-sin/faqs/63674?page=2",
+      "https://gamefaqs.gamespot.com/ps/197340-final-fantasy-vii/faqs/80373/materia",
+    ]) {
+      const resolved = resolveSiteRule(url, BUILT_IN_SITE_RULES, [], [])
+
+      expect(resolved.matchedRuleIds).toContain("gamefaqs-guides")
+      expect(resolved.dontWalkTags).not.toBeNull()
+      expect(resolved.dontWalkTags!.has("PRE")).toBe(false)
+      expect(resolved.dontWalkTags!.has("SCRIPT")).toBe(true)
+      expect(resolved.dontWalkTagsExplicitAdds?.has("PRE") ?? false).toBe(false)
+    }
+
+    for (const url of [
+      "https://gamefaqs.gamespot.com/",
+      "https://gamefaqs.gamespot.com/psp/611279-shin-megami-tensei-persona-2-innocent-sin/faqs",
+      "https://gamefaqs.gamespot.com/boards/611279-shin-megami-tensei-persona-2-innocent-sin",
+    ]) {
+      expect(resolveSiteRule(url, BUILT_IN_SITE_RULES, [], []).dontWalkTags).toBeNull()
+    }
+
+    const disabled = resolveSiteRule(
+      "https://gamefaqs.gamespot.com/psp/611279-shin-megami-tensei-persona-2-innocent-sin/faqs/63674",
+      BUILT_IN_SITE_RULES,
+      [],
+      ["gamefaqs-guides"],
+    )
+    expect(disabled.dontWalkTags).toBeNull()
+  })
+
   // The header dropdowns open on `li:hover`, so no mutation ever brings the
   // walk back to them once it skipped them as display: none (Featurebase #141).
   it("walks The North Face Korea's CSS-only header menus while hidden", () => {

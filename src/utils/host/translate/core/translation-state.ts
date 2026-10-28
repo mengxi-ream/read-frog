@@ -565,12 +565,16 @@ export function isVirtualParagraphGroupCurrent(
   )
   for (const { source, parent, originalValue, createdTails } of group.splitRecords) {
     const fragments = [source, ...createdTails]
-    let previousIndex = -1
+    // One forward sibling walk proves the fragments are in order. Indexing each
+    // fragment in a fresh copy of `parent.childNodes` cost O(tails × children)
+    // per check, and every unit and mutation record re-checks: a 50k-character
+    // GameFAQs <pre> split into ~225 units froze the page for ~13 s.
+    let cursor: ChildNode | null = null
     for (const fragment of fragments) {
       if (!fragment.isConnected || fragment.parentNode !== parent) return false
-      const index = [...parent.childNodes].indexOf(fragment)
-      if (index <= previousIndex) return false
-      previousIndex = index
+      cursor = cursor === null ? fragment : cursor.nextSibling
+      while (cursor !== null && cursor !== fragment) cursor = cursor.nextSibling
+      if (cursor === null) return false
     }
     if (fragments.map((fragment) => fragment.data).join("") !== originalValue) return false
   }

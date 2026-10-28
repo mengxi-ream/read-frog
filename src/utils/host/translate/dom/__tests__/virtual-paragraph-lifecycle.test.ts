@@ -414,6 +414,44 @@ describe("virtual paragraph lifecycle", () => {
     disposeVirtualParagraphGroup(group)
   })
 
+  it("stays current across a Text split into hundreds of fragments", () => {
+    const paragraphs = Array.from({ length: 300 }, (_, index) => `paragraph ${index}`)
+    const originalValue = paragraphs.join("\n\n")
+    const layoutSource = document.createElement("div")
+    const source = document.createTextNode(originalValue)
+    layoutSource.append(source)
+    document.body.append(layoutSource)
+    let end = 0
+    const offsets = paragraphs.map((paragraph, index) => {
+      end += paragraph.length + (index === 0 ? 0 : 2)
+      return end
+    })
+    const { group, wrappers } = createSplitGroup(layoutSource, source, offsets)
+
+    expect(group.splitRecords[0]!.createdTails).toHaveLength(299)
+    expect(isVirtualParagraphGroupCurrent(group)).toBe(true)
+    expect(isVirtualParagraphGroupCurrent(group, wrappers[150])).toBe(true)
+    disposeVirtualParagraphGroup(group)
+  })
+
+  it("treats split fragments the host reordered as stale", () => {
+    // Identical tails keep the host text unchanged, so only the fragment order
+    // check can tell that the cut Text nodes were swapped.
+    const layoutSource = document.createElement("div")
+    const source = document.createTextNode("a\n\nx\n\nx")
+    layoutSource.append(source)
+    document.body.append(layoutSource)
+    const { group } = createSplitGroup(layoutSource, source, [1, 4, source.data.length])
+    const [first, second] = group.splitRecords[0]!.createdTails
+
+    expect(isVirtualParagraphGroupCurrent(group)).toBe(true)
+    layoutSource.insertBefore(second!, first!)
+
+    expect(collectSourceTextExcludingWrappers(layoutSource)).toBe("a\n\nx\n\nx")
+    expect(isVirtualParagraphGroupCurrent(group)).toBe(false)
+    disposeVirtualParagraphGroup(group)
+  })
+
   it("treats a tracked wrapper moved within the layout source as stale", () => {
     const layoutSource = document.createElement("div")
     const source = document.createTextNode("one\n\ntwo")
