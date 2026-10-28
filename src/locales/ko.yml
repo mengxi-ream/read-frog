@@ -115,6 +115,7 @@ options:
     product: 제품
   tools:
     translationHub: 번역 허브
+    pdfTranslation: PDF 번역
   product:
     roadmap: 로드맵
   helpAndCommunity:

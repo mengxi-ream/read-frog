@@ -115,6 +115,7 @@ options:
     product: 产品
   tools:
     translationHub: 翻译中心
+    pdfTranslation: PDF 翻译
   product:
     roadmap: 路线图
   helpAndCommunity:

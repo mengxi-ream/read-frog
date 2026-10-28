@@ -115,6 +115,7 @@ options:
     product: Продукт
   tools:
     translationHub: Центр переводов
+    pdfTranslation: Перевод PDF
   product:
     roadmap: Дорожная карта
   helpAndCommunity:

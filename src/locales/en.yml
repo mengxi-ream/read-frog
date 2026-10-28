@@ -115,6 +115,7 @@ options:
     product: Product
   tools:
     translationHub: Translation Hub
+    pdfTranslation: PDF translation
   product:
     roadmap: Roadmap
   helpAndCommunity:
