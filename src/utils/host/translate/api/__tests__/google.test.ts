@@ -67,6 +67,78 @@ describe("google translate adapter", () => {
     expect(result).toBe(translated)
   })
 
+  describe("preserveLineBreaks with html-format input", () => {
+    const MARKER_PAIR = '<br data-read-frog-lb="1">'.repeat(2)
+
+    it("swaps only text-content newlines for markers and sends the markup unescaped", async () => {
+      mockTranslateResponse("ok")
+
+      await googleTranslate(
+        '<a data-rf-attr="0" title="two\nlines">Tom &amp; Jerry\nguide</a>\nNext line',
+        "en",
+        "zh",
+        { textFormat: "html", preserveLineBreaks: true },
+      )
+
+      // The newline inside the attribute value is not line structure.
+      expect(sentSourceText()).toBe(
+        `<a data-rf-attr="0" title="two\nlines">Tom &amp; Jerry${MARKER_PAIR}guide</a>${MARKER_PAIR}Next line`,
+      )
+    })
+
+    it("restores each line with the source's indentation and bullet", async () => {
+      // Shape of a GameFAQs guide's version-history banner. The model collapses
+      // the indentation and eats the bullet, as it does for plain text.
+      mockTranslateResponse(
+        [
+          "=====",
+          "---[版本历史]---",
+          "=====",
+          "2012年1月22日",
+          "<b>最终</b>版本",
+          '<a data-rf-attr="0">链接</a>',
+        ].join(MARKER_PAIR),
+      )
+
+      const result = await googleTranslate(
+        [
+          "=====",
+          "---[VERSION HISTORY]---",
+          "=====",
+          "    January 22, 2012",
+          "- <b>Final</b> version",
+          '<a data-rf-attr="0">Link</a>',
+        ].join("\n"),
+        "en",
+        "zh",
+        { textFormat: "html", preserveLineBreaks: true },
+      )
+
+      expect(result).toBe(
+        [
+          "=====",
+          "---[版本历史]---",
+          "=====",
+          "    2012年1月22日",
+          "- <b>最终</b>版本",
+          '<a data-rf-attr="0">链接</a>',
+        ].join("\n"),
+      )
+    })
+
+    it("keeps a newline inside an element as a line break of that element", async () => {
+      mockTranslateResponse(`<b>标题${MARKER_PAIR}副标题</b>`)
+
+      const result = await googleTranslate("<b>Title\nSubtitle</b>", "en", "zh", {
+        textFormat: "html",
+        preserveLineBreaks: true,
+      })
+
+      expect(sentSourceText()).toBe(`<b>Title${MARKER_PAIR}Subtitle</b>`)
+      expect(result).toBe("<b>标题\n副标题</b>")
+    })
+  })
+
   it("returns the HTML-encoded API payload without decoding it", async () => {
     // Decoding happens exactly once, in executeTranslate via normalizeTranslationOutput.
     mockTranslateResponse("It&#39;s")

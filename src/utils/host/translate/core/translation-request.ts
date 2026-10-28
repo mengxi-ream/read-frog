@@ -64,14 +64,6 @@ interface DeepLXHtmlAttributeProbe {
 }
 const deepLXHtmlAttributeProbes = new Map<string, DeepLXHtmlAttributeProbe>()
 
-function translateTextForAction(
-  text: string,
-  textFormat: "plain" | "html",
-  forceRetranslation: boolean = false,
-): Promise<string> {
-  return translateTextForPage(text, textFormat, { forceRetranslation })
-}
-
 function createDeepLXHtmlAttributeProbe(): DeepLXHtmlAttributeProbe {
   let resolve!: (result: DeepLXHtmlAttributeProbeResult) => void
   const promise = new Promise<DeepLXHtmlAttributeProbeResult>((resolvePromise) => {
@@ -171,10 +163,10 @@ export function createPageTranslationRequest(
   // its tags intact.
   const deepLXProviderKey = getDeepLXHtmlAttributeProviderKey(config)
   const translateLegacyHtml = async () => {
-    const translatedHtml = await translateTextForAction(
+    const translatedHtml = await translateTextForPage(
       protectedHtml.legacyRequestHtml,
       "html",
-      options.forceRetranslation,
+      options,
     )
     return translatedHtml ? protectedHtml.restoreLegacy(translatedHtml) : translatedHtml
   }
@@ -189,11 +181,7 @@ export function createPageTranslationRequest(
     }
 
     try {
-      const translatedHtml = await translateTextForAction(
-        protectedHtml.requestHtml,
-        "html",
-        options.forceRetranslation,
-      )
+      const translatedHtml = await translateTextForPage(protectedHtml.requestHtml, "html", options)
       if (!translatedHtml) {
         if (deepLXProviderKey) {
           finishDeepLXHtmlAttributeProbe(deepLXProviderKey, ownedDeepLXProbe, "unknown")

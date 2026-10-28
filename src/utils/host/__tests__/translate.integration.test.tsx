@@ -770,9 +770,11 @@ describe("translate", () => {
           await removeOrShowPageTranslation("translationOnly", true)
 
           expect(translateTextForPage).toHaveBeenCalledTimes(1)
-          expect(translateTextForPage).toHaveBeenCalledWith(sourceText, "html", {
-            forceRetranslation: false,
-          })
+          expect(translateTextForPage).toHaveBeenCalledWith(
+            sourceText,
+            "html",
+            DEFAULT_PAGE_TRANSLATION_OPTIONS,
+          )
           expectInPlaceTranslation(sourceSpan, translatedText)
           expect(sourceSpan.firstChild).toBe(sourceTextNode)
           expect([...tweet.children]).toEqual([sourceSpan, ...emojiImages])
@@ -3425,6 +3427,35 @@ describe("translate", () => {
         expect(viewer).toHaveAttribute(TRANSLATION_ONLY_ATTRIBUTE)
       })
 
+      it("translation only mode: keeps the single line breaks inside each paragraph", async () => {
+        // A text/plain guide's banner (`===` / `---[VERSION HISTORY]---` / `===`)
+        // is one paragraph of single-newline lines. The request has to say the
+        // newlines matter, or Google returns the banner as one wrapped line.
+        const lineTranslations = paragraphs.map((paragraph, index) =>
+          paragraph
+            .split("\n")
+            .map((_, line) => `【第${index + 1}段第${line + 1}行】`)
+            .join("\n"),
+        )
+        vi.mocked(translateTextForPage).mockImplementation(async (text) => {
+          const index = paragraphs.indexOf(text)
+          if (index === -1) throw new Error(`Unexpected paragraph: ${JSON.stringify(text)}`)
+          return lineTranslations[index]!
+        })
+        const viewer = renderPlainTextViewer()
+
+        await removeOrShowPageTranslation("translationOnly", true)
+
+        paragraphs.forEach((paragraph) => {
+          expect(translateTextForPage).toHaveBeenCalledWith(
+            paragraph,
+            "html",
+            PRESERVE_LINE_BREAKS_TRANSLATION_OPTIONS,
+          )
+        })
+        expect(viewer.textContent).toBe(lineTranslations.join("\n\n"))
+      })
+
       it("translation only mode: restores the original single text node on toggle", async () => {
         mockPerParagraphTranslations()
         const viewer = renderPlainTextViewer()
@@ -4472,12 +4503,18 @@ describe("translate", () => {
         await removeOrShowPageTranslation("translationOnly", true)
 
         expect(translateTextForPage).toHaveBeenCalledTimes(2)
-        expect(translateTextForPage).toHaveBeenNthCalledWith(1, MOCK_ORIGINAL_TEXT, "html", {
-          forceRetranslation: false,
-        })
-        expect(translateTextForPage).toHaveBeenNthCalledWith(2, MOCK_ORIGINAL_TEXT, "html", {
-          forceRetranslation: false,
-        })
+        expect(translateTextForPage).toHaveBeenNthCalledWith(
+          1,
+          MOCK_ORIGINAL_TEXT,
+          "html",
+          DEFAULT_PAGE_TRANSLATION_OPTIONS,
+        )
+        expect(translateTextForPage).toHaveBeenNthCalledWith(
+          2,
+          MOCK_ORIGINAL_TEXT,
+          "html",
+          DEFAULT_PAGE_TRANSLATION_OPTIONS,
+        )
       })
     })
   })
