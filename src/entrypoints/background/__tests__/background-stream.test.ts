@@ -460,7 +460,7 @@ describe("background-stream", () => {
         message: "hostedAi.availability.quotaExhausted",
         action: {
           label: "action.upgrade",
-          url: new URL("/pricing", env.WXT_WEBSITE_URL).toString(),
+          url: new URL("/pricing?entry=extension_quota_exhausted", env.WXT_WEBSITE_URL).toString(),
         },
         // Classified in the background, where the hosted-AI error code still exists.
         reason: "quota_exceeded",

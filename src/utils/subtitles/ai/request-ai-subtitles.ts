@@ -52,7 +52,7 @@ function mapTranscriptError(error: unknown): SubtitlesError {
   if (isORPCPublicAppError(error, "VIDEO_TRANSCRIPTION_SUBSCRIPTION_REQUIRED")) {
     return new ToastSubtitlesError(
       i18n.t("subtitles.errors.aiSubscriptionRequired"),
-      upgradeAction(),
+      upgradeAction("extension_video_quota"),
     )
   }
   if (isORPCPublicAppError(error, "VIDEO_TRANSCRIPTION_PAYMENT_REQUIRED")) {
@@ -61,7 +61,10 @@ function mapTranscriptError(error: unknown): SubtitlesError {
   if (isORPCPublicAppError(error, "VIDEO_TRANSCRIPTION_QUOTA_EXCEEDED")) {
     // The pre-flight normally catches this and can name the reset date; by the
     // time the server refuses, only it knows the remainder and we do not.
-    return new ToastSubtitlesError(i18n.t("subtitles.errors.aiQuotaExceeded"), upgradeAction())
+    return new ToastSubtitlesError(
+      i18n.t("subtitles.errors.aiQuotaExceeded"),
+      upgradeAction("extension_video_quota"),
+    )
   }
   if (isORPCPublicAppError(error, "VIDEO_TRANSCRIPTION_UNSUPPORTED_LENGTH")) {
     // A property of the video, not of the account — no upgrade and no waiting

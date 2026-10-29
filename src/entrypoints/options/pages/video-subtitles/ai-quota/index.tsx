@@ -140,7 +140,11 @@ function QuotaUpgradeGuide() {
       <QuotaNotice>{i18n.t("options.videoSubtitles.aiQuota.upgradeRequired")}</QuotaNotice>
       {/* Unlike the player, this surface never navigates on its own — opening a
           tab just for landing on the settings page would be hostile. */}
-      <Button variant="outline" size="sm" onClick={() => window.open(pricingUrl(), "_blank")}>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => window.open(pricingUrl("extension_video_quota"), "_blank")}
+      >
         {i18n.t("action.upgrade")}
       </Button>
       <LaunchBonusPromo />

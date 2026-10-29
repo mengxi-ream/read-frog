@@ -86,7 +86,7 @@ describe("ai subtitles access guard", () => {
     expect(lastToast().title).toBe("subtitles.errors.aiSubscriptionRequired")
     expect(lastToast().action).toEqual({
       label: "action.upgrade",
-      url: "https://readfrog.app/pricing",
+      url: "https://readfrog.app/pricing?entry=extension_video_quota",
     })
   })
 
@@ -148,7 +148,7 @@ describe("ai subtitles access guard", () => {
 
     await expect(ensureAiSubtitlesEntitled()).resolves.toBe(false)
     expect(lastToast().title).toBe("subtitles.errors.aiSubscriptionRequired")
-    expect(lastToast().action?.url).toBe("https://readfrog.app/pricing")
+    expect(lastToast().action?.url).toBe("https://readfrog.app/pricing?entry=extension_video_quota")
   })
 
   // Responses are not runtime-validated, so a server that predates `plan` must
