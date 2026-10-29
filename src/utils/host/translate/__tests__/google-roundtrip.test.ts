@@ -10,21 +10,43 @@ import { executeTranslate } from "../execute-translate"
 // as HTML whitespace, line-break marker tags survive as tags, and within each
 // marker-delimited segment leading indentation collapses and the model strips
 // a leading dash-family list bullet (worst case: from EVERY segment) — then
-// the resulting plain text is re-serialized as escaped HTML. executeTranslate
-// must therefore return the original text byte-for-byte only when the request
-// was escaped and, for multi-line text, marker-joined with indentation and
-// bullet prefixes captured client-side.
+// the resulting plain text is re-serialized as escaped HTML. Dash runs it can
+// see are mangled ("---[INTRODUCTION]---" comes back "- -[介绍] -  - " live),
+// while empty punctuation-run placeholders pass through as tags with the
+// text around them re-spaced. executeTranslate must therefore return the
+// original text byte-for-byte only when the request was escaped, punctuation
+// runs travelled as placeholders and, for multi-line text, marker-joined with
+// indentation and bullet prefixes captured client-side.
 const LINE_BREAK_MARKER = '<br data-read-frog-lb="1">'
+const RUN_PLACEHOLDER_SPLIT_REGEX = /(<span data-read-frog-run="\d+"><\/span>)/
+
+function simulateTranslateText(text: string): string {
+  const withoutBogusTag = text.replace(/<[a-z][\s\S]*$/i, "")
+  return (
+    escapeText(decodeHTML(withoutBogusTag))
+      // Newlines are HTML whitespace to the parser.
+      .replace(/[^\S\r\n]*[\r\n]\s*/g, " ")
+      .replace(/-{3,}/g, " -  - ")
+  )
+}
 
 function simulateTranslateHtmlEndpoint(requestText: string): string {
   return requestText
     .split(LINE_BREAK_MARKER)
     .map((segment) => {
-      const withoutBogusTag = segment.replace(/<[a-z][\s\S]*$/i, "")
+      const parts = segment.split(RUN_PLACEHOLDER_SPLIT_REGEX)
       return (
-        escapeText(decodeHTML(withoutBogusTag))
-          // Newlines and leading indentation are HTML whitespace to the parser.
-          .replace(/[^\S\r\n]*[\r\n]\s*/g, " ")
+        parts
+          .map((part, index) => {
+            // Odd parts are placeholders: kept, with a space the model adds.
+            if (index % 2 === 1) return `${part} `
+            const translated = simulateTranslateText(part)
+            // Text next to a placeholder loses its own spacing.
+            if (index === 0) return parts.length > 1 ? translated.trimEnd() : translated
+            return index === parts.length - 1 ? translated.trimStart() : translated.trim()
+          })
+          .join("")
+          // Leading indentation is HTML whitespace to the parser.
           .replace(/^[ \t]+/, "")
           // The model eats leading list dashes (live-observed on x.com bullets;
           // a bullet-only segment "- " comes back as a bare "-").
@@ -155,6 +177,55 @@ describe("google translate escape/decode round trip", () => {
     })
 
     expect(result).toBe("- \nhello")
+  })
+
+  const introductionBanner = `---[INTRODUCTION]${"-".repeat(61)}`
+
+  it("keeps a lone banner's dashes (the simulator mangles any dashes it sees)", async () => {
+    const result = await executeTranslate(
+      introductionBanner,
+      langConfig,
+      googleProviderConfig,
+      vi.fn(),
+    )
+
+    expect(result).toBe(introductionBanner)
+    const [payload] = JSON.parse(fetchMock.mock.calls.at(-1)![1].body)
+    expect(payload[0][0]).not.toContain("---")
+  })
+
+  it.each([
+    ["dash banners", introductionBanner],
+    ["tilde banners with inner spacing", "~~~~~~~~ BOSS: Iron Golem ~~~~~~~~"],
+    ["table borders", "+-------------+-------------+"],
+    ["dot leaders", "Controls ...... [CTRL]"],
+    ["fill-in blanks", "Name: ________   Date: ____"],
+  ])("keeps %s byte-for-byte", async (_name, text) => {
+    const result = await executeTranslate(text, langConfig, googleProviderConfig, vi.fn())
+
+    expect(result).toBe(text)
+  })
+
+  it("keeps a plain-text guide's banners and line structure with preserveLineBreaks", async () => {
+    const guide = [
+      "=============================================================================",
+      "---[TABLE OF CONTENTS]-------------------------------------------------------",
+      "",
+      "  1. Introduction ............................................ [INTR]",
+      "  2. Version History ......................................... [VERS]",
+      "",
+      introductionBanner,
+      "",
+      "Welcome to my guide for Starfall Chronicles.",
+      "*** Chapter 1: The Burning Village ***",
+      "- Talk to the old man --- he gives you a sword.",
+    ].join("\n")
+
+    const result = await executeTranslate(guide, langConfig, googleProviderConfig, vi.fn(), {
+      preserveLineBreaks: true,
+    })
+
+    expect(result).toBe(guide)
   })
 
   it("normalizes a model-restyled bullet back to the source prefix", async () => {

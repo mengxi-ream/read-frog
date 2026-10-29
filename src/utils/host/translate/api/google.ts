@@ -85,7 +85,8 @@ const LINE_SPLIT_REGEX = /\r\n?|\n/
 // "<" in them always opens a tag and attribute values are always
 // double-quoted: a tag runs from "<" to the first ">" outside quotes. Only
 // newlines between tags are line structure — one inside a tag sits in an
-// attribute value and must stay where it is.
+// attribute value and must stay where it is. Plain payloads are escaped, so
+// their only tags are our own markers.
 const HTML_TAG_SPLIT_REGEX = /(<(?:[^>"]|"[^"]*")*>)/
 const LINE_INDENT_REGEX = /^[ \t]*/
 // A dash-family bullet must be followed by horizontal whitespace so negative
@@ -141,6 +142,66 @@ export function reassemblePreservedLine(line: PreservedLine, translation: string
   return line.prefix + translation.replace(TRANSLATED_LINE_PREFIX_REGEX, "")
 }
 
+// Long runs of repeated punctuation are layout, not text, but the model
+// rewrites them. Live-verified on plain-text guides (GameFAQs, text/plain
+// <pre>), deterministic per input and independent of the line-break markers:
+//   - "---[INTRODUCTION]-----…" (zh-CN, ja) comes back "- -[介绍] -  -  - …",
+//     and the line prefix normalization then eats the leading "- ";
+//   - "##### Weapons #####" (zh-CN) comes back "武器", and "....." leaders
+//     become "……".
+// translate="no" (also class="notranslate", <code>) does NOT help: the
+// element survives, but the model still sees its dashes, drops the word
+// between them and appends " -  - " pairs. An EMPTY element is left alone,
+// so each run travels as an empty placeholder span and is put back from the
+// source. The model re-spaces text around tags ("Chapter 2 ~~~~" →
+// "第二章~~~~", "+-----+" → "+----- +"), so a run carries its surrounding
+// horizontal whitespace and decoding swaps whatever spacing the model put
+// around the placeholder for the source's. In sampling (8 target languages,
+// whole-unit marker transport and single paragraphs, 350+ runs) every
+// placeholder came back exactly once.
+// 3+ of a separator character, or 4+ dots ("..." is an ordinary ellipsis).
+const PUNCTUATION_RUN_REGEX = /([ \t]*)(?:([-=_*~#])\2{2,}|\.{4,})([ \t]*)/g
+const PUNCTUATION_RUN_PLACEHOLDER_REGEX =
+  /[ \t]*<span data-read-frog-run="(\d+)"\s*(?:\/>|>\s*<\/span>)[ \t]*/g
+
+/**
+ * Swap each punctuation run in text content for an empty placeholder span,
+ * returning the runs (with their surrounding whitespace) in index order.
+ * Tags are skipped: a run inside one is an attribute value.
+ */
+function protectPunctuationRuns(requestText: string): {
+  text: string
+  runs: string[]
+} {
+  const runs: string[] = []
+  const text = requestText
+    .split(HTML_TAG_SPLIT_REGEX)
+    .map((part, index) =>
+      // split() with a capture group alternates text (even) and tags (odd).
+      index % 2 === 1
+        ? part
+        : part.replace(PUNCTUATION_RUN_REGEX, (run, leading: string, _char, trailing: string) => {
+            runs.push(run)
+            return `${leading}<span data-read-frog-run="${runs.length - 1}"></span>${trailing}`
+          }),
+    )
+    .join("")
+  return { text, runs }
+}
+
+function restorePunctuationRuns(translatedText: string, runs: readonly string[]): string {
+  if (runs.length === 0) {
+    return translatedText
+  }
+  // An index we never issued can only be model noise: drop the markup rather
+  // than render it. A placeholder the model dropped loses its run (never seen
+  // in sampling).
+  return translatedText.replace(
+    PUNCTUATION_RUN_PLACEHOLDER_REGEX,
+    (_placeholder, index: string) => runs[Number(index)] ?? " ",
+  )
+}
+
 export async function googleTranslate(
   sourceText: string,
   fromLang: string,
@@ -177,13 +238,17 @@ export async function googleTranslate(
   } else {
     requestText = isHtml ? sourceText : escapeText(sourceText)
   }
+  const punctuationRuns = protectPunctuationRuns(requestText)
   const resp = await fetch(GOOGLE_TRANSLATE_HTML_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json+protobuf",
       "X-Goog-API-Key": GOOGLE_TRANSLATE_HTML_API_KEY,
     },
-    body: JSON.stringify([[[requestText], fromLang, toLang], GOOGLE_TRANSLATE_HTML_CLIENT]),
+    body: JSON.stringify([
+      [[punctuationRuns.text], fromLang, toLang],
+      GOOGLE_TRANSLATE_HTML_CLIENT,
+    ]),
     signal: options?.signal,
   }).catch((error) => {
     throw attachRequestErrorMeta(new Error(`Network error during translation: ${error.message}`), {
@@ -213,7 +278,10 @@ export async function googleTranslate(
     if (!Array.isArray(result) || !Array.isArray(result[0]) || typeof result[0][0] !== "string") {
       throw new TypeError("Unexpected response format from translation API")
     }
-    const translatedText: string = result[0][0]
+    // Runs go back before line reassembly: the restored source characters
+    // are never a bullet the prefix normalization would strip ("-" followed
+    // by "-" is not a bullet).
+    const translatedText = restorePunctuationRuns(result[0][0], punctuationRuns.runs)
 
     if (!preservedLines) {
       return translatedText
