@@ -1,0 +1,4 @@
+{
+  "setup": ["./.superset/setup.sh"],
+  "run": ["pnpm dev"]
+}
