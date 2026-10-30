@@ -16,13 +16,22 @@ function readCueText(cue: TextTrackCue): string {
   return "text" in cue && typeof cue.text === "string" ? cue.text : ""
 }
 
-export function cuesToFragments(cues: ArrayLike<TextTrackCue>): SubtitlesFragment[] {
+/** Cleans each cue's text and keeps the cues that still have text and a duration, in time order. */
+export function toSubtitlesFragments(cues: Iterable<SubtitlesFragment>): SubtitlesFragment[] {
   return Array.from(cues)
-    .flatMap((cue) => {
-      const text = cleanCueText(readCueText(cue))
-      const start = Math.round(cue.startTime * 1000)
-      const end = Math.round(cue.endTime * 1000)
-      return text && end > start ? [{ text, start, end }] : []
+    .flatMap(({ text, start, end }) => {
+      const cleanText = cleanCueText(text)
+      return cleanText && end > start ? [{ text: cleanText, start, end }] : []
     })
     .sort((a, b) => a.start - b.start || a.end - b.end)
+}
+
+export function cuesToFragments(cues: ArrayLike<TextTrackCue>): SubtitlesFragment[] {
+  return toSubtitlesFragments(
+    Array.from(cues, (cue) => ({
+      text: readCueText(cue),
+      start: Math.round(cue.startTime * 1000),
+      end: Math.round(cue.endTime * 1000),
+    })),
+  )
 }
