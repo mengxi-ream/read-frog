@@ -4,6 +4,10 @@ set -euo pipefail
 # Copy the gitignored local files listed in .worktreeinclude (env files,
 # web-ext config) from the main checkout. Missing files are skipped.
 # Dependencies are not installed here; run `pnpm install` when you need them.
+#
+# Keep this out of config.json's "setup": Paradev then runs it by absolute path
+# from the worktree or, failing that, the main checkout, so workspaces created
+# from refs that predate this script still get it.
 if [ -n "${SUPERSET_ROOT_PATH:-}" ] && [ -f .worktreeinclude ]; then
   while IFS= read -r file || [ -n "$file" ]; do
     case "$file" in '' | \#*) continue ;; esac
