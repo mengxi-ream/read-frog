@@ -17,6 +17,19 @@ describe("getBilibiliPartIdFromUrl", () => {
     ).toBe("BV1XZn26rE8x:3")
   })
 
+  it("gives every spelling of one part the same id", () => {
+    for (const p of ["2", "02", "2.0"]) {
+      expect(getBilibiliPartIdFromUrl(`https://www.bilibili.com/video/BV1XZn26rE8x?p=${p}`)).toBe(
+        "BV1XZn26rE8x:2",
+      )
+    }
+    for (const p of ["", "0", "-1", "abc", "1.5"]) {
+      expect(getBilibiliPartIdFromUrl(`https://www.bilibili.com/video/BV1XZn26rE8x?p=${p}`)).toBe(
+        "BV1XZn26rE8x:1",
+      )
+    }
+  })
+
   it("reads a video behind a locale prefix", () => {
     expect(getBilibiliPartIdFromUrl("https://www.bilibili.com/zh-Hans/video/BV1XZn26rE8x/")).toBe(
       "BV1XZn26rE8x:1",

@@ -93,6 +93,21 @@ export const NETFLIX_PAGE_POLL_INTERVAL_MS = 100
 export const NETFLIX_WATCH_POLL_INTERVAL_MS = 1000
 export const NETFLIX_TRANSLATE_BUTTON_ZOOM = 1.4
 
+// Bilibili specific
+// The player's own signed request; an unsigned one answers with another video's subtitles.
+export const BILIBILI_PLAYER_INFO_URL_PATTERN =
+  /^(?:https:)?\/\/api\.bilibili\.com\/x\/player\/wbi\/v2\?/
+export const BILIBILI_SUBTITLES_REQUEST_TYPE = "READ_FROG_BILIBILI_SUBTITLES"
+export const BILIBILI_SUBTITLES_RESPONSE_TYPE = "READ_FROG_BILIBILI_SUBTITLES_DONE"
+// The page script waits this long for the player to reach the part and report its subtitle list.
+export const BILIBILI_PAGE_WAIT_TIMEOUT_MS = 5000
+// A page script injected after the player asked repeats the player's request once, within this.
+export const BILIBILI_PLAYER_INFO_REFETCH_TIMEOUT_MS = 3000
+// Outwaits the page's wait and its one repeated request, with room for a throttled background tab.
+export const BILIBILI_POST_MESSAGE_TIMEOUT_MS =
+  BILIBILI_PAGE_WAIT_TIMEOUT_MS + BILIBILI_PLAYER_INFO_REFETCH_TIMEOUT_MS + 2000
+export const BILIBILI_PAGE_POLL_INTERVAL_MS = 100
+
 // YouTube player wait constants
 export const MAX_PLAYER_WAIT_ATTEMPTS = 50
 export const PLAYER_WAIT_INTERVAL_MS = 100

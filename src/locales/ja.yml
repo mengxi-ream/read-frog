@@ -1716,6 +1716,7 @@ subtitles:
     buttonNotFound: 字幕ボタンが見つかりません
     noSubtitlesFound: この動画には字幕がありません
     trackFileNotLoaded: 字幕を読み込めませんでした。ページを再読み込みしてみてください
+    bilibiliLoginRequired: この動画の字幕を取得するには Bilibili にログインしてください
     videoNotFound: 動画要素が見つかりません
     controlsBarNotFound: コントロールバーが見つかりません
     aiRateLimited: リクエストが多すぎます。後でもう一度お試しください

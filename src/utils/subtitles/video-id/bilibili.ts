@@ -2,10 +2,8 @@ const BILIBILI_VIDEO_ID_PATTERN = /^(?:BV[\dA-Za-z]{10}|av\d+)$/
 // The site may put a locale first, as in `/zh-Hans/video/BV…`.
 const BILIBILI_VIDEO_PATH_PATTERN = /^\/(?:[A-Za-z-]+\/)?video\/([^/]+)\/?$/
 
-/**
- * The video and its part, as `BV…:2`. A playlist page names the video in `bvid` instead of the
- * path, and a missing `p` is the first part, so both spellings of one part share an id.
- */
+// The video and part as `BV…:2`, from the path or a playlist's `bvid`; a missing or bad `p` is
+// part 1, so every spelling of a part shares one id, matching the part the player reports.
 export function getBilibiliPartIdFromUrl(url: string): string | null {
   let parsedUrl: URL
 
@@ -23,7 +21,8 @@ export function getBilibiliPartIdFromUrl(url: string): string | null {
     return null
   }
 
-  return `${videoId}:${parsedUrl.searchParams.get("p") ?? "1"}`
+  const part = Number(parsedUrl.searchParams.get("p"))
+  return `${videoId}:${Number.isInteger(part) && part > 0 ? part : 1}`
 }
 
 export function getBilibiliPartId(): string | null {
