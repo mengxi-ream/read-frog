@@ -1,6 +1,8 @@
 import type { DeferredSelectionOpenDetail } from "./constants/selection"
 import { DEFERRED_SELECTION_OPEN_EVENT, SELECTION_TOOLBAR_READY_EVENT } from "./constants/selection"
 
+export { isReadFrogEbookSection } from "./ebook-section"
+
 interface PendingSelection extends DeferredSelectionOpenDetail {
   anchorNode: Node | null
   anchorOffset: number
