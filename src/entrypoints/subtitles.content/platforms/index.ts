@@ -5,6 +5,8 @@ export interface ControlsConfig {
   findVideoContainer?: () => HTMLElement | null
   measureHeight: (container: HTMLElement) => number
   checkVisibility: (container: HTMLElement) => boolean
+  /** The change to recheck the controls on, for a player whose subtree churns, as with danmaku. */
+  observe?: MutationObserverInit
 }
 
 export interface PlatformConfig {

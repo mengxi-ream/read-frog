@@ -4,6 +4,7 @@ export const FETCH_CHECK_INTERVAL = 100
 export const FETCH_SUBTITLES_TIMEOUT = 10_000
 export const MAX_GAP_MS = 2_000
 export const PAUSE_TIMEOUT_MS = 1_000
+export const PLAYER_WATCH_POLL_INTERVAL_MS = 1000
 // How long the pointer rests on the subtitles before pause-on-hover pauses the video,
 // so a pointer passing over them on its way to the controls does not.
 export const HOVER_PAUSE_DELAY_MS = 500
@@ -94,6 +95,10 @@ export const NETFLIX_WATCH_POLL_INTERVAL_MS = 1000
 export const NETFLIX_TRANSLATE_BUTTON_ZOOM = 1.4
 
 // Bilibili specific
+export const BILIBILI_PLAYER_SELECTOR = ".bpx-player-container"
+export const BILIBILI_CONTROLS_SELECTOR = ".bpx-player-control-wrap"
+export const BILIBILI_CONTROLS_BAR_SELECTOR = ".bpx-player-control-bottom-right"
+export const BILIBILI_NATIVE_SUBTITLES_SELECTOR = ".bpx-player-subtitle-wrap"
 // The player's own signed request; an unsigned one answers with another video's subtitles.
 export const BILIBILI_PLAYER_INFO_URL_PATTERN =
   /^(?:https:)?\/\/api\.bilibili\.com\/x\/player\/wbi\/v2\?/

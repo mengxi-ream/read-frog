@@ -73,7 +73,7 @@ const TOGGLE_SOURCE_SURFACE: Record<SubtitlesToggleSource, SurfaceByFeature["vid
  * Sites where most videos have no captions: auto-start on one of those leaves
  * no loading pill or error behind, and the toggle falls back to off.
  */
-const QUIET_AUTO_START_PLATFORMS: ReadonlySet<SubtitlesPlatform> = new Set(["xcom"])
+const QUIET_AUTO_START_PLATFORMS: ReadonlySet<SubtitlesPlatform> = new Set(["xcom", "bilibili"])
 
 interface SubtitlesStartOptions {
   analyticsContext?: FeatureUsageContext<"video_subtitles">
