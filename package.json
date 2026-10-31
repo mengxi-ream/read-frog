@@ -75,7 +75,7 @@
     "@radix-ui/react-slot": "^1.5.0",
     "@read-frog/api-contract": "0.23.0",
     "@read-frog/definitions": "0.12.0",
-    "@read-frog/layout-engine": "0.5.0",
+    "@read-frog/layout-engine": "0.6.0",
     "@remixicon/react": "^4.9.0",
     "@t3-oss/env-core": "^0.13.11",
     "@tabler/icons-react": "^3.50.0",
@@ -167,7 +167,7 @@
     "vite": "^8.3.5",
     "vitest": "^5.0.5",
     "web-ext": "^10.8.0",
-    "wxt": "0.21.4"
+    "wxt": "0.21.5"
   },
   "devEngines": {
     "runtime": {
