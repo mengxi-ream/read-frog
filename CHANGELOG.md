@@ -1,5 +1,11 @@
 # @read-frog/extension
 
+## 1.55.1
+
+### Patch Changes
+
+- [#2434](https://github.com/mengxi-ream/read-frog/pull/2434) [`ab15bee`](https://github.com/mengxi-ream/read-frog/commit/ab15beef7fc6b57498b3047c6a4d394ddd2743eb) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(custom-actions): keep custom layout CSS as written when nothing in it is unsafe, so a `var()` shorthand followed by one of its longhands, such as `text-decoration: underline wavy var(--c); text-decoration-thickness: 2px`, no longer gets dropped
+
 ## 1.55.0
 
 ### Minor Changes
