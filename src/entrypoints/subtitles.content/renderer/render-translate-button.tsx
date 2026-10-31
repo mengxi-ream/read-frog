@@ -17,7 +17,6 @@ const TRANSLATE_BUTTON_HEIGHT = 40
 
 const wrapperCSS = `
   :host {
-    display: inline-flex;
     align-items: center;
     justify-content: center;
     vertical-align: middle;
@@ -36,7 +35,6 @@ const wrapperCSS = `
 
 const embedWrapperCSS = `
   :host {
-    display: inline-flex;
     align-items: center;
     position: relative;
     height: 100%;
@@ -92,6 +90,9 @@ export function renderSubtitlesTranslateButton({
   })
 
   shadowHost.id = TRANSLATE_BUTTON_CONTAINER_ID
+  // `position: "inline"` writes `display: inline` on the host, which in a row that is not a flex
+  // container, as on edX, puts the button on a line of its own.
+  shadowHost.style.display = "inline-flex"
 
   if (adapter.embedded) {
     isolatePlayerEvents(shadowHost)
