@@ -293,8 +293,8 @@ importers:
         specifier: 0.23.0
         version: 0.23.0(@opentelemetry/api@1.9.1)
       '@read-frog/definitions':
-        specifier: 0.11.0
-        version: 0.11.0
+        specifier: 0.12.0
+        version: 0.12.0
       '@read-frog/layout-engine':
         specifier: 0.5.0
         version: 0.5.0(@codemirror/lang-liquid@6.3.3)(@codemirror/lint@6.9.7)(@codemirror/state@6.7.6)(@codemirror/view@6.43.14)(dompurify@3.4.16)(liquidjs@10.30.0)(morphdom@2.7.8)(react@19.3.0)
@@ -2476,6 +2476,9 @@ packages:
 
   '@read-frog/definitions@0.11.0':
     resolution: {integrity: sha512-wzW9QA0NgtHfAjn+LiePl8GCVPaqIgDpqtegzn+eOHoBxiEZKtvAR56hfb8tCNPiMaPLHEoN7BiquRFJqinTiA==}
+
+  '@read-frog/definitions@0.12.0':
+    resolution: {integrity: sha512-qxe38qNNF1rucap1YNgHmTBo2Hv6c7YKEmMM5ekVAY+Z15WYZ0E+sKIU3W/VmVn39kd7pPgdG6/ttHnucuKReA==}
 
   '@read-frog/layout-engine@0.5.0':
     resolution: {integrity: sha512-EmPrzJ+YBYxyGUM4p3EQCT4U9sSGUUWMpIHPfmu4zKsBKPuMVhSy3tPv8aL1giEAZweD8kvCl7xJKCHUA1CWQA==}
@@ -9149,6 +9152,11 @@ snapshots:
       - '@opentelemetry/api'
 
   '@read-frog/definitions@0.11.0':
+    dependencies:
+      temporal-polyfill: 1.0.5
+      zod: 4.6.5
+
+  '@read-frog/definitions@0.12.0':
     dependencies:
       temporal-polyfill: 1.0.5
       zod: 4.6.5

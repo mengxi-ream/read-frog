@@ -4,6 +4,7 @@ import {
   DEFERRED_SELECTION_OPEN_EVENT,
   SELECTION_TOOLBAR_READY_EVENT,
 } from "../constants/selection"
+import { isReadFrogEbookSection } from "../ebook-section"
 import { registerIframeSelectionTrigger } from "../iframe-selection-trigger"
 
 describe("iframe selection trigger", () => {
@@ -107,5 +108,16 @@ describe("iframe selection trigger", () => {
     cleanup()
     trustedGesture()
     expect(requestRuntime).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe("isReadFrogEbookSection", () => {
+  afterEach(() => {
+    document.documentElement.removeAttribute("data-read-frog-ebook-section")
+  })
+  it("recognises a section document the readfrog.app reader marked", () => {
+    expect(isReadFrogEbookSection(document)).toBe(false)
+    document.documentElement.setAttribute("data-read-frog-ebook-section", "")
+    expect(isReadFrogEbookSection(document)).toBe(true)
   })
 })
