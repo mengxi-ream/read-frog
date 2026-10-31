@@ -269,6 +269,7 @@ options:
         jalapenocloud: トップチームが使うエンタープライズ級 AI を、あなたにも！
         siliconflow: 中国および国際モデル向けの高性能推論プラットフォーム
         tensdaq: 革命的入札型AI MaaSプラットフォーム、市場の需給で価格が決まり高コスト固定料金を排除
+        runcrate: DeepSeek、Kimi、GLM、Qwen などのオープンウェイトモデル向けの OpenAI 互換 API
         openaiCompatible: OpenAI Chat Completions API 互換のカスタムエンドポイントに接続
         openResponses: Open Responses API 互換のカスタムエンドポイントに接続
         deeplx: 非公式 DeepL API

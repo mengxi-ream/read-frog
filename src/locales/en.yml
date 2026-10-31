@@ -270,6 +270,7 @@ options:
         jalapenocloud: Enterprise-grade AI used by top teams — now made for you!
         siliconflow: High-performance inference platform for Chinese and international models
         tensdaq: Revolutionary bidding AI MaaS platform with market-driven pricing, eliminating high-cost fixed pricing
+        runcrate: OpenAI-compatible API for open-weight models like DeepSeek, Kimi, GLM, and Qwen
         openaiCompatible: Connect to a custom endpoint compatible with the OpenAI Chat Completions API
         openResponses: Connect to a custom endpoint compatible with the Open Responses API
         deeplx: Unofficial DeepL API

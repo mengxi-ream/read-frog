@@ -96,6 +96,7 @@ describe("provider constants", () => {
       "minimax",
       "siliconflow",
       "tensdaq",
+      "runcrate",
       "volcengine",
     ])
     expect(OPEN_RESPONSES_LLM_PROVIDER_TYPES).toEqual(["open-responses"])

@@ -16,6 +16,7 @@ import customResponsesLogo from "@/assets/providers/custom-responses.svg?url&no-
 import deeplxLogoDark from "@/assets/providers/deeplx-dark.svg?url&no-inline"
 import deeplxLogoLight from "@/assets/providers/deeplx-light.svg?url&no-inline"
 import jalapenoCloudLogo from "@/assets/providers/jalapeno-cloud.png?url&no-inline"
+import runcrateLogo from "@/assets/providers/runcrate.svg?url&no-inline"
 import tensdaqLogoColor from "@/assets/providers/tensdaq-color.svg?url&no-inline"
 import { env } from "@/env"
 import {
@@ -153,6 +154,11 @@ export const DEFAULT_LLM_PROVIDER_MODELS: LLMProviderModels = {
   tensdaq: {
     model: "Qwen3-30B-A3B-Instruct-2507",
     isCustomModel: true,
+    customModel: null,
+  },
+  runcrate: {
+    model: "deepseek-ai/DeepSeek-V4.1-Flash",
+    isCustomModel: false,
     customModel: null,
   },
   volcengine: {
@@ -346,6 +352,11 @@ export const PROVIDER_ITEMS: Record<
     name: "Tensdaq",
     website: "https://dashboard.x-aio.com/zh/register?ref=c356c1daba9a4641a18e",
   },
+  runcrate: {
+    logo: () => runcrateLogo,
+    name: "Runcrate",
+    website: "https://runcrate.ai",
+  },
   ollama: {
     logo: getLobeIconsCDNUrlFn("ollama"),
     name: "Ollama",
@@ -427,6 +438,14 @@ export const DEFAULT_PROVIDER_CONFIG = {
     provider: "tensdaq",
     baseURL: "https://tensdaq-api.x-aio.com/v1",
     model: DEFAULT_LLM_PROVIDER_MODELS.tensdaq,
+  },
+  runcrate: {
+    id: "runcrate-default",
+    name: PROVIDER_ITEMS.runcrate.name,
+    enabled: true,
+    provider: "runcrate",
+    baseURL: "https://api.runcrate.ai/v1",
+    model: DEFAULT_LLM_PROVIDER_MODELS.runcrate,
   },
   "openai-compatible": {
     id: "openai-compatible-default",
@@ -669,6 +688,7 @@ export const PROVIDER_URL_PLACEHOLDERS: Partial<Record<APIProviderTypes, string>
   atlascloud: DEFAULT_PROVIDER_CONFIG.atlascloud.baseURL,
   siliconflow: DEFAULT_PROVIDER_CONFIG.siliconflow.baseURL,
   tensdaq: DEFAULT_PROVIDER_CONFIG.tensdaq.baseURL,
+  runcrate: DEFAULT_PROVIDER_CONFIG.runcrate.baseURL,
   "openai-compatible": DEFAULT_PROVIDER_CONFIG["openai-compatible"].baseURL,
   "open-responses": DEFAULT_PROVIDER_CONFIG["open-responses"].url,
   openai: "https://api.openai.com/v1",

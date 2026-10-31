@@ -270,6 +270,7 @@ options:
         jalapenocloud: Aparıcı komandaların istifadə etdiyi korporativ səviyyəli süni intellekt indi sizin üçün də əlçatandır!
         siliconflow: Çin və beynəlxalq modellər üçün yüksək məhsuldarlıqlı model icrası platforması
         tensdaq: Bazar əsasında qiymət qoyan, baha sabit tarifləri aradan qaldıran yenilikçi hərrac əsaslı süni intellekt MaaS platforması
+        runcrate: DeepSeek, Kimi, GLM və Qwen kimi açıq çəkili modellər üçün OpenAI ilə uyğun API
         openaiCompatible: OpenAI Chat Completions API ilə uyğun fərdi xidmət ünvanına qoşulun
         openResponses: Open Responses API ilə uyğun fərdi xidmət ünvanına qoşulun
         deeplx: Qeyri-rəsmi DeepL API
