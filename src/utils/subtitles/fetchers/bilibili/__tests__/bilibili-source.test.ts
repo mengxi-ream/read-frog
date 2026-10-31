@@ -26,7 +26,6 @@ function response(overrides: Partial<BilibiliSubtitlesResponse> = {}): BilibiliS
     type: "response",
     requestId: "1",
     cid: 42,
-    needLogin: false,
     subtitles: [AI, HUMAN],
     ...overrides,
   }
@@ -72,15 +71,7 @@ describe("bilibiliTrackSource", () => {
     await expect(bilibiliTrackSource.load(PART_ID)).resolves.toMatchObject({ language: "zh" })
   })
 
-  it("asks a signed-out viewer to sign in when the list is empty", async () => {
-    postMessageRequest.mockResolvedValue(response({ needLogin: true, subtitles: [] }))
-
-    await expect(bilibiliTrackSource.load(PART_ID)).rejects.toThrow(
-      "subtitles.errors.bilibiliLoginRequired",
-    )
-  })
-
-  it("reports no subtitles when a signed-in viewer's list is empty", async () => {
+  it("reports no subtitles when the list is empty, as it is for a signed-out viewer", async () => {
     postMessageRequest.mockResolvedValue(response({ subtitles: [] }))
 
     await expect(bilibiliTrackSource.load(PART_ID)).rejects.toBeInstanceOf(NoSubtitlesError)

@@ -1,22 +1,13 @@
 import { BILIBILI_PLAYER_INFO_URL_PATTERN } from "@/utils/constants/subtitles"
 
-export interface BilibiliPlayerInfo {
-  needLogin: boolean
-  /** Passed on as the player got it; the content script validates it. */
-  subtitles: unknown[]
-}
-
-// The player asks for one part's info at a time and asks again on a part switch, so the cid is the key.
-const playerInfoByCid = new Map<number, BilibiliPlayerInfo>()
+// One entry per part the player asked for, keyed by cid; the content script validates it.
+const subtitlesByCid = new Map<number, unknown[]>()
 
 export function recordPlayerInfo(value: any): void {
   const data = value?.data
   if (typeof data?.cid !== "number" || !Array.isArray(data.subtitle?.subtitles)) return
 
-  playerInfoByCid.set(data.cid, {
-    needLogin: data.need_login_subtitle === true,
-    subtitles: data.subtitle.subtitles,
-  })
+  subtitlesByCid.set(data.cid, data.subtitle.subtitles)
 }
 
 export function setupPlayerInfoCapture(): void {
@@ -36,6 +27,6 @@ export function setupPlayerInfoCapture(): void {
   } as typeof XMLHttpRequest.prototype.open
 }
 
-export function findCapturedPlayerInfo(cid: number): BilibiliPlayerInfo | null {
-  return playerInfoByCid.get(cid) ?? null
+export function findCapturedSubtitles(cid: number): unknown[] | null {
+  return subtitlesByCid.get(cid) ?? null
 }

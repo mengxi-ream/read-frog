@@ -1721,7 +1721,6 @@ subtitles:
     buttonNotFound: Botón de subtítulos no encontrado
     noSubtitlesFound: No hay subtítulos disponibles para este video
     trackFileNotLoaded: No se pudieron cargar los subtítulos; intenta actualizar la página
-    bilibiliLoginRequired: Inicia sesión en Bilibili para ver los subtítulos de este video
     videoNotFound: Elemento de video no encontrado
     controlsBarNotFound: Barra de controles no encontrada
     aiRateLimited: Demasiadas solicitudes, inténtalo de nuevo más tarde

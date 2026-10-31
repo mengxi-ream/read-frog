@@ -15,7 +15,6 @@ const bilibiliSubtitlesResponseSchema = z.object({
   type: z.string(),
   requestId: z.string(),
   cid: z.number().nullable(),
-  needLogin: z.boolean(),
   subtitles: z.array(z.unknown()).nullable(),
 })
 
@@ -77,12 +76,9 @@ async function loadTrack(partId: string): Promise<SubtitlesTrack> {
     throw new OverlaySubtitlesError(i18n.t("subtitles.errors.trackFileNotLoaded"))
   }
 
+  // Bilibili also sends an empty list to a signed-out viewer; signing in is theirs to do.
   const subtitle = pickSubtitle(response.subtitles)
-  if (!subtitle) {
-    throw response.needLogin
-      ? new OverlaySubtitlesError(i18n.t("subtitles.errors.bilibiliLoginRequired"))
-      : new NoSubtitlesError()
-  }
+  if (!subtitle) throw new NoSubtitlesError()
 
   return {
     language: subtitle.lan.replace(/^ai-/, ""),

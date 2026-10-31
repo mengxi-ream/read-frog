@@ -96,6 +96,8 @@ export const NETFLIX_TRANSLATE_BUTTON_ZOOM = 1.4
 
 // Bilibili specific
 export const BILIBILI_PLAYER_SELECTOR = ".bpx-player-container"
+// The video and its controls, without the danmaku bar the player container also holds below them.
+export const BILIBILI_VIDEO_AREA_SELECTOR = ".bpx-player-video-area"
 export const BILIBILI_CONTROLS_SELECTOR = ".bpx-player-control-wrap"
 export const BILIBILI_CONTROLS_BAR_SELECTOR = ".bpx-player-control-bottom-right"
 export const BILIBILI_NATIVE_SUBTITLES_SELECTOR = ".bpx-player-subtitle-wrap"

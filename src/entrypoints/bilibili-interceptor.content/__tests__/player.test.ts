@@ -8,7 +8,7 @@ import {
   BILIBILI_SUBTITLES_RESPONSE_TYPE,
 } from "@/utils/constants/subtitles"
 import { listenForSubtitlesRequests } from "../player"
-import { findCapturedPlayerInfo, recordPlayerInfo } from "../player-info-capture"
+import { findCapturedSubtitles, recordPlayerInfo } from "../player-info-capture"
 
 const SUBTITLES = [{ lan: "ai-zh", subtitle_url: "//aisubtitle.hdslb.com/bfs/ai_subtitle/zh.json" }]
 const PAST_PAGE_WAIT = BILIBILI_PAGE_WAIT_TIMEOUT_MS + BILIBILI_PAGE_POLL_INTERVAL_MS
@@ -16,8 +16,8 @@ const PAST_PAGE_WAIT = BILIBILI_PAGE_WAIT_TIMEOUT_MS + BILIBILI_PAGE_POLL_INTERV
 let cid = 0
 let manifest: () => object
 
-function playerInfo(needLogin = false, subtitles: object[] = SUBTITLES) {
-  return { data: { cid, need_login_subtitle: needLogin, subtitle: { subtitles } } }
+function playerInfo(subtitles: object[] = SUBTITLES) {
+  return { data: { cid, subtitle: { subtitles } } }
 }
 
 beforeAll(() => {
@@ -66,24 +66,24 @@ function request(partId = "BV1XZn26rE8x:1"): Promise<any> {
 
 describe("recordPlayerInfo", () => {
   it("keeps the subtitle list of a player response by its cid", () => {
-    recordPlayerInfo(playerInfo(true))
+    recordPlayerInfo(playerInfo())
 
-    expect(findCapturedPlayerInfo(cid)).toEqual({ needLogin: true, subtitles: SUBTITLES })
+    expect(findCapturedSubtitles(cid)).toEqual(SUBTITLES)
   })
 
   it("ignores responses that are not player info", () => {
     recordPlayerInfo({ code: -400, data: null })
     recordPlayerInfo({ data: { cid } })
 
-    expect(findCapturedPlayerInfo(cid)).toBeNull()
+    expect(findCapturedSubtitles(cid)).toBeNull()
   })
 })
 
 describe("Bilibili subtitle requests", () => {
   it("answers with the subtitle list the player got for the part", async () => {
-    recordPlayerInfo(playerInfo(true, []))
+    recordPlayerInfo(playerInfo([]))
 
-    await expect(request()).resolves.toMatchObject({ cid, needLogin: true, subtitles: [] })
+    await expect(request()).resolves.toMatchObject({ cid, subtitles: [] })
   })
 
   it("names an av-numbered part the way the url does", async () => {
@@ -94,7 +94,7 @@ describe("Bilibili subtitle requests", () => {
 
   it("waits for the player to reach the part the url names", async () => {
     vi.useFakeTimers()
-    recordPlayerInfo(playerInfo(false, []))
+    recordPlayerInfo(playerInfo([]))
     const firstPartCid = cid
     cid += 1
     recordPlayerInfo(playerInfo())

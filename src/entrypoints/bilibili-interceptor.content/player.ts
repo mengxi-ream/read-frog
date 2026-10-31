@@ -1,4 +1,3 @@
-import type { BilibiliPlayerInfo } from "./player-info-capture"
 import type { BilibiliSubtitlesResponse } from "@/utils/subtitles/fetchers/bilibili"
 import {
   BILIBILI_PAGE_POLL_INTERVAL_MS,
@@ -9,16 +8,10 @@ import {
   BILIBILI_SUBTITLES_RESPONSE_TYPE,
 } from "@/utils/constants/subtitles"
 import { pollUntil } from "@/utils/poll"
-import { findCapturedPlayerInfo, recordPlayerInfo } from "./player-info-capture"
+import { findCapturedSubtitles, recordPlayerInfo } from "./player-info-capture"
 
 function emptyResponse(requestId: string): BilibiliSubtitlesResponse {
-  return {
-    type: BILIBILI_SUBTITLES_RESPONSE_TYPE,
-    requestId,
-    cid: null,
-    needLogin: false,
-    subtitles: null,
-  }
+  return { type: BILIBILI_SUBTITLES_RESPONSE_TYPE, requestId, cid: null, subtitles: null }
 }
 
 // The url can name the next part before the player has switched to it, so wait for both to agree.
@@ -34,7 +27,7 @@ function findPartCid(partId: string): number | null {
 
 // For a page script injected after the player asked, as on a Firefox update or a dev reload: the
 // player's signed url is still in the resource timeline, and asking it again answers for this part.
-async function refetchPlayerInfo(cid: number): Promise<BilibiliPlayerInfo | null> {
+async function refetchSubtitles(cid: number): Promise<unknown[] | null> {
   const signedUrl = performance
     .getEntriesByType("resource")
     .map((entry) => entry.name)
@@ -54,7 +47,7 @@ async function refetchPlayerInfo(cid: number): Promise<BilibiliPlayerInfo | null
   } catch {
     return null
   }
-  return findCapturedPlayerInfo(cid)
+  return findCapturedSubtitles(cid)
 }
 
 function untilDeadline(deadline: number) {
@@ -69,16 +62,10 @@ async function handleRequest(
   const cid = await pollUntil(() => findPartCid(partId), untilDeadline(deadline))
   if (cid === null) return emptyResponse(requestId)
 
-  const playerInfo =
-    (await pollUntil(() => findCapturedPlayerInfo(cid), untilDeadline(deadline))) ??
-    (await refetchPlayerInfo(cid))
-  return {
-    type: BILIBILI_SUBTITLES_RESPONSE_TYPE,
-    requestId,
-    cid,
-    needLogin: playerInfo?.needLogin ?? false,
-    subtitles: playerInfo?.subtitles ?? null,
-  }
+  const subtitles =
+    (await pollUntil(() => findCapturedSubtitles(cid), untilDeadline(deadline))) ??
+    (await refetchSubtitles(cid))
+  return { type: BILIBILI_SUBTITLES_RESPONSE_TYPE, requestId, cid, subtitles }
 }
 
 export function listenForSubtitlesRequests(): void {
