@@ -1,5 +1,17 @@
 # @read-frog/extension
 
+## 1.55.0
+
+### Minor Changes
+
+- [#2428](https://github.com/mengxi-ream/read-frog/pull/2428) [`73c74fa`](https://github.com/mengxi-ream/read-frog/commit/73c74fa4d0539d6e6468e651e64870cf19f3e59d) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(ebook): translate books in the readfrog.app reader. Page translation now reaches the reader's book sections, which Chrome's webNavigation API hides from the background's iframe injection, through a content script of their own; selections inside a section stay with the reader's bridge instead of a second toolbar clipped to the page.
+
+### Patch Changes
+
+- [#2419](https://github.com/mengxi-ream/read-frog/pull/2419) [`7dda3ce`](https://github.com/mengxi-ream/read-frog/commit/7dda3ceff30c86b98941dfc04f44051ed22a1bb8) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(translate): keep ASCII banners, rules and dot leaders intact with Google Translate, so a line like `---[INTRODUCTION]-----` no longer comes back as `-[介绍] -  -  -`
+
+- [#2421](https://github.com/mengxi-ream/read-frog/pull/2421) [`878e18d`](https://github.com/mengxi-ream/read-frog/commit/878e18d488020aad5437a96041f577f89f98bd74) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(analytics): identify extension upgrade entry points on pricing links
+
 ## 1.54.1
 
 ### Patch Changes
