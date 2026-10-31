@@ -102,8 +102,9 @@ export const UDEMY_PLAYER_SELECTOR = "[data-purpose='shaka-video-player']"
 export const UDEMY_CONTROLS_SELECTOR = "[data-purpose='video-controls']"
 export const UDEMY_CONTROL_BAR_SELECTOR = "[data-purpose='video-control-bar']"
 export const UDEMY_CAPTIONS_BUTTON_SELECTOR = "[data-purpose='captions-dropdown-button']"
-// The class names carry a build hash, so this matches the stable part.
-export const UDEMY_INACTIVE_CONTROLS_SELECTOR = "[class*='user-inactive']"
+// The control bar's own `…user-inactive--<hash>` state class, matched on the bar's parent only:
+// other elements always carry a `…hide-when-user-inactive--<hash>` class.
+export const UDEMY_INACTIVE_CONTROLS_SELECTOR = `[class*='--user-inactive--']:has(> ${UDEMY_CONTROLS_SELECTOR})`
 export const UDEMY_NATIVE_SUBTITLES_SELECTOR = "[id$='-captions-display-container']"
 
 // Bilibili specific
