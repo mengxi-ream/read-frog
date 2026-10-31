@@ -1422,7 +1422,7 @@ options:
       title: 基礎設定
       enable:
         title: 開啟影片字幕
-        description: 在 YouTube、X、Netflix、嗶哩嗶哩和 Udemy 的影片播放器控制列加上翻譯按鈕。
+        description: 在 YouTube、X、Netflix、嗶哩嗶哩、Udemy 和 edX 的影片播放器控制列加上翻譯按鈕。
       autoStart:
         title: 打開影片就翻譯
         description: 影片載入完成後自動開始翻譯字幕，不用再點按鈕。

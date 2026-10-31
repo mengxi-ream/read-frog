@@ -97,6 +97,18 @@ export const NETFLIX_PAGE_POLL_INTERVAL_MS = 100
 export const NETFLIX_WATCH_POLL_INTERVAL_MS = 1000
 export const NETFLIX_TRANSLATE_BUTTON_ZOOM = 1.4
 
+// edX specific
+export const EDX_VIDEO_SELECTOR = ".video[data-metadata]"
+export const EDX_HTML5_VIDEO_SELECTOR = ".video-player video"
+export const EDX_ACTIVE_VIDEO_ATTRIBUTE = "data-read-frog-edx-video"
+export const EDX_ACTIVE_VIDEO_SELECTOR = `[${EDX_ACTIVE_VIDEO_ATTRIBUTE}]`
+export const EDX_PLAYER_SELECTOR = `${EDX_ACTIVE_VIDEO_SELECTOR} .video-wrapper`
+export const EDX_CONTROLS_SELECTOR = ".video-controls"
+export const EDX_CONTROLS_BAR_SELECTOR = `${EDX_ACTIVE_VIDEO_SELECTOR} .secondary-controls`
+export const EDX_NATIVE_SUBTITLES_SELECTOR = `${EDX_ACTIVE_VIDEO_SELECTOR} .closed-captions`
+export const EDX_ACTIVE_LANGUAGE_SELECTOR = ".langs-list .is-active[data-lang-code]"
+export const EDX_LAST_LINE_DURATION_MS = 3000
+
 // Udemy specific
 export const UDEMY_PLAYER_SELECTOR = "[data-purpose='shaka-video-player']"
 export const UDEMY_CONTROLS_SELECTOR = "[data-purpose='video-controls']"

@@ -35,7 +35,9 @@ function addPlayer(): HTMLElement {
   return player
 }
 
-function start(hooks: { onStay?: () => void; onLeave?: () => void } = {}) {
+function start(
+  hooks: { selectPlayer?: () => void; onStay?: () => void; onLeave?: () => void } = {},
+) {
   const adapter = {
     initialize: vi.fn<() => Promise<void>>(async () => {
       calls.push("initialize")
@@ -118,6 +120,25 @@ describe("pollPlayerSubtitles", () => {
     player.remove()
     addPlayer()
     await tick()
+    expect(calls).toEqual(["mount", "navigate"])
+  })
+
+  it("follows the player the page picks on the same tick", async () => {
+    const players = [addPlayer(), addPlayer()]
+    let active = 0
+    start({
+      selectPlayer: () => {
+        players.forEach((player, index) => {
+          player.className = index === active ? "player" : ""
+        })
+      },
+    })
+    await tick()
+    calls.length = 0
+
+    active = 1
+    await tick()
+
     expect(calls).toEqual(["mount", "navigate"])
   })
 

@@ -1417,7 +1417,7 @@ options:
       title: Aspectos básicos
       enable:
         title: Activar subtítulos de video
-        description: Añade un botón de traducción a los controles del reproductor en YouTube, X, Netflix, Bilibili y Udemy.
+        description: Añade un botón de traducción a los controles del reproductor en YouTube, X, Netflix, Bilibili, Udemy y edX.
       autoStart:
         title: Traducir al abrir el video
         description: Empieza a traducir en cuanto se carga el video, sin pulsar el botón.

@@ -1412,7 +1412,7 @@ options:
       title: Temel ayarlar
       enable:
         title: Video altyazılarını aç
-        description: YouTube, X, Netflix, Bilibili ve Udemy'de oynatıcı kontrollerine bir çeviri düğmesi ekler.
+        description: YouTube, X, Netflix, Bilibili, Udemy ve edX'te oynatıcı kontrollerine bir çeviri düğmesi ekler.
       autoStart:
         title: Video açılınca çevir
         description: Video yüklenir yüklenmez, düğmeye basmadan altyazıları çevirmeye başlar.
