@@ -1,4 +1,4 @@
-import type { Hotkey } from "@tanstack/hotkeys"
+import type { HotkeyChord } from "@tanstack/hotkeys"
 import type { SubtitlesProvidersAdapter } from "./universal-adapter"
 import { HotkeyManager } from "@tanstack/hotkeys"
 import { toastManager } from "@/components/ui/base-ui/toast"
@@ -31,7 +31,7 @@ export async function bindSubtitlesToggleShortcut(
   }
 
   const registration = HotkeyManager.getInstance().register(
-    shortcut as Hotkey,
+    shortcut as HotkeyChord,
     () => {
       const nextVisible = !subtitlesStore.get(subtitlesVisibleAtom)
       adapter.toggleSubtitlesByShortcut(nextVisible)

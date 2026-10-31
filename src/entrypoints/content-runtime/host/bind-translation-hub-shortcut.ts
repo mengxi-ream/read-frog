@@ -1,4 +1,4 @@
-import type { Hotkey } from "@tanstack/hotkeys"
+import type { HotkeyChord } from "@tanstack/hotkeys"
 import { HotkeyManager } from "@tanstack/hotkeys"
 import { browser } from "#imports"
 import { getLocalConfig } from "@/utils/config/storage"
@@ -23,7 +23,7 @@ export async function bindTranslationHubShortcutKey() {
   }
 
   const registration = HotkeyManager.getInstance().register(
-    shortcut as Hotkey,
+    shortcut as HotkeyChord,
     () => {
       void sendMessage("openPage", {
         url: browser.runtime.getURL(TRANSLATION_HUB_PAGE_PATH),

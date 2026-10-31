@@ -1,4 +1,4 @@
-import type { Hotkey } from "@tanstack/hotkeys"
+import type { HotkeyChord } from "@tanstack/hotkeys"
 import type { PageTranslationManager } from "./page-translation"
 import { HotkeyManager } from "@tanstack/hotkeys"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
@@ -22,7 +22,7 @@ export async function bindTranslationShortcutKey(pageTranslationManager: PageTra
   }
 
   const registration = HotkeyManager.getInstance().register(
-    shortcut as Hotkey,
+    shortcut as HotkeyChord,
     () => {
       if (pageTranslationManager.isActive) {
         pageTranslationManager.stop({ userInitiated: true })
