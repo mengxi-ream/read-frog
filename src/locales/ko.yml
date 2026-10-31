@@ -269,6 +269,7 @@ options:
         jalapenocloud: 최고의 팀들이 사용하는 엔터프라이즈급 AI, 이제 당신을 위해 찾아왔습니다!
         siliconflow: 중국 및 국제 모델을 위한 고성능 추론 플랫폼
         tensdaq: 혁신적인 경매 AI MaaS 플랫폼으로 시장 수요와 공급에 따라 가격이 결정되어 고비용 고정 요금제를 없앰
+        runcrate: DeepSeek, Kimi, GLM, Qwen 등 오픈 웨이트 모델을 위한 OpenAI 호환 API
         openaiCompatible: OpenAI Chat Completions API와 호환되는 사용자 지정 엔드포인트에 연결
         openResponses: Open Responses API와 호환되는 사용자 지정 엔드포인트에 연결
         deeplx: 비공식 DeepL API

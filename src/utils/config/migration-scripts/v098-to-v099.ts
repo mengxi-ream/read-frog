@@ -41,6 +41,7 @@ const PROVIDER_DESCRIPTIONS: Record<string, string> = {
   siliconflow: "High-performance inference platform for Chinese and international models",
   tensdaq:
     "Revolutionary bidding AI MaaS platform with market-driven pricing, eliminating high-cost fixed pricing",
+  runcrate: "OpenAI-compatible API for open-weight models like DeepSeek, Kimi, GLM, and Qwen",
   volcengine: "ByteDance's cloud AI platform offering Doubao models for translation and reading",
   openai: "Provides models like GPT-4o",
   deepseek: "Recommend to use in China",

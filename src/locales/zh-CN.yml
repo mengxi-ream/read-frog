@@ -270,6 +270,7 @@ options:
         jalapenocloud: 顶尖团队都在用的企业级 AI，现在为你而来！
         siliconflow: 面向中国和国际模型的高性能推理平台
         tensdaq: 革命性竞价 AI MaaS 平台，价格由市场供需决定，告别高成本固定定价
+        runcrate: 兼容 OpenAI 的 API，提供 DeepSeek、Kimi、GLM、Qwen 等开放权重模型
         openaiCompatible: 连接兼容 OpenAI Chat Completions API 的自定义端点
         openResponses: 连接兼容 Open Responses API 的自定义端点
         deeplx: 非官方 DeepL API

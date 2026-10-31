@@ -95,6 +95,10 @@ const llmProviderConfigSchemaList = [
     model: createProviderModelSchema<"tensdaq">("tensdaq"),
   }),
   baseOpenAICompatibleLLMProviderConfigSchema.extend({
+    provider: z.literal("runcrate"),
+    model: createProviderModelSchema<"runcrate">("runcrate"),
+  }),
+  baseOpenAICompatibleLLMProviderConfigSchema.extend({
     provider: z.literal("volcengine"),
     model: createProviderModelSchema<"volcengine">("volcengine"),
   }),

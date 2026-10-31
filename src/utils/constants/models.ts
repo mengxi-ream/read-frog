@@ -120,6 +120,13 @@ export const LLM_PROVIDER_MODELS = {
   ],
   siliconflow: ["Qwen/Qwen3-Next-80B-A3B-Instruct"],
   tensdaq: ["Qwen3-30B-A3B-Instruct-2507", "deepseek-v3.1"],
+  runcrate: [
+    "deepseek-ai/DeepSeek-V4.1-Flash",
+    "moonshotai/Kimi-K2.6",
+    "zai-org/GLM-5.3",
+    "Qwen/Qwen3.5-35B-A3B",
+    "openai/gpt-oss-120b",
+  ],
   atlascloud: [
     "deepseek-ai/deepseek-v4-flash",
     "deepseek-ai/deepseek-v4-pro",

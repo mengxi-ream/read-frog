@@ -269,6 +269,7 @@ options:
         jalapenocloud: AI cấp doanh nghiệp được các đội ngũ hàng đầu sử dụng, nay dành cho bạn!
         siliconflow: Nền tảng suy luận hiệu suất cao cho các mô hình Trung Quốc và quốc tế
         tensdaq: Nền tảng MaaS đấu giá AI cách mạng với giá thị trường, loại bỏ giá cố định cao
+        runcrate: API tương thích OpenAI cho các mô hình trọng số mở như DeepSeek, Kimi, GLM và Qwen
         openaiCompatible: Kết nối với endpoint tùy chỉnh tương thích với OpenAI Chat Completions API
         openResponses: Kết nối với endpoint tùy chỉnh tương thích với Open Responses API
         deeplx: API DeepL không chính thức

@@ -269,6 +269,7 @@ options:
         jalapenocloud: En iyi ekiplerin kullandığı kurumsal düzeyde yapay zekâ, şimdi sizin için!
         siliconflow: Çin ve uluslararası modeller için yüksek performanslı çıkarım platformu
         tensdaq: Yüksek maliyetli sabit fiyatlandırmayı ortadan kaldıran pazar odaklı fiyatlandırma ile devrimci açık artırma AI MaaS platformu
+        runcrate: DeepSeek, Kimi, GLM ve Qwen gibi açık ağırlıklı modeller için OpenAI uyumlu API
         openaiCompatible: OpenAI Chat Completions API ile uyumlu özel bir uç noktaya bağlanın
         openResponses: Open Responses API ile uyumlu özel bir uç noktaya bağlanın
         deeplx: Resmi olmayan DeepL API
