@@ -1,4 +1,4 @@
-import type { Hotkey } from "@tanstack/hotkeys"
+import type { HotkeyChord } from "@tanstack/hotkeys"
 import type { NodeTranslationPreview } from "./node-translation-preview"
 import type { Config } from "@/types/config/config"
 import type { Point } from "@/types/dom"
@@ -62,7 +62,7 @@ function matchesCustomShortcut(event: KeyboardEvent, config: Config | null): boo
 
   const { hotkey, shortcut } = config.pageTranslation.node
   if (hotkey !== "custom" || isShortcutEmpty(shortcut) || !isValidShortcut(shortcut)) return false
-  return matchesKeyboardEvent(event, shortcut as Hotkey)
+  return matchesKeyboardEvent(event, shortcut as HotkeyChord)
 }
 
 /**

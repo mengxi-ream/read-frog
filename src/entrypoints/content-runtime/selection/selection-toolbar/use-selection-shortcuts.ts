@@ -1,4 +1,4 @@
-import type { Hotkey } from "@tanstack/hotkeys"
+import type { HotkeyChord } from "@tanstack/hotkeys"
 import type { SelectionSession } from "./atoms"
 import { matchesKeyboardEvent } from "@tanstack/hotkeys"
 import { useAtomValue } from "jotai"
@@ -107,7 +107,7 @@ export function useSelectionShortcuts(
         if (
           claimed &&
           event.code === claimed.code &&
-          matchesKeyboardEvent(event, claimed.shortcut as Hotkey)
+          matchesKeyboardEvent(event, claimed.shortcut as HotkeyChord)
         ) {
           event.preventDefault()
           event.stopImmediatePropagation()
@@ -119,7 +119,7 @@ export function useSelectionShortcuts(
         return
       }
       const binding = keyBindings.find(([, shortcut]) =>
-        matchesKeyboardEvent(event, shortcut as Hotkey),
+        matchesKeyboardEvent(event, shortcut as HotkeyChord),
       )
       if (!binding || !onRun(binding[0])) {
         return

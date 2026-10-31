@@ -1,4 +1,4 @@
-import type { Hotkey } from "@tanstack/hotkeys"
+import type { HotkeyChord } from "@tanstack/hotkeys"
 import type { TranslationMode } from "@/types/config/translate"
 import { HotkeyManager } from "@tanstack/hotkeys"
 import { toastManager } from "@/components/ui/base-ui/toast"
@@ -24,7 +24,7 @@ export async function bindTranslationModeShortcutKey() {
   }
 
   const registration = HotkeyManager.getInstance().register(
-    shortcut as Hotkey,
+    shortcut as HotkeyChord,
     async () => {
       const currentConfig = await getLocalConfig()
       if (!currentConfig) return

@@ -1,3 +1,4 @@
+import type { HotkeyChord } from "@tanstack/hotkeys"
 import {
   detectPlatform,
   formatForDisplay,
@@ -25,7 +26,7 @@ export function formatShortcut(
     return ""
   }
 
-  const configuredHotkey = hotkey?.trim() ?? ""
+  const configuredHotkey = (hotkey?.trim() ?? "") as HotkeyChord
   return formatForDisplay(configuredHotkey, platform ? { platform } : undefined)
 }
 
@@ -39,7 +40,7 @@ export function formatShortcutParts(
 
   // Ask the library for the parts instead of splitting its display string: on
   // Windows/Linux the parts are joined with "+", which is also a valid key ("Mod++").
-  const configuredHotkey = hotkey?.trim() ?? ""
+  const configuredHotkey = (hotkey?.trim() ?? "") as HotkeyChord
   return formatForDisplay(configuredHotkey, platform ? { platform, parts: true } : { parts: true })
 }
 
