@@ -167,7 +167,7 @@
     "vite": "^8.3.5",
     "vitest": "^5.0.5",
     "web-ext": "^10.8.0",
-    "wxt": "0.21.4"
+    "wxt": "0.21.5"
   },
   "devEngines": {
     "runtime": {
