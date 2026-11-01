@@ -169,13 +169,13 @@ options:
         inputTranslation: Daxil edilən mətnin tərcüməsi
         languageDetection: Dilin aşkarlanması
     sponsorCta: Sürətli və sərfəli süni intellekt əldə et
-    sponsorCtaJalapenoCloud: GLM 5.2 üçün 50% endirim əldə et
+    sponsorCtaJalapenoCloud: GLM 5.3 üçün 50% endirim əldə et
     setApiKeyWarning:
       message: API açarını $1 səhifəsində təyin edin
     badges:
       featureCount: $1 funksiya
       sponsor: Dəstəkçi
-      sponsorJalapenoCloud: $$2 hədiyyə
+      sponsorJalapenoCloud: CN¥1 hədiyyə
     dialog:
       title: Yeni provayder əlavə et
       groups:

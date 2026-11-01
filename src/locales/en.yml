@@ -169,13 +169,13 @@ options:
         inputTranslation: Input translation
         languageDetection: Language detection
     sponsorCta: Get fast, cost-effective AI
-    sponsorCtaJalapenoCloud: Get 50% Off GLM 5.2
+    sponsorCtaJalapenoCloud: Get 50% Off GLM 5.3
     setApiKeyWarning:
       message: Please set your API key on the $1 page
     badges:
       featureCount: $1 features
       sponsor: Sponsor
-      sponsorJalapenoCloud: $$2 Free
+      sponsorJalapenoCloud: CN¥1 Free
     dialog:
       title: Add new provider
       groups:

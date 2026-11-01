@@ -169,13 +169,13 @@ options:
         inputTranslation: Dịch đầu vào
         languageDetection: Phát hiện ngôn ngữ
     sponsorCta: Nhận AI nhanh, tiết kiệm chi phí
-    sponsorCtaJalapenoCloud: Nhận ưu đãi giảm 50% GLM 5.2
+    sponsorCtaJalapenoCloud: Nhận ưu đãi giảm 50% GLM 5.3
     setApiKeyWarning:
       message: Hãy đặt API Key ở trang $1
     badges:
       featureCount: $1 tính năng
       sponsor: Tài trợ
-      sponsorJalapenoCloud: Miễn phí $$2
+      sponsorJalapenoCloud: Miễn phí CN¥1
     dialog:
       title: Thêm nhà cung cấp mới
       groups:
