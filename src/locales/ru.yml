@@ -169,13 +169,13 @@ options:
         inputTranslation: Перевод ввода
         languageDetection: Определение языка
     sponsorCta: Получить быстрый и выгодный ИИ
-    sponsorCtaJalapenoCloud: Получить GLM 5.2 со скидкой 50 %
+    sponsorCtaJalapenoCloud: Получить GLM 5.3 со скидкой 50 %
     setApiKeyWarning:
       message: Укажите API-ключ на странице $1
     badges:
       featureCount: $1 функций
       sponsor: Спонсор
-      sponsorJalapenoCloud: $$2 бесплатно
+      sponsorJalapenoCloud: CN¥1 бесплатно
     dialog:
       title: Добавить нового провайдера
       groups:
