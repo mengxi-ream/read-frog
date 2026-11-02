@@ -310,7 +310,7 @@ options:
         noteSuggestion: Not önerileri
       descriptions:
         pageTranslation: Sayfanın tamamını iki dilli ya da değiştirme modunda çevirir.
-        selectionTranslation: Seçim araç çubuğundan, seçtiğiniz metni çevirir.
+        selectionTranslation: "Seçtiğiniz metni çevirir; sözcük notlarının anlamı da buradan gelir."
         inputTranslation: Bir metin kutusuna yazdıklarınızı göndermeden önce çevirir.
         videoSubtitles: Video oynatıcıda görünen altyazıları çevirir.
         noteSuggestion: Seçim çevirisinden sonra Notebase'inize kaydetmeye değer kelimeler önerir.
@@ -548,6 +548,9 @@ options:
     selectionSpeak:
       title: "Seçimi sesli okuma"
       description: "Seçili metni sesli okur. Durdurmak için tekrar basın."
+    selectionAnnotation:
+      title: "Not ekle"
+      description: "Seçili metnin altını çizer ve anlamını satırların arasına yazar."
     actions:
       title: "AI eylemleri"
       description: "Seçili metin üzerinde bir AI eylemi çalıştırır. Özel eylemlerin, burada atayana kadar kısayolu yoktur."
@@ -620,6 +623,14 @@ options:
     enable:
       title: Seçim araç çubuğunu etkinleştir
       description: Web sayfalarında metin seçtiğinizde araç çubuğunu göstererek hızlı çeviri, seslendirme ve AI eylemleri sunar
+    annotation:
+      title: "Sözcük notları"
+      enable:
+        title: "Etkinleştir"
+        description: "Seçili sözcüğün veya ifadenin altını çizer ve anlamını satırların arasına yazar"
+      provider:
+        title: "Sağlayıcı"
+        description: "Anlamı üretir; Çevir ile aynı ayardır"
     actions:
       title: Eylemler
       translate:
@@ -1559,6 +1570,19 @@ translation:
   sameLanguage: Kaynak ve hedef diller farklı olmalıdır
   autoModeSameLanguage: Algılanan dil '$1' hedef dille aynı
   extensionContextInvalidated: Uzantı güncellendi. Bu sayfayı yenileyip tekrar deneyin.
+annotation:
+  annotate: "Not ekle"
+  enterMode: "Not modu"
+  exitMode: "Not modundan çık"
+  modeLabel: "Not modu"
+  noTextSelected: "Seçili metin yok"
+  tooLong: "Not eklemek için bir sözcük veya kısa bir ifade seçin"
+  multipleParagraphs: "Not eklemek için tek bir paragraf içinden metin seçin"
+  translatedTextUnsupported: "Çevrilmiş metne not eklenemez"
+  unsupportedPlace: "Buradaki metne not eklenemez"
+  markOnly: "İşaretlendi. Bu satırların arasında anlamı için yer yok."
+  failed: "Anlam alınamadı"
+  remove: "Notu kaldır"
 speak:
   languageDetectionFallback: Yerel dil algılamaya geçildi
   languageDetectionSettingsHint: Ayarlardan kullanılabilir bir LLM veya yerel algılamayı seçin.

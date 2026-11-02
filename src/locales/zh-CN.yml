@@ -311,7 +311,7 @@ options:
         noteSuggestion: 猜你想存
       descriptions:
         pageTranslation: 翻译整个网页，双语对照或直接替换原文。
-        selectionTranslation: 通过划词工具栏翻译你选中的文本。
+        selectionTranslation: "翻译你选中的文本；划词标注的释义也由它生成。"
         inputTranslation: 在发送前翻译你写在输入框里的内容。
         videoSubtitles: 翻译视频播放器中随播放出现的字幕。
         noteSuggestion: 划词翻译后，推荐值得存入笔记库的词条。
@@ -549,6 +549,9 @@ options:
     selectionSpeak:
       title: "划词朗读"
       description: "朗读选中的文本，再按一次停止。"
+    selectionAnnotation:
+      title: "划词标注"
+      description: "给选中的文本加下划线，并在行间显示释义。"
     actions:
       title: "AI 指令"
       description: "对选中的文本运行 AI 指令。自定义指令默认没有快捷键，在这里设置即可。"
@@ -621,6 +624,14 @@ options:
     enable:
       title: 启用选择工具栏
       description: 在网页上选择文本时显示工具栏，快速翻译、朗读和使用 AI 指令
+    annotation:
+      title: "划词标注"
+      enable:
+        title: "启用"
+        description: "给选中的词或短语加下划线，并在行间写出释义"
+      provider:
+        title: "提供商"
+        description: "生成释义；与「翻译」共用同一个设置"
     actions:
       title: 操作
       translate:
@@ -1569,6 +1580,19 @@ translation:
   sameLanguage: 源语言和目标语言必须不同
   autoModeSameLanguage: 检测到的语言 '$1' 与目标语言相同
   extensionContextInvalidated: 扩展已更新，请刷新此页面后重试。
+annotation:
+  annotate: "划词标注"
+  enterMode: "进入划词模式"
+  exitMode: "退出划词模式"
+  modeLabel: "划词模式"
+  noTextSelected: "没有选中文本"
+  tooLong: "请选择一个词或短语来标注"
+  multipleParagraphs: "请在同一段落内选择文本来标注"
+  translatedTextUnsupported: "译文无法标注"
+  unsupportedPlace: "这里的文本无法标注"
+  markOnly: "已标记。这几行之间放不下释义。"
+  failed: "获取释义失败"
+  remove: "移除标注"
 speak:
   languageDetectionFallback: 已改用本地语言检测
   languageDetectionSettingsHint: 可在设置中更换可用的大模型，或选择本地检测。

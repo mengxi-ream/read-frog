@@ -29,6 +29,36 @@ vi.mock("../more-menu", () => ({
 }))
 
 // Mock atoms
+// The slot follows its switch in the config, like the real hook.
+vi.mock("../../annotation/provider", async () => {
+  const jotai = await import("jotai")
+  const configAtoms = await import("@/utils/atoms/config")
+  return {
+    useAnnotation: () => {
+      const selectionToolbar = jotai.useAtomValue(configAtoms.configFieldsAtomMap.selectionToolbar)
+      return {
+        enabled: selectionToolbar.enabled && (selectionToolbar.annotation?.enabled ?? false),
+        mode: false,
+        setMode: vi.fn<(mode: boolean) => void>(),
+        count: 0,
+        annotate: vi.fn<() => boolean>(),
+      }
+    },
+  }
+})
+
+vi.mock("../../annotation/toolbar-slot", () => ({
+  AnnotateButton: () => null,
+  AnnotateReveal: () => null,
+  useAnnotateReveal: () => ({
+    open: false,
+    placement: "left",
+    openReveal: vi.fn<() => void>(),
+    scheduleClose: vi.fn<() => void>(),
+    cancelClose: vi.fn<() => void>(),
+  }),
+}))
+
 vi.mock("@/utils/atoms/config", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/utils/atoms/config")>()
   return {

@@ -53,6 +53,20 @@ const selectionToolbarSpeakFeatureSchema = z.object({
   shortcut: shortcutSchema.optional(),
 })
 
+// The toolbar's leftmost slot: annotates the selection with its meaning
+// between the lines. A fixed place like the "more" menu's, not an item in
+// `order`. `.default()` lets a config stored before v116 parse in UI contexts
+// that load ahead of the background migration.
+const selectionToolbarAnnotationSchema = z
+  .object({
+    enabled: z.boolean(),
+    // Missing means the default key (see getAnnotationShortcut); empty means
+    // the user cleared it. Optional rather than defaulted, for the reason
+    // given on the speak feature's key.
+    shortcut: shortcutSchema.optional(),
+  })
+  .default(() => ({ enabled: true }))
+
 // Text selection toolbar schema
 const selectionToolbarSchema = z
   .object({
@@ -63,6 +77,7 @@ const selectionToolbarSchema = z
       translate: selectionToolbarFeatureSchema,
       speak: selectionToolbarSpeakFeatureSchema,
     }),
+    annotation: selectionToolbarAnnotationSchema,
     builtInActions: selectionToolbarBuiltInActionsSchema,
     customActions: selectionToolbarCustomActionsSchema,
     // The order of every toolbar item (translate, speak and the actions), by

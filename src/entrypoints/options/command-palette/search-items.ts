@@ -421,6 +421,13 @@ export const SEARCH_ITEMS: SearchItem[] = [
     pageKey: "options.selectionToolbar.title",
   },
   {
+    sectionId: "selection-toolbar-annotation",
+    route: "/selection-toolbar",
+    titleKey: "options.selectionToolbar.annotation.title",
+    descriptionKey: "options.selectionToolbar.annotation.enable.description",
+    pageKey: "options.selectionToolbar.title",
+  },
+  {
     sectionId: "selection-toolbar-opacity",
     route: "/selection-toolbar",
     titleKey: "options.selectionToolbar.display.opacity.title",

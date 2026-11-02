@@ -5,7 +5,8 @@ import type {
 import type { ModalDialogHostController } from "./modal-dialog-host"
 import type { DeferredSelectionOpenDetail } from "@/utils/constants/selection"
 import { useAtom, useAtomValue, useSetAtom } from "jotai"
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useEffectEvent, useLayoutEffect, useRef, useState } from "react"
+import { ANALYTICS_SURFACE } from "@/types/analytics"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { NOTRANSLATE_CLASS } from "@/utils/constants/dom-labels"
 import {
@@ -22,8 +23,20 @@ import {
 import { getSelectionToolbarItems } from "@/utils/selection-toolbar-items"
 import { cn } from "@/utils/styles/utils"
 import { urlMatchesPattern } from "@/utils/url-pattern"
+import { useAnnotation } from "../annotation/provider"
+import {
+  ANNOTATE_REVEAL_WIDTH_PX,
+  AnnotateButton,
+  AnnotateReveal,
+  useAnnotateReveal,
+} from "../annotation/toolbar-slot"
 import { buildContextSnapshot, readSelectionSnapshot } from "../utils"
-import { clearSelectionStateAtom, isSelectionToolbarOpenAtom, setSelectionStateAtom } from "./atoms"
+import {
+  clearSelectionStateAtom,
+  createSelectionSession,
+  isSelectionToolbarOpenAtom,
+  setSelectionStateAtom,
+} from "./atoms"
 import { CloseButton, DropEvent } from "./close-button"
 import { createModalDialogHostController } from "./modal-dialog-host"
 import { SelectionToolbarMoreMenu } from "./more-menu"
@@ -230,13 +243,29 @@ export function SelectionToolbar() {
   const isSiteDisabled = selectionToolbar.disabledSelectionToolbarPatterns?.some((pattern) =>
     urlMatchesPattern(window.location.href, pattern),
   )
+  const annotation = useAnnotation()
   // With nothing pinned the toolbar still shows its "more" menu; with nothing
-  // enabled there is nothing to show.
+  // enabled — and the annotation slot off — there is nothing to show.
   const enabledItems = getSelectionToolbarItems(selectionToolbar).filter((item) => item.enabled)
-  const hasAnyEnabledItem = enabledItems.length > 0
+  const hasAnyEnabledItem = enabledItems.length > 0 || annotation.enabled
   const hasAnyPinnedItem = enabledItems.some((item) => item.pinned)
   const isSelectionToolbarVisible =
     isSelectionToolbarOpen && selectionToolbar.enabled && !isSiteDisabled && hasAnyEnabledItem
+  const reveal = useAnnotateReveal(tooltipRef, isSelectionToolbarVisible)
+  // In annotation mode a selection is annotated where it is made; the toolbar
+  // never opens for it. Selections in text controls have nothing to annotate.
+  const annotateInMode = useEffectEvent(
+    (snapshot: NonNullable<ReturnType<typeof readSelectionSnapshot>>) => {
+      if (!annotation.mode) return false
+      if (!snapshot.textControl) {
+        annotation.annotate(
+          createSelectionSession(snapshot, buildContextSnapshot(snapshot)),
+          ANALYTICS_SURFACE.ANNOTATION_MODE,
+        )
+      }
+      return true
+    },
+  )
   const dropdownOpenRef = useRef(false)
   // Bumped per external (ebook bridge) selection so the position is re-applied
   // even when the toolbar is already visible (visibility doesn't flip then).
@@ -422,6 +451,7 @@ export function SelectionToolbar() {
         }
 
         if (selectionSnapshot) {
+          if (annotateInMode(selectionSnapshot)) return
           preserveSelectionStateRef.current = false
           // Enter a native modal's top layer before React measures or shows the toolbar.
           placeHostForSelection(selectionSnapshot.ranges)
@@ -624,26 +654,57 @@ export function SelectionToolbar() {
           ref={tooltipRef}
           inert={!isSelectionToolbarVisible}
           className={cn(
-            `group absolute ${SELECTION_CONTENT_OVERLAY_LAYERS.selectionOverlay} overflow-visible transition-opacity`,
+            `group absolute ${SELECTION_CONTENT_OVERLAY_LAYERS.selectionOverlay} overflow-visible transition-[opacity,transform] duration-150`,
             isSelectionToolbarVisible
               ? "pointer-events-auto opacity-100"
               : "pointer-events-none opacity-0",
           )}
+          onPointerEnter={reveal.cancelClose}
+          onPointerLeave={reveal.scheduleClose}
+          onBlur={reveal.scheduleClose}
+          style={{ transform: reveal.shift ? `translateX(${reveal.shift}px)` : undefined }}
         >
-          {/* Clips the buttons' hover fills to its rounded corners. The close
-              button is positioned against the wrapper above, so it isn't clipped. */}
+          {/* The bar is one box: this element carries its border, background
+              and shadow, and when the annotation slot opens it is this box's
+              left edge that moves out, so there is no seam to hide. The
+              toolbar is measured and placed by the buttons alone. */}
           <div
             data-slot="selection-toolbar-surface"
-            className="flex items-center overflow-hidden rounded-lg border border-border/50 bg-popover shadow-md"
+            className="relative"
             style={{ opacity: "var(--rf-selection-opacity, 1)" }}
           >
-            <div className="no-scrollbar flex max-w-105 items-center overflow-x-auto overflow-y-hidden scroll-driven:scroll-fade-x">
-              <SelectionToolbarPinnedItems />
+            <div
+              data-slot="selection-toolbar-chrome"
+              aria-hidden
+              className="absolute inset-y-0 right-0 rounded-lg border border-border/50 bg-popover shadow-md transition-[left] duration-150 ease-out"
+              style={{ left: reveal.open ? -ANNOTATE_REVEAL_WIDTH_PX : 0 }}
+            />
+            {annotation.enabled && <AnnotateReveal open={reveal.open} />}
+            {/* Clips the buttons' hover fills to the bar's rounded ends; with
+                the slot open, its left end is no longer the bar's. The close
+                button is positioned against the wrapper above, so it isn't
+                clipped. */}
+            <div
+              data-slot="selection-toolbar-buttons"
+              className={cn(
+                "relative flex items-center overflow-hidden rounded-lg transition-[border-radius] duration-150 ease-out",
+                reveal.open && "rounded-l-none",
+              )}
+            >
+              {annotation.enabled && (
+                <>
+                  <AnnotateButton onPointerEnter={reveal.openReveal} />
+                  <div className="w-px shrink-0 self-stretch bg-border" />
+                </>
+              )}
+              <div className="no-scrollbar flex max-w-105 items-center overflow-x-auto overflow-y-hidden scroll-driven:scroll-fade-x">
+                <SelectionToolbarPinnedItems />
+              </div>
+              {hasAnyPinnedItem && <div className="w-px shrink-0 self-stretch bg-border" />}
+              <SelectionToolbarMoreMenu />
             </div>
-            {hasAnyPinnedItem && <div className="w-px shrink-0 self-stretch bg-border" />}
-            <SelectionToolbarMoreMenu />
-            <CloseButton />
           </div>
+          <CloseButton />
         </div>
       )}
     </div>

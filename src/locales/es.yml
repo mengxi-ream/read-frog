@@ -311,7 +311,7 @@ options:
         noteSuggestion: Sugerencias de notas
       descriptions:
         pageTranslation: Traduce la página completa en modo bilingüe o de reemplazo.
-        selectionTranslation: Traduce el texto que seleccionas desde la barra de selección.
+        selectionTranslation: "Traduce el texto que seleccionas; también da el significado de las anotaciones."
         inputTranslation: Traduce lo que escribes en un campo de texto antes de enviarlo.
         videoSubtitles: Traduce los subtítulos que aparecen en el reproductor de video.
         noteSuggestion: Sugiere palabras que vale la pena guardar en tu Notebase después de traducir una selección.
@@ -549,6 +549,9 @@ options:
     selectionSpeak:
       title: "Leer la selección en voz alta"
       description: "Lee en voz alta el texto seleccionado. Vuelve a pulsar para detener."
+    selectionAnnotation:
+      title: "Anotar"
+      description: "Subraya el texto seleccionado y escribe su significado entre las líneas."
     actions:
       title: "Acciones AI"
       description: "Ejecuta una acción AI sobre el texto seleccionado. Las acciones personalizadas no tienen atajo hasta que les asignes uno aquí."
@@ -621,6 +624,14 @@ options:
     enable:
       title: Activar barra de selección
       description: Muestra la barra de herramientas al seleccionar texto en páginas web para traducción rápida, voz y acciones AI
+    annotation:
+      title: "Anotación de palabras"
+      enable:
+        title: "Activar"
+        description: "Subraya la palabra o frase seleccionada y escribe su significado entre las líneas"
+      provider:
+        title: "Proveedor"
+        description: "Genera el significado; es el mismo ajuste que Traducir"
     actions:
       title: Acciones
       translate:
@@ -1564,6 +1575,19 @@ translation:
   sameLanguage: Los idiomas de origen y destino deben ser diferentes
   autoModeSameLanguage: El idioma detectado '$1' es el mismo que el idioma de destino
   extensionContextInvalidated: La extensión se actualizó. Actualiza esta página e inténtalo de nuevo.
+annotation:
+  annotate: "Anotar"
+  enterMode: "Modo de anotación"
+  exitMode: "Salir del modo de anotación"
+  modeLabel: "Modo de anotación"
+  noTextSelected: "No hay texto seleccionado"
+  tooLong: "Selecciona una palabra o una frase corta para anotarla"
+  multipleParagraphs: "Selecciona texto dentro de un solo párrafo para anotarlo"
+  translatedTextUnsupported: "El texto traducido no se puede anotar"
+  unsupportedPlace: "Este texto no se puede anotar aquí"
+  markOnly: "Marcado. No hay espacio entre estas líneas para su significado."
+  failed: "No se pudo obtener el significado"
+  remove: "Quitar anotación"
 speak:
   languageDetectionFallback: Se usa la detección local de idioma
   languageDetectionSettingsHint: En Ajustes, elige un LLM disponible o la detección local.

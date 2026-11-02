@@ -310,7 +310,7 @@ options:
         noteSuggestion: ノートの提案
       descriptions:
         pageTranslation: ページ全体を対訳または置き換えで翻訳します。
-        selectionTranslation: 選択ツールバーから、選択したテキストを翻訳します。
+        selectionTranslation: "選択したテキストを翻訳します。単語注釈の意味にも使われます。"
         inputTranslation: 入力欄に書いた文章を、送信する前に翻訳します。
         videoSubtitles: 動画プレーヤーに表示される字幕を翻訳します。
         noteSuggestion: 選択テキストを翻訳した後、Notebase に保存する価値のある単語を提案します。
@@ -548,6 +548,9 @@ options:
     selectionSpeak:
       title: "選択範囲の読み上げ"
       description: "選択したテキストを読み上げます。もう一度押すと停止します。"
+    selectionAnnotation:
+      title: "注釈"
+      description: "選択したテキストに下線を引き、行間に意味を表示します。"
     actions:
       title: "AI アクション"
       description: "選択したテキストに AI アクションを実行します。カスタムアクションには最初はショートカットがないので、ここで設定してください。"
@@ -620,6 +623,14 @@ options:
     enable:
       title: 選択ツールバーを有効化
       description: ウェブページでテキストを選択したときにツールバーを表示し、すばやく翻訳・読み上げ・AIアクションを実行します
+    annotation:
+      title: "単語注釈"
+      enable:
+        title: "有効にする"
+        description: "選択した単語やフレーズに下線を引き、行間に意味を書き込みます"
+      provider:
+        title: "プロバイダー"
+        description: "意味を生成します。「翻訳」と同じ設定です"
     actions:
       title: アクション
       translate:
@@ -1559,6 +1570,19 @@ translation:
   sameLanguage: ソース言語とターゲット言語は異なる必要があります
   autoModeSameLanguage: 検出された言語 '$1' はターゲット言語と同じです
   extensionContextInvalidated: 拡張機能が更新されました。このページを再読み込みしてからもう一度お試しください。
+annotation:
+  annotate: "注釈を付ける"
+  enterMode: "注釈モード"
+  exitMode: "注釈モードを終了"
+  modeLabel: "注釈モード"
+  noTextSelected: "テキストが選択されていません"
+  tooLong: "注釈を付けるには単語か短いフレーズを選択してください"
+  multipleParagraphs: "注釈を付けるには同じ段落内のテキストを選択してください"
+  translatedTextUnsupported: "翻訳文には注釈を付けられません"
+  unsupportedPlace: "ここのテキストには注釈を付けられません"
+  markOnly: "マークしました。この行間には意味を表示する余白がありません。"
+  failed: "意味を取得できませんでした"
+  remove: "注釈を削除"
 speak:
   languageDetectionFallback: ローカルの言語検出に切り替えました
   languageDetectionSettingsHint: 設定で利用可能なLLMに変更するか、ローカル検出を選んでください。

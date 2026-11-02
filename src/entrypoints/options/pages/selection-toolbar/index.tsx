@@ -3,6 +3,7 @@ import { GradientBackground } from "@/components/gradient-background"
 import { i18n } from "@/utils/i18n"
 import { PageLayout } from "../../components/page-layout"
 import { ActionsSection } from "./actions"
+import { AnnotationSection } from "./annotation"
 import { DisplaySection } from "./display"
 import { EnableItem } from "./enable-item"
 
@@ -22,6 +23,7 @@ export function SelectionToolbarPage() {
       </GradientBackground>
       <EnableItem />
       <ActionsSection />
+      <AnnotationSection />
       <DisplaySection />
     </PageLayout>
   )

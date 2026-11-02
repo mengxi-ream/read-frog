@@ -310,7 +310,7 @@ options:
         noteSuggestion: 노트 제안
       descriptions:
         pageTranslation: 페이지 전체를 대역 또는 원문 대체 방식으로 번역합니다.
-        selectionTranslation: 선택 도구 모음에서 선택한 텍스트를 번역합니다.
+        selectionTranslation: "선택한 텍스트를 번역합니다. 단어 주석의 뜻에도 사용됩니다."
         inputTranslation: 입력창에 쓴 내용을 보내기 전에 번역합니다.
         videoSubtitles: 동영상 플레이어에 표시되는 자막을 번역합니다.
         noteSuggestion: 선택 번역 후 Notebase에 저장할 만한 단어를 제안합니다.
@@ -548,6 +548,9 @@ options:
     selectionSpeak:
       title: "선택 영역 읽기"
       description: "선택한 텍스트를 소리 내어 읽습니다. 다시 누르면 멈춥니다."
+    selectionAnnotation:
+      title: "주석"
+      description: "선택한 텍스트에 밑줄을 긋고 줄 사이에 뜻을 표시합니다."
     actions:
       title: "AI 액션"
       description: "선택한 텍스트에 AI 액션을 실행합니다. 커스텀 액션은 처음에 단축키가 없으니 여기서 설정하세요."
@@ -620,6 +623,14 @@ options:
     enable:
       title: 선택 툴바 활성화
       description: 웹 페이지에서 텍스트를 선택할 때 도구 모음을 표시하여 빠르게 번역, 읽기, AI 액션을 사용할 수 있습니다
+    annotation:
+      title: "단어 주석"
+      enable:
+        title: "사용"
+        description: "선택한 단어나 구에 밑줄을 긋고 줄 사이에 뜻을 적습니다"
+      provider:
+        title: "제공업체"
+        description: "뜻을 생성합니다. 「번역」과 같은 설정입니다"
     actions:
       title: 작업
       translate:
@@ -1559,6 +1570,19 @@ translation:
   sameLanguage: 원본 언어와 대상 언어는 달라야 합니다
   autoModeSameLanguage: 감지된 언어 '$1'은(는) 대상 언어와 같습니다
   extensionContextInvalidated: 확장 프로그램이 업데이트되었습니다. 이 페이지를 새로고침한 후 다시 시도하세요.
+annotation:
+  annotate: "주석 달기"
+  enterMode: "주석 모드"
+  exitMode: "주석 모드 종료"
+  modeLabel: "주석 모드"
+  noTextSelected: "선택된 텍스트가 없습니다"
+  tooLong: "주석을 달려면 단어나 짧은 구를 선택하세요"
+  multipleParagraphs: "주석을 달려면 한 문단 안의 텍스트를 선택하세요"
+  translatedTextUnsupported: "번역문에는 주석을 달 수 없습니다"
+  unsupportedPlace: "이 텍스트에는 주석을 달 수 없습니다"
+  markOnly: "표시했습니다. 이 줄 사이에는 뜻을 넣을 공간이 없습니다."
+  failed: "뜻을 가져오지 못했습니다"
+  remove: "주석 삭제"
 speak:
   languageDetectionFallback: 로컬 언어 감지로 전환했습니다
   languageDetectionSettingsHint: 설정에서 사용 가능한 LLM을 선택하거나 로컬 감지로 바꾸세요.

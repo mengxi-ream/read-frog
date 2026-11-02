@@ -77,6 +77,7 @@ describe("shortcut bindings", () => {
       "translation-mode-shortcut",
       "selection-translation-shortcut",
       "selection-speak-shortcut",
+      "selection-annotation-shortcut",
       "subtitles-toggle-shortcut",
       "translation-hub-shortcut",
       getActionShortcutId("default-dictionary"),

@@ -1,6 +1,7 @@
 import type { Config } from "@/types/config/config"
 import type { WebPagePromptContext } from "@/types/content"
 import type { MatchedTerm } from "@/utils/glossary/types"
+import type { SelectionPromptContext } from "@/utils/prompts/selection-context"
 import { getLocalConfig } from "@/utils/config/storage"
 import { resolveGlossaryTerms } from "@/utils/glossary/active-matcher"
 import { appendGlossaryToSystemPrompt } from "@/utils/glossary/prompt"
@@ -12,6 +13,7 @@ import {
   hasInlineAtomTokens,
   INLINE_ATOM_TOKEN_SYSTEM_PROMPT,
 } from "@/utils/host/translate/inline-atom-tokens"
+import { appendSelectionContextToSystemPrompt } from "@/utils/prompts/selection-context"
 import { DEFAULT_CONFIG } from "../constants/config"
 import {
   BATCH_SEPARATOR,
@@ -46,6 +48,12 @@ export interface TranslatePromptOptions<TContext = unknown> {
    * on any glossary edit.
    */
   glossaryTerms?: readonly MatchedTerm[]
+  /**
+   * The paragraph(s) the input was selected from. Only the selection paths
+   * pass it; page translation never does, so its prompts, and the cache keys
+   * taken over them, do not change.
+   */
+  selectionContext?: SelectionPromptContext
 }
 
 export interface TranslatePromptResult {
@@ -143,10 +151,13 @@ ${INLINE_ATOM_TOKEN_SYSTEM_PROMPT}`
   // nothing matched, so a user whose glossary missed this paragraph produces a
   // prompt byte-identical to a user with no glossary — merely owning a glossary
   // must not orphan the cache.
+  // The passage block follows the glossary block for the same reason, and
+  // `appendSelectionContextToSystemPrompt` likewise returns its input
+  // byte-identical when there is no passage.
   return {
-    systemPrompt: appendGlossaryToSystemPrompt(
-      replaceTokens(systemPrompt),
-      options?.glossaryTerms ?? [],
+    systemPrompt: appendSelectionContextToSystemPrompt(
+      appendGlossaryToSystemPrompt(replaceTokens(systemPrompt), options?.glossaryTerms ?? []),
+      options?.selectionContext,
     ),
     prompt: replaceTokens(prompt),
   }
