@@ -16,12 +16,11 @@ export interface SubtitlesTrackSource {
   load: (key: string) => Promise<SubtitlesTrack>
 }
 
-/**
- * A fetcher for sites whose subtitles arrive as a whole file. The adapter keeps the subtitles it
- * loaded, so this only remembers which track they came from.
- */
+/** For sites that serve a whole subtitle file: one load per track, shared by check and fetch. */
 export class TrackSubtitlesFetcher implements SubtitlesFetcher {
-  private loadedKey: string | null = null
+  // Kept after a failed load, so a track poll does not ask the site again on every tick.
+  private trackKey: string | null = null
+  private trackLoad: Promise<SubtitlesTrack> | null = null
   private sourceLanguage = ""
 
   constructor(private readonly source: SubtitlesTrackSource) {}
@@ -32,26 +31,49 @@ export class TrackSubtitlesFetcher implements SubtitlesFetcher {
       throw new NoSubtitlesError()
     }
 
-    const track = await this.source.load(key)
-    this.loadedKey = key
+    const load = this.load(key)
+    const track = await load.catch((error: unknown) => {
+      // A failure is reported once; asking again asks the site again.
+      if (this.trackLoad === load) this.trackLoad = null
+      throw error
+    })
     this.sourceLanguage = track.language
-    return toSubtitlesFragments(track.fragments)
+    return track.fragments
   }
 
   getSourceLanguage(): string {
     return this.sourceLanguage
   }
 
+  // Only the file says whether a video has subtitles, so checking loads it, and `fetch` reuses that
+  // load. A file of blank lines counts as none; any other failure is left for `fetch` to report.
   async hasAvailableSubtitles(): Promise<boolean> {
-    return this.source.currentKey() !== null
+    const key = this.source.currentKey()
+    if (key === null) return false
+    return this.load(key).then(
+      (track) => track.fragments.length > 0,
+      (error: unknown) => !(error instanceof NoSubtitlesError),
+    )
+  }
+
+  private load(key: string): Promise<SubtitlesTrack> {
+    if (this.trackKey !== key || !this.trackLoad) {
+      this.trackKey = key
+      this.trackLoad = this.source.load(key).then(({ language, fragments }) => ({
+        language,
+        fragments: toSubtitlesFragments(fragments),
+      }))
+    }
+    return this.trackLoad
   }
 
   async shouldUseSameTrack(): Promise<boolean> {
-    return this.loadedKey !== null && this.source.currentKey() === this.loadedKey
+    return this.trackKey !== null && this.source.currentKey() === this.trackKey
   }
 
   cleanup(): void {
-    this.loadedKey = null
+    this.trackKey = null
+    this.trackLoad = null
     this.sourceLanguage = ""
   }
 }

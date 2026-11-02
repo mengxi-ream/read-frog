@@ -44,6 +44,46 @@ describe("TrackSubtitlesFetcher", () => {
     expect(trackSource.load).not.toHaveBeenCalled()
   })
 
+  it("checks for subtitles by loading the track, and fetches from that same load", async () => {
+    const trackSource = source()
+    const fetcher = new TrackSubtitlesFetcher(trackSource)
+
+    await expect(fetcher.hasAvailableSubtitles()).resolves.toBe(true)
+    await expect(fetcher.fetch()).resolves.toHaveLength(2)
+    expect(trackSource.load).toHaveBeenCalledTimes(1)
+  })
+
+  it("reports no subtitles when the source finds none in the track", async () => {
+    const trackSource = source()
+    trackSource.load.mockRejectedValueOnce(new NoSubtitlesError())
+    const fetcher = new TrackSubtitlesFetcher(trackSource)
+
+    await expect(fetcher.hasAvailableSubtitles()).resolves.toBe(false)
+  })
+
+  it("reports no subtitles when every line of the track is blank", async () => {
+    const trackSource = source()
+    trackSource.load.mockResolvedValueOnce({
+      language: "en-US",
+      fragments: [{ text: "", start: 333, end: 5333 }],
+    })
+    const fetcher = new TrackSubtitlesFetcher(trackSource)
+
+    await expect(fetcher.hasAvailableSubtitles()).resolves.toBe(false)
+  })
+
+  it("leaves any other failure for fetch to report, then asks the source again", async () => {
+    const trackSource = source()
+    const error = new OverlaySubtitlesError("subtitles.errors.trackFileNotLoaded")
+    trackSource.load.mockRejectedValueOnce(error)
+    const fetcher = new TrackSubtitlesFetcher(trackSource)
+
+    await expect(fetcher.hasAvailableSubtitles()).resolves.toBe(true)
+    await expect(fetcher.fetch()).rejects.toBe(error)
+    await expect(fetcher.fetch()).resolves.toHaveLength(2)
+    expect(trackSource.load).toHaveBeenCalledTimes(2)
+  })
+
   it("keeps the loaded track until the page moves to another one", async () => {
     const trackSource = source()
     const fetcher = new TrackSubtitlesFetcher(trackSource)
@@ -73,6 +113,23 @@ describe("TrackSubtitlesFetcher", () => {
     const fetcher = new TrackSubtitlesFetcher(trackSource)
 
     await expect(fetcher.fetch()).rejects.toBe(error)
+  })
+
+  it("stays on a track whose load is running or failed, so a track poll does not ask again", async () => {
+    const trackSource = source()
+    const load = Promise.withResolvers<never>()
+    trackSource.load.mockReturnValueOnce(load.promise)
+    const fetcher = new TrackSubtitlesFetcher(trackSource)
+
+    const fetching = fetcher.fetch()
+    await expect(fetcher.shouldUseSameTrack()).resolves.toBe(true)
+
+    load.reject(new NoSubtitlesError())
+    await expect(fetching).rejects.toBeInstanceOf(NoSubtitlesError)
+    await expect(fetcher.shouldUseSameTrack()).resolves.toBe(true)
+    expect(trackSource.load).toHaveBeenCalledTimes(1)
+
+    trackSource.key = "video:2"
     await expect(fetcher.shouldUseSameTrack()).resolves.toBe(false)
   })
 })
