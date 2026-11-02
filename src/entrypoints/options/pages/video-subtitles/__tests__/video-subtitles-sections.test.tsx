@@ -77,13 +77,17 @@ describe("video subtitles page sections", () => {
   it("writes each switch on its own, leaving the other alone", () => {
     renderInRouter(<PreferenceSection />)
 
-    const [enable, aiSegmentation] = screen.getAllByRole("switch")
+    const [enable, aiSegmentation, pauseOnHover] = screen.getAllByRole("switch")
 
     fireEvent.click(enable!)
     expect(setVideoSubtitlesMock).toHaveBeenCalledWith({ enabled: false })
 
     fireEvent.click(aiSegmentation!)
     expect(setVideoSubtitlesMock).toHaveBeenCalledWith({ aiSegmentation: true })
+
+    expect(pauseOnHover).not.toBeChecked()
+    fireEvent.click(pauseOnHover!)
+    expect(setVideoSubtitlesMock).toHaveBeenCalledWith({ pauseOnHover: true })
   })
 
   it("turns translate-on-open on for one platform only", () => {

@@ -14,7 +14,8 @@ export const subtitlesHoveredAtom = atom(false)
 
 /**
  * Whether the subtitles hold still, while the pointer is on them or a lookup is
- * open: the video stays paused and the box stays where it is.
+ * open: the box stays where it is. Whether the video pauses too is up to
+ * `useHoldPlayback`, which also weighs the pause-on-hover setting.
  */
 export const subtitlesHeldAtom = atom(
   (get) => get(subtitlesHoveredAtom) || get(wordLookupAtom) !== null,

@@ -1423,6 +1423,9 @@ options:
       wordLookupAction:
         title: Acción al buscar una palabra
         description: La acción de IA que responde al hacer clic en una palabra de los subtítulos. Diccionario, salvo que elijas una tuya.
+      pauseOnHover:
+        title: Pausar al pasar el cursor
+        description: Pausa el vídeo mientras el puntero se detiene sobre los subtítulos y lo reanuda al apartarlo. Hacer clic en una palabra para buscarla siempre pausa.
     aiQuota:
       title: Cuota de subtítulos con IA
       description: El reconocimiento de voz con IA te da subtítulos precisos para cualquier vídeo

@@ -1423,6 +1423,9 @@ options:
       wordLookupAction:
         title: Söz axtarışı əməliyyatı
         description: Altyazıdakı sözə kliklədikdə işə düşən AI əməliyyatı. Standart olaraq lüğətdir; öz əməliyyatınızı seçə bilərsiniz.
+      pauseOnHover:
+        title: Üzərinə gələndə dayandır
+        description: Göstərici altyazıların üzərində bir müddət qalanda videonu dayandırır, göstərici çəkiləndə oxutmaya davam edir. Axtarmaq üçün sözə klikləmək həmişə dayandırır.
     aiQuota:
       title: Süni intellekt subtitrlərinin kvotası
       description: Süni intellektlə nitqin tanınması istənilən video üçün dəqiq subtitrlər yaradır
