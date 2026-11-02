@@ -76,7 +76,7 @@ export const GOOGLE_DRIVE_TOKEN_STORAGE_KEY = "__googleDriveToken"
 
 export const THEME_STORAGE_KEY = "theme"
 export const DEFAULT_DETECTED_CODE = "eng" as const
-export const CONFIG_SCHEMA_VERSION = 116
+export const CONFIG_SCHEMA_VERSION = 117
 
 export const DEFAULT_FLOATING_BUTTON_POSITION = 0.66
 export const DEFAULT_FLOATING_BUTTON_SIDE: FloatingButtonSide = "right"
@@ -318,6 +318,7 @@ export const DEFAULT_CONFIG: Config = {
     },
     aiSegmentation: false,
     wordLookupActionId: BUILT_IN_DICTIONARY_ACTION_ID,
+    pauseOnHover: false,
     requestQueueConfig: {
       capacity: DEFAULT_REQUEST_CAPACITY,
       rate: DEFAULT_REQUEST_RATE,

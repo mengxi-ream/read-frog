@@ -67,6 +67,18 @@ export function PreferenceSection() {
         />
       </ConfigItem>
       <WordLookupActionItem />
+      <ConfigItem
+        id="subtitles-pause-on-hover"
+        title={i18n.t("options.videoSubtitles.preference.pauseOnHover.title")}
+        description={i18n.t("options.videoSubtitles.preference.pauseOnHover.description")}
+      >
+        <Switch
+          checked={videoSubtitlesConfig.pauseOnHover}
+          onCheckedChange={(pauseOnHover) => {
+            void setVideoSubtitlesConfig({ pauseOnHover })
+          }}
+        />
+      </ConfigItem>
     </ConfigSection>
   )
 }

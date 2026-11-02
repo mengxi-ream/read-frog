@@ -67,6 +67,9 @@ export const videoSubtitlesSchema = z.object({
   // `.default()` is load-bearing: it lets configs stored before this field existed still
   // parse during the upgrade window, before the v115 migration runs.
   wordLookupActionId: z.string().nonempty().default(BUILT_IN_DICTIONARY_ACTION_ID),
+  // Whether resting the pointer on the subtitles pauses the video. `.default()` is
+  // load-bearing for the same reason as above, until the v117 migration runs.
+  pauseOnHover: z.boolean().default(false),
   requestQueueConfig: requestQueueConfigSchema,
   batchQueueConfig: batchQueueConfigSchema,
   customPromptsConfig: subtitleCustomPromptsConfigSchema,
