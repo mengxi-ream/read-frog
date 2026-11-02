@@ -892,6 +892,60 @@ describe("universalVideoAdapter", () => {
       expect(switchSpy.mock.calls.map((call) => (call[1] as any).quiet)).toEqual([true, false])
     })
 
+    async function waitForFirstPlay(adapter: UniversalVideoAdapter) {
+      ;(adapter as any).config.embedded = true
+      mocks.getLocalConfig.mockResolvedValue({
+        videoSubtitles: { autoStart: { youtube: false, xcom: true, netflix: false } },
+      })
+      const video = Object.assign(new EventTarget(), { paused: true })
+      ;(adapter as any).subtitlesScheduler.getVideoElement = () => video
+      const switchSpy = vi
+        .spyOn(adapter as any, "switchSubtitlesFetcher")
+        .mockResolvedValue(undefined)
+      await (adapter as any).tryAutoStartSubtitles()
+      return { switchSpy, play: () => video.dispatchEvent(new Event("playing")) }
+    }
+
+    it("starts subtitles on the first play of a paused video", async () => {
+      const { adapter } = setUpVideoWithoutSubtitles()
+      const { switchSpy, play } = await waitForFirstPlay(adapter)
+
+      play()
+      play()
+
+      expect(switchSpy.mock.calls.map((call) => call[0])).toEqual([SUBTITLES_SOURCE.NATIVE])
+    })
+
+    it("keeps the AI subtitles a reader asked for before the first play", async () => {
+      const { adapter } = setUpVideoWithoutSubtitles()
+      const { switchSpy, play } = await waitForFirstPlay(adapter)
+
+      await adapter.requestAiSubtitles()
+      play()
+
+      expect(switchSpy.mock.calls.map((call) => call[0])).toEqual([SUBTITLES_SOURCE.AI])
+    })
+
+    it("keeps subtitles off when a reader turns them off before the first play", async () => {
+      const { adapter } = setUpVideoWithoutSubtitles()
+      const { switchSpy, play } = await waitForFirstPlay(adapter)
+
+      adapter.toggleSubtitlesManually(false)
+      play()
+
+      expect(switchSpy).not.toHaveBeenCalled()
+    })
+
+    it("drops the first-play start when the reader moves to another video", async () => {
+      const { adapter } = setUpVideoWithoutSubtitles()
+      const { switchSpy, play } = await waitForFirstPlay(adapter)
+
+      ;(adapter as any).resetForNavigation()
+      play()
+
+      expect(switchSpy).not.toHaveBeenCalled()
+    })
+
     it("still tells a reader who asked that the video has none", async () => {
       const { adapter, scheduler } = setUpVideoWithoutSubtitles()
 
