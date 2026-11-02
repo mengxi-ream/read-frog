@@ -11,7 +11,7 @@ interface PollPlayerOptions {
   config: PlatformConfig
   /** Runs first on every tick, for a page with several players: marks the one the selectors match. */
   selectPlayer?: () => void
-  /** Runs on every tick that finds a player, for controls the site may rebuild. */
+  /** Runs on every tick that finds the same player, for what the site changes silently. */
   onStay?: () => void
   onLeave?: () => void
 }
@@ -66,6 +66,7 @@ export function pollPlayerSubtitles(
 
     if (videoId !== mounted?.videoId || player !== mounted.player) {
       void mount({ videoId, player }).then(() => adapter.notifyNavigation())
+      return
     }
     onStay?.()
   }

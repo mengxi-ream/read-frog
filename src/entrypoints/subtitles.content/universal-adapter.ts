@@ -247,7 +247,8 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
   }
 
   async handleSourceTrackChanged(): Promise<void> {
-    if (this.destroyed) return
+    // A navigation that has not reset yet loads the new video's track itself.
+    if (this.destroyed || this.hasPendingNavigationReset) return
     if (!this.trackChangeRefreshPromise) {
       this.trackChangeRefreshPromise = this.refreshSourceTrackIfNeeded().finally(() => {
         this.trackChangeRefreshPromise = null

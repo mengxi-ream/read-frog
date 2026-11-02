@@ -20,5 +20,6 @@ export function initEdxSubtitles(ctx: ContentScriptContext) {
     adapter,
     config,
     selectPlayer: markActiveEdxVideo,
+    onStay: () => void adapter.handleSourceTrackChanged(),
   })
 }

@@ -156,7 +156,7 @@ describe("pollPlayerSubtitles", () => {
     expect(calls).toEqual(["mount", "navigate"])
   })
 
-  it("calls onStay on every tick once started", async () => {
+  it("calls onStay on every tick that finds the same player, and leaves a new video to the remount", async () => {
     addPlayer()
     const onStay = vi.fn<() => void>()
     start({ onStay })
@@ -165,8 +165,12 @@ describe("pollPlayerSubtitles", () => {
 
     await tick()
     await tick()
-
     expect(onStay).toHaveBeenCalledTimes(2)
+
+    onStay.mockClear()
+    videoId = "video/2"
+    await tick()
+    expect(onStay).not.toHaveBeenCalled()
   })
 
   it("cleans up when the page leaves the player, and comes back as a navigation", async () => {

@@ -25,29 +25,50 @@ const transcriptSchema = z
     ({ start, end, text }) => start.length === text.length && (!end || end.length === text.length),
   )
 
-function readMetadata(block: HTMLElement): unknown {
+type Metadata = z.infer<typeof metadataSchema>
+
+function readMetadata(block: HTMLElement): Metadata | null {
   try {
-    return JSON.parse(block.dataset.metadata ?? "")
+    const parsed = metadataSchema.safeParse(JSON.parse(block.dataset.metadata ?? ""))
+    return parsed.success ? parsed.data : null
   } catch {
     return null
   }
 }
 
-async function loadTrack(blockId: string): Promise<SubtitlesTrack> {
+function findVideo(blockId: string): { block: HTMLElement; metadata: Metadata } | null {
   const block = [...document.querySelectorAll<HTMLElement>(EDX_VIDEO_SELECTOR)].find(
     (video) => video.dataset.blockId === blockId,
   )
-  if (!block) throw new TrackFileNotLoadedError()
-  const metadata = metadataSchema.safeParse(readMetadata(block))
-  if (!metadata.success) throw new TrackFileNotLoadedError()
+  const metadata = block && readMetadata(block)
+  return block && metadata ? { block, metadata } : null
+}
 
-  // `transcriptLanguage` is the learner's language as of page load, and edX saves whichever
-  // language is fetched as their choice for every video, so follow the player's menu instead.
-  const language =
+// `transcriptLanguage` is the learner's language as of page load, and edX saves whichever
+// language is fetched as their choice for every video, so follow the player's menu instead.
+function readLanguage(block: HTMLElement, metadata: Metadata): string {
+  return (
     block.querySelector<HTMLElement>(EDX_ACTIVE_LANGUAGE_SELECTOR)?.dataset.langCode ??
-    metadata.data.transcriptLanguage
+    metadata.transcriptLanguage
+  )
+}
+
+// The language is part of the key, so picking another one in the player's menu loads that one.
+// A block id never holds a space, so a space separates the two.
+function currentKey(): string | null {
+  const blockId = getEdxVideoId()
+  if (blockId === null) return null
+  const video = findVideo(blockId)
+  return video ? `${blockId} ${readLanguage(video.block, video.metadata)}` : blockId
+}
+
+async function loadTrack(key: string): Promise<SubtitlesTrack> {
+  const [blockId = "", language] = key.split(" ")
+  const metadata = findVideo(blockId)?.metadata
+  if (!metadata || !language) throw new TrackFileNotLoadedError()
+
   const url = new URL(
-    metadata.data.transcriptTranslationUrl.replace("__lang__", language),
+    metadata.transcriptTranslationUrl.replace("__lang__", language),
     window.location.origin,
   )
   const response = await fetchWithRetry(url)
@@ -67,6 +88,6 @@ async function loadTrack(blockId: string): Promise<SubtitlesTrack> {
 }
 
 export const edxTrackSource: SubtitlesTrackSource = {
-  currentKey: getEdxVideoId,
+  currentKey,
   load: loadTrack,
 }

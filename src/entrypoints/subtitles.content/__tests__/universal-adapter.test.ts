@@ -419,6 +419,19 @@ describe("universalVideoAdapter", () => {
     expect(startTranslationSpy).not.toHaveBeenCalled()
   })
 
+  it("leaves a source track change to a navigation that has not reset yet", async () => {
+    vi.useFakeTimers()
+    const { adapter, subtitlesFetcher } = createAdapter([{ text: "hello", start: 0, end: 500 }])
+    attachScheduler(adapter, true)
+    subtitlesStore.set(sourceTrackAtom, [{ text: "old", start: 0, end: 500 }])
+
+    adapter.notifyNavigation()
+    await adapter.handleSourceTrackChanged()
+
+    expect(subtitlesFetcher.shouldUseSameTrack).not.toHaveBeenCalled()
+    expect(subtitlesFetcher.fetch).not.toHaveBeenCalled()
+  })
+
   it("stops the video it was showing when the page leaves the player", () => {
     const { adapter } = createAdapter([{ text: "hello", start: 0, end: 500 }])
     const subtitlesScheduler = attachScheduler(adapter, true)
