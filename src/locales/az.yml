@@ -1656,10 +1656,12 @@ subtitles:
   aiSubtitlesHint: Təkmil süni intellektlə nitqin tanınması dəqiq subtitrlər yaradır. Rəsmi subtitrlər olmadıqda da əlçatandır.
   requestAiSubtitles: Süni intellekt subtitrləri istə
   usingAiSubtitles: Süni intellekt subtitrlərindən istifadə olunur
+  settings: Subtitr ayarları
   toggle:
     enabled: Subtitr tərcüməsi aktivdir
     disabled: Subtitr tərcüməsi deaktivdir
   actions:
+    download: Subtitrləri endir
     downloadTranslated: Tərcümə edilmiş subtitrləri endir
     downloadTranslatedPreparing: Subtitrlər hazırlanır, uzun videolar bir qədər vaxt apara bilər
     downloadTranslatedTranslating: Subtitrlər tərcümə edilir

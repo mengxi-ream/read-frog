@@ -1,16 +1,14 @@
 import type { ReactNode } from "react"
 import type { PartialDeep } from "type-fest"
 import type {
-  SubtitlesDisplayMode,
   SubtitlesFontFamily,
   SubtitlesStyle,
-  SubtitlesTranslationPosition,
   SubtitleTextStyle,
 } from "@/types/config/subtitles"
 import { IconLanguage, IconRefresh, IconSettings, IconSubtitles } from "@tabler/icons-react"
 import { deepmerge } from "deepmerge-ts"
 import { useAtom } from "jotai"
-import { Activity, use, useEffect, useState } from "react"
+import { use, useEffect, useState } from "react"
 import { DebouncedColorPicker } from "@/components/debounced-color-picker"
 import { Button } from "@/components/ui/base-ui/button"
 import {
@@ -25,12 +23,10 @@ import { SliderComfortable } from "@/components/ui/base-ui/slider"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import {
   DEFAULT_BACKGROUND_OPACITY,
-  DEFAULT_DISPLAY_MODE,
   DEFAULT_FONT_FAMILY,
   DEFAULT_FONT_SCALE,
   DEFAULT_FONT_WEIGHT,
   DEFAULT_SUBTITLE_COLOR,
-  DEFAULT_TRANSLATION_POSITION,
   MAX_BACKGROUND_OPACITY,
   MAX_FONT_SCALE,
   MAX_FONT_WEIGHT,
@@ -43,9 +39,9 @@ import { i18n } from "@/utils/i18n"
 import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-host"
 import { subtitlesStore } from "../../../atoms"
 
-const SELECT_TRIGGER_CLASS =
+export const SELECT_TRIGGER_CLASS =
   "min-w-[5.5rem] text-xs text-popover-foreground [&_[data-slot=select-value]]:text-popover-foreground [&_[data-slot=select-icon]]:text-muted-foreground"
-const SELECT_CONTENT_CLASS = "[&_[role=option]]:text-xs"
+export const SELECT_CONTENT_CLASS = "[&_[role=option]]:text-xs"
 /* The panel sits on `bg-muted/50` rows, so the scrubber needs the popover surface
    under it to keep the fill and the label's occluder reading as one control. */
 const SLIDER_CLASS = "bg-popover"
@@ -222,7 +218,7 @@ const DEFAULT_TEXT_STYLE: SubtitleTextStyle = {
 export function StyleView() {
   const [config, setConfig] = useAtom(configFieldsAtomMap.videoSubtitles, { store: subtitlesStore })
   const portalContainer = use(ShadowWrapperContext)
-  const { displayMode, translationPosition, container } = config.style
+  const { container } = config.style
 
   const updateStyle = (patch: PartialDeep<SubtitlesStyle>) => {
     void setConfig(deepmerge(config, { style: patch }))
@@ -234,68 +230,9 @@ export function StyleView() {
         icon={<IconSettings className="size-3.5" />}
         title={i18n.t("options.videoSubtitles.style.generalSettings")}
         onReset={() =>
-          updateStyle({
-            displayMode: DEFAULT_DISPLAY_MODE,
-            translationPosition: DEFAULT_TRANSLATION_POSITION,
-            container: { backgroundOpacity: DEFAULT_BACKGROUND_OPACITY },
-          })
+          updateStyle({ container: { backgroundOpacity: DEFAULT_BACKGROUND_OPACITY } })
         }
       >
-        <SettingRow label={i18n.t("options.videoSubtitles.style.displayMode.title")}>
-          <Select
-            value={displayMode}
-            onValueChange={(v: SubtitlesDisplayMode | null) => v && updateStyle({ displayMode: v })}
-          >
-            <SelectTrigger size="sm" className={SELECT_TRIGGER_CLASS}>
-              <SelectValue>
-                {i18n.t(`options.videoSubtitles.style.displayMode.${displayMode}`)}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent container={portalContainer} className={SELECT_CONTENT_CLASS}>
-              <SelectGroup>
-                <SelectItem value="bilingual">
-                  {i18n.t("options.videoSubtitles.style.displayMode.bilingual")}
-                </SelectItem>
-                <SelectItem value="originalOnly">
-                  {i18n.t("options.videoSubtitles.style.displayMode.originalOnly")}
-                </SelectItem>
-                <SelectItem value="translationOnly">
-                  {i18n.t("options.videoSubtitles.style.displayMode.translationOnly")}
-                </SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        </SettingRow>
-
-        <Activity mode={displayMode === "bilingual" ? "visible" : "hidden"}>
-          <SettingRow label={i18n.t("options.videoSubtitles.style.translationPosition.title")}>
-            <Select
-              value={translationPosition}
-              onValueChange={(v: SubtitlesTranslationPosition | null) =>
-                v && updateStyle({ translationPosition: v })
-              }
-            >
-              <SelectTrigger size="sm" className={SELECT_TRIGGER_CLASS}>
-                <SelectValue>
-                  {i18n.t(
-                    `options.videoSubtitles.style.translationPosition.${translationPosition}`,
-                  )}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent container={portalContainer} className={SELECT_CONTENT_CLASS}>
-                <SelectGroup>
-                  <SelectItem value="above">
-                    {i18n.t("options.videoSubtitles.style.translationPosition.above")}
-                  </SelectItem>
-                  <SelectItem value="below">
-                    {i18n.t("options.videoSubtitles.style.translationPosition.below")}
-                  </SelectItem>
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </SettingRow>
-        </Activity>
-
         <SliderRow
           label={i18n.t("options.videoSubtitles.style.backgroundOpacity")}
           value={container.backgroundOpacity}

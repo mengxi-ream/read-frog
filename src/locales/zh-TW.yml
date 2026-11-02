@@ -1436,14 +1436,14 @@ options:
       description: 顯示模式、位置、字型、顏色和背景，都對著預覽調
       customizeStyle: 自訂樣式
       displayMode:
-        title: 顯示模式
-        bilingual: 雙語模式
+        title: 字幕顯示類型
+        bilingual: 雙語字幕
         originalOnly: 僅原文
         translationOnly: 僅譯文
       translationPosition:
         title: 譯文位置
-        above: 上方
-        below: 下方
+        above: 原文上方
+        below: 原文下方
       generalSettings: 通用設定
       mainSubtitle: 主字幕
       translationSubtitle: 翻譯字幕
@@ -1668,10 +1668,12 @@ subtitles:
   aiSubtitlesHint: 透過先進 AI 辨識語音生成準確字幕，無官方字幕時依然可用。
   requestAiSubtitles: 請求 AI 字幕
   usingAiSubtitles: 正在使用 AI 字幕
+  settings: 字幕設定
   toggle:
     enabled: 字幕翻譯已開啟
     disabled: 字幕翻譯已關閉
   actions:
+    download: 下載字幕
     downloadTranslated: 下載翻譯字幕
     downloadTranslatedPreparing: 正在準備字幕，長影片可能需要更久
     downloadTranslatedTranslating: 正在翻譯字幕
