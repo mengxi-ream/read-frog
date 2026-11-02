@@ -1,25 +1,25 @@
-import type { ViewId } from "./views"
+import type { SubpageId, ViewId } from "./views"
 import { useAtom } from "jotai"
 import { useRef } from "react"
 import { subtitlesSettingsPanelOpenAtom, subtitlesSettingsPanelViewAtom } from "../../atoms"
 import { PanelShell } from "./panel-shell"
-import { MainMenu, ROOT_VIEW, SUBPAGE_MAP } from "./views"
+import { getViewDepth, MainMenu, ROOT_VIEW, SUBPAGES } from "./views"
 
 export function SubtitlesSettingsPanel() {
   const [isOpen, setPanelOpen] = useAtom(subtitlesSettingsPanelOpenAtom)
   const [view, setView] = useAtom(subtitlesSettingsPanelViewAtom)
   const prevViewRef = useRef<ViewId>(ROOT_VIEW)
 
-  const subpage = view !== ROOT_VIEW ? SUBPAGE_MAP.get(view) : undefined
+  const subpage = view !== ROOT_VIEW ? SUBPAGES[view] : undefined
 
-  const navigateTo = (id: ViewId) => {
+  const navigateTo = (id: SubpageId) => {
     prevViewRef.current = view
     setView(id)
   }
 
   const navigateBack = () => {
     prevViewRef.current = view
-    setView(ROOT_VIEW)
+    setView(subpage?.parent ?? ROOT_VIEW)
   }
 
   const close = () => {
@@ -37,13 +37,18 @@ export function SubtitlesSettingsPanel() {
         subpage
           ? {
               key: view,
-              // oxlint-disable-next-line react/refs -- the previous view is what decides the slide direction
-              direction: prevViewRef.current === ROOT_VIEW ? "forward" : "back",
+              direction:
+                // oxlint-disable-next-line react/refs -- the previous view is what decides the slide direction
+                getViewDepth(view) > getViewDepth(prevViewRef.current) ? "forward" : "back",
             }
           : undefined
       }
     >
-      {subpage ? <subpage.component /> : <MainMenu onNavigate={navigateTo} />}
+      {subpage ? (
+        <subpage.component onNavigate={navigateTo} />
+      ) : (
+        <MainMenu onNavigate={navigateTo} />
+      )}
     </PanelShell>
   )
 }

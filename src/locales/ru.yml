@@ -1658,10 +1658,12 @@ subtitles:
   aiSubtitlesHint: Точные субтитры создаются с помощью передового ИИ-распознавания речи и доступны даже без официальных субтитров.
   requestAiSubtitles: Запросить ИИ-субтитры
   usingAiSubtitles: Используются ИИ-субтитры
+  settings: Настройки субтитров
   toggle:
     enabled: Перевод субтитров включён
     disabled: Перевод субтитров выключен
   actions:
+    download: Скачать субтитры
     downloadTranslated: Скачать переведённые субтитры
     downloadTranslatedPreparing: Подготовка субтитров, длинные видео могут занять больше времени
     downloadTranslatedTranslating: Перевод субтитров

@@ -1658,10 +1658,12 @@ subtitles:
   aiSubtitlesHint: Gelişmiş yapay zeka ses tanıma ile doğru altyazılar oluşturulur; resmi altyazı olmadığında da kullanılabilir.
   requestAiSubtitles: Yapay zeka altyazısı iste
   usingAiSubtitles: Yapay zeka altyazısı kullanılıyor
+  settings: Altyazı ayarları
   toggle:
     enabled: Altyazı çevirisi açık
     disabled: Altyazı çevirisi kapalı
   actions:
+    download: Altyazıları indir
     downloadTranslated: Çevrilmiş altyazıları indir
     downloadTranslatedPreparing: Altyazılar hazırlanıyor, uzun videolar daha uzun sürebilir
     downloadTranslatedTranslating: Altyazılar çevriliyor

@@ -1658,10 +1658,12 @@ subtitles:
   aiSubtitlesHint: 첨단 AI 음성 인식으로 정확한 자막을 생성하며, 공식 자막이 없어도 사용할 수 있습니다.
   requestAiSubtitles: AI 자막 요청
   usingAiSubtitles: AI 자막 사용 중
+  settings: 자막 설정
   toggle:
     enabled: 자막 번역을 켰습니다
     disabled: 자막 번역을 껐습니다
   actions:
+    download: 자막 다운로드
     downloadTranslated: 번역 자막 다운로드
     downloadTranslatedPreparing: 자막 준비 중, 긴 동영상은 시간이 더 걸릴 수 있습니다
     downloadTranslatedTranslating: 자막 번역 중

@@ -1436,14 +1436,14 @@ options:
       description: 显示模式、位置、字体、颜色和背景，都对着预览调
       customizeStyle: 自定义样式
       displayMode:
-        title: 显示模式
-        bilingual: 双语模式
+        title: 字幕显示类型
+        bilingual: 双语字幕
         originalOnly: 仅原文
         translationOnly: 仅译文
       translationPosition:
         title: 译文位置
-        above: 上方
-        below: 下方
+        above: 原文上方
+        below: 原文下方
       generalSettings: 通用设置
       mainSubtitle: 主字幕
       translationSubtitle: 翻译字幕
@@ -1668,10 +1668,12 @@ subtitles:
   aiSubtitlesHint: 通过先进 AI 识别语音生成准确字幕，无官方字幕时依然可用。
   requestAiSubtitles: 请求 AI 字幕
   usingAiSubtitles: 正在使用 AI 字幕中
+  settings: 字幕设置
   toggle:
     enabled: 字幕翻译已开启
     disabled: 字幕翻译已关闭
   actions:
+    download: 下载字幕
     downloadTranslated: 下载翻译字幕
     downloadTranslatedPreparing: 正在准备字幕，长视频可能需要更久
     downloadTranslatedTranslating: 正在翻译字幕

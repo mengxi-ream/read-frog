@@ -1,32 +1,44 @@
-import type { ComponentType, ReactNode } from "react"
-import { IconAdjustmentsHorizontal } from "@tabler/icons-react"
+import type { ComponentType } from "react"
 import { i18n } from "@/utils/i18n"
+import { DownloadView } from "./download"
+import { SettingsView } from "./settings"
 import { StyleView } from "./style"
 
-export type ViewId = "main" | "style"
+export type ViewId = "main" | "download" | "settings" | "style"
+export type SubpageId = Exclude<ViewId, "main">
 export const ROOT_VIEW = "main" satisfies ViewId
 
+export type NavigateToSubpage = (id: SubpageId) => void
+
 export interface SubpageConfig {
-  id: Exclude<ViewId, "main">
+  /** The view the header's back button returns to. */
+  parent: ViewId
   // Resolved lazily (thunk) so a runtime UI-language switch re-reads it at render
   // instead of freezing the string at module-import time.
   title: () => string
-  icon: ReactNode
-  component: ComponentType
-  hidden?: boolean
+  component: ComponentType<{ onNavigate: NavigateToSubpage }>
 }
 
-export const SUBPAGES: SubpageConfig[] = [
-  {
-    id: "style",
+export const SUBPAGES: Record<SubpageId, SubpageConfig> = {
+  download: {
+    parent: ROOT_VIEW,
+    title: () => i18n.t("subtitles.actions.download"),
+    component: DownloadView,
+  },
+  settings: {
+    parent: ROOT_VIEW,
+    title: () => i18n.t("subtitles.settings"),
+    component: SettingsView,
+  },
+  style: {
+    parent: "settings",
     title: () => i18n.t("options.videoSubtitles.style.title"),
-    icon: <IconAdjustmentsHorizontal className="size-3.5" />,
     component: StyleView,
   },
-]
+}
 
-export const VISIBLE_SUBPAGES = SUBPAGES.filter((p) => !p.hidden)
-
-export const SUBPAGE_MAP = new Map(SUBPAGES.map((p) => [p.id, p]))
+export function getViewDepth(id: ViewId): number {
+  return id === ROOT_VIEW ? 0 : getViewDepth(SUBPAGES[id].parent) + 1
+}
 
 export { MainMenu } from "./main-menu"

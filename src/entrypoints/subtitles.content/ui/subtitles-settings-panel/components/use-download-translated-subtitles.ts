@@ -20,6 +20,14 @@ function getMessageTone(
   return message !== null ? DOWNLOAD_TRANSLATED_SUBTITLES_MESSAGE_TONE.Muted : null
 }
 
+export function isTranslatedDownloadRunning(phase: TranslatedDownloadPhase) {
+  return (
+    phase === TranslatedDownloadPhase.Checking ||
+    phase === TranslatedDownloadPhase.Preparing ||
+    phase === TranslatedDownloadPhase.Translating
+  )
+}
+
 export function useDownloadTranslatedSubtitles() {
   const status = useAtomValue(translatedSubtitlesDownloadStatusAtom)
   const { downloadTranslatedSubtitles } = useSubtitlesUI()
@@ -57,10 +65,7 @@ export function useDownloadTranslatedSubtitles() {
     [TranslatedDownloadPhase.Checking]: preparingMessage,
   }[status.phase]
   const messageTone = getMessageTone(status.phase, message)
-  const isRunning =
-    status.phase === TranslatedDownloadPhase.Preparing ||
-    status.phase === TranslatedDownloadPhase.Translating ||
-    status.phase === TranslatedDownloadPhase.Checking
+  const isRunning = isTranslatedDownloadRunning(status.phase)
 
   return {
     message,

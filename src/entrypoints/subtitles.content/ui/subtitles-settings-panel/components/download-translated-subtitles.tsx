@@ -1,14 +1,13 @@
-import { IconDownload, IconLanguage, IconLoader2 } from "@tabler/icons-react"
+import { IconLanguage, IconLoader2 } from "@tabler/icons-react"
 import { cva } from "class-variance-authority"
-import { Button } from "@/components/ui/base-ui/button"
 import { i18n } from "@/utils/i18n"
 import { cn } from "@/utils/styles/utils"
 import { DOWNLOAD_TRANSLATED_SUBTITLES_MESSAGE_TONE } from "./download-translated-subtitles.constants"
-import { SubtitlesSettingsItem } from "./subtitles-settings-item"
+import { SubpageMenuEntry } from "./subpage-menu-entry"
 import { useDownloadTranslatedSubtitles } from "./use-download-translated-subtitles"
 
 const downloadTranslatedSubtitlesMessageVariants = cva(
-  "text-xs leading-4 drop-shadow-[0_1px_1px_rgba(0,0,0,0.85)]",
+  "text-xs leading-4 whitespace-normal drop-shadow-[0_1px_1px_rgba(0,0,0,0.85)]",
   {
     variants: {
       tone: {
@@ -24,14 +23,19 @@ const downloadTranslatedSubtitlesMessageVariants = cva(
 
 export function DownloadTranslatedSubtitles() {
   const { message, messageTone, progress, isRunning, download } = useDownloadTranslatedSubtitles()
-  const buttonId = "read-frog-download-translated-subtitles"
   const title = i18n.t("subtitles.actions.downloadTranslated")
 
   return (
-    <SubtitlesSettingsItem
-      icon={<IconLanguage className="size-3.5" />}
+    <SubpageMenuEntry
+      icon={
+        isRunning ? (
+          <IconLoader2 className="size-3.5 animate-spin" />
+        ) : (
+          <IconLanguage className="size-3.5" />
+        )
+      }
       label={
-        <div className="flex min-w-0 flex-col">
+        <span className="flex min-w-0 flex-col">
           <span className="truncate">{title}</span>
           {message && (
             <span
@@ -51,24 +55,12 @@ export function DownloadTranslatedSubtitles() {
               )}
             </span>
           )}
-        </div>
+        </span>
       }
-      labelFor={buttonId}
-    >
-      <Button
-        id={buttonId}
-        type="button"
-        variant="ghost-secondary"
-        size="icon-sm"
-        onClick={download}
-        disabled={isRunning}
-      >
-        {isRunning ? (
-          <IconLoader2 className="size-3.5 animate-spin" />
-        ) : (
-          <IconDownload className="size-3.5" />
-        )}
-      </Button>
-    </SubtitlesSettingsItem>
+      onClick={download}
+      disabled={isRunning}
+      // Busy, not unavailable: the spinner and progress line say so, and stay readable.
+      className="disabled:opacity-100"
+    />
   )
 }
