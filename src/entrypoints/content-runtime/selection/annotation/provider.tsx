@@ -184,8 +184,10 @@ function useAnnotationController(): AnnotationContextValue {
         return false
       }
       // The selection's own highlight paints over the mark; the mark is the
-      // point now.
-      window.getSelection()?.collapseToEnd()
+      // point now. A page may have dropped the range already, and collapsing
+      // an empty selection throws.
+      const selection = window.getSelection()
+      if (selection && selection.rangeCount > 0) selection.collapseToEnd()
 
       const { record } = result
       const preparedText = prepareTranslationText(snapshot.text)
@@ -214,12 +216,15 @@ function useAnnotationController(): AnnotationContextValue {
         preparedText,
         provider,
         translateRequest,
-        selectionContext: toSelectionPromptContext(session.contextSnapshot.paragraphs),
+        selectionContext: toSelectionPromptContext(
+          session.contextSnapshot.paragraphs,
+          snapshot.text,
+        ),
         registerAbortController: (abort) => {
           inFlight.current.set(record.id, abort)
         },
       })
-        .then((output) => {
+        .then(({ output }) => {
           inFlight.current.delete(record.id)
           if (!controller.registry.get(record.id)) return
           const gloss = output.trim()
@@ -267,10 +272,13 @@ function useAnnotationController(): AnnotationContextValue {
   )
 
   // The key annotates like the pen; with nothing selected it lets the page
-  // have the keystroke rather than complain.
+  // have the keystroke rather than complain. Nothing selected means on the
+  // page now: the toolbar keeps the session it recorded after the pen
+  // collapsed the selection, and that word is annotated already.
   useSelectionShortcuts(
     { annotate: enabled ? getAnnotationShortcut(selectionToolbar.annotation) : undefined },
     (_, session) => {
+      if (window.getSelection()?.isCollapsed !== false) return false
       if (!session?.selectionSnapshot.text) return false
       return annotate(session, ANALYTICS_SURFACE.SHORTCUT)
     },

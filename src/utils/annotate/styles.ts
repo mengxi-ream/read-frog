@@ -106,7 +106,8 @@ export const LAYER_CSS = `
   left: 0;
   height: 6px;
   box-sizing: border-box;
-  pointer-events: auto;
+  /* Drawn, never hit: hovering the text is tracked from the pointer (see layer.ts). */
+  pointer-events: none;
 }
 .layer.fallback .u {
   border-top: 1.5px solid ${UNDERLINE_COLOR};

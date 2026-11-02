@@ -1,5 +1,5 @@
 import type { SelectionToolbarTranslateRequestSlice } from "../atoms"
-import type { BackgroundTextStreamSnapshot } from "@/types/background-stream"
+import type { BackgroundTextStreamSnapshot, ThinkingSnapshot } from "@/types/background-stream"
 import type { LLMProviderConfig, TranslateProviderConfig } from "@/types/config/provider"
 import type { SelectionPromptContext } from "@/utils/prompts/selection-context"
 import type { PromptableProviderRef } from "@/utils/providers/provider-ref"
@@ -293,7 +293,8 @@ export function checkSelectionTranslateProvider(
 /**
  * Translates a selection on whichever provider is configured and resolves
  * with the finished text. A hosted or LLM provider streams; `onChunk` sees
- * the stream, and the returned text is its final output.
+ * the stream, and the result is its final output and thinking. A pure
+ * translate provider has no thinking: `null`.
  */
 export async function translateSelection({
   preparedText,
@@ -309,10 +310,10 @@ export async function translateSelection({
   selectionContext?: SelectionPromptContext
   onChunk?: (data: BackgroundTextStreamSnapshot) => void
   registerAbortController: (abortController: AbortController) => void
-}): Promise<string> {
+}): Promise<{ output: string; thinking: ThinkingSnapshot | null }> {
   const handleChunk = onChunk ?? (() => {})
   if (provider.kind === "system") {
-    const snapshot = await translateWithHostedTextStream({
+    return translateWithHostedTextStream({
       preparedText,
       provider,
       translateRequest,
@@ -320,14 +321,13 @@ export async function translateSelection({
       onChunk: handleChunk,
       registerAbortController,
     })
-    return snapshot.output
   }
   if (!isTranslateProviderConfig(provider.config)) {
     throw new Error("The configured provider cannot translate a selection.")
   }
   if (isLLMProviderConfig(provider.config)) {
     const providerConfig = provider.config
-    const snapshot = await translateWithTextStream({
+    return translateWithTextStream({
       preparedText,
       providerId: providerConfig.id,
       providerConfig,
@@ -336,7 +336,11 @@ export async function translateSelection({
       onChunk: handleChunk,
       registerAbortController,
     })
-    return snapshot.output
   }
-  return translateWithStandardProvider({ text: preparedText, provider, translateRequest })
+  const output = await translateWithStandardProvider({
+    text: preparedText,
+    provider,
+    translateRequest,
+  })
+  return { output, thinking: null }
 }

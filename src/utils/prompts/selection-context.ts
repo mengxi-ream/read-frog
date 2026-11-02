@@ -20,13 +20,20 @@ export interface SelectionPromptContext {
   passage: string
 }
 
+const collapseWhitespace = (text: string) => text.replace(/\s+/g, " ").trim()
+const WORD_CHARACTER = /[\p{L}\p{N}]/u
+
 /**
  * The paragraphs a selection sits in, as prompt context, or `undefined` when
  * there is nothing to give: the prompt then comes out byte-identical to one
- * built without context.
+ * built without context. Nothing either when the passage holds no words
+ * beyond the selected `input` (a whole paragraph selected), or does not hold
+ * the input at all (a selection longer than the cut): the passage would only
+ * repeat the input, and the rules would call the input a fragment of itself.
  */
 export function toSelectionPromptContext(
   paragraphs: readonly string[] | null | undefined,
+  input: string,
 ): SelectionPromptContext | undefined {
   const passage = (paragraphs ?? [])
     .map((paragraph) => paragraph.trim())
@@ -34,7 +41,11 @@ export function toSelectionPromptContext(
     .join("\n\n")
     .slice(0, SELECTION_CONTEXT_CHAR_LIMIT)
     .trim()
-  return passage === "" ? undefined : { passage }
+  if (passage === "") return undefined
+  const fragment = collapseWhitespace(input)
+  const flatPassage = collapseWhitespace(passage)
+  if (!flatPassage.includes(fragment)) return undefined
+  return WORD_CHARACTER.test(flatPassage.replace(fragment, "")) ? { passage } : undefined
 }
 
 /**

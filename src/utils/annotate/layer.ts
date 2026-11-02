@@ -7,10 +7,11 @@ import { ANNOTATION_HOST_ATTRIBUTE, GLOSS_GAP_PX, LAYER_CSS, UNDERLINE_OFFSET_PX
 // own text, so a page that re-renders its paragraphs cannot throw them out.
 //
 // Positions are taken relative to the layer's host, which sits at the
-// document's origin and scrolls with it: a window scroll moves host and text
-// together and needs no work. Only a scroller inside the page, a resize or a
-// reflow does, and every relayout reads all rects first and writes all
-// transforms after — interleaving the two is a layout thrash per annotation.
+// document's origin and scrolls with it. Any scroll still relays out — sticky
+// and fixed text does not move with the host, and text can scroll under a
+// fixed header — as do resizes and reflows anywhere on the page, and every
+// relayout reads all rects first and writes all transforms after —
+// interleaving the two is a layout thrash per annotation.
 
 export interface LineRect {
   left: number
@@ -28,6 +29,10 @@ interface LayerEntry {
   text: HTMLElement | null
   remove: HTMLElement
   hoverTimer: ReturnType<typeof setTimeout> | null
+  /** The text's line rects at the last relayout, in viewport px: its hover area. */
+  hitLines: LineRect[]
+  /** Whether the pointer is over the text itself (not the gloss or the button). */
+  textHover: boolean
 }
 
 interface Frame {
@@ -93,6 +98,18 @@ export function mergeLineRects(rects: ArrayLike<DOMRect>): LineRect[] {
     }
   }
   return lines
+}
+
+/**
+ * Whether the page shows the text at a viewport point: not scrolled out of a
+ * container that clips it, not under something painted over it (a fixed
+ * header, a modal). The layer is above everything, so it hides what the page
+ * hides. A point off the viewport cannot be tested and counts as shown.
+ */
+function isTextShownAt(block: Element, host: Element, x: number, y: number): boolean {
+  const root = block.getRootNode() as Document | ShadowRoot
+  const hit = root.elementFromPoint(x, y)
+  return hit === null || hit === host || block.contains(hit) || hit.contains(block)
 }
 
 /**
@@ -196,7 +213,8 @@ export class AnnotationLayer {
   relayout() {
     const host = this.host
     const container = this.container
-    if (!host || !container || !host.isConnected) return
+    if (!host || !container || this.entries.size === 0) return
+    const dialog = this.placeHost(host)
 
     // Read everything first.
     const hostRect = host.getBoundingClientRect()
@@ -204,7 +222,9 @@ export class AnnotationLayer {
     const frames: Frame[] = []
     for (const entry of this.entries.values()) {
       const { block } = entry.record
-      if (!block.isConnected) {
+      // While the layer is in a modal dialog, text outside it is under the
+      // dialog's backdrop, and its glosses would only widen the dialog.
+      if (!block.isConnected || (dialog && !dialog.contains(block))) {
         frames.push({
           entry,
           lines: [],
@@ -231,6 +251,18 @@ export class AnnotationLayer {
       let anchor: LineRect | null = null
       for (const line of lines) {
         if (!anchor || line.right - line.left > anchor.right - anchor.left) anchor = line
+      }
+      if (
+        anchor &&
+        !isTextShownAt(
+          block,
+          host,
+          (anchor.left + anchor.right) / 2,
+          (anchor.top + anchor.bottom) / 2,
+        )
+      ) {
+        lines = []
+        anchor = null
       }
       const natural = entry.text ? entry.text.getBoundingClientRect().width : 0
       frames.push({
@@ -270,10 +302,10 @@ export class AnnotationLayer {
     // Then write everything.
     for (const frame of frames) {
       const { entry, lines, anchor, blockRect } = frame
+      entry.hitLines = lines
       while (entry.lines.length < lines.length) {
         const line = document.createElement("div")
         line.className = "u"
-        this.bindHover(entry, line)
         entry.group.append(line)
         entry.lines.push(line)
       }
@@ -374,6 +406,8 @@ export class AnnotationLayer {
       text,
       remove,
       hoverTimer: null,
+      hitLines: [],
+      textHover: false,
     }
     if (gloss) this.bindHover(entry, gloss)
     this.bindHover(entry, remove)
@@ -384,18 +418,63 @@ export class AnnotationLayer {
   // for a moment after it leaves: CSS :hover alone drops the instant the
   // pointer is in the gap between the gloss and the button.
   private bindHover(entry: LayerEntry, element: HTMLElement) {
-    element.addEventListener("pointerenter", () => {
-      if (entry.hoverTimer !== null) clearTimeout(entry.hoverTimer)
+    element.addEventListener("pointerenter", () => this.showRemove(entry))
+    element.addEventListener("pointerleave", () => this.hideRemoveSoon(entry))
+  }
+
+  private showRemove(entry: LayerEntry) {
+    if (entry.hoverTimer !== null) clearTimeout(entry.hoverTimer)
+    entry.hoverTimer = null
+    entry.group.classList.add("hover")
+  }
+
+  private hideRemoveSoon(entry: LayerEntry) {
+    if (entry.hoverTimer !== null) clearTimeout(entry.hoverTimer)
+    entry.hoverTimer = setTimeout(() => {
       entry.hoverTimer = null
-      entry.group.classList.add("hover")
-    })
-    element.addEventListener("pointerleave", () => {
-      if (entry.hoverTimer !== null) clearTimeout(entry.hoverTimer)
-      entry.hoverTimer = setTimeout(() => {
-        entry.hoverTimer = null
-        entry.group.classList.remove("hover")
-      }, HOVER_GRACE_MS)
-    })
+      entry.group.classList.remove("hover")
+    }, HOVER_GRACE_MS)
+  }
+
+  // The text itself is no hit target — the page keeps its clicks there, even
+  // on a block too tight for a gloss, where the underline sits over the next
+  // line — so hovering it is found from the pointer against its line rects.
+  private hoverAt(event: PointerEvent) {
+    const path = event.composedPath()
+    for (const entry of this.entries.values()) {
+      // On the gloss or the button, their own listeners have it.
+      if (path.includes(entry.group)) continue
+      const over = entry.hitLines.some(
+        (line) =>
+          event.clientX >= line.left &&
+          event.clientX <= line.right &&
+          event.clientY >= line.top &&
+          event.clientY <= line.bottom + UNDERLINE_OFFSET_PX,
+      )
+      if (over && !entry.textHover) {
+        entry.textHover = true
+        this.showRemove(entry)
+      } else if (!over && entry.textHover) {
+        entry.textHover = false
+        this.hideRemoveSoon(entry)
+      }
+    }
+  }
+
+  // A native modal dialog is in the top layer, above any z-index: while text
+  // in one is annotated, the layer is drawn from inside that dialog.
+  private placeHost(host: HTMLElement): HTMLDialogElement | null {
+    let dialog: HTMLDialogElement | null = null
+    for (const { record } of this.entries.values()) {
+      const candidate = record.block.isConnected ? record.block.closest("dialog") : null
+      if (candidate?.open && candidate.matches(":modal")) {
+        dialog = candidate
+        break
+      }
+    }
+    const parent = dialog ?? document.documentElement
+    if (host.parentNode !== parent) parent.append(host)
+    return dialog
   }
 
   // `swap` is the moment the meaning replaces the skeleton: the box may grow
@@ -463,16 +542,25 @@ export class AnnotationLayer {
     const { signal } = controller
     const relayout = () => this.scheduleRelayout()
     window.addEventListener("resize", relayout, { signal })
-    // A window scroll moves the host with the text. Anything else that
-    // scrolls — a column, a dialog — moves the text alone.
-    document.addEventListener(
-      "scroll",
-      (event) => {
-        if (event.target !== document) relayout()
-      },
-      { capture: true, passive: true, signal },
-    )
+    document.addEventListener("scroll", relayout, { capture: true, passive: true, signal })
+    document.addEventListener("pointermove", (event) => this.hoverAt(event), {
+      capture: true,
+      passive: true,
+      signal,
+    })
     document.fonts?.ready.then(relayout, () => {})
+    // Text moves when the page reflows above it without its own block
+    // changing: page translation inserting translations, an image loading,
+    // a section expanding. The document's size, or its nodes, change then.
+    const reflows = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(relayout)
+    reflows?.observe(document.documentElement)
+    if (document.body) reflows?.observe(document.body)
+    const insertions = new MutationObserver(relayout)
+    if (document.body) insertions.observe(document.body, { childList: true, subtree: true })
+    signal.addEventListener("abort", () => {
+      reflows?.disconnect()
+      insertions.disconnect()
+    })
     this.listeners = controller
   }
 }

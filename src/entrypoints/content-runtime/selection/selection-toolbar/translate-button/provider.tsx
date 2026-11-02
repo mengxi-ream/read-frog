@@ -29,7 +29,7 @@ import { SelectionToolbarErrorAlert } from "@/components/ui/selection-popover/se
 import { SelectionToolbarFooterContent } from "@/components/ui/selection-popover/selection-toolbar-footer-content"
 import { SelectionToolbarTitleContent } from "@/components/ui/selection-popover/selection-toolbar-title-content"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
-import { isLLMProviderConfig, isTranslateProviderConfig } from "@/types/config/provider"
+import { isLLMProviderConfig } from "@/types/config/provider"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
 import { classifyFailureReason } from "@/utils/analytics-failure-reason"
 import { classifyResolvedProvider } from "@/utils/analytics-provider"
@@ -52,11 +52,7 @@ import { NoteSuggestionCard } from "../note-suggestion/note-suggestion-card"
 import { useNoteSuggestion } from "../note-suggestion/use-note-suggestion"
 import { useSelectionOpenRequestResolver } from "../use-selection-open-request"
 import { useSelectionShortcuts } from "../use-selection-shortcuts"
-import {
-  translateWithHostedTextStream,
-  translateWithStandardProvider,
-  translateWithTextStream,
-} from "./dispatch"
+import { checkSelectionTranslateProvider, translateSelection } from "./dispatch"
 import { TargetLanguageSelector } from "./target-language-selector"
 import { TranslationContent } from "./translation-content"
 
@@ -139,7 +135,11 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
   const selectionText = activeSession?.selectionSnapshot.text ?? null
   const paragraphsText = activeSession?.contextSnapshot.text ?? selectionText
   const selectionContext = useMemo(
-    () => toSelectionPromptContext(activeSession?.contextSnapshot.paragraphs),
+    () =>
+      toSelectionPromptContext(
+        activeSession?.contextSnapshot.paragraphs,
+        activeSession?.selectionSnapshot.text ?? "",
+      ),
     [activeSession],
   )
   const titleText = getSourceDocumentTitle() || null
@@ -258,26 +258,13 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
       setError(null)
 
       const provider = translateRequest.provider
-      if (!provider) {
+      const precheck = checkSelectionTranslateProvider(provider)
+      if (precheck || !provider) {
         if (runIdRef.current === runId) {
           setIsTranslating(false)
-          setError(createSelectionToolbarPrecheckError("translate", "providerUnavailable"))
-        }
-        void trackFeatureUsed({
-          ...analyticsContext,
-          ...providerAnalytics,
-          char_count: preparedText.length,
-          target_language,
-          outcome: "failure",
-          failure_reason: "precheck",
-        })
-        return
-      }
-
-      if (provider.kind === "local" && !provider.config.enabled) {
-        if (runIdRef.current === runId) {
-          setIsTranslating(false)
-          setError(createSelectionToolbarPrecheckError("translate", "providerDisabled"))
+          setError(
+            createSelectionToolbarPrecheckError("translate", precheck ?? "providerUnavailable"),
+          )
         }
         void trackFeatureUsed({
           ...analyticsContext,
@@ -291,86 +278,30 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
       }
 
       try {
-        let nextTranslatedText = ""
-        if (provider.kind === "system") {
-          setThinking({
-            status: "thinking",
-            text: "",
-          })
+        // Hosted and LLM providers stream, thinking first; a pure translate
+        // provider answers in one go.
+        const streams = provider.kind === "system" || isLLMProviderConfig(provider.config)
+        setThinking(streams ? { status: "thinking", text: "" } : null)
 
-          const nextSnapshot = await translateWithHostedTextStream({
-            preparedText,
-            provider,
-            translateRequest,
-            selectionContext,
-            onChunk: (data) => {
-              if (runIdRef.current === runId) {
-                setTranslatedText(data.output)
-                setThinking(data.thinking)
-              }
-            },
-            registerAbortController: (abortController) => {
-              abortControllerRef.current = abortController
-            },
-          })
-
-          nextTranslatedText = nextSnapshot.output
-          if (runIdRef.current === runId) {
-            setThinking(nextSnapshot.thinking)
-          }
-        } else if (!isTranslateProviderConfig(provider.config)) {
-          if (runIdRef.current === runId) {
-            setIsTranslating(false)
-            setError(createSelectionToolbarPrecheckError("translate", "providerUnavailable"))
-          }
-          void trackFeatureUsed({
-            ...analyticsContext,
-            ...providerAnalytics,
-            char_count: preparedText.length,
-            target_language,
-            outcome: "failure",
-            failure_reason: "precheck",
-          })
-          return
-        } else if (isLLMProviderConfig(provider.config)) {
-          const providerConfig = provider.config
-          setThinking({
-            status: "thinking",
-            text: "",
-          })
-
-          const nextSnapshot = await translateWithTextStream({
-            preparedText,
-            providerId: providerConfig.id,
-            providerConfig,
-            translateRequest,
-            selectionContext,
-            onChunk: (data) => {
-              if (runIdRef.current === runId) {
-                setTranslatedText(data.output)
-                setThinking(data.thinking)
-              }
-            },
-            registerAbortController: (abortController) => {
-              abortControllerRef.current = abortController
-            },
-          })
-
-          nextTranslatedText = nextSnapshot.output
-          if (runIdRef.current === runId) {
-            setThinking(nextSnapshot.thinking)
-          }
-        } else {
-          setThinking(null)
-          nextTranslatedText = await translateWithStandardProvider({
-            text: preparedText,
-            provider,
-            translateRequest,
-          })
-        }
+        const result = await translateSelection({
+          preparedText,
+          provider,
+          translateRequest,
+          selectionContext,
+          onChunk: (data) => {
+            if (runIdRef.current === runId) {
+              setTranslatedText(data.output)
+              setThinking(data.thinking)
+            }
+          },
+          registerAbortController: (abortController) => {
+            abortControllerRef.current = abortController
+          },
+        })
 
         if (runIdRef.current === runId) {
-          setTranslatedText(nextTranslatedText)
+          setThinking(result.thinking)
+          setTranslatedText(result.output)
         }
 
         void trackFeatureUsed({

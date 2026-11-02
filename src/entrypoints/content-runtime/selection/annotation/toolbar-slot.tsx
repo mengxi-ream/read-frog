@@ -43,7 +43,15 @@ export function useAnnotateReveal(toolbarRef: RefObject<HTMLElement | null>, vis
 
   const openReveal = useCallback(() => {
     cancelClose()
-    const left = toolbarRef.current?.getBoundingClientRect().left ?? Number.POSITIVE_INFINITY
+    // Where the toolbar is laid out, not where it is drawn: its bounding rect
+    // counts the shift already applied (or half of it, mid-transition), and
+    // hovering the pen again would take the shift back.
+    const toolbar = toolbarRef.current
+    const parentLeft = toolbar?.offsetParent?.getBoundingClientRect().left
+    const left =
+      toolbar && parentLeft !== undefined
+        ? parentLeft + toolbar.offsetLeft
+        : Number.POSITIVE_INFINITY
     setShift(Math.max(0, ANNOTATE_REVEAL_WIDTH_PX + REVEAL_EDGE_GAP_PX - left))
     setOpen(true)
   }, [cancelClose, toolbarRef])

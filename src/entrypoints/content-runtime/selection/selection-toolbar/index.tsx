@@ -704,7 +704,12 @@ export function SelectionToolbar() {
               <SelectionToolbarMoreMenu />
             </div>
           </div>
-          <CloseButton />
+          {/* Outside the surface, which is positioned now, yet as faded as the
+              bar: the wrapper is not positioned, so the button still sits
+              against the toolbar. */}
+          <div style={{ opacity: "var(--rf-selection-opacity, 1)" }}>
+            <CloseButton />
+          </div>
         </div>
       )}
     </div>

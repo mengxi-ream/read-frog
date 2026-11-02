@@ -16,19 +16,27 @@ const translateConfig: Pick<Config["pageTranslation"], "customPromptsConfig"> = 
 
 describe("toSelectionPromptContext", () => {
   it("joins the paragraphs around the selection", () => {
-    expect(toSelectionPromptContext([" First. ", "", "Second."])).toEqual({
+    expect(toSelectionPromptContext([" First. ", "", "Second."], "First")).toEqual({
       passage: "First.\n\nSecond.",
     })
   })
 
   it("gives nothing when there is no text to give", () => {
-    expect(toSelectionPromptContext(undefined)).toBeUndefined()
-    expect(toSelectionPromptContext([])).toBeUndefined()
-    expect(toSelectionPromptContext(["", "  "])).toBeUndefined()
+    expect(toSelectionPromptContext(undefined, "cat")).toBeUndefined()
+    expect(toSelectionPromptContext([], "cat")).toBeUndefined()
+    expect(toSelectionPromptContext(["", "  "], "cat")).toBeUndefined()
+  })
+
+  it("gives nothing when the passage would only repeat the input", () => {
+    // The whole paragraph selected, give or take its punctuation and line breaks.
+    expect(toSelectionPromptContext(["The cat sat."], "The cat\nsat")).toBeUndefined()
+    // A selection longer than the cut: the passage no longer holds it.
+    const long = "word ".repeat(SELECTION_CONTEXT_CHAR_LIMIT / 4)
+    expect(toSelectionPromptContext([long], long)).toBeUndefined()
   })
 
   it("cuts the passage to the custom actions' limit", () => {
-    const context = toSelectionPromptContext(["x".repeat(SELECTION_CONTEXT_CHAR_LIMIT + 50)])
+    const context = toSelectionPromptContext(["x".repeat(SELECTION_CONTEXT_CHAR_LIMIT + 50)], "x")
 
     expect(context?.passage).toHaveLength(SELECTION_CONTEXT_CHAR_LIMIT)
   })

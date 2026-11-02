@@ -124,6 +124,27 @@ export function isLeadingUnsafe(block: Element): boolean {
   return false
 }
 
+/**
+ * Whether a box around the block now cuts part of it off. A fixed `height`
+ * with hidden overflow does not show in the computed style (that is always
+ * px), so it is caught after a rung is applied: content that fitted before
+ * and overflows now was pushed out by the rung.
+ */
+export function isLeadingClipped(block: Element): boolean {
+  let element: Element | null = block
+  for (let depth = 0; element && depth < CLIP_CHECK_DEPTH; depth += 1) {
+    const { overflowY } = getComputedStyle(element)
+    if (
+      (overflowY === "hidden" || overflowY === "clip") &&
+      element.scrollHeight > element.clientHeight + 1
+    ) {
+      return true
+    }
+    element = element.parentElement
+  }
+  return false
+}
+
 export function applyLeadingRung(element: Element, rung: number): void {
   element.setAttribute(ANNOTATION_LEADING_ATTRIBUTE, String(rung))
 }
