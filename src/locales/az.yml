@@ -1718,6 +1718,7 @@ subtitles:
     aiSubscriptionRequired: Süni intellekt subtitrləri üçün Pro və ya Ultra abunəliyi tələb olunur
     aiPaymentRequired: Süni intellekt subtitrləri yaratmağa davam etmək üçün ödəniş üsulunuzu yeniləyin
     aiVideoTooLong: Bu video süni intellekt subtitrləri üçün həddindən artıq uzundur
+    aiVideoMismatch: Bu video istədiyiniz posta uyğun gəlmir, videonu yenidən açıb təkrar cəhd edin
     aiLiveReplayUnsupported: Canlı yayım yazıları üçün süni intellekt subtitrləri hələ əlçatan deyil
     aiStillProcessing: Transkripsiya hələ davam edir. Nəticəni almaq üçün bir neçə dəqiqə sonra yenidən klikləyin
     aiRequestFailed: Süni intellekt subtitr sorğusu alınmadı, daha sonra yenidən cəhd edin

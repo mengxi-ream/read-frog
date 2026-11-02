@@ -71,6 +71,9 @@ function mapTranscriptError(error: unknown): SubtitlesError {
     // for the quota to reset makes this one work, so offer neither.
     return new ToastSubtitlesError(i18n.t("subtitles.errors.aiVideoTooLong"))
   }
+  if (isORPCPublicAppError(error, "VIDEO_TRANSCRIPTION_VIDEO_MISMATCH")) {
+    return new ToastSubtitlesError(i18n.t("subtitles.errors.aiVideoMismatch"))
+  }
   if (isORPCPublicAppError(error, "VIDEO_TRANSCRIPT_NOT_READY")) {
     // The job is fine, the file just is not written yet.
     return new ToastSubtitlesError(i18n.t("subtitles.errors.aiStillProcessing"))
