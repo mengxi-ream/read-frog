@@ -44,3 +44,17 @@ export const DEFAULT_SELECTION_SPEAK_SHORTCUT_KEY = "Alt+Shift+R"
 export function getSpeakShortcut(speak: { shortcut?: string }) {
   return speak.shortcut ?? DEFAULT_SELECTION_SPEAK_SHORTCUT_KEY
 }
+
+// Annotates the selection: underlines it and writes its meaning between the
+// lines. Alt+Shift, like the other toolbar keys; A is kept by Chrome, so E,
+// for "explain".
+export const DEFAULT_SELECTION_ANNOTATION_SHORTCUT_KEY = "Alt+Shift+E"
+
+// Annotation's key: a config without one has the default key, an empty one has none.
+export function getAnnotationShortcut(annotation: { shortcut?: string }) {
+  return annotation.shortcut ?? DEFAULT_SELECTION_ANNOTATION_SHORTCUT_KEY
+}
+
+// The most text one annotation takes: a word or a phrase, whose meaning fits
+// between two lines, not a passage.
+export const MAX_ANNOTATION_TEXT_LENGTH = 200

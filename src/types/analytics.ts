@@ -13,6 +13,7 @@ export const ANALYTICS_FEATURE = {
   NOTE_SUGGESTION: "note_suggestion",
   NOTE_SAVE: "note_save",
   GLOSSARY: "glossary",
+  WORD_ANNOTATION: "word_annotation",
 } as const
 
 export type AnalyticsFeature = (typeof ANALYTICS_FEATURE)[keyof typeof ANALYTICS_FEATURE]
@@ -33,6 +34,8 @@ export const ANALYTICS_SURFACE = {
   VIDEO_SUBTITLES_AUTO: "video_subtitles_auto",
   PAGE_TRANSLATION: "page_translation",
   TTS_SETTINGS: "tts_settings",
+  /** The selection toolbar's annotation mode: every selection annotates. */
+  ANNOTATION_MODE: "annotation_mode",
 } as const
 
 export type AnalyticsSurface = (typeof ANALYTICS_SURFACE)[keyof typeof ANALYTICS_SURFACE]
@@ -106,6 +109,7 @@ export interface SurfaceByFeature {
   note_suggestion: "selection_toolbar"
   note_save: "selection_toolbar" | "video_subtitles"
   glossary: "page_translation" | "video_subtitles" | "selection_toolbar" | "input_translation"
+  word_annotation: "selection_toolbar" | "shortcut" | "annotation_mode"
 }
 
 export type FeatureUsageContext<F extends AnalyticsFeature = AnalyticsFeature> = {
@@ -139,6 +143,7 @@ export interface ObservedByFeature {
         is_guide: boolean
       }
   glossary: { target_language: LangCodeISO6393 }
+  word_annotation: { char_count: number; target_language: LangCodeISO6393 }
 }
 
 export interface FeatureUsedEventBase extends FeatureProviderAnalytics {

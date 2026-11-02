@@ -310,7 +310,7 @@ options:
         noteSuggestion: Gợi ý ghi chú
       descriptions:
         pageTranslation: Dịch toàn bộ trang ở chế độ song ngữ hoặc thay thế bản gốc.
-        selectionTranslation: Dịch đoạn văn bản bạn chọn từ thanh công cụ bôi đen.
+        selectionTranslation: "Dịch văn bản bạn chọn; nghĩa của chú thích từ cũng lấy từ đây."
         inputTranslation: Dịch nội dung bạn gõ trong ô nhập trước khi gửi.
         videoSubtitles: Dịch phụ đề hiện ra trong trình phát video.
         noteSuggestion: Gợi ý các từ đáng lưu vào Notebase sau khi dịch vùng chọn.
@@ -548,6 +548,9 @@ options:
     selectionSpeak:
       title: "Đọc vùng chọn"
       description: "Đọc to văn bản đã chọn. Nhấn lần nữa để dừng."
+    selectionAnnotation:
+      title: "Chú thích"
+      description: "Gạch chân văn bản đã chọn và ghi nghĩa của nó giữa các dòng."
     actions:
       title: "Hành động AI"
       description: "Chạy một hành động AI trên văn bản đã chọn. Hành động tùy chỉnh chưa có phím tắt cho đến khi bạn đặt ở đây."
@@ -620,6 +623,14 @@ options:
     enable:
       title: Bật thanh công cụ chọn văn bản
       description: Hiển thị thanh công cụ khi chọn văn bản trên trang web để dịch nhanh, đọc to và dùng các hành động AI
+    annotation:
+      title: "Chú thích từ"
+      enable:
+        title: "Bật"
+        description: "Gạch chân từ hoặc cụm từ đã chọn và ghi nghĩa của nó giữa các dòng"
+      provider:
+        title: "Nhà cung cấp"
+        description: "Tạo ra nghĩa; dùng chung cài đặt với Dịch"
     actions:
       title: Hành động
       translate:
@@ -1559,6 +1570,19 @@ translation:
   sameLanguage: Ngôn ngữ nguồn và đích phải khác nhau
   autoModeSameLanguage: Ngôn ngữ phát hiện '$1' giống với ngôn ngữ đích
   extensionContextInvalidated: Tiện ích đã được cập nhật. Hãy tải lại trang này rồi thử lại.
+annotation:
+  annotate: "Chú thích"
+  enterMode: "Chế độ chú thích"
+  exitMode: "Thoát chế độ chú thích"
+  modeLabel: "Chế độ chú thích"
+  noTextSelected: "Chưa chọn văn bản"
+  tooLong: "Hãy chọn một từ hoặc cụm từ ngắn để chú thích"
+  multipleParagraphs: "Hãy chọn văn bản trong cùng một đoạn để chú thích"
+  translatedTextUnsupported: "Không thể chú thích văn bản đã dịch"
+  unsupportedPlace: "Không thể chú thích văn bản ở đây"
+  markOnly: "Đã đánh dấu. Giữa các dòng này không có chỗ cho nghĩa."
+  failed: "Không lấy được nghĩa"
+  remove: "Xóa chú thích"
 speak:
   languageDetectionFallback: Đã chuyển sang phát hiện ngôn ngữ cục bộ
   languageDetectionSettingsHint: Trong Cài đặt, chọn LLM khả dụng hoặc phát hiện cục bộ.

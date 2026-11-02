@@ -311,7 +311,7 @@ options:
         noteSuggestion: 猜你想存
       descriptions:
         pageTranslation: 翻譯整個網頁，雙語對照或直接取代原文。
-        selectionTranslation: 透過劃詞工具列翻譯你選取的文字。
+        selectionTranslation: "翻譯你選取的文字；劃詞標註的釋義也由它產生。"
         inputTranslation: 在送出前翻譯你寫在輸入框裡的內容。
         videoSubtitles: 翻譯影片播放器中隨播放出現的字幕。
         noteSuggestion: 選取文字翻譯後，推薦值得存入筆記庫的詞條。
@@ -549,6 +549,9 @@ options:
     selectionSpeak:
       title: "選取文字朗讀"
       description: "朗讀選取的文字，再按一次停止。"
+    selectionAnnotation:
+      title: "劃詞標註"
+      description: "為選取的文字加上底線，並在行間顯示釋義。"
     actions:
       title: "AI 指令"
       description: "對選取的文字執行 AI 指令。自訂指令預設沒有快速鍵，在這裡設定即可。"
@@ -621,6 +624,14 @@ options:
     enable:
       title: 啟用選取工具列
       description: 在網頁上選取文字時顯示工具列，快速翻譯、朗讀和使用 AI 指令
+    annotation:
+      title: "劃詞標註"
+      enable:
+        title: "啟用"
+        description: "為選取的詞或短語加上底線，並在行間寫出釋義"
+      provider:
+        title: "提供者"
+        description: "產生釋義；與「翻譯」共用同一個設定"
     actions:
       title: 操作
       translate:
@@ -1569,6 +1580,19 @@ translation:
   sameLanguage: 來源語言和目標語言必須不同
   autoModeSameLanguage: 偵測到的語言「$1」與目標語言相同
   extensionContextInvalidated: 擴充功能已更新，請重新整理此頁面後再試一次。
+annotation:
+  annotate: "劃詞標註"
+  enterMode: "進入劃詞模式"
+  exitMode: "退出劃詞模式"
+  modeLabel: "劃詞模式"
+  noTextSelected: "沒有選取文字"
+  tooLong: "請選擇一個詞或短語來標註"
+  multipleParagraphs: "請在同一段落內選取文字來標註"
+  translatedTextUnsupported: "譯文無法標註"
+  unsupportedPlace: "這裡的文字無法標註"
+  markOnly: "已標記。這幾行之間放不下釋義。"
+  failed: "無法取得釋義"
+  remove: "移除標註"
 speak:
   languageDetectionFallback: 已改用本機語言偵測
   languageDetectionSettingsHint: 可在設定中更換可用的大型語言模型，或選擇本機偵測。

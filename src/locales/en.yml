@@ -311,7 +311,7 @@ options:
         noteSuggestion: Note suggestions
       descriptions:
         pageTranslation: Translates the whole page in bilingual or replace mode.
-        selectionTranslation: Translates the text you select from the selection toolbar.
+        selectionTranslation: "Translates the text you select; word annotations use it too."
         inputTranslation: Translates what you type into an input box before you send it.
         videoSubtitles: Translates subtitles as they appear in a video player.
         noteSuggestion: Suggests words worth saving to your Notebase after a selection translation.
@@ -549,6 +549,9 @@ options:
     selectionSpeak:
       title: "Read aloud"
       description: "Read the text you selected aloud. Press again to stop."
+    selectionAnnotation:
+      title: "Annotate"
+      description: "Underline the text you selected and write its meaning between the lines."
     actions:
       title: "AI actions"
       description: "Run an AI action on the text you selected. Custom actions have no key until you set one here."
@@ -621,6 +624,14 @@ options:
     enable:
       title: Enable selection toolbar
       description: Display the toolbar when selecting text on web pages for quick translation, speech, and AI actions
+    annotation:
+      title: "Word annotation"
+      enable:
+        title: "Enable"
+        description: "Underline the selected word or phrase and write its meaning between the lines"
+      provider:
+        title: "Provider"
+        description: "Produces the meaning; the same setting as Translate"
     actions:
       title: Actions
       translate:
@@ -1706,6 +1717,19 @@ translation:
   sameLanguage: Source and target languages must be different
   autoModeSameLanguage: Detected language '$1' is the same as target language
   extensionContextInvalidated: The extension was updated. Refresh this page and try again.
+annotation:
+  annotate: "Annotate"
+  enterMode: "Annotation mode"
+  exitMode: "Exit annotation mode"
+  modeLabel: "Annotation mode"
+  noTextSelected: "No text selected"
+  tooLong: "Select a word or a short phrase to annotate"
+  multipleParagraphs: "Select text within one paragraph to annotate"
+  translatedTextUnsupported: "Translated text can't be annotated"
+  unsupportedPlace: "This text can't be annotated here"
+  markOnly: "Marked. There is no room between these lines for its meaning."
+  failed: "Couldn't get the meaning"
+  remove: "Remove annotation"
 speak:
   languageDetectionFallback: Using local language detection
   languageDetectionSettingsHint: In Settings, choose an available LLM or switch to local detection.

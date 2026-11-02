@@ -6,6 +6,8 @@ import {
   SELECTION_CONTENT_OVERLAY_LAYERS,
   SELECTION_CONTENT_OVERLAY_ROOT_ATTRIBUTE,
 } from "@/utils/constants/selection-overlay-layers"
+import { AnnotationModePill } from "./annotation/mode-pill"
+import { AnnotationProvider } from "./annotation/provider"
 import { useInputTranslation } from "./input-translation"
 import { SelectionToolbar } from "./selection-toolbar"
 import { SelectionCustomActionProvider } from "./selection-toolbar/custom-action-button/provider"
@@ -48,7 +50,10 @@ export default function App({
       <SelectionTranslationProvider>
         <SelectionCustomActionProvider>
           <SelectionSpeechProvider>
-            <SelectionToolbar />
+            <AnnotationProvider>
+              <SelectionToolbar />
+              <AnnotationModePill />
+            </AnnotationProvider>
           </SelectionSpeechProvider>
         </SelectionCustomActionProvider>
       </SelectionTranslationProvider>

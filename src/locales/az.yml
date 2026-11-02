@@ -311,7 +311,7 @@ options:
         noteSuggestion: Qeyd təklifləri
       descriptions:
         pageTranslation: Bütün səhifəni ikidilli və ya əvəzetmə rejimində tərcümə edir.
-        selectionTranslation: Seçdiyiniz mətni seçim alətlər paneli vasitəsilə tərcümə edir.
+        selectionTranslation: "Seçdiyiniz mətni tərcümə edir; söz qeydlərinin mənası da buradan gəlir."
         inputTranslation: Mətn sahəsinə yazdığınızı göndərməzdən əvvəl tərcümə edir.
         videoSubtitles: Subtitrləri video pleyerdə göründükcə tərcümə edir.
         noteSuggestion: Seçilmiş mətn tərcümə edildikdən sonra Notebase daxilində saxlamağa dəyər sözlər təklif edir.
@@ -549,6 +549,9 @@ options:
     selectionSpeak:
       title: "Seçilmiş mətnin səsləndirilməsi"
       description: "Seçilmiş mətni ucadan oxuyun. Dayandırmaq üçün yenidən basın."
+    selectionAnnotation:
+      title: "Qeyd əlavə et"
+      description: "Seçilmiş mətnin altını cızır və mənasını sətirlər arasına yazır."
     actions:
       title: "Süni intellekt əməliyyatları"
       description: "Seçilmiş mətn üzərində süni intellekt əməliyyatı işə salın. Fərdi əməliyyatların burada təyin edənə qədər qısayolu olmur."
@@ -621,6 +624,14 @@ options:
     enable:
       title: Seçim alətlər panelini aktiv et
       description: Sürətli tərcümə, səsləndirmə və süni intellekt əməliyyatları üçün veb səhifələrdə mətn seçərkən alətlər panelini göstərin
+    annotation:
+      title: "Söz qeydləri"
+      enable:
+        title: "Aktivləşdir"
+        description: "Seçilmiş sözün və ya ifadənin altını cızır və mənasını sətirlər arasına yazır"
+      provider:
+        title: "Provayder"
+        description: "Mənanı yaradır; Tərcümə ilə eyni ayardır"
     actions:
       title: Əməliyyatlar
       translate:
@@ -1564,6 +1575,19 @@ translation:
   sameLanguage: Mənbə və hədəf dilləri fərqli olmalıdır
   autoModeSameLanguage: Aşkarlanan '$1' dili hədəf dili ilə eynidir
   extensionContextInvalidated: Genişlənmə yeniləndi. Bu səhifəni yeniləyib yenidən cəhd edin.
+annotation:
+  annotate: "Qeyd əlavə et"
+  enterMode: "Qeyd rejimi"
+  exitMode: "Qeyd rejimindən çıx"
+  modeLabel: "Qeyd rejimi"
+  noTextSelected: "Mətn seçilməyib"
+  tooLong: "Qeyd əlavə etmək üçün bir söz və ya qısa ifadə seçin"
+  multipleParagraphs: "Qeyd əlavə etmək üçün eyni abzas daxilində mətn seçin"
+  translatedTextUnsupported: "Tərcümə olunmuş mətnə qeyd əlavə etmək olmaz"
+  unsupportedPlace: "Buradakı mətnə qeyd əlavə etmək olmaz"
+  markOnly: "İşarələndi. Bu sətirlər arasında mənası üçün yer yoxdur."
+  failed: "Mənanı almaq mümkün olmadı"
+  remove: "Qeydi sil"
 speak:
   languageDetectionFallback: Yerli dil aşkarlanmasına keçildi
   languageDetectionSettingsHint: Ayarlarda işlək LLM seçin və ya yerli aşkarlamaya keçin.

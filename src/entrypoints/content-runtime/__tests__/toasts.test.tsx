@@ -36,6 +36,14 @@ vi.mock("../selection/selection-toolbar/translate-button/provider", () => ({
   SelectionTranslationProvider: ({ children }: { children: ReactNode }) => children,
 }))
 
+vi.mock("../selection/annotation/provider", () => ({
+  AnnotationProvider: ({ children }: { children: React.ReactNode }) => children,
+}))
+
+vi.mock("../selection/annotation/mode-pill", () => ({
+  AnnotationModePill: () => null,
+}))
+
 vi.mock("../side/components/floating-button", () => ({
   default: () => null,
 }))
