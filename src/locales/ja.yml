@@ -175,7 +175,7 @@ options:
     badges:
       featureCount: $1 件の機能
       sponsor: スポンサー
-      sponsorJalapenoCloud: CN¥1 無料
+      sponsorJalapenoCloud: $$1 無料
     dialog:
       title: 新しいプロバイダーを追加
       groups:

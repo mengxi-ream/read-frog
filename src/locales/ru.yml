@@ -175,7 +175,7 @@ options:
     badges:
       featureCount: $1 функций
       sponsor: Спонсор
-      sponsorJalapenoCloud: CN¥1 бесплатно
+      sponsorJalapenoCloud: $$1 бесплатно
     dialog:
       title: Добавить нового провайдера
       groups:

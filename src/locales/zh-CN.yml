@@ -175,7 +175,7 @@ options:
     badges:
       featureCount: $1 个功能
       sponsor: 赞助
-      sponsorJalapenoCloud: ¥1 免费额度
+      sponsorJalapenoCloud: $$1 免费额度
     dialog:
       title: 添加新提供商
       groups:

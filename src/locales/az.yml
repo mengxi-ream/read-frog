@@ -175,7 +175,7 @@ options:
     badges:
       featureCount: $1 funksiya
       sponsor: Dəstəkçi
-      sponsorJalapenoCloud: CN¥1 hədiyyə
+      sponsorJalapenoCloud: $$1 hədiyyə
     dialog:
       title: Yeni provayder əlavə et
       groups:
