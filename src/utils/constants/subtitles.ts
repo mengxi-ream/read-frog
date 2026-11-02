@@ -100,6 +100,8 @@ export const BILIBILI_PLAYER_SELECTOR = ".bpx-player-container"
 export const BILIBILI_VIDEO_AREA_SELECTOR = ".bpx-player-video-area"
 export const BILIBILI_CONTROLS_SELECTOR = ".bpx-player-control-wrap"
 export const BILIBILI_CONTROLS_BAR_SELECTOR = ".bpx-player-control-bottom-right"
+// The player's own buttons, which sit at the top of a taller controls row.
+export const BILIBILI_CONTROL_BUTTON_HEIGHT = 22
 export const BILIBILI_NATIVE_SUBTITLES_SELECTOR = ".bpx-player-subtitle-wrap"
 // The player's own signed request; an unsigned one answers with another video's subtitles.
 export const BILIBILI_PLAYER_INFO_URL_PATTERN =

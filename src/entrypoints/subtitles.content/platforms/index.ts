@@ -31,6 +31,9 @@ export interface PlatformConfig {
 
   controls?: ControlsConfig
 
+  /** Height of the translate button's box, for a controls row taller than the buttons it holds. */
+  translateButtonHeight?: number
+
   supportsSidebar?: boolean
 
   getVideoId?: () => string | null

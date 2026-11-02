@@ -683,7 +683,10 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
       removeReactShadowHost(existingButton)
     }
 
-    const toggleButton = renderSubtitlesTranslateButton({ adapter: this })
+    const toggleButton = renderSubtitlesTranslateButton({
+      adapter: this,
+      height: this.config.translateButtonHeight,
+    })
 
     if (this.config.embedded) {
       container.appendChild(toggleButton)

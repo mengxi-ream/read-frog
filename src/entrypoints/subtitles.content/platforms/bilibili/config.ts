@@ -1,5 +1,6 @@
 import type { PlatformConfig } from "@/entrypoints/subtitles.content/platforms"
 import {
+  BILIBILI_CONTROL_BUTTON_HEIGHT,
   BILIBILI_CONTROLS_BAR_SELECTOR,
   BILIBILI_CONTROLS_SELECTOR,
   BILIBILI_NATIVE_SUBTITLES_SELECTOR,
@@ -28,6 +29,7 @@ export function getBilibiliConfig(): PlatformConfig {
       checkVisibility: (container) => container.dataset.ctrlHidden !== "true",
       observe: { attributes: true, attributeFilter: ["data-ctrl-hidden"] },
     },
+    translateButtonHeight: BILIBILI_CONTROL_BUTTON_HEIGHT,
     getVideoId: getBilibiliPartId,
   }
 }
