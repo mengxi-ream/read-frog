@@ -175,7 +175,7 @@ options:
     badges:
       featureCount: $1 개 기능
       sponsor: 스폰서
-      sponsorJalapenoCloud: CN¥1 무료
+      sponsorJalapenoCloud: $$1 무료
     dialog:
       title: 새 제공업체 추가
       groups:

@@ -175,7 +175,7 @@ options:
     badges:
       featureCount: $1 tính năng
       sponsor: Tài trợ
-      sponsorJalapenoCloud: Miễn phí CN¥1
+      sponsorJalapenoCloud: Miễn phí $$1
     dialog:
       title: Thêm nhà cung cấp mới
       groups:

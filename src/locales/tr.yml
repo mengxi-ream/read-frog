@@ -175,7 +175,7 @@ options:
     badges:
       featureCount: $1 özellik
       sponsor: Sponsor
-      sponsorJalapenoCloud: CN¥1 ücretsiz
+      sponsorJalapenoCloud: $$1 ücretsiz
     dialog:
       title: Yeni sağlayıcı ekle
       groups:
