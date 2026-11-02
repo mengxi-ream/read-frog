@@ -47,10 +47,21 @@ export const subtitlesStyleSchema = z.object({
 })
 
 /** The players subtitles get translated on. */
-export const subtitlesPlatformSchema = z.enum(["youtube", "xcom", "netflix"])
+export const subtitlesPlatformSchema = z.enum([
+  "youtube",
+  "xcom",
+  "netflix",
+  "bilibili",
+  "udemy",
+  "edx",
+])
 
-/** Per platform, whether subtitles start translating as soon as a video loads. */
-export const subtitlesAutoStartSchema = z.record(subtitlesPlatformSchema, z.boolean())
+// Per platform, whether subtitles start as a video loads. `.default()` lets a config stored
+// before a platform was added parse until its migration adds it.
+export const subtitlesAutoStartSchema = z.record(
+  subtitlesPlatformSchema,
+  z.boolean().default(false),
+)
 
 export const subtitlePositionSchema = z.object({
   percent: z.number().min(0).max(100),
