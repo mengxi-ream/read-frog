@@ -8,6 +8,7 @@ import { PLAYER_WATCH_POLL_INTERVAL_MS } from "@/utils/constants/subtitles"
 import { pollPlayerSubtitles } from "../poll-player-subtitles"
 
 const calls = vi.hoisted(() => [] as string[])
+const shortcut = vi.hoisted(() => ({ bound: Promise.resolve() }))
 vi.mock("../renderer/mount-subtitles-ui", () => ({
   mountSubtitlesUI: async () => {
     calls.push("mount")
@@ -18,7 +19,10 @@ vi.mock("../renderer/mount-subtitles-ui", () => ({
 }))
 vi.mock("../renderer/mount-subtitles-sidebar", () => ({ mountSubtitlesSidebar: () => {} }))
 vi.mock("../bind-subtitles-toggle-shortcut", () => ({
-  bindSubtitlesToggleShortcut: async () => () => {},
+  bindSubtitlesToggleShortcut: async () => {
+    await shortcut.bound
+    return () => {}
+  },
 }))
 
 let videoId: string | null
@@ -66,6 +70,7 @@ beforeEach(() => {
   calls.length = 0
   invalidated = []
   videoId = "video/1"
+  shortcut.bound = Promise.resolve()
   document.body.innerHTML = ""
 })
 
@@ -85,6 +90,17 @@ describe("pollPlayerSubtitles", () => {
     await tick()
 
     expect(calls).toEqual(["mount", "initialize"])
+  })
+
+  it("starts the adapter without waiting for the shortcut to bind", async () => {
+    const binding = Promise.withResolvers<void>()
+    shortcut.bound = binding.promise
+    addPlayer()
+    start()
+    await tick()
+
+    expect(calls).toEqual(["mount", "initialize"])
+    binding.resolve()
   })
 
   it("remounts before telling the adapter about a new video or a new player", async () => {

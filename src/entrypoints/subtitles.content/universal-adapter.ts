@@ -147,6 +147,8 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
   private retryAfterAdOperationId: number | null = null
   // Set by destroy(); async work that resumes afterwards backs out instead of touching the page.
   private destroyed = false
+  // Bumped by a leave and a navigation reset, so an init still waiting on the old player stops.
+  private playerGeneration = 0
 
   get embedded() {
     return this.config.embedded
@@ -187,12 +189,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
     this.publishVideoId()
     this.initializeTranslatedSubtitlesDownloader()
     void this.restorePosition()
-    void this.renderTranslateButton()
-
-    await this.initializeScheduler()
-    if (this.destroyed) return
-    this.setupAdObserver()
-    await this.tryAutoStartSubtitles()
+    await this.attachPlayer()
     if (this.destroyed) return
     this.setupNavigationListeners()
   }
@@ -234,9 +231,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
     subtitlesStore.set(subtitlesVisibleAtom, false)
     subtitlesStore.set(translatedTrackAtom, [])
     this.showNativeSubtitles()
-
-    const toggleButton = document.getElementById(TRANSLATE_BUTTON_CONTAINER_ID)
-    if (toggleButton) removeReactShadowHost(toggleButton)
+    this.removeTranslateButton()
   }
 
   getControlsConfig(): ControlsConfig | undefined {
@@ -380,6 +375,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
 
   private resetForNavigation() {
     this.switchOperationId++
+    this.playerGeneration++
     this.prepareSummaryForNavigation()
     // Keyed by video id already; this only stops them accumulating.
     queryClient.removeQueries({ queryKey: VIDEO_SUMMARY_QUERY_SCOPE })
@@ -408,12 +404,14 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
   }
 
   private async initializeScheduler() {
+    const generation = this.playerGeneration
     const video = (await waitForElement(
       this.config.selectors.video,
       (el) => !!el.closest(this.config.selectors.playerContainer),
     )) as HTMLVideoElement | null
 
-    if (this.destroyed) return
+    // Waited on a player the page has since left or replaced: no scheduler, and nothing missing.
+    if (this.isPlayerSuperseded(generation)) return
     if (!video) {
       toastManager.add({ type: "error", title: i18n.t("subtitles.errors.videoNotFound") })
       return
@@ -570,10 +568,13 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
   notifyLeave() {
     if (this.destroyed) return
     this.switchOperationId++
+    this.playerGeneration++
     this.hasPendingNavigationReset = false
     this.clearVisibleStateForNavigation()
     // No reset follows to drop the session, and a toggle would resume it on a player that is gone.
     this.clearRuntimeSession()
+    // Its controls may stay hidden or vanish; the next player gets a button of its own.
+    this.removeTranslateButton()
   }
 
   private async handleNavigation() {
@@ -584,12 +585,26 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
 
     this.hasPendingNavigationReset = false
     this.resetForNavigation()
-    void this.renderTranslateButton()
+    await this.attachPlayer()
+  }
 
+  private async attachPlayer() {
+    const generation = this.playerGeneration
+    void this.renderTranslateButton()
     await this.initializeScheduler()
-    if (this.destroyed) return
+    // Left or reset while it waited: the init that follows the player starts subtitles.
+    if (this.isPlayerSuperseded(generation)) return
     this.setupAdObserver()
     await this.tryAutoStartSubtitles()
+  }
+
+  private removeTranslateButton() {
+    const toggleButton = document.getElementById(TRANSLATE_BUTTON_CONTAINER_ID)
+    if (toggleButton) removeReactShadowHost(toggleButton)
+  }
+
+  private isPlayerSuperseded(generation: number) {
+    return this.destroyed || generation !== this.playerGeneration
   }
 
   private isSuperseded(operationId: number) {
@@ -676,8 +691,9 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
       return
     }
 
+    const generation = this.playerGeneration
     const container = await waitForElement(controlsBar)
-    if (this.destroyed) return
+    if (this.isPlayerSuperseded(generation)) return
     if (!container) {
       if (!this.config.embedded) {
         toastManager.add({
@@ -706,8 +722,9 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
   }
 
   private async tryAutoStartSubtitles() {
+    const generation = this.playerGeneration
     const config = await getLocalConfig()
-    if (this.destroyed) return
+    if (this.isPlayerSuperseded(generation)) return
     const autoStart = config?.videoSubtitles?.autoStart?.[this.config.platform] ?? false
 
     const learningOpen = subtitlesStore.get(subtitlesSidebarOpenAtom)

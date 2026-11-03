@@ -33,9 +33,10 @@ export function pollPlayerSubtitles(
   const init = async (current: MountedPlayer) => {
     await mount(current)
     mountSubtitlesSidebar(adapter)
-    ctx.onInvalidated(await bindSubtitlesToggleShortcut(adapter))
+    // Before the shortcut's config read, so a leave during that read meets a running init.
     initialized = true
     void adapter.initialize()
+    ctx.onInvalidated(await bindSubtitlesToggleShortcut(adapter))
   }
 
   const tick = () => {
