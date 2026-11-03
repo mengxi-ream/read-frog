@@ -145,6 +145,8 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
   // load that overlapped one can fail for the video itself. It gets one more try after the ad.
   private adOverlappedLoad = false
   private retryAfterAdOperationId: number | null = null
+  // The start a switch is running: a track check waits for the track it loads.
+  private pendingStart: Promise<boolean> | null = null
   // Set by destroy(); async work that resumes afterwards backs out instead of touching the page.
   private destroyed = false
   // Bumped by a leave and a navigation reset, so an init still waiting on the old player stops.
@@ -377,6 +379,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
   private resetForNavigation() {
     this.switchOperationId++
     this.playerGeneration++
+    this.pendingStart = null
     this.prepareSummaryForNavigation()
     // Keyed by video id already; this only stops them accumulating.
     queryClient.removeQueries({ queryKey: VIDEO_SUMMARY_QUERY_SCOPE })
@@ -824,7 +827,10 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
       this.subtitlesScheduler?.setState("loading", { message })
     }
 
-    const succeeded = await this.startTranslation(options)
+    const start = this.startTranslation(options)
+    this.pendingStart = start
+    const succeeded = await start
+    if (this.pendingStart === start) this.pendingStart = null
     if (operationId !== this.switchOperationId) {
       return
     }
@@ -844,6 +850,10 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
   }
 
   private async refreshSourceTrackIfNeeded(): Promise<void> {
+    // A running start loads the current track, so a switch is checked against what it loaded.
+    while (this.pendingStart) await this.pendingStart
+    if (this.destroyed || this.hasPendingNavigationReset) return
+
     const scheduler = this.subtitlesScheduler
     const isSchedulerActive = !!scheduler?.isActive()
 

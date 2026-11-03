@@ -432,6 +432,49 @@ describe("universalVideoAdapter", () => {
     expect(subtitlesFetcher.fetch).not.toHaveBeenCalled()
   })
 
+  describe("a track check while a start is still loading", () => {
+    function startWithConfigOnHold() {
+      const created = createAdapter([{ text: "hello", start: 0, end: 500 }])
+      attachStartableScheduler(created.adapter)
+      vi.spyOn(created.adapter as any, "hideNativeSubtitles").mockImplementation(() => {})
+      const processSpy = vi
+        .spyOn(created.adapter as any, "processTranslatedSubtitles")
+        .mockResolvedValue(undefined)
+      const config = mocks.getLocalConfig()
+      const configRead = Promise.withResolvers<unknown>()
+      mocks.getLocalConfig.mockReturnValueOnce(configRead.promise)
+      const starting = (created.adapter as any).switchSubtitlesFetcher(SUBTITLES_SOURCE.NATIVE)
+      return { ...created, processSpy, releaseConfig: () => configRead.resolve(config), starting }
+    }
+
+    it("runs one session: it waits for the start, then finds the track it loaded", async () => {
+      const { adapter, subtitlesFetcher, processSpy, releaseConfig, starting } =
+        startWithConfigOnHold()
+      // Before its load the fetcher has no track to call the same.
+      subtitlesFetcher.shouldUseSameTrack.mockImplementation(
+        async () => subtitlesFetcher.fetch.mock.calls.length > 0,
+      )
+
+      const checking = adapter.handleSourceTrackChanged()
+      releaseConfig()
+      await Promise.all([starting, checking])
+
+      expect(processSpy).toHaveBeenCalledOnce()
+    })
+
+    it("still follows a track the site switched to after the start loaded", async () => {
+      const { adapter, subtitlesFetcher, processSpy, releaseConfig, starting } =
+        startWithConfigOnHold()
+
+      const checking = adapter.handleSourceTrackChanged()
+      releaseConfig()
+      await Promise.all([starting, checking])
+
+      expect(subtitlesFetcher.fetch).toHaveBeenCalledTimes(2)
+      expect(processSpy).toHaveBeenCalledTimes(2)
+    })
+  })
+
   it("stops the video it was showing when the page leaves the player", () => {
     const { adapter } = createAdapter([{ text: "hello", start: 0, end: 500 }])
     const subtitlesScheduler = attachScheduler(adapter, true)
