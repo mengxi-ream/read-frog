@@ -85,12 +85,19 @@ export interface BlockText {
   offsets: number[]
 }
 
-/** A walker over `root`'s text nodes and line breaks, skipping what is not read. */
-function createScanWalker(root: Node, onSkipped?: () => void) {
+/**
+ * A walker over `root`'s text nodes and line breaks, skipping what is not
+ * read, and the elements `skips` says to leave out with everything in them.
+ */
+function createScanWalker(
+  root: Node,
+  onSkipped?: () => void,
+  skips?: (element: Element) => boolean,
+) {
   return document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT, {
     acceptNode(node) {
       if (node instanceof Element) {
-        if (isScanSkipped(node)) {
+        if (isScanSkipped(node) || skips?.(node)) {
           onSkipped?.()
           return NodeFilter.FILTER_REJECT
         }
@@ -106,9 +113,15 @@ export function readBlockText(block: Element, resolver: BlockResolver): BlockTex
   const nodes: Text[] = []
   const offsets: number[] = []
   let interrupted = false
-  const walker = createScanWalker(block, () => {
-    interrupted = true
-  })
+  // A block nested in it is not walked: a page's outer blocks would
+  // otherwise walk all the paragraphs they hold each time they change.
+  const walker = createScanWalker(
+    block,
+    () => {
+      interrupted = true
+    },
+    (element) => resolver.blockOf(element) === element,
+  )
   for (let node = walker.nextNode(); node; node = walker.nextNode()) {
     if (node instanceof Element) {
       interrupted = true

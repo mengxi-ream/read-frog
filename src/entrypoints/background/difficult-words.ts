@@ -1,10 +1,9 @@
-import type { VocabEvent, VocabJudgeInput, VocabLang } from "@read-frog/api-contract"
+import type { VocabEvent, VocabJudgeInput } from "@read-frog/api-contract"
 import type { DifficultWordsAccess, DifficultWordsFailure } from "@/utils/difficult-words/types"
 import { ORPCError } from "@orpc/client"
 import { VOCAB_JUDGE_MAX_EVENTS } from "@read-frog/api-contract"
 import { GATED_FEATURES } from "@read-frog/definitions"
 import { browser, storage } from "#imports"
-import { uuidv7 } from "@/utils/difficult-words/uuid"
 import { logger } from "@/utils/logger"
 import { onMessage, sendMessage } from "@/utils/message"
 import { backgroundOrpcClient } from "@/utils/orpc/background-client"
@@ -64,9 +63,21 @@ function isUnsendable(failure: DifficultWordsFailure) {
   return failure.kind === "signedOut" || failure.kind === "restricted" || failure.kind === "error"
 }
 
+/**
+ * The records still to be stored, oldest first.
+ *
+ * An undo goes in the same request as the record it takes back or a later
+ * one, never while that record is on its way in another: the server acks an
+ * undo of a record it has not stored yet and does nothing, and the record,
+ * sent again, would then stand.
+ */
 export class DifficultWordsOutbox {
   private events: VocabEvent[] = []
   private readonly inFlight = new Set<string>()
+  /** Handed to a request at least once, or left from before: the server may have them. */
+  private readonly attempted = new Set<string>()
+  /** By record id: called once the request carrying it settles. */
+  private readonly settleWaiters = new Map<string, Array<() => void>>()
   private loaded: Promise<void> | null = null
   private timer: ReturnType<typeof setTimeout> | null = null
   private retries = 0
@@ -79,7 +90,10 @@ export class DifficultWordsOutbox {
       .then((saved) => {
         if (!Array.isArray(saved)) return
         const known = new Set(this.events.map((event) => event.id))
-        this.events = [...saved.filter((event) => !known.has(event.id)), ...this.events]
+        const left = saved.filter((event) => !known.has(event.id))
+        // They may have gone out before the worker was torn down.
+        for (const event of left) this.attempted.add(event.id)
+        this.events = [...left, ...this.events]
         if (this.events.length > 0) this.schedule(FLUSH_DELAY_MS)
       })
       .catch((error) => {
@@ -99,41 +113,78 @@ export class DifficultWordsOutbox {
     })
   }
 
+  /** Queues records. An undo of a record no request has carried yet drops it instead: neither goes. */
   async add(events: VocabEvent[]) {
     await this.load()
     const known = new Set(this.events.map((event) => event.id))
     const added: VocabEvent[] = []
+    let dropped = false
     for (const event of events) {
       if (known.has(event.id)) continue
       known.add(event.id)
+      if (event.kind === "undo" && this.isUnsent(event.target)) {
+        this.events = this.events.filter((other) => other.id !== event.target)
+        dropped = true
+        continue
+      }
       added.push(event)
     }
-    if (added.length === 0) return
+    if (added.length === 0) {
+      if (dropped) this.persist()
+      return
+    }
     this.events.push(...added)
     this.persist()
     this.retries = 0
     this.schedule(FLUSH_DELAY_MS)
   }
 
-  /** Undo: an unsent record is dropped, one that may have reached the server is taken back. */
-  async takeBack(id: string, lang: VocabLang) {
-    await this.load()
-    const index = this.events.findIndex((event) => event.id === id)
-    if (index !== -1 && !this.inFlight.has(id)) {
-      this.events.splice(index, 1)
-      this.persist()
-      return
+  private isUnsent(id: string) {
+    return (
+      !this.inFlight.has(id) &&
+      !this.attempted.has(id) &&
+      this.events.some((event) => event.id === id)
+    )
+  }
+
+  /**
+   * Waits until no record the undos among `events` take back is on its way,
+   * so a request carrying them can judge with the undos counted.
+   */
+  async afterTargets(events: VocabEvent[]) {
+    const waits: Promise<void>[] = []
+    for (const event of events) {
+      if (event.kind !== "undo" || !this.inFlight.has(event.target)) continue
+      const target = event.target
+      waits.push(
+        new Promise((resolve) => {
+          const waiters = this.settleWaiters.get(target)
+          if (waiters) waiters.push(resolve)
+          else this.settleWaiters.set(target, [resolve])
+        }),
+      )
     }
-    await this.add([{ id: uuidv7(), lang, kind: "undo", target: id, at: new Date().toISOString() }])
+    await Promise.all(waits)
   }
 
   /** The oldest records not already on their way, marked as on their way. */
   async take(): Promise<VocabEvent[]> {
     await this.load()
-    const taken = this.events
-      .filter((event) => !this.inFlight.has(event.id))
-      .slice(0, VOCAB_JUDGE_MAX_EVENTS)
-    for (const event of taken) this.inFlight.add(event.id)
+    const queued = new Set(this.events.map((event) => event.id))
+    const taken: VocabEvent[] = []
+    const takenIds = new Set<string>()
+    for (const event of this.events) {
+      if (taken.length >= VOCAB_JUDGE_MAX_EVENTS) break
+      if (this.inFlight.has(event.id)) continue
+      // Its record is on its way in another request: the undo waits for it.
+      if (event.kind === "undo" && queued.has(event.target) && !takenIds.has(event.target)) continue
+      taken.push(event)
+      takenIds.add(event.id)
+    }
+    for (const event of taken) {
+      this.inFlight.add(event.id)
+      this.attempted.add(event.id)
+    }
     if (taken.length > 0 && this.timer) {
       clearTimeout(this.timer)
       this.timer = null
@@ -153,7 +204,13 @@ export class DifficultWordsOutbox {
           : new Set<string>()
     if (drop.size > 0) {
       this.events = this.events.filter((event) => !drop.has(event.id))
+      for (const id of drop) this.attempted.delete(id)
       this.persist()
+    }
+    // The requests waiting on these go on once this returns, with the queue as it is now.
+    for (const event of sent) {
+      for (const resolve of this.settleWaiters.get(event.id) ?? []) resolve()
+      this.settleWaiters.delete(event.id)
     }
     // Sent and still queued, a failure or a record the server did not take:
     // tried again a little later, a few times, never straight away.
@@ -257,7 +314,10 @@ export function setupDifficultWordsHandlers() {
 
   onMessage("judgeDifficultWords", async (message) => {
     const { own, blocks, events: newEvents } = message.data
-    if (newEvents?.length) await outbox.add(newEvents)
+    if (newEvents?.length) {
+      await outbox.add(newEvents)
+      await outbox.afterTargets(newEvents)
+    }
     const events = await outbox.take()
     try {
       const output = await backgroundOrpcClient.vocab.judge({
@@ -279,10 +339,6 @@ export function setupDifficultWordsHandlers() {
 
   onMessage("recordDifficultWordEvents", async (message) => {
     await outbox.add(message.data.events)
-  })
-
-  onMessage("takeBackDifficultWordEvent", async (message) => {
-    await outbox.takeBack(message.data.id, message.data.lang)
   })
 
   // A word the reader knows is unmarked in every open page, not just this one.

@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { afterEach, describe, expect, it } from "vitest"
+import { afterEach, describe, expect, it, vi } from "vitest"
 import {
   BlockDiscovery,
   BlockResolver,
@@ -51,6 +51,17 @@ describe("readBlockText", () => {
 
     expect(text).toBe("First part\nsecond\nthird")
     expect(nodes.map((node) => node.data)).toEqual(["First ", "part", "second", "third"])
+  })
+
+  it("does not walk into the blocks nested in it", () => {
+    mount("<div id='d'>Intro<p>one <b id='b'>two</b></p>outro</div>")
+    const resolver = new BlockResolver()
+    const blockOf = vi.spyOn(resolver, "blockOf")
+
+    const { text } = readBlockText(document.querySelector("#d")!, resolver)
+
+    expect(text).toBe("Intro\noutro")
+    expect(blockOf).not.toHaveBeenCalledWith(document.querySelector("#b"))
   })
 
   it("leaves out code, form controls and editable text, keeping the words around them apart", () => {

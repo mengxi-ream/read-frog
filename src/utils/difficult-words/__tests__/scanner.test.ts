@@ -140,6 +140,35 @@ async function settle() {
 
 const PARAGRAPH = "The ubiquitous cat sat on the ubiquitous mat."
 
+const KNOWN: VocabEvent = {
+  id: "0190f5c6-2d0c-7000-8000-000000000001",
+  lang: "eng",
+  kind: "known",
+  word: "ubiquitous",
+  at: "2026-11-03T00:00:00.000Z",
+}
+
+/** Puts `element` on screen, as far as the scanner can tell. */
+function onScreen(element: Element) {
+  vi.spyOn(element, "getBoundingClientRect").mockReturnValue({
+    top: 0,
+    bottom: 20,
+    left: 0,
+    right: 100,
+    width: 100,
+    height: 20,
+  } as DOMRect)
+}
+
+/** A promise held until `release` is called. */
+function hold() {
+  let release!: () => void
+  const held = new Promise<void>((resolve) => {
+    release = resolve
+  })
+  return { held, release }
+}
+
 let scanner: DifficultWordsScanner | null = null
 
 beforeEach(() => {
@@ -381,6 +410,83 @@ describe("DifficultWordsScanner", () => {
     expect(host.record).toHaveBeenCalledTimes(1)
   })
 
+  it("sends again, with the records, a paragraph on screen still on its way, and keeps only that answer", async () => {
+    document.body.innerHTML = `<p id="a">${PARAGRAPH}</p>`
+    const card = hold()
+    const withWord = judgeHard(["ubiquitous"])
+    const host = createHost(async (blocks) => {
+      // The card's request, judged before the undo: it comes back last.
+      if (host.judge.mock.calls.length === 2) {
+        await card.held
+        return judgeHard([])(blocks)
+      }
+      return withWord(blocks)
+    })
+    const started = await startScanner(host)
+    scanner = started.scanner
+    started.observer.fire([$("#a")])
+    await flush()
+    onScreen($("#a"))
+    const undo: VocabEvent = {
+      id: "0190f5c6-2d0c-7000-8000-000000000002",
+      lang: "eng",
+      kind: "undo",
+      target: KNOWN.id,
+      at: "2026-11-03T00:00:01.000Z",
+    }
+
+    scanner.refreshVisible([KNOWN])
+    await settle()
+    scanner.refreshVisible([undo])
+    await settle()
+
+    expect(host.judge).toHaveBeenCalledTimes(3)
+    expect(host.judge.mock.calls[2]).toEqual([[expect.objectContaining({ id: "b1" })], [undo]])
+    card.release()
+    await settle()
+    expect(painted()).toEqual(["ubiquitous", "ubiquitous"])
+  })
+
+  it("drops the answer for a paragraph the page removed while it was being judged", async () => {
+    document.body.innerHTML = `<p id="a">${PARAGRAPH}</p>`
+    const answerHeld = hold()
+    const judge = judgeHard(["ubiquitous"])
+    const host = createHost(async (blocks) => {
+      await answerHeld.held
+      return judge(blocks)
+    })
+    const started = await startScanner(host)
+    scanner = started.scanner
+    started.observer.fire([$("#a")])
+    await flush()
+
+    $("#a").remove()
+    await vi.advanceTimersByTimeAsync(100)
+    answerHeld.release()
+    await settle()
+
+    expect(painted()).toEqual([])
+    expect(scanner.count).toBe(0)
+  })
+
+  it("watches the paragraphs a page adds, not the elements they are added to", async () => {
+    document.body.innerHTML = `<div id="feed"><p id="a">${PARAGRAPH}</p></div><p id="blank"> </p>`
+    const host = createHost(judgeHard(["ubiquitous"]))
+    const started = await startScanner(host)
+    scanner = started.scanner
+    expect(started.observer.observed).toEqual(new Set([$("#a")]))
+
+    const item = document.createElement("p")
+    item.id = "b"
+    item.textContent = PARAGRAPH
+    $("#feed").append(item)
+    document.body.append(document.createElement("div"))
+    ;($("#blank").firstChild as Text).data = PARAGRAPH
+    await vi.advanceTimersByTimeAsync(100)
+
+    expect(started.observer.observed).toEqual(new Set([$("#a"), $("#b"), $("#blank")]))
+  })
+
   it("asks for a level, and judges the paragraphs waiting for it once it is given", async () => {
     document.body.innerHTML = `<p id="a">${PARAGRAPH}</p>`
     let hasLevel = false
@@ -394,7 +500,7 @@ describe("DifficultWordsScanner", () => {
     scanner = started.scanner
     started.observer.fire([$("#a")])
     await flush()
-    expect(host.onNeedsLevel).toHaveBeenCalledWith(["eng"])
+    expect(host.onNeedsLevel).toHaveBeenCalledWith(["eng"], expect.any(Number))
     expect(painted()).toEqual([])
 
     hasLevel = true
@@ -450,6 +556,55 @@ describe("DifficultWordsScanner", () => {
       expect(host.judge).toHaveBeenCalledTimes(2)
       await vi.advanceTimersByTimeAsync(1)
       expect(host.judge).toHaveBeenCalledTimes(3)
+    })
+
+    it("tries again at once when the connection comes back", async () => {
+      document.body.innerHTML = `<p id="a">${PARAGRAPH}</p>`
+      let online = false
+      const judge = judgeHard(["ubiquitous"])
+      const host = createHost((blocks) =>
+        online ? judge(blocks) : { ok: false, failure: { kind: "offline" } },
+      )
+      const started = await startScanner(host)
+      scanner = started.scanner
+      started.observer.fire([$("#a")])
+      await flush()
+      expect(host.judge).toHaveBeenCalledTimes(1)
+
+      online = true
+      window.dispatchEvent(new Event("online"))
+      await settle()
+
+      expect(host.judge).toHaveBeenCalledTimes(2)
+      expect(painted()).toEqual(["ubiquitous", "ubiquitous"])
+    })
+
+    it("reads again a paragraph that changed while a request for it failed", async () => {
+      document.body.innerHTML = `<p id="a">${PARAGRAPH}</p>`
+      const refused = hold()
+      const judge = judgeHard(["ubiquitous", "dog"])
+      const host = createHost(async (blocks) => {
+        if (host.judge.mock.calls.length !== 2) return judge(blocks)
+        await refused.held
+        return { ok: false, failure: { kind: "error" } }
+      })
+      const started = await startScanner(host)
+      scanner = started.scanner
+      started.observer.fire([$("#a")])
+      await flush()
+      onScreen($("#a"))
+      scanner.refreshVisible([KNOWN])
+      await settle()
+
+      $("#a").replaceChildren("The ubiquitous dog.")
+      await vi.advanceTimersByTimeAsync(100)
+      refused.release()
+      await vi.advanceTimersByTimeAsync(100)
+      await flush()
+
+      expect(host.judge).toHaveBeenCalledTimes(3)
+      expect(host.judge.mock.calls[2]![0][0]!.words).toEqual(["The", "ubiquitous", "dog"])
+      expect(painted()).toEqual(["ubiquitous", "dog"])
     })
 
     it("waits out a rate limit until the time the server gives", async () => {

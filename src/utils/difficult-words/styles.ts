@@ -8,7 +8,10 @@ import { highlightName } from "./highlights"
 // (assets/styles/host-theme.css), carried in this sheet because the theme's
 // own sheet only reaches a page that is being translated.
 
-/** On <html> while the pointer is over a marked word: the pointer cursor. */
+/**
+ * On the paragraph of the marked word the pointer is over: the pointer
+ * cursor. On the paragraph, not <html>: each change restyles what it is on.
+ */
 export const DIFFICULT_WORD_HOVER_ATTRIBUTE = "data-read-frog-difficult-word-hover"
 
 function highlightRule(kind: MarkKind, tone: MarkTone, hover: boolean) {
@@ -29,7 +32,7 @@ export function buildDifficultWordsDocumentCss(): string {
     }
   }
   rules.push(
-    `html[${DIFFICULT_WORD_HOVER_ATTRIBUTE}], html[${DIFFICULT_WORD_HOVER_ATTRIBUTE}] * { cursor: pointer !important; }`,
+    `[${DIFFICULT_WORD_HOVER_ATTRIBUTE}], [${DIFFICULT_WORD_HOVER_ATTRIBUTE}] * { cursor: pointer !important; }`,
   )
   return rules.join("\n")
 }

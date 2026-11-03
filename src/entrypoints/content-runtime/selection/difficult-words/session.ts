@@ -117,9 +117,15 @@ export class DifficultWordsSession {
   private readonly listeners = new Set<() => void>()
   private readonly scanner: DifficultWordsScanner
   private readonly dismissedLevels = new Set<VocabLang>()
+  /** Languages waiting to be asked their level, while another is. */
+  private readonly levelQueue: VocabLang[] = []
+  /** When the reader gave a level here, by language. */
+  private readonly levelSavedAt = new Map<VocabLang, number>()
   private pointer: { x: number; y: number } | null = null
   private frame = 0
   private hovered: DifficultWordMark | null = null
+  /** The paragraph wearing the pointer cursor. */
+  private hoveredBlock: Element | null = null
   private overCheck = false
   private showCheckTimer: ReturnType<typeof setTimeout> | null = null
   private hideCheckTimer: ReturnType<typeof setTimeout> | null = null
@@ -140,7 +146,7 @@ export class DifficultWordsSession {
       record: (events) => {
         void sendMessage("recordDifficultWordEvents", { events })
       },
-      onNeedsLevel: (langs) => this.askLevel(langs),
+      onNeedsLevel: (langs, sentAt) => this.askLevel(langs, sentAt),
       onFailure: (failure) => this.showFailure(failure),
       onRecovered: () => toastManager.close(OFFLINE_TOAST_ID),
       onMarksChange: () => this.options.onCountChange(this.scanner.count),
@@ -188,7 +194,8 @@ export class DifficultWordsSession {
     for (const timer of [this.showCheckTimer, this.hideCheckTimer, this.openTimer]) {
       if (timer) clearTimeout(timer)
     }
-    document.documentElement.removeAttribute(DIFFICULT_WORD_HOVER_ATTRIBUTE)
+    this.hoveredBlock?.removeAttribute(DIFFICULT_WORD_HOVER_ATTRIBUTE)
+    this.hoveredBlock = null
     const card = this.view.card
     if (card) {
       this.options.setRequest(null)
@@ -224,10 +231,12 @@ export class DifficultWordsSession {
     this.markKnown(card.mark, true)
   }
 
-  onCardSave = (outcome: SaveToNotebaseOutcome) => {
-    const card = this.view.card
-    if (!card || outcome === "failed") return
-    this.record(card.mark, "save")
+  /**
+   * The card for `mark` saved its word, or tried to. Only a save made counts:
+   * one that opened a dialog to connect a notebase may never happen.
+   */
+  onCardSave = (mark: DifficultWordMark, outcome: SaveToNotebaseOutcome) => {
+    if (outcome === "saved") this.record(mark, "save")
   }
 
   markCheckKnown = () => {
@@ -257,14 +266,15 @@ export class DifficultWordsSession {
       throw error
     }
     if (this.disposed) return
-    this.setView({ levelLang: null })
+    this.levelSavedAt.set(lang, performance.now())
     this.scanner.retryLevel(lang)
+    if (this.view.levelLang === lang) this.askNextLevel()
   }
 
   dismissLevel = () => {
     const lang = this.view.levelLang
     if (lang) this.dismissedLevels.add(lang)
-    this.setView({ levelLang: null })
+    this.askNextLevel()
   }
 
   /** Another tab unmarked a word, or brought it back. */
@@ -314,15 +324,26 @@ export class DifficultWordsSession {
         children: i18n.t("difficultWords.undo"),
         onClick: () => {
           toastManager.close(toastId)
-          if (!this.disposed) this.scanner.showLemma(mark.lang, mark.lemma)
           void sendMessage("broadcastDifficultWordLemma", {
             lang: mark.lang,
             lemma: mark.lemma,
             known: false,
           })
-          if (event) {
-            void sendMessage("takeBackDifficultWordEvent", { id: event.id, lang: mark.lang })
+          const undo: VocabEvent | null = event && {
+            id: uuidv7(),
+            lang: event.lang,
+            kind: "undo",
+            target: event.id,
+            at: new Date().toISOString(),
           }
+          if (this.disposed) {
+            if (undo) void sendMessage("recordDifficultWordEvents", { events: [undo] })
+            return
+          }
+          this.scanner.showLemma(mark.lang, mark.lemma)
+          // What the card judged again without the word is judged again with it back.
+          if (undo && withVisible) this.scanner.refreshVisible([undo])
+          else if (undo) void sendMessage("recordDifficultWordEvents", { events: [undo] })
         },
       },
     })
@@ -345,10 +366,24 @@ export class DifficultWordsSession {
 
   // ---- notices
 
-  private askLevel(langs: VocabLang[]) {
-    if (this.view.levelLang) return
-    const lang = langs.find((candidate) => !this.dismissedLevels.has(candidate))
-    if (lang) this.setView({ levelLang: lang })
+  /** `langs` have no level yet, as a request sent at `sentAt` found. */
+  private askLevel(langs: VocabLang[], sentAt: number) {
+    for (const lang of langs) {
+      const savedAt = this.levelSavedAt.get(lang)
+      if (savedAt !== undefined && sentAt < savedAt) {
+        // Judged before the level given here was saved: judged again with it.
+        this.scanner.retryLevel(lang)
+        continue
+      }
+      if (this.dismissedLevels.has(lang) || this.view.levelLang === lang) continue
+      if (!this.levelQueue.includes(lang)) this.levelQueue.push(lang)
+    }
+    if (!this.view.levelLang && this.levelQueue.length > 0) this.askNextLevel()
+  }
+
+  /** Asks the next language waiting, or closes the picker. */
+  private askNextLevel() {
+    this.setView({ levelLang: this.levelQueue.shift() ?? null })
   }
 
   private showFailure(failure: DifficultWordsFailure) {
@@ -432,7 +467,11 @@ export class DifficultWordsSession {
   private setHovered(mark: DifficultWordMark | null) {
     this.hovered = mark
     this.scanner.setHover(mark)
-    document.documentElement.toggleAttribute(DIFFICULT_WORD_HOVER_ATTRIBUTE, mark !== null)
+    const block = mark?.block ?? null
+    if (block === this.hoveredBlock) return
+    this.hoveredBlock?.removeAttribute(DIFFICULT_WORD_HOVER_ATTRIBUTE)
+    block?.setAttribute(DIFFICULT_WORD_HOVER_ATTRIBUTE, "")
+    this.hoveredBlock = block
   }
 
   private showCheck(mark: DifficultWordMark) {

@@ -202,6 +202,7 @@ function DifficultWordsRuntime() {
   }, [shortcut])
 
   if (!session) return null
+  const card = view.card
 
   return (
     <>
@@ -211,7 +212,10 @@ function DifficultWordsRuntime() {
         mountKey={view.card?.key ?? 0}
         onClose={session.closeCard}
         onKnown={session.markCardKnown}
-        onSave={session.onCardSave}
+        onSave={(outcome) => {
+          // The card that was pressed: the save may end after another word's opened.
+          if (card) session.onCardSave(card.mark, outcome)
+        }}
         isOverMark={session.isOverMark}
       />
       {view.check && (

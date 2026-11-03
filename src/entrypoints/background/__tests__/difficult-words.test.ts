@@ -49,6 +49,17 @@ function event(word = "ubiquitous"): VocabEvent {
   }
 }
 
+function undoOf(record: VocabEvent): VocabEvent {
+  nextEvent += 1
+  return {
+    id: `0190f5c6-2d0c-7000-8000-${String(nextEvent).padStart(12, "0")}`,
+    lang: record.lang,
+    kind: "undo",
+    target: record.id,
+    at: "2026-11-03T00:00:01.000Z",
+  }
+}
+
 type Send = (input: VocabJudgeInput) => Promise<{ acked: string[] }>
 
 function ackAll(input: VocabJudgeInput) {
@@ -141,26 +152,66 @@ describe("DifficultWordsOutbox", () => {
     expect(store.get(OUTBOX_KEY)).toEqual([])
   })
 
-  it("drops an unsent record taken back, and sends an undo for one already on its way", async () => {
+  it("drops an undo and its record together while no request has carried the record", async () => {
     const send = vi.fn<Send>(ackAll)
     const outbox = new DifficultWordsOutbox(send)
-    const unsent = event()
-    await outbox.add([unsent])
-    await outbox.takeBack(unsent.id, "eng")
+    const record = event()
+    await outbox.add([record])
+
+    await outbox.add([undoOf(record)])
+    await vi.advanceTimersByTimeAsync(300)
+
+    expect(send).not.toHaveBeenCalled()
+    expect(store.get(OUTBOX_KEY)).toEqual([])
+  })
+
+  it("holds an undo while its record is on its way, and sends it once the record is stored", async () => {
+    const send = vi.fn<Send>(ackAll)
+    const outbox = new DifficultWordsOutbox(send)
+    const record = event()
+    await outbox.add([record])
+    // A page's request carries it.
+    const carried = await outbox.take()
+    const undo = undoOf(record)
+
+    await outbox.add([undo])
     await vi.advanceTimersByTimeAsync(300)
     expect(send).not.toHaveBeenCalled()
 
-    const sent = event()
-    await outbox.add([sent])
-    // A page's request carries it.
-    expect(await outbox.take()).toEqual([sent])
-    await outbox.takeBack(sent.id, "eng")
-    await vi.advanceTimersByTimeAsync(300)
+    outbox.settle(carried, { acked: [record.id] })
+    await vi.advanceTimersByTimeAsync(0)
 
     expect(send).toHaveBeenCalledTimes(1)
-    expect(send.mock.calls[0]![0].events).toEqual([
-      expect.objectContaining({ kind: "undo", lang: "eng", target: sent.id }),
-    ])
+    expect(send).toHaveBeenCalledWith({ events: [undo] })
+    expect(store.get(OUTBOX_KEY)).toEqual([])
+  })
+
+  it("sends an undo after its record when the request that carried the record failed", async () => {
+    const send = vi.fn<Send>(ackAll)
+    const outbox = new DifficultWordsOutbox(send)
+    const record = event()
+    await outbox.add([record])
+    // It may have been stored all the same.
+    outbox.settle(await outbox.take(), { failure: { kind: "offline" } })
+    const undo = undoOf(record)
+
+    await outbox.add([undo])
+    await vi.advanceTimersByTimeAsync(300)
+
+    expect(send).toHaveBeenCalledWith({ events: [record, undo] })
+  })
+
+  it("takes back with an undo a record left from before, which may have gone out", async () => {
+    const record = event()
+    store.set(OUTBOX_KEY, [record])
+    const send = vi.fn<Send>(ackAll)
+    const outbox = new DifficultWordsOutbox(send)
+    const undo = undoOf(record)
+
+    await outbox.add([undo])
+    await vi.advanceTimersByTimeAsync(300)
+
+    expect(send).toHaveBeenCalledWith({ events: [record, undo] })
   })
 
   it("hands out at most a request's worth of records, none twice", async () => {
@@ -329,6 +380,32 @@ describe("difficult words handlers", () => {
 
       expect(judgeMock).toHaveBeenCalledWith({ own: "cmn", events: [record], blocks })
       expect(response).toEqual({ ok: true, output: { ...output, acked: [record.id] } })
+      expect(store.get(OUTBOX_KEY)).toEqual([])
+    })
+
+    it("judges with an undo only once the request carrying its record has settled", async () => {
+      const record = event()
+      const undo = undoOf(record)
+      let release!: () => void
+      const held = new Promise<void>((resolve) => {
+        release = resolve
+      })
+      judgeMock.mockImplementation(async (input: VocabJudgeInput) => {
+        if (judgeMock.mock.calls.length === 1) await held
+        return { ...output, acked: input.events?.map((entry) => entry.id) ?? [] }
+      })
+
+      const first = ask("judgeDifficultWords", { blocks, events: [record] })
+      await vi.waitFor(() => expect(judgeMock).toHaveBeenCalledTimes(1))
+      const second = ask("judgeDifficultWords", { blocks, events: [undo] })
+      await new Promise((resolve) => setTimeout(resolve, 0))
+      expect(judgeMock).toHaveBeenCalledTimes(1)
+
+      release()
+      await Promise.all([first, second])
+
+      expect(judgeMock).toHaveBeenCalledTimes(2)
+      expect(judgeMock.mock.calls[1]![0]).toEqual({ events: [undo], blocks })
       expect(store.get(OUTBOX_KEY)).toEqual([])
     })
 

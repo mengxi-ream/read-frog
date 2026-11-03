@@ -7,6 +7,7 @@ import { configAtom } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
 import { formatHotkey } from "@/utils/os"
 import { ConfigItem } from "../../components/config-item"
+import { useIsDifficultWordsOpen } from "../difficult-words/access"
 import { findShortcutOwner, getShortcutBindings } from "./shortcut-bindings"
 import { ShortcutTitle } from "./shortcut-title"
 
@@ -36,7 +37,9 @@ export function ShortcutConfigItem({
   onChange: (shortcut: string) => void
   turnOn?: To
 }) {
-  const bindings = getShortcutBindings(useAtomValue(configAtom))
+  const bindings = getShortcutBindings(useAtomValue(configAtom), {
+    difficultWords: useIsDifficultWordsOpen(),
+  })
   const clash = findShortcutOwner(bindings, id, shortcut)
 
   return (

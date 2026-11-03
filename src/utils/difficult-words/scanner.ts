@@ -59,8 +59,11 @@ export interface DifficultWordsScannerHost {
   judge: (blocks: VocabJudgeBlock[], events?: VocabEvent[]) => Promise<DifficultWordsJudgeResponse>
   /** Records with no paragraph to go with them. */
   record: (events: VocabEvent[]) => void
-  /** Languages whose paragraphs wait for the reader's level. */
-  onNeedsLevel: (langs: VocabLang[]) => void
+  /**
+   * Languages whose paragraphs wait for the reader's level, as found by a
+   * request sent at `sentAt` (`performance.now()`).
+   */
+  onNeedsLevel: (langs: VocabLang[], sentAt: number) => void
   onFailure: (failure: DifficultWordsFailure) => void
   /** The server answered again after a failure. */
   onRecovered: () => void
@@ -175,6 +178,9 @@ export class DifficultWordsScanner {
   private readonly mutations = new MutationObserver((records) => this.onMutations(records))
   private readonly onOnline = () => {
     this.pausedUntil = 0
+    // The wait after a failure is cut short, not waited out.
+    if (this.flushTimer) clearTimeout(this.flushTimer)
+    this.flushTimer = null
     this.scheduleFlush(0)
   }
 
@@ -281,11 +287,16 @@ export class DifficultWordsScanner {
 
   /**
    * Sends `events` with the judged paragraphs on screen, so they come back
-   * judged with the records counted.
+   * judged with the records counted. A paragraph already on its way is sent
+   * again with them: the answer it waits for may not count them. One changed
+   * since it went is left to be read again.
    */
   refreshVisible(events: VocabEvent[]) {
     const visible = [...this.near].filter(
-      (block) => block.state === "judged" && block.payload && isOnScreen(block.element),
+      (block) =>
+        (block.state === "judged" || (block.state === "sending" && !block.dirty)) &&
+        block.payload &&
+        isOnScreen(block.element),
     )
     if (this.halted || visible.length === 0) {
       this.host.record(events)
@@ -380,6 +391,8 @@ export class DifficultWordsScanner {
   }
 
   private drop(block: ScanBlock) {
+    // An answer still on its way for it is dropped too.
+    block.seq += 1
     this.intersections.unobserve(block.element)
     this.clearMarks(block)
     this.blocks.delete(block.element)
@@ -532,6 +545,7 @@ export class DifficultWordsScanner {
       return { block, seq: block.seq, payload: block.payload! }
     })
     this.inFlight += 1
+    const sentAt = performance.now()
     let response: DifficultWordsJudgeResponse
     try {
       response = await this.host.judge(
@@ -558,7 +572,9 @@ export class DifficultWordsScanner {
       if (!entry || entry.block.seq !== entry.seq || result.id !== entry.payload.id) return
       this.apply(entry.block, result)
     })
-    if (response.output.needsLevel.length > 0) this.host.onNeedsLevel(response.output.needsLevel)
+    if (response.output.needsLevel.length > 0) {
+      this.host.onNeedsLevel(response.output.needsLevel, sentAt)
+    }
     this.host.onMarksChange()
     this.scheduleFlush(0)
   }
@@ -572,11 +588,16 @@ export class DifficultWordsScanner {
       if (failure.kind === "error") {
         // Refused as sent: not sent again until it changes.
         block.state = block.result ? "judged" : "skipped"
-        continue
+      } else {
+        // Marks already painted stay: they are still the best answer there is.
+        block.state = block.result ? "judged" : "new"
+        if (block.state === "new" && this.near.has(block)) this.pending.add(block)
       }
-      // Marks already painted stay: they are still the best answer there is.
-      block.state = block.result ? "judged" : "new"
-      if (block.state === "new" && this.near.has(block)) this.pending.add(block)
+      // Changed while it was out: read again, as an answer would have it.
+      if (block.dirty) {
+        block.dirty = false
+        if (block.state !== "new") this.rereadSoon(block)
+      }
     }
     this.failing = true
     this.host.onFailure(failure)
@@ -641,7 +662,7 @@ export class DifficultWordsScanner {
     }
     if (block.dirty) {
       block.dirty = false
-      this.markDirty(block.element)
+      this.rereadSoon(block)
     }
   }
 
@@ -715,12 +736,18 @@ export class DifficultWordsScanner {
     block.marks = []
   }
 
+  // Paragraphs being watched are read again when their text changes. New
+  // ones are found in what was added, a text node that was blank included:
+  // an element that only had children come and go (a feed's list, or the
+  // body itself) is no paragraph, and is not watched as one.
   private onMutations(records: MutationRecord[]) {
     for (const record of records) {
       const target = record.target
       if (record.type === "characterData") {
+        if (isInScanSkippedSubtree(target)) continue
         const parent = target.parentElement
-        if (parent && !isInScanSkippedSubtree(target)) this.markDirty(parent)
+        if (parent) this.markDirty(parent)
+        this.added.push(target)
         continue
       }
       if (!(target instanceof Element) || isScanSkipped(target) || isInScanSkippedSubtree(target)) {
@@ -733,14 +760,23 @@ export class DifficultWordsScanner {
       }
       if (record.removedNodes.length > 0) this.sawRemovals = true
     }
+    this.scheduleDirty()
   }
 
-  /** The paragraph `element`'s own text is in changed: read it again soon. */
+  /** The paragraph `element`'s own text is in changed: read it again soon, if it is watched. */
   private markDirty(element: Element) {
     const block = this.resolver.blockOf(element)
-    if (!block) return
-    this.dirty.add(block)
+    if (block && this.blocks.has(block)) this.dirty.add(block)
+  }
+
+  private rereadSoon(block: ScanBlock) {
+    this.dirty.add(block.element)
+    this.scheduleDirty()
+  }
+
+  private scheduleDirty() {
     if (this.disposed || this.dirtyTimer) return
+    if (this.dirty.size === 0 && this.added.length === 0 && !this.sawRemovals) return
     this.dirtyTimer = setTimeout(() => {
       this.dirtyTimer = null
       this.processDirty()
@@ -766,11 +802,7 @@ export class DifficultWordsScanner {
     for (const element of [...this.dirty]) {
       this.dirty.delete(element)
       const block = this.blocks.get(element)
-      if (!block) {
-        if (element.isConnected) this.addBlock(element)
-        continue
-      }
-      changed = this.refresh(block) || changed
+      if (block) changed = this.refresh(block) || changed
     }
     if (changed) this.host.onMarksChange()
   }
