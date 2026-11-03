@@ -47,6 +47,21 @@ describe("markActiveEdxVideo", () => {
     expect(getEdxVideoId()).toBe("second")
   })
 
+  it("moves the mark to a block that starts while another plays on, and keeps it there", () => {
+    const first = addVideoBlock("first")
+    const second = addVideoBlock("second")
+    first.classList.add("is-playing")
+    markActiveEdxVideo()
+    expect(getEdxVideoId()).toBe("first")
+
+    second.classList.add("is-playing")
+    markActiveEdxVideo()
+    expect(getEdxVideoId()).toBe("second")
+
+    markActiveEdxVideo()
+    expect(getEdxVideoId()).toBe("second")
+  })
+
   it("marks nothing when no block plays HTML5 video", () => {
     addVideoBlock("youtube", { html5: false })
 
