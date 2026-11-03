@@ -4,7 +4,10 @@ import { act, fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { TooltipProvider } from "@/components/ui/base-ui/tooltip"
 import { i18n } from "@/utils/i18n"
-import { SelectionToolbarFooterContent } from "../selection-toolbar-footer-content"
+import {
+  SelectionToolbarFooterContent,
+  SelectionToolbarProviderSelect,
+} from "../selection-toolbar-footer-content"
 
 vi.mock("@/components/llm-providers/provider-selector", () => ({
   default: ({
@@ -54,18 +57,22 @@ describe("selectionToolbarFooterContent", () => {
     },
   ]
 
-  it("renders the provider selector and forwards footer actions", async () => {
+  it("renders the host's start slot and forwards footer actions", async () => {
     const onProviderChange = vi.fn<(...args: any[]) => any>()
     const onRegenerate = vi.fn<(...args: any[]) => any>()
 
     render(
       <TooltipProvider>
         <SelectionToolbarFooterContent
+          start={
+            <SelectionToolbarProviderSelect
+              providers={providers}
+              value="google-translate-default"
+              onChange={onProviderChange}
+            />
+          }
           paragraphsText="Context text"
-          providers={providers}
           titleText="Page Title"
-          value="google-translate-default"
-          onProviderChange={onProviderChange}
           onRegenerate={onRegenerate}
         >
           <button type="button">Save to Notebase</button>
@@ -105,10 +112,7 @@ describe("selectionToolbarFooterContent", () => {
       <TooltipProvider>
         <SelectionToolbarFooterContent
           paragraphsText={null}
-          providers={providers}
           titleText=""
-          value="google-translate-default"
-          onProviderChange={vi.fn<(...args: any[]) => any>()}
           onRegenerate={vi.fn<(...args: any[]) => any>()}
         />
       </TooltipProvider>,

@@ -533,6 +533,9 @@ options:
     translationMode:
       title: 翻譯模式
       description: 在雙語對照和僅顯示翻譯之間切換。
+    difficultWords:
+      title: 掃描難詞
+      description: 標出目前頁面上你可能不認識的詞，再按一次清除
     selectionTranslation:
       title: 選取文字翻譯
       description: 翻譯選取的文字。
@@ -616,7 +619,6 @@ options:
       lockPosition: 鎖定位置
       unlockPosition: 解鎖位置
       settings: 設定
-      feedback: 傳送意見回饋
   selectionToolbar:
     title: 選取工具列
     pageDescription: 設定選取文字時出現哪些操作，以及工具列在哪些網站顯示。
@@ -1170,6 +1172,32 @@ options:
           confirm: 確認
           cancel: 取消
           description: "全部 $1 筆術語將被永久刪除。此操作無法復原。"
+  difficultWords:
+    title: 難詞掃描
+    pageDescription: 在網頁上標出你可能不認識的詞。點一下看釋義；認識的詞點「認識」，以後就不再標。
+    enable:
+      title: 啟用難詞掃描
+      description: 在彈出視窗和懸浮按鈕上顯示「掃描難詞」，並啟用它的快速鍵
+    usage:
+      title: 使用
+    shortcut:
+      title: 快速鍵
+      description: 在目前頁面掃描難詞，再按一次清除
+    lookupAction:
+      title: 點開難詞時執行
+      description: 點開標出的詞時開啟的 AI 指令，預設是內建的字典
+    colors:
+      title: 顏色
+      description: 兩種標記顏色的意思
+      hard: 難詞：你可能不認識
+      learning: 在學：已經存進筆記庫
+    levels:
+      title: 我的閱讀程度
+      description: 每種語言分開計算。第一次掃描某種語言的頁面時會問你，之後根據你標「認識」的詞自動調整。
+      empty: 還沒有。第一次掃描某種語言的頁面時，會先問你在這種語言裡的程度。
+      known: 大約認識最常用的 $1 個詞
+      loginRequired: 登入後可以查看和修改各語言的程度
+      loadError: 沒能讀取你的閱讀程度，請稍後再試
   contextMenu:
     title: 右鍵選單
     pageDescription: 控制瀏覽器右鍵選單裡的 Read Frog 選項。
@@ -1781,6 +1809,41 @@ translationHub:
   translationFailed: 翻譯失敗
   translationFailedFallback: 翻譯失敗
   retryTranslation: 重試翻譯
+difficultWords:
+  name: 難詞掃描
+  scan: 掃描難詞
+  clear: 清除難詞
+  clearCount: 清除難詞 $1
+  scanTooltip: 標出這頁上你可能不認識的詞
+  clearTooltip: 清除這頁上標出的難詞
+  translationOnlyUnavailable: 「僅顯示翻譯」模式下頁面上沒有原文，無法掃描難詞
+  unavailableHere: 陪讀蛙在這個頁面上沒有啟用
+  known: 認識
+  knownDescription: 標為認識：這頁和其他頁都不再標出這個詞
+  markKnown: 認識這個詞
+  markedKnown: 已記為認識
+  undo: 復原
+  offline: 暫時連不上伺服器，恢復後自動繼續
+  empty: 這頁沒有可以掃描的段落
+  signInRequired: 登入後才能掃描難詞
+  restricted: 難詞掃描還在 Beta 測試，暫未對你的帳號開放
+  dailyLimit: 今天的難詞掃描額度用完了，$1 恢復
+  unsupportedBrowser: 目前的瀏覽器無法在頁面上標出單字，請更新瀏覽器後再使用難詞掃描
+  level:
+    title: 你的$1閱讀程度大概是？
+    description: 選最接近的一項，用來決定一開始標出哪些詞
+    footer: 之後會根據你的點擊自動調整
+    later: 以後再說
+    unsure: 不確定
+    saveFailed: 沒能儲存程度，請稍後再試
+    descriptions:
+      A1: 熟悉的名字、單字和很簡單的句子，例如告示、海報、目錄上的
+      A2: 很短、很簡單的文字；能在廣告、菜單、時刻表裡找到需要的資訊；簡短的私人信件
+      B1: 以常用詞為主的文字，例如日常生活和工作相關的；私人信件裡對事情、感受、願望的描述
+      B2: 討論當代問題的文章和報導，作者有明確的立場和觀點；當代文學散文
+      C1: 較長、較複雜的事實性和文學性文字，能體會風格的差別；非自己領域的專業文章和較長的技術說明
+      C2: 幾乎所有形式的書面語，包括抽象的、結構和語言都很複雜的文字，例如說明書、專業文章、文學作品
+      unsure: 按 A2 算。寧可偏低：標多了，點「認識」很快就能調上去；標少了，沒有東西可點，很難發現
 languages:
   eng: 英語
   cmn: 簡體中文

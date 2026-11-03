@@ -1,4 +1,5 @@
 import type { Config } from "@/types/config/config"
+import { getDifficultWordsShortcut } from "@/utils/constants/difficult-words"
 import { getAnnotationShortcut, getSpeakShortcut } from "@/utils/constants/selection"
 import { getSelectionToolbarActions } from "@/utils/custom-actions"
 import { i18n } from "@/utils/i18n"
@@ -33,6 +34,11 @@ export function getShortcutBindings(config: Config): ShortcutBinding[] {
       id: "translation-mode-shortcut",
       title: i18n.t("options.shortcuts.translationMode.title"),
       shortcut: config.pageTranslation.modeShortcut,
+    },
+    {
+      id: "difficult-words-shortcut",
+      title: i18n.t("options.shortcuts.difficultWords.title"),
+      shortcut: getDifficultWordsShortcut(config.difficultWords),
     },
     {
       id: "selection-translation-shortcut",

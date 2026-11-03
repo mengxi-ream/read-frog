@@ -63,7 +63,6 @@ const langConfig = {
   sourceCode: "eng" as const,
   targetCode: "cmn" as const,
   detectedCode: "eng" as const,
-  level: "intermediate" as const,
 }
 
 const googleProviderConfig = {

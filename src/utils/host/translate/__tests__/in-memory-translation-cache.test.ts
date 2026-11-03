@@ -34,7 +34,6 @@ const googleProviderConfig = {
 const langConfig = {
   sourceCode: "eng" as const,
   targetCode: "cmn" as const,
-  level: "intermediate" as const,
 }
 
 const sendMessageMock = vi.mocked(sendMessage)

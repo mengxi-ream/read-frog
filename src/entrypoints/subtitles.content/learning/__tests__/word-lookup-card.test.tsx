@@ -36,7 +36,9 @@ vi.mock("@/components/ui/selection-popover", () => ({
     Content: ({ children }: { children: ReactNode }) => children,
   },
 }))
-vi.mock("@/components/custom-action/custom-action-panel", () => ({ CustomActionPanel: () => null }))
+vi.mock("@/components/custom-action/custom-action-panel", () => ({
+  CustomActionPanel: { Root: () => null },
+}))
 vi.mock("@/components/custom-action/save-to-notebase-dialog-host", () => ({
   SaveToNotebaseDialogHost: () => null,
 }))

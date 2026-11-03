@@ -1,8 +1,9 @@
-import { langCodeISO6393Schema, langLevel } from "@read-frog/definitions"
+import { langCodeISO6393Schema } from "@read-frog/definitions"
 import { z } from "zod"
 import {
   BUILT_IN_ACTION_IDS,
   BUILT_IN_ACTION_KEYS,
+  BUILT_IN_DICTIONARY_ACTION_ID,
   isBuiltInActionId,
 } from "@/utils/constants/custom-action"
 import { FEATURE_KEYS, FEATURE_PROVIDER_DEFS } from "@/utils/constants/feature-providers"
@@ -34,7 +35,6 @@ import { ttsConfigSchema } from "./tts"
 const languageSchema = z.object({
   sourceCode: langCodeISO6393Schema.or(z.literal("auto")),
   targetCode: langCodeISO6393Schema,
-  level: langLevel,
 })
 
 const selectionToolbarFeatureSchema = z.object({
@@ -112,6 +112,23 @@ const selectionToolbarSchema = z
   // Every parse brings `order` and `unpinned` in step with the actions there
   // are, so adding or deleting an action never has to update them itself.
   .transform((selectionToolbar) => normalizeSelectionToolbarLists(selectionToolbar))
+
+// Difficult words: marks the words on a page the reader probably does not
+// know. `.default()` lets a config stored before v118 parse in UI contexts
+// that load ahead of the background migration.
+const difficultWordsSchema = z
+  .object({
+    // Shows the ways to start marking: the popup, the floating button, the key.
+    enabled: z.boolean(),
+    // Missing means the default key (see getDifficultWordsShortcut); empty
+    // means the user cleared it. Optional rather than defaulted, for the
+    // reason given on the speak feature's key.
+    shortcut: shortcutSchema.optional(),
+    // The action a click on a marked word runs. One that no longer exists or
+    // is turned off falls back to the built-in Dictionary where it is used.
+    lookupActionId: z.string().nonempty().default(BUILT_IN_DICTIONARY_ACTION_ID),
+  })
+  .default(() => ({ enabled: true, lookupActionId: BUILT_IN_DICTIONARY_ACTION_ID }))
 
 // side content schema
 const sideContentSchema = z.object({
@@ -208,6 +225,7 @@ export const configSchema = z
     uiLanguage: uiLanguageSchema,
     translationHub: translationHubSchema,
     glossary: glossaryConfigSchema,
+    difficultWords: difficultWordsSchema,
   })
   .superRefine((data, ctx) => {
     for (const featureKey of FEATURE_KEYS) {

@@ -24,6 +24,7 @@ import {
   createImproveWritingDefinition,
   createSentenceAnalysisDefinition,
 } from "./custom-action-templates"
+import { DEFAULT_DIFFICULT_WORDS_SHORTCUT_KEY } from "./difficult-words"
 import { DEFAULT_GLOSSARY_CONFIG } from "./glossary"
 import { DEFAULT_NODE_TRANSLATION_SHORTCUT_KEY } from "./hotkeys"
 import {
@@ -76,7 +77,7 @@ export const GOOGLE_DRIVE_TOKEN_STORAGE_KEY = "__googleDriveToken"
 
 export const THEME_STORAGE_KEY = "theme"
 export const DEFAULT_DETECTED_CODE = "eng" as const
-export const CONFIG_SCHEMA_VERSION = 116
+export const CONFIG_SCHEMA_VERSION = 118
 
 export const DEFAULT_FLOATING_BUTTON_POSITION = 0.66
 export const DEFAULT_FLOATING_BUTTON_SIDE: FloatingButtonSide = "right"
@@ -169,7 +170,6 @@ export const DEFAULT_CONFIG: Config = {
   language: {
     sourceCode: "auto",
     targetCode: "cmn",
-    level: "intermediate",
   },
   providersConfig: DEFAULT_PROVIDER_CONFIG_LIST,
   pageTranslation: {
@@ -347,6 +347,11 @@ export const DEFAULT_CONFIG: Config = {
     promptId: DEFAULT_TRANSLATE_PROMPTS_CONFIG.promptId,
   },
   glossary: { ...DEFAULT_GLOSSARY_CONFIG },
+  difficultWords: {
+    enabled: true,
+    shortcut: DEFAULT_DIFFICULT_WORDS_SHORTCUT_KEY,
+    lookupActionId: BUILT_IN_DICTIONARY_ACTION_ID,
+  },
 }
 
 /**

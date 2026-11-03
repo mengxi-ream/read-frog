@@ -532,6 +532,9 @@ options:
     translationMode:
       title: Çeviri modu
       description: İki dilli ve yalnızca çeviri arasında geçiş yapar.
+    difficultWords:
+      title: Zor kelimeleri tara
+      description: Sayfada muhtemelen bilmediğiniz kelimeleri vurgular. Temizlemek için yeniden basın.
     selectionTranslation:
       title: Seçim çevirisi
       description: Seçtiğiniz metni çevirir.
@@ -615,7 +618,6 @@ options:
       lockPosition: Konumu kilitle
       unlockPosition: Konum kilidini aç
       settings: Ayarlar
-      feedback: Geri bildirim gönder
   selectionToolbar:
     title: Seçim Araç Çubuğu
     pageDescription: Metin seçtiğinizde hangi eylemlerin görüneceğini ve araç çubuğunun nerede çıkacağını belirleyin.
@@ -1160,6 +1162,32 @@ options:
           confirm: Onayla
           cancel: İptal
           description: "$1 terimin tamamı kalıcı olarak silinecek. Bu işlem geri alınamaz."
+  difficultWords:
+    title: Zor kelimeler
+    pageDescription: Bir sayfada muhtemelen bilmediğiniz kelimeleri vurgular. Anlamına bakmak için birine tıklayın; bildiklerinizi işaretleyin ki bir daha vurgulanmasın.
+    enable:
+      title: Zor kelimeleri etkinleştir
+      description: Tarama butonunu açılır pencerede ve yüzen butonda gösterir, kısayolunu açar
+    usage:
+      title: Kullanım
+    shortcut:
+      title: Kısayol
+      description: Sayfadaki zor kelimeleri tarar. Temizlemek için yeniden basın.
+    lookupAction:
+      title: Bir kelimeye tıklayınca çalışır
+      description: Vurgulanan bir kelimeye tıkladığınızda açılan AI eylemi. Başkasını seçmediğiniz sürece yerleşik Sözlük.
+    colors:
+      title: Renkler
+      description: İki vurgu renginin anlamı
+      hard: Zor, muhtemelen sizin için yeni
+      learning: Öğreniliyor, bir Notebase'e kaydedildi
+    levels:
+      title: Okuma seviyeniz
+      description: Her dilin kendi seviyesi vardır. O dilde bir sayfayı ilk kez taradığınızda sorulur ve bildiğiniz kelimeleri işaretledikçe ayarlanır.
+      empty: Henüz yok. Bir dilde bir sayfayı ilk kez taradığınızda o dildeki seviyeniz sorulur.
+      known: Muhtemelen en yaygın $1 kelimeyi biliyorsunuz
+      loginRequired: Her dildeki seviyenizi görmek ve değiştirmek için giriş yapın
+      loadError: Okuma seviyeleriniz yüklenemedi. Daha sonra tekrar deneyin.
   contextMenu:
     title: Bağlam Menüsü
     pageDescription: Tarayıcının sağ tık menüsündeki Read Frog seçeneklerini yönetin.
@@ -1771,6 +1799,41 @@ translationHub:
   translationFailed: Çeviri Başarısız
   translationFailedFallback: Çeviri başarısız
   retryTranslation: Çeviriyi yeniden dene
+difficultWords:
+  name: Zor kelimeler
+  scan: Kelimeleri tara
+  clear: Temizle
+  clearCount: $1 zor kelimeyi temizle
+  scanTooltip: Bu sayfada muhtemelen bilmediğiniz kelimeleri vurgular
+  clearTooltip: Bu sayfadaki vurguları kaldırır
+  translationOnlyUnavailable: Sayfada orijinal metin bırakmayan "Yalnızca çeviri" modunda kullanılamaz
+  unavailableHere: Read Frog bu sayfada açık değil
+  known: Biliyorum
+  knownDescription: Bilinen olarak işaretle. Ne bu sayfada ne de diğerlerinde bir daha vurgulanmaz.
+  markKnown: Bu kelimeyi biliyorum
+  markedKnown: Bilinen olarak işaretlendi
+  undo: Geri al
+  offline: Şu anda sunucuya ulaşılamıyor. Bağlantı geri geldiğinde tarama kendiliğinden devam eder.
+  empty: Bu sayfada taranacak paragraf yok
+  signInRequired: Zor kelimeleri taramak için giriş yapın
+  restricted: Zor kelimeler beta aşamasında ve henüz hesabınıza açık değil
+  dailyLimit: Bugünkü zor kelime sınırına ulaştınız. Sınır $1 itibarıyla sıfırlanır.
+  unsupportedBrowser: Bu tarayıcı sayfadaki kelimeleri vurgulayamıyor. Zor kelimeleri kullanmak için tarayıcınızı güncelleyin.
+  level:
+    title: $1 okuma seviyeniz nedir?
+    description: En yakın olanı seçin. Başta hangi kelimelerin vurgulanacağını bu belirler.
+    footer: Bildiğiniz kelimeleri işaretledikçe kendiliğinden ayarlanır.
+    later: Şimdi değil
+    unsure: Emin değilim
+    saveFailed: Seviyeniz kaydedilemedi. Daha sonra tekrar deneyin.
+    descriptions:
+      A1: Duyurular, afişler ve kataloglardaki gibi tanıdık adlar, kelimeler ve çok basit cümleler
+      A2: Çok kısa, basit metinler; ilan, menü ve tarifelerde aradığını bulmak; kısa kişisel mektuplar
+      B1: Çoğunlukla gündelik dille yazılmış, günlük yaşam ya da işle ilgili metinler; kişisel mektuplarda olay, duygu ve dilek anlatımları
+      B2: Yazarın belirli bir tutum aldığı güncel sorunlarla ilgili makale ve raporlar; çağdaş edebi düzyazı
+      C1: Üslup farklarını sezerek okunan uzun, karmaşık, olgusal ve edebi metinler; alanınız dışındaki uzmanlık makaleleri ve uzun teknik talimatlar
+      C2: Kullanım kılavuzları, uzmanlık makaleleri ve edebi eserler gibi yapısı ve dili karmaşık soyut metinler dahil, hemen her tür yazılı dil
+      unsure: A2 olarak sayılır. Düşükten başlamak daha iyidir; fazla vurgu bildiğiniz kelimeleri işaretleyerek çabucak düzelir, çok az vurguda ise tıklanacak bir şey kalmaz.
 languages:
   eng: İngilizce
   cmn: Basitleştirilmiş Çince

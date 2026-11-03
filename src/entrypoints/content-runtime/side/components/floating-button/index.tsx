@@ -1,5 +1,5 @@
 import type { FloatingButtonSide } from "@/types/config/floating-button"
-import { IconLock, IconLockOpen, IconMessageCircle, IconSettings, IconX } from "@tabler/icons-react"
+import { IconLock, IconLockOpen, IconSettings, IconX } from "@tabler/icons-react"
 import { useAtom, useAtomValue } from "jotai"
 import { useEffect, useRef, useState } from "react"
 import { browser } from "#imports"
@@ -16,15 +16,14 @@ import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext } from "@/utils/analytics"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { APP_NAME } from "@/utils/constants/app"
-import { buildFeaturebaseFeedbackMetadata, buildFeaturebasePortalUrl } from "@/utils/featurebase"
 import { i18n } from "@/utils/i18n"
-import { resolveUiLocale } from "@/utils/i18n/locale-map"
 import { sendMessage } from "@/utils/message"
 import { cn } from "@/utils/styles/utils"
 import { urlMatchesPattern } from "@/utils/url-pattern"
 import { enablePageTranslationAtom, isDraggingButtonAtom } from "../../atoms"
 import { shadowWrapper } from "../../main"
 import HiddenButton from "./components/hidden-button"
+import DifficultWordsButton from "./difficult-words-button"
 import TranslateButton from "./translate-button"
 
 const readFrogLogoUrl = new URL(readFrogLogo, browser.runtime.getURL("/")).href
@@ -125,7 +124,6 @@ function getNormalizedFloatingContainerTop(mainButtonTop: number, mainOffsetY: n
 
 export default function FloatingButton() {
   const [floatingButton, setFloatingButton] = useAtom(configFieldsAtomMap.floatingButton)
-  const uiLanguage = useAtomValue(configFieldsAtomMap.uiLanguage)
   const translationState = useAtomValue(enablePageTranslationAtom)
   const [isDraggingButton, setIsDraggingButton] = useAtom(isDraggingButtonAtom)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
@@ -140,7 +138,6 @@ export default function FloatingButton() {
   const floatingButtonSide = getFloatingButtonSide(floatingButton.side)
   const isFloatingButtonExpanded = isHitAreaExpanded || isDropdownOpen
   const isMainButtonAttached = isFloatingButtonLocked || isFloatingButtonExpanded
-  const locale = resolveUiLocale(uiLanguage)
 
   useEffect(() => {
     if (!isDraggingButton) return undefined
@@ -215,20 +212,6 @@ export default function FloatingButton() {
         })
       }
     })
-  }
-
-  const handleFeedbackClick = () => {
-    const url = buildFeaturebasePortalUrl({
-      destination: "feedback",
-      locale,
-      metadata: buildFeaturebaseFeedbackMetadata({
-        browserName: import.meta.env.BROWSER,
-        extensionVersion: browser.runtime.getManifest().version,
-        pageUrl: window.location.href,
-      }),
-    })
-
-    void sendMessage("openPage", { url, active: true })
   }
 
   const startActiveDrag = () => {
@@ -402,6 +385,9 @@ export default function FloatingButton() {
       onMouseLeave={handleMouseLeave}
     >
       {!isDraggingButton && (
+        <DifficultWordsButton side={floatingButtonSide} expanded={isFloatingButtonExpanded} />
+      )}
+      {!isDraggingButton && (
         <TranslateButton side={floatingButtonSide} expanded={isFloatingButtonExpanded} />
       )}
       <div className="relative">
@@ -463,15 +449,6 @@ export default function FloatingButton() {
           onClick={() => {
             void sendMessage("openOptionsPage", undefined)
           }}
-        />
-      )}
-      {!isDraggingButton && (
-        <HiddenButton
-          side={floatingButtonSide}
-          expanded={isFloatingButtonExpanded}
-          icon={<IconMessageCircle className="h-5 w-5" />}
-          label={i18n.t("options.floatingButton.tooltips.feedback")}
-          onClick={handleFeedbackClick}
         />
       )}
     </div>

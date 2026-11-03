@@ -75,6 +75,7 @@ describe("shortcut bindings", () => {
     expect(bindings.map((binding) => binding.id)).toEqual([
       "page-translation-shortcut",
       "translation-mode-shortcut",
+      "difficult-words-shortcut",
       "selection-translation-shortcut",
       "selection-speak-shortcut",
       "selection-annotation-shortcut",

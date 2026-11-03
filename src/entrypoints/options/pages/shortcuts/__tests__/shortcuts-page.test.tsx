@@ -21,6 +21,10 @@ vi.mock("../translation-mode-shortcut", () => ({
   TranslationModeShortcut: () => <section data-section="translation-mode-shortcut" />,
 }))
 
+vi.mock("../difficult-words-shortcut", () => ({
+  DifficultWordsShortcut: () => <section data-section="difficult-words-shortcut" />,
+}))
+
 vi.mock("../selection-translation-shortcut", () => ({
   SelectionTranslationShortcut: () => <section data-section="selection-translation-shortcut" />,
 }))
@@ -60,6 +64,7 @@ describe("shortcuts page", () => {
     expect(sections).toEqual([
       "page-translation-shortcut",
       "translation-mode-shortcut",
+      "difficult-words-shortcut",
       "selection-translation-shortcut",
       "selection-speak-shortcut",
       "selection-annotation-shortcut",

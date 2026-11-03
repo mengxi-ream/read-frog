@@ -532,6 +532,9 @@ options:
     translationMode:
       title: 翻訳モード
       description: バイリンガルと翻訳のみを切り替えます。
+    difficultWords:
+      title: 難しい単語をスキャン
+      description: ページ上で知らない可能性が高い単語をハイライトします。もう一度押すとクリアします。
     selectionTranslation:
       title: 選択範囲の翻訳
       description: 選択したテキストを翻訳します。
@@ -615,7 +618,6 @@ options:
       lockPosition: 位置を固定
       unlockPosition: 位置の固定を解除
       settings: 設定
-      feedback: フィードバックを送信
   selectionToolbar:
     title: 選択ツールバー
     pageDescription: テキストを選択したときに表示するアクションと、ツールバーを表示するサイトを設定します。
@@ -1160,6 +1162,32 @@ options:
           confirm: 確認
           cancel: キャンセル
           description: "$1 件の用語がすべて完全に削除されます。この操作は元に戻せません。"
+  difficultWords:
+    title: 難しい単語
+    pageDescription: ページ上で知らない可能性が高い単語をハイライトします。クリックすると意味を調べられ、知っている単語をマークすると次からハイライトされなくなります。
+    enable:
+      title: 難しい単語を有効化
+      description: ポップアップとフローティングボタンにスキャンボタンを表示し、ショートカットを有効にします
+    usage:
+      title: 使い方
+    shortcut:
+      title: ショートカット
+      description: ページの難しい単語をスキャンします。もう一度押すとクリアします。
+    lookupAction:
+      title: 単語をクリックしたときに実行
+      description: ハイライトされた単語をクリックしたときに開く AI アクション。ほかを選ばない限り、内蔵の辞書です。
+    colors:
+      title: 色
+      description: 2 種類のハイライト色の意味
+      hard: 難しい：おそらく初めて見る単語
+      learning: 学習中：Notebase に保存済み
+    levels:
+      title: 読解レベル
+      description: 言語ごとに設定されます。その言語のページを初めてスキャンするときに尋ねられ、知っている単語をマークするにつれて調整されます。
+      empty: まだありません。ある言語のページを初めてスキャンするとき、その言語のレベルを尋ねます。
+      known: よく使われる $1 語はおそらく知っています
+      loginRequired: ログインすると、言語ごとのレベルを確認・変更できます
+      loadError: 読解レベルを読み込めませんでした。しばらくしてからもう一度お試しください。
   contextMenu:
     title: コンテキストメニュー
     pageDescription: ブラウザーの右クリックメニューに表示される Read Frog の項目を設定します。
@@ -1771,6 +1799,41 @@ translationHub:
   translationFailed: 翻訳に失敗しました
   translationFailedFallback: 翻訳に失敗しました
   retryTranslation: 翻訳を再試行
+difficultWords:
+  name: 難しい単語
+  scan: 単語をスキャン
+  clear: クリア
+  clearCount: 難しい単語 $1 件をクリア
+  scanTooltip: このページで知らない可能性が高い単語をハイライトします
+  clearTooltip: このページのハイライトを消します
+  translationOnlyUnavailable: 「翻訳のみ」モードではページに原文が残らないため、使えません
+  unavailableHere: このページでは Read Frog が有効になっていません
+  known: 知っている
+  knownDescription: 既知としてマークします。このページでも他のページでも、もうハイライトされません。
+  markKnown: この単語は知っている
+  markedKnown: 既知としてマークしました
+  undo: 元に戻す
+  offline: 現在サーバーに接続できません。接続が戻ると自動で再開します。
+  empty: このページにはスキャンできる段落がありません
+  signInRequired: 難しい単語をスキャンするにはログインしてください
+  restricted: 難しい単語はベータ版で、まだお使いのアカウントでは利用できません
+  dailyLimit: 今日の難しい単語の上限に達しました。$1 にリセットされます。
+  unsupportedBrowser: このブラウザはページ上の単語をハイライトできません。難しい単語を使うにはブラウザを更新してください。
+  level:
+    title: $1の読解レベルはどのくらいですか？
+    description: いちばん近いものを選んでください。最初にどの単語をハイライトするかが決まります。
+    footer: 知っている単語をマークするにつれて自動で調整されます。
+    later: あとで
+    unsure: わからない
+    saveFailed: レベルを保存できませんでした。しばらくしてからもう一度お試しください。
+    descriptions:
+      A1: 掲示やポスター、カタログなどにある、なじみのある名前や単語、ごく簡単な文
+      A2: ごく短く簡単な文章。広告やメニュー、時刻表から必要な情報を見つけられる。短い個人的な手紙
+      B1: 日常生活や仕事に関する、主に日常的な言葉で書かれた文章。個人的な手紙の中の出来事や気持ち、希望の記述
+      B2: 書き手が明確な立場をとる、現代の問題についての記事や報告。現代の文学的な散文
+      C1: 長く複雑な、事実に基づく文章や文学作品を、文体の違いを味わいながら読める。専門外の専門的な記事や長い技術的な説明書
+      C2: 抽象的で構成も言葉も複雑な文章を含む、ほぼあらゆる書き言葉。マニュアル、専門的な記事、文学作品など
+      unsure: A2 として扱います。低めから始めるのがおすすめです。ハイライトが多すぎても知っている単語をマークすればすぐ直りますが、少なすぎるとクリックするものがありません。
 languages:
   eng: 英語
   cmn: 簡体字中国語

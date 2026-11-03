@@ -533,6 +533,9 @@ options:
     translationMode:
       title: Translation mode
       description: Switch between bilingual and translation only.
+    difficultWords:
+      title: Scan difficult words
+      description: Highlights the words on the page you probably don't know. Press it again to clear them.
     selectionTranslation:
       title: Selection translation
       description: Translate the text you selected.
@@ -616,7 +619,6 @@ options:
       lockPosition: Lock position
       unlockPosition: Unlock position
       settings: Settings
-      feedback: Send feedback
   selectionToolbar:
     title: Selection Toolbar
     pageDescription: Set which actions appear when you select text, and where the toolbar shows up.
@@ -1307,6 +1309,32 @@ options:
           confirm: Confirm
           cancel: Cancel
           description: "All $1 terms will be permanently deleted. This action cannot be undone."
+  difficultWords:
+    title: Difficult words
+    pageDescription: Highlights the words on a page you probably don't know. Click one to look it up, and mark the ones you know so they aren't highlighted again.
+    enable:
+      title: Enable difficult words
+      description: Shows the scan button in the popup and on the floating button, and turns on its shortcut
+    usage:
+      title: Using it
+    shortcut:
+      title: Shortcut
+      description: Scans the page for difficult words. Press it again to clear them.
+    lookupAction:
+      title: Clicking a word runs
+      description: The AI action that opens when you click a highlighted word. The built-in Dictionary unless you pick another.
+    colors:
+      title: Colors
+      description: What the two highlight colors mean
+      hard: Difficult, probably new to you
+      learning: Learning, saved to a notebase
+    levels:
+      title: Your reading level
+      description: Each language has its own. You're asked the first time you scan a page in it, and it adjusts as you mark the words you know.
+      empty: None yet. The first time you scan a page in a language, you'll be asked your level in it.
+      known: You likely know the $1 most common words
+      loginRequired: Sign in to see and change your level in each language
+      loadError: Couldn't load your reading levels. Try again later.
   contextMenu:
     title: Context Menu
     pageDescription: Control the Read Frog entries in the browser's right-click menu.
@@ -1918,6 +1946,41 @@ translationHub:
   translationFailed: Translation Failed
   translationFailedFallback: Translation failed
   retryTranslation: Retry translation
+difficultWords:
+  name: Difficult words
+  scan: Scan words
+  clear: Clear
+  clearCount: Clear $1 difficult words
+  scanTooltip: Highlight the words on this page you probably don't know
+  clearTooltip: Remove the highlights from this page
+  translationOnlyUnavailable: Not available in "Translation only" mode, which leaves no original text on the page
+  unavailableHere: Read Frog isn't on for this page
+  known: I know it
+  knownDescription: Mark as known. It won't be highlighted again, on this page or others.
+  markKnown: I know this word
+  markedKnown: Marked as known
+  undo: Undo
+  offline: Can't reach the server right now. Scanning resumes on its own once it's back.
+  empty: There are no paragraphs on this page to scan
+  signInRequired: Sign in to scan for difficult words
+  restricted: Difficult words is in beta and not open to your account yet
+  dailyLimit: You've reached today's difficult-word limit. It resets at $1.
+  unsupportedBrowser: This browser can't highlight words on a page. Update it to use difficult words.
+  level:
+    title: What's your $1 reading level?
+    description: Pick the closest one. It decides which words get highlighted at first.
+    footer: It adjusts as you mark words you know.
+    later: Not now
+    unsure: Not sure
+    saveFailed: Couldn't save your level. Try again later.
+    descriptions:
+      A1: Familiar names, words and very simple sentences, like those on notices, posters and catalogues
+      A2: Very short, simple texts; finding what you need in ads, menus and timetables; short personal letters
+      B1: Texts mostly in everyday language, about daily life or work; descriptions of events, feelings and wishes in personal letters
+      B2: Articles and reports on current issues in which the writer takes a clear stance; contemporary literary prose
+      C1: Long, complex factual and literary texts, telling styles apart; specialised articles and longer technical instructions outside your field
+      C2: Virtually every kind of written language, including abstract texts complex in structure and language, such as manuals, specialised articles and literary works
+      unsure: Counted as A2. Better to start low; too many highlights are quickly fixed by marking words you know, while too few leave nothing to click.
 languages:
   eng: English
   cmn: Simplified Chinese

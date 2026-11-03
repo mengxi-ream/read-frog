@@ -15,3 +15,28 @@
     --read-frog-muted-foreground: oklch(0.708 0 0);
   }
 }
+
+/* The difficult-words highlighter (utils/difficult-words): golden on the
+   words a reader probably does not know, pink on the ones they are learning.
+   Each comes for light pages, for dark ones (-dark, with -ink for the text
+   on it) and deepened under the pointer (-hover). Picked per paragraph from
+   its text colour, not from the system theme, so they stay out of the media
+   query. The theme's lemon scale and Tailwind's pink, as oklch. */
+:root {
+  /* lemon-400; lemon-100 */
+  --read-frog-highlight-hard: oklch(86% 0.16779 95 / 45%);
+  --read-frog-highlight-hard-dark: oklch(86% 0.16779 95 / 30%);
+  --read-frog-highlight-hard-ink: oklch(97.3% 0.071 106.257);
+  /* lemon-500; lemon-400; lemon-50 */
+  --read-frog-highlight-hard-hover: oklch(79.5% 0.15438 89.111 / 70%);
+  --read-frog-highlight-hard-hover-dark: oklch(86% 0.16779 95 / 46%);
+  --read-frog-highlight-hard-hover-ink: oklch(98.7% 0.026 105.276);
+  /* pink-400; pink-200 */
+  --read-frog-highlight-learning: oklch(71.8% 0.202 349.761 / 40%);
+  --read-frog-highlight-learning-dark: oklch(71.8% 0.202 349.761 / 25%);
+  --read-frog-highlight-learning-ink: oklch(89.9% 0.061 343.231);
+  /* pink-500; pink-400; pink-50 */
+  --read-frog-highlight-learning-hover: oklch(65.6% 0.241 354.308 / 55%);
+  --read-frog-highlight-learning-hover-dark: oklch(71.8% 0.202 349.761 / 42%);
+  --read-frog-highlight-learning-hover-ink: oklch(97.1% 0.014 343.198);
+}
