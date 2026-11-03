@@ -70,12 +70,15 @@ export class TextTrackFetcher implements SubtitlesFetcher {
     return this.sourceLanguage
   }
 
-  // A track can be there and never get a cue, so only its cues say whether the video has
-  // subtitles: checking loads them, and `fetch` then reuses that load.
+  // A track can be there and never get a cue, so checking loads the cues and `fetch` reuses them.
+  // A missing video is not a captionless one, so that error goes to the caller.
   async hasAvailableSubtitles(): Promise<boolean> {
     return this.fetch().then(
       () => true,
-      () => false,
+      (error: unknown) => {
+        if (error instanceof NoSubtitlesError) return false
+        throw error
+      },
     )
   }
 

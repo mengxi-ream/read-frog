@@ -212,4 +212,10 @@ describe("TextTrackFetcher", () => {
     await expect(fetcher.hasAvailableSubtitles()).resolves.toBe(false)
     await expect(fetcher.fetch()).rejects.toThrow("subtitles.errors.noSubtitlesFound")
   })
+
+  it("leaves a video it cannot find for the caller to report", async () => {
+    await expect(createFetcher(null).hasAvailableSubtitles()).rejects.toThrow(
+      "subtitles.errors.videoNotFound",
+    )
+  })
 })

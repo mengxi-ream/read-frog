@@ -774,7 +774,8 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
 
     // Showing first would flash the toggle ON on every captionless video.
     if (options.quiet) {
-      const hasSubtitles = await this.fetcher.hasAvailableSubtitles()
+      // Nobody asked for an automatic start, so one that cannot reach the video stays quiet too.
+      const hasSubtitles = await this.fetcher.hasAvailableSubtitles().catch(() => false)
       // The check can wait seconds for cues; a toggle or a navigation since then starts its own.
       if (this.isSuperseded(operationId) || this.hasPendingNavigationReset) return
       if (!hasSubtitles) {

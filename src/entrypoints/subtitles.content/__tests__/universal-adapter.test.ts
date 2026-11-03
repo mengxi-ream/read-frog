@@ -895,6 +895,30 @@ describe("universalVideoAdapter", () => {
       expect(scheduler.isActive()).toBe(false)
     })
 
+    it("stays quiet when the check cannot reach the video", async () => {
+      const { scheduler, subtitlesFetcher, autoStart } = setUpVideoWithoutSubtitles()
+      subtitlesFetcher.hasAvailableSubtitles.mockRejectedValue(
+        new OverlaySubtitlesError("video not found"),
+      )
+
+      await autoStart()
+
+      expect(scheduler.show).not.toHaveBeenCalled()
+      expect(scheduler.setState).not.toHaveBeenCalledWith("error", expect.anything())
+      expect(scheduler.isActive()).toBe(false)
+    })
+
+    it("tells a reader who asked that the video cannot be reached", async () => {
+      const { adapter, scheduler, subtitlesFetcher } = setUpVideoWithoutSubtitles()
+      subtitlesFetcher.hasAvailableSubtitles.mockRejectedValue(
+        new OverlaySubtitlesError("video not found"),
+      )
+
+      await (adapter as any).switchSubtitlesFetcher(SUBTITLES_SOURCE.NATIVE)
+
+      expect(scheduler.setState).toHaveBeenCalledWith("error", { message: "video not found" })
+    })
+
     it("turns on once the check finds subtitles", async () => {
       const { adapter, scheduler, subtitlesFetcher, autoStart } = setUpVideoWithoutSubtitles()
       subtitlesFetcher.hasAvailableSubtitles.mockResolvedValue(true)
