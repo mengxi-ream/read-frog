@@ -1456,6 +1456,9 @@ options:
       wordLookupAction:
         title: 點詞查詢指令
         description: 點擊字幕裡的單字時執行的 AI 指令。預設是詞典，也可以換成你自己的指令。
+      pauseOnHover:
+        title: 懸停暫停
+        description: 滑鼠在字幕上停留片刻時暫停影片，移開後繼續播放。點擊單字查詢時一律會暫停。
     aiQuota:
       title: AI 字幕額度
       description: AI 利用語音轉文字技術取得任何影片的準確字幕

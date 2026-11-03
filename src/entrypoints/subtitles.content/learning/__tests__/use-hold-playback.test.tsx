@@ -2,11 +2,23 @@
 import type { ReactNode } from "react"
 import { act, renderHook } from "@testing-library/react"
 import { Provider } from "jotai"
-import { afterEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import { HOVER_PAUSE_DELAY_MS } from "@/utils/constants/subtitles"
 import { subtitlesStore } from "../../atoms"
 import { SubtitlesUIContext } from "../../ui/subtitles-ui-context"
 import { subtitlesHoveredAtom, wordLookupAtom } from "../atoms"
 import { useHoldPlayback } from "../use-hold-playback"
+
+vi.mock("@/utils/atoms/config", async () => {
+  const { atom } = await import("jotai")
+  const { DEFAULT_CONFIG: defaults } = await import("@/utils/constants/config")
+  return {
+    configAtom: atom(defaults),
+    configFieldsAtomMap: { videoSubtitles: atom(defaults.videoSubtitles) },
+  }
+})
 
 function createVideo(initiallyPaused: boolean) {
   const video = document.createElement("video")
@@ -36,8 +48,23 @@ function renderHold(video: HTMLVideoElement) {
   return renderHook(() => useHoldPlayback(), { wrapper })
 }
 
+function setPauseOnHover(pauseOnHover: boolean) {
+  act(() => {
+    void subtitlesStore.set(configFieldsAtomMap.videoSubtitles, {
+      ...DEFAULT_CONFIG.videoSubtitles,
+      pauseOnHover,
+    })
+  })
+}
+
 function hover(hovered: boolean) {
   act(() => subtitlesStore.set(subtitlesHoveredAtom, hovered))
+}
+
+function rest(ms = HOVER_PAUSE_DELAY_MS) {
+  act(() => {
+    vi.advanceTimersByTime(ms)
+  })
 }
 
 function lookUpWord(index: number | null) {
@@ -45,19 +72,67 @@ function lookUpWord(index: number | null) {
 }
 
 describe("useHoldPlayback", () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+    setPauseOnHover(true)
+  })
+
   afterEach(() => {
     hover(false)
     lookUpWord(null)
+    setPauseOnHover(false)
+    vi.useRealTimers()
   })
 
-  it("pauses while the pointer is on the subtitles and plays once it leaves", () => {
+  it("pauses once the pointer rests on the subtitles and plays once it leaves", () => {
     const { video, pause, play } = createVideo(false)
     renderHold(video)
 
     hover(true)
+    rest(HOVER_PAUSE_DELAY_MS - 1)
+    expect(pause).not.toHaveBeenCalled()
+
+    rest(1)
     expect(pause).toHaveBeenCalledTimes(1)
 
     hover(false)
+    expect(play).toHaveBeenCalledTimes(1)
+  })
+
+  it("leaves the video playing when the pointer only passes over the subtitles", () => {
+    const { video, pause, play } = createVideo(false)
+    renderHold(video)
+
+    hover(true)
+    rest(HOVER_PAUSE_DELAY_MS / 2)
+    hover(false)
+    rest()
+
+    expect(pause).not.toHaveBeenCalled()
+    expect(play).not.toHaveBeenCalled()
+  })
+
+  it("does not pause on hover with pause-on-hover off", () => {
+    setPauseOnHover(false)
+    const { video, pause } = createVideo(false)
+    renderHold(video)
+
+    hover(true)
+    rest()
+
+    expect(pause).not.toHaveBeenCalled()
+  })
+
+  it("still pauses for a lookup with pause-on-hover off, and plays on close under the pointer", () => {
+    setPauseOnHover(false)
+    const { video, pause, play } = createVideo(false)
+    renderHold(video)
+
+    hover(true)
+    lookUpWord(2)
+    expect(pause).toHaveBeenCalledTimes(1)
+
+    lookUpWord(null)
     expect(play).toHaveBeenCalledTimes(1)
   })
 
@@ -79,6 +154,7 @@ describe("useHoldPlayback", () => {
     renderHold(video)
 
     hover(true)
+    rest()
     lookUpWord(2)
     lookUpWord(null)
     hover(false)
@@ -103,6 +179,7 @@ describe("useHoldPlayback", () => {
     const { unmount } = renderHold(video)
 
     hover(true)
+    rest()
     unmount()
 
     expect(play).toHaveBeenCalledTimes(1)

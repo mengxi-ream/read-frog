@@ -1446,6 +1446,9 @@ options:
       wordLookupAction:
         title: 単語クリック時のアクション
         description: 字幕の単語をクリックしたときに実行する AI アクション。既定は辞書で、自分のアクションにも変更できます。
+      pauseOnHover:
+        title: ホバーで一時停止
+        description: ポインターを字幕の上にしばらく置くと動画を一時停止し、離すと再生を再開します。単語をクリックして調べるときは常に一時停止します。
     aiQuota:
       title: AI字幕の利用枠
       description: AIの音声認識で、どんな動画にも正確な字幕を生成します

@@ -4,6 +4,9 @@ export const FETCH_CHECK_INTERVAL = 100
 export const FETCH_SUBTITLES_TIMEOUT = 10_000
 export const MAX_GAP_MS = 2_000
 export const PAUSE_TIMEOUT_MS = 1_000
+// How long the pointer rests on the subtitles before pause-on-hover pauses the video,
+// so a pointer passing over them on its way to the controls does not.
+export const HOVER_PAUSE_DELAY_MS = 500
 
 // Segmentation constants
 export const MAX_WORDS = 15

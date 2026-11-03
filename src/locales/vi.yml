@@ -1446,6 +1446,9 @@ options:
       wordLookupAction:
         title: Hành động tra từ
         description: Hành động AI chạy khi bạn nhấp vào một từ trong phụ đề. Mặc định là từ điển, bạn có thể chọn hành động của riêng mình.
+      pauseOnHover:
+        title: Tạm dừng khi di chuột
+        description: Tạm dừng video khi con trỏ dừng trên phụ đề và phát tiếp khi con trỏ rời đi. Nhấp vào một từ để tra luôn tạm dừng video.
     aiQuota:
       title: Hạn mức phụ đề AI
       description: AI dùng công nghệ nhận dạng giọng nói để tạo phụ đề chính xác cho mọi video

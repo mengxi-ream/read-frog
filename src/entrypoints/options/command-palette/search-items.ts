@@ -516,6 +516,13 @@ export const SEARCH_ITEMS: SearchItem[] = [
     pageKey: "options.videoSubtitles.title",
   },
   {
+    sectionId: "subtitles-pause-on-hover",
+    route: "/video-subtitles",
+    titleKey: "options.videoSubtitles.preference.pauseOnHover.title",
+    descriptionKey: "options.videoSubtitles.preference.pauseOnHover.description",
+    pageKey: "options.videoSubtitles.title",
+  },
+  {
     sectionId: "subtitles-ai-quota",
     route: "/video-subtitles",
     titleKey: "options.videoSubtitles.aiQuota.title",
