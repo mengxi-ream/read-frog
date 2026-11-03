@@ -298,6 +298,10 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
 
   hasSubtitlesAvailable = () => this.fetcher.hasAvailableSubtitles()
 
+  // From the request until its subtitles arrive; a refused request reverts to native and ends it.
+  isAwaitingAiSubtitles = () =>
+    this.source === SUBTITLES_SOURCE.AI && this.sourceSubtitles.length === 0
+
   /**
    * The transcript reads `sourceTrackAtom`, which only fills once a subtitles
    * session starts. Publishing it here does not put captions on the video:
@@ -707,7 +711,13 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
 
       this.cancelAutoStart()
       this.autoStartAbortController = new AbortController()
-      video.addEventListener("playing", () => this.toggleSubtitlesWithSource(true, "auto"), {
+      // AI subtitles asked for meanwhile stay, and a refused request has already gone back to native.
+      const startOnFirstPlay = () => {
+        if (this.source === SUBTITLES_SOURCE.NATIVE) {
+          this.toggleSubtitlesWithSource(true, "auto")
+        }
+      }
+      video.addEventListener("playing", startOnFirstPlay, {
         once: true,
         signal: this.autoStartAbortController.signal,
       })
@@ -754,7 +764,6 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
       showAiSubtitlesWallToast(i18n.t("subtitles.errors.aiLiveReplayUnsupported"))
       return
     }
-    this.cancelAutoStart()
     return this.switchSubtitlesFetcher(SUBTITLES_SOURCE.AI)
   }
 

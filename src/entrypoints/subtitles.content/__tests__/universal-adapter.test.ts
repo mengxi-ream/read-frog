@@ -892,16 +892,16 @@ describe("universalVideoAdapter", () => {
       expect(switchSpy.mock.calls.map((call) => (call[1] as any).quiet)).toEqual([true, false])
     })
 
-    async function waitForFirstPlay(adapter: UniversalVideoAdapter) {
+    async function waitForFirstPlay(adapter: UniversalVideoAdapter, loads = true) {
       ;(adapter as any).config.embedded = true
+      ;(adapter as any).fetchers.ai = () => ({ cleanup: vi.fn<() => void>() })
       mocks.getLocalConfig.mockResolvedValue({
         videoSubtitles: { autoStart: { youtube: false, xcom: true, netflix: false } },
       })
       const video = Object.assign(new EventTarget(), { paused: true })
       ;(adapter as any).subtitlesScheduler.getVideoElement = () => video
-      const switchSpy = vi
-        .spyOn(adapter as any, "switchSubtitlesFetcher")
-        .mockResolvedValue(undefined)
+      vi.spyOn(adapter as any, "startTranslation").mockResolvedValue(loads)
+      const switchSpy = vi.spyOn(adapter as any, "switchSubtitlesFetcher")
       await (adapter as any).tryAutoStartSubtitles()
       return { switchSpy, play: () => video.dispatchEvent(new Event("playing")) }
     }
@@ -924,6 +924,38 @@ describe("universalVideoAdapter", () => {
       play()
 
       expect(switchSpy.mock.calls.map((call) => call[0])).toEqual([SUBTITLES_SOURCE.AI])
+    })
+
+    it("starts the video's own subtitles on the first play after the AI request is refused", async () => {
+      const { adapter } = setUpVideoWithoutSubtitles()
+      const { switchSpy, play } = await waitForFirstPlay(adapter, false)
+
+      await adapter.requestAiSubtitles()
+      play()
+
+      expect(switchSpy.mock.calls.map((call) => call[0])).toEqual([
+        SUBTITLES_SOURCE.AI,
+        SUBTITLES_SOURCE.NATIVE,
+      ])
+    })
+
+    it("waits on AI subtitles from the request until they arrive or it is refused", async () => {
+      const { adapter } = setUpVideoWithoutSubtitles()
+      ;(adapter as any).fetchers.ai = () => ({ cleanup: vi.fn<() => void>() })
+      let settle: (loaded: boolean) => void = () => {}
+      vi.spyOn(adapter as any, "startTranslation").mockImplementation(
+        () => new Promise<boolean>((resolve) => (settle = resolve)),
+      )
+
+      const request = adapter.requestAiSubtitles()
+      await vi.waitFor(() => expect(adapter.isAwaitingAiSubtitles()).toBe(true))
+      ;(adapter as any).sourceSubtitles = [{ text: "Hello", start: 0, end: 1000 }]
+      expect(adapter.isAwaitingAiSubtitles()).toBe(false)
+
+      ;(adapter as any).sourceSubtitles = []
+      settle(false)
+      await request
+      expect(adapter.isAwaitingAiSubtitles()).toBe(false)
     })
 
     it("keeps subtitles off when a reader turns them off before the first play", async () => {
