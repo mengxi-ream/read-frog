@@ -24,6 +24,9 @@ export const currentVideoIdAtom = atom<string | null>(null)
  */
 export const adPlayingAtom = atom<boolean>(false)
 
+/** True while the video has no media, as on a part switch; the overlay then shows nothing. */
+export const videoLoadingAtom = atom<boolean>(false)
+
 /** Scheduler’s current *translated* cue only (null when no translated cue covers now). */
 export const currentSubtitleAtom = atom<SubtitlesFragment | null>(null)
 
@@ -41,7 +44,7 @@ export const translatedTrackAtom = atom<SubtitlesFragment[]>([])
  * at the current time (used for original / pending bilingual UI).
  */
 export const displaySubtitleAtom = atom((get): SubtitlesFragment | null => {
-  if (get(adPlayingAtom)) {
+  if (get(adPlayingAtom) || get(videoLoadingAtom)) {
     return null
   }
 

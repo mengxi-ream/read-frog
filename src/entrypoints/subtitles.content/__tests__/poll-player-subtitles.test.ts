@@ -101,6 +101,20 @@ describe("pollPlayerSubtitles", () => {
     expect(calls).toEqual(["mount", "navigate"])
   })
 
+  it("checks for a new video as soon as one starts playing", async () => {
+    const player = addPlayer()
+    start()
+    await tick()
+    calls.length = 0
+
+    videoId = "video/2"
+    player.append(document.createElement("video"))
+    player.querySelector("video")!.dispatchEvent(new Event("playing"))
+    await vi.advanceTimersByTimeAsync(0)
+
+    expect(calls).toEqual(["mount", "navigate"])
+  })
+
   it("cleans up when the page leaves the player, and comes back as a navigation", async () => {
     const player = addPlayer()
     start()
@@ -128,6 +142,7 @@ describe("pollPlayerSubtitles", () => {
 
     videoId = "video/2"
     await tick()
+    document.dispatchEvent(new Event("playing"))
 
     expect(calls).toEqual([])
   })

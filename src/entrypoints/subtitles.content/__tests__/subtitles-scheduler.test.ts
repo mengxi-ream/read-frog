@@ -5,6 +5,7 @@ import {
   currentTimeMsAtom,
   subtitlesStateAtom,
   subtitlesStore,
+  videoLoadingAtom,
 } from "../atoms"
 import { SubtitlesScheduler } from "../subtitles-scheduler"
 
@@ -23,6 +24,7 @@ describe("subtitles scheduler", () => {
     subtitlesStore.set(subtitlesStateAtom, null)
     subtitlesStore.set(currentTimeMsAtom, 0)
     subtitlesStore.set(adPlayingAtom, false)
+    subtitlesStore.set(videoLoadingAtom, false)
   })
 
   it("syncs currentTimeMsAtom on start without waiting for timeupdate", () => {
@@ -50,6 +52,25 @@ describe("subtitles scheduler", () => {
     expect(subtitlesStore.get(currentTimeMsAtom)).toBe(8000)
     expect(scheduler.isActive()).toBe(false)
     expect(subtitlesStore.get(currentSubtitleAtom)).toBeNull()
+  })
+
+  it("reports the video loading while it swaps media, and loaded once it has", () => {
+    const video = createVideo(1)
+    new SubtitlesScheduler({ videoElement: video }).start()
+    const calls = (video.addEventListener as unknown as ReturnType<typeof vi.fn>).mock.calls as [
+      string,
+      () => void,
+    ][]
+    const on = (type: string) => calls.find((call) => call[0] === type)![1]
+    expect(subtitlesStore.get(videoLoadingAtom)).toBe(false)
+
+    Object.assign(video, { readyState: 0, currentTime: 0 })
+    on("emptied")()
+    expect(subtitlesStore.get(videoLoadingAtom)).toBe(true)
+
+    Object.assign(video, { readyState: 2 })
+    on("loadeddata")()
+    expect(subtitlesStore.get(videoLoadingAtom)).toBe(false)
   })
 
   it("holds the published time while an ad plays", () => {

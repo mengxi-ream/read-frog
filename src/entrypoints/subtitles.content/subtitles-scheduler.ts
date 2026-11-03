@@ -7,6 +7,7 @@ import {
   subtitlesStore,
   translatedTrackAtom,
   subtitlesVisibleAtom,
+  videoLoadingAtom,
 } from "./atoms"
 
 const ERROR_STATE_AUTO_HIDE_MS = 5_000
@@ -208,11 +209,16 @@ export class SubtitlesScheduler {
   private attachListeners() {
     this.videoElement.addEventListener("timeupdate", this.handleTimeUpdate)
     this.videoElement.addEventListener("seeking", this.handleSeeking)
+    // The video empties as it swaps media, and has a picture again once the new media loads.
+    this.videoElement.addEventListener("emptied", this.handleMediaChange)
+    this.videoElement.addEventListener("loadeddata", this.handleMediaChange)
   }
 
   private detachListeners() {
     this.videoElement.removeEventListener("timeupdate", this.handleTimeUpdate)
     this.videoElement.removeEventListener("seeking", this.handleSeeking)
+    this.videoElement.removeEventListener("emptied", this.handleMediaChange)
+    this.videoElement.removeEventListener("loadeddata", this.handleMediaChange)
   }
 
   private handleTimeUpdate = () => {
@@ -223,8 +229,14 @@ export class SubtitlesScheduler {
     this.updateSubtitles(this.videoElement.currentTime)
   }
 
+  private handleMediaChange = () => {
+    this.updateSubtitles(this.videoElement.currentTime)
+  }
+
   private updateSubtitles(currentTime: number) {
     const timeMs = currentTime * 1000
+    // HAVE_NOTHING: the video is between media, as on a part switch.
+    subtitlesStore.set(videoLoadingAtom, this.videoElement.readyState === 0)
     // Published whether or not captions are showing: the transcript follows
     // playback even when the user never turned subtitle translation on. An ad
     // plays through the same element, so its clock is not the video's.

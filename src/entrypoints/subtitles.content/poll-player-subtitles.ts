@@ -63,5 +63,10 @@ export function pollPlayerSubtitles(
 
   tick()
   const intervalId = setInterval(tick, PLAYER_WATCH_POLL_INTERVAL_MS)
-  ctx.onInvalidated(() => clearInterval(intervalId))
+  // The url changes only once the next video loads, so playback starting is the first sign.
+  document.addEventListener("playing", tick, true)
+  ctx.onInvalidated(() => {
+    clearInterval(intervalId)
+    document.removeEventListener("playing", tick, true)
+  })
 }
