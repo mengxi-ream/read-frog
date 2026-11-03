@@ -4,6 +4,7 @@ import {
   NoSubtitlesError,
   OverlaySubtitlesError,
   ToastSubtitlesError,
+  VideoNotFoundError,
 } from "@/utils/subtitles/errors"
 import {
   adPlayingAtom,
@@ -904,6 +905,18 @@ describe("universalVideoAdapter", () => {
       await autoStart()
 
       expect(scheduler.show).not.toHaveBeenCalled()
+      expect(scheduler.setState).not.toHaveBeenCalledWith("error", expect.anything())
+      expect(scheduler.isActive()).toBe(false)
+    })
+
+    it("stays quiet when the video goes missing after the check", async () => {
+      const { scheduler, subtitlesFetcher, autoStart } = setUpVideoWithoutSubtitles()
+      subtitlesFetcher.hasAvailableSubtitles
+        .mockResolvedValueOnce(true)
+        .mockRejectedValueOnce(new VideoNotFoundError())
+
+      await autoStart()
+
       expect(scheduler.setState).not.toHaveBeenCalledWith("error", expect.anything())
       expect(scheduler.isActive()).toBe(false)
     })

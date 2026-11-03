@@ -5,9 +5,8 @@ import {
   TEXT_TRACK_CUE_WAIT_TIMEOUT_MS,
   TEXT_TRACK_NATIVE_REHIDE_DELAY_MS,
 } from "@/utils/constants/subtitles"
-import { i18n } from "@/utils/i18n"
 import { pollUntil } from "@/utils/poll"
-import { NoSubtitlesError, OverlaySubtitlesError } from "@/utils/subtitles/errors"
+import { NoSubtitlesError, VideoNotFoundError } from "@/utils/subtitles/errors"
 import { cuesToFragments } from "./cues"
 
 interface TextTrackFetcherOptions {
@@ -40,7 +39,7 @@ export class TextTrackFetcher implements SubtitlesFetcher {
   async fetch(): Promise<SubtitlesFragment[]> {
     const video = this.options.resolveVideo()
     if (!video) {
-      throw new OverlaySubtitlesError(i18n.t("subtitles.errors.videoNotFound"))
+      throw new VideoNotFoundError()
     }
 
     const track = this.selectTrack(video)

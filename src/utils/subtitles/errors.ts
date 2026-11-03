@@ -28,6 +28,13 @@ export class OverlaySubtitlesError extends SubtitlesError {
   }
 }
 
+/** The player's video could not be found, as when the page swaps it out while we look. */
+export class VideoNotFoundError extends OverlaySubtitlesError {
+  constructor() {
+    super(i18n.t("subtitles.errors.videoNotFound"))
+  }
+}
+
 /** The video has no captions to load — a fact about the video, not a failure of ours. */
 export class NoSubtitlesError extends OverlaySubtitlesError {
   constructor() {
