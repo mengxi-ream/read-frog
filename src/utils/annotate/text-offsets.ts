@@ -14,7 +14,7 @@ import {
 const SKIPPED_ELEMENT_NAMES = new Set(["script", "style", "noscript", "template", "rt", "rp"])
 
 /** The display values an element can have and still be part of a line. */
-function isInlineDisplay(display: string) {
+export function isInlineDisplay(display: string) {
   return (
     display === "inline" ||
     display === "contents" ||

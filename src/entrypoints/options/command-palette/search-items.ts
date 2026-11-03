@@ -12,6 +12,8 @@ export interface SearchItem {
   titleKey: string
   descriptionKey?: string
   pageKey: string
+  /** Found only while the feature is open to the account: in testing, its page is hidden too. */
+  gate?: "difficultWords"
 }
 
 type SearchItemDefinition = Omit<SearchItem, "titleKey" | "descriptionKey" | "pageKey"> & {
@@ -132,6 +134,14 @@ export const SEARCH_ITEMS: SearchItem[] = [
     titleKey: "options.shortcuts.translationMode.title",
     descriptionKey: "options.shortcuts.translationMode.description",
     pageKey: "options.shortcuts.title",
+  },
+  {
+    sectionId: "difficult-words-shortcut",
+    route: "/shortcuts",
+    titleKey: "options.shortcuts.difficultWords.title",
+    descriptionKey: "options.shortcuts.difficultWords.description",
+    pageKey: "options.shortcuts.title",
+    gate: "difficultWords",
   },
   {
     sectionId: "selection-translation-shortcut",
@@ -563,6 +573,32 @@ export const SEARCH_ITEMS: SearchItem[] = [
     titleKey: "options.videoSubtitles.cache.clearCache.title",
     descriptionKey: "options.videoSubtitles.cache.clearCache.description",
     pageKey: "options.videoSubtitles.title",
+  },
+
+  // Difficult words page
+  {
+    sectionId: "difficult-words-enable",
+    route: "/difficult-words",
+    titleKey: "options.difficultWords.enable.title",
+    descriptionKey: "options.difficultWords.enable.description",
+    pageKey: "options.difficultWords.title",
+    gate: "difficultWords",
+  },
+  {
+    sectionId: "difficult-words-lookup-action",
+    route: "/difficult-words",
+    titleKey: "options.difficultWords.lookupAction.title",
+    descriptionKey: "options.difficultWords.lookupAction.description",
+    pageKey: "options.difficultWords.title",
+    gate: "difficultWords",
+  },
+  {
+    sectionId: "difficult-words-levels",
+    route: "/difficult-words",
+    titleKey: "options.difficultWords.levels.title",
+    descriptionKey: "options.difficultWords.levels.description",
+    pageKey: "options.difficultWords.title",
+    gate: "difficultWords",
   },
 
   // Text to Speech page

@@ -532,6 +532,9 @@ options:
     translationMode:
       title: Chế độ dịch
       description: Chuyển giữa song ngữ và chỉ bản dịch.
+    difficultWords:
+      title: Quét từ khó
+      description: Tô sáng những từ trên trang mà có lẽ bạn chưa biết. Nhấn lần nữa để xóa.
     selectionTranslation:
       title: Dịch vùng chọn
       description: Dịch văn bản bạn đã chọn.
@@ -615,7 +618,6 @@ options:
       lockPosition: Khóa vị trí
       unlockPosition: Mở khóa vị trí
       settings: Cài đặt
-      feedback: Gửi phản hồi
   selectionToolbar:
     title: Thanh công cụ chọn
     pageDescription: Đặt các thao tác xuất hiện khi bạn chọn văn bản và nơi hiển thị thanh công cụ.
@@ -1160,6 +1162,32 @@ options:
           confirm: Xác nhận
           cancel: Hủy
           description: "Toàn bộ $1 thuật ngữ sẽ bị xóa vĩnh viễn. Hành động này không thể hoàn tác."
+  difficultWords:
+    title: Từ khó
+    pageDescription: Tô sáng những từ trên trang mà có lẽ bạn chưa biết. Bấm vào một từ để tra nghĩa, và đánh dấu những từ đã biết để chúng không được tô sáng nữa.
+    enable:
+      title: Bật Từ khó
+      description: Hiện nút quét trong cửa sổ bật lên và trên nút nổi, đồng thời bật phím tắt của nó
+    usage:
+      title: Cách dùng
+    shortcut:
+      title: Phím tắt
+      description: Quét từ khó trên trang. Nhấn lần nữa để xóa.
+    lookupAction:
+      title: Khi bấm vào một từ sẽ chạy
+      description: Hành động AI mở ra khi bạn bấm vào một từ được tô sáng. Mặc định là Từ điển có sẵn, trừ khi bạn chọn cái khác.
+    colors:
+      title: Màu sắc
+      description: Ý nghĩa của hai màu tô sáng
+      hard: Khó, có lẽ còn mới với bạn
+      learning: Đang học, đã lưu vào Notebase
+    levels:
+      title: Trình độ đọc của bạn
+      description: Mỗi ngôn ngữ có trình độ riêng. Bạn sẽ được hỏi khi quét một trang bằng ngôn ngữ đó lần đầu, và trình độ tự điều chỉnh khi bạn đánh dấu những từ đã biết.
+      empty: Chưa có. Lần đầu bạn quét một trang bằng một ngôn ngữ, bạn sẽ được hỏi trình độ của mình ở ngôn ngữ đó.
+      known: Có lẽ bạn biết $1 từ thông dụng nhất
+      loginRequired: Đăng nhập để xem và đổi trình độ của bạn ở từng ngôn ngữ
+      loadError: Không tải được trình độ đọc của bạn. Hãy thử lại sau.
   contextMenu:
     title: Menu ngữ cảnh
     pageDescription: Kiểm soát các mục Read Frog trong menu chuột phải của trình duyệt.
@@ -1774,6 +1802,41 @@ translationHub:
   translationFailed: Dịch Thất Bại
   translationFailedFallback: Dịch thất bại
   retryTranslation: Thử lại dịch
+difficultWords:
+  name: Từ khó
+  scan: Quét từ
+  clear: Xóa
+  clearCount: Xóa $1 từ khó
+  scanTooltip: Tô sáng những từ trên trang này mà có lẽ bạn chưa biết
+  clearTooltip: Bỏ tô sáng trên trang này
+  translationOnlyUnavailable: Không dùng được ở chế độ "Chỉ bản dịch", vì chế độ này không giữ văn bản gốc trên trang
+  unavailableHere: Read Frog không bật trên trang này
+  known: Đã biết
+  knownDescription: Đánh dấu là đã biết. Từ này sẽ không được tô sáng nữa, trên trang này hay trang khác.
+  markKnown: Tôi biết từ này
+  markedKnown: Đã đánh dấu là đã biết
+  undo: Hoàn tác
+  offline: Hiện không kết nối được máy chủ. Việc quét sẽ tự tiếp tục khi có kết nối lại.
+  empty: Trang này không có đoạn văn nào để quét
+  signInRequired: Đăng nhập để quét từ khó
+  restricted: Từ khó đang trong giai đoạn beta và chưa mở cho tài khoản của bạn
+  dailyLimit: Bạn đã dùng hết hạn mức từ khó hôm nay. Hạn mức được đặt lại lúc $1.
+  unsupportedBrowser: Trình duyệt này không tô sáng được từ trên trang. Hãy cập nhật trình duyệt để dùng Từ khó.
+  level:
+    title: Trình độ đọc $1 của bạn thế nào?
+    description: Chọn mức gần nhất. Mức này quyết định những từ nào được tô sáng lúc đầu.
+    footer: Mức sẽ tự điều chỉnh khi bạn đánh dấu những từ đã biết.
+    later: Để sau
+    unsure: Không chắc
+    saveFailed: Không lưu được trình độ. Hãy thử lại sau.
+    descriptions:
+      A1: Tên, từ quen thuộc và những câu rất đơn giản, như trên thông báo, áp phích và danh mục
+      A2: Văn bản rất ngắn, đơn giản; tìm thông tin cần thiết trong quảng cáo, thực đơn, lịch trình; thư cá nhân ngắn
+      B1: Văn bản chủ yếu dùng ngôn ngữ thường ngày, về cuộc sống hằng ngày hay công việc; mô tả sự việc, cảm xúc và mong muốn trong thư cá nhân
+      B2: Bài báo và báo cáo về các vấn đề thời sự, trong đó tác giả có lập trường rõ ràng; văn xuôi văn học đương đại
+      C1: Văn bản dài, phức tạp, mang tính thông tin hay văn học, phân biệt được văn phong; bài viết chuyên ngành và hướng dẫn kỹ thuật dài ngoài lĩnh vực của bạn
+      C2: Hầu như mọi dạng văn viết, kể cả văn bản trừu tượng có cấu trúc và ngôn ngữ phức tạp, như sách hướng dẫn, bài viết chuyên ngành và tác phẩm văn học
+      unsure: Tính là A2. Nên bắt đầu ở mức thấp; tô sáng quá nhiều thì đánh dấu từ đã biết là sửa được ngay, còn quá ít thì chẳng có gì để bấm.
 languages:
   eng: Tiếng Anh
   cmn: Tiếng Trung giản thể

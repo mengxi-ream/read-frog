@@ -45,7 +45,6 @@ export function TranslationCard({
 }: TranslationCardProps) {
   const { theme } = useTheme()
   const request = useAtomValue(translateRequestAtom)
-  const language = useAtomValue(configFieldsAtomMap.language)
   const glossary = useAtomValue(configFieldsAtomMap.glossary)
   const ttsConfig = useAtomValue(configFieldsAtomMap.tts)
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
@@ -93,7 +92,6 @@ export function TranslationCard({
           const langConfig = {
             sourceCode: req.sourceLanguage,
             targetCode: req.targetLanguage,
-            level: language.level,
           }
           const preparedText = prepareTranslationText(req.inputText)
           const glossaryTerms =

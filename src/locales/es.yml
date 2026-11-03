@@ -533,6 +533,9 @@ options:
     translationMode:
       title: Modo de traducción
       description: Alterna entre bilingüe y solo traducción.
+    difficultWords:
+      title: Buscar palabras difíciles
+      description: Resalta las palabras de la página que probablemente no conoces. Púlsalo otra vez para borrarlas.
     selectionTranslation:
       title: Traducción de la selección
       description: Traduce el texto que seleccionaste.
@@ -616,7 +619,6 @@ options:
       lockPosition: Bloquear posición
       unlockPosition: Desbloquear posición
       settings: Ajustes
-      feedback: Enviar comentarios
   selectionToolbar:
     title: Barra de selección
     pageDescription: Define qué acciones aparecen al seleccionar texto y dónde se muestra la barra.
@@ -1165,6 +1167,32 @@ options:
           confirm: Confirmar
           cancel: Cancelar
           description: "Se eliminarán permanentemente los $1 términos. Esta acción no se puede deshacer."
+  difficultWords:
+    title: Palabras difíciles
+    pageDescription: Resalta las palabras de una página que probablemente no conoces. Haz clic en una para consultarla y marca las que conoces para que no vuelvan a resaltarse.
+    enable:
+      title: Activar palabras difíciles
+      description: Muestra el botón de búsqueda en la ventana emergente y en el botón flotante, y activa su atajo
+    usage:
+      title: Uso
+    shortcut:
+      title: Atajo
+      description: Busca palabras difíciles en la página. Púlsalo otra vez para borrarlas.
+    lookupAction:
+      title: Al hacer clic en una palabra se ejecuta
+      description: La acción AI que se abre al hacer clic en una palabra resaltada. El Diccionario integrado, salvo que elijas otra.
+    colors:
+      title: Colores
+      description: Qué significan los dos colores de resaltado
+      hard: Difícil, probablemente nueva para ti
+      learning: Aprendiendo, guardada en una Notebase
+    levels:
+      title: Tu nivel de lectura
+      description: Cada idioma tiene el suyo. Se te pregunta la primera vez que buscas en una página en ese idioma y se ajusta a medida que marcas las palabras que conoces.
+      empty: Ninguno todavía. La primera vez que busques en una página en un idioma, se te preguntará tu nivel en él.
+      known: Probablemente conoces las $1 palabras más comunes
+      loginRequired: Inicia sesión para ver y cambiar tu nivel en cada idioma
+      loadError: No se pudieron cargar tus niveles de lectura. Inténtalo más tarde.
   contextMenu:
     title: Menú contextual
     pageDescription: Controla las opciones de Read Frog en el menú contextual del navegador.
@@ -1779,6 +1807,41 @@ translationHub:
   translationFailed: Falló la traducción
   translationFailedFallback: Falló la traducción
   retryTranslation: Reintentar traducción
+difficultWords:
+  name: Palabras difíciles
+  scan: Buscar palabras
+  clear: Borrar
+  clearCount: Borrar $1 palabras difíciles
+  scanTooltip: Resalta las palabras de esta página que probablemente no conoces
+  clearTooltip: Quita los resaltados de esta página
+  translationOnlyUnavailable: No disponible en el modo «Solo traducción», que no deja texto original en la página
+  unavailableHere: Read Frog no está activado en esta página
+  known: La conozco
+  knownDescription: Marcar como conocida. No volverá a resaltarse, ni en esta página ni en otras.
+  markKnown: Conozco esta palabra
+  markedKnown: Marcada como conocida
+  undo: Deshacer
+  offline: No se puede conectar con el servidor ahora mismo. La búsqueda se reanuda sola cuando vuelva.
+  empty: No hay párrafos que analizar en esta página
+  signInRequired: Inicia sesión para buscar palabras difíciles
+  restricted: Palabras difíciles está en beta y aún no está disponible para tu cuenta
+  dailyLimit: Has alcanzado el límite de hoy de palabras difíciles. Se restablece a las $1.
+  unsupportedBrowser: Este navegador no puede resaltar palabras en una página. Actualízalo para usar Palabras difíciles.
+  level:
+    title: ¿Cuál es tu nivel de lectura en $1?
+    description: Elige el más cercano. Decide qué palabras se resaltan al principio.
+    footer: Se ajusta a medida que marcas las palabras que conoces.
+    later: Ahora no
+    unsure: No lo sé
+    saveFailed: No se pudo guardar tu nivel. Inténtalo más tarde.
+    descriptions:
+      A1: Nombres, palabras y frases muy sencillas y conocidas, como las de anuncios, carteles y catálogos
+      A2: Textos muy breves y sencillos; encontrar lo que buscas en anuncios, menús y horarios; cartas personales breves
+      B1: Textos redactados sobre todo en lengua cotidiana, sobre la vida diaria o el trabajo; descripciones de hechos, sentimientos y deseos en cartas personales
+      B2: Artículos e informes sobre problemas actuales en los que el autor adopta una postura clara; prosa literaria contemporánea
+      C1: Textos largos y complejos, literarios o basados en hechos, distinguiendo estilos; artículos especializados e instrucciones técnicas largas fuera de tu campo
+      C2: Prácticamente cualquier texto escrito, incluidos textos abstractos de estructura y lenguaje complejos, como manuales, artículos especializados y obras literarias
+      unsure: Se cuenta como A2. Mejor empezar bajo; el exceso de resaltados se corrige rápido marcando las palabras que conoces, y si hay muy pocos no queda nada en qué hacer clic.
 languages:
   eng: Inglés
   cmn: Chino simplificado

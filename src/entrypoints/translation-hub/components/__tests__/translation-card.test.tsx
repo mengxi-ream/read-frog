@@ -7,7 +7,6 @@ import { TranslationCard } from "@/entrypoints/translation-hub/components/transl
 const {
   anchoredToastAddMock,
   clipboardWriteMock,
-  languageAtom,
   glossaryAtom,
   providersAtom,
   requestAtom,
@@ -22,7 +21,6 @@ const {
 } = vi.hoisted(() => ({
   anchoredToastAddMock: vi.fn<(options: unknown) => void>(),
   clipboardWriteMock: vi.fn<(text: string) => void>(),
-  languageAtom: {},
   glossaryAtom: {},
   providersAtom: {},
   requestAtom: {},
@@ -69,7 +67,6 @@ vi.mock("jotai", () => ({
   useAtom: () => [["provider-1"], vi.fn<(value: unknown) => void>()],
   useAtomValue: (atom: object) => {
     if (atom === requestAtom) return null
-    if (atom === languageAtom) return { level: "intermediate" }
     if (atom === glossaryAtom) return { enabled: false }
     if (atom === ttsAtom) return ttsConfig
     if (atom === providersAtom) return []
@@ -100,7 +97,6 @@ vi.mock("@/hooks/use-text-to-speech", () => ({
 
 vi.mock("@/utils/atoms/config", () => ({
   configFieldsAtomMap: {
-    language: languageAtom,
     glossary: glossaryAtom,
     tts: ttsAtom,
     providersConfig: providersAtom,

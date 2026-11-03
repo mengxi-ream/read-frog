@@ -10,6 +10,7 @@ import { SaveToNotebaseDialogHost } from "@/components/custom-action/save-to-not
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { SelectionPopover } from "@/components/ui/selection-popover"
 import { createSelectionToolbarPrecheckError } from "@/components/ui/selection-popover/inline-error"
+import { ReviewDueTab } from "@/components/ui/selection-popover/review-due-tab"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
 import { classifyResolvedProvider, UNKNOWN_FEATURE_PROVIDER } from "@/utils/analytics-provider"
@@ -18,6 +19,7 @@ import { findSelectionToolbarAction, getSelectionToolbarActions } from "@/utils/
 import { onMessage } from "@/utils/message"
 import { resolveProviderRefForCapability } from "@/utils/providers/provider-registry"
 import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-host"
+import { notifySelectionLookup } from "../../selection-lookups"
 import { normalizeSelectedText } from "../../utils"
 import {
   contextAtom,
@@ -94,6 +96,7 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
 
       if (mode === "open") {
         sessionKeyRef.current += 1
+        if (pendingRequest) notifySelectionLookup(session)
       }
 
       setCustomActionRequest((previous) =>
@@ -277,7 +280,14 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
           key={customActionRequest?.sessionKey ?? 0}
           container={shadowWrapper ?? document.body}
         >
-          <CustomActionPanel />
+          <CustomActionPanel.Root>
+            <CustomActionPanel.Header />
+            <CustomActionPanel.Body />
+            <ReviewDueTab source="extension_custom_ai_action" />
+            <CustomActionPanel.Footer>
+              <CustomActionPanel.ProviderSelect />
+            </CustomActionPanel.Footer>
+          </CustomActionPanel.Root>
         </SelectionPopover.Content>
       </SelectionPopover.Root>
       <SaveToNotebaseDialogHost />

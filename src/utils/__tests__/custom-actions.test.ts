@@ -6,6 +6,7 @@ import {
   getBuiltInDictionaryAction,
   getSelectionToolbarActions,
   replaceSelectionToolbarAction,
+  resolveDifficultWordLookupAction,
   resolveNoteSuggestionAction,
   resolveWordLookupAction,
 } from "@/utils/custom-actions"
@@ -318,5 +319,30 @@ describe("subtitle word lookup action", () => {
 
     expect(resolveWordLookupAction(config).id).toBe("default-dictionary")
     expect(resolveWordLookupAction(configWith("deleted-action")).id).toBe("default-dictionary")
+  })
+})
+
+describe("difficult word lookup action", () => {
+  function configWith(lookupActionId: string) {
+    const config = structuredClone(DEFAULT_CONFIG)
+    config.difficultWords.lookupActionId = lookupActionId
+    return config
+  }
+
+  it("opens Dictionary by default", () => {
+    expect(resolveDifficultWordLookupAction(structuredClone(DEFAULT_CONFIG)).id).toBe(
+      "default-dictionary",
+    )
+  })
+
+  it("runs the picked action while it is on, and falls back to Dictionary when it is off or deleted", () => {
+    const config = configWith("default-sentence-analysis")
+    expect(resolveDifficultWordLookupAction(config).id).toBe("default-sentence-analysis")
+
+    config.selectionToolbar.builtInActions.sentenceAnalysis.enabled = false
+    expect(resolveDifficultWordLookupAction(config).id).toBe("default-dictionary")
+    expect(resolveDifficultWordLookupAction(configWith("deleted-action")).id).toBe(
+      "default-dictionary",
+    )
   })
 })

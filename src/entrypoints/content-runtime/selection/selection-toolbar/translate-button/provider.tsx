@@ -26,7 +26,10 @@ import {
 } from "@/components/ui/selection-popover/inline-error"
 import { ReviewDueTab } from "@/components/ui/selection-popover/review-due-tab"
 import { SelectionToolbarErrorAlert } from "@/components/ui/selection-popover/selection-toolbar-error-alert"
-import { SelectionToolbarFooterContent } from "@/components/ui/selection-popover/selection-toolbar-footer-content"
+import {
+  SelectionToolbarFooterContent,
+  SelectionToolbarProviderSelect,
+} from "@/components/ui/selection-popover/selection-toolbar-footer-content"
 import { SelectionToolbarTitleContent } from "@/components/ui/selection-popover/selection-toolbar-title-content"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { isLLMProviderConfig } from "@/types/config/provider"
@@ -41,6 +44,7 @@ import { onMessage } from "@/utils/message"
 import { toSelectionPromptContext } from "@/utils/prompts/selection-context"
 import { getSelectableProvidersForCapability } from "@/utils/providers/provider-registry"
 import { shadowWrapper } from "../../main"
+import { notifySelectionLookup } from "../../selection-lookups"
 import { normalizeSelectedText } from "../../utils"
 import {
   isSelectionToolbarOpenAtom,
@@ -69,14 +73,14 @@ interface SelectionTranslatePendingOpenRequest {
  * Keeps the hosted-status hook inside SelectionPopover.Content, which stays
  * unmounted until the popover first opens — the selection app mounts on every
  * page, and merely loading a page must not fire hosted-AI session/status
- * requests. Mirrors CustomActionFooterContent.
+ * requests. Mirrors CustomActionPanel.ProviderSelect.
  */
-function TranslateFooterContent({
+function TranslateProviderSelect({
   providers,
   ...props
-}: ComponentProps<typeof SelectionToolbarFooterContent>) {
+}: ComponentProps<typeof SelectionToolbarProviderSelect>) {
   const translateProviders = useHostedAiProviderOptions("selectionTranslation", providers)
-  return <SelectionToolbarFooterContent providers={translateProviders} {...props} />
+  return <SelectionToolbarProviderSelect providers={translateProviders} {...props} />
 }
 
 interface SelectionTranslationContextValue {
@@ -216,7 +220,9 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
   const applyPendingSession = useCallback(() => {
     const pendingRequest = pendingOpenRequestRef.current
 
-    setActiveSession(pendingRequest?.session ?? selectionSession)
+    const session = pendingRequest?.session ?? selectionSession
+    setActiveSession(session)
+    notifySelectionLookup(session)
     setSourceSurface(pendingRequest?.surface ?? ANALYTICS_SURFACE.SELECTION_TOOLBAR)
     setIsSelectionToolbarOpen(false)
     pendingOpenRequestRef.current = null
@@ -596,12 +602,16 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
             <SelectionToolbarErrorAlert error={error} className="-mt-3" />
           </SelectionPopover.Body>
           <ReviewDueTab source="extension_selection_translation" />
-          <TranslateFooterContent
+          <SelectionToolbarFooterContent
+            start={
+              <TranslateProviderSelect
+                providers={translateProviders}
+                value={translateRequest.provider?.id ?? ""}
+                onChange={handleProviderChange}
+              />
+            }
             paragraphsText={paragraphsText}
-            providers={translateProviders}
             titleText={titleText}
-            value={translateRequest.provider?.id ?? ""}
-            onProviderChange={handleProviderChange}
             onRegenerate={handleRegenerate}
           />
         </SelectionPopover.Content>

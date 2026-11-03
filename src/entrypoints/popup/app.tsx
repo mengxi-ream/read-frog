@@ -6,6 +6,7 @@ import { version } from "../../../package.json"
 import { AISmartContext } from "./components/ai-smart-context"
 import { AlwaysTranslate } from "./components/always-translate"
 import BlogNotification from "./components/blog-notification"
+import { DifficultWordsButton } from "./components/difficult-words-button"
 import { DiscordButton } from "./components/discord-button"
 import LanguageOptionsSelector from "./components/language-options-selector"
 import { MoreMenu } from "./components/more-menu"
@@ -40,6 +41,7 @@ function App() {
           <div className="flex w-full items-center gap-2">
             <TranslationModeSelector />
             <TranslateButton className="min-w-0 flex-1" />
+            <DifficultWordsButton />
           </div>
           <SiteControlToggle />
           <AlwaysTranslate />

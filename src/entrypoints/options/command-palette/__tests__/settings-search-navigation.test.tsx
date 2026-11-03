@@ -55,6 +55,10 @@ vi.mock("../search-items", () => ({
   ],
 }))
 
+vi.mock("../../pages/difficult-words/access", () => ({
+  useIsDifficultWordsOpen: () => false,
+}))
+
 vi.mock("../section-scroll", () => ({
   buildSectionSearch: mockedSectionScroll.buildSectionSearch,
   getSectionIdFromSearch: mockedSectionScroll.getSectionIdFromSearch,

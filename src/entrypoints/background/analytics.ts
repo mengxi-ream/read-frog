@@ -66,7 +66,13 @@ const FEATURE_SURFACES = listEveryFeatureSurface({
     "touch_gesture",
   ],
   selection_translation: ["selection_toolbar", "context_menu", "shortcut"],
-  custom_ai_action: ["selection_toolbar", "context_menu", "shortcut", "video_subtitles"],
+  custom_ai_action: [
+    "selection_toolbar",
+    "context_menu",
+    "shortcut",
+    "video_subtitles",
+    "difficult_words",
+  ],
   input_translation: ["input_translation"],
   translation_hub: ["translation_hub"],
   video_subtitles: ["video_subtitles", "video_subtitles_auto", "shortcut"],
@@ -82,6 +88,7 @@ const FEATURE_SURFACES = listEveryFeatureSurface({
   note_save: ["selection_toolbar", "video_subtitles"],
   glossary: ["page_translation", "video_subtitles", "selection_toolbar", "input_translation"],
   word_annotation: ["selection_toolbar", "shortcut", "annotation_mode"],
+  difficult_words: ["popup", "floating_button", "shortcut"],
 })
 
 /** The tab a feature was used in, as reported by the message sender. */
@@ -463,6 +470,16 @@ function normalizeFeatureUsedEvent(
       }
     })
     .with({ feature: "video_subtitles" }, (event) => {
+      if (!isLanguageCode(event.target_language)) return null
+      return {
+        ...common,
+        ...siteProperties,
+        feature: event.feature,
+        surface: event.surface,
+        target_language: event.target_language,
+      }
+    })
+    .with({ feature: "difficult_words" }, (event) => {
       if (!isLanguageCode(event.target_language)) return null
       return {
         ...common,

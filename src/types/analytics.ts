@@ -14,6 +14,7 @@ export const ANALYTICS_FEATURE = {
   NOTE_SAVE: "note_save",
   GLOSSARY: "glossary",
   WORD_ANNOTATION: "word_annotation",
+  DIFFICULT_WORDS: "difficult_words",
 } as const
 
 export type AnalyticsFeature = (typeof ANALYTICS_FEATURE)[keyof typeof ANALYTICS_FEATURE]
@@ -36,6 +37,8 @@ export const ANALYTICS_SURFACE = {
   TTS_SETTINGS: "tts_settings",
   /** The selection toolbar's annotation mode: every selection annotates. */
   ANNOTATION_MODE: "annotation_mode",
+  /** A click on a word marked as difficult. */
+  DIFFICULT_WORDS: "difficult_words",
 } as const
 
 export type AnalyticsSurface = (typeof ANALYTICS_SURFACE)[keyof typeof ANALYTICS_SURFACE]
@@ -95,7 +98,12 @@ export interface SurfaceByFeature {
     | "shortcut"
     | "touch_gesture"
   selection_translation: "selection_toolbar" | "context_menu" | "shortcut"
-  custom_ai_action: "selection_toolbar" | "context_menu" | "shortcut" | "video_subtitles"
+  custom_ai_action:
+    | "selection_toolbar"
+    | "context_menu"
+    | "shortcut"
+    | "video_subtitles"
+    | "difficult_words"
   input_translation: "input_translation"
   translation_hub: "translation_hub"
   video_subtitles: "video_subtitles" | "video_subtitles_auto" | "shortcut"
@@ -110,6 +118,7 @@ export interface SurfaceByFeature {
   note_save: "selection_toolbar" | "video_subtitles"
   glossary: "page_translation" | "video_subtitles" | "selection_toolbar" | "input_translation"
   word_annotation: "selection_toolbar" | "shortcut" | "annotation_mode"
+  difficult_words: "popup" | "floating_button" | "shortcut"
 }
 
 export type FeatureUsageContext<F extends AnalyticsFeature = AnalyticsFeature> = {
@@ -144,6 +153,7 @@ export interface ObservedByFeature {
       }
   glossary: { target_language: LangCodeISO6393 }
   word_annotation: { char_count: number; target_language: LangCodeISO6393 }
+  difficult_words: { target_language: LangCodeISO6393 }
 }
 
 export interface FeatureUsedEventBase extends FeatureProviderAnalytics {

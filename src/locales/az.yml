@@ -533,6 +533,9 @@ options:
     translationMode:
       title: Tərcümə rejimi
       description: İkidilli və yalnız tərcümə rejimləri arasında keçid edin.
+    difficultWords:
+      title: Çətin sözləri axtar
+      description: Səhifədə yəqin ki, bilmədiyiniz sözləri işarələyir. Təmizləmək üçün yenidən basın.
     selectionTranslation:
       title: Seçilmiş mətnin tərcüməsi
       description: Seçdiyiniz mətni tərcümə edin.
@@ -616,7 +619,6 @@ options:
       lockPosition: Mövqeyi kilidlə
       unlockPosition: Mövqenin kilidini aç
       settings: Parametrlər
-      feedback: Rəy göndər
   selectionToolbar:
     title: Seçim alətlər paneli
     pageDescription: Mətn seçdikdə hansı əməliyyatların göründüyünü və alətlər panelinin harada açıldığını təyin edin.
@@ -1165,6 +1167,32 @@ options:
           confirm: Təsdiqlə
           cancel: Ləğv et
           description: "Bütün $1 termin həmişəlik silinəcək. Bu əməliyyatı geri qaytarmaq mümkün deyil."
+  difficultWords:
+    title: Çətin sözlər
+    pageDescription: Səhifədə yəqin ki, bilmədiyiniz sözləri işarələyir. Mənasına baxmaq üçün birinə klikləyin, bildiklərinizi isə qeyd edin ki, bir daha işarələnməsin.
+    enable:
+      title: Çətin sözləri aktiv et
+      description: Axtarış düyməsini açılan pəncərədə və üzən düymədə göstərir, qısayolunu aktiv edir
+    usage:
+      title: İstifadə
+    shortcut:
+      title: Qısayol
+      description: Səhifədə çətin sözləri axtarır. Təmizləmək üçün yenidən basın.
+    lookupAction:
+      title: Sözə kliklədikdə işə düşür
+      description: İşarələnmiş sözə kliklədikdə açılan AI əməliyyatı. Başqasını seçməsəniz, daxili Lüğətdir.
+    colors:
+      title: Rənglər
+      description: İki işarə rənginin mənası
+      hard: Çətin, yəqin ki, sizin üçün yenidir
+      learning: Öyrənilir, Notebase-ə saxlanılıb
+    levels:
+      title: Oxu səviyyəniz
+      description: Hər dilin öz səviyyəsi var. O dildə səhifəni ilk dəfə axtaranda soruşulur və bildiyiniz sözləri qeyd etdikcə tənzimlənir.
+      empty: Hələ yoxdur. Bir dildə səhifəni ilk dəfə axtaranda o dildəki səviyyəniz soruşulacaq.
+      known: Yəqin ki, ən çox işlənən $1 sözü bilirsiniz
+      loginRequired: Hər dildəki səviyyənizi görmək və dəyişmək üçün daxil olun
+      loadError: Oxu səviyyələrinizi yükləmək alınmadı. Bir az sonra yenidən cəhd edin.
   contextMenu:
     title: Kontekst menyusu
     pageDescription: Brauzerin sağ klik menyusundakı Read Frog elementlərini idarə edin.
@@ -1772,6 +1800,41 @@ translationHub:
   translationFailed: Tərcümə alınmadı
   translationFailedFallback: Tərcümə alınmadı
   retryTranslation: Yenidən tərcümə et
+difficultWords:
+  name: Çətin sözlər
+  scan: Sözləri axtar
+  clear: Təmizlə
+  clearCount: $1 çətin sözü təmizlə
+  scanTooltip: Bu səhifədə yəqin ki, bilmədiyiniz sözləri işarələyir
+  clearTooltip: Bu səhifədəki işarələri silir
+  translationOnlyUnavailable: Səhifədə orijinal mətn saxlamayan "Yalnız tərcümə" rejimində əlçatan deyil
+  unavailableHere: Read Frog bu səhifədə aktiv deyil
+  known: Bilirəm
+  knownDescription: Bilinən kimi qeyd et. Bu söz nə bu səhifədə, nə də digərlərində bir daha işarələnməyəcək.
+  markKnown: Bu sözü bilirəm
+  markedKnown: Bilinən kimi qeyd edildi
+  undo: Geri al
+  offline: Hazırda serverə qoşulmaq mümkün deyil. Bağlantı bərpa olunanda axtarış özü davam edəcək.
+  empty: Bu səhifədə axtarılacaq abzas yoxdur
+  signInRequired: Çətin sözləri axtarmaq üçün daxil olun
+  restricted: Çətin sözlər beta mərhələsindədir və hələ hesabınız üçün açıq deyil
+  dailyLimit: "Bugünkü çətin söz limitinə çatdınız. Yenilənmə vaxtı: $1."
+  unsupportedBrowser: Bu brauzer səhifədəki sözləri işarələyə bilmir. Çətin sözlərdən istifadə etmək üçün brauzeri yeniləyin.
+  level:
+    title: "$1: oxu səviyyəniz necədir?"
+    description: Ən yaxın olanı seçin. Əvvəlcə hansı sözlərin işarələnəcəyini bu müəyyən edir.
+    footer: Bildiyiniz sözləri qeyd etdikcə özü tənzimlənir.
+    later: İndi yox
+    unsure: Əmin deyiləm
+    saveFailed: Səviyyənizi yadda saxlamaq alınmadı. Bir az sonra yenidən cəhd edin.
+    descriptions:
+      A1: Elanlar, afişalar və kataloqlardakı kimi tanış adlar, sözlər və çox sadə cümlələr
+      A2: Çox qısa, sadə mətnlər; reklam, menyu və cədvəllərdə lazım olanı tapmaq; qısa şəxsi məktublar
+      B1: Əsasən gündəlik dildə, gündəlik həyat və ya işlə bağlı mətnlər; şəxsi məktublarda hadisələrin, hisslərin və arzuların təsviri
+      B2: Müəllifin aydın mövqe tutduğu aktual məsələlərə dair məqalə və hesabatlar; müasir bədii nəsr
+      C1: Üslub fərqlərini seçərək oxunan uzun, mürəkkəb faktiki və bədii mətnlər; öz sahənizdən kənar ixtisas məqalələri və uzun texniki təlimatlar
+      C2: Təlimatlar, ixtisas məqalələri və bədii əsərlər kimi quruluşu və dili mürəkkəb abstrakt mətnlər də daxil olmaqla, demək olar ki, hər cür yazılı dil
+      unsure: A2 kimi sayılır. Aşağıdan başlamaq daha yaxşıdır; artıq işarələr bildiyiniz sözləri qeyd etməklə tez düzəlir, çox az olanda isə klikləməyə heç nə qalmır.
 languages:
   eng: İngilis dili
   cmn: Sadələşdirilmiş çin dili

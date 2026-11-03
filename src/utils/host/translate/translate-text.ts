@@ -1,4 +1,4 @@
-import type { LangCodeISO6393, LangLevel } from "@read-frog/definitions"
+import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type { HostedAiTextStreamRoute } from "@/types/background-stream"
 import type { Config } from "@/types/config/config"
 import type { LLMProviderConfig, TranslateProviderConfig } from "@/types/config/provider"
@@ -280,7 +280,6 @@ export interface TranslateTextOptions {
   langConfig: {
     sourceCode: LangCodeISO6393 | "auto"
     targetCode: LangCodeISO6393
-    level: LangLevel
   }
   providerConfig: ResolvedProviderRef<TranslateProviderConfig>
   enableAIContentAware?: boolean

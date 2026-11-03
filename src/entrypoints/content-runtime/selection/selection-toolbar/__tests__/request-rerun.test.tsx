@@ -276,18 +276,33 @@ vi.mock("@/components/ui/selection-popover/selection-toolbar-footer-content", ()
   SelectionToolbarFooterContent: ({
     children,
     paragraphsText,
-    onProviderChange,
     onRegenerate,
-    providers,
+    start,
     titleText,
-    value,
   }: {
     children?: ReactNode
     paragraphsText: string | null | undefined
-    onProviderChange: (id: string) => void
     onRegenerate: () => void
-    providers: Array<{ id: string; disabled?: boolean; kind?: string }>
+    start?: ReactNode
     titleText: string | null | undefined
+  }) => (
+    <div>
+      <span data-testid="footer-title">{titleText}</span>
+      <span data-testid="footer-paragraphs">{paragraphsText}</span>
+      {children}
+      <button type="button" aria-label="Regenerate" onClick={onRegenerate}>
+        Regenerate
+      </button>
+      {start}
+    </div>
+  ),
+  SelectionToolbarProviderSelect: ({
+    onChange,
+    providers,
+    value,
+  }: {
+    onChange: (id: string) => void
+    providers: Array<{ id: string; disabled?: boolean; kind?: string }>
     value: string
   }) => {
     // Skip the hosted system entries so the pick stays aligned with
@@ -298,26 +313,18 @@ vi.mock("@/components/ui/selection-popover/selection-toolbar-footer-content", ()
     )
 
     return (
-      <div>
-        <span data-testid="footer-title">{titleText}</span>
-        <span data-testid="footer-paragraphs">{paragraphsText}</span>
-        {children}
-        <button type="button" aria-label="Regenerate" onClick={onRegenerate}>
-          Regenerate
-        </button>
-        <button
-          type="button"
-          aria-label="Change provider"
-          disabled={!nextProvider}
-          onClick={() => {
-            if (nextProvider) {
-              onProviderChange(nextProvider.id)
-            }
-          }}
-        >
-          Change provider
-        </button>
-      </div>
+      <button
+        type="button"
+        aria-label="Change provider"
+        disabled={!nextProvider}
+        onClick={() => {
+          if (nextProvider) {
+            onChange(nextProvider.id)
+          }
+        }}
+      >
+        Change provider
+      </button>
     )
   },
 }))

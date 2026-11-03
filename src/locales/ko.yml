@@ -532,6 +532,9 @@ options:
     translationMode:
       title: 번역 모드
       description: 이중 언어와 번역만 사이를 전환합니다.
+    difficultWords:
+      title: 어려운 단어 스캔
+      description: 페이지에서 모를 가능성이 높은 단어를 강조 표시합니다. 다시 누르면 지웁니다.
     selectionTranslation:
       title: 선택 영역 번역
       description: 선택한 텍스트를 번역합니다.
@@ -615,7 +618,6 @@ options:
       lockPosition: 위치 잠금
       unlockPosition: 위치 잠금 해제
       settings: 설정
-      feedback: 피드백 보내기
   selectionToolbar:
     title: 선택 툴바
     pageDescription: 텍스트를 선택했을 때 나타날 동작과 도구 모음을 표시할 사이트를 설정하세요.
@@ -1160,6 +1162,32 @@ options:
           confirm: 확인
           cancel: 취소
           description: "$1개의 용어가 모두 영구히 삭제됩니다. 이 작업은 되돌릴 수 없습니다."
+  difficultWords:
+    title: 어려운 단어
+    pageDescription: 페이지에서 모를 가능성이 높은 단어를 강조 표시합니다. 단어를 클릭해 뜻을 찾고, 아는 단어를 표시해 두면 다시 강조 표시되지 않습니다.
+    enable:
+      title: 어려운 단어 활성화
+      description: 팝업과 플로팅 버튼에 스캔 버튼을 표시하고 단축키를 켭니다
+    usage:
+      title: 사용
+    shortcut:
+      title: 단축키
+      description: 페이지에서 어려운 단어를 스캔합니다. 다시 누르면 지웁니다.
+    lookupAction:
+      title: 단어를 클릭하면 실행
+      description: 강조 표시된 단어를 클릭할 때 열리는 AI 액션입니다. 다른 것을 고르지 않으면 기본 제공 사전입니다.
+    colors:
+      title: 색상
+      description: 두 가지 강조 색상의 의미
+      hard: 어려움, 아마 처음 보는 단어
+      learning: 학습 중, Notebase에 저장됨
+    levels:
+      title: 읽기 수준
+      description: 언어마다 따로 있습니다. 그 언어의 페이지를 처음 스캔할 때 묻고, 아는 단어를 표시할수록 조정됩니다.
+      empty: 아직 없습니다. 어떤 언어의 페이지를 처음 스캔하면 그 언어의 수준을 묻습니다.
+      known: 가장 흔한 단어 $1개는 아마 알고 있습니다
+      loginRequired: 로그인하면 언어별 수준을 확인하고 바꿀 수 있습니다
+      loadError: 읽기 수준을 불러오지 못했습니다. 잠시 후 다시 시도하세요.
   contextMenu:
     title: 컨텍스트 메뉴
     pageDescription: 브라우저 우클릭 메뉴에 표시되는 Read Frog 항목을 설정하세요.
@@ -1774,6 +1802,41 @@ translationHub:
   translationFailed: 번역 실패
   translationFailedFallback: 번역 실패
   retryTranslation: 번역 재시도
+difficultWords:
+  name: 어려운 단어
+  scan: 단어 스캔
+  clear: 지우기
+  clearCount: 어려운 단어 $1개 지우기
+  scanTooltip: 이 페이지에서 모를 가능성이 높은 단어를 강조 표시합니다
+  clearTooltip: 이 페이지의 강조 표시를 지웁니다
+  translationOnlyUnavailable: "'번역만' 모드에서는 페이지에 원문이 남지 않아 사용할 수 없습니다"
+  unavailableHere: 이 페이지에서는 Read Frog가 켜져 있지 않습니다
+  known: 알아요
+  knownDescription: 아는 단어로 표시합니다. 이 페이지와 다른 페이지에서 더 이상 강조 표시되지 않습니다.
+  markKnown: 이 단어를 알아요
+  markedKnown: 아는 단어로 표시했습니다
+  undo: 실행 취소
+  offline: 지금은 서버에 연결할 수 없습니다. 연결되면 자동으로 다시 시작합니다.
+  empty: 이 페이지에는 스캔할 단락이 없습니다
+  signInRequired: 어려운 단어를 스캔하려면 로그인하세요
+  restricted: 어려운 단어는 베타 기능이며 아직 회원님의 계정에는 열려 있지 않습니다
+  dailyLimit: 오늘의 어려운 단어 한도에 도달했습니다. $1에 초기화됩니다.
+  unsupportedBrowser: 이 브라우저는 페이지의 단어를 강조 표시할 수 없습니다. 어려운 단어를 사용하려면 브라우저를 업데이트하세요.
+  level:
+    title: $1 읽기 수준이 어느 정도인가요?
+    description: 가장 가까운 것을 고르세요. 처음에 어떤 단어를 강조 표시할지 정합니다.
+    footer: 아는 단어를 표시할수록 자동으로 조정됩니다.
+    later: 나중에
+    unsure: 잘 모르겠어요
+    saveFailed: 수준을 저장하지 못했습니다. 잠시 후 다시 시도하세요.
+    descriptions:
+      A1: 안내문, 포스터, 카탈로그 등에 나오는 익숙한 이름, 단어, 아주 간단한 문장
+      A2: 아주 짧고 간단한 글. 광고, 메뉴, 시간표에서 필요한 정보 찾기. 짧은 개인 편지
+      B1: 일상생활이나 업무에 관한, 주로 일상적인 말로 쓰인 글. 개인 편지 속 사건, 감정, 바람에 대한 묘사
+      B2: 필자가 분명한 입장을 취하는 시사 문제에 관한 기사와 보고서. 현대 문학 산문
+      C1: 길고 복잡한 사실적인 글과 문학 작품을 문체의 차이를 느끼며 읽기. 내 분야가 아닌 전문 기사와 긴 기술 설명서
+      C2: 구조와 언어가 복잡한 추상적인 글을 포함한 거의 모든 형태의 글. 설명서, 전문 기사, 문학 작품 등
+      unsure: A2로 계산합니다. 낮게 시작하는 편이 낫습니다. 강조 표시가 너무 많으면 아는 단어를 표시해 금방 고칠 수 있지만, 너무 적으면 클릭할 것이 없습니다.
 languages:
   eng: 영어
   cmn: 중국어 간체

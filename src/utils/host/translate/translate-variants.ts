@@ -265,7 +265,6 @@ export async function translateTextForInput(
     langConfig: {
       sourceCode: resolvedFromLang,
       targetCode: resolvedToLang,
-      level: config.language.level,
     },
     extraHashTags: [`inputTranslation:${fromLang}->${toLang}`],
     providerConfig: resolved,

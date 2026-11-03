@@ -7,6 +7,7 @@ import { isSaveToNotebaseDialogOpenAtom } from "@/components/custom-action/save-
 import { SaveToNotebaseDialogHost } from "@/components/custom-action/save-to-notebase-dialog-host"
 import { ThemeProvider } from "@/components/providers/theme-provider"
 import { SelectionPopover } from "@/components/ui/selection-popover"
+import { ReviewDueTab } from "@/components/ui/selection-popover/review-due-tab"
 import { SUBTITLES_BOX_CLASS } from "@/utils/constants/subtitles"
 import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-host"
 import { subtitlesPositionAtom } from "../atoms"
@@ -103,7 +104,14 @@ export function WordLookupCard() {
           disablePointerDismissal={isSaveToNotebaseDialogOpen}
         >
           <SelectionPopover.Content key={placement.mountKey} container={container}>
-            <CustomActionPanel />
+            <CustomActionPanel.Root>
+              <CustomActionPanel.Header />
+              <CustomActionPanel.Body />
+              <ReviewDueTab source="extension_custom_ai_action" />
+              <CustomActionPanel.Footer>
+                <CustomActionPanel.ProviderSelect />
+              </CustomActionPanel.Footer>
+            </CustomActionPanel.Root>
           </SelectionPopover.Content>
         </SelectionPopover.Root>
         {active && <SaveToNotebaseDialogHost />}

@@ -8,6 +8,7 @@ import {
 } from "@/utils/constants/selection-overlay-layers"
 import { AnnotationModePill } from "./annotation/mode-pill"
 import { AnnotationProvider } from "./annotation/provider"
+import { DifficultWords } from "./difficult-words"
 import { useInputTranslation } from "./input-translation"
 import { SelectionToolbar } from "./selection-toolbar"
 import { SelectionCustomActionProvider } from "./selection-toolbar/custom-action-button/provider"
@@ -53,6 +54,7 @@ export default function App({
             <AnnotationProvider>
               <SelectionToolbar />
               <AnnotationModePill />
+              <DifficultWords />
             </AnnotationProvider>
           </SelectionSpeechProvider>
         </SelectionCustomActionProvider>

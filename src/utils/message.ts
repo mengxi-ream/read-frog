@@ -1,4 +1,11 @@
+import type { VocabEvent, VocabJudgeBlock, VocabLang } from "@read-frog/api-contract"
 import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type {
+  DifficultWordLemmaChange,
+  DifficultWordsAccess,
+  DifficultWordsJudgeResponse,
+  DifficultWordsTabState,
+} from "./difficult-words/types"
 import type { GuideDictionaryNotebaseCompletionInput } from "./guide/dictionary-notebase"
 import type { FeatureUsageContext, FeatureUsedEventProperties } from "@/types/analytics"
 import type {
@@ -185,6 +192,25 @@ interface ProtocolMap {
   // because content scripts cannot read the session storage that cache lives in.
   // Null means "no verdict" (fetch failed); callers fail open on it.
   getHostedAiStatus: () => Promise<HostedAiStatus | null>
+  // difficult words. The background owns the server traffic: the access
+  // verdict, cached for every tab, and the queue of what the reader did with
+  // marked words, which must outlive the page it happened on.
+  // `fresh` skips the cached verdict: the popup asks it so a new grant shows at once.
+  getDifficultWordsAccess: (data?: { fresh?: boolean }) => DifficultWordsAccess
+  // `events` are queued first, so the blocks are judged with them counted.
+  judgeDifficultWords: (data: {
+    own?: LangCodeISO6393
+    blocks: VocabJudgeBlock[]
+    events?: VocabEvent[]
+  }) => DifficultWordsJudgeResponse
+  recordDifficultWordEvents: (data: { events: VocabEvent[] }) => void
+  // Undo: dropped from the queue while still unsent, otherwise taken back on the server.
+  takeBackDifficultWordEvent: (data: { id: string; lang: VocabLang }) => void
+  broadcastDifficultWordLemma: (data: DifficultWordLemmaChange) => void
+  // to a tab's top frame
+  difficultWordLemmaChanged: (data: DifficultWordLemmaChange) => void
+  getDifficultWordsState: () => DifficultWordsTabState
+  setDifficultWordsEnabled: (data: { enabled: boolean }) => DifficultWordsTabState
   // network proxy
   backgroundFetch: (data: ProxyRequest) => Promise<ProxyResponse>
   // cache management

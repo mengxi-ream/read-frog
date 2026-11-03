@@ -533,6 +533,9 @@ options:
     translationMode:
       title: 翻译模式
       description: 在双语对照和仅显示翻译之间切换。
+    difficultWords:
+      title: 扫描难词
+      description: 标出当前页面上你可能不认识的词，再按一次清除
     selectionTranslation:
       title: 划词翻译
       description: 翻译选中的文本。
@@ -616,7 +619,6 @@ options:
       lockPosition: 锁定位置
       unlockPosition: 解锁位置
       settings: 设置
-      feedback: 发送反馈
   selectionToolbar:
     title: 选择工具栏
     pageDescription: 设置选中文本时出现哪些操作，以及工具栏在哪些网站显示。
@@ -1170,6 +1172,32 @@ options:
           confirm: 确认
           cancel: 取消
           description: "全部 $1 条术语将被永久删除。此操作无法撤销。"
+  difficultWords:
+    title: 难词扫描
+    pageDescription: 在网页上标出你可能不认识的词。点一下看释义；认识的词点「认识」，以后就不再标。
+    enable:
+      title: 启用难词扫描
+      description: 在 popup 和悬浮球上显示「扫描难词」，并启用它的快捷键
+    usage:
+      title: 使用
+    shortcut:
+      title: 快捷键
+      description: 在当前页面扫描难词，再按一次清除
+    lookupAction:
+      title: 点开难词时运行
+      description: 点开标出的词时打开的 AI 指令，默认是内置的词典
+    colors:
+      title: 颜色
+      description: 两种标记颜色的意思
+      hard: 难词：你可能不认识
+      learning: 在学：已经存进笔记库
+    levels:
+      title: 我的阅读水平
+      description: 每种语言分开算。第一次扫描某种语言的页面时会问你，之后根据你标「认识」的词自动调整。
+      empty: 还没有。第一次扫描某种语言的页面时，会先问你在这种语言里的水平。
+      known: 大约认识最常用的 $1 个词
+      loginRequired: 登录后可以查看和修改各语言的水平
+      loadError: 没能读取你的阅读水平，请稍后再试
   contextMenu:
     title: 右键菜单
     pageDescription: 控制浏览器右键菜单里的 Read Frog 选项。
@@ -1784,6 +1812,41 @@ translationHub:
   translationFailed: 翻译失败
   translationFailedFallback: 翻译失败
   retryTranslation: 重试翻译
+difficultWords:
+  name: 难词扫描
+  scan: 扫描难词
+  clear: 清除难词
+  clearCount: 清除难词 $1
+  scanTooltip: 标出这页上你可能不认识的词
+  clearTooltip: 清除这页上标出的难词
+  translationOnlyUnavailable: 「仅显示翻译」模式下页面上没有原文，无法扫描难词
+  unavailableHere: 陪读蛙在这个页面上没有启用
+  known: 认识
+  knownDescription: 标为认识：这页和其他页都不再标出这个词
+  markKnown: 认识这个词
+  markedKnown: 已记为认识
+  undo: 撤销
+  offline: 暂时连不上服务器，恢复后自动继续
+  empty: 这页没有可以扫描的段落
+  signInRequired: 登录后才能扫描难词
+  restricted: 难词扫描还在内测，暂未对你的账号开放
+  dailyLimit: 今天的难词扫描额度用完了，$1 恢复
+  unsupportedBrowser: 当前浏览器无法在页面上标出单词，请更新浏览器后再使用难词扫描
+  level:
+    title: 你的$1阅读水平大概是？
+    description: 选最接近的一项，用来决定一开始标出哪些词
+    footer: 之后会根据你的点击自动调整
+    later: 以后再说
+    unsure: 不确定
+    saveFailed: 没能保存水平，请稍后再试
+    descriptions:
+      A1: 熟悉的名字、单词和很简单的句子，比如告示、海报、目录上的
+      A2: 很短、很简单的文字；能在广告、菜单、时刻表里找到要的信息；简短的私人信件
+      B1: 以常用词为主的文字，比如日常生活和工作相关的；私人信件里对事情、感受、愿望的描述
+      B2: 讨论当代问题的文章和报道，作者有明确的立场和观点；当代文学散文
+      C1: 较长、较复杂的事实性和文学性文字，能体会风格的差别；不是自己领域的专业文章和较长的技术说明
+      C2: 几乎所有形式的书面语，包括抽象的、结构和语言都很复杂的文字，比如说明书、专业文章、文学作品
+      unsure: 按 A2 算。宁可偏低：标多了，点「认识」很快调上去；标少了，没有东西可点，很难发现
 languages:
   eng: 英语
   cmn: 简体中文

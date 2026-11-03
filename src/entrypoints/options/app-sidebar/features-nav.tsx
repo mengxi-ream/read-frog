@@ -23,6 +23,7 @@ import {
 import { env } from "@/env"
 import { TRANSLATION_HUB_PAGE_PATH } from "@/utils/constants/translation-hub"
 import { i18n } from "@/utils/i18n"
+import { DIFFICULT_WORDS_ROUTE, useIsDifficultWordsOpen } from "../pages/difficult-words/access"
 
 const OVERLAY_TOOLS_PATHS = ["/floating-button", "/selection-toolbar", "/context-menu"] as const
 /**
@@ -42,6 +43,8 @@ export function FeaturesNav() {
   // `startsWith`, so the group stays lit while a single glossary is open on
   // `/advanced/glossary/:glossaryId`.
   const isAdvancedActive = pathname.startsWith("/advanced")
+  // Only for the accounts it is open to while it is in testing.
+  const isDifficultWordsOpen = useIsDifficultWordsOpen()
 
   return (
     <SidebarGroup>
@@ -122,6 +125,19 @@ export function FeaturesNav() {
               </CollapsibleContent>
             </SidebarMenuItem>
           </CollapsibleNavGroup>
+
+          {isDifficultWordsOpen && (
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                render={<Link to={DIFFICULT_WORDS_ROUTE} />}
+                isActive={pathname === DIFFICULT_WORDS_ROUTE}
+                tooltip={i18n.t("options.difficultWords.title")}
+              >
+                <Icon icon="tabler:highlight" />
+                <span>{i18n.t("options.difficultWords.title")}</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
 
           <CollapsibleNavGroup active={isOverlayToolsActive}>
             <SidebarMenuItem>
