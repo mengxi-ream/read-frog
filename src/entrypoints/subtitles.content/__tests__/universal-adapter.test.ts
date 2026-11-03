@@ -475,6 +475,114 @@ describe("universalVideoAdapter", () => {
     })
   })
 
+  describe("a track check that something newer overtook", () => {
+    function setUp() {
+      const created = createAdapter([{ text: "hello", start: 0, end: 500 }])
+      Object.assign(attachScheduler(created.adapter, true), {
+        hide: vi.fn<(...args: any[]) => any>(),
+      })
+      return created
+    }
+
+    it.each([
+      {
+        what: "a navigation drops the start it waits on",
+        overtake: (adapter: any) => adapter.resetForNavigation(),
+      },
+      { what: "the page leaves the player", overtake: (adapter: any) => adapter.notifyLeave() },
+      {
+        what: "the reader turns subtitles off",
+        overtake: (adapter: any) => adapter.handleToggleSubtitles(false),
+      },
+    ])("lets the next check run once $what", ({ overtake }) => {
+      const { adapter } = setUp()
+      ;(adapter as any).pendingStart = new Promise(() => {})
+      const refreshSpy = vi.spyOn(adapter as any, "refreshSourceTrackIfNeeded")
+
+      void adapter.handleSourceTrackChanged()
+      overtake(adapter)
+      void adapter.handleSourceTrackChanged()
+
+      expect(refreshSpy).toHaveBeenCalledTimes(2)
+    })
+
+    it("lets the next check run once a newer start replaces the one it waits on", async () => {
+      const { adapter } = createAdapter([{ text: "hello", start: 0, end: 500 }])
+      attachStartableScheduler(adapter)
+      vi.spyOn(adapter as any, "hideNativeSubtitles").mockImplementation(() => {})
+      vi.spyOn(adapter as any, "startTranslation").mockResolvedValue(true)
+      ;(adapter as any).pendingStart = new Promise(() => {})
+      const refreshSpy = vi.spyOn(adapter as any, "refreshSourceTrackIfNeeded")
+
+      void adapter.handleSourceTrackChanged()
+      await (adapter as any).switchSubtitlesFetcher(SUBTITLES_SOURCE.NATIVE)
+      void adapter.handleSourceTrackChanged()
+
+      expect(refreshSpy).toHaveBeenCalledTimes(2)
+    })
+
+    it.each([
+      {
+        what: "a newer start began while it waited",
+        succeeded: true,
+        overtake: (adapter: any) => adapter.switchOperationId++,
+      },
+      {
+        what: "the start it waited on fell back from AI subtitles",
+        succeeded: false,
+        overtake: (adapter: any) => adapter.revertToNativeSource(),
+      },
+    ])("stops when $what", async ({ succeeded, overtake }) => {
+      const { adapter, subtitlesFetcher } = setUp()
+      const start = Promise.withResolvers<boolean>()
+      ;(adapter as any).pendingStart = start.promise
+
+      const checking = adapter.handleSourceTrackChanged()
+      overtake(adapter)
+      ;(adapter as any).pendingStart = null
+      start.resolve(succeeded)
+      await checking
+
+      expect(subtitlesFetcher.shouldUseSameTrack).not.toHaveBeenCalled()
+    })
+
+    it.each([
+      { what: "a navigation reset came", overtake: (adapter: any) => adapter.switchOperationId++ },
+      { what: "a navigation began", overtake: (adapter: any) => adapter.notifyNavigation() },
+    ])("stops when $what while it asked about the track", async ({ overtake }) => {
+      vi.useFakeTimers()
+      const { adapter, subtitlesFetcher } = setUp()
+      const sameTrack = Promise.withResolvers<boolean>()
+      subtitlesFetcher.shouldUseSameTrack.mockReturnValueOnce(sameTrack.promise)
+      const startSpy = vi.spyOn(adapter as any, "startTranslation")
+
+      const checking = adapter.handleSourceTrackChanged()
+      await vi.waitFor(() => expect(subtitlesFetcher.shouldUseSameTrack).toHaveBeenCalled())
+      overtake(adapter)
+      sameTrack.resolve(false)
+      await checking
+
+      expect(startSpy).not.toHaveBeenCalled()
+    })
+
+    it("keeps the newer check when an overtaken one settles after it", async () => {
+      const { adapter } = setUp()
+      const oldStart = Promise.withResolvers<boolean>()
+      ;(adapter as any).pendingStart = oldStart.promise
+      const refreshSpy = vi.spyOn(adapter as any, "refreshSourceTrackIfNeeded")
+
+      const overtaken = adapter.handleSourceTrackChanged()
+      ;(adapter as any).resetForNavigation()
+      ;(adapter as any).pendingStart = new Promise(() => {})
+      void adapter.handleSourceTrackChanged()
+      oldStart.resolve(true)
+      await overtaken
+      void adapter.handleSourceTrackChanged()
+
+      expect(refreshSpy).toHaveBeenCalledTimes(2)
+    })
+  })
+
   it("stops the video it was showing when the page leaves the player", () => {
     const { adapter } = createAdapter([{ text: "hello", start: 0, end: 500 }])
     const subtitlesScheduler = attachScheduler(adapter, true)
