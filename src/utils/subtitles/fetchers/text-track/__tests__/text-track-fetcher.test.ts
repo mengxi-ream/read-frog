@@ -177,6 +177,35 @@ describe("TextTrackFetcher", () => {
     await expect(fetcher.fetch()).resolves.toEqual([{ text: "hello", start: 0, end: 1000 }])
   })
 
+  it("leaves captions on that the reader turned on while the check found none", async () => {
+    const track = new FakeTrack("subtitles", "English", "en", "disabled")
+    const fetcher = createFetcher(videoWith(track))
+    const check = fetcher.hasAvailableSubtitles()
+
+    track.mode = "showing"
+    await vi.advanceTimersByTimeAsync(TEXT_TRACK_CUE_WAIT_TIMEOUT_MS)
+    await expect(check).resolves.toBe(false)
+    fetcher.showNativeSubtitles()
+
+    expect(track.mode).toBe("showing")
+  })
+
+  it("restores captions the reader turned on while the check loaded them", async () => {
+    const track = new FakeTrack("subtitles", "English", "en", "disabled")
+    const fetcher = createFetcher(videoWith(track))
+    const check = fetcher.hasAvailableSubtitles()
+
+    track.mode = "showing"
+    track.loadCues("hello")
+    await vi.advanceTimersByTimeAsync(TEXT_TRACK_CUE_POLL_INTERVAL_MS)
+    await expect(check).resolves.toBe(true)
+    fetcher.hideNativeSubtitles()
+    expect(track.mode).toBe("hidden")
+    fetcher.showNativeSubtitles()
+
+    expect(track.mode).toBe("showing")
+  })
+
   it("restores the mode the player last asked for, not the one it had first", () => {
     const track = new FakeTrack("captions", "English", "en", "showing")
     const video = videoWith(track)

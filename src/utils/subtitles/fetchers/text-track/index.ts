@@ -107,7 +107,10 @@ export class TextTrackFetcher implements SubtitlesFetcher {
     this.unwatchTrackChanges()
     this.clearRehideTimer()
     for (const [track, mode] of this.playerModes) {
-      track.mode = mode
+      // A track the player moved off our "hidden" already has the mode it wants.
+      if (track.mode === "hidden") {
+        track.mode = mode
+      }
     }
     this.playerModes.clear()
   }
@@ -138,9 +141,8 @@ export class TextTrackFetcher implements SubtitlesFetcher {
   }
 
   private setMode(track: TextTrack, mode: TextTrackMode): void {
-    if (!this.playerModes.has(track)) {
-      this.playerModes.set(track, track.mode)
-    }
+    // Only a mode other than our "hidden" changes here, so it is the player's latest choice.
+    this.playerModes.set(track, track.mode)
     track.mode = mode
   }
 
