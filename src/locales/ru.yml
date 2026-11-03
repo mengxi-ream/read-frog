@@ -1412,7 +1412,7 @@ options:
       title: Основное
       enable:
         title: Включить видеосубтитры
-        description: Добавляет кнопку перевода в панель управления плеера на YouTube, X, Netflix и Bilibili.
+        description: Добавляет кнопку перевода в панель управления плеера на YouTube, X, Netflix, Bilibili и Udemy.
       autoStart:
         title: Переводить сразу при открытии
         description: Начинать перевод субтитров, как только видео загрузилось, без нажатия кнопки.

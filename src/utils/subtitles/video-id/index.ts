@@ -1,4 +1,5 @@
 export { getBilibiliPartId } from "./bilibili"
 export { getNetflixMovieId } from "./netflix"
+export { getUdemyLectureId, parseUdemyLectureId } from "./udemy"
 export { getXcomStatusId, getXcomStatusIdFromUrl } from "./xcom"
 export { getYoutubeVideoId } from "./youtube"

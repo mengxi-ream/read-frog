@@ -35,7 +35,7 @@ function addPlayer(): HTMLElement {
   return player
 }
 
-function start() {
+function start(hooks: { onStay?: () => void; onLeave?: () => void } = {}) {
   const adapter = {
     initialize: vi.fn<() => Promise<void>>(async () => {
       calls.push("initialize")
@@ -57,6 +57,7 @@ function start() {
   pollPlayerSubtitles(ctx as unknown as ContentScriptContext, {
     adapter: adapter as unknown as UniversalVideoAdapter,
     config,
+    ...hooks,
   })
   return adapter
 }
@@ -134,9 +135,23 @@ describe("pollPlayerSubtitles", () => {
     expect(calls).toEqual(["mount", "navigate"])
   })
 
+  it("calls onStay on every tick once started", async () => {
+    addPlayer()
+    const onStay = vi.fn<() => void>()
+    start({ onStay })
+    await tick()
+    onStay.mockClear()
+
+    await tick()
+    await tick()
+
+    expect(onStay).toHaveBeenCalledTimes(2)
+  })
+
   it("cleans up when the page leaves the player, and comes back as a navigation", async () => {
     const player = addPlayer()
-    start()
+    const onLeave = vi.fn<() => void>()
+    start({ onLeave })
     await tick()
     calls.length = 0
 
@@ -144,6 +159,7 @@ describe("pollPlayerSubtitles", () => {
     await tick()
     await tick()
 
+    expect(onLeave).toHaveBeenCalledOnce()
     expect(calls).toEqual(["unmount", "leave"])
 
     calls.length = 0
