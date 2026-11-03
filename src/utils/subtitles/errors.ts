@@ -41,3 +41,10 @@ export class NoSubtitlesError extends OverlaySubtitlesError {
     super(i18n.t("subtitles.errors.noSubtitlesFound"))
   }
 }
+
+/** The site has captions for the video, but their file or listing could not be read. */
+export class TrackFileNotLoadedError extends OverlaySubtitlesError {
+  constructor() {
+    super(i18n.t("subtitles.errors.trackFileNotLoaded"))
+  }
+}

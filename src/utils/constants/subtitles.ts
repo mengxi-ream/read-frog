@@ -8,6 +8,9 @@ export const PLAYER_WATCH_POLL_INTERVAL_MS = 1000
 // How long the pointer rests on the subtitles before pause-on-hover pauses the video,
 // so a pointer passing over them on its way to the controls does not.
 export const HOVER_PAUSE_DELAY_MS = 500
+// A subtitle host can drop a request and answer the next, so a file is asked for this often.
+export const TRACK_FETCH_ATTEMPTS = 3
+export const TRACK_FETCH_RETRY_DELAY_MS = 500
 
 // Segmentation constants
 export const MAX_WORDS = 15

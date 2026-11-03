@@ -6,6 +6,7 @@ import { NoSubtitlesError } from "@/utils/subtitles/errors"
 import { bilibiliTrackSource } from ".."
 
 vi.mock("@/utils/i18n", () => ({ i18n: { t: (key: string) => key } }))
+vi.mock("@/utils/sleep", () => ({ sleep: () => Promise.resolve() }))
 
 const postMessageRequest = vi.fn<(...args: unknown[]) => Promise<unknown>>()
 vi.mock("@/utils/subtitles/fetchers/post-message-request", () => ({
@@ -87,6 +88,13 @@ describe("bilibiliTrackSource", () => {
     await expect(bilibiliTrackSource.load(PART_ID)).rejects.toThrow(
       "subtitles.errors.fetchSubTimeout",
     )
+  })
+
+  it("asks for the file again when the subtitle host drops the request", async () => {
+    fetchMock.mockRejectedValueOnce(new TypeError("Failed to fetch"))
+
+    await expect(bilibiliTrackSource.load(PART_ID)).resolves.toMatchObject({ language: "zh-CN" })
+    expect(fetchMock).toHaveBeenCalledTimes(2)
   })
 
   it("reports a load failure when the list or the file cannot be had", async () => {

@@ -7,8 +7,13 @@ import {
   BILIBILI_SUBTITLES_RESPONSE_TYPE,
 } from "@/utils/constants/subtitles"
 import { i18n } from "@/utils/i18n"
-import { NoSubtitlesError, OverlaySubtitlesError } from "@/utils/subtitles/errors"
+import {
+  NoSubtitlesError,
+  OverlaySubtitlesError,
+  TrackFileNotLoadedError,
+} from "@/utils/subtitles/errors"
 import { getBilibiliPartId } from "@/utils/subtitles/video-id"
+import { fetchWithRetry, readJson } from "../fetch-with-retry"
 import { postMessageRequest } from "../post-message-request"
 
 const bilibiliSubtitlesResponseSchema = z.object({
@@ -49,15 +54,9 @@ function pickSubtitle(subtitles: unknown[]): SubtitleEntry | null {
 
 async function downloadFragments(subtitle: SubtitleEntry): Promise<SubtitlesFragment[]> {
   // `subtitle_url` comes without a scheme, as `//host/path`.
-  const response = await fetch(new URL(subtitle.subtitle_url, window.location.href)).catch(
-    () => null,
-  )
-  const parsed = subtitleFileSchema.safeParse(
-    response?.ok ? await response.json().catch(() => null) : null,
-  )
-  if (!parsed.success) {
-    throw new OverlaySubtitlesError(i18n.t("subtitles.errors.trackFileNotLoaded"))
-  }
+  const response = await fetchWithRetry(new URL(subtitle.subtitle_url, window.location.href))
+  const parsed = subtitleFileSchema.safeParse(await readJson(response))
+  if (!parsed.success) throw new TrackFileNotLoadedError()
 
   return parsed.data.body.map(({ from, to, content }) => ({
     text: content,
@@ -72,9 +71,7 @@ async function loadTrack(partId: string): Promise<SubtitlesTrack> {
   if (!response || response.cid === null) {
     throw new OverlaySubtitlesError(i18n.t("subtitles.errors.fetchSubTimeout"))
   }
-  if (!response.subtitles) {
-    throw new OverlaySubtitlesError(i18n.t("subtitles.errors.trackFileNotLoaded"))
-  }
+  if (!response.subtitles) throw new TrackFileNotLoadedError()
 
   // Bilibili also sends an empty list to a signed-out viewer; signing in is theirs to do.
   const subtitle = pickSubtitle(response.subtitles)
