@@ -566,6 +566,16 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
     }, NAVIGATION_HANDLER_DELAY)
   }
 
+  /** The page left the player for one with no video: stop its work and start nothing. */
+  notifyLeave() {
+    if (this.destroyed) return
+    this.switchOperationId++
+    this.hasPendingNavigationReset = false
+    this.clearVisibleStateForNavigation()
+    // No reset follows to drop the session, and a toggle would resume it on a player that is gone.
+    this.clearRuntimeSession()
+  }
+
   private async handleNavigation() {
     // A -> B -> A still needs to restore the state torn down at navigation start.
     if (!this.hasPendingNavigationReset || this.destroyed) {
@@ -959,13 +969,15 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
       loadingSource = true
       await this.getOrLoadSourceSubtitles()
       loadingSource = false
-      if (this.destroyed) return false
+      // A newer start, a navigation reset or a leave has superseded this one since it began.
+      if (this.isSuperseded(operationId)) return false
       this.sessionSubtitles = this.sourceSubtitles
 
       if (this.shouldSkipTranslationForCurrentTrack(analyticsConfig)) {
         this.processPassthroughSubtitles()
       } else {
         await this.processTranslatedSubtitles(analyticsConfig)
+        if (this.isSuperseded(operationId)) return false
       }
       if (analyticsContext && targetLanguage) {
         void trackFeatureUsed({
@@ -1096,7 +1108,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
 
     const useAiSegmentation = !!config?.videoSubtitles?.aiSegmentation
 
-    this.sessionProcessedFragments = [...this.sourceProcessedSubtitles]
+    const sessionFragments = [...this.sourceProcessedSubtitles]
 
     // Source track for display fallback; scheduler only receives translated cues
     // later. Published before the provider resolve below, which none of this
@@ -1105,7 +1117,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
     // flow — so sequencing it second made the original captions wait on a round
     // trip they never needed, and a hung request (backgroundFetch carries no
     // timeout) left the player in "loading" showing nothing at all.
-    this.publishSourceTrack(this.sessionProcessedFragments)
+    this.publishSourceTrack(sessionFragments)
 
     // Resolved once per session; the cache key needs the same identity the
     // background will use, and a hosted ref costs one status fetch here rather
@@ -1113,7 +1125,11 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
     // and the summary are generations, so a translate-only provider keeps the
     // rule-based recut and skips the summary without a doomed prompt attempt
     // per look-ahead window.
+    const operationId = this.switchOperationId
     const providerRef = config ? await resolveSubtitlesProviderRef(config, "lineTranslation") : null
+    // Superseded: the session stays unclaimed, or a newer start would resume it untranslated.
+    if (this.isSuperseded(operationId)) return
+    this.sessionProcessedFragments = sessionFragments
     const promptableProviderRef =
       providerRef && canProviderRefGenerateText(providerRef) ? providerRef : null
 

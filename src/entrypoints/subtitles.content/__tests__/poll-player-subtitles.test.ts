@@ -39,6 +39,9 @@ function start() {
     notifyNavigation: vi.fn<() => void>(() => {
       calls.push("navigate")
     }),
+    notifyLeave: vi.fn<() => void>(() => {
+      calls.push("leave")
+    }),
   }
   const config = {
     platform: "bilibili",
@@ -125,7 +128,7 @@ describe("pollPlayerSubtitles", () => {
     await tick()
     await tick()
 
-    expect(calls).toEqual(["unmount", "navigate"])
+    expect(calls).toEqual(["unmount", "leave"])
 
     calls.length = 0
     addPlayer()

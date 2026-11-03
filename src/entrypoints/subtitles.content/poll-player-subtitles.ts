@@ -45,7 +45,7 @@ export function pollPlayerSubtitles(
     if (!videoId || !player) {
       if (mounted) {
         unmountSubtitlesUI()
-        adapter.notifyNavigation()
+        adapter.notifyLeave()
       }
       mounted = null
       return
