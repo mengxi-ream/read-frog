@@ -168,6 +168,7 @@ options:
         videoSubtitles: 動画字幕
         inputTranslation: 入力翻訳
         languageDetection: 言語検出
+        pdfTranslation: PDF 翻訳
     sponsorCta: 高速で高コスパのAIを入手
     sponsorCtaJalapenoCloud: GLM 5.3 を 50% オフで入手
     setApiKeyWarning:

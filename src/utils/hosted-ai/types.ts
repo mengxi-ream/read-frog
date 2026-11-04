@@ -7,6 +7,7 @@ export type {
   HostedAiCreditPeriodKind,
   HostedAiCreditPoolStatus,
   HostedAiFeature,
+  HostedAiFeatureStatus,
   HostedAiOneTimeCreditStatus,
   HostedAiRecurringCreditStatus,
   HostedAiTierStatus,

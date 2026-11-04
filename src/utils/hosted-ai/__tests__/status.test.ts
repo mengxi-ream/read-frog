@@ -39,6 +39,17 @@ function featureMap(
 }
 
 describe("hosted AI status presentation", () => {
+  it("reports no tier status for a feature the status has no entry for", () => {
+    // PDF translation draws on the credit pools but has no per-tier status.
+    const status: HostedAiStatus = {
+      credits: [],
+      features: featureMap(() => ({ normal: tier(), advance: tier() })),
+    }
+
+    expect(getHostedAiTierStatus(status, "pdfTranslation", "normal")).toBeUndefined()
+    expect(getHostedAiTierStatus(status, "pageTranslation", "normal")).toEqual(tier())
+  })
+
   it("shows one shared weekly credit for both model tiers", () => {
     const status: HostedAiStatus = {
       credits: [

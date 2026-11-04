@@ -174,6 +174,32 @@ describe("BuiltInAiUsageConfig", () => {
     expect(bars[1]).toHaveAttribute("aria-valuenow", "95")
   })
 
+  it("names PDF translation in a pool's feature list", () => {
+    hostedAiState.value = {
+      isSignedIn: true,
+      isPending: false,
+      isError: false,
+      status: {
+        credits: [],
+        pools: [
+          {
+            periodKind: "weekly",
+            usedPercent: 0,
+            resetAt: null,
+            features: ["pageTranslation", "pdfTranslation"],
+          },
+        ],
+        features: {} as never,
+      },
+    }
+
+    render(<BuiltInAiUsageConfig />)
+
+    expect(
+      screen.getByText("options.apiProviders.builtInAiUsage.features.pdfTranslation"),
+    ).toBeInTheDocument()
+  })
+
   it("lists a one-time pool after the recurring ones, with its expiry instead of a reset", () => {
     hostedAiState.value = {
       isSignedIn: true,

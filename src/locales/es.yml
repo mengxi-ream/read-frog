@@ -168,6 +168,7 @@ options:
         videoSubtitles: Subtítulos de video
         inputTranslation: Traducción de entrada
         languageDetection: Detección de idioma
+        pdfTranslation: Traducción de PDF
     sponsorCta: Obtén IA rápida y rentable
     sponsorCtaJalapenoCloud: Obtén un 50 % de descuento en GLM 5.3
     setApiKeyWarning:

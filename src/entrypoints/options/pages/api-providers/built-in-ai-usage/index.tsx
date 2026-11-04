@@ -20,6 +20,7 @@ const FEATURE_LABEL_I18N_KEYS = {
   videoSubtitles: "options.apiProviders.builtInAiUsage.features.videoSubtitles",
   inputTranslation: "options.apiProviders.builtInAiUsage.features.inputTranslation",
   languageDetection: "options.apiProviders.builtInAiUsage.features.languageDetection",
+  pdfTranslation: "options.apiProviders.builtInAiUsage.features.pdfTranslation",
 } as const satisfies Record<HostedAiFeature, string>
 
 const PERIOD_LABEL_I18N_KEYS = {

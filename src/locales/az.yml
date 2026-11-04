@@ -168,6 +168,7 @@ options:
         videoSubtitles: Video subtitrləri
         inputTranslation: Daxil edilən mətnin tərcüməsi
         languageDetection: Dilin aşkarlanması
+        pdfTranslation: PDF tərcüməsi
     sponsorCta: Sürətli və sərfəli süni intellekt əldə et
     sponsorCtaJalapenoCloud: GLM 5.3 üçün 50% endirim əldə et
     setApiKeyWarning:
