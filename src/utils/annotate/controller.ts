@@ -106,6 +106,11 @@ export class AnnotationController {
     if (!offsets) return { ok: false, reason: "noBlock" }
     const surface = getBlockText(block).slice(offsets.start, offsets.end)
     if (surface.trim() === "") return { ok: false, reason: "empty" }
+    // Rebuilt from the offsets, it starts in the text holding the first
+    // character. The selection may start at the end of the text before it
+    // (a small @mention, a timestamp), whose size is not the word's.
+    const liveRange = offsetsToRange(block, offsets.start, offsets.end)
+    if (!liveRange) return { ok: false, reason: "noBlock" }
 
     const replaced = this.registry
       .overlapping(block, offsets.start, offsets.end)
@@ -113,7 +118,7 @@ export class AnnotationController {
     for (const id of replaced) this.remove(id)
 
     ensureAnnotationDocumentStyles()
-    const probe = range.startContainer instanceof Text ? range.startContainer : null
+    const probe = liveRange.startContainer instanceof Text ? liveRange.startContainer : null
     const state = this.ensureBlock(block)
     const glossFits = this.makeRoom(block, state, probe)
 
@@ -129,9 +134,6 @@ export class AnnotationController {
       glossFits,
       createdAt: Date.now(),
     }
-    const liveRange = offsetsToRange(block, offsets.start, offsets.end)
-    if (!liveRange) return { ok: false, reason: "noBlock" }
-
     this.registry.add(record)
     this.ranges.set(record.id, liveRange)
     this.marks.add(liveRange)
