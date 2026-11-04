@@ -666,6 +666,11 @@ options:
       missingSelection: Không có văn bản được chọn
       providerDisabled: Nhà cung cấp đã chọn bị tắt
       providerUnavailable: Nhà cung cấp đã chọn không khả dụng
+    missingApiKey:
+      fallbackNotice: AI tích hợp đã trả lời vì $1 chưa có khóa API.
+      title: $1 chưa có khóa API
+      description: Thêm khóa API để sử dụng, hoặc dùng AI tích hợp thay thế.
+      addApiKey: Thêm khóa API
     customActions:
       title: Hành động AI tùy chỉnh
       pageDescription: Viết prompt của riêng bạn và chạy trên văn bản đã chọn từ thanh công cụ chọn văn bản. Dữ liệu, kiểu dáng và cách tương tác của kết quả đều có thể tùy chỉnh.

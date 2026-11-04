@@ -667,6 +667,11 @@ options:
       missingSelection: No hay texto seleccionado disponible
       providerDisabled: El proveedor seleccionado está desactivado
       providerUnavailable: El proveedor seleccionado no está disponible
+    missingApiKey:
+      fallbackNotice: Respondido por la IA integrada porque $1 no tiene clave de API.
+      title: $1 no tiene clave de API
+      description: Añade una clave de API para usarlo o usa la IA integrada.
+      addApiKey: Añadir clave de API
     customActions:
       title: Acciones AI personalizadas
       pageDescription: Escribe tus propios prompts y ejecútalos sobre el texto seleccionado desde la barra de selección. Los datos, el estilo y la interacción de cada resultado son totalmente personalizables.

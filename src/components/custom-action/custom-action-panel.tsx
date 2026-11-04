@@ -2,6 +2,7 @@ import type { ComponentProps } from "react"
 import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { useEffect, useMemo, useRef } from "react"
 import { useHostedAiProviderOptions } from "@/components/llm-providers/use-hosted-ai-provider-options"
+import { useHostedAiStatus } from "@/components/llm-providers/use-hosted-ai-status"
 import { SelectionPopover } from "@/components/ui/selection-popover"
 import { ReviewDueTab } from "@/components/ui/selection-popover/review-due-tab"
 import { SelectionToolbarErrorAlert } from "@/components/ui/selection-popover/selection-toolbar-error-alert"
@@ -20,6 +21,7 @@ import {
 import { customActionRequestAtom } from "./atoms"
 import { CustomActionContent } from "./custom-action-content"
 import { CustomActionToolButton } from "./custom-action-tool-button"
+import { MissingApiKeyNotice } from "./missing-api-key-notice"
 import { SaveToNotebaseButton } from "./save-to-notebase-button"
 import {
   buildCustomActionExecutionPlan,
@@ -67,6 +69,8 @@ export function CustomActionPanel() {
     [providersConfig],
   )
 
+  // The same query the footer's provider list reads, so this adds no request.
+  const { status: hostedAiStatus } = useHostedAiStatus()
   const webPageContext = useCustomActionWebPageContext(open, request?.sessionKey ?? 0)
   const { executionContext, error: precheckError } = useMemo(
     () =>
@@ -82,6 +86,7 @@ export function CustomActionPanel() {
     bodyRef,
     analyticsSurface: request?.surface ?? ANALYTICS_SURFACE.SELECTION_TOOLBAR,
     executionContext,
+    hostedAiStatus,
     open,
     popoverSessionKey: request?.sessionKey ?? 0,
     rerunNonce: request?.rerunNonce ?? 0,
@@ -129,7 +134,9 @@ export function CustomActionPanel() {
   const result = executionContext ? execution.result : null
   const error = execution.error ?? precheckError
   const isRunning = webPageContext === undefined || (executionContext ? execution.isRunning : false)
-  const status = isRunning ? "streaming" : error ? "error" : "done"
+  const missingApiKey = executionContext ? execution.missingApiKey : null
+  const blocked = missingApiKey?.kind === "blocked"
+  const status = isRunning ? "streaming" : error || blocked ? "error" : "done"
   const titleText = (webPageContext?.webTitle ?? getSourceDocumentTitle()) || null
   // Speech and Notebase saves count the card by where it sits: on video subtitles, or by a
   // selection, however the selection's card was opened.
@@ -151,6 +158,7 @@ export function CustomActionPanel() {
         </div>
       </SelectionPopover.Header>
       <SelectionPopover.Body key={`${request.sessionKey}:${request.selectionText}`} ref={bodyRef}>
+        {missingApiKey?.kind === "fallback" && <MissingApiKeyNotice state={missingApiKey} />}
         <CustomActionContent
           action={action}
           status={status}
@@ -161,6 +169,7 @@ export function CustomActionPanel() {
           thinking={executionContext ? execution.thinking : null}
           speakSurface={cardSurface}
         />
+        {blocked && <MissingApiKeyNotice state={missingApiKey} />}
         <SelectionToolbarErrorAlert error={error} />
       </SelectionPopover.Body>
       <ReviewDueTab source="extension_custom_ai_action" />
@@ -176,7 +185,7 @@ export function CustomActionPanel() {
           <>
             <SaveToNotebaseButton
               action={action}
-              failed={!!error}
+              failed={!!error || blocked}
               isRunning={isRunning}
               result={result}
               surface={cardSurface}

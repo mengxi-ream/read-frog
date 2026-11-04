@@ -666,6 +666,11 @@ options:
       missingSelection: Seçili metin yok
       providerDisabled: Seçilen sağlayıcı devre dışı
       providerUnavailable: Seçilen sağlayıcı kullanılamıyor
+    missingApiKey:
+      fallbackNotice: $1 için API anahtarı olmadığından Yerleşik AI yanıtladı.
+      title: $1 için API anahtarı yok
+      description: Kullanmak için bir API anahtarı ekleyin veya bunun yerine Yerleşik AI kullanın.
+      addApiKey: API anahtarı ekle
     customActions:
       title: Özel AI Eylemleri
       pageDescription: Kendi istemlerinizi yazın ve seçim araç çubuğundan seçili metin üzerinde çalıştırın. Her sonucun verileri, stili ve etkileşimleri tamamen özelleştirilebilir.

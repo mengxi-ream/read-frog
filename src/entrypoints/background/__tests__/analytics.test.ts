@@ -521,6 +521,32 @@ describe("background analytics", () => {
     })
   })
 
+  it("keeps the provider a Built-in AI fallback stood in for, and drops unknown ones", async () => {
+    mockEnabledAnalyticsStorage()
+    const { captureFeatureUsedEventInBackground } = createAnalytics()
+    const attempt = {
+      feature: "custom_ai_action" as const,
+      surface: "selection_toolbar" as const,
+      latency_ms: 40,
+      provider: "read-frog-built-in-ai" as const,
+      backend_kind: "llm" as const,
+      action_id: "default-dictionary",
+      outcome: "success" as const,
+    }
+
+    await captureFeatureUsedEventInBackground({ ...attempt, fallback_from_provider: "openai" })
+    await captureFeatureUsedEventInBackground({
+      ...attempt,
+      fallback_from_provider: "gremlins" as never,
+    })
+
+    expect(posthogCaptureMock).toHaveBeenNthCalledWith(1, "feature_used", {
+      ...attempt,
+      fallback_from_provider: "openai",
+    })
+    expect(posthogCaptureMock).toHaveBeenNthCalledWith(2, "feature_used", attempt)
+  })
+
   it("records both note-save steps and drops malformed ones", async () => {
     mockEnabledAnalyticsStorage()
     const { cache } = createMemoryFeatureUsageCache()

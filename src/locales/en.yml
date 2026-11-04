@@ -667,6 +667,11 @@ options:
       missingSelection: No selected text available
       providerDisabled: Selected provider is disabled
       providerUnavailable: Selected provider is unavailable
+    missingApiKey:
+      fallbackNotice: Answered by Built-in AI because $1 has no API key.
+      title: $1 has no API key
+      description: Add an API key to use it, or use Built-in AI instead.
+      addApiKey: Add API key
     customActions:
       title: Custom AI Actions
       pageDescription: Write your own prompts and run them on selected text from the selection toolbar. The data, style and interactions of each result are all yours to customize.
