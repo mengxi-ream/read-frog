@@ -168,6 +168,7 @@ options:
         videoSubtitles: Video altyazıları
         inputTranslation: Giriş çevirisi
         languageDetection: Dil algılama
+        pdfTranslation: PDF çevirisi
     sponsorCta: Hızlı ve uygun maliyetli yapay zekâ al
     sponsorCtaJalapenoCloud: GLM 5.3ʼte %50 indirim al
     setApiKeyWarning:

@@ -312,6 +312,7 @@ describe("saveToNotebaseButton notebase availability", () => {
         srsModelVersion: "FSRS-6" as const,
         srsWeights: null,
         srsSleepingAt: null,
+        srsSleepSource: null,
         createdAt: new Date(0),
         updatedAt: new Date(0),
       },

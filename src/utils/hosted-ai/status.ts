@@ -1,6 +1,7 @@
 import type {
   HostedAiCreditPoolStatus,
   HostedAiFeature,
+  HostedAiFeatureStatus,
   HostedAiRecurringCreditStatus,
   HostedAiStatus,
   HostedAiTierStatus,
@@ -104,5 +105,9 @@ export function getHostedAiTierStatus(
   feature: HostedAiFeature,
   tier: HostedAiModelTier,
 ): HostedAiTierStatus | undefined {
-  return status?.features[feature]?.[tier]
+  // Not every feature has a status entry: PDF translation draws on the credit
+  // pools but has no per-tier status, so it reads as undefined here.
+  const features: Partial<Record<HostedAiFeature, HostedAiFeatureStatus>> | undefined =
+    status?.features
+  return features?.[feature]?.[tier]
 }

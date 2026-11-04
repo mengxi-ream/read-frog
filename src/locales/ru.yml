@@ -168,6 +168,7 @@ options:
         videoSubtitles: Субтитры видео
         inputTranslation: Перевод ввода
         languageDetection: Определение языка
+        pdfTranslation: Перевод PDF
     sponsorCta: Получить быстрый и выгодный ИИ
     sponsorCtaJalapenoCloud: Получить GLM 5.3 со скидкой 50 %
     setApiKeyWarning:

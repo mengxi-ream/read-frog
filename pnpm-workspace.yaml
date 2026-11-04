@@ -16,3 +16,7 @@ allowBuilds:
   msw: true
   nx: true
   spawn-sync: true
+
+overrides:
+  # @modyfi/vite-plugin-yaml@1.1.1 (latest) pins js-yaml 4.1.0, which has open advisories fixed in 4.3.2.
+  "@modyfi/vite-plugin-yaml>js-yaml": ^4.3.2

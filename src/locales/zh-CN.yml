@@ -168,6 +168,7 @@ options:
         videoSubtitles: 视频字幕
         inputTranslation: 输入翻译
         languageDetection: 语言检测
+        pdfTranslation: PDF 翻译
     sponsorCta: 获取高速性价比 AI
     sponsorCtaJalapenoCloud: 获取 GLM 5.3 五折优惠
     setApiKeyWarning:

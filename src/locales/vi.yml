@@ -168,6 +168,7 @@ options:
         videoSubtitles: Phụ đề video
         inputTranslation: Dịch đầu vào
         languageDetection: Phát hiện ngôn ngữ
+        pdfTranslation: Dịch PDF
     sponsorCta: Nhận AI nhanh, tiết kiệm chi phí
     sponsorCtaJalapenoCloud: Nhận ưu đãi giảm 50% GLM 5.3
     setApiKeyWarning:

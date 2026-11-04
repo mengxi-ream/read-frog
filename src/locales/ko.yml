@@ -168,6 +168,7 @@ options:
         videoSubtitles: 비디오 자막
         inputTranslation: 입력 번역
         languageDetection: 언어 감지
+        pdfTranslation: PDF 번역
     sponsorCta: 빠르고 가성비 좋은 AI 받기
     sponsorCtaJalapenoCloud: GLM 5.3 50% 할인 받기
     setApiKeyWarning:
