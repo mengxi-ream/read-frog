@@ -552,6 +552,9 @@ options:
     selectionAnnotation:
       title: "Qeyd əlavə et"
       description: "Seçilmiş mətnin altını cızır və mənasını sətirlər arasına yazır."
+    selectionAnnotationMode:
+      title: "Qeyd rejimi"
+      description: "Alətlər panelini açmadan qeyd rejimini açır və ya bağlayır. Açıq olduqda seçdiyiniz hər mətnə qeyd əlavə olunur."
     actions:
       title: "Süni intellekt əməliyyatları"
       description: "Seçilmiş mətn üzərində süni intellekt əməliyyatı işə salın. Fərdi əməliyyatların burada təyin edənə qədər qısayolu olmur."

@@ -551,6 +551,9 @@ options:
     selectionAnnotation:
       title: "Chú thích"
       description: "Gạch chân văn bản đã chọn và ghi nghĩa của nó giữa các dòng."
+    selectionAnnotationMode:
+      title: "Chế độ chú thích"
+      description: "Bật hoặc tắt chế độ chú thích mà không cần mở thanh công cụ. Khi bật, mọi văn bản bạn chọn đều được chú thích."
     actions:
       title: "Hành động AI"
       description: "Chạy một hành động AI trên văn bản đã chọn. Hành động tùy chỉnh chưa có phím tắt cho đến khi bạn đặt ở đây."

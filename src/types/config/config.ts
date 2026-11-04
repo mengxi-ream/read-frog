@@ -64,6 +64,10 @@ const selectionToolbarAnnotationSchema = z
     // the user cleared it. Optional rather than defaulted, for the reason
     // given on the speak feature's key.
     shortcut: shortcutSchema.optional(),
+    // The key that turns annotation mode on and off (see
+    // getAnnotationModeShortcut), optional for the same reason: the v119
+    // migration must still tell a missing key from one the user chose.
+    modeShortcut: shortcutSchema.optional(),
   })
   .default(() => ({ enabled: true }))
 
