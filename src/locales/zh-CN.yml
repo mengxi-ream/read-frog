@@ -671,6 +671,7 @@ options:
       fallbackNotice: 由于 $1 未设置 API 密钥，本次由内置 AI 回答。
       title: $1 未设置 API 密钥
       description: 添加 API 密钥后即可使用它，或改用内置 AI。
+      addKeyDescription: 添加 API 密钥后即可使用它。
       addApiKey: 添加 API 密钥
     customActions:
       title: 自定义 AI 指令

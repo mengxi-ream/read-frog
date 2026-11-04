@@ -671,6 +671,7 @@ options:
       fallbackNotice: 由於 $1 未設定 API 金鑰，本次由內建 AI 回答。
       title: $1 未設定 API 金鑰
       description: 新增 API 金鑰後即可使用它，或改用內建 AI。
+      addKeyDescription: 新增 API 金鑰後即可使用它。
       addApiKey: 新增 API 金鑰
     customActions:
       title: 自訂 AI 指令

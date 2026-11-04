@@ -20,12 +20,13 @@ export interface MissingApiKeyProvider {
 /**
  * What the card says about a provider that has no API key:
  * - `fallback`: the Built-in AI answered instead.
- * - `blocked`: the Built-in AI cannot answer for this account either, so the
- *   card offers to add the key, or to sign in or upgrade for the Built-in AI.
+ * - `blocked`: the Built-in AI did not answer either, so the card offers to
+ *   add the key, and to sign in or upgrade when that is what walls the Built-in
+ *   AI off (`builtInAiAction`; null when no account change would help).
  */
 export type MissingApiKeyState =
   | (MissingApiKeyProvider & { kind: "fallback" })
-  | (MissingApiKeyProvider & { kind: "blocked"; builtInAiAction: ErrorAction })
+  | (MissingApiKeyProvider & { kind: "blocked"; builtInAiAction: ErrorAction | null })
 
 /**
  * The provider a keyless action falls back to. Never saved: once the user adds

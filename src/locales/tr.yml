@@ -670,6 +670,7 @@ options:
       fallbackNotice: $1 için API anahtarı olmadığından Yerleşik AI yanıtladı.
       title: $1 için API anahtarı yok
       description: Kullanmak için bir API anahtarı ekleyin veya bunun yerine Yerleşik AI kullanın.
+      addKeyDescription: Kullanmak için bir API anahtarı ekleyin.
       addApiKey: API anahtarı ekle
     customActions:
       title: Özel AI Eylemleri

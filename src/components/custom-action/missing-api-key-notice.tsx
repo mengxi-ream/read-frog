@@ -49,6 +49,8 @@ export function MissingApiKeyNotice({ state }: { state: MissingApiKeyState | nul
     )
   }
 
+  const { builtInAiAction } = state
+
   return (
     <div className="px-4 pb-4">
       <Alert variant="warning" data-slot="missing-api-key-blocked">
@@ -57,20 +59,26 @@ export function MissingApiKeyNotice({ state }: { state: MissingApiKeyState | nul
           {i18n.t("options.selectionToolbar.missingApiKey.title", [state.providerName])}
         </AlertTitle>
         <AlertDescription className="col-start-2">
-          <p>{i18n.t("options.selectionToolbar.missingApiKey.description")}</p>
+          <p>
+            {builtInAiAction
+              ? i18n.t("options.selectionToolbar.missingApiKey.description")
+              : i18n.t("options.selectionToolbar.missingApiKey.addKeyDescription")}
+          </p>
           <div className="mt-2 flex flex-wrap gap-2">
             <Button size="sm" onClick={() => openProviderApiKey(state.providerId)}>
               {addApiKeyLabel}
             </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() =>
-                void sendMessage("openPage", { url: state.builtInAiAction.url, active: true })
-              }
-            >
-              {state.builtInAiAction.label}
-            </Button>
+            {builtInAiAction && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() =>
+                  void sendMessage("openPage", { url: builtInAiAction.url, active: true })
+                }
+              >
+                {builtInAiAction.label}
+              </Button>
+            )}
           </div>
         </AlertDescription>
       </Alert>

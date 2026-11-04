@@ -670,6 +670,7 @@ options:
       fallbackNotice: AI tích hợp đã trả lời vì $1 chưa có khóa API.
       title: $1 chưa có khóa API
       description: Thêm khóa API để sử dụng, hoặc dùng AI tích hợp thay thế.
+      addKeyDescription: Thêm khóa API để sử dụng.
       addApiKey: Thêm khóa API
     customActions:
       title: Hành động AI tùy chỉnh

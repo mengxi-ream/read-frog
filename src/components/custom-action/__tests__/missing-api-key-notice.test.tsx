@@ -69,4 +69,22 @@ describe("missingApiKeyNotice", () => {
       active: true,
     })
   })
+  it("offers only the key when no account change would help", () => {
+    render(
+      <MissingApiKeyNotice
+        state={{
+          kind: "blocked",
+          providerId: "openai-default",
+          providerName: "OpenAI",
+          builtInAiAction: null,
+        }}
+      />,
+    )
+
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "options.selectionToolbar.missingApiKey.addKeyDescription",
+    )
+    expect(screen.getAllByRole("button")).toHaveLength(1)
+    expect(screen.getByRole("button", { name: ADD_API_KEY })).toBeInTheDocument()
+  })
 })

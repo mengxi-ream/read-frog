@@ -671,6 +671,7 @@ options:
       fallbackNotice: Answered by Built-in AI because $1 has no API key.
       title: $1 has no API key
       description: Add an API key to use it, or use Built-in AI instead.
+      addKeyDescription: Add an API key to use it.
       addApiKey: Add API key
     customActions:
       title: Custom AI Actions

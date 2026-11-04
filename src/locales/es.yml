@@ -671,6 +671,7 @@ options:
       fallbackNotice: Respondido por la IA integrada porque $1 no tiene clave de API.
       title: $1 no tiene clave de API
       description: Añade una clave de API para usarlo o usa la IA integrada.
+      addKeyDescription: Añade una clave de API para usarlo.
       addApiKey: Añadir clave de API
     customActions:
       title: Acciones AI personalizadas

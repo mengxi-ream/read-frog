@@ -517,7 +517,7 @@ describe("useCustomActionExecution with a provider that has no API key", () => {
     )
   })
 
-  it("keeps the Built-in AI's own failure when it is not about access", async () => {
+  it("names the missing key over the Built-in AI's own failure when it is not about access", async () => {
     streamBackgroundStructuredObjectMock
       .mockRejectedValueOnce(missingApiKeyError())
       .mockRejectedValueOnce(
@@ -528,6 +528,75 @@ describe("useCustomActionExecution with a provider that has no API key", () => {
 
     await waitFor(() => expect(result.current.error).not.toBeNull())
     expect(result.current.error?.description).toBe("Quota used up")
+    // Never "answered by Built-in AI" for an answer that never came.
+    expect(result.current.missingApiKey).toEqual({
+      kind: "blocked",
+      providerId: OPENAI_ID,
+      providerName: "OpenAI",
+      builtInAiAction: null,
+    })
+    expect(trackFeatureUsed).toHaveBeenCalledWith(
+      expect.objectContaining({
+        outcome: "failure",
+        failure_reason: "quota_exceeded",
+        provider: ANALYTICS_PROVIDER.BUILT_IN_AI,
+        fallback_from_provider: "openai",
+      }),
+    )
+  })
+
+  it("keeps the missing key when the action does not fit the Built-in AI's limits", async () => {
+    streamBackgroundStructuredObjectMock
+      .mockRejectedValueOnce(missingApiKeyError())
+      .mockRejectedValueOnce(
+        new StreamPortError({ message: "Invalid hosted AI request", reason: "precheck" }),
+      )
+
+    const { result } = runAction(openAiContext(undefined), statusWith(tier()))
+
+    await waitFor(() => expect(result.current.missingApiKey?.kind).toBe("blocked"))
+    expect(result.current.isRunning).toBe(false)
+    expect(result.current.error).toBeNull()
+    expect(result.current.missingApiKey).toMatchObject({ builtInAiAction: null })
+    expect(trackFeatureUsed).toHaveBeenCalledTimes(1)
+    expect(trackFeatureUsed).toHaveBeenCalledWith(
+      expect.objectContaining({
+        outcome: "failure",
+        failure_reason: "missing_api_key",
+        provider: "openai",
+      }),
+    )
+    expect(vi.mocked(trackFeatureUsed).mock.calls[0]![0]).not.toHaveProperty(
+      "fallback_from_provider",
+    )
+  })
+
+  it("says the Built-in AI answered only once it has output", async () => {
+    const fallbackRun = createDeferredPromise<unknown>()
+    let emitChunk!: (snapshot: unknown) => void
+    streamBackgroundStructuredObjectMock
+      .mockRejectedValueOnce(missingApiKeyError())
+      .mockImplementationOnce(
+        (_payload: unknown, { onChunk }: { onChunk: (snapshot: unknown) => void }) => {
+          emitChunk = onChunk
+          return fallbackRun.promise
+        },
+      )
+
+    const { result } = runAction(openAiContext(undefined), statusWith(tier()))
+
+    await waitFor(() => expect(streamBackgroundStructuredObjectMock).toHaveBeenCalledTimes(2))
+    expect(result.current.isRunning).toBe(true)
+    expect(result.current.missingApiKey).toBeNull()
+
+    act(() => emitChunk({ output: answer, thinking: { status: "complete", text: "" } }))
+    expect(result.current.missingApiKey?.kind).toBe("fallback")
+
+    await act(async () => {
+      fallbackRun.resolve({ output: answer, thinking: { status: "complete", text: "" } })
+      await Promise.resolve()
+    })
+    await waitFor(() => expect(result.current.isRunning).toBe(false))
     expect(result.current.missingApiKey?.kind).toBe("fallback")
   })
 

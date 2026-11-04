@@ -12,6 +12,7 @@ import type { Config } from "@/types/config/config"
 import type { AISDKReasoning, AllProviderTypes } from "@/types/config/provider"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import type { HostedAiModelTier } from "@/utils/constants/provider-ids"
+import type { ErrorAction } from "@/utils/error-action"
 import type { CachedWebPageContext } from "@/utils/host/translate/webpage-context"
 import type { HostedAiStatus } from "@/utils/hosted-ai/types"
 import type { CustomActionProviderRef } from "@/utils/providers/provider-registry"
@@ -447,7 +448,7 @@ export function useCustomActionExecution({
       fallback_from_provider?: AllProviderTypes
     } = requestedProviderAnalytics
 
-    const stream = (payload: CustomActionExecutionPayload) =>
+    const stream = (payload: CustomActionExecutionPayload, onOutput?: () => void) =>
       streamBackgroundStructuredObject(
         {
           ...payload,
@@ -460,6 +461,7 @@ export function useCustomActionExecution({
               return
             }
 
+            onOutput?.()
             setResult(withSelectionOutputValues(partial.output, request.selectionValues))
             setThinking(partial.thinking)
             scrollSelectionPopoverBodyToBottom(bodyRefRef.current)
@@ -467,18 +469,25 @@ export function useCustomActionExecution({
         },
       )
 
-    const block = (
+    const setMissingApiKeyBlocked = (
       provider: MissingApiKeyProvider,
-      builtInAiAction: NonNullable<ReturnType<typeof getBuiltInAiWallAction>>,
-      failureReason: ReturnType<typeof classifyFailureReason>,
+      builtInAiAction: ErrorAction | null,
     ) => {
-      setThinking(null)
       setMissingApiKey({
         kind: "blocked",
         providerId: provider.providerId,
         providerName: provider.providerName,
         builtInAiAction,
       })
+    }
+
+    const block = (
+      provider: MissingApiKeyProvider,
+      builtInAiAction: ErrorAction | null,
+      failureReason: ReturnType<typeof classifyFailureReason>,
+    ) => {
+      setThinking(null)
+      setMissingApiKeyBlocked(provider, builtInAiAction)
       void trackFeatureUsed({
         ...analyticsContext,
         ...actionAnalytics,
@@ -511,27 +520,47 @@ export function useCustomActionExecution({
           return null
         }
 
-        setMissingApiKey({
-          kind: "fallback",
-          providerId: fallback.providerId,
-          providerName: fallback.providerName,
-        })
+        // "Answered by Built-in AI" only once it has actually answered.
+        const showFallbackNotice = () =>
+          setMissingApiKey({
+            kind: "fallback",
+            providerId: fallback.providerId,
+            providerName: fallback.providerName,
+          })
         providerAnalytics = {
           ...BUILT_IN_AI_FEATURE_PROVIDER,
           fallback_from_provider: fallback.providerType,
         }
 
         try {
-          return await stream(fallback.payload)
+          const fallbackResult = await stream(fallback.payload, showFallbackNotice)
+          if (!isCancelled) {
+            showFallbackNotice()
+          }
+          return fallbackResult
         } catch (fallbackError) {
-          const failureReason = classifyFailureReason(fallbackError)
-          const fallbackWallAction = getBuiltInAiWallActionForFailure(failureReason)
-          if (isCancelled || isAbortError(fallbackError) || !fallbackWallAction) {
+          if (isCancelled || isAbortError(fallbackError)) {
             throw fallbackError
           }
-          // The status was unknown up front; the server's answer settles it.
-          block(fallback, fallbackWallAction, failureReason)
-          return null
+          const failureReason = classifyFailureReason(fallbackError)
+          const fallbackWallAction = getBuiltInAiWallActionForFailure(failureReason)
+          if (fallbackWallAction) {
+            // The status was unknown up front; the server's answer settles it.
+            block(fallback, fallbackWallAction, failureReason)
+            return null
+          }
+          if (failureReason === "precheck") {
+            // The background turned the request down before sending it: this
+            // action does not fit the Built-in AI's limits (an empty prompt,
+            // too many fields). Nothing ran, so it is the missing key, as before.
+            providerAnalytics = requestedProviderAnalytics
+            block(fallback, null, "missing_api_key")
+            return null
+          }
+          // The Built-in AI could not answer this time (quota, rate limit,
+          // outage): its own error shows below, under the missing key.
+          setMissingApiKeyBlocked(fallback, null)
+          throw fallbackError
         }
       }
     }
