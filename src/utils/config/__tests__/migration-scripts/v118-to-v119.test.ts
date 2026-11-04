@@ -34,7 +34,7 @@ function configWith({
 }
 
 describe("v118-to-v119 migration", () => {
-  it("gives annotation mode its key, Alt+Shift+N", () => {
+  it("gives annotation mode its key, Alt+Shift+P", () => {
     const oldConfig = configWith()
     const snapshot = structuredClone(oldConfig)
 
@@ -43,7 +43,7 @@ describe("v118-to-v119 migration", () => {
     expect(migrated.selectionToolbar.annotation).toEqual({
       enabled: true,
       shortcut: "Alt+Shift+E",
-      modeShortcut: "Alt+Shift+N",
+      modeShortcut: "Alt+Shift+P",
     })
     expect(migrated.selectionToolbar.builtInActions).toBe(oldConfig.selectionToolbar.builtInActions)
     expect(oldConfig).toEqual(snapshot)
@@ -59,16 +59,16 @@ describe("v118-to-v119 migration", () => {
   })
 
   it("does not take a key another shortcut already has, however it is written", () => {
-    const migrated = migrate(configWith({ customShortcut: "shift+option+n" }))
+    const migrated = migrate(configWith({ customShortcut: "shift+option+p" }))
 
     expect(migrated.selectionToolbar.annotation.modeShortcut).toBe("")
   })
 
   it("counts hover translation's key only while hover translation uses it", () => {
-    const unused = migrate(configWith({ node: { hotkey: "control", shortcut: "Alt+Shift+N" } }))
-    const used = migrate(configWith({ node: { hotkey: "custom", shortcut: "Alt+Shift+N" } }))
+    const unused = migrate(configWith({ node: { hotkey: "control", shortcut: "Alt+Shift+P" } }))
+    const used = migrate(configWith({ node: { hotkey: "custom", shortcut: "Alt+Shift+P" } }))
 
-    expect(unused.selectionToolbar.annotation.modeShortcut).toBe("Alt+Shift+N")
+    expect(unused.selectionToolbar.annotation.modeShortcut).toBe("Alt+Shift+P")
     expect(used.selectionToolbar.annotation.modeShortcut).toBe("")
   })
 

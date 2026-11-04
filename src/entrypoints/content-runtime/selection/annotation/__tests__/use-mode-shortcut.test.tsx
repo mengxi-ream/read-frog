@@ -12,8 +12,8 @@ function Binding({ shortcut }: { shortcut: string | undefined }) {
 
 function press(target: EventTarget, { repeat = false, type = "keydown" } = {}) {
   const event = new KeyboardEvent(type, {
-    key: "N",
-    code: "KeyN",
+    key: "P",
+    code: "KeyP",
     altKey: true,
     shiftKey: true,
     repeat,
@@ -35,7 +35,7 @@ afterEach(() => {
 
 describe("useAnnotationModeShortcut", () => {
   it("runs on each press with nothing selected, and keeps the key from the page", () => {
-    render(<Binding shortcut="Alt+Shift+N" />)
+    render(<Binding shortcut="Alt+Shift+P" />)
 
     expect(press(document.body).defaultPrevented).toBe(true)
     press(document.body, { type: "keyup" })
@@ -45,7 +45,7 @@ describe("useAnnotationModeShortcut", () => {
   })
 
   it("runs once for a held key, not on its repeats", () => {
-    render(<Binding shortcut="Alt+Shift+N" />)
+    render(<Binding shortcut="Alt+Shift+P" />)
 
     press(document.body)
     press(document.body, { repeat: true })
@@ -55,7 +55,7 @@ describe("useAnnotationModeShortcut", () => {
   })
 
   it("leaves the key to a text field being typed in", () => {
-    render(<Binding shortcut="Alt+Shift+N" />)
+    render(<Binding shortcut="Alt+Shift+P" />)
     const input = document.createElement("input")
     document.body.append(input)
     input.focus()
@@ -71,7 +71,7 @@ describe("useAnnotationModeShortcut", () => {
     press(document.body)
     expect(onPress).not.toHaveBeenCalled()
 
-    rerender(<Binding shortcut="Alt+Shift+N" />)
+    rerender(<Binding shortcut="Alt+Shift+P" />)
     unmount()
     expect(press(document.body).defaultPrevented).toBe(false)
     expect(onPress).not.toHaveBeenCalled()

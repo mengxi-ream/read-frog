@@ -6,7 +6,7 @@ import type { TestSeriesObject } from "./types"
  * silently change what v119 asserts.
  *
  * Delta from v118: `selectionToolbar.annotation.modeShortcut` is added in
- * every series, "Alt+Shift+N", the key that turns annotation mode on and off.
+ * every series, "Alt+Shift+P", the key that turns annotation mode on and off.
  * No series has that key on another shortcut; the case where one does is
  * covered in `migration-scripts/v118-to-v119.test.ts`.
  */
@@ -397,7 +397,7 @@ export const testSeries: TestSeriesObject = {
         annotation: {
           enabled: true,
           shortcut: "Alt+Shift+E",
-          modeShortcut: "Alt+Shift+N",
+          modeShortcut: "Alt+Shift+P",
         },
         builtInActions: {
           dictionary: {
@@ -824,7 +824,7 @@ export const testSeries: TestSeriesObject = {
         annotation: {
           enabled: true,
           shortcut: "Alt+Shift+E",
-          modeShortcut: "Alt+Shift+N",
+          modeShortcut: "Alt+Shift+P",
         },
         builtInActions: {
           dictionary: {
@@ -1345,7 +1345,7 @@ export const testSeries: TestSeriesObject = {
         annotation: {
           enabled: true,
           shortcut: "Alt+Shift+E",
-          modeShortcut: "Alt+Shift+N",
+          modeShortcut: "Alt+Shift+P",
         },
         builtInActions: {
           dictionary: {
@@ -1780,7 +1780,7 @@ export const testSeries: TestSeriesObject = {
         annotation: {
           enabled: true,
           shortcut: "Alt+Shift+E",
-          modeShortcut: "Alt+Shift+N",
+          modeShortcut: "Alt+Shift+P",
         },
         builtInActions: {
           dictionary: {
@@ -2262,7 +2262,7 @@ export const testSeries: TestSeriesObject = {
         annotation: {
           enabled: true,
           shortcut: "Alt+Shift+E",
-          modeShortcut: "Alt+Shift+N",
+          modeShortcut: "Alt+Shift+P",
         },
         builtInActions: {
           dictionary: {

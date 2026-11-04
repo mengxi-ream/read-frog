@@ -1,6 +1,6 @@
 /**
  * Migration script from v118 to v119
- * - Adds `selectionToolbar.annotation.modeShortcut` ("Alt+Shift+N"), the key
+ * - Adds `selectionToolbar.annotation.modeShortcut` ("Alt+Shift+P"), the key
  *   that turns annotation mode on and off from the page, so the reader no
  *   longer has to open the selection toolbar for its switch.
  * - A key the reader already gave another shortcut is not taken from it: the
@@ -14,7 +14,7 @@
  * snapshots - never import constants, helpers, or shared types.
  */
 
-const MODE_SHORTCUT = "Alt+Shift+N"
+const MODE_SHORTCUT = "Alt+Shift+P"
 
 function isRecord(value: unknown): value is Record<string, any> {
   return !!value && typeof value === "object" && !Array.isArray(value)
@@ -33,8 +33,8 @@ const MODIFIER_ALIASES: Record<string, string> = {
   mod: "mod",
 }
 
-// A shortcut as the keys it presses, however it is written: "Shift+Alt+n"
-// and "Alt+Shift+N" give the same. Modifiers are sorted and their aliases
+// A shortcut as the keys it presses, however it is written: "Shift+Alt+p"
+// and "Alt+Shift+P" give the same. Modifiers are sorted and their aliases
 // folded; the last part is the key ("Alt++" is the "+" key).
 function toKey(shortcut: unknown): string | null {
   if (typeof shortcut !== "string") {
