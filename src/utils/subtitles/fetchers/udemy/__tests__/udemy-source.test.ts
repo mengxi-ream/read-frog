@@ -99,6 +99,22 @@ describe("udemyTrackSource", () => {
     expect(downloadedCaption()).toBe("https://vtt-c.udemycdn.com/1/en_IN/auto.vtt")
   })
 
+  it("reads a caption whose language comes as a locale code or a locale object", async () => {
+    const { locale_id: _english, ...english } = caption("en_IN", "manual")
+    const { locale_id: _spanish, ...spanish } = caption("es_ES", "manual")
+    lecture = {
+      asset: {
+        captions: [
+          { ...spanish, locale: "es_ES" },
+          { ...english, locale: { locale: "en_IN" } },
+        ],
+      },
+    }
+
+    await expect(load()).resolves.toMatchObject({ language: "en-IN" })
+    expect(downloadedCaption()).toBe("https://vtt-c.udemycdn.com/1/en_IN/manual.vtt")
+  })
+
   it("asks for the course once per page", async () => {
     await load()
     await load()

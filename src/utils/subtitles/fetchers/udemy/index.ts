@@ -11,13 +11,23 @@ type Course = z.infer<typeof courseSchema>
 
 const lectureSchema = z.object({ asset: z.object({ captions: z.array(z.unknown()) }) })
 
-const captionSchema = z.object({
-  locale_id: z.string(),
+const captionFields = {
   source: z.string(),
   // 1 is a caption Udemy finished processing.
   status: z.literal(1),
   url: z.string().nonempty(),
-})
+}
+
+// Udemy names the language `locale_id` or `locale`, a code or an object, by the fields it serves.
+const captionSchema = z.union([
+  z.object({ ...captionFields, locale_id: z.string() }),
+  z
+    .object({ ...captionFields, locale: z.union([z.string(), z.object({ locale: z.string() })]) })
+    .transform(({ locale, ...caption }) => ({
+      ...caption,
+      locale_id: typeof locale === "string" ? locale : locale.locale,
+    })),
+])
 
 type Caption = z.infer<typeof captionSchema>
 
