@@ -20,7 +20,9 @@ export default function App({
   portalContainer,
 }: {
   uiContainer: HTMLElement
-  portalContainer: ShadowRoot
+  // The wrapper ThemeProvider puts `.dark` on. A toast portalled to the shadow
+  // root itself would sit beside it and keep the light tokens in dark mode.
+  portalContainer: HTMLElement
 }) {
   useInputTranslation()
   useContextMenuReadAloud()
