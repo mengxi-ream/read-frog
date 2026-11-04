@@ -28,10 +28,12 @@ export function mountSubtitlesToast(): () => void {
   const reactContainer = hostBuilder.build()
   applyTheme(reactContainer, SUBTITLES_THEME)
 
+  // The toasts portal into reactContainer, under the theme class above: in the
+  // shadow root itself they would sit beside it and stay light.
   const reactRoot = ReactDOM.createRoot(reactContainer)
   reactRoot.render(
     <div className={NOTRANSLATE_CLASS}>
-      <ToastProvider portalProps={{ container: shadowRoot }} />
+      <ToastProvider portalProps={{ container: reactContainer }} />
     </div>,
   )
 
