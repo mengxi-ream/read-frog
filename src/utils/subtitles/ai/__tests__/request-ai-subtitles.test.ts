@@ -192,6 +192,17 @@ describe("requestAiSubtitles", () => {
     expect(get).not.toHaveBeenCalled()
   })
 
+  it("tells the user the post holds another video than the one playing", async () => {
+    create.mockRejectedValue(new ORPCError("VIDEO_TRANSCRIPTION_VIDEO_MISMATCH", { defined: true }))
+
+    const error = await rejection(requestAiSubtitles(ctx))
+    expect(error).toMatchObject({
+      name: "ToastSubtitlesError",
+      message: "subtitles.errors.aiVideoMismatch",
+    })
+    expect(get).not.toHaveBeenCalled()
+  })
+
   it("shows a localized generic error for other create failures", async () => {
     create.mockRejectedValue(new ORPCError("VIDEO_TRANSCRIPT_NOT_FOUND", { defined: true }))
     await expect(requestAiSubtitles(ctx)).rejects.toThrow("subtitles.errors.aiRequestFailed")
