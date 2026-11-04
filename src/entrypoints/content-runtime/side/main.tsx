@@ -100,7 +100,7 @@ export async function runSideContent(ctx: ContentScriptContext) {
               <ThemeProvider container={wrapper}>
                 <TooltipProvider>
                   <LocaleBoundary>
-                    <App portalContainer={shadow} />
+                    <App portalContainer={wrapper} />
                   </LocaleBoundary>
                 </TooltipProvider>
               </ThemeProvider>
