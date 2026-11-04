@@ -19,6 +19,7 @@ import {
   SELECTION_POPOVER_NO_DRAG_SELECTOR,
   SELECTION_POPOVER_RESIZE_HANDLE_STYLES,
   SELECTION_POPOVER_RESIZE_HANDLES,
+  SELECTION_POPOVER_RESIZE_HANDLES_CLASS,
   useSelectionPopoverLayout,
 } from "./use-selection-popover-layout"
 
@@ -251,6 +252,28 @@ function SelectionPopoverRoot({
     }
   }, [instanceId, open, setOpen])
 
+  React.useEffect(() => {
+    if (!open || pinned || disablePointerDismissal) {
+      return undefined
+    }
+
+    // A press inside an iframe never reaches this document, so Base UI cannot
+    // treat it as an outside press: on readfrog.app, whose ebook reader shows
+    // the book in one, clicking elsewhere in the book left the popover open.
+    // This window sees its own blur instead, with the frame as the active
+    // element, once the press moves focus into the frame.
+    const handleWindowBlur = () => {
+      if (document.activeElement instanceof HTMLIFrameElement) {
+        setOpen(false)
+      }
+    }
+
+    window.addEventListener("blur", handleWindowBlur)
+    return () => {
+      window.removeEventListener("blur", handleWindowBlur)
+    }
+  }, [disablePointerDismissal, open, pinned, setOpen])
+
   const contextValue = React.useMemo(
     () => ({
       open,
@@ -342,6 +365,7 @@ function SelectionPopoverShell({
   handleDragStop,
   handleResizeStop,
   handleWheel,
+  handlePointerDown,
   isDragging: _isDragging,
   minHeight,
   minWidth,
@@ -389,6 +413,7 @@ function SelectionPopoverShell({
       enableUserSelectHack={false}
       enableResizing={SELECTION_POPOVER_RESIZE_HANDLES}
       resizeHandleStyles={SELECTION_POPOVER_RESIZE_HANDLE_STYLES}
+      resizeHandleWrapperClass={SELECTION_POPOVER_RESIZE_HANDLES_CLASS}
       onMouseDown={
         onMouseDown
           ? (e) => onMouseDown(e as unknown as React.MouseEvent<HTMLDivElement>)
@@ -423,6 +448,7 @@ function SelectionPopoverShell({
         handleResizeStop(elementRef, { x: resizedPosition.x, y: resizedPosition.y })
       }}
       onWheel={handleWheel}
+      onPointerDown={handlePointerDown}
     >
       {children}
     </Rnd>
@@ -459,6 +485,7 @@ function SelectionPopoverContent({
     handleDragStop,
     handleResizeStop,
     handleWheel,
+    handlePointerDown,
   } = useSelectionPopoverLayout({
     anchor,
     isVisible: open,
@@ -531,6 +558,7 @@ function SelectionPopoverContent({
           handleDragStop={handleDragStop}
           handleResizeStop={handleResizeStop}
           handleWheel={handleWheel}
+          handlePointerDown={handlePointerDown}
         >
           {shell}
         </SelectionPopoverShell>

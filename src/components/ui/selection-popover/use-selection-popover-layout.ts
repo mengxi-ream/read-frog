@@ -38,6 +38,7 @@ interface UseSelectionPopoverLayoutResult {
   handleDragStop: (position: Position) => void
   handleResizeStop: (element: HTMLElement, position: Position) => void
   handleWheel: (event: React.WheelEvent<HTMLElement>) => void
+  handlePointerDown: (event: React.PointerEvent<HTMLElement>) => void
 }
 
 const DEFAULT_WIDTH = 500
@@ -48,6 +49,7 @@ const BOTTOM_EDGE_TOLERANCE = 1
 export const SELECTION_POPOVER_DRAG_HANDLE_CLASS = "rf-selection-popover-drag-handle"
 export const SELECTION_POPOVER_NO_DRAG_SELECTOR =
   'button, input, textarea, select, option, a, [role="button"], [data-rf-no-drag="true"]'
+export const SELECTION_POPOVER_RESIZE_HANDLES_CLASS = "rf-selection-popover-resize-handles"
 export const SELECTION_POPOVER_RESIZE_HANDLES = {
   top: true,
   right: true,
@@ -510,6 +512,32 @@ export function useSelectionPopoverLayout({
     event.stopPropagation()
   }, [])
 
+  // Drags and resizes follow mouse events on this document, but an iframe under
+  // the cursor takes them instead: the readfrog.app ebook reader shows the book
+  // in one, so a popover that lagged the cursor onto the book while streaming
+  // stopped following it. Capturing the pointer keeps the events on the popover.
+  const handlePointerDown = useCallback((event: React.PointerEvent<HTMLElement>) => {
+    if (event.button !== 0 || !(event.target instanceof Element)) {
+      return
+    }
+
+    const popover = event.currentTarget
+    const handle =
+      event.target.closest(`.${SELECTION_POPOVER_RESIZE_HANDLES_CLASS} > *`) ??
+      event.target.closest(`.${SELECTION_POPOVER_DRAG_HANDLE_CLASS}`)
+    if (!handle || !popover.contains(handle)) {
+      return
+    }
+
+    // Mirrors the drag's `cancel` selector, which leaves header buttons clickable.
+    const noDrag = event.target.closest(SELECTION_POPOVER_NO_DRAG_SELECTOR)
+    if (noDrag && popover.contains(noDrag)) {
+      return
+    }
+
+    handle.setPointerCapture(event.pointerId)
+  }, [])
+
   useEffect(() => {
     if (isVisible) {
       return
@@ -583,5 +611,6 @@ export function useSelectionPopoverLayout({
     handleDragStop,
     handleResizeStop,
     handleWheel,
+    handlePointerDown,
   }
 }
