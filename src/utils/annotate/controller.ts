@@ -7,6 +7,7 @@ import {
   findLineHeightOwner,
   isLeadingClipped,
   isLeadingUnsafe,
+  isTooSmallForGloss,
   leadingRungFor,
   measureLeading,
 } from "./leading"
@@ -187,12 +188,12 @@ export class AnnotationController {
   /**
    * Makes room under the line the probe's text sits on, and says whether a
    * gloss fits there. Per annotation, not per block: the line-height owner of
-   * one word (a `<code>` with its own) is not that of the next.
+   * one word (a `<code>` with its own) is not that of the next, nor is its size.
    */
   private makeRoom(block: Element, state: BlockState, probe: Text | null): boolean {
     if (!state.glossFits) return false
     const measurement = measureLeading(block, probe)
-    if (!measurement) return false
+    if (!measurement || isTooSmallForGloss(measurement)) return false
     const rung = leadingRungFor(measurement)
     if (rung !== null) {
       const owner = findLineHeightOwner(block, probe)
