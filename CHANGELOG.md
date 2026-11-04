@@ -1,5 +1,25 @@
 # @read-frog/extension
 
+## 1.56.0
+
+### Minor Changes
+
+- [#2439](https://github.com/mengxi-ream/read-frog/pull/2439) [`57e0b6a`](https://github.com/mengxi-ream/read-frog/commit/57e0b6a74edb291cb99644ac186ebc44f3983508) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(selection-toolbar): annotate selected words with their meaning between the lines
+
+### Patch Changes
+
+- [#2437](https://github.com/mengxi-ream/read-frog/pull/2437) [`5c53376`](https://github.com/mengxi-ream/read-frog/commit/5c5337624f148bd2c62d8d9496c9e5f06d7c7d8f) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(providers): update Jalapeno Cloud offer to GLM 5.3 and US$1 credit
+
+- [#2434](https://github.com/mengxi-ream/read-frog/pull/2434) [`ab15bee`](https://github.com/mengxi-ream/read-frog/commit/ab15beef7fc6b57498b3047c6a4d394ddd2743eb) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(custom-actions): keep custom layout CSS as written when nothing in it is unsafe, so a `var()` shorthand followed by one of its longhands, such as `text-decoration: underline wavy var(--c); text-decoration-thickness: 2px`, no longer gets dropped
+
+- [#2452](https://github.com/mengxi-ream/read-frog/pull/2452) [`5b6df34`](https://github.com/mengxi-ream/read-frog/commit/5b6df342cc3f2b9a647549dea7d27f1c89f9b0d8) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(selection-toolbar): keep translation and AI action popovers following a drag or resize when the cursor crosses the book in the readfrog.app ebook reader, or any other embedded frame, and close them when you click elsewhere in the book
+
+- [#2440](https://github.com/mengxi-ream/read-frog/pull/2440) [`06ee8d3`](https://github.com/mengxi-ream/read-frog/commit/06ee8d3472506332306d518232750a3cdec3c58e) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(subtitles): group subtitle downloads into one menu page and move display mode and translation position into a new Subtitle settings page
+
+- [#2443](https://github.com/mengxi-ream/read-frog/pull/2443) [`9608313`](https://github.com/mengxi-ream/read-frog/commit/96083134b111e56762f578b143bcd48e85058ba3) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(subtitles): make pausing the video on subtitle hover an opt-in setting, off by default, that waits for the pointer to rest on the subtitles for 0.5 s so passing over them no longer pauses
+
+- [#2451](https://github.com/mengxi-ream/read-frog/pull/2451) [`a2d5e0d`](https://github.com/mengxi-ream/read-frog/commit/a2d5e0dd6296676693a4fafe0fc1480848b380ee) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(content): show toasts on web pages in the dark theme when it is on, and subtitle toasts in the subtitles' dark theme, instead of always light
+
 ## 1.55.0
 
 ### Minor Changes
