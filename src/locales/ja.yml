@@ -666,12 +666,6 @@ options:
       missingSelection: 選択されたテキストがありません
       providerDisabled: 選択したプロバイダーは無効です
       providerUnavailable: 選択したプロバイダーは利用できません
-    missingApiKey:
-      fallbackNotice: $1 に API キーが設定されていないため、組み込み AI が回答しました。
-      title: $1 に API キーが設定されていません
-      description: API キーを追加して使用するか、代わりに組み込み AI を使用してください。
-      addKeyDescription: 使用するには API キーを追加してください。
-      addApiKey: API キーを追加
     customActions:
       title: カスタム AI アクション
       pageDescription: 独自のプロンプトを作成し、選択ツールバーから選択したテキストに対して実行します。生成結果のデータ、スタイル、インタラクションはすべてカスタマイズできます。

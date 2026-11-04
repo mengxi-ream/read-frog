@@ -1,7 +1,6 @@
 import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type { JSONValue } from "ai"
 import type { RefObject } from "react"
-import type { MissingApiKeyProvider, MissingApiKeyState } from "./missing-api-key"
 import type { SelectionToolbarInlineError } from "@/components/ui/selection-popover/inline-error"
 import type { FeatureProviderAnalytics, SurfaceByFeature } from "@/types/analytics"
 import type {
@@ -9,12 +8,10 @@ import type {
   ThinkingSnapshot,
 } from "@/types/background-stream"
 import type { Config } from "@/types/config/config"
-import type { AISDKReasoning, AllProviderTypes } from "@/types/config/provider"
+import type { AISDKReasoning } from "@/types/config/provider"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import type { HostedAiModelTier } from "@/utils/constants/provider-ids"
-import type { ErrorAction } from "@/utils/error-action"
 import type { CachedWebPageContext } from "@/utils/host/translate/webpage-context"
-import type { HostedAiStatus } from "@/utils/hosted-ai/types"
 import type { CustomActionProviderRef } from "@/utils/providers/provider-registry"
 
 export interface SelectionToolbarCustomActionRequestSlice {
@@ -32,7 +29,7 @@ import {
 import { ANALYTICS_FEATURE } from "@/types/analytics"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
 import { classifyFailureReason } from "@/utils/analytics-failure-reason"
-import { BUILT_IN_AI_FEATURE_PROVIDER, classifyResolvedProvider } from "@/utils/analytics-provider"
+import { classifyResolvedProvider } from "@/utils/analytics-provider"
 import {
   getModelOutputFields,
   getSelectionOutputValues,
@@ -50,11 +47,6 @@ import { getOrCreateWebPageContext } from "@/utils/host/translate/webpage-contex
 import { resolveModelId } from "@/utils/providers/model-id"
 import { getProviderOptionsWithOverride } from "@/utils/providers/options"
 import { getTopLevelReasoning } from "@/utils/providers/reasoning"
-import {
-  getBuiltInAiWallAction,
-  getBuiltInAiWallActionForFailure,
-  getMissingApiKeyFallbackProvider,
-} from "./missing-api-key"
 
 export interface CustomActionExecutionContext {
   action: SelectionToolbarCustomAction
@@ -81,20 +73,6 @@ interface ResolvedWebPageContext {
   value: CachedWebPageContext | null
 }
 
-interface CustomActionExecutionPayload {
-  outputSchema: Array<{
-    name: string
-    type: SelectionToolbarCustomAction["outputSchema"][number]["type"]
-  }>
-  prompt: string
-  providerId: string
-  modelTier?: HostedAiModelTier
-  providerOptions?: Record<string, Record<string, JSONValue>>
-  reasoning?: AISDKReasoning
-  instructions: string
-  temperature?: number
-}
-
 interface CustomActionExecutionRequest {
   analytics: FeatureProviderAnalytics & {
     actionId: string
@@ -105,13 +83,18 @@ interface CustomActionExecutionRequest {
   // Each selection field's value: the run's selection, put into every answer
   // so the result shows it and "save to notebase" keeps it.
   selectionValues: Record<string, string>
-  payload: CustomActionExecutionPayload
-  // Only a provider of the user's own can be missing its key. The same run on
-  // the Built-in AI, for when it turns out to be; built up front so the
-  // fallback asks exactly what the action asked.
-  missingApiKeyFallback?: MissingApiKeyProvider & {
-    providerType: AllProviderTypes
-    payload: CustomActionExecutionPayload
+  payload: {
+    outputSchema: Array<{
+      name: string
+      type: SelectionToolbarCustomAction["outputSchema"][number]["type"]
+    }>
+    prompt: string
+    providerId: string
+    modelTier?: HostedAiModelTier
+    providerOptions?: Record<string, Record<string, JSONValue>>
+    reasoning?: AISDKReasoning
+    instructions: string
+    temperature?: number
   }
 }
 
@@ -274,8 +257,7 @@ function buildCustomActionExecutionRequest({
   popoverSessionKey: number
   rerunNonce: number
 }): CustomActionExecutionRequest {
-  const { provider } = executionContext
-  const { action, promptTokens } = executionContext
+  const { action, provider, promptTokens } = executionContext
   // A selection field is never asked of the model: neither its contract nor
   // its schema names it.
   const modelFields = getModelOutputFields(action.outputSchema)
@@ -340,19 +322,6 @@ function buildCustomActionExecutionRequest({
       reasoning,
       temperature,
     },
-    ...(provider.kind === "local" && {
-      missingApiKeyFallback: {
-        providerId: provider.id,
-        providerName: provider.name,
-        providerType: provider.config.provider,
-        payload: buildCustomActionExecutionRequest({
-          analyticsSurface,
-          executionContext: { ...executionContext, provider: getMissingApiKeyFallbackProvider() },
-          popoverSessionKey,
-          rerunNonce,
-        }).payload,
-      },
-    }),
   }
 }
 
@@ -360,7 +329,6 @@ export function useCustomActionExecution({
   analyticsSurface,
   bodyRef,
   executionContext,
-  hostedAiStatus,
   open,
   popoverSessionKey,
   rerunNonce,
@@ -368,10 +336,6 @@ export function useCustomActionExecution({
   analyticsSurface: SurfaceByFeature["custom_ai_action"]
   bodyRef: RefObject<HTMLDivElement | null>
   executionContext: CustomActionExecutionContext | null
-  // Decides, when the action's provider has no API key, whether the Built-in
-  // AI can answer instead. Read when a run hits the missing key, so a status
-  // that arrives later never reruns an answered action.
-  hostedAiStatus?: HostedAiStatus
   open: boolean
   popoverSessionKey: number
   rerunNonce: number
@@ -380,10 +344,6 @@ export function useCustomActionExecution({
   const [result, setResult] = useState<Record<string, unknown> | null>(null)
   const [error, setError] = useState<SelectionToolbarInlineError | null>(null)
   const [thinking, setThinking] = useState<ThinkingSnapshot | null>(null)
-  const [missingApiKey, setMissingApiKey] = useState<MissingApiKeyState | null>(null)
-  const hostedAiStatusRef = useRef(hostedAiStatus)
-  // oxlint-disable-next-line react/refs -- latest-value ref: read when a run hits a missing key
-  hostedAiStatusRef.current = hostedAiStatus
   const lastRunKeyRef = useRef<string | null>(null)
   const bodyRefRef = useRef(bodyRef)
   // oxlint-disable-next-line react/refs -- latest-value ref: writing it during render is what keeps callbacks in sync
@@ -409,7 +369,6 @@ export function useCustomActionExecution({
     setResult(null)
     setError(null)
     setThinking(null)
-    setMissingApiKey(null)
   }
 
   useEffect(() => {
@@ -438,147 +397,41 @@ export function useCustomActionExecution({
       action_id: request.analytics.actionId,
       action_name: request.analytics.actionName,
     }
-    const requestedProviderAnalytics: FeatureProviderAnalytics = {
+    const providerAnalytics: FeatureProviderAnalytics = {
       provider: request.analytics.provider,
       backend_kind: request.analytics.backend_kind,
-    }
-    // Whoever actually answered: the Built-in AI once a run falls back to it,
-    // with the provider it stood in for alongside.
-    let providerAnalytics: FeatureProviderAnalytics & {
-      fallback_from_provider?: AllProviderTypes
-    } = requestedProviderAnalytics
-
-    const stream = (payload: CustomActionExecutionPayload, onOutput?: () => void) =>
-      streamBackgroundStructuredObject(
-        {
-          ...payload,
-          requestId: getRandomUUID(),
-        },
-        {
-          signal: abortController.signal,
-          onChunk: (partial: BackgroundStructuredObjectStreamSnapshot) => {
-            if (isCancelled) {
-              return
-            }
-
-            onOutput?.()
-            setResult(withSelectionOutputValues(partial.output, request.selectionValues))
-            setThinking(partial.thinking)
-            scrollSelectionPopoverBodyToBottom(bodyRefRef.current)
-          },
-        },
-      )
-
-    const setMissingApiKeyBlocked = (
-      provider: MissingApiKeyProvider,
-      builtInAiAction: ErrorAction | null,
-    ) => {
-      setMissingApiKey({
-        kind: "blocked",
-        providerId: provider.providerId,
-        providerName: provider.providerName,
-        builtInAiAction,
-      })
-    }
-
-    const block = (
-      provider: MissingApiKeyProvider,
-      builtInAiAction: ErrorAction | null,
-      failureReason: ReturnType<typeof classifyFailureReason>,
-    ) => {
-      setThinking(null)
-      setMissingApiKeyBlocked(provider, builtInAiAction)
-      void trackFeatureUsed({
-        ...analyticsContext,
-        ...actionAnalytics,
-        ...providerAnalytics,
-        outcome: "failure",
-        failure_reason: failureReason,
-      })
-    }
-
-    // The action's own provider first, so a key added since — or a provider
-    // that needs none, like a local Ollama — is never second-guessed. Only the
-    // AI SDK's own "no API key" error moves the run to the Built-in AI.
-    const streamWithMissingApiKeyFallback = async () => {
-      try {
-        return await stream(request.payload)
-      } catch (caughtError) {
-        const fallback = request.missingApiKeyFallback
-        if (
-          !fallback ||
-          isCancelled ||
-          isAbortError(caughtError) ||
-          classifyFailureReason(caughtError) !== "missing_api_key"
-        ) {
-          throw caughtError
-        }
-
-        const wallAction = getBuiltInAiWallAction(hostedAiStatusRef.current)
-        if (wallAction) {
-          block(fallback, wallAction, "missing_api_key")
-          return null
-        }
-
-        // "Answered by Built-in AI" only once it has actually answered.
-        const showFallbackNotice = () =>
-          setMissingApiKey({
-            kind: "fallback",
-            providerId: fallback.providerId,
-            providerName: fallback.providerName,
-          })
-        providerAnalytics = {
-          ...BUILT_IN_AI_FEATURE_PROVIDER,
-          fallback_from_provider: fallback.providerType,
-        }
-
-        try {
-          const fallbackResult = await stream(fallback.payload, showFallbackNotice)
-          if (!isCancelled) {
-            showFallbackNotice()
-          }
-          return fallbackResult
-        } catch (fallbackError) {
-          if (isCancelled || isAbortError(fallbackError)) {
-            throw fallbackError
-          }
-          const failureReason = classifyFailureReason(fallbackError)
-          const fallbackWallAction = getBuiltInAiWallActionForFailure(failureReason)
-          if (fallbackWallAction) {
-            // The status was unknown up front; the server's answer settles it.
-            block(fallback, fallbackWallAction, failureReason)
-            return null
-          }
-          if (failureReason === "precheck") {
-            // The background turned the request down before sending it: this
-            // action does not fit the Built-in AI's limits (an empty prompt,
-            // too many fields). Nothing ran, so it is the missing key, as before.
-            providerAnalytics = requestedProviderAnalytics
-            block(fallback, null, "missing_api_key")
-            return null
-          }
-          // The Built-in AI could not answer this time (quota, rate limit,
-          // outage): its own error shows below, under the missing key.
-          setMissingApiKeyBlocked(fallback, null)
-          throw fallbackError
-        }
-      }
     }
 
     const run = async () => {
       setIsRunning(true)
       setResult(null)
       setError(null)
-      setMissingApiKey(null)
       setThinking({
         status: "thinking",
         text: "",
       })
 
       try {
-        const finalResult = await streamWithMissingApiKeyFallback()
+        const finalResult = await streamBackgroundStructuredObject(
+          {
+            ...request.payload,
+            requestId: getRandomUUID(),
+          },
+          {
+            signal: abortController.signal,
+            onChunk: (partial: BackgroundStructuredObjectStreamSnapshot) => {
+              if (isCancelled) {
+                return
+              }
 
-        if (isCancelled || !finalResult) {
+              setResult(withSelectionOutputValues(partial.output, request.selectionValues))
+              setThinking(partial.thinking)
+              scrollSelectionPopoverBodyToBottom(bodyRefRef.current)
+            },
+          },
+        )
+
+        if (isCancelled) {
           return
         }
 
@@ -632,7 +485,6 @@ export function useCustomActionExecution({
   return {
     error,
     isRunning,
-    missingApiKey,
     result,
     thinking,
   }

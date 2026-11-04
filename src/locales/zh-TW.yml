@@ -667,12 +667,6 @@ options:
       missingSelection: 沒有可用的選取文字
       providerDisabled: 所選提供者已被停用
       providerUnavailable: 所選提供者無法使用
-    missingApiKey:
-      fallbackNotice: 由於 $1 未設定 API 金鑰，本次由內建 AI 回答。
-      title: $1 未設定 API 金鑰
-      description: 新增 API 金鑰後即可使用它，或改用內建 AI。
-      addKeyDescription: 新增 API 金鑰後即可使用它。
-      addApiKey: 新增 API 金鑰
     customActions:
       title: 自訂 AI 指令
       pageDescription: 撰寫自己的提示詞，從劃詞工具列對選取的文字執行。指令產生結果的資料、樣式和互動都可以自訂。

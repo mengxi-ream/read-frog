@@ -6,14 +6,12 @@ import type {
   FeatureUsedEventProperties,
   SurfaceByFeature,
 } from "@/types/analytics"
-import type { AllProviderTypes } from "@/types/config/provider"
 import { langCodeISO6393Schema, NOTE_SAVE_SURFACES } from "@read-frog/definitions"
 import { posthog } from "posthog-js/dist/module.no-external"
 import { match } from "ts-pattern"
 import { storage } from "#imports"
 import { env } from "@/env"
 import { ANALYTICS_FAILURE_REASONS, ANALYTICS_FEATURE, NOTE_SAVE_PATHS } from "@/types/analytics"
-import { ALL_PROVIDER_TYPES } from "@/types/config/provider"
 import { translationModeSchema } from "@/types/config/translate"
 import { normalizeFeatureProviderAnalytics } from "@/utils/analytics-provider"
 import {
@@ -382,10 +380,6 @@ function isNoteSaveSurface(value: unknown): value is NoteSaveSurface {
   return typeof value === "string" && NOTE_SAVE_SURFACE_VALUES.has(value)
 }
 
-function isProviderType(value: unknown): value is AllProviderTypes {
-  return typeof value === "string" && (ALL_PROVIDER_TYPES as readonly string[]).includes(value)
-}
-
 /** Pick only documented event fields, including for messages from older content scripts. */
 function normalizeFeatureUsedEvent(
   properties: FeatureUsedEventProperties,
@@ -497,9 +491,6 @@ function normalizeFeatureUsedEvent(
         surface: event.surface,
         action_id: event.action_id,
         ...(typeof event.action_name === "string" ? { action_name: event.action_name } : {}),
-        ...(isProviderType(event.fallback_from_provider)
-          ? { fallback_from_provider: event.fallback_from_provider }
-          : {}),
       }
     })
     .with({ feature: "note_suggestion", action_id: "suggestion_shown" }, (event) => ({

@@ -667,12 +667,6 @@ options:
       missingSelection: 没有可用的选中文本
       providerDisabled: 所选提供商已被禁用
       providerUnavailable: 所选提供商不可用
-    missingApiKey:
-      fallbackNotice: 由于 $1 未设置 API 密钥，本次由内置 AI 回答。
-      title: $1 未设置 API 密钥
-      description: 添加 API 密钥后即可使用它，或改用内置 AI。
-      addKeyDescription: 添加 API 密钥后即可使用它。
-      addApiKey: 添加 API 密钥
     customActions:
       title: 自定义 AI 指令
       pageDescription: 编写自己的提示词，从划词工具栏对选中的文本运行。指令生成结果的数据、样式和交互都可以自定义。

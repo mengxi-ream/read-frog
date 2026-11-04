@@ -667,12 +667,6 @@ options:
       missingSelection: Seçilmiş mətn yoxdur
       providerDisabled: Seçilmiş provayder deaktivdir
       providerUnavailable: Seçilmiş provayder əlçatan deyil
-    missingApiKey:
-      fallbackNotice: $1 üçün API açarı olmadığından cavabı Daxili süni intellekt verdi.
-      title: $1 üçün API açarı yoxdur
-      description: İstifadə etmək üçün API açarı əlavə edin və ya əvəzinə Daxili süni intellektdən istifadə edin.
-      addKeyDescription: İstifadə etmək üçün API açarı əlavə edin.
-      addApiKey: API açarı əlavə et
     customActions:
       title: Fərdi süni intellekt əməliyyatları
       pageDescription: Öz təlimatlarınızı yazın və seçim alətlər panelindən seçilmiş mətnə tətbiq edin. Hər nəticənin məlumatları, üslubu və qarşılıqlı əlaqəsi tam fərdiləşdirilə bilər.

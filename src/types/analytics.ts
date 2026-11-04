@@ -125,16 +125,7 @@ export interface ObservedByFeature {
     source_language?: LangCodeISO6393
   }
   selection_translation: { char_count: number; target_language: LangCodeISO6393 }
-  custom_ai_action: {
-    action_id: string
-    action_name?: string
-    /**
-     * Set when the action's own provider had no API key and the Built-in AI
-     * answered instead: the provider it stood in for. `provider` stays the one
-     * that answered.
-     */
-    fallback_from_provider?: AllProviderTypes
-  }
+  custom_ai_action: { action_id: string; action_name?: string }
   input_translation: { char_count: number; target_language: LangCodeISO6393 }
   translation_hub: { char_count: number; target_language: LangCodeISO6393 }
   video_subtitles: { target_language: LangCodeISO6393 }
