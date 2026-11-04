@@ -2,7 +2,7 @@ import type { ReactNode } from "react"
 import type { SelectionSession } from "../selection-toolbar/atoms"
 import type { AnalyticsSurface } from "@/types/analytics"
 import type { AnnotateFailure, AnnotationController } from "@/utils/annotate"
-import { useAtom, useAtomValue } from "jotai"
+import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import {
   createContext,
   use,
@@ -20,11 +20,18 @@ import { classifyFailureReason } from "@/utils/analytics-failure-reason"
 import { classifyResolvedProvider } from "@/utils/analytics-provider"
 import { disposeAnnotationController, getAnnotationController } from "@/utils/annotate"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { getAnnotationShortcut, MAX_ANNOTATION_TEXT_LENGTH } from "@/utils/constants/selection"
+import {
+  getAnnotationModeShortcut,
+  getAnnotationShortcut,
+  MAX_ANNOTATION_TEXT_LENGTH,
+} from "@/utils/constants/selection"
 import { prepareTranslationText } from "@/utils/host/translate/text-preparation"
 import { i18n } from "@/utils/i18n"
 import { toSelectionPromptContext } from "@/utils/prompts/selection-context"
-import { selectionToolbarTranslateRequestAtom } from "../selection-toolbar/atoms"
+import {
+  isSelectionToolbarOpenAtom,
+  selectionToolbarTranslateRequestAtom,
+} from "../selection-toolbar/atoms"
 import {
   checkSelectionTranslateProvider,
   translateSelection,
@@ -32,6 +39,7 @@ import {
 import { useSelectionShortcuts } from "../selection-toolbar/use-selection-shortcuts"
 import { toLiveRange } from "../utils"
 import { annotationModeAtom } from "./atoms"
+import { useAnnotationModeShortcut } from "./use-mode-shortcut"
 
 export type AnnotateSurface = Extract<
   AnalyticsSurface,
@@ -82,6 +90,7 @@ function useAnnotationController(): AnnotationContextValue {
   const selectionToolbar = useAtomValue(configFieldsAtomMap.selectionToolbar)
   const translateRequest = useAtomValue(selectionToolbarTranslateRequestAtom)
   const [mode, setModeState] = useAtom(annotationModeAtom)
+  const setIsSelectionToolbarOpen = useSetAtom(isSelectionToolbarOpenAtom)
   const enabled = selectionToolbar.enabled && selectionToolbar.annotation.enabled
   const controllerRef = useRef<AnnotationController | null>(null)
   const inFlight = useRef(new Map<string, AbortController>())
@@ -147,6 +156,16 @@ function useAnnotationController(): AnnotationContextValue {
     window.addEventListener("keydown", handleKeydown)
     return () => window.removeEventListener("keydown", handleKeydown)
   }, [mode, setModeState])
+
+  // The mode's own key, in and out, for a reader who would rather not open the
+  // toolbar for its switch. Going in closes the toolbar, as the switch does.
+  useAnnotationModeShortcut(
+    enabled ? getAnnotationModeShortcut(selectionToolbar.annotation) : undefined,
+    () => {
+      setModeState(!mode)
+      if (!mode) setIsSelectionToolbarOpen(false)
+    },
+  )
 
   const annotate = useCallback(
     (session: SelectionSession | null, surface: AnnotateSurface): boolean => {

@@ -552,6 +552,9 @@ options:
     selectionAnnotation:
       title: "注釈"
       description: "選択したテキストに下線を引き、行間に意味を表示します。"
+    selectionAnnotationMode:
+      title: "注釈モード"
+      description: "ツールバーを開かずに注釈モードをオン・オフします。オンの間は、選択したテキストに自動で注釈が付きます。"
     actions:
       title: "AI アクション"
       description: "選択したテキストに AI アクションを実行します。カスタムアクションには最初はショートカットがないので、ここで設定してください。"

@@ -553,6 +553,9 @@ options:
     selectionAnnotation:
       title: "Anotar"
       description: "Subraya el texto seleccionado y escribe su significado entre las líneas."
+    selectionAnnotationMode:
+      title: "Modo de anotación"
+      description: "Activa o desactiva el modo de anotación sin abrir la barra. Mientras está activo, se anota cualquier texto que selecciones."
     actions:
       title: "Acciones AI"
       description: "Ejecuta una acción AI sobre el texto seleccionado. Las acciones personalizadas no tienen atajo hasta que les asignes uno aquí."

@@ -552,6 +552,9 @@ options:
     selectionAnnotation:
       title: "Not ekle"
       description: "Seçili metnin altını çizer ve anlamını satırların arasına yazar."
+    selectionAnnotationMode:
+      title: "Not modu"
+      description: "Araç çubuğunu açmadan not modunu açar veya kapatır. Açıkken seçtiğiniz her metne not eklenir."
     actions:
       title: "AI eylemleri"
       description: "Seçili metin üzerinde bir AI eylemi çalıştırır. Özel eylemlerin, burada atayana kadar kısayolu yoktur."

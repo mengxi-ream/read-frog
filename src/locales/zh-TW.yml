@@ -553,6 +553,9 @@ options:
     selectionAnnotation:
       title: "劃詞標註"
       description: "為選取的文字加上底線，並在行間顯示釋義。"
+    selectionAnnotationMode:
+      title: "標註模式"
+      description: "無需開啟工具列即可開啟或關閉標註模式。開啟後，選取的文字都會自動標註。"
     actions:
       title: "AI 指令"
       description: "對選取的文字執行 AI 指令。自訂指令預設沒有快速鍵，在這裡設定即可。"
@@ -1586,9 +1589,9 @@ translation:
   extensionContextInvalidated: 擴充功能已更新，請重新整理此頁面後再試一次。
 annotation:
   annotate: "劃詞標註"
-  enterMode: "進入劃詞模式"
-  exitMode: "退出劃詞模式"
-  modeLabel: "劃詞模式"
+  enterMode: "進入標註模式"
+  exitMode: "退出標註模式"
+  modeLabel: "標註模式"
   noTextSelected: "沒有選取文字"
   tooLong: "請選擇一個詞或短語來標註"
   multipleParagraphs: "請在同一段落內選取文字來標註"

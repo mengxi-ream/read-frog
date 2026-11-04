@@ -552,6 +552,9 @@ options:
     selectionAnnotation:
       title: "주석"
       description: "선택한 텍스트에 밑줄을 긋고 줄 사이에 뜻을 표시합니다."
+    selectionAnnotationMode:
+      title: "주석 모드"
+      description: "툴바를 열지 않고 주석 모드를 켜거나 끕니다. 켜져 있는 동안 선택한 텍스트에 자동으로 주석이 달립니다."
     actions:
       title: "AI 액션"
       description: "선택한 텍스트에 AI 액션을 실행합니다. 커스텀 액션은 처음에 단축키가 없으니 여기서 설정하세요."

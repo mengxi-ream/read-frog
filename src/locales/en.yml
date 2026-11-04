@@ -553,6 +553,9 @@ options:
     selectionAnnotation:
       title: "Annotate"
       description: "Underline the text you selected and write its meaning between the lines."
+    selectionAnnotationMode:
+      title: "Annotation mode"
+      description: "Turn annotation mode on or off without opening the toolbar. While it's on, any text you select is annotated."
     actions:
       title: "AI actions"
       description: "Run an AI action on the text you selected. Custom actions have no key until you set one here."

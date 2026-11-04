@@ -37,6 +37,7 @@ import {
   MICROSOFT_TRANSLATE_PROVIDER_ID,
 } from "./providers"
 import {
+  DEFAULT_ANNOTATION_MODE_SHORTCUT_KEY,
   DEFAULT_SELECTION_ANNOTATION_SHORTCUT_KEY,
   DEFAULT_SELECTION_OVERLAY_OPACITY,
   DEFAULT_SELECTION_SPEAK_SHORTCUT_KEY,
@@ -76,7 +77,7 @@ export const GOOGLE_DRIVE_TOKEN_STORAGE_KEY = "__googleDriveToken"
 
 export const THEME_STORAGE_KEY = "theme"
 export const DEFAULT_DETECTED_CODE = "eng" as const
-export const CONFIG_SCHEMA_VERSION = 118
+export const CONFIG_SCHEMA_VERSION = 119
 
 export const DEFAULT_FLOATING_BUTTON_POSITION = 0.66
 export const DEFAULT_FLOATING_BUTTON_SIDE: FloatingButtonSide = "right"
@@ -244,6 +245,7 @@ export const DEFAULT_CONFIG: Config = {
     annotation: {
       enabled: true,
       shortcut: DEFAULT_SELECTION_ANNOTATION_SHORTCUT_KEY,
+      modeShortcut: DEFAULT_ANNOTATION_MODE_SHORTCUT_KEY,
     },
     builtInActions: {
       dictionary: {

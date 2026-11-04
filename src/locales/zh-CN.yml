@@ -553,6 +553,9 @@ options:
     selectionAnnotation:
       title: "划词标注"
       description: "给选中的文本加下划线，并在行间显示释义。"
+    selectionAnnotationMode:
+      title: "标注模式"
+      description: "无需打开工具栏即可开启或关闭标注模式。开启后，选中的文本都会自动标注。"
     actions:
       title: "AI 指令"
       description: "对选中的文本运行 AI 指令。自定义指令默认没有快捷键，在这里设置即可。"
@@ -1586,9 +1589,9 @@ translation:
   extensionContextInvalidated: 扩展已更新，请刷新此页面后重试。
 annotation:
   annotate: "划词标注"
-  enterMode: "进入划词模式"
-  exitMode: "退出划词模式"
-  modeLabel: "划词模式"
+  enterMode: "进入标注模式"
+  exitMode: "退出标注模式"
+  modeLabel: "标注模式"
   noTextSelected: "没有选中文本"
   tooLong: "请选择一个词或短语来标注"
   multipleParagraphs: "请在同一段落内选择文本来标注"
