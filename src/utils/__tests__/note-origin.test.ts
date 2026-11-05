@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { afterEach, describe, expect, it } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import {
   clearAppliedDocumentTitleTranslation,
   setAppliedDocumentTitleTranslation,
@@ -109,6 +109,41 @@ describe("getVideoNoteOrigin", () => {
 
   it("gives no origin off http(s)", () => {
     expect(getVideoNoteOrigin({ seconds: 1 }, { href: "file:///movie.html", title: "" })).toBeNull()
+  })
+})
+
+describe("in a Firefox content script", () => {
+  // Content scripts see the page's `URL` objects through Xray wrappers, where
+  // the iterators `searchParams.keys()`, `values()` and `entries()` return have
+  // `next()` but no `Symbol.iterator`, so spreading one throws (#2470).
+  beforeEach(() => {
+    const searchParamsPrototype = Object.getPrototypeOf(
+      new URL("https://example.com/").searchParams,
+    )
+    for (const method of ["keys", "values", "entries"] as const) {
+      vi.spyOn(searchParamsPrototype, method).mockImplementation(() => ({
+        next: () => ({ done: true, value: undefined }),
+      }))
+    }
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it("records the page, without its credential query parameters", () => {
+    expect(
+      getWebPageNoteOrigin({ href: "https://example.com/a?token=secret&page=2", title: "A" }),
+    ).toEqual({ kind: "webpage", url: "https://example.com/a?page=2", title: "A" })
+  })
+
+  it("records the video page", () => {
+    expect(
+      getVideoNoteOrigin(
+        { seconds: 3 },
+        { href: "https://www.youtube.com/watch?v=abc", title: "" },
+      ),
+    ).toEqual({ kind: "video", url: "https://www.youtube.com/watch?v=abc", seconds: 3 })
   })
 })
 

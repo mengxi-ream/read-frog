@@ -293,14 +293,14 @@ importers:
         specifier: ^1.5.0
         version: 1.5.0(@types/react@19.3.0)(react@19.3.1)
       '@read-frog/api-contract':
-        specifier: 0.26.0
-        version: 0.26.0(@opentelemetry/api@1.9.1)
+        specifier: 0.27.0
+        version: 0.27.0(@opentelemetry/api@1.9.1)
       '@read-frog/definitions':
-        specifier: 0.14.0
-        version: 0.14.0
+        specifier: 0.15.0
+        version: 0.15.0
       '@read-frog/layout-engine':
-        specifier: 0.6.0
-        version: 0.6.0(@codemirror/lang-liquid@6.3.3)(@codemirror/lint@6.9.7)(@codemirror/state@6.7.6)(@codemirror/view@6.43.15)(dompurify@3.4.17)(liquidjs@10.30.1)(morphdom@2.7.8)(react@19.3.1)
+        specifier: 0.8.0
+        version: 0.8.0(@codemirror/lang-liquid@6.3.3)(@codemirror/lint@6.9.7)(@codemirror/state@6.7.6)(@codemirror/view@6.43.15)(dompurify@3.4.17)(liquidjs@10.30.1)(morphdom@2.7.8)(react@19.3.1)
       '@remixicon/react':
         specifier: ^4.9.0
         version: 4.9.0(react@19.3.1)
@@ -2230,23 +2230,24 @@ packages:
       '@types/react':
         optional: true
 
-  '@read-frog/api-contract@0.26.0':
-    resolution: {integrity: sha512-5xb8+Pa3/Z7YVsEqi1EFcWCIcuPsQD4kpNw9mE2/H4/ycJCD7WmtpI8VL02ZqPhJvOIRNU/pBP4TPTJcanarXg==}
+  '@read-frog/api-contract@0.27.0':
+    resolution: {integrity: sha512-hf/dPBnOMm/6l4ZHwKLydm/D5Wq8mz5XASDnwIEZp+zhtHfBK0+XqRzpT8R4XPKyRnxkxODo14CzwLXfVJabhg==}
 
-  '@read-frog/definitions@0.14.0':
-    resolution: {integrity: sha512-/9EUdzIoDzPob6DNiIK+hQRrkrgnjCyJhiRwZMMBHA4DiymdbCuFpcP8soV3v2aQCWL5pUWQeGD+6TFLNcbOww==}
+  '@read-frog/definitions@0.15.0':
+    resolution: {integrity: sha512-1VKPn/y5gJt5eCGBgRh1UPYaJB8S3wXV1c+HA7/VX09vbLC8H3anYjv4CrXLmg86uEc35GhRAggpeeuMrnnzeA==}
 
-  '@read-frog/layout-engine@0.6.0':
-    resolution: {integrity: sha512-iSagn6wCdcCz7XELgOh0x/4NiBeCsQcZI2BJW4PH/XLKKoSEP49zsRU7cKtIwi7vn+agrJXZ7LaFpgXf4096Fw==}
+  '@read-frog/layout-engine@0.8.0':
+    resolution: {integrity: sha512-WHwMTMZyCZvmKqaSSMvcICJyTh29Wi9HvcK1jYOZHG35QBDCETbkjb0zGSgUnVolJoaPpEp87gvkwHcODMrssg==}
     peerDependencies:
       '@codemirror/lang-liquid': ^6.3.3
       '@codemirror/lint': ^6.9.7
       '@codemirror/state': ^6.7.6
-      '@codemirror/view': ^6.43.14
-      dompurify: ^3.4.16
-      liquidjs: ~10.30.0
+      '@codemirror/view': ^6.43.15
+      dompurify: ^3.4.17
+      liquidjs: ~10.30.1
       morphdom: ^2.7.8
       react: ^19.3.0
+      temml: 0.14.0
     peerDependenciesMeta:
       '@codemirror/lang-liquid':
         optional: true
@@ -2261,6 +2262,8 @@ packages:
       morphdom:
         optional: true
       react:
+        optional: true
+      temml:
         optional: true
 
   '@remix-run/route-pattern@0.22.1':
@@ -8442,20 +8445,20 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.3.0
 
-  '@read-frog/api-contract@0.26.0(@opentelemetry/api@1.9.1)':
+  '@read-frog/api-contract@0.27.0(@opentelemetry/api@1.9.1)':
     dependencies:
       '@orpc/contract': 1.16.1(@opentelemetry/api@1.9.1)
-      '@read-frog/definitions': 0.14.0
+      '@read-frog/definitions': 0.15.0
       zod: 4.6.7
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
-  '@read-frog/definitions@0.14.0':
+  '@read-frog/definitions@0.15.0':
     dependencies:
       temporal-polyfill: 1.0.7
       zod: 4.6.7
 
-  '@read-frog/layout-engine@0.6.0(@codemirror/lang-liquid@6.3.3)(@codemirror/lint@6.9.7)(@codemirror/state@6.7.6)(@codemirror/view@6.43.15)(dompurify@3.4.17)(liquidjs@10.30.1)(morphdom@2.7.8)(react@19.3.1)':
+  '@read-frog/layout-engine@0.8.0(@codemirror/lang-liquid@6.3.3)(@codemirror/lint@6.9.7)(@codemirror/state@6.7.6)(@codemirror/view@6.43.15)(dompurify@3.4.17)(liquidjs@10.30.1)(morphdom@2.7.8)(react@19.3.1)':
     dependencies:
       liquidjs: 10.30.1
     optionalDependencies:

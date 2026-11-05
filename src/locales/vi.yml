@@ -798,6 +798,8 @@ options:
             unquotedAttributeOutput: Hãy đặt giá trị thuộc tính này trong dấu ngoặc kép, nếu không giá trị có thể thoát ra ngoài thuộc tính.
             filterIgnored: Bộ lọc bị bỏ qua trong thẻ "$1". Hãy gán giá trị đã lọc trước.
             newlineToBrNotLast: newline_to_br chỉ hoạt động khi là bộ lọc cuối cùng của một đầu ra.
+            mathFilterNotLast: $1 chỉ hoạt động khi là bộ lọc cuối cùng của một đầu ra.
+            mathFilterInAttribute: Đừng dùng $1 trong giá trị thuộc tính. Công thức nó vẽ có dấu ngoặc kép, sẽ kết thúc thuộc tính.
             tooLong: Bố cục này dài hơn $1 ký tự và không thể lưu.
             fieldNotShown: '"$1" không được hiển thị trong bố cục này.'
             reservedFieldName: Tên trường "$1" là tên dành riêng trong bố cục. Hãy đổi tên trường.

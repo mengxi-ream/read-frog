@@ -798,6 +798,8 @@ options:
             unquotedAttributeOutput: この属性値を引用符で囲んでください。囲まないと値が属性の外にはみ出すおそれがあります。
             filterIgnored: 「$1」タグではフィルターは無視されます。先にフィルター後の値を代入してください。
             newlineToBrNotLast: newline_to_br は出力の最後のフィルターとしてのみ機能します。
+            mathFilterNotLast: $1 は出力の最後のフィルターとしてのみ機能します。
+            mathFilterInAttribute: 属性値の中では $1 を使わないでください。描画した数式に含まれる引用符で属性が終わってしまいます。
             tooLong: このレイアウトは $1 文字を超えているため保存できません。
             fieldNotShown: 「$1」はこのレイアウトに表示されません。
             reservedFieldName: フィールド名「$1」はレイアウトの予約名です。フィールドの名前を変更してください。
