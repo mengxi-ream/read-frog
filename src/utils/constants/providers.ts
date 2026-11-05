@@ -41,7 +41,7 @@ export const DEFAULT_LLM_PROVIDER_MODELS: LLMProviderModels = {
     customModel: null,
   },
   jalapenocloud: {
-    model: "GLM-5.2",
+    model: "GLM-5.3",
     isCustomModel: false,
     customModel: null,
   },

@@ -4,7 +4,7 @@ import {
   getProviderOptionsWithOverride,
   getRecommendedProviderOptionsMatch,
 } from "../../providers/options"
-import { LLM_PROVIDER_MODELS } from "../models"
+import { getOpenAIGPT5ReasoningEffortPolicy, LLM_PROVIDER_MODELS } from "../models"
 
 describe("getProviderOptions", () => {
   describe("model pattern matching", () => {
@@ -150,6 +150,7 @@ describe("getProviderOptions", () => {
     it("should expose the current xAI Grok chat model ids", () => {
       expect(LLM_PROVIDER_MODELS.xai).toEqual([
         "grok-4.3",
+        "grok-4.7",
         "grok-4.6",
         "grok-4.5",
         "grok-4.20-non-reasoning",
@@ -160,7 +161,20 @@ describe("getProviderOptions", () => {
     })
 
     it("should prioritize the Jalapeno Cloud GLM models", () => {
-      expect(LLM_PROVIDER_MODELS.jalapenocloud.slice(0, 2)).toEqual(["GLM-5.2", "GLM-5.1"])
+      expect(LLM_PROVIDER_MODELS.jalapenocloud.slice(0, 3)).toEqual([
+        "GLM-5.3",
+        "GLM-5.3-Flash",
+        "GLM-5.1",
+      ])
+    })
+
+    it("should not list models that providers retired or delisted", () => {
+      for (const model of ["GLM-5.2", "Hy3", "Qwen3-Next-80B-A3B-Instruct"]) {
+        expect(LLM_PROVIDER_MODELS.jalapenocloud).not.toContain(model)
+      }
+      for (const model of ["deepseek-chat", "deepseek-reasoner"]) {
+        expect(LLM_PROVIDER_MODELS.deepseek).not.toContain(model)
+      }
     })
 
     it("should expose current Ollama recommended model ids", () => {
@@ -434,6 +448,46 @@ describe("getProviderOptions", () => {
     it("should return empty object for non-matching models", () => {
       const options = getProviderOptions("some-random-model", "openai")
       expect(options).toEqual({})
+    })
+  })
+
+  describe("models added in the 2026-11 catalog refresh", () => {
+    it("should give Gemini 4 a thinking level, never the thinkingBudget it rejects", () => {
+      const options = getProviderOptions("gemini-4-argon", "google")
+      expect(options.google?.thinkingConfig).toEqual({
+        thinkingLevel: "low",
+        includeThoughts: false,
+      })
+    })
+
+    it("should use the lowest reasoning effort each GPT-6.1 model accepts", () => {
+      expect(getProviderOptions("gpt-6.1-sol", "openai").openai?.reasoningEffort).toBe("low")
+      expect(getProviderOptions("gpt-6.1-terra", "openai").openai?.reasoningEffort).toBe("none")
+      expect(getOpenAIGPT5ReasoningEffortPolicy("gpt-6.1-sol")?.supportedValues).not.toContain(
+        "none",
+      )
+    })
+
+    it("should use low reasoning effort for Grok 4.7, which cannot disable reasoning", () => {
+      expect(getProviderOptions("grok-4.7", "xai").xai?.reasoningEffort).toBe("low")
+    })
+
+    it("should use low reasoning effort for Kimi K3.1 Pro and its highspeed variant", () => {
+      for (const model of ["kimi-k3.1-pro", "kimi-k3.1-pro-highspeed"]) {
+        expect(getProviderOptions(model, "moonshotai")).toEqual({
+          moonshotai: { reasoningEffort: "low" },
+        })
+      }
+    })
+
+    it("should disable thinking for the deepseek-flash alias", () => {
+      expect(getProviderOptions("deepseek-flash", "deepseek").deepseek?.thinking).toEqual({
+        type: "disabled",
+      })
+    })
+
+    it("should never send thinking: disabled to MiniMax-M3.1-Flash, which errors on it", () => {
+      expect(getProviderOptions("MiniMax-M3.1-Flash", "minimax")).toEqual({})
     })
   })
 

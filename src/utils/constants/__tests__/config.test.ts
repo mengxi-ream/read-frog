@@ -87,7 +87,7 @@ describe("dEFAULT_CONFIG", () => {
     ).toEqual(
       expect.objectContaining({
         model: {
-          model: "GLM-5.2",
+          model: "GLM-5.3",
           isCustomModel: false,
           customModel: null,
         },
