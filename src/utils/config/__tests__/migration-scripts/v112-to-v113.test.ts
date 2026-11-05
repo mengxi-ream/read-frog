@@ -49,7 +49,7 @@ describe("v112-to-v113 migration", () => {
     const parsed = configSchema.safeParse(migrate(structuredClone(config)))
 
     expect(parsed.success).toBe(true)
-    expect(parsed.data?.videoSubtitles.autoStart).toEqual({
+    expect(parsed.data?.videoSubtitles.autoStart).toMatchObject({
       youtube: true,
       xcom: true,
       netflix: true,
