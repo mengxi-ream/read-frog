@@ -93,6 +93,12 @@ function createStoreWithAction(action?: SelectionToolbarCustomAction) {
   return store
 }
 
+const PAGE_ORIGIN = {
+  kind: "webpage",
+  url: "https://example.com/article",
+  title: "An article",
+} as const
+
 function renderCard(
   store: ReturnType<typeof createStore>,
   actionSnapshot: SelectionToolbarCustomAction,
@@ -102,6 +108,7 @@ function renderCard(
     <NoteSuggestionCard
       suggestion={createSuggestion(actionSnapshot, notes)}
       markShownOnce={() => false}
+      noteOrigin={PAGE_ORIGIN}
     />,
     { wrapper: wrapper(store) },
   )
@@ -130,6 +137,7 @@ describe("NoteSuggestionCard", () => {
       action: liveAction,
       results: [{ Term: "ephemeral", Definition: "lasting a very short time" }],
       analyticsSource: "note_suggestion",
+      origin: PAGE_ORIGIN,
     })
     expect(mocks.toastAdd).not.toHaveBeenCalled()
   })

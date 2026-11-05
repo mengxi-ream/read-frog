@@ -174,6 +174,33 @@ describe("selectionToolbar - external selection source", () => {
     })
   })
 
+  it("records the book and the selection's CFI as the session's note origin", async () => {
+    window.history.replaceState(null, "", "/ebook/reader")
+    render(<SelectionToolbar />)
+
+    await dispatchExternalOpen({
+      ...EXTERNAL_PAYLOAD,
+      ebookId: "44444444-4444-4444-8444-444444444444",
+      cfi: "epubcfi(/6/8!/4/2/3:12)",
+    })
+    await waitFor(expectToolbarVisible)
+
+    expect(store.get(selectionSessionAtom)?.noteOrigin).toEqual({
+      kind: "ebook",
+      ebookId: "44444444-4444-4444-8444-444444444444",
+      cfi: "epubcfi(/6/8!/4/2/3:12)",
+    })
+  })
+
+  it("records no origin, not the reader page, when an older reader sends no book id", async () => {
+    render(<SelectionToolbar />)
+
+    await dispatchExternalOpen(EXTERNAL_PAYLOAD)
+    await waitFor(expectToolbarVisible)
+
+    expect(store.get(selectionSessionAtom)?.noteOrigin).toBeNull()
+  })
+
   it("hides the toolbar and clears the session on the external clear event", async () => {
     render(<SelectionToolbar />)
 

@@ -591,6 +591,7 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
                   key={noteSuggestion.sessionKey}
                   suggestion={noteSuggestion}
                   markShownOnce={markNoteSuggestionShownOnce}
+                  noteOrigin={activeSession?.noteOrigin ?? null}
                 />
               )}
             <SelectionToolbarErrorAlert error={error} className="-mt-3" />

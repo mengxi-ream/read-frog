@@ -1,3 +1,4 @@
+import type { NoteOriginInput } from "@read-frog/definitions"
 import type { ComponentProps } from "react"
 import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { useEffect, useMemo, useRef } from "react"
@@ -41,7 +42,15 @@ function CustomActionFooterContent({
   return <SelectionToolbarFooterContent providers={customActionProviders} {...props} />
 }
 
-export function CustomActionPanel() {
+export function CustomActionPanel({
+  getNoteOrigin,
+}: {
+  /**
+   * Where a note saved from the card comes from, read when the save starts, in
+   * place of the request's. The card on video subtitles reads the video here.
+   */
+  getNoteOrigin?: () => NoteOriginInput | null
+} = {}) {
   const bodyRef = useRef<HTMLDivElement>(null)
   const [request, setRequest] = useAtom(customActionRequestAtom)
   const language = useAtomValue(configFieldsAtomMap.language)
@@ -180,6 +189,7 @@ export function CustomActionPanel() {
               isRunning={isRunning}
               result={result}
               surface={cardSurface}
+              getNoteOrigin={getNoteOrigin ?? (() => request.noteOrigin)}
             />
             <CustomActionToolButton action={action} />
           </>

@@ -102,6 +102,8 @@ export interface SubtitlesProvidersAdapter {
   ensureSourceTrackPublished: () => Promise<void>
   seekTo: (seconds: number) => void
   getVideoElement: () => HTMLVideoElement | null
+  /** The platform's link to the playing video, when the page URL does not name it. */
+  getVideoPageUrl: () => string | null
   toggleSubtitlesManually: (enabled: boolean) => void
   toggleSubtitlesByShortcut: (enabled: boolean) => void
   requestAiSubtitles: () => Promise<void>
@@ -327,6 +329,8 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
   }
 
   getVideoElement = () => this.subtitlesScheduler?.getVideoElement() ?? null
+
+  getVideoPageUrl = () => this.config.getVideoPageUrl?.() ?? null
 
   downloadSourceSubtitles = async () => {
     await this.getOrLoadSourceSubtitles()

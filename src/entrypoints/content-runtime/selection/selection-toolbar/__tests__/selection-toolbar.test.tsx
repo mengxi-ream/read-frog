@@ -480,6 +480,28 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     await waitFor(() => expectToolbarVisible())
   })
 
+  it("records the page the text was selected on as the session's note origin", async () => {
+    window.history.replaceState(null, "", "/articles/frogs?page=2")
+    document.title = "  Frogs  "
+    render(
+      <div>
+        <SelectionToolbar />
+        <div data-testid="test-element">Some text</div>
+      </div>,
+    )
+
+    await clearToolbarState()
+
+    await triggerMouseUpWithSelection(screen.getByTestId("test-element"))
+    await waitFor(() => expectToolbarVisible())
+
+    expect(getDefaultStore().get(selectionSessionAtom)?.noteOrigin).toEqual({
+      kind: "webpage",
+      url: `${window.location.origin}/articles/frogs?page=2`,
+      title: "Frogs",
+    })
+  })
+
   it("should keep the toolbar visible on right-click so context menu translation can reuse the selection", async () => {
     render(
       <div>

@@ -3,7 +3,7 @@ import {
   DEFAULT_CONTROLS_HEIGHT,
   XCOM_PLAYER_CONTAINER_SELECTOR,
 } from "@/utils/constants/subtitles"
-import { getCurrentXcomVideoId } from "./dom"
+import { getCurrentXcomVideoId, getCurrentXcomVideoUrl } from "./dom"
 
 export function getXcomConfig(): PlatformConfig {
   return {
@@ -23,5 +23,6 @@ export function getXcomConfig(): PlatformConfig {
       },
     },
     getVideoId: getCurrentXcomVideoId,
+    getVideoPageUrl: getCurrentXcomVideoUrl,
   }
 }

@@ -1,3 +1,4 @@
+import type { NoteOriginInput } from "@read-frog/definitions"
 import type { SurfaceByFeature } from "@/types/analytics"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import { IconBookmarkPlus } from "@tabler/icons-react"
@@ -15,6 +16,7 @@ export function SaveToNotebaseButton({
   isRunning,
   result,
   surface,
+  getNoteOrigin,
 }: {
   action: SelectionToolbarCustomAction
   /** The run ended in an error: `result` is only what streamed before it, so it is not saved. */
@@ -22,6 +24,8 @@ export function SaveToNotebaseButton({
   isRunning: boolean
   result: Record<string, unknown> | null
   surface: SurfaceByFeature["note_save"]
+  /** Where the note came from, read when the save starts. */
+  getNoteOrigin?: () => NoteOriginInput | null
 }) {
   const connection = sanitizeCustomActionNotebaseConnection(
     action.notebaseConnection,
@@ -35,7 +39,7 @@ export function SaveToNotebaseButton({
       return
     }
 
-    void save({ action, results: [result], surface })
+    void save({ action, results: [result], surface, origin: getNoteOrigin?.() ?? null })
   }
 
   const isDisabled = connection

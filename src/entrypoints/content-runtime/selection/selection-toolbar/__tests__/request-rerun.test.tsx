@@ -10,6 +10,7 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-libra
 import { createStore, Provider } from "jotai"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { fakeBrowser } from "wxt/testing/fake-browser"
+import { customActionRequestAtom } from "@/components/custom-action/atoms"
 import { TooltipProvider } from "@/components/ui/base-ui/tooltip"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { configAtom } from "@/utils/atoms/config"
@@ -1896,6 +1897,48 @@ describe("selection toolbar requests", () => {
         action_name: action.name,
       }),
     )
+  })
+
+  it("carries the note origin recorded with the selection into the custom action request", async () => {
+    streamBackgroundStructuredObjectMock.mockResolvedValue(
+      createStructuredObjectSnapshot({ summary: "Context menu result" }),
+    )
+    const paragraph = document.createElement("p")
+    paragraph.textContent = "Selected text inside a paragraph."
+    document.body.appendChild(paragraph)
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    const selection = {
+      text: "Selected text",
+      ranges: [createRangeSnapshot(createRangeFor(paragraph))],
+    }
+    const noteOrigin = {
+      kind: "ebook",
+      ebookId: "55555555-5555-4555-8555-555555555555",
+      cfi: "epubcfi(/6/2)",
+    } as const
+    store.set(setSelectionStateAtom, {
+      selection,
+      context: buildContextSnapshot(selection),
+      noteOrigin,
+    })
+    renderWithProviders(<SelectionToolbarPinnedItems />, store)
+
+    act(() => {
+      paragraph.dispatchEvent(
+        new MouseEvent("contextmenu", { bubbles: true, button: 2, clientX: 140, clientY: 180 }),
+      )
+    })
+    await act(async () => {
+      getRegisteredMessageHandler("openSelectionCustomActionFromContextMenu")({
+        data: { actionId: DEFAULT_DICTIONARY_ACTION.id, selectionText: "Selected text" },
+      })
+      await Promise.resolve()
+    })
+
+    await waitFor(() => {
+      expect(store.get(customActionRequestAtom)?.noteOrigin).toEqual(noteOrigin)
+    })
   })
 
   it("opens a custom action from its shortcut and tracks the shortcut surface", async () => {
