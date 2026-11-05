@@ -12,11 +12,13 @@ import {
   subtitlesStateAtom,
   subtitlesStore,
   subtitlesVisibleAtom,
+  videoLoadingAtom,
 } from "../atoms"
 
 describe("displaySubtitleAtom", () => {
   afterEach(() => {
     subtitlesStore.set(adPlayingAtom, false)
+    subtitlesStore.set(videoLoadingAtom, false)
     subtitlesStore.set(currentSubtitleAtom, null)
     subtitlesStore.set(sourceTrackAtom, [])
     subtitlesStore.set(subtitlesStateAtom, null)
@@ -37,6 +39,15 @@ describe("displaySubtitleAtom", () => {
       start: 0,
       end: 1000,
     })
+  })
+
+  it("shows nothing while the video loads new media", () => {
+    // A part switch resets the clock to the start while the old track is still loaded.
+    subtitlesStore.set(currentTimeMsAtom, 0)
+    subtitlesStore.set(sourceTrackAtom, [{ text: "old part", start: 0, end: 1000 }])
+    subtitlesStore.set(videoLoadingAtom, true)
+
+    expect(subtitlesStore.get(displaySubtitleAtom)).toBeNull()
   })
 
   it("prefers the translated scheduler cue when present", () => {

@@ -4,9 +4,13 @@ export const FETCH_CHECK_INTERVAL = 100
 export const FETCH_SUBTITLES_TIMEOUT = 10_000
 export const MAX_GAP_MS = 2_000
 export const PAUSE_TIMEOUT_MS = 1_000
+export const PLAYER_WATCH_POLL_INTERVAL_MS = 1000
 // How long the pointer rests on the subtitles before pause-on-hover pauses the video,
 // so a pointer passing over them on its way to the controls does not.
 export const HOVER_PAUSE_DELAY_MS = 500
+// A subtitle host can drop a request and answer the next, so a file is asked for this often.
+export const TRACK_FETCH_ATTEMPTS = 3
+export const TRACK_FETCH_RETRY_DELAY_MS = 500
 
 // Segmentation constants
 export const MAX_WORDS = 15
@@ -92,6 +96,29 @@ export const NETFLIX_LOAD_POST_MESSAGE_TIMEOUT_MS = NETFLIX_LOAD_TIMEOUT_MS + 20
 export const NETFLIX_PAGE_POLL_INTERVAL_MS = 100
 export const NETFLIX_WATCH_POLL_INTERVAL_MS = 1000
 export const NETFLIX_TRANSLATE_BUTTON_ZOOM = 1.4
+
+// Bilibili specific
+export const BILIBILI_PLAYER_SELECTOR = ".bpx-player-container"
+// The video and its controls, without the danmaku bar the player container also holds below them.
+export const BILIBILI_VIDEO_AREA_SELECTOR = ".bpx-player-video-area"
+export const BILIBILI_CONTROLS_SELECTOR = ".bpx-player-control-wrap"
+export const BILIBILI_CONTROLS_BAR_SELECTOR = ".bpx-player-control-bottom-right"
+// The player's own buttons, which sit at the top of a taller controls row.
+export const BILIBILI_CONTROL_BUTTON_HEIGHT = 22
+export const BILIBILI_NATIVE_SUBTITLES_SELECTOR = ".bpx-player-subtitle-wrap"
+// The player's own signed request; an unsigned one answers with another video's subtitles.
+export const BILIBILI_PLAYER_INFO_URL_PATTERN =
+  /^(?:https:)?\/\/api\.bilibili\.com\/x\/player\/wbi\/v2\?/
+export const BILIBILI_SUBTITLES_REQUEST_TYPE = "READ_FROG_BILIBILI_SUBTITLES"
+export const BILIBILI_SUBTITLES_RESPONSE_TYPE = "READ_FROG_BILIBILI_SUBTITLES_DONE"
+// The page script waits this long for the player to reach the part and report its subtitle list.
+export const BILIBILI_PAGE_WAIT_TIMEOUT_MS = 5000
+// A page script injected after the player asked repeats the player's request once, within this.
+export const BILIBILI_PLAYER_INFO_REFETCH_TIMEOUT_MS = 3000
+// Outwaits the page's wait and its one repeated request, with room for a throttled background tab.
+export const BILIBILI_POST_MESSAGE_TIMEOUT_MS =
+  BILIBILI_PAGE_WAIT_TIMEOUT_MS + BILIBILI_PLAYER_INFO_REFETCH_TIMEOUT_MS + 2000
+export const BILIBILI_PAGE_POLL_INTERVAL_MS = 100
 
 // YouTube player wait constants
 export const MAX_PLAYER_WAIT_ATTEMPTS = 50

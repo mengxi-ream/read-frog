@@ -1,5 +1,7 @@
 export * from "./types"
 export { AiSubtitlesFetcher } from "./ai"
+export { bilibiliTrackSource } from "./bilibili"
 export { NetflixSubtitlesFetcher } from "./netflix"
 export { TextTrackFetcher } from "./text-track"
+export { TrackSubtitlesFetcher } from "./track"
 export { YoutubeSubtitlesFetcher } from "./youtube"

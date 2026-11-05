@@ -1559,7 +1559,7 @@ options:
       title: Basics
       enable:
         title: Enable video subtitles
-        description: Puts a translate button in the video player's controls on YouTube, X and Netflix.
+        description: Puts a translate button in the video player's controls on YouTube, X, Netflix and Bilibili.
       autoStart:
         title: Translate on open
         description: Start translating as soon as a video loads, without pressing the button.

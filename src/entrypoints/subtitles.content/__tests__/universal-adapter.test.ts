@@ -1,5 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import { SUBTITLES_SOURCE } from "@/utils/constants/subtitles"
+import {
+  NAVIGATION_HANDLER_DELAY,
+  SUBTITLES_SOURCE,
+  TRANSLATE_BUTTON_CONTAINER_ID,
+} from "@/utils/constants/subtitles"
 import {
   NoSubtitlesError,
   OverlaySubtitlesError,
@@ -27,6 +31,15 @@ const mocks = vi.hoisted(() => ({
   resolveSubtitlesProviderRef: vi.fn<(...args: any[]) => any>(),
   showSubtitlesErrorToast: vi.fn<(...args: any[]) => any>(),
   showAiSubtitlesWallToast: vi.fn<(...args: any[]) => any>(),
+  waitForElement: vi.fn<(...args: any[]) => any>(),
+  addToast: vi.fn<(...args: any[]) => any>(),
+  removeReactShadowHost: vi.fn<(...args: any[]) => any>(),
+}))
+
+vi.mock("@/utils/dom/wait-for-element", () => ({ waitForElement: mocks.waitForElement }))
+vi.mock("@/components/ui/base-ui/toast", () => ({ toastManager: { add: mocks.addToast } }))
+vi.mock("@/utils/react-shadow-host/create-shadow-host", () => ({
+  removeReactShadowHost: mocks.removeReactShadowHost,
 }))
 
 vi.mock("@/utils/subtitles/toast", () => ({
@@ -94,6 +107,13 @@ function attachScheduler(adapter: UniversalVideoAdapter, active: boolean, curren
   return subtitlesScheduler
 }
 
+function attachStartableScheduler(adapter: UniversalVideoAdapter) {
+  return Object.assign(attachScheduler(adapter, true), {
+    start: vi.fn<(...args: any[]) => any>(),
+    show: vi.fn<(...args: any[]) => any>(),
+  })
+}
+
 describe("universalVideoAdapter", () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -104,6 +124,7 @@ describe("universalVideoAdapter", () => {
     vi.stubGlobal("document", {
       title: "Test video",
       querySelector: vi.fn<(...args: any[]) => any>(() => null),
+      getElementById: vi.fn<(...args: any[]) => any>(() => null),
     })
     mocks.getLocalConfig.mockResolvedValue({
       language: {},
@@ -396,6 +417,264 @@ describe("universalVideoAdapter", () => {
 
     expect(subtitlesFetcher.shouldUseSameTrack).not.toHaveBeenCalled()
     expect(startTranslationSpy).not.toHaveBeenCalled()
+  })
+
+  it("stops the video it was showing when the page leaves the player", () => {
+    const { adapter } = createAdapter([{ text: "hello", start: 0, end: 500 }])
+    const subtitlesScheduler = attachScheduler(adapter, true)
+    const showNativeSubtitlesSpy = vi.spyOn(adapter as any, "showNativeSubtitles")
+
+    adapter.notifyLeave()
+
+    expect(subtitlesScheduler.stop).toHaveBeenCalled()
+    expect(showNativeSubtitlesSpy).toHaveBeenCalled()
+  })
+
+  it("starts nothing again when the page leaves before a navigation resets", async () => {
+    vi.useFakeTimers()
+    const { adapter } = createAdapter([{ text: "hello", start: 0, end: 500 }])
+    attachScheduler(adapter, true)
+    const handleNavigationSpy = vi.spyOn(adapter as any, "handleNavigation")
+
+    adapter.notifyNavigation()
+    adapter.notifyLeave()
+    await vi.advanceTimersByTimeAsync(NAVIGATION_HANDLER_DELAY)
+
+    expect(handleNavigationSpy).not.toHaveBeenCalled()
+  })
+
+  it("backs out of a start still checking for subtitles when the page leaves the player", async () => {
+    const { adapter, subtitlesFetcher } = createAdapter([{ text: "hello", start: 0, end: 500 }])
+    attachScheduler(adapter, false)
+    const check = Promise.withResolvers<boolean>()
+    subtitlesFetcher.hasAvailableSubtitles.mockReturnValue(check.promise)
+    const startTranslationSpy = vi.spyOn(adapter as any, "startTranslation")
+
+    const switching = (adapter as any).switchSubtitlesFetcher(SUBTITLES_SOURCE.NATIVE, {
+      quiet: true,
+    })
+    adapter.notifyLeave()
+    check.resolve(true)
+    await switching
+
+    expect(startTranslationSpy).not.toHaveBeenCalled()
+  })
+
+  it("builds no session for a start the page leaves while the provider resolves", async () => {
+    const { adapter } = createAdapter([{ text: "hello", start: 0, end: 500 }])
+    attachScheduler(adapter, true)
+    await (adapter as any).getOrLoadSourceSubtitles()
+    ;(adapter as any).sessionSubtitles = (adapter as any).sourceSubtitles
+    const startSpy = vi
+      .spyOn(TranslationCoordinator.prototype, "start")
+      .mockImplementation(() => undefined)
+    const provider = Promise.withResolvers<null>()
+    mocks.resolveSubtitlesProviderRef.mockReturnValueOnce(provider.promise)
+
+    const processing = (adapter as any).processTranslatedSubtitles({
+      videoSubtitles: { aiSegmentation: false },
+    })
+    adapter.notifyLeave()
+    provider.resolve(null)
+    await processing
+
+    expect(startSpy).not.toHaveBeenCalled()
+    expect((adapter as any).translationCoordinator).toBeNull()
+
+    startSpy.mockRestore()
+  })
+
+  it("backs out of a start whose track loads after the page leaves the player", async () => {
+    const { adapter, subtitlesFetcher } = createAdapter([])
+    attachScheduler(adapter, true)
+    const track = Promise.withResolvers<Array<{ text: string; start: number; end: number }>>()
+    subtitlesFetcher.fetch.mockReturnValueOnce(track.promise)
+    const processSpy = vi.spyOn(adapter as any, "processTranslatedSubtitles")
+
+    const starting = (adapter as any).startTranslation()
+    await vi.waitFor(() => expect(subtitlesFetcher.fetch).toHaveBeenCalled())
+    adapter.notifyLeave()
+    track.resolve([{ text: "hello", start: 0, end: 500 }])
+
+    await expect(starting).resolves.toBe(false)
+    expect(processSpy).not.toHaveBeenCalled()
+  })
+
+  it("drops the session of the video it leaves", () => {
+    const { adapter } = createAdapter([{ text: "hello", start: 0, end: 500 }])
+    attachScheduler(adapter, true)
+    const coordinator = { stop: vi.fn<() => void>() }
+    ;(adapter as any).translationCoordinator = coordinator
+    ;(adapter as any).sessionProcessedFragments = [{ text: "hello", start: 0, end: 500 }]
+    subtitlesStore.set(sourceTrackAtom, [{ text: "hello", start: 0, end: 500 }])
+
+    adapter.notifyLeave()
+
+    expect(coordinator.stop).toHaveBeenCalled()
+    expect((adapter as any).translationCoordinator).toBeNull()
+    expect((adapter as any).sessionProcessedFragments).toEqual([])
+    expect(subtitlesStore.get(sourceTrackAtom)).toEqual([])
+  })
+
+  it("translates in a start that replaced one still resolving the provider", async () => {
+    const { adapter, subtitlesFetcher } = createAdapter([{ text: "hello", start: 0, end: 500 }])
+    delete (adapter as any).config.selectors.nativeSubtitles
+    attachStartableScheduler(adapter)
+    // As a real fetcher answers once its track is loaded.
+    subtitlesFetcher.shouldUseSameTrack.mockResolvedValue(true)
+    const startSpy = vi
+      .spyOn(TranslationCoordinator.prototype, "start")
+      .mockImplementation(() => undefined)
+    const firstProvider = Promise.withResolvers<null>()
+    mocks.resolveSubtitlesProviderRef
+      .mockReturnValueOnce(firstProvider.promise)
+      .mockResolvedValueOnce(null)
+
+    const first = (adapter as any).switchSubtitlesFetcher(SUBTITLES_SOURCE.NATIVE)
+    await vi.waitFor(() => expect(mocks.resolveSubtitlesProviderRef).toHaveBeenCalledOnce())
+    await (adapter as any).switchSubtitlesFetcher(SUBTITLES_SOURCE.NATIVE)
+    firstProvider.resolve(null)
+    await first
+
+    expect(startSpy).toHaveBeenCalledOnce()
+    expect((adapter as any).translationCoordinator).not.toBeNull()
+
+    startSpy.mockRestore()
+  })
+
+  it("takes the translate button off when the page leaves the player", () => {
+    const { adapter } = createAdapter([])
+    const button = {} as HTMLElement
+    vi.stubGlobal("document", {
+      title: "Test video",
+      querySelector: vi.fn<(...args: any[]) => any>(() => null),
+      getElementById: vi.fn<(id: string) => HTMLElement | null>((id) =>
+        id === TRANSLATE_BUTTON_CONTAINER_ID ? button : null,
+      ),
+    })
+
+    adapter.notifyLeave()
+
+    expect(mocks.removeReactShadowHost).toHaveBeenCalledWith(button)
+  })
+
+  describe("an init still waiting on a player the page left", () => {
+    function fakeVideo() {
+      return {
+        addEventListener: vi.fn<(...args: any[]) => any>(),
+        removeEventListener: vi.fn<(...args: any[]) => any>(),
+        currentTime: 0,
+        readyState: 4,
+      }
+    }
+
+    // Holds the video lookup until the returned call finds the video; other lookups find nothing.
+    function holdVideoLookup() {
+      const lookup = Promise.withResolvers<unknown>()
+      mocks.waitForElement.mockImplementation((selector: string) =>
+        selector === "video" ? lookup.promise : Promise.resolve(null),
+      )
+      return () => lookup.resolve(fakeVideo())
+    }
+
+    afterEach(() => {
+      mocks.waitForElement.mockReset()
+    })
+
+    it("builds no scheduler and reports nothing missing", async () => {
+      const { adapter } = createAdapter([])
+      const lookup = Promise.withResolvers<unknown>()
+      mocks.waitForElement.mockReturnValueOnce(lookup.promise)
+
+      const waiting = (adapter as any).initializeScheduler()
+      adapter.notifyLeave()
+      lookup.resolve(null)
+      await waiting
+
+      expect(mocks.addToast).not.toHaveBeenCalled()
+      expect((adapter as any).subtitlesScheduler).toBeNull()
+    })
+
+    it("leaves the scheduler to the init after a navigation reset", async () => {
+      const { adapter } = createAdapter([])
+      const oldLookup = Promise.withResolvers<unknown>()
+      const newLookup = Promise.withResolvers<unknown>()
+      mocks.waitForElement
+        .mockReturnValueOnce(oldLookup.promise)
+        .mockReturnValueOnce(newLookup.promise)
+      const oldVideo = fakeVideo()
+      const newVideo = fakeVideo()
+
+      const first = (adapter as any).initializeScheduler()
+      ;(adapter as any).resetForNavigation()
+      const second = (adapter as any).initializeScheduler()
+      oldLookup.resolve(oldVideo)
+      newLookup.resolve(newVideo)
+      await Promise.all([first, second])
+
+      expect(oldVideo.addEventListener).not.toHaveBeenCalled()
+      expect((adapter as any).subtitlesScheduler.getVideoElement()).toBe(newVideo)
+    })
+
+    it("leaves the auto-start to the init that follows the player back", async () => {
+      const { adapter } = createAdapter([])
+      const findVideo = holdVideoLookup()
+      const autoStartSpy = vi.spyOn(adapter as any, "tryAutoStartSubtitles")
+
+      const initializing = adapter.initialize()
+      adapter.notifyLeave()
+      findVideo()
+      await initializing
+
+      expect(autoStartSpy).not.toHaveBeenCalled()
+      expect(mocks.addToast).not.toHaveBeenCalled()
+    })
+
+    it("still listens for navigations after the page left it", async () => {
+      const { adapter } = createAdapter([])
+      ;(adapter as any).config.events = { navigateStart: "nav-start", navigateFinish: "nav-finish" }
+      const addEventListener = vi.fn<(...args: any[]) => any>()
+      vi.stubGlobal("window", { addEventListener })
+      const findVideo = holdVideoLookup()
+
+      const initializing = adapter.initialize()
+      adapter.notifyLeave()
+      findVideo()
+      await initializing
+
+      expect(addEventListener.mock.calls.map(([type]) => type)).toEqual(["nav-start", "nav-finish"])
+    })
+
+    it("starts nothing for a navigation the page left before its video came", async () => {
+      const { adapter } = createAdapter([])
+      const findVideo = holdVideoLookup()
+      const autoStartSpy = vi.spyOn(adapter as any, "tryAutoStartSubtitles")
+      ;(adapter as any).hasPendingNavigationReset = true
+
+      const navigating = (adapter as any).handleNavigation()
+      adapter.notifyLeave()
+      findVideo()
+      await navigating
+
+      expect(autoStartSpy).not.toHaveBeenCalled()
+      expect((adapter as any).subtitlesScheduler).toBeNull()
+    })
+
+    it("starts nothing when the page leaves while it reads the config", async () => {
+      const { adapter } = createAdapter([])
+      const configRead = Promise.withResolvers<unknown>()
+      mocks.getLocalConfig.mockReturnValueOnce(configRead.promise)
+      const toggleSpy = vi
+        .spyOn(adapter as any, "toggleSubtitlesWithSource")
+        .mockImplementation(() => undefined)
+
+      const starting = (adapter as any).tryAutoStartSubtitles()
+      adapter.notifyLeave()
+      configRead.resolve({ videoSubtitles: { autoStart: { youtube: true } } })
+      await starting
+
+      expect(toggleSpy).not.toHaveBeenCalled()
+    })
   })
 
   it("does not reload subtitles when the selected track is unchanged", async () => {
