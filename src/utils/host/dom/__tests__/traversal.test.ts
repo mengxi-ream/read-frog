@@ -462,6 +462,36 @@ describe("site rule node selectors", () => {
   })
 })
 
+describe("hidden attribute", () => {
+  // science.nasa.gov's secondary nav (#1474): the wrapper carries the `hidden`
+  // attribute and the site's stylesheet displays it anyway; its dropdowns stay
+  // hidden until a button removes their `hidden` attribute.
+  it("walks a hidden-attribute region that author CSS displays, but not its closed dropdown", () => {
+    const host = fixture(`
+      <div class="secondary-nav" hidden style="display:block">
+        <nav>
+          <ul>
+            <li id="missions"><a href="/missions">Science Missions</a></li>
+            <li>
+              <button id="topics"><span>Science Topics</span></button>
+              <ul id="submenu" hidden>
+                <li id="earth"><a href="/earth">Earth Science</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    `)
+    walkAndLabelElement(host, "walk-hidden-attribute", DEFAULT_CONFIG)
+
+    expect(host.querySelector("#missions")).toHaveAttribute(PARAGRAPH_ATTRIBUTE)
+    expect(host.querySelector("#topics")).toHaveAttribute(PARAGRAPH_ATTRIBUTE)
+    expect(host.querySelector("#submenu")).not.toHaveAttribute(WALKED_ATTRIBUTE)
+    expect(host.querySelector("#earth")).not.toHaveAttribute(PARAGRAPH_ATTRIBUTE)
+    host.remove()
+  })
+})
+
 describe("document root labeling guard", () => {
   it("never labels documentElement as a paragraph even with inline-level children beside body", () => {
     // Unstyled custom elements default to display:inline, so a reader-mode

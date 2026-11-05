@@ -298,8 +298,15 @@ export function isDontWalkIntoAndDontTranslateAsChildElement(
     !isPlainTextDocumentPre(element, config)
   if (dontWalkInvalidTag) return true
 
-  const dontWalkHidden = element.hidden
-  if (dontWalkHidden) return true
+  // The `hidden` attribute hides only through the UA stylesheet's
+  // `display: none`, so the computed-style check below decides it: author CSS
+  // can show a `hidden` element, as science.nasa.gov does with a
+  // `<div hidden>` set to `display: block` that holds its secondary nav
+  // (#1474). `hidden="until-found"` hides through `content-visibility` instead,
+  // which that check does not read; the browser drops the attribute when it
+  // reveals the content, and the attribute mutation re-walks it then.
+  const dontWalkUntilFound = element.getAttribute("hidden")?.toLowerCase() === "until-found"
+  if (dontWalkUntilFound) return true
 
   const dontWalkVisuallyHidden = ["sr-only", "visually-hidden"].some((cls) =>
     element.classList.contains(cls),
