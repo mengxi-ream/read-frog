@@ -2444,7 +2444,7 @@
     "id": "cnn",
     "matches": "*.cnn.com",
     "description": "多视频页面不好处理，暂时不支持",
-    "excludeSelectors.add": [".ad-slot-header__wrapper", "#pageFooter"]
+    "excludeSelectors.add": [".ad-slot-header__wrapper"]
   },
   {
     "id": "githubBlog",

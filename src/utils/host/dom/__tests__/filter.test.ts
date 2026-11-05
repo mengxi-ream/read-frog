@@ -155,6 +155,42 @@ describe("isDontWalkIntoAndDontTranslateAsChildElement", () => {
     expect(isDontWalkIntoAndDontTranslateAsChildElement(element, DEFAULT_CONFIG)).toBe(true)
   })
 
+  it("should block an element the hidden attribute actually hides", () => {
+    setHost("non-configured-example.org")
+    const element = document.createElement("div")
+    element.hidden = true
+    element.textContent = "Collapsed menu"
+    document.body.appendChild(element)
+
+    expect(isDontWalkIntoAndDontTranslateAsChildElement(element, DEFAULT_CONFIG)).toBe(true)
+    element.remove()
+  })
+
+  // science.nasa.gov ships its secondary nav inside `<div hidden>` restyled
+  // to `display: block` (#1474).
+  it("should not block a hidden-attribute element that author CSS displays", () => {
+    setHost("non-configured-example.org")
+    const element = document.createElement("div")
+    element.hidden = true
+    element.style.display = "block"
+    element.innerHTML = '<nav><a href="/missions">Science Missions</a></nav>'
+    document.body.appendChild(element)
+
+    expect(isDontWalkIntoAndDontTranslateAsChildElement(element, DEFAULT_CONFIG)).toBe(false)
+    element.remove()
+  })
+
+  it('should block hidden="until-found" content until the browser reveals it', () => {
+    setHost("non-configured-example.org")
+    const element = document.createElement("div")
+    element.setAttribute("hidden", "until-found")
+    element.textContent = "Collapsed section"
+    document.body.appendChild(element)
+
+    expect(isDontWalkIntoAndDontTranslateAsChildElement(element, DEFAULT_CONFIG)).toBe(true)
+    element.remove()
+  })
+
   it("should still block Twitch aria-hidden chat decorations through the built-in site rule", () => {
     setHost("www.twitch.tv")
     const container = document.createElement("div")
