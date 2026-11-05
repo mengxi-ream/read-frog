@@ -10,6 +10,7 @@ import {
 } from "@tabler/icons-react"
 import { useEffect, useRef } from "react"
 import { Button } from "@/components/ui/base-ui/button"
+import { getDeepActiveElement } from "@/utils/dom/active-element"
 import { cn } from "@/utils/styles/utils"
 
 // The design system's toast (`@repo/ui`'s toast.tsx: shadcn base-nova's toast on Base UI),
@@ -181,8 +182,9 @@ function FrameFocusRelay({ hasToasts }: { hasToasts: boolean }): ReactElement {
     }
 
     // Base UI's main branch also counts a blur from before the first toast, so a toast raised
-    // while focus is already in a frame would start paused.
-    if (doc.activeElement instanceof HTMLIFrameElement) resumeIfStillOnThePage()
+    // while focus is already in a frame would start paused. The frame may sit in a shadow root,
+    // where `document.activeElement` stops at the host.
+    if (getDeepActiveElement(doc) instanceof HTMLIFrameElement) resumeIfStillOnThePage()
     win.addEventListener("blur", resumeIfStillOnThePage)
     return () => {
       win.removeEventListener("blur", resumeIfStillOnThePage)

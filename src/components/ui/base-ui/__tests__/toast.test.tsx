@@ -119,7 +119,17 @@ describe("ToastProvider", () => {
     expect(onClose).toHaveBeenCalledOnce()
   })
 
-  it("keeps counting down a toast raised while focus is already in a frame", () => {
+  it.each([
+    ["directly in the page", (frame: HTMLIFrameElement): HTMLElement => frame],
+    [
+      "inside a shadow root",
+      (frame: HTMLIFrameElement): HTMLElement => {
+        const host = document.createElement("div")
+        host.attachShadow({ mode: "open" }).append(frame)
+        return host
+      },
+    ],
+  ])("keeps counting down a toast raised while focus is already in a frame %s", (_, place) => {
     vi.useFakeTimers()
     const hasFocus = vi.spyOn(document, "hasFocus").mockReturnValue(false)
     const shadowRoot = renderToastProvider()
@@ -137,8 +147,10 @@ describe("ToastProvider", () => {
 
     // Back on the page with focus in a frame, which sends this window no event.
     const frame = document.createElement("iframe")
-    document.body.append(frame)
+    const placed = place(frame)
+    document.body.append(placed)
     frame.focus()
+    expect(document.activeElement).toBe(placed)
     hasFocus.mockReturnValue(true)
     const onClose = vi.fn<() => void>()
 
@@ -150,7 +162,7 @@ describe("ToastProvider", () => {
     })
 
     expect(onClose).toHaveBeenCalledOnce()
-    frame.remove()
+    placed.remove()
   })
 
   it("portals a bottom-right viewport into the requested shadow root", () => {
