@@ -26,7 +26,7 @@ import { i18n } from "@/utils/i18n"
 import { canProviderRefGenerateText } from "@/utils/providers/provider-ref"
 import { resolveProviderRefForCapability } from "@/utils/providers/provider-registry"
 import { removeReactShadowHost } from "@/utils/react-shadow-host/create-shadow-host"
-import { NoSubtitlesError, ToastSubtitlesError } from "@/utils/subtitles/errors"
+import { NoSubtitlesError, ToastSubtitlesError, VideoNotFoundError } from "@/utils/subtitles/errors"
 import { optimizeSubtitles } from "@/utils/subtitles/processor/optimizer"
 import {
   buildSubtitlesSummaryContextHash,
@@ -582,6 +582,10 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
     await this.tryAutoStartSubtitles()
   }
 
+  private isSuperseded(operationId: number) {
+    return this.destroyed || operationId !== this.switchOperationId
+  }
+
   private setupAdObserver() {
     if (!this.config.isAdPlaying) {
       return
@@ -766,6 +770,18 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
       this.fetcher = make()
       this.clearSourceCache()
       this.clearRuntimeSession()
+    }
+
+    // Showing first would flash the toggle ON on every captionless video.
+    if (options.quiet) {
+      // Nobody asked for an automatic start, so one that cannot reach the video stays quiet too.
+      const hasSubtitles = await this.fetcher.hasAvailableSubtitles().catch(() => false)
+      // The check can wait seconds for cues; a toggle or a navigation since then starts its own.
+      if (this.isSuperseded(operationId) || this.hasPendingNavigationReset) return
+      if (!hasSubtitles) {
+        this.handleToggleSubtitles(false)
+        return
+      }
     }
 
     this.subtitlesScheduler?.start()
@@ -958,9 +974,9 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
       }
       return true
     } catch (error) {
-      // Not a failure: the video simply has none. Skipping analytics too, since
-      // on a quiet site this is most videos and nothing actually ran.
-      if (quiet && error instanceof NoSubtitlesError) {
+      // Not a failure: the video has none, or an automatic start lost it. Skipping analytics
+      // too, since on a quiet site this is most videos and nothing actually ran.
+      if (quiet && (error instanceof NoSubtitlesError || error instanceof VideoNotFoundError)) {
         if (operationId === this.switchOperationId) {
           this.handleToggleSubtitles(false)
         }

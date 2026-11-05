@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import {
   TEXT_TRACK_CUE_POLL_INTERVAL_MS,
+  TEXT_TRACK_CUE_WAIT_TIMEOUT_MS,
   TEXT_TRACK_NATIVE_REHIDE_DELAY_MS,
 } from "@/utils/constants/subtitles"
 import { TextTrackFetcher } from ".."
@@ -87,6 +88,92 @@ describe("TextTrackFetcher", () => {
     await expect(pending).resolves.toEqual([{ text: "late", start: 0, end: 1000 }])
   })
 
+  it("checks for subtitles by loading the cues, and fetches from that same load", async () => {
+    const track = new FakeTrack("subtitles", "English", "en", "hidden")
+    const fetcher = createFetcher(videoWith(track))
+    const check = fetcher.hasAvailableSubtitles()
+
+    track.loadCues("late")
+    await vi.advanceTimersByTimeAsync(TEXT_TRACK_CUE_POLL_INTERVAL_MS)
+    await expect(check).resolves.toBe(true)
+
+    track.cues = null
+    await expect(fetcher.fetch()).resolves.toEqual([{ text: "late", start: 0, end: 1000 }])
+  })
+
+  it("answers for the track the reader switches to while the check loads", async () => {
+    const english = new FakeTrack("subtitles", "English", "en", "showing")
+    const spanish = new FakeTrack("subtitles", "Español", "es", "disabled")
+    const fetcher = createFetcher(videoWith(english, spanish))
+    const check = fetcher.hasAvailableSubtitles()
+
+    english.mode = "disabled"
+    spanish.mode = "showing"
+    english.loadCues("hello")
+    await vi.advanceTimersByTimeAsync(TEXT_TRACK_CUE_POLL_INTERVAL_MS)
+    spanish.loadCues("hola")
+    await vi.advanceTimersByTimeAsync(TEXT_TRACK_CUE_POLL_INTERVAL_MS)
+
+    await expect(check).resolves.toBe(true)
+    expect(fetcher.getSourceLanguage()).toBe("es")
+    await expect(fetcher.shouldUseSameTrack()).resolves.toBe(true)
+  })
+
+  it("answers for the track the reader switches to while an empty one is checked", async () => {
+    const english = new FakeTrack("subtitles", "English", "en", "showing")
+    const spanish = new FakeTrack("subtitles", "Español", "es", "disabled")
+    spanish.loadCues("hola")
+    const fetcher = createFetcher(videoWith(english, spanish))
+    const check = fetcher.hasAvailableSubtitles()
+
+    english.mode = "disabled"
+    spanish.mode = "showing"
+    await vi.advanceTimersByTimeAsync(TEXT_TRACK_CUE_WAIT_TIMEOUT_MS)
+
+    await expect(check).resolves.toBe(true)
+    expect(fetcher.getSourceLanguage()).toBe("es")
+  })
+
+  it("reports no subtitles when the track the reader switches to never gets a cue", async () => {
+    const english = new FakeTrack("subtitles", "English", "en", "showing")
+    const spanish = new FakeTrack("subtitles", "Español", "es", "disabled")
+    const check = createFetcher(videoWith(english, spanish)).hasAvailableSubtitles()
+
+    english.mode = "disabled"
+    spanish.mode = "showing"
+    english.loadCues("hello")
+    await vi.advanceTimersByTimeAsync(TEXT_TRACK_CUE_POLL_INTERVAL_MS)
+    await vi.advanceTimersByTimeAsync(TEXT_TRACK_CUE_WAIT_TIMEOUT_MS)
+
+    await expect(check).resolves.toBe(false)
+  })
+
+  it("reports no subtitles for a track that never gets a cue, or only blank ones", async () => {
+    const check = createFetcher(
+      videoWith(new FakeTrack("subtitles", "English", "en", "hidden")),
+    ).hasAvailableSubtitles()
+    await vi.advanceTimersByTimeAsync(TEXT_TRACK_CUE_WAIT_TIMEOUT_MS)
+    await expect(check).resolves.toBe(false)
+
+    const blank = new FakeTrack("subtitles", "English", "en", "hidden")
+    blank.loadCues(" ")
+    await expect(createFetcher(videoWith(blank)).hasAvailableSubtitles()).resolves.toBe(false)
+  })
+
+  it("keeps to the track the player shows once its captions are hidden", async () => {
+    const shown = new FakeTrack("captions", "English", "en", "showing")
+    shown.loadCues("hello")
+    const fetcher = createFetcher(
+      videoWith(shown, new FakeTrack("subtitles", "Español", "es", "disabled")),
+    )
+
+    await expect(fetcher.hasAvailableSubtitles()).resolves.toBe(true)
+    fetcher.hideNativeSubtitles()
+
+    expect(shown.mode).toBe("hidden")
+    await expect(fetcher.shouldUseSameTrack()).resolves.toBe(true)
+  })
+
   it("reuses the same track until the video changes", async () => {
     const track = new FakeTrack("subtitles", "English", "en", "showing")
     track.loadCues("hello")
@@ -137,6 +224,35 @@ describe("TextTrackFetcher", () => {
     await expect(fetcher.fetch()).resolves.toEqual([{ text: "hello", start: 0, end: 1000 }])
   })
 
+  it("leaves captions on that the reader turned on while the check found none", async () => {
+    const track = new FakeTrack("subtitles", "English", "en", "disabled")
+    const fetcher = createFetcher(videoWith(track))
+    const check = fetcher.hasAvailableSubtitles()
+
+    track.mode = "showing"
+    await vi.advanceTimersByTimeAsync(TEXT_TRACK_CUE_WAIT_TIMEOUT_MS)
+    await expect(check).resolves.toBe(false)
+    fetcher.showNativeSubtitles()
+
+    expect(track.mode).toBe("showing")
+  })
+
+  it("restores captions the reader turned on while the check loaded them", async () => {
+    const track = new FakeTrack("subtitles", "English", "en", "disabled")
+    const fetcher = createFetcher(videoWith(track))
+    const check = fetcher.hasAvailableSubtitles()
+
+    track.mode = "showing"
+    track.loadCues("hello")
+    await vi.advanceTimersByTimeAsync(TEXT_TRACK_CUE_POLL_INTERVAL_MS)
+    await expect(check).resolves.toBe(true)
+    fetcher.hideNativeSubtitles()
+    expect(track.mode).toBe("hidden")
+    fetcher.showNativeSubtitles()
+
+    expect(track.mode).toBe("showing")
+  })
+
   it("restores the mode the player last asked for, not the one it had first", () => {
     const track = new FakeTrack("captions", "English", "en", "showing")
     const video = videoWith(track)
@@ -171,5 +287,11 @@ describe("TextTrackFetcher", () => {
 
     await expect(fetcher.hasAvailableSubtitles()).resolves.toBe(false)
     await expect(fetcher.fetch()).rejects.toThrow("subtitles.errors.noSubtitlesFound")
+  })
+
+  it("leaves a video it cannot find for the caller to report", async () => {
+    await expect(createFetcher(null).hasAvailableSubtitles()).rejects.toThrow(
+      "subtitles.errors.videoNotFound",
+    )
   })
 })

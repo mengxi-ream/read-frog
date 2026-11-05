@@ -5,9 +5,8 @@ import {
   TEXT_TRACK_CUE_WAIT_TIMEOUT_MS,
   TEXT_TRACK_NATIVE_REHIDE_DELAY_MS,
 } from "@/utils/constants/subtitles"
-import { i18n } from "@/utils/i18n"
 import { pollUntil } from "@/utils/poll"
-import { NoSubtitlesError, OverlaySubtitlesError } from "@/utils/subtitles/errors"
+import { NoSubtitlesError, VideoNotFoundError } from "@/utils/subtitles/errors"
 import { cuesToFragments } from "./cues"
 
 interface TextTrackFetcherOptions {
@@ -40,7 +39,7 @@ export class TextTrackFetcher implements SubtitlesFetcher {
   async fetch(): Promise<SubtitlesFragment[]> {
     const video = this.options.resolveVideo()
     if (!video) {
-      throw new OverlaySubtitlesError(i18n.t("subtitles.errors.videoNotFound"))
+      throw new VideoNotFoundError()
     }
 
     const track = this.selectTrack(video)
@@ -70,25 +69,29 @@ export class TextTrackFetcher implements SubtitlesFetcher {
     return this.sourceLanguage
   }
 
+  // A track can be there and never get a cue, so checking loads the cues and `fetch` reuses them.
+  // A missing video is not a captionless one, so that error goes to the caller.
   async hasAvailableSubtitles(): Promise<boolean> {
-    const video = this.options.resolveVideo()
-    const track = video ? this.selectTrack(video) : null
-    if (!track) {
-      return false
+    // The reader can pick another track while the cues load; the answer is for the one picked.
+    for (;;) {
+      const picked = this.pickedTrackHash()
+      const found = await this.fetch().then(
+        () => true,
+        (error: unknown) => {
+          if (error instanceof NoSubtitlesError) return false
+          throw error
+        },
+      )
+      if (this.pickedTrackHash() === picked) return found
     }
-
-    this.ensureLoading(track)
-    return true
   }
 
   async shouldUseSameTrack(): Promise<boolean> {
-    if (this.subtitles.length === 0 || !this.cachedTrackHash) {
-      return false
-    }
-
-    const video = this.options.resolveVideo()
-    const track = video ? this.selectTrack(video) : null
-    return !!track && this.buildTrackHash(track) === this.cachedTrackHash
+    return (
+      this.subtitles.length > 0 &&
+      !!this.cachedTrackHash &&
+      this.pickedTrackHash() === this.cachedTrackHash
+    )
   }
 
   hideNativeSubtitles(): void {
@@ -106,7 +109,10 @@ export class TextTrackFetcher implements SubtitlesFetcher {
     this.unwatchTrackChanges()
     this.clearRehideTimer()
     for (const [track, mode] of this.playerModes) {
-      track.mode = mode
+      // A track the player moved off our "hidden" already has the mode it wants.
+      if (track.mode === "hidden") {
+        track.mode = mode
+      }
     }
     this.playerModes.clear()
   }
@@ -122,13 +128,20 @@ export class TextTrackFetcher implements SubtitlesFetcher {
     return [this.options.getVideoId() ?? "", track.language, track.label, track.kind].join(":")
   }
 
+  private pickedTrackHash(): string | null {
+    const video = this.options.resolveVideo()
+    const track = video ? this.selectTrack(video) : null
+    return track ? this.buildTrackHash(track) : null
+  }
+
   private selectTrack(video: HTMLVideoElement): TextTrack | null {
     const { isSourceTrack } = this.options
     const candidates = Array.from(video.textTracks).filter(
       (track) => SUBTITLE_KINDS.has(track.kind) && (!isSourceTrack || isSourceTrack(track)),
     )
     return (
-      candidates.find((track) => track.mode === "showing") ??
+      // A track the player shows is still its pick once we hide it under our overlay.
+      candidates.find((track) => (this.playerModes.get(track) ?? track.mode) === "showing") ??
       candidates.find((track) => track.kind === "subtitles") ??
       candidates[0] ??
       null
@@ -136,9 +149,8 @@ export class TextTrackFetcher implements SubtitlesFetcher {
   }
 
   private setMode(track: TextTrack, mode: TextTrackMode): void {
-    if (!this.playerModes.has(track)) {
-      this.playerModes.set(track, track.mode)
-    }
+    // Only a mode other than our "hidden" changes here, so it is the player's latest choice.
+    this.playerModes.set(track, track.mode)
     track.mode = mode
   }
 
