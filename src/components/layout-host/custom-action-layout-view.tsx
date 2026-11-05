@@ -7,6 +7,7 @@ import { DEFAULT_LAYOUT } from "@read-frog/layout-engine/presets"
 import { LayoutView } from "@read-frog/layout-engine/react"
 import { useMemo, useRef } from "react"
 import { buildCustomActionLayoutScope, CUSTOM_ACTION_LAYOUT_HOST } from "@/utils/layout-host/host"
+import { loadLayoutMath } from "@/utils/layout-host/math"
 import { logger } from "@/utils/logger"
 import { FallbackFieldList } from "./fallback-field-list"
 import { useExtensionSpeakAdapter } from "./use-extension-speak-adapter"
@@ -97,6 +98,7 @@ export function CustomActionLayoutView({
       status={status}
       fallbackSources={FALLBACK_SOURCES}
       speak={speak}
+      math={loadLayoutMath}
       onReport={handleReport}
       onWarn={logLayoutWarning}
       className={className}

@@ -67,6 +67,8 @@ const LINT_MESSAGES: Record<LayoutLintCode, (params: string[]) => string> = {
   unquotedAttributeOutput: () => i18n.t(`${LINT_KEY}.unquotedAttributeOutput`),
   filterIgnored: ([tag = ""]) => i18n.t(`${LINT_KEY}.filterIgnored`, [tag]),
   newlineToBrNotLast: () => i18n.t(`${LINT_KEY}.newlineToBrNotLast`),
+  mathFilterNotLast: ([filter = ""]) => i18n.t(`${LINT_KEY}.mathFilterNotLast`, [filter]),
+  mathFilterInAttribute: ([filter = ""]) => i18n.t(`${LINT_KEY}.mathFilterInAttribute`, [filter]),
   tooLong: ([maxLength = ""]) => i18n.t(`${LINT_KEY}.tooLong`, [maxLength]),
   fieldNotShown: ([name = ""]) => i18n.t(`${LINT_KEY}.fieldNotShown`, [name]),
   reservedFieldName: ([name = ""]) => i18n.t(`${LINT_KEY}.reservedFieldName`, [name]),

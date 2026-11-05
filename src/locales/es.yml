@@ -799,6 +799,8 @@ options:
             unquotedAttributeOutput: Pon comillas alrededor de este valor de atributo, o el valor podría salirse de él.
             filterIgnored: Los filtros se ignoran en una etiqueta «$1». Asigna primero el valor filtrado.
             newlineToBrNotLast: newline_to_br solo funciona como último filtro de una salida.
+            mathFilterNotLast: $1 solo funciona como último filtro de una salida.
+            mathFilterInAttribute: No uses $1 dentro de un valor de atributo. Las fórmulas que dibuja llevan comillas, que cierran el atributo.
             tooLong: Este diseño supera los $1 caracteres y no se puede guardar.
             fieldNotShown: «$1» no aparece en este diseño.
             reservedFieldName: El nombre de campo «$1» está reservado en los diseños. Cambia el nombre del campo.

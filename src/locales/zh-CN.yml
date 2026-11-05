@@ -804,6 +804,8 @@ options:
             unquotedAttributeOutput: 请给这个属性值加上引号，否则值可能突破属性边界。
             filterIgnored: 「$1」标签中的过滤器会被忽略，请先把过滤后的值赋给变量。
             newlineToBrNotLast: newline_to_br 只有作为输出的最后一个过滤器才有效。
+            mathFilterNotLast: $1 只有作为输出的最后一个过滤器才有效。
+            mathFilterInAttribute: 不要在属性值里使用 $1，它画出的公式含有引号，会提前结束属性。
             tooLong: 版式超过 $1 个字符，无法保存。
             fieldNotShown: 「$1」未在此版式中显示。
             reservedFieldName: 字段名「$1」是版式保留名，请重命名该字段。

@@ -799,6 +799,8 @@ options:
             unquotedAttributeOutput: Bu atribut dəyərini dırnaq içinə alın, əks halda dəyər atributdan kənara çıxa bilər.
             filterIgnored: '"$1" teqində filtrlər nəzərə alınmır. Əvvəlcə filtrlənmiş dəyəri mənimsədin.'
             newlineToBrNotLast: newline_to_br yalnız çıxışın son filtri olduqda işləyir.
+            mathFilterNotLast: $1 yalnız çıxışın son filtri olduqda işləyir.
+            mathFilterInAttribute: $1 filtrini atribut dəyərinin içində istifadə etməyin. Onun çəkdiyi düsturlardakı dırnaqlar atributu bağlayır.
             tooLong: Bu tərtibat $1 simvoldan uzundur və yadda saxlanıla bilməz.
             fieldNotShown: '"$1" bu tərtibatda göstərilmir.'
             reservedFieldName: '"$1" sahə adı tərtibatlarda ehtiyatda saxlanılır. Sahənin adını dəyişin.'

@@ -804,6 +804,8 @@ options:
             unquotedAttributeOutput: 請為這個屬性值加上引號，否則值可能突破屬性範圍。
             filterIgnored: 「$1」標籤中的篩選器會被忽略，請先將篩選後的值指派給變數。
             newlineToBrNotLast: newline_to_br 只有作為輸出的最後一個篩選器才有效。
+            mathFilterNotLast: $1 只有作為輸出的最後一個篩選器才有效。
+            mathFilterInAttribute: 不要在屬性值裡使用 $1，它畫出的公式含有引號，會提前結束屬性。
             tooLong: 版面超過 $1 個字元，無法儲存。
             fieldNotShown: 「$1」未在此版面中顯示。
             reservedFieldName: 欄位名稱「$1」是版面保留名稱，請重新命名該欄位。

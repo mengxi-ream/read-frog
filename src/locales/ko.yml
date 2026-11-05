@@ -798,6 +798,8 @@ options:
             unquotedAttributeOutput: 이 속성 값을 따옴표로 감싸세요. 그렇지 않으면 값이 속성 밖으로 벗어날 수 있습니다.
             filterIgnored: "'$1' 태그에서는 필터가 무시됩니다. 먼저 필터를 적용한 값을 할당하세요."
             newlineToBrNotLast: newline_to_br는 출력의 마지막 필터일 때만 동작합니다.
+            mathFilterNotLast: $1 필터는 출력의 마지막 필터일 때만 동작합니다.
+            mathFilterInAttribute: 속성 값 안에서는 $1 필터를 쓰지 마세요. 그려진 수식에 들어 있는 따옴표가 속성을 끝내 버립니다.
             tooLong: 이 레이아웃은 $1자를 넘어 저장할 수 없습니다.
             fieldNotShown: "'$1'은(는) 이 레이아웃에 표시되지 않습니다."
             reservedFieldName: 필드 이름 '$1'은(는) 레이아웃 예약어입니다. 필드 이름을 바꾸세요.

@@ -502,6 +502,43 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     })
   })
 
+  it("opens and records the page in Firefox content scripts too (#2470)", async () => {
+    // Firefox content scripts see the page's URL objects through Xray wrappers,
+    // where the iterators `searchParams` methods return have no Symbol.iterator.
+    const searchParamsPrototype = Object.getPrototypeOf(
+      new URL("https://example.com/").searchParams,
+    )
+    const iteratorSpies = (["keys", "values", "entries"] as const).map((method) =>
+      vi.spyOn(searchParamsPrototype, method).mockImplementation(() => ({
+        next: () => ({ done: true, value: undefined }),
+      })),
+    )
+    window.history.replaceState(null, "", "/articles/frogs?token=secret&page=2")
+    document.title = "Frogs"
+
+    try {
+      render(
+        <div>
+          <SelectionToolbar />
+          <div data-testid="test-element">Some text</div>
+        </div>,
+      )
+
+      await clearToolbarState()
+
+      await triggerMouseUpWithSelection(screen.getByTestId("test-element"))
+      await waitFor(() => expectToolbarVisible())
+
+      expect(getDefaultStore().get(selectionSessionAtom)?.noteOrigin).toEqual({
+        kind: "webpage",
+        url: `${window.location.origin}/articles/frogs?page=2`,
+        title: "Frogs",
+      })
+    } finally {
+      for (const spy of iteratorSpies) spy.mockRestore()
+    }
+  })
+
   it("should keep the toolbar visible on right-click so context menu translation can reuse the selection", async () => {
     render(
       <div>
