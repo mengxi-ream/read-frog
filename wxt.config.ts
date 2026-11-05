@@ -3,6 +3,7 @@ import process from "node:process"
 import ViteYaml from "@modyfi/vite-plugin-yaml"
 import { defineConfig } from "wxt"
 import { z } from "zod"
+import { escapeNoncharactersPlugin } from "./scripts/escape-noncharacters"
 import {
   createExtensionClientEnvSchema,
   isLocalPackagesEnabled,
@@ -138,6 +139,10 @@ export default defineConfig({
         return
       }
       if (entrypoint?.type !== "content-script") return
+
+      // Chrome loads a content script file only if it holds no Unicode
+      // noncharacter, which Temml's lexer has (see escape-noncharacters).
+      viteConfig.plugins = [...(viteConfig.plugins ?? []), escapeNoncharactersPlugin()]
 
       const output = viteConfig.build?.rollupOptions?.output
       if (!output) return
