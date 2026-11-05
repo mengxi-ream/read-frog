@@ -120,6 +120,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
   private switchOperationId = 0
   private navigationReinitTimeoutId: ReturnType<typeof setTimeout> | null = null
   private hasPendingNavigationReset = false
+  // Dropped by a newer start, a navigation reset or a leave; it may wait on a start that hangs.
   private trackChangeRefreshPromise: Promise<void> | null = null
   private pendingTranscriptLoads = 0
 
@@ -145,6 +146,8 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
   // load that overlapped one can fail for the video itself. It gets one more try after the ad.
   private adOverlappedLoad = false
   private retryAfterAdOperationId: number | null = null
+  // The start a switch is running: a track check waits for the track it loads.
+  private pendingStart: Promise<boolean> | null = null
   // Set by destroy(); async work that resumes afterwards backs out instead of touching the page.
   private destroyed = false
   // Bumped by a leave and a navigation reset, so an init still waiting on the old player stops.
@@ -247,11 +250,13 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
   }
 
   async handleSourceTrackChanged(): Promise<void> {
-    if (this.destroyed) return
+    // A navigation that has not reset yet loads the new video's track itself.
+    if (this.destroyed || this.hasPendingNavigationReset) return
     if (!this.trackChangeRefreshPromise) {
-      this.trackChangeRefreshPromise = this.refreshSourceTrackIfNeeded().finally(() => {
-        this.trackChangeRefreshPromise = null
+      const refresh = this.refreshSourceTrackIfNeeded().finally(() => {
+        if (this.trackChangeRefreshPromise === refresh) this.trackChangeRefreshPromise = null
       })
+      this.trackChangeRefreshPromise = refresh
     }
 
     await this.trackChangeRefreshPromise
@@ -376,6 +381,8 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
   private resetForNavigation() {
     this.switchOperationId++
     this.playerGeneration++
+    this.pendingStart = null
+    this.trackChangeRefreshPromise = null
     this.prepareSummaryForNavigation()
     // Keyed by video id already; this only stops them accumulating.
     queryClient.removeQueries({ queryKey: VIDEO_SUMMARY_QUERY_SCOPE })
@@ -569,6 +576,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
     if (this.destroyed) return
     this.switchOperationId++
     this.playerGeneration++
+    this.trackChangeRefreshPromise = null
     this.hasPendingNavigationReset = false
     this.clearVisibleStateForNavigation()
     // No reset follows to drop the session, and a toggle would resume it on a player that is gone.
@@ -771,6 +779,9 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
       this.subtitlesScheduler?.hide()
       this.showNativeSubtitles()
       this.translationCoordinator?.stop()
+      // Nothing waits on a start the reader turned off: it may never settle.
+      this.pendingStart = null
+      this.trackChangeRefreshPromise = null
     }
   }
 
@@ -792,6 +803,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
     }
 
     const operationId = ++this.switchOperationId
+    this.trackChangeRefreshPromise = null
 
     if (next !== this.source) {
       this.fetcher.cleanup()
@@ -823,7 +835,10 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
       this.subtitlesScheduler?.setState("loading", { message })
     }
 
-    const succeeded = await this.startTranslation(options)
+    const start = this.startTranslation(options)
+    this.pendingStart = start
+    const succeeded = await start
+    if (this.pendingStart === start) this.pendingStart = null
     if (operationId !== this.switchOperationId) {
       return
     }
@@ -833,6 +848,8 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
   }
 
   private revertToNativeSource() {
+    // A track check that waited on the failed start would lay a session over the native captions.
+    this.switchOperationId++
     this.fetcher.cleanup()
     this.source = SUBTITLES_SOURCE.NATIVE
     this.fetcher = this.fetchers.native()
@@ -843,6 +860,13 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
   }
 
   private async refreshSourceTrackIfNeeded(): Promise<void> {
+    const checkOperationId = this.switchOperationId
+    // A newer start, navigation reset or leave loads the current track itself, so this check stops.
+    const isOvertaken = () => this.isSuperseded(checkOperationId) || this.hasPendingNavigationReset
+    // A running start loads the current track, so a switch is checked against what it loaded.
+    while (this.pendingStart && !isOvertaken()) await this.pendingStart
+    if (isOvertaken()) return
+
     const scheduler = this.subtitlesScheduler
     const isSchedulerActive = !!scheduler?.isActive()
 
@@ -853,9 +877,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
     }
 
     const useSameTrack = await this.fetcher.shouldUseSameTrack()
-    if (useSameTrack || this.destroyed) {
-      return
-    }
+    if (useSameTrack || isOvertaken()) return
 
     if (!scheduler || !isSchedulerActive) {
       const operationId = ++this.switchOperationId

@@ -35,7 +35,9 @@ function addPlayer(): HTMLElement {
   return player
 }
 
-function start(hooks: { onStay?: () => void; onLeave?: () => void } = {}) {
+function start(
+  hooks: { selectPlayer?: () => void; onStay?: () => void; onLeave?: () => void } = {},
+) {
   const adapter = {
     initialize: vi.fn<() => Promise<void>>(async () => {
       calls.push("initialize")
@@ -121,6 +123,25 @@ describe("pollPlayerSubtitles", () => {
     expect(calls).toEqual(["mount", "navigate"])
   })
 
+  it("follows the player the page picks on the same tick", async () => {
+    const players = [addPlayer(), addPlayer()]
+    let active = 0
+    start({
+      selectPlayer: () => {
+        players.forEach((player, index) => {
+          player.className = index === active ? "player" : ""
+        })
+      },
+    })
+    await tick()
+    calls.length = 0
+
+    active = 1
+    await tick()
+
+    expect(calls).toEqual(["mount", "navigate"])
+  })
+
   it("checks for a new video as soon as one starts playing", async () => {
     const player = addPlayer()
     start()
@@ -135,7 +156,7 @@ describe("pollPlayerSubtitles", () => {
     expect(calls).toEqual(["mount", "navigate"])
   })
 
-  it("calls onStay on every tick once started", async () => {
+  it("calls onStay on every tick that finds the same player, and leaves a new video to the remount", async () => {
     addPlayer()
     const onStay = vi.fn<() => void>()
     start({ onStay })
@@ -144,8 +165,12 @@ describe("pollPlayerSubtitles", () => {
 
     await tick()
     await tick()
-
     expect(onStay).toHaveBeenCalledTimes(2)
+
+    onStay.mockClear()
+    videoId = "video/2"
+    await tick()
+    expect(onStay).not.toHaveBeenCalled()
   })
 
   it("cleans up when the page leaves the player, and comes back as a navigation", async () => {
