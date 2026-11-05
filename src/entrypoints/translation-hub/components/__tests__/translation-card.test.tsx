@@ -198,12 +198,23 @@ vi.mock("@/utils/providers/provider-registry", async (importOriginal) => ({
   resolveProviderRefForCapability: () =>
     providerRefState.kind === "system"
       ? { kind: "system", id: "read-frog-free-ai", name: "Built-in AI", modelTier: "normal" }
-      : {
-          kind: "local",
-          id: "provider-1",
-          name: "OpenAI",
-          config: { id: "provider-1", name: "OpenAI", provider: "openai" },
-        },
+      : providerRefState.kind === "google"
+        ? {
+            kind: "local",
+            id: "google-translate-default",
+            name: "Google Translate",
+            config: {
+              id: "google-translate-default",
+              name: "Google Translate",
+              provider: "google-translate",
+            },
+          }
+        : {
+            kind: "local",
+            id: "provider-1",
+            name: "OpenAI",
+            config: { id: "provider-1", name: "OpenAI", provider: "openai" },
+          },
 }))
 
 vi.mock("@/utils/content-script/background-stream-client", () => ({
@@ -389,6 +400,43 @@ describe("TranslationCard built-in translation", () => {
       systemPrompt: "Hub system",
       prompt: "Hub prompt",
     })
+  })
+})
+
+describe("TranslationCard translate providers", () => {
+  beforeEach(() => {
+    executeTranslateMock.mockReset()
+  })
+
+  // Google's transport collapses unprotected newlines, which ran typed
+  // paragraphs together and let its zh-TW model cut them short (#2466).
+  it("keeps the line breaks of typed text", async () => {
+    providerRefState.kind = "google"
+    executeTranslateMock.mockResolvedValueOnce("第一段。\n\n第二段。")
+    render(
+      <TranslationCard
+        providerId="google-translate-default"
+        isExpanded
+        onExpandedChange={vi.fn<(expanded: boolean) => void>()}
+      />,
+    )
+
+    const result = await mutationFnState.current!({
+      inputText: "First paragraph.\n\nSecond paragraph.",
+      sourceLanguage: "eng",
+      targetLanguage: "cmn-Hant",
+      timestamp: 1,
+      promptConfig: { promptId: "default", patterns: [] },
+    })
+
+    expect(result).toBe("第一段。\n\n第二段。")
+    expect(executeTranslateMock).toHaveBeenCalledWith(
+      "First paragraph.\n\nSecond paragraph.",
+      expect.objectContaining({ sourceCode: "eng", targetCode: "cmn-Hant" }),
+      expect.objectContaining({ provider: "google-translate" }),
+      expect.any(Function),
+      expect.objectContaining({ preserveLineBreaks: true }),
+    )
   })
 })
 

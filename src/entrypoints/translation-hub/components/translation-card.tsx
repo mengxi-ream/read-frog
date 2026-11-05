@@ -137,6 +137,8 @@ export function TranslationCard({
               provider.config,
               promptResolver,
               {
+                // Typed newlines are always meaningful, as in input translation.
+                preserveLineBreaks: true,
                 signal: abortController.signal,
               },
             )
