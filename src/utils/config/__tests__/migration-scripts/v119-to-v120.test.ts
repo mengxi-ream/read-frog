@@ -45,6 +45,50 @@ describe("v119-to-v120 migration", () => {
     })
   })
 
+  // Ticking "enter custom model" copies the selected id into customModel, and requests
+  // go to customModel, so a removed id parked there must not survive the migration.
+  it.each([
+    ["jalapenocloud", "Hy3", "GLM-5.3"],
+    ["jalapenocloud", "Qwen3-Next-80B-A3B-Instruct", "GLM-5.3"],
+    ["jalapenocloud", "GLM-5.2", "GLM-5.3"],
+    ["deepseek", "deepseek-chat", "deepseek-v4-flash"],
+    ["deepseek", "deepseek-reasoner", "deepseek-v4-flash"],
+  ])(
+    "moves %s off a custom model prefilled with the removed %s, back onto %s",
+    (type, removed, replacement) => {
+      const migrated = migrate({ providersConfig: [provider(type, removed, true, removed)] })
+
+      expect(migrated.providersConfig[0].model).toEqual({
+        model: replacement,
+        isCustomModel: false,
+        customModel: null,
+      })
+    },
+  )
+
+  it("matches a removed custom model however the user typed it", () => {
+    const migrated = migrate({
+      providersConfig: [provider("deepseek", "deepseek-v4-pro", true, "  DeepSeek-Chat ")],
+    })
+
+    expect(migrated.providersConfig[0].model).toEqual({
+      model: "deepseek-v4-flash",
+      isCustomModel: false,
+      customModel: null,
+    })
+  })
+
+  it("keeps a custom model that is still listed, and an inactive stale customModel", () => {
+    const config = {
+      providersConfig: [
+        provider("jalapenocloud", "GLM-5.1", true, "GLM-5.1"),
+        provider("deepseek", "deepseek-v4-flash", false, "deepseek-chat"),
+      ],
+    }
+
+    expect(migrate(config)).toBe(config)
+  })
+
   it("leaves providers on models that are still listed untouched", () => {
     const kept = [
       provider("jalapenocloud", "GLM-5.1"),
@@ -95,6 +139,7 @@ describe("v119-to-v120 migration", () => {
         "x",
         { provider: "deepseek" },
         { provider: "deepseek", model: "deepseek-chat" },
+        provider("constructor", "deepseek-chat"),
       ],
     }
     expect(migrate(odd)).toBe(odd)
