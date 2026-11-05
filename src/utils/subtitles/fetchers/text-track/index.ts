@@ -72,13 +72,16 @@ export class TextTrackFetcher implements SubtitlesFetcher {
   // A track can be there and never get a cue, so checking loads the cues and `fetch` reuses them.
   // A missing video is not a captionless one, so that error goes to the caller.
   async hasAvailableSubtitles(): Promise<boolean> {
-    return this.fetch().then(
-      () => true,
-      (error: unknown) => {
-        if (error instanceof NoSubtitlesError) return false
-        throw error
-      },
-    )
+    try {
+      // The reader can pick another track while the cues load; the answer is for the one picked.
+      do {
+        await this.fetch()
+      } while (!(await this.shouldUseSameTrack()))
+      return true
+    } catch (error) {
+      if (error instanceof NoSubtitlesError) return false
+      throw error
+    }
   }
 
   async shouldUseSameTrack(): Promise<boolean> {

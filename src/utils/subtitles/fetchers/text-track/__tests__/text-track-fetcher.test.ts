@@ -101,6 +101,38 @@ describe("TextTrackFetcher", () => {
     await expect(fetcher.fetch()).resolves.toEqual([{ text: "late", start: 0, end: 1000 }])
   })
 
+  it("answers for the track the reader switches to while the check loads", async () => {
+    const english = new FakeTrack("subtitles", "English", "en", "showing")
+    const spanish = new FakeTrack("subtitles", "Español", "es", "disabled")
+    const fetcher = createFetcher(videoWith(english, spanish))
+    const check = fetcher.hasAvailableSubtitles()
+
+    english.mode = "disabled"
+    spanish.mode = "showing"
+    english.loadCues("hello")
+    await vi.advanceTimersByTimeAsync(TEXT_TRACK_CUE_POLL_INTERVAL_MS)
+    spanish.loadCues("hola")
+    await vi.advanceTimersByTimeAsync(TEXT_TRACK_CUE_POLL_INTERVAL_MS)
+
+    await expect(check).resolves.toBe(true)
+    expect(fetcher.getSourceLanguage()).toBe("es")
+    await expect(fetcher.shouldUseSameTrack()).resolves.toBe(true)
+  })
+
+  it("reports no subtitles when the track the reader switches to never gets a cue", async () => {
+    const english = new FakeTrack("subtitles", "English", "en", "showing")
+    const spanish = new FakeTrack("subtitles", "Español", "es", "disabled")
+    const check = createFetcher(videoWith(english, spanish)).hasAvailableSubtitles()
+
+    english.mode = "disabled"
+    spanish.mode = "showing"
+    english.loadCues("hello")
+    await vi.advanceTimersByTimeAsync(TEXT_TRACK_CUE_POLL_INTERVAL_MS)
+    await vi.advanceTimersByTimeAsync(TEXT_TRACK_CUE_WAIT_TIMEOUT_MS)
+
+    await expect(check).resolves.toBe(false)
+  })
+
   it("reports no subtitles for a track that never gets a cue, or only blank ones", async () => {
     const check = createFetcher(
       videoWith(new FakeTrack("subtitles", "English", "en", "hidden")),
