@@ -8,10 +8,16 @@ import { applyTheme } from "@/utils/theme"
 
 const SUBTITLES_TOAST_HOST_ID = "read-frog-subtitles-toast-host"
 
+let mountedCleanup: (() => void) | null = null
+
 export function mountSubtitlesToast(): () => void {
-  const existingHost = document.getElementById(SUBTITLES_TOAST_HOST_ID)
-  if (existingHost) {
-    return (existingHost as any).__cleanup ?? (() => {})
+  if (mountedCleanup) return mountedCleanup
+
+  // Left by a dead instance of this script; this instance's toasts would never reach it.
+  const staleHost = document.getElementById(SUBTITLES_TOAST_HOST_ID)
+  if (staleHost) {
+    ;(staleHost as any).__cleanup?.()
+    staleHost.remove()
   }
 
   const target = document.body ?? document.documentElement
@@ -40,10 +46,12 @@ export function mountSubtitlesToast(): () => void {
   target.appendChild(shadowHost)
 
   const cleanup = () => {
+    if (mountedCleanup === cleanup) mountedCleanup = null
     reactRoot.unmount()
     hostBuilder.cleanup()
     shadowHost.remove()
   }
   ;(shadowHost as any).__cleanup = cleanup
+  mountedCleanup = cleanup
   return cleanup
 }
