@@ -27,7 +27,7 @@ interface RootProps {
 
 const popover = vi.hoisted(() => ({ root: null as RootProps | null }))
 const panel = vi.hoisted(() => ({
-  props: null as { getVideoSeconds?: () => number | undefined } | null,
+  props: null as { getNoteOrigin?: () => unknown } | null,
 }))
 
 vi.mock("@/components/ui/selection-popover", () => ({
@@ -40,7 +40,7 @@ vi.mock("@/components/ui/selection-popover", () => ({
   },
 }))
 vi.mock("@/components/custom-action/custom-action-panel", () => ({
-  CustomActionPanel: (props: { getVideoSeconds?: () => number | undefined }) => {
+  CustomActionPanel: (props: { getNoteOrigin?: () => unknown }) => {
     panel.props = props
     return null
   },
@@ -59,7 +59,7 @@ vi.mock("../use-top-layer-portal-container", () => ({
  * "one two three": words at 0, 2 and 4, with their right edges 100px apart and
  * their bottoms at 300px, in a subtitles box whose top is at 240px.
  */
-function renderCard(video: HTMLVideoElement | null = null) {
+function renderCard(video: HTMLVideoElement | null = null, videoPageUrl: string | null = null) {
   subtitlesStore.set(sourceTrackAtom, [{ text: "one two three", start: 0, end: 5000 }])
   subtitlesStore.set(currentTimeMsAtom, 1000)
   const box = document.createElement("div")
@@ -78,7 +78,9 @@ function renderCard(video: HTMLVideoElement | null = null) {
   document.body.append(box)
   render(
     <Provider store={subtitlesStore}>
-      <SubtitlesUIContext value={{ getVideoElement: () => video } as never}>
+      <SubtitlesUIContext
+        value={{ getVideoElement: () => video, getVideoPageUrl: () => videoPageUrl } as never}
+      >
         <WordLookupCard />
       </SubtitlesUIContext>
     </Provider>,
@@ -131,13 +133,33 @@ describe("WordLookupCard", () => {
     expect(popover.root?.anchor).toEqual({ x: 300, y: 240, above: true })
   })
 
-  it("lets a save read the playing video's time for its note origin", () => {
+  it("saves notes with the video's page and its time when the save starts", () => {
+    window.history.replaceState(null, "", "/watch?v=abc")
+    document.title = "A talk"
     const video = document.createElement("video")
     renderCard(video)
     lookUp(2)
 
     Object.defineProperty(video, "currentTime", { value: 42.5, configurable: true })
-    expect(panel.props?.getVideoSeconds?.()).toBe(42.5)
+    expect(panel.props?.getNoteOrigin?.()).toEqual({
+      kind: "video",
+      url: `${window.location.origin}/watch?v=abc`,
+      title: "A talk",
+      seconds: 42.5,
+    })
+  })
+
+  it("links a note to the platform's video when the page URL does not name it", () => {
+    const video = document.createElement("video")
+    renderCard(video, "https://x.com/i/status/1234567890")
+    lookUp(2)
+
+    Object.defineProperty(video, "currentTime", { value: 3, configurable: true })
+    expect(panel.props?.getNoteOrigin?.()).toEqual({
+      kind: "video",
+      url: "https://x.com/i/status/1234567890",
+      seconds: 3,
+    })
   })
 
   it("drops the pin when the lookup is closed from outside the card", () => {

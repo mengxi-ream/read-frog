@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest"
+import { afterEach, describe, expect, it } from "vitest"
 import { customActionRequestAtom } from "@/components/custom-action/atoms"
 import { currentTimeMsAtom, sourceTrackAtom, subtitlesStore } from "../../atoms"
 import { lookUpAtom, subtitleTokensAtom, wordLookupAtom } from "../atoms"
@@ -16,7 +16,6 @@ describe("word lookup atoms", () => {
   afterEach(() => {
     subtitlesStore.set(lookUpAtom, null)
     subtitlesStore.set(sourceTrackAtom, [])
-    vi.unstubAllGlobals()
   })
 
   it("looks up a word with Dictionary, using the cue and its translation as context", () => {
@@ -46,19 +45,5 @@ describe("word lookup atoms", () => {
     subtitlesStore.set(lookUpAtom, null)
     expect(subtitlesStore.get(wordLookupAtom)).toBeNull()
     expect(subtitlesStore.get(customActionRequestAtom)).toBeNull()
-  })
-
-  it("records the video page as the note origin when the lookup opens", () => {
-    vi.stubGlobal("location", { href: "https://www.youtube.com/watch?v=abc" })
-    vi.stubGlobal("document", { title: " A talk - YouTube " })
-    showCue("I'm running out of patience.")
-
-    subtitlesStore.set(lookUpAtom, indexOf("patience"))
-
-    expect(subtitlesStore.get(customActionRequestAtom)?.noteOrigin).toEqual({
-      kind: "video",
-      url: "https://www.youtube.com/watch?v=abc",
-      title: "A talk - YouTube",
-    })
   })
 })

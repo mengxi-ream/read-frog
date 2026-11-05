@@ -33,6 +33,13 @@ export interface PlatformConfig {
 
   getVideoId?: () => string | null
 
+  /**
+   * A link to the video playing now, for a note saved from its subtitles.
+   * Needed where the page URL does not name the video (a timeline, a reply's
+   * video); without it the page URL is used.
+   */
+  getVideoPageUrl?: () => string | null
+
   createAiSubtitlesContext?: () => AiSubtitlesContext | null
 
   isLiveContent?: () => Promise<boolean>

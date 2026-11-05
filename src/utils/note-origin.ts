@@ -1,16 +1,21 @@
 import type { EbookBridgeSelectionPayload, NoteOriginInput } from "@read-frog/definitions"
 import { noteOriginInputSchema, toNoteOriginUrl } from "@read-frog/definitions"
+import { getSourceDocumentTitle } from "@/utils/content/document-title"
 
 interface NoteOriginPage {
   href: string
   title: string
 }
 
-/** The page this script runs in; empty where there is none (a worker, a test without a DOM). */
+/**
+ * The page this script runs in, with the title the page set rather than one
+ * page translation wrote over it. Empty where there is no page (a worker, a
+ * test without a DOM).
+ */
 function readCurrentPage(): NoteOriginPage {
   return {
     href: globalThis.location?.href ?? "",
-    title: globalThis.document?.title ?? "",
+    title: typeof document === "undefined" ? "" : getSourceDocumentTitle(),
   }
 }
 
@@ -53,12 +58,23 @@ function isVideoSeconds(seconds: number | undefined): seconds is number {
   return seconds !== undefined && Number.isFinite(seconds) && seconds >= 0
 }
 
-/** The video page a subtitle save comes from, at `seconds` into the video when known. */
+/**
+ * The video a subtitle save comes from, at `seconds` into it when known.
+ * `videoPageUrl` is the platform's link to the playing video, for pages whose
+ * URL does not name it (an x.com timeline); the page's title then describes
+ * the page, not the video, so it is left out.
+ */
 export function getVideoNoteOrigin(
-  seconds?: number,
+  {
+    seconds,
+    videoPageUrl,
+  }: {
+    seconds?: number
+    videoPageUrl?: string | null
+  } = {},
   page = readCurrentPage(),
 ): NoteOriginInput | null {
-  const url = toNoteOriginUrl(page.href)
+  const url = toNoteOriginUrl(videoPageUrl ?? page.href)
   if (!url) {
     return null
   }
@@ -66,15 +82,7 @@ export function getVideoNoteOrigin(
   return {
     kind: "video",
     url,
-    ...getPageTitle(page),
+    ...(videoPageUrl ? {} : getPageTitle(page)),
     ...(isVideoSeconds(seconds) ? { seconds } : {}),
   }
-}
-
-/** The origin with the video's playing time filled in; other origins are left as they are. */
-export function withVideoNoteOriginSeconds(
-  origin: NoteOriginInput | null,
-  seconds: number | undefined,
-): NoteOriginInput | null {
-  return origin?.kind === "video" && isVideoSeconds(seconds) ? { ...origin, seconds } : origin
 }

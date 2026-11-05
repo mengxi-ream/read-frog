@@ -1,10 +1,10 @@
-import { describe, expect, it } from "vitest"
+// @vitest-environment jsdom
+import { afterEach, describe, expect, it } from "vitest"
 import {
-  getEbookNoteOrigin,
-  getVideoNoteOrigin,
-  getWebPageNoteOrigin,
-  withVideoNoteOriginSeconds,
-} from "../note-origin"
+  clearAppliedDocumentTitleTranslation,
+  setAppliedDocumentTitleTranslation,
+} from "@/utils/content/document-title"
+import { getEbookNoteOrigin, getVideoNoteOrigin, getWebPageNoteOrigin } from "../note-origin"
 
 const EBOOK_ID = "33333333-3333-4333-8333-333333333333"
 
@@ -74,7 +74,7 @@ describe("getVideoNoteOrigin", () => {
   const page = { href: "https://www.youtube.com/watch?v=abc", title: "A talk - YouTube" }
 
   it("records the video page", () => {
-    expect(getVideoNoteOrigin(undefined, page)).toEqual({
+    expect(getVideoNoteOrigin({}, page)).toEqual({
       kind: "video",
       url: "https://www.youtube.com/watch?v=abc",
       title: "A talk - YouTube",
@@ -82,36 +82,54 @@ describe("getVideoNoteOrigin", () => {
   })
 
   it("records the playing time when known", () => {
-    expect(getVideoNoteOrigin(83.5, page)).toMatchObject({ kind: "video", seconds: 83.5 })
-  })
-
-  it.each([Number.NaN, -1, Number.POSITIVE_INFINITY])("leaves out a time of %s", (seconds) => {
-    expect(getVideoNoteOrigin(seconds, page)).not.toHaveProperty("seconds")
-  })
-
-  it("gives no origin off http(s)", () => {
-    expect(getVideoNoteOrigin(1, { href: "file:///movie.html", title: "" })).toBeNull()
-  })
-})
-
-describe("withVideoNoteOriginSeconds", () => {
-  it("adds the playing time to a video origin", () => {
-    const origin = getVideoNoteOrigin(undefined, { href: "https://example.com/v", title: "" })
-    expect(withVideoNoteOriginSeconds(origin, 12)).toEqual({
+    expect(getVideoNoteOrigin({ seconds: 83.5 }, page)).toMatchObject({
       kind: "video",
-      url: "https://example.com/v",
-      seconds: 12,
+      seconds: 83.5,
     })
   })
 
-  it("keeps the video origin without a time when the video cannot be reached", () => {
-    const origin = getVideoNoteOrigin(undefined, { href: "https://example.com/v", title: "" })
-    expect(withVideoNoteOriginSeconds(origin, undefined)).toBe(origin)
+  it.each([Number.NaN, -1, Number.POSITIVE_INFINITY])("leaves out a time of %s", (seconds) => {
+    expect(getVideoNoteOrigin({ seconds }, page)).not.toHaveProperty("seconds")
   })
 
-  it("leaves other origins and none as they are", () => {
-    const page = getWebPageNoteOrigin({ href: "https://example.com/", title: "" })
-    expect(withVideoNoteOriginSeconds(page, 12)).toBe(page)
-    expect(withVideoNoteOriginSeconds(null, 12)).toBeNull()
+  it("links to the platform's video, without the page's title, when the page URL does not name it", () => {
+    expect(
+      getVideoNoteOrigin(
+        { seconds: 7, videoPageUrl: "https://x.com/i/status/1234567890" },
+        { href: "https://x.com/home", title: "Home / X" },
+      ),
+    ).toEqual({ kind: "video", url: "https://x.com/i/status/1234567890", seconds: 7 })
+  })
+
+  it("falls back to the page when the platform has no link for the video", () => {
+    expect(getVideoNoteOrigin({ videoPageUrl: null }, page)).toMatchObject({
+      url: "https://www.youtube.com/watch?v=abc",
+    })
+  })
+
+  it("gives no origin off http(s)", () => {
+    expect(getVideoNoteOrigin({ seconds: 1 }, { href: "file:///movie.html", title: "" })).toBeNull()
+  })
+})
+
+describe("the current page's title", () => {
+  afterEach(() => {
+    clearAppliedDocumentTitleTranslation()
+    document.title = ""
+  })
+
+  it("is the page's own title, not the one page translation wrote over it", () => {
+    document.title = "青蛙的生活"
+    setAppliedDocumentTitleTranslation("The life of frogs", "青蛙的生活")
+
+    expect(getWebPageNoteOrigin()).toMatchObject({ title: "The life of frogs" })
+    expect(getVideoNoteOrigin()).toMatchObject({ title: "The life of frogs" })
+  })
+
+  it("is the title the page set itself after a translation", () => {
+    setAppliedDocumentTitleTranslation("The life of frogs", "青蛙的生活")
+    document.title = "A newer title"
+
+    expect(getWebPageNoteOrigin()).toMatchObject({ title: "A newer title" })
   })
 })

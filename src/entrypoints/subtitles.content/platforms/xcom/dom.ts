@@ -117,6 +117,12 @@ export function getCurrentXcomVideoId(): string | null {
   return (video && getXcomVideoStatusId(video)) ?? getXcomStatusId()
 }
 
+/** The playing video's own post, which a timeline or parent post URL does not name. */
+export function getCurrentXcomVideoUrl(): string | null {
+  const statusId = getCurrentXcomVideoId()
+  return statusId ? `https://x.com/i/status/${statusId}` : null
+}
+
 function getReadFrogXcomStatusVideo(): HTMLVideoElement | null {
   return pickSingleCandidate(
     Array.from(

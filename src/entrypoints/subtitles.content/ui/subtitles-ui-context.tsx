@@ -18,6 +18,7 @@ interface SubtitlesUIContextValue {
   ensureSourceTrackPublished: () => Promise<void>
   seekTo: (seconds: number) => void
   getVideoElement: () => HTMLVideoElement | null
+  getVideoPageUrl: () => string | null
   downloadSourceSubtitles: () => Promise<void>
   downloadTranslatedSubtitles: () => Promise<void>
   controlsConfig?: ControlsConfig
@@ -56,6 +57,7 @@ export function SubtitlesProviders({
       ensureSourceTrackPublished: adapter.ensureSourceTrackPublished,
       seekTo: adapter.seekTo,
       getVideoElement: adapter.getVideoElement,
+      getVideoPageUrl: adapter.getVideoPageUrl,
       downloadSourceSubtitles: adapter.downloadSourceSubtitles,
       downloadTranslatedSubtitles: adapter.downloadTranslatedSubtitles,
       controlsConfig: adapter.getControlsConfig(),

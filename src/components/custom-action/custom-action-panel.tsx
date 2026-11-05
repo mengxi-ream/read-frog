@@ -1,3 +1,4 @@
+import type { NoteOriginInput } from "@read-frog/definitions"
 import type { ComponentProps } from "react"
 import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { useEffect, useMemo, useRef } from "react"
@@ -13,7 +14,6 @@ import { classifyResolvedProvider } from "@/utils/analytics-provider"
 import { configFieldsAtomMap, writeConfigAtom } from "@/utils/atoms/config"
 import { getSourceDocumentTitle } from "@/utils/content/document-title"
 import { findSelectionToolbarAction, patchSelectionToolbarAction } from "@/utils/custom-actions"
-import { withVideoNoteOriginSeconds } from "@/utils/note-origin"
 import {
   getSelectableProvidersForCapability,
   resolveProviderRefForCapability,
@@ -43,10 +43,13 @@ function CustomActionFooterContent({
 }
 
 export function CustomActionPanel({
-  getVideoSeconds,
+  getNoteOrigin,
 }: {
-  /** The playing video's time, for a card on video subtitles: saved with its notes. */
-  getVideoSeconds?: () => number | undefined
+  /**
+   * Where a note saved from the card comes from, read when the save starts, in
+   * place of the request's. The card on video subtitles reads the video here.
+   */
+  getNoteOrigin?: () => NoteOriginInput | null
 } = {}) {
   const bodyRef = useRef<HTMLDivElement>(null)
   const [request, setRequest] = useAtom(customActionRequestAtom)
@@ -186,9 +189,7 @@ export function CustomActionPanel({
               isRunning={isRunning}
               result={result}
               surface={cardSurface}
-              getNoteOrigin={() =>
-                withVideoNoteOriginSeconds(request.noteOrigin, getVideoSeconds?.())
-              }
+              getNoteOrigin={getNoteOrigin ?? (() => request.noteOrigin)}
             />
             <CustomActionToolButton action={action} />
           </>
