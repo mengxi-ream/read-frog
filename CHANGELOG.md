@@ -1,5 +1,25 @@
 # @read-frog/extension
 
+## 1.57.0
+
+### Minor Changes
+
+- [#2461](https://github.com/mengxi-ream/read-frog/pull/2461) [`c1b5a03`](https://github.com/mengxi-ream/read-frog/commit/c1b5a0319de04ed8a24f858dc16eaa10a5a524cd) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(selection-toolbar): turn annotation mode on and off with a shortcut (Alt+Shift+P), without opening the toolbar
+
+### Patch Changes
+
+- [#2458](https://github.com/mengxi-ream/read-frog/pull/2458) [`babd62d`](https://github.com/mengxi-ream/read-frog/commit/babd62d31af6f535ec434700a14edb6f5815506d) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(selection-toolbar): move AI actions whose provider has no API key onto Built-in AI, so they answer instead of failing with a missing-key error
+
+- [#2462](https://github.com/mengxi-ream/read-frog/pull/2462) [`27f3cc5`](https://github.com/mengxi-ream/read-frog/commit/27f3cc578223c39efcb2b6b583b35fd3cb57ed94) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(annotation): show a word's meaning under it in YouTube comments and other line-clamped text that isn't cut off, instead of only underlining it with "There is no room between these lines for its meaning"
+
+- [#2460](https://github.com/mengxi-ream/read-frog/pull/2460) [`0af313a`](https://github.com/mengxi-ream/read-frog/commit/0af313a81fa4763d1ff7ab3125c212146f3aff1c) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - chore(deps): update deps, including five majors, and fix Dependabot alerts. The Built-in AI usage list also names PDF translation when a credit pool covers it.
+
+- [#2465](https://github.com/mengxi-ream/read-frog/pull/2465) [`1e25cb0`](https://github.com/mengxi-ream/read-frog/commit/1e25cb036d5a6992fa26636d8c137b44532e18e8) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(notebase): record where each saved note came from (the web page, the book and spot in the readfrog.app ebook reader, or the video and its playing time), so learners can jump back to the article or video where they saved a word
+
+- [#2464](https://github.com/mengxi-ream/read-frog/pull/2464) [`b489297`](https://github.com/mengxi-ream/read-frog/commit/b48929718f48cf9455641762559dbfe6de56dd83) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(providers): refresh built-in models and default Jalapeno Cloud to GLM 5.3
+
+- [#2463](https://github.com/mengxi-ream/read-frog/pull/2463) [`c0141f9`](https://github.com/mengxi-ream/read-frog/commit/c0141f922d551541909de0364cf3d4ce6cb9ce52) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(ui): close toasts on time while focus is in the ebook reader's book or another iframe on the page, instead of keeping them up until a click outside it
+
 ## 1.56.0
 
 ### Minor Changes
