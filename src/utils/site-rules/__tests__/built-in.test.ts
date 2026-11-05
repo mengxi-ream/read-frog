@@ -688,6 +688,67 @@ describe("built-in site rules", () => {
     expect(disabled.dontWalkTags).toBeNull()
   })
 
+  // A plain-text RFC renders its whole body in <pre>, so the PRE block left
+  // nothing to translate (#2427). v3 RFCs keep code and figures in <pre>,
+  // which must stay out of the walk.
+  it("un-blocks plain-text RFC bodies but keeps v3 RFC code and figures out", () => {
+    for (const url of [
+      "https://www.rfc-editor.org/info/rfc2104/",
+      "https://www.rfc-editor.org/rfc/rfc2104.html",
+      "https://datatracker.ietf.org/doc/html/rfc2104",
+      "https://datatracker.ietf.org/doc/rfc2104/",
+      "https://datatracker.ietf.org/doc/draft-ietf-httpbis-semantics/",
+      "https://www.rfc-editor.org/info/rfc9110/",
+    ]) {
+      const resolved = resolveSiteRule(url, BUILT_IN_SITE_RULES, [], [])
+
+      expect(resolved.matchedRuleIds).toContain("ietf-rfc-plaintext")
+      expect(resolved.dontWalkTags).not.toBeNull()
+      expect(resolved.dontWalkTags!.has("PRE")).toBe(false)
+      expect(resolved.dontWalkTags!.has("SCRIPT")).toBe(true)
+    }
+
+    for (const url of [
+      "https://www.rfc-editor.org/",
+      "https://www.rfc-editor.org/search/rfc_search.php",
+      "https://datatracker.ietf.org/doc/search",
+      "https://datatracker.ietf.org/",
+    ]) {
+      expect(resolveSiteRule(url, BUILT_IN_SITE_RULES, [], []).matchedRuleIds).not.toContain(
+        "ietf-rfc-plaintext",
+      )
+    }
+
+    const { excludeSelector } = resolveSiteRule(
+      "https://www.rfc-editor.org/info/rfc9110/",
+      BUILT_IN_SITE_RULES,
+      [],
+      [],
+    )
+    expect(excludeSelector).not.toBeNull()
+
+    document.body.innerHTML = `
+      <div class="rfc-content rfc-content-type-plaintext">
+        <pre id="title-page">Abstract<span class="grey" id="header">RFC 2104</span></pre>
+        <pre class="newpage" id="page"> body</pre>
+      </div>
+      <div class="rfc-content rfc-content-type-xml2rfc">
+        <div class="bg-gray-100"><pre class="" id="info-figure">UA ==== O</pre></div>
+      </div>
+      <div class="artwork"><pre id="artwork">UA ==== O</pre></div>
+      <pre class="lang-abnf9110 sourcecode" id="abnf">token = 1*tchar</pre>
+    `
+    const matches = (id: string) => document.getElementById(id)!.matches(excludeSelector!)
+
+    expect(matches("title-page")).toBe(false)
+    expect(matches("page")).toBe(false)
+    expect(matches("header")).toBe(true)
+    expect(matches("info-figure")).toBe(true)
+    expect(matches("artwork")).toBe(true)
+    expect(matches("abnf")).toBe(true)
+    document.body.innerHTML = ""
+  })
+
   // The header dropdowns open on `li:hover`, so no mutation ever brings the
   // walk back to them once it skipped them as display: none (Featurebase #141).
   it("walks The North Face Korea's CSS-only header menus while hidden", () => {
