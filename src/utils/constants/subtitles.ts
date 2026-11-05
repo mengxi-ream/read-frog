@@ -97,6 +97,16 @@ export const NETFLIX_PAGE_POLL_INTERVAL_MS = 100
 export const NETFLIX_WATCH_POLL_INTERVAL_MS = 1000
 export const NETFLIX_TRANSLATE_BUTTON_ZOOM = 1.4
 
+// Udemy specific
+export const UDEMY_PLAYER_SELECTOR = "[data-purpose='shaka-video-player']"
+export const UDEMY_CONTROLS_SELECTOR = "[data-purpose='video-controls']"
+export const UDEMY_CONTROL_BAR_SELECTOR = "[data-purpose='video-control-bar']"
+export const UDEMY_CAPTIONS_BUTTON_SELECTOR = "[data-purpose='captions-dropdown-button']"
+// The control bar's own `…user-inactive--<hash>` state class, matched on the bar's parent only:
+// other elements always carry a `…hide-when-user-inactive--<hash>` class.
+export const UDEMY_INACTIVE_CONTROLS_SELECTOR = `[class*='--user-inactive--']:has(> ${UDEMY_CONTROLS_SELECTOR})`
+export const UDEMY_NATIVE_SUBTITLES_SELECTOR = "[id$='-captions-display-container']"
+
 // Bilibili specific
 export const BILIBILI_PLAYER_SELECTOR = ".bpx-player-container"
 // The video and its controls, without the danmaku bar the player container also holds below them.

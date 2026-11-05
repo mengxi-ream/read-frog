@@ -9,6 +9,9 @@ import { mountSubtitlesUI, unmountSubtitlesUI } from "./renderer/mount-subtitles
 interface PollPlayerOptions {
   adapter: UniversalVideoAdapter
   config: PlatformConfig
+  /** Runs on every tick that finds a player, for controls the site may rebuild. */
+  onStay?: () => void
+  onLeave?: () => void
 }
 
 interface MountedPlayer {
@@ -19,7 +22,7 @@ interface MountedPlayer {
 /** Mounts subtitles on a site that changes videos without a page load or an event. */
 export function pollPlayerSubtitles(
   ctx: ContentScriptContext,
-  { adapter, config }: PollPlayerOptions,
+  { adapter, config, onStay, onLeave }: PollPlayerOptions,
 ) {
   let initPromise: Promise<void> | null = null
   let initialized = false
@@ -45,6 +48,7 @@ export function pollPlayerSubtitles(
 
     if (!videoId || !player) {
       if (mounted) {
+        onLeave?.()
         unmountSubtitlesUI()
         adapter.notifyLeave()
       }
@@ -60,6 +64,7 @@ export function pollPlayerSubtitles(
     if (videoId !== mounted?.videoId || player !== mounted.player) {
       void mount({ videoId, player }).then(() => adapter.notifyNavigation())
     }
+    onStay?.()
   }
 
   tick()
