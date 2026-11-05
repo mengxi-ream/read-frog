@@ -2126,6 +2126,24 @@
     "forceBlockStyleSelectors.add": ["[href^='#page']"]
   },
   {
+    "id": "ietf-rfc-plaintext",
+    "description": "An RFC published as plain text renders its whole body in <pre>: the title page in a bare <pre>, every later page in <pre class=\"newpage\">, and the datatracker document page in one <pre> under .card-body. PRE is hard-blocked by default for authored code, so the RFC body was never walked. v3 (xml2rfc) RFCs write prose as <p> and keep only code and figures in <pre>, so those stay blocked: pre.sourcecode and .artwork pre on the HTML renderings, and every <pre> inside .rfc-content-type-xml2rfc on rfc-editor.org/info pages, whose figures carry no class. span.grey is the running page header and footer of the plain-text pages",
+    "matches": [
+      "www.rfc-editor.org/rfc/*",
+      "www.rfc-editor.org/info/*",
+      "datatracker.ietf.org/doc/html/*",
+      "datatracker.ietf.org/doc/rfc*",
+      "datatracker.ietf.org/doc/draft-*"
+    ],
+    "dontWalkTags.remove": ["PRE"],
+    "excludeSelectors": [
+      "pre.sourcecode",
+      ".artwork pre",
+      ".rfc-content-type-xml2rfc pre",
+      "pre span.grey"
+    ]
+  },
+  {
     "id": "newsminimalist",
     "matches": "https://www.newsminimalist.com/",
     "forceBlockNodeSelectors.add": [".inline-flex"],
