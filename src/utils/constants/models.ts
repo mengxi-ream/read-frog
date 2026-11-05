@@ -1,19 +1,12 @@
-import type { OpenAIResponsesProviderOptions } from "@ai-sdk/openai"
 import type { JSONValue } from "ai"
 
-type OpenAIReasoningEffort = Exclude<OpenAIResponsesProviderOptions["reasoningEffort"], undefined>
-
-interface OpenAIGPT5ReasoningEffortPolicy {
-  pattern: RegExp
-  supportedValues: readonly OpenAIReasoningEffort[]
-  recommendedValue?: OpenAIReasoningEffort
-}
-
-// Reviewed against provider catalogs and AI SDK docs on 2026-09-26.
+// Reviewed against provider catalogs and AI SDK docs on 2026-11-04.
 // Keep existing IDs: persisted provider configs validate against these enums.
 export const LLM_PROVIDER_MODELS = {
   openai: [
     "gpt-6-luna",
+    "gpt-6.1-sol",
+    "gpt-6.1-terra",
     "gpt-6-sol",
     "gpt-6-astra",
     "gpt-5.6-luna",
@@ -75,9 +68,12 @@ export const LLM_PROVIDER_MODELS = {
     "grok-4",
     "grok-code-fast-1",
   ],
-  deepseek: ["deepseek-v4-flash", "deepseek-v4-pro", "deepseek-chat", "deepseek-reasoner"],
+  // deepseek-chat and deepseek-reasoner were retired on 2026-07-24; v119-to-v120 moves them off.
+  // deepseek-flash is DeepSeek's alias for whichever V4.x Flash release is current.
+  deepseek: ["deepseek-v4-flash", "deepseek-flash", "deepseek-v4-pro"],
   google: [
     "gemini-3.5-flash-lite",
+    "gemini-4-argon",
     "gemini-3.8-flash",
     "gemini-3.7-flash",
     "gemini-3.1-flash-lite",
@@ -140,28 +136,38 @@ export const LLM_PROVIDER_MODELS = {
     "google/gemini-3.1-flash-lite",
   ],
   // Jalapeno Cloud addresses models by their catalog name verbatim — the id in an API
-  // call is the same string shown on the models page. Narrowed to what suits translation:
-  // the code-specialised (Kimi-K2.7-Code), vision-first (Qwen3-VL-*) and thinking-only
-  // variants are left out, since neither buys anything here and both cost more per call.
+  // call is the same string shown on the models page (catalog JSON:
+  // https://www.jalapeno-cloud.ai/token-api/v1/models). Narrowed to what suits translation:
+  // the code-specialised (Kimi-K2.7-Code) and video-generation (Doubao-Seedance-*) entries
+  // are left out, since neither buys anything here.
+  // Hy3 and Qwen3-Next-80B-A3B-Instruct were delisted. GLM-5.2 is still in the catalog but is
+  // dropped because GLM-5.3 supersedes it. v119-to-v120 moves all three off.
   jalapenocloud: [
-    "GLM-5.2",
+    "GLM-5.3",
+    "GLM-5.3-Flash",
     "GLM-5.1",
+    "DeepSeek-V4.1-Flash",
+    "DeepSeek-V4.1-Flash-1017",
+    "DeepSeek-V4-Flash-0731",
     "DeepSeek-V4-Flash",
     "DeepSeek-V4-Pro",
-    "Hy3",
+    "Hy4-preview",
+    "Kimi-K3.1-Pro",
     "Kimi-K3",
     "Kimi-K2.5",
+    "MiniMax-M3.1-Flash",
     "MiniMax-M3",
+    "Step-5-preview",
     "Qwen3.5-27B",
     "Qwen3.5-35B-A3B",
     "Qwen3.5-122B-A10B",
     "Qwen3.5-397B-A17B",
-    "Qwen3-Next-80B-A3B-Instruct",
   ],
   "openai-compatible": ["use-custom-model"],
   "open-responses": ["use-custom-model"],
   xai: [
     "grok-4.3",
+    "grok-4.7",
     "grok-4.6",
     "grok-4.5",
     "grok-4.20-non-reasoning",
@@ -170,6 +176,9 @@ export const LLM_PROVIDER_MODELS = {
     "grok-4.20-0309-reasoning",
   ],
   bedrock: [
+    "us.anthropic.claude-haiku-5-5",
+    "us.anthropic.claude-sonnet-5-5",
+    "us.anthropic.claude-fable-5-1",
     "anthropic.claude-haiku-5-5",
     "anthropic.claude-sonnet-5-5",
     "anthropic.claude-opus-5-5",
@@ -296,6 +305,10 @@ export const LLM_PROVIDER_MODELS = {
   ],
   mistral: [
     "mistral-small-latest",
+    "magistral-medium-latest",
+    "magistral-small-latest",
+    "ministral-14b-latest",
+    "zai-glm-5-2",
     "mistral-small-2603",
     "pixtral-large-latest",
     "mistral-large-latest",
@@ -398,6 +411,7 @@ export const LLM_PROVIDER_MODELS = {
     "doubao-seed-1-6-251015",
   ],
   minimax: [
+    "MiniMax-M3.1-Flash",
     "MiniMax-M3",
     "MiniMax-M2.7",
     "MiniMax-M2.7-highspeed",
@@ -435,6 +449,8 @@ export const LLM_PROVIDER_MODELS = {
   ],
   moonshotai: [
     "kimi-k2.6",
+    "kimi-k3.1-pro",
+    "kimi-k3.1-pro-highspeed",
     "kimi-k3",
     "moonshot-v1-8k",
     "moonshot-v1-32k",
@@ -484,91 +500,6 @@ export const PURE_TRANSLATE_PROVIDERS = [
   "deepl",
 ] as const
 
-const OPENAI_GPT5_REASONING_EFFORT_POLICIES: OpenAIGPT5ReasoningEffortPolicy[] = [
-  {
-    pattern: /^(?:openai\/)?gpt-6-astra$/i,
-    supportedValues: ["low", "medium", "high", "xhigh", "max"],
-    recommendedValue: "low",
-  },
-  {
-    pattern: /^(?:openai\/)?gpt-6-sol$/i,
-    supportedValues: ["none", "low", "medium", "high", "xhigh", "max"],
-    recommendedValue: "medium",
-  },
-  {
-    pattern: /^(?:openai\/)?gpt-6-luna$/i,
-    supportedValues: ["none", "low", "medium", "high", "xhigh", "max"],
-    recommendedValue: "medium",
-  },
-  {
-    pattern: /^(?:openai\/)?gpt-5\.6(?:-(?:luna|terra|sol))?$/i,
-    supportedValues: ["none", "low", "medium", "high", "xhigh", "max"],
-    recommendedValue: "none",
-  },
-  {
-    pattern: /^gpt-5\.4-pro$/i,
-    supportedValues: ["medium", "high", "xhigh"],
-    recommendedValue: "medium",
-  },
-  {
-    pattern: /^gpt-5\.2-pro$/i,
-    supportedValues: ["medium", "high", "xhigh"],
-    recommendedValue: "medium",
-  },
-  {
-    pattern: /^gpt-5-pro$/i,
-    supportedValues: ["high"],
-    recommendedValue: "high",
-  },
-  {
-    pattern: /^(?:gpt-5\.5|gpt-5\.4|gpt-5\.4-mini|gpt-5\.4-nano)$/i,
-    supportedValues: ["none", "low", "medium", "high", "xhigh"],
-    recommendedValue: "none",
-  },
-  {
-    pattern: /^gpt-5\.2$/i,
-    supportedValues: ["none", "low", "medium", "high", "xhigh"],
-    recommendedValue: "none",
-  },
-  {
-    pattern: /^(?:gpt-5\.1|gpt-5\.1-codex|gpt-5\.1-codex-mini)$/i,
-    supportedValues: ["none", "low", "medium", "high"],
-    recommendedValue: "none",
-  },
-  {
-    pattern: /^(?:gpt-5|gpt-5-mini|gpt-5-nano|gpt-5-codex)$/i,
-    supportedValues: ["minimal", "low", "medium", "high"],
-    recommendedValue: "minimal",
-  },
-  {
-    pattern:
-      /^(?:gpt-5-chat-latest|gpt-5\.1-chat-latest|gpt-5\.2-chat-latest|gpt-5\.3-chat-latest)$/i,
-    supportedValues: [],
-  },
-]
-
-const OPENAI_GPT5_RECOMMENDED_MODEL_OPTIONS: Array<{
-  pattern: RegExp
-  options: Record<string, JSONValue>
-}> = OPENAI_GPT5_REASONING_EFFORT_POLICIES.flatMap(({ pattern, recommendedValue }) => {
-  if (recommendedValue === undefined) {
-    return []
-  }
-
-  return [
-    {
-      pattern,
-      options: { reasoningEffort: recommendedValue },
-    },
-  ]
-})
-
-export function getOpenAIGPT5ReasoningEffortPolicy(
-  model: string,
-): OpenAIGPT5ReasoningEffortPolicy | undefined {
-  return OPENAI_GPT5_REASONING_EFFORT_POLICIES.find(({ pattern }) => pattern.test(model))
-}
-
 /**
  * Model options configuration.
  * Flat list design: first match wins, more specific patterns should be placed first.
@@ -594,6 +525,13 @@ export const LLM_MODEL_OPTIONS: Array<{
   {
     pattern: /^gemini-3(?:\.\d+)?-.*?(?:-preview(?:-customtools)?)?$/i,
     options: { thinkingConfig: { thinkingLevel: "minimal", includeThoughts: false } },
+  },
+  // Gemini 4 rejects thinkingBudget, so it must not fall through to the default below.
+  // Its docs do not list "minimal", so use "low" as for the Pro models.
+  // https://ai-sdk.dev/providers/ai-sdk-providers/google#long-decode
+  {
+    pattern: /^gemini-4(?:\.\d+)?-/i,
+    options: { thinkingConfig: { thinkingLevel: "low", includeThoughts: false } },
   },
   {
     pattern: /^gemini-2\.5-/i,
@@ -626,17 +564,73 @@ export const LLM_MODEL_OPTIONS: Array<{
     options: { reasoningEffort: "minimal" },
   },
 
-  // OpenAI GPT-5 defaults use the lowest supported reasoning effort per model.
-  // GPT-5 chat-latest variants are intentionally omitted because their docs do not advertise reasoning.effort.
-  ...OPENAI_GPT5_RECOMMENDED_MODEL_OPTIONS,
+  // OpenAI GPT-5 and GPT-6 - the lowest reasoning effort each model accepts, unless noted.
+  // The accepted range is noted on each entry. The chat-latest variants are left out on
+  // purpose: their docs do not advertise reasoning.effort.
+  // https://ai-sdk.dev/providers/ai-sdk-providers/openai (reviewed 2026-11-04)
+  {
+    // Accepts low to max: cannot turn reasoning off.
+    pattern: /^(?:openai\/)?gpt-6\.1-sol$/i,
+    options: { reasoningEffort: "low" },
+  },
+  {
+    // Accepts none to max.
+    pattern: /^(?:openai\/)?gpt-6\.1-terra$/i,
+    options: { reasoningEffort: "none" },
+  },
+  {
+    // Accepts low to max.
+    pattern: /^(?:openai\/)?gpt-6-astra$/i,
+    options: { reasoningEffort: "low" },
+  },
+  {
+    // Accepts none to max, but recommends medium rather than the floor (since #2241).
+    pattern: /^(?:openai\/)?gpt-6-sol$/i,
+    options: { reasoningEffort: "medium" },
+  },
+  {
+    // Accepts none to max, but recommends medium rather than the floor (since #2241).
+    pattern: /^(?:openai\/)?gpt-6-luna$/i,
+    options: { reasoningEffort: "medium" },
+  },
+  {
+    // Accepts none to max.
+    pattern: /^(?:openai\/)?gpt-5\.6(?:-(?:luna|terra|sol))?$/i,
+    options: { reasoningEffort: "none" },
+  },
+  {
+    // Accepts medium to xhigh.
+    pattern: /^gpt-5\.[24]-pro$/i,
+    options: { reasoningEffort: "medium" },
+  },
+  {
+    // Accepts high only.
+    pattern: /^gpt-5-pro$/i,
+    options: { reasoningEffort: "high" },
+  },
+  {
+    // Accepts none to xhigh.
+    pattern: /^(?:gpt-5\.5|gpt-5\.4|gpt-5\.4-mini|gpt-5\.4-nano|gpt-5\.2)$/i,
+    options: { reasoningEffort: "none" },
+  },
+  {
+    // Accepts none to high.
+    pattern: /^(?:gpt-5\.1|gpt-5\.1-codex|gpt-5\.1-codex-mini)$/i,
+    options: { reasoningEffort: "none" },
+  },
+  {
+    // Accepts minimal to high.
+    pattern: /^(?:gpt-5|gpt-5-mini|gpt-5-nano|gpt-5-codex)$/i,
+    options: { reasoningEffort: "minimal" },
+  },
 
-  // Grok 4.3 can disable thinking; 4.5 and 4.6 cannot.
+  // Grok 4.3 can disable thinking; 4.5, 4.6 and 4.7 cannot.
   {
     pattern: /^grok-4\.3$/i,
     options: { reasoningEffort: "none" },
   },
   {
-    pattern: /^grok-4\.[56]$/i,
+    pattern: /^grok-4\.[567]$/i,
     options: { reasoningEffort: "low" },
   },
   {
@@ -658,9 +652,10 @@ export const LLM_MODEL_OPTIONS: Array<{
     options: { thinking: { type: "disabled" } },
   },
 
-  // DeepSeek reasoning models - disable thinking by default
+  // DeepSeek reasoning models - disable thinking by default.
+  // `deepseek-flash` is the alias for the current V4.x Flash release.
   {
-    pattern: /(?:^|\/)deepseek-(?:reasoner|v4-(?:flash|pro))$/i,
+    pattern: /(?:^|\/)deepseek-(?:reasoner|flash|v4-(?:flash|pro))$/i,
     options: { thinking: { type: "disabled" } },
   },
 
@@ -672,6 +667,7 @@ export const LLM_MODEL_OPTIONS: Array<{
 
   // MiniMax reasoning-capable models - disable thinking/history by default.
   // Keep this provider-agnostic because recommendation matching is model-name based.
+  // MiniMax-M3.1-Flash must not match: it always thinks and errors on `thinking: disabled`.
   {
     pattern: /(?:^|\/)minimax-m(?:2(?:[.-].*)?|3)$/i,
     options: { thinking: { type: "disabled" }, reasoningHistory: "disabled" },
@@ -690,9 +686,9 @@ export const LLM_MODEL_OPTIONS: Array<{
     pattern: /(?:^|\/)kimi-k2(?!-instruct(?:[a-z0-9.-].*)?$)(?:[a-z0-9.-].*)?$/i,
     options: { thinking: { type: "disabled" }, reasoningHistory: "disabled" },
   },
-  // Kimi K3 always reasons and does not accept the K2 thinking options.
+  // Kimi K3 and K3.1 Pro always reason and do not accept the K2 thinking options.
   {
-    pattern: /^kimi-k3$/i,
+    pattern: /^kimi-k3(?:\.1-pro(?:-highspeed)?)?$/i,
     options: { reasoningEffort: "low" },
   },
 
