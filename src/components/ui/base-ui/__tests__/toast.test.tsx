@@ -36,8 +36,21 @@ function renderAnchoredToastProvider(
   return shadowRoot
 }
 
+// Focus moving into an iframe on the page blurs the window although the document keeps focus.
+// jsdom moves no focus between frames, so tests fire the window's events and stub `hasFocus`.
+function fireWindowFocusEvent(type: "blur" | "focus") {
+  const event = new FocusEvent(type)
+  // jsdom hands listeners its inner window as the target, not the `window` Base UI compares
+  // it with, and Base UI would ignore the event.
+  Object.defineProperty(event, "composedPath", { value: () => [window] })
+  act(() => {
+    window.dispatchEvent(event)
+  })
+}
+
 afterEach(() => {
   vi.useRealTimers()
+  vi.restoreAllMocks()
   act(() => toastManager.close())
   act(() => anchoredToastManager.close())
   shadowHost?.remove()
@@ -62,6 +75,82 @@ describe("ToastProvider", () => {
     })
 
     expect(onClose).toHaveBeenCalledOnce()
+  })
+
+  it("keeps counting down when focus moves into a frame on the page", () => {
+    vi.useFakeTimers()
+    vi.spyOn(document, "hasFocus").mockReturnValue(true)
+    renderToastProvider()
+    const onClose = vi.fn<() => void>()
+
+    act(() => {
+      toastManager.add({ onClose, title: "Saved to Notebase" })
+    })
+    fireWindowFocusEvent("blur")
+    act(() => {
+      vi.advanceTimersByTime(5000)
+    })
+
+    expect(onClose).toHaveBeenCalledOnce()
+  })
+
+  it("waits while the user is away from the page", () => {
+    vi.useFakeTimers()
+    const hasFocus = vi.spyOn(document, "hasFocus").mockReturnValue(false)
+    renderToastProvider()
+    const onClose = vi.fn<() => void>()
+
+    act(() => {
+      toastManager.add({ onClose, title: "Saved to Notebase" })
+    })
+    fireWindowFocusEvent("blur")
+    act(() => {
+      vi.advanceTimersByTime(15000)
+    })
+
+    expect(onClose).not.toHaveBeenCalled()
+
+    hasFocus.mockReturnValue(true)
+    fireWindowFocusEvent("focus")
+    act(() => {
+      vi.advanceTimersByTime(5000)
+    })
+
+    expect(onClose).toHaveBeenCalledOnce()
+  })
+
+  it("keeps counting down a toast raised while focus is already in a frame", () => {
+    vi.useFakeTimers()
+    const hasFocus = vi.spyOn(document, "hasFocus").mockReturnValue(false)
+    const shadowRoot = renderToastProvider()
+
+    // Base UI takes the window as left: the user went away while an earlier toast was up.
+    act(() => {
+      toastManager.add({ title: "Earlier" })
+    })
+    fireWindowFocusEvent("blur")
+    act(() => {
+      toastManager.close()
+      vi.runOnlyPendingTimers()
+    })
+    expect(shadowRoot.querySelector("[data-slot='toast']")).toBeNull()
+
+    // Back on the page with focus in a frame, which sends this window no event.
+    const frame = document.createElement("iframe")
+    document.body.append(frame)
+    frame.focus()
+    hasFocus.mockReturnValue(true)
+    const onClose = vi.fn<() => void>()
+
+    act(() => {
+      toastManager.add({ onClose, title: "Saved to Notebase" })
+    })
+    act(() => {
+      vi.advanceTimersByTime(5000)
+    })
+
+    expect(onClose).toHaveBeenCalledOnce()
+    frame.remove()
   })
 
   it("portals a bottom-right viewport into the requested shadow root", () => {
@@ -169,6 +258,26 @@ describe("AnchoredToastProvider", () => {
 
     act(() => {
       vi.advanceTimersByTime(1)
+    })
+
+    expect(onClose).toHaveBeenCalledOnce()
+    anchor.remove()
+  })
+
+  it("keeps counting down anchored toasts when focus moves into a frame on the page", () => {
+    vi.useFakeTimers()
+    vi.spyOn(document, "hasFocus").mockReturnValue(true)
+    renderAnchoredToastProvider()
+    const anchor = document.createElement("button")
+    const onClose = vi.fn<() => void>()
+    document.body.append(anchor)
+
+    act(() => {
+      anchoredToastManager.add({ onClose, positionerProps: { anchor }, title: "Copied!" })
+    })
+    fireWindowFocusEvent("blur")
+    act(() => {
+      vi.advanceTimersByTime(3000)
     })
 
     expect(onClose).toHaveBeenCalledOnce()

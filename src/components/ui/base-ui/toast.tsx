@@ -8,6 +8,7 @@ import {
   IconLoader,
   IconX,
 } from "@tabler/icons-react"
+import { useEffect, useRef } from "react"
 import { Button } from "@/components/ui/base-ui/button"
 import { cn } from "@/utils/styles/utils"
 
@@ -153,6 +154,45 @@ function FullToastContent({
   )
 }
 
+/**
+ * Base UI pauses toasts whenever their window blurs, and focus moving into an iframe on the page
+ * blurs it as well, though the user never left: in the readfrog.app ebook reader the book is an
+ * iframe, so a toast stayed up until the reader clicked outside the book. When the document still
+ * has focus once it settles, this hands Base UI what resumes the timers, a focus event on an
+ * element of the page outside the viewport. Remove it once Base UI tells the two apart:
+ * https://github.com/mui/base-ui/issues/6174
+ */
+function FrameFocusRelay({ hasToasts }: { hasToasts: boolean }): ReactElement {
+  const ref = useRef<HTMLSpanElement>(null)
+
+  useEffect(() => {
+    const relay = ref.current
+    const win = relay?.ownerDocument.defaultView
+    if (!hasToasts || !relay || !win) return undefined
+
+    const doc = relay.ownerDocument
+    let timeout: number | undefined
+    const resumeIfStillOnThePage = () => {
+      win.clearTimeout(timeout)
+      timeout = win.setTimeout(() => {
+        // `composed` carries it out of a content script's shadow root to the window.
+        if (doc.hasFocus()) relay.dispatchEvent(new FocusEvent("focus", { composed: true }))
+      })
+    }
+
+    // Base UI's main branch also counts a blur from before the first toast, so a toast raised
+    // while focus is already in a frame would start paused.
+    if (doc.activeElement instanceof HTMLIFrameElement) resumeIfStillOnThePage()
+    win.addEventListener("blur", resumeIfStillOnThePage)
+    return () => {
+      win.removeEventListener("blur", resumeIfStillOnThePage)
+      win.clearTimeout(timeout)
+    }
+  }, [hasToasts])
+
+  return <span ref={ref} hidden />
+}
+
 function Toasts({
   position,
   portalProps,
@@ -231,6 +271,7 @@ function Toasts({
           )
         })}
       </Toast.Viewport>
+      <FrameFocusRelay hasToasts={toasts.length > 0} />
     </Toast.Portal>
   )
 }
@@ -299,6 +340,7 @@ function AnchoredToasts({
           )
         })}
       </Toast.Viewport>
+      <FrameFocusRelay hasToasts={toasts.length > 0} />
     </Toast.Portal>
   )
 }
