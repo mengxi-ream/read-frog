@@ -1,5 +1,31 @@
 # @read-frog/extension
 
+## 1.58.0
+
+### Minor Changes
+
+- [#2446](https://github.com/mengxi-ream/read-frog/pull/2446) [`ad487f3`](https://github.com/mengxi-ream/read-frog/commit/ad487f31da2d69ee3a62ba6d3857412305475b4b) Thanks [@taiiiyang](https://github.com/taiiiyang)! - feat(subtitles): translate Bilibili video subtitles, preferring the uploader's over AI ones, with their own translate-on-open switch
+
+- [#2474](https://github.com/mengxi-ream/read-frog/pull/2474) [`bbfcfa8`](https://github.com/mengxi-ream/read-frog/commit/bbfcfa8f6f37dfbb5f6cccbf09154a0f732bbfea) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(custom-actions): draw formulas in custom AI action layouts with the `math` and `latex` filters, so an answer's LaTeX shows as real formulas instead of its source
+
+- [#2448](https://github.com/mengxi-ream/read-frog/pull/2448) [`8f25fca`](https://github.com/mengxi-ream/read-frog/commit/8f25fca0bc1f6ad0791e1e657f945fc430d683f3) Thanks [@taiiiyang](https://github.com/taiiiyang)! - feat(subtitles): translate edX course video subtitles in the caption language picked in the player, following the video that plays when a unit has several, with their own translate-on-open switch
+
+- [#2447](https://github.com/mengxi-ream/read-frog/pull/2447) [`98e3692`](https://github.com/mengxi-ream/read-frog/commit/98e36922f0b4c96b382317cc079743e94c75f528) Thanks [@taiiiyang](https://github.com/taiiiyang)! - feat(subtitles): translate Udemy lecture subtitles, on Udemy Business too, starting from the caption in the course's own language rather than one of Udemy's machine translations, with their own translate-on-open switch
+
+### Patch Changes
+
+- [#2474](https://github.com/mengxi-ream/read-frog/pull/2474) [`bbfcfa8`](https://github.com/mengxi-ream/read-frog/commit/bbfcfa8f6f37dfbb5f6cccbf09154a0f732bbfea) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(selection-toolbar): open the toolbar and the selection shortcut again in Firefox, which 1.57.0 broke on every page, and keep the page a note saved there came from
+
+- [#2468](https://github.com/mengxi-ream/read-frog/pull/2468) [`52e6fed`](https://github.com/mengxi-ream/read-frog/commit/52e6fedb2f3b1a1b959f6012aa15e296d88c0269) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(translate): stop Google Translate from cutting off multi-paragraph selections
+
+- [#2467](https://github.com/mengxi-ream/read-frog/pull/2467) [`63b9759`](https://github.com/mengxi-ream/read-frog/commit/63b9759863b9ba199884cb60732e0e6b820d8afa) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(site-rules): translate the body of plain-text RFCs on rfc-editor.org and datatracker
+
+- [#2473](https://github.com/mengxi-ream/read-frog/pull/2473) [`19777c1`](https://github.com/mengxi-ream/read-frog/commit/19777c11e071a6986fa18e8f35fa0b5b75ba1847) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(page-translation): translate CNN's footer and NASA's secondary nav, along with any page content a site displays despite marking it `hidden`
+
+- [#2444](https://github.com/mengxi-ream/read-frog/pull/2444) [`d8b6098`](https://github.com/mengxi-ream/read-frog/commit/d8b609897a7731d04211c870062c1e68ef6356f1) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(subtitles): keep the toggle off while auto-start checks an X video for subtitles
+
+- [#2444](https://github.com/mengxi-ream/read-frog/pull/2444) [`d8b6098`](https://github.com/mengxi-ream/read-frog/commit/d8b609897a7731d04211c870062c1e68ef6356f1) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(subtitles): say an X video could not be found instead of reporting it has no subtitles
+
 ## 1.57.0
 
 ### Minor Changes
