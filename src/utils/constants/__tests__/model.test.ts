@@ -4,7 +4,7 @@ import {
   getProviderOptionsWithOverride,
   getRecommendedProviderOptionsMatch,
 } from "../../providers/options"
-import { getOpenAIGPT5ReasoningEffortPolicy, LLM_PROVIDER_MODELS } from "../models"
+import { LLM_PROVIDER_MODELS } from "../models"
 
 describe("getProviderOptions", () => {
   describe("model pattern matching", () => {
@@ -463,9 +463,6 @@ describe("getProviderOptions", () => {
     it("should use the lowest reasoning effort each GPT-6.1 model accepts", () => {
       expect(getProviderOptions("gpt-6.1-sol", "openai").openai?.reasoningEffort).toBe("low")
       expect(getProviderOptions("gpt-6.1-terra", "openai").openai?.reasoningEffort).toBe("none")
-      expect(getOpenAIGPT5ReasoningEffortPolicy("gpt-6.1-sol")?.supportedValues).not.toContain(
-        "none",
-      )
     })
 
     it("should use low reasoning effort for Grok 4.7, which cannot disable reasoning", () => {

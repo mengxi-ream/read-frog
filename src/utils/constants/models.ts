@@ -1,13 +1,4 @@
-import type { OpenAIResponsesProviderOptions } from "@ai-sdk/openai"
 import type { JSONValue } from "ai"
-
-type OpenAIReasoningEffort = Exclude<OpenAIResponsesProviderOptions["reasoningEffort"], undefined>
-
-interface OpenAIGPT5ReasoningEffortPolicy {
-  pattern: RegExp
-  supportedValues: readonly OpenAIReasoningEffort[]
-  recommendedValue?: OpenAIReasoningEffort
-}
 
 // Reviewed against provider catalogs and AI SDK docs on 2026-11-04.
 // Keep existing IDs: persisted provider configs validate against these enums.
@@ -508,103 +499,6 @@ export const PURE_TRANSLATE_PROVIDERS = [
   "deepl",
 ] as const
 
-const OPENAI_GPT5_REASONING_EFFORT_POLICIES: OpenAIGPT5ReasoningEffortPolicy[] = [
-  // https://ai-sdk.dev/providers/ai-sdk-providers/openai (reviewed 2026-11-04):
-  // GPT-6.1 Sol cannot turn reasoning off; Terra can.
-  {
-    pattern: /^(?:openai\/)?gpt-6\.1-sol$/i,
-    supportedValues: ["low", "medium", "high", "xhigh", "max"],
-    recommendedValue: "low",
-  },
-  {
-    pattern: /^(?:openai\/)?gpt-6\.1-terra$/i,
-    supportedValues: ["none", "low", "medium", "high", "xhigh", "max"],
-    recommendedValue: "none",
-  },
-  {
-    pattern: /^(?:openai\/)?gpt-6-astra$/i,
-    supportedValues: ["low", "medium", "high", "xhigh", "max"],
-    recommendedValue: "low",
-  },
-  {
-    pattern: /^(?:openai\/)?gpt-6-sol$/i,
-    supportedValues: ["none", "low", "medium", "high", "xhigh", "max"],
-    recommendedValue: "medium",
-  },
-  {
-    pattern: /^(?:openai\/)?gpt-6-luna$/i,
-    supportedValues: ["none", "low", "medium", "high", "xhigh", "max"],
-    recommendedValue: "medium",
-  },
-  {
-    pattern: /^(?:openai\/)?gpt-5\.6(?:-(?:luna|terra|sol))?$/i,
-    supportedValues: ["none", "low", "medium", "high", "xhigh", "max"],
-    recommendedValue: "none",
-  },
-  {
-    pattern: /^gpt-5\.4-pro$/i,
-    supportedValues: ["medium", "high", "xhigh"],
-    recommendedValue: "medium",
-  },
-  {
-    pattern: /^gpt-5\.2-pro$/i,
-    supportedValues: ["medium", "high", "xhigh"],
-    recommendedValue: "medium",
-  },
-  {
-    pattern: /^gpt-5-pro$/i,
-    supportedValues: ["high"],
-    recommendedValue: "high",
-  },
-  {
-    pattern: /^(?:gpt-5\.5|gpt-5\.4|gpt-5\.4-mini|gpt-5\.4-nano)$/i,
-    supportedValues: ["none", "low", "medium", "high", "xhigh"],
-    recommendedValue: "none",
-  },
-  {
-    pattern: /^gpt-5\.2$/i,
-    supportedValues: ["none", "low", "medium", "high", "xhigh"],
-    recommendedValue: "none",
-  },
-  {
-    pattern: /^(?:gpt-5\.1|gpt-5\.1-codex|gpt-5\.1-codex-mini)$/i,
-    supportedValues: ["none", "low", "medium", "high"],
-    recommendedValue: "none",
-  },
-  {
-    pattern: /^(?:gpt-5|gpt-5-mini|gpt-5-nano|gpt-5-codex)$/i,
-    supportedValues: ["minimal", "low", "medium", "high"],
-    recommendedValue: "minimal",
-  },
-  {
-    pattern:
-      /^(?:gpt-5-chat-latest|gpt-5\.1-chat-latest|gpt-5\.2-chat-latest|gpt-5\.3-chat-latest)$/i,
-    supportedValues: [],
-  },
-]
-
-const OPENAI_GPT5_RECOMMENDED_MODEL_OPTIONS: Array<{
-  pattern: RegExp
-  options: Record<string, JSONValue>
-}> = OPENAI_GPT5_REASONING_EFFORT_POLICIES.flatMap(({ pattern, recommendedValue }) => {
-  if (recommendedValue === undefined) {
-    return []
-  }
-
-  return [
-    {
-      pattern,
-      options: { reasoningEffort: recommendedValue },
-    },
-  ]
-})
-
-export function getOpenAIGPT5ReasoningEffortPolicy(
-  model: string,
-): OpenAIGPT5ReasoningEffortPolicy | undefined {
-  return OPENAI_GPT5_REASONING_EFFORT_POLICIES.find(({ pattern }) => pattern.test(model))
-}
-
 /**
  * Model options configuration.
  * Flat list design: first match wins, more specific patterns should be placed first.
@@ -669,9 +563,65 @@ export const LLM_MODEL_OPTIONS: Array<{
     options: { reasoningEffort: "minimal" },
   },
 
-  // OpenAI GPT-5 defaults use the lowest supported reasoning effort per model.
-  // GPT-5 chat-latest variants are intentionally omitted because their docs do not advertise reasoning.effort.
-  ...OPENAI_GPT5_RECOMMENDED_MODEL_OPTIONS,
+  // OpenAI GPT-5 and GPT-6 - the lowest reasoning effort each model accepts, unless noted.
+  // The accepted range is noted on each entry. The chat-latest variants are left out on
+  // purpose: their docs do not advertise reasoning.effort.
+  // https://ai-sdk.dev/providers/ai-sdk-providers/openai (reviewed 2026-11-04)
+  {
+    // Accepts low to max: cannot turn reasoning off.
+    pattern: /^(?:openai\/)?gpt-6\.1-sol$/i,
+    options: { reasoningEffort: "low" },
+  },
+  {
+    // Accepts none to max.
+    pattern: /^(?:openai\/)?gpt-6\.1-terra$/i,
+    options: { reasoningEffort: "none" },
+  },
+  {
+    // Accepts low to max.
+    pattern: /^(?:openai\/)?gpt-6-astra$/i,
+    options: { reasoningEffort: "low" },
+  },
+  {
+    // Accepts none to max, but recommends medium rather than the floor (since #2241).
+    pattern: /^(?:openai\/)?gpt-6-sol$/i,
+    options: { reasoningEffort: "medium" },
+  },
+  {
+    // Accepts none to max, but recommends medium rather than the floor (since #2241).
+    pattern: /^(?:openai\/)?gpt-6-luna$/i,
+    options: { reasoningEffort: "medium" },
+  },
+  {
+    // Accepts none to max.
+    pattern: /^(?:openai\/)?gpt-5\.6(?:-(?:luna|terra|sol))?$/i,
+    options: { reasoningEffort: "none" },
+  },
+  {
+    // Accepts medium to xhigh.
+    pattern: /^gpt-5\.[24]-pro$/i,
+    options: { reasoningEffort: "medium" },
+  },
+  {
+    // Accepts high only.
+    pattern: /^gpt-5-pro$/i,
+    options: { reasoningEffort: "high" },
+  },
+  {
+    // Accepts none to xhigh.
+    pattern: /^(?:gpt-5\.5|gpt-5\.4|gpt-5\.4-mini|gpt-5\.4-nano|gpt-5\.2)$/i,
+    options: { reasoningEffort: "none" },
+  },
+  {
+    // Accepts none to high.
+    pattern: /^(?:gpt-5\.1|gpt-5\.1-codex|gpt-5\.1-codex-mini)$/i,
+    options: { reasoningEffort: "none" },
+  },
+  {
+    // Accepts minimal to high.
+    pattern: /^(?:gpt-5|gpt-5-mini|gpt-5-nano|gpt-5-codex)$/i,
+    options: { reasoningEffort: "minimal" },
+  },
 
   // Grok 4.3 can disable thinking; 4.5, 4.6 and 4.7 cannot.
   {
