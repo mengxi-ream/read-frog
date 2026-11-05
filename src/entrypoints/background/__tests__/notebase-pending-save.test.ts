@@ -770,4 +770,126 @@ describe("notebase pending save processor", () => {
     expect(deps.clearPendingNotebaseSave).not.toHaveBeenCalled()
     expect(deps.reportNoteSave).not.toHaveBeenCalled()
   })
+
+  describe("note origin", () => {
+    const origin = {
+      kind: "webpage",
+      url: "https://example.com/article",
+      title: "An article",
+    } as const
+
+    it("puts the origin on a new Notebase's first note", async () => {
+      const action = createAction()
+      const pending = createPendingNotebaseSave(action, [{ summary: "A short summary" }], 1_000, {
+        origin,
+      })
+      const deps = createDeps({ pending, config: createConfig(action), authenticated: true })
+
+      await createNotebasePendingSaveProcessor(deps)("auth-cookie-change")
+
+      const input = deps.createNotebase.mock.calls[0]?.[0]
+      expect(input.options.initialRow).toEqual({
+        id: pending.rows[0]!.id,
+        cells: pending.rows[0]!.cells,
+        origin,
+      })
+    })
+
+    it("puts the origin on each of a new Notebase's first notes", async () => {
+      const action = createAction()
+      const pending = createPendingNotebaseSave(
+        action,
+        [{ summary: "First" }, { summary: "Second" }],
+        1_000,
+        { origin },
+      )
+      const deps = createDeps({ pending, config: createConfig(action), authenticated: true })
+
+      await createNotebasePendingSaveProcessor(deps)("auth-cookie-change")
+
+      const input = deps.createNotebase.mock.calls[0]?.[0]
+      expect(input.options.initialRows).toHaveLength(2)
+      for (const row of input.options.initialRows) {
+        expect(row.origin).toEqual(origin)
+      }
+    })
+
+    it("puts the origin on a connected pending row", async () => {
+      const action = createConnectedAction()
+      const pending = createPendingConnectedNotebaseSave(
+        action,
+        action.notebaseConnection!,
+        [{ summary: "A short summary" }],
+        1_000,
+        { origin },
+      )
+      const deps = createDeps({ pending, config: createConfig(action), authenticated: true })
+      deps.getSchema.mockResolvedValueOnce(createConnectedSchema())
+
+      await createNotebasePendingSaveProcessor(deps)("auth-cookie-change")
+
+      expect(deps.createRow).toHaveBeenCalledWith(
+        {
+          notebaseId: "notebase-1",
+          data: { cells: { "column-summary": "A short summary" }, origin },
+        },
+        { surface: "custom_action", isGuide: false },
+      )
+    })
+
+    it("puts the origin on every connected pending row", async () => {
+      const action = createConnectedAction()
+      const pending = createPendingConnectedNotebaseSave(
+        action,
+        action.notebaseConnection!,
+        [{ summary: "First" }, { summary: "Second" }],
+        1_000,
+        { origin },
+      )
+      const deps = createDeps({ pending, config: createConfig(action), authenticated: true })
+      deps.getSchema.mockResolvedValueOnce(createConnectedSchema())
+
+      await createNotebasePendingSaveProcessor(deps)("auth-cookie-change")
+
+      expect(deps.createRows).toHaveBeenCalledWith(
+        {
+          notebaseId: "notebase-1",
+          rows: [
+            { cells: { "column-summary": "First" }, origin },
+            { cells: { "column-summary": "Second" }, origin },
+          ],
+        },
+        { surface: "custom_action", isGuide: false },
+      )
+    })
+
+    it("keeps the origin when a connected save falls back to a replacement Notebase", async () => {
+      const action = createConnectedAction()
+      const pending = createPendingConnectedNotebaseSave(
+        action,
+        action.notebaseConnection!,
+        [{ summary: "A short summary" }],
+        1_000,
+        { origin },
+      )
+      const deps = createDeps({ pending, config: createConfig(action), authenticated: true })
+      deps.listNotebases.mockResolvedValueOnce([])
+
+      await createNotebasePendingSaveProcessor(deps)("auth-cookie-change")
+
+      const input = deps.createNotebase.mock.calls[0]?.[0]
+      expect(input.options.initialRow.origin).toEqual(origin)
+    })
+
+    it("sends no origin when the save has none", async () => {
+      const action = createAction()
+      const pending = createPendingNotebaseSave(action, [{ summary: "A short summary" }], 1_000)
+      const deps = createDeps({ pending, config: createConfig(action), authenticated: true })
+
+      await createNotebasePendingSaveProcessor(deps)("auth-cookie-change")
+
+      const input = deps.createNotebase.mock.calls[0]?.[0]
+      expect(input.options.initialRow).not.toHaveProperty("origin")
+    })
+  })
 })

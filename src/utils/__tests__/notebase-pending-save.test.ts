@@ -158,6 +158,48 @@ describe("notebase pending save", () => {
     expect(pendingCreateNotebaseSaveSchema.parse(pending)).toEqual(pending)
   })
 
+  it("keeps the save's origin through storage and on every first note", () => {
+    const origin = {
+      kind: "ebook",
+      ebookId: "22222222-2222-4222-8222-222222222222",
+      cfi: "epubcfi(/6/4!/4/2/1:0)",
+    } as const
+    const pending = createPendingNotebaseSave(
+      createAction(),
+      [
+        { summary: "First", score: 1 },
+        { summary: "Second", score: 2 },
+      ],
+      1_000,
+      { origin },
+    )
+
+    const parsed = pendingCreateNotebaseSaveSchema.parse(JSON.parse(JSON.stringify(pending)))
+    expect(parsed.origin).toEqual(origin)
+    const createInput = buildNotebaseCreateInputFromPending(parsed)
+    expect(createInput.options?.initialRows).toEqual(
+      pending.rows.map((row) => ({ ...row, origin })),
+    )
+  })
+
+  it("drops an origin that no longer parses without losing the save", () => {
+    const pending = createPendingNotebaseSave(
+      createAction(),
+      [{ summary: "A short summary", score: 9 }],
+      1_000,
+    )
+
+    const parsed = pendingCreateNotebaseSaveSchema.parse({
+      ...pending,
+      origin: { kind: "ebook", ebookId: "not-a-uuid" },
+    })
+    expect(parsed.origin).toBeUndefined()
+    expect(parsed.rows).toEqual(pending.rows)
+    expect(buildNotebaseCreateInputFromPending(parsed).options?.initialRow).not.toHaveProperty(
+      "origin",
+    )
+  })
+
   it("builds the website detail URL from the pending notebase id", () => {
     const notebaseId = "11111111-1111-4111-8111-111111111111"
     const url = new URL(getNotebaseDetailUrl(notebaseId))

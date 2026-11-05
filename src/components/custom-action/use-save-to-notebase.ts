@@ -1,5 +1,5 @@
 import type { NotebaseRowCreateInput, NotebaseRowCreateManyInput } from "@read-frog/api-contract"
-import type { NoteSaveSurface } from "@read-frog/definitions"
+import type { NoteOriginInput, NoteSaveSurface } from "@read-frog/definitions"
 import type { SaveToNotebaseAnalyticsSource } from "./save-to-notebase-dialog-atom"
 import type { AnalyticsFailureReason, SurfaceByFeature } from "@/types/analytics"
 import type {
@@ -62,6 +62,12 @@ export interface SaveToNotebaseRequest {
   results: Array<Record<string, unknown>>
   analyticsSource?: SaveToNotebaseAnalyticsSource
   surface?: SurfaceByFeature["note_save"]
+  /**
+   * Where the notes came from, put on every note this save creates. Read by the
+   * caller when the save starts: a save that waits for a sign-in or a dialog
+   * finishes in the background, away from the page.
+   */
+  origin?: NoteOriginInput | null
 }
 
 /** One direct save, as reported to the server (request header) and to analytics. */
@@ -325,6 +331,8 @@ export function useSaveToNotebase() {
 
   const save = async (request: SaveToNotebaseRequest): Promise<SaveToNotebaseOutcome> => {
     const { action, results, analyticsSource } = request
+    const origin = request.origin ?? undefined
+    const originField = origin ? { origin } : {}
     const surface = request.surface ?? ANALYTICS_SURFACE.SELECTION_TOOLBAR
     if (results.length === 0) {
       return "failed"
@@ -362,6 +370,7 @@ export function useSaveToNotebase() {
           guideDictionaryNotebaseTracking: guideDictionaryNotebaseTracking ?? undefined,
           saveSource,
           analyticsSurface: surface,
+          origin,
         }),
       })
       return "dialog_opened" as const
@@ -379,6 +388,7 @@ export function useSaveToNotebase() {
           guideDictionaryNotebaseTracking: guideDictionaryNotebaseTracking ?? undefined,
           saveSource,
           analyticsSurface: surface,
+          origin,
         }),
         connectedAccount,
       })
@@ -415,6 +425,7 @@ export function useSaveToNotebase() {
           guideDictionaryNotebaseTracking: guideDictionaryNotebaseTracking ?? undefined,
           saveSource,
           analyticsSurface: surface,
+          origin,
         },
       )
       setSaveToNotebaseDialog({
@@ -506,6 +517,7 @@ export function useSaveToNotebase() {
               notebaseId: refreshedConnection.notebaseId,
               data: {
                 cells: firstCells,
+                ...originField,
               },
             },
             attempt,
@@ -514,7 +526,7 @@ export function useSaveToNotebase() {
           await saveManyMutation.mutateAsync({
             input: {
               notebaseId: refreshedConnection.notebaseId,
-              rows: cellsList.map((cells) => ({ cells })),
+              rows: cellsList.map((cells) => ({ cells, ...originField })),
             },
             attempt,
           })

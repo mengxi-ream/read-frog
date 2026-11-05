@@ -26,6 +26,9 @@ interface RootProps {
 }
 
 const popover = vi.hoisted(() => ({ root: null as RootProps | null }))
+const panel = vi.hoisted(() => ({
+  props: null as { getVideoSeconds?: () => number | undefined } | null,
+}))
 
 vi.mock("@/components/ui/selection-popover", () => ({
   SelectionPopover: {
@@ -36,7 +39,12 @@ vi.mock("@/components/ui/selection-popover", () => ({
     Content: ({ children }: { children: ReactNode }) => children,
   },
 }))
-vi.mock("@/components/custom-action/custom-action-panel", () => ({ CustomActionPanel: () => null }))
+vi.mock("@/components/custom-action/custom-action-panel", () => ({
+  CustomActionPanel: (props: { getVideoSeconds?: () => number | undefined }) => {
+    panel.props = props
+    return null
+  },
+}))
 vi.mock("@/components/custom-action/save-to-notebase-dialog-host", () => ({
   SaveToNotebaseDialogHost: () => null,
 }))
@@ -51,7 +59,7 @@ vi.mock("../use-top-layer-portal-container", () => ({
  * "one two three": words at 0, 2 and 4, with their right edges 100px apart and
  * their bottoms at 300px, in a subtitles box whose top is at 240px.
  */
-function renderCard() {
+function renderCard(video: HTMLVideoElement | null = null) {
   subtitlesStore.set(sourceTrackAtom, [{ text: "one two three", start: 0, end: 5000 }])
   subtitlesStore.set(currentTimeMsAtom, 1000)
   const box = document.createElement("div")
@@ -70,7 +78,7 @@ function renderCard() {
   document.body.append(box)
   render(
     <Provider store={subtitlesStore}>
-      <SubtitlesUIContext value={{ getVideoElement: () => null } as never}>
+      <SubtitlesUIContext value={{ getVideoElement: () => video } as never}>
         <WordLookupCard />
       </SubtitlesUIContext>
     </Provider>,
@@ -121,6 +129,15 @@ describe("WordLookupCard", () => {
 
     lookUp(4)
     expect(popover.root?.anchor).toEqual({ x: 300, y: 240, above: true })
+  })
+
+  it("lets a save read the playing video's time for its note origin", () => {
+    const video = document.createElement("video")
+    renderCard(video)
+    lookUp(2)
+
+    Object.defineProperty(video, "currentTime", { value: 42.5, configurable: true })
+    expect(panel.props?.getVideoSeconds?.()).toBe(42.5)
   })
 
   it("drops the pin when the lookup is closed from outside the card", () => {

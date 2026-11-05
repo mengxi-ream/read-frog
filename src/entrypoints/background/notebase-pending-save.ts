@@ -313,6 +313,7 @@ async function createReplacementNotebaseFromConnectedPending(
       guideDictionaryNotebaseTracking: pendingNotebaseSave.guideDictionaryNotebaseTracking,
       ...(pendingNotebaseSave.saveSource ? { saveSource: pendingNotebaseSave.saveSource } : {}),
       analyticsSurface: pendingNotebaseSave.analyticsSurface,
+      ...(pendingNotebaseSave.origin ? { origin: pendingNotebaseSave.origin } : {}),
     },
   )
 
@@ -656,6 +657,7 @@ async function processConnectedPendingSave(
   )
 
   const noteSave = getPendingNotebaseSaveContext(pendingNotebaseSave)
+  const originField = pendingNotebaseSave.origin ? { origin: pendingNotebaseSave.origin } : {}
   try {
     const [firstCells] = cellsList
     if (cellsList.length === 1 && firstCells) {
@@ -664,6 +666,7 @@ async function processConnectedPendingSave(
           notebaseId: refreshedConnection.notebaseId,
           data: {
             cells: firstCells,
+            ...originField,
           },
         },
         noteSave,
@@ -672,7 +675,7 @@ async function processConnectedPendingSave(
       await deps.createRows(
         {
           notebaseId: refreshedConnection.notebaseId,
-          rows: cellsList.map((cells) => ({ cells })),
+          rows: cellsList.map((cells) => ({ cells, ...originField })),
         },
         noteSave,
       )

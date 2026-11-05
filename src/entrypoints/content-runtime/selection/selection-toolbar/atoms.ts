@@ -1,3 +1,4 @@
+import type { NoteOriginInput } from "@read-frog/definitions"
 import type { ContextSnapshot, SelectionSnapshot } from "../utils"
 import type { SelectionToolbarCustomActionRequestSlice } from "@/components/custom-action/use-custom-action-execution"
 import type { Config } from "@/types/config/config"
@@ -11,6 +12,7 @@ import { atomFamily } from "jotai-family"
 import { selectAtom } from "jotai/utils"
 import { configAtom } from "@/utils/atoms/config"
 import { findSelectionToolbarAction } from "@/utils/custom-actions"
+import { getWebPageNoteOrigin } from "@/utils/note-origin"
 import { resolveProviderRefForCapability } from "@/utils/providers/provider-registry"
 import { buildContextSnapshot } from "../utils"
 
@@ -19,13 +21,24 @@ export interface SelectionSession {
   createdAt: number
   selectionSnapshot: SelectionSnapshot
   contextSnapshot: ContextSnapshot
+  /**
+   * Where the selection was made, recorded with each note saved from it. Read
+   * when the selection is made, since a save can finish after the page is gone.
+   * Null when the note gets no origin.
+   */
+  noteOrigin: NoteOriginInput | null
 }
 
 let nextSelectionSessionId = 0
 
+/**
+ * `noteOrigin` defaults to the page this frame shows; a selection relayed from
+ * elsewhere (the ebook reader) passes its own, or null.
+ */
 export function createSelectionSession(
   selection: SelectionSnapshot | null,
   context: ContextSnapshot | null,
+  noteOrigin?: NoteOriginInput | null,
 ): SelectionSession | null {
   if (!selection) {
     return null
@@ -41,6 +54,7 @@ export function createSelectionSession(
     createdAt: Date.now(),
     selectionSnapshot: selection,
     contextSnapshot: nextContext,
+    noteOrigin: noteOrigin === undefined ? getWebPageNoteOrigin() : noteOrigin,
   }
 }
 
@@ -62,8 +76,11 @@ export const selectionAtom = atom(
 export const contextAtom = atom(
   (get) => get(selectionSessionAtom)?.contextSnapshot ?? null,
   (get, set, nextContext: ContextSnapshot | null) => {
-    const currentSelection = get(selectionAtom)
-    set(selectionSessionAtom, createSelectionSession(currentSelection, nextContext))
+    const current = get(selectionSessionAtom)
+    set(
+      selectionSessionAtom,
+      createSelectionSession(current?.selectionSnapshot ?? null, nextContext, current?.noteOrigin),
+    )
   },
 )
 export const isSelectionToolbarOpenAtom = atom<boolean>(false)
@@ -75,9 +92,17 @@ export const setSelectionStateAtom = atom(
   (
     _get,
     set,
-    nextState: { selection: SelectionSnapshot | null; context: ContextSnapshot | null },
+    nextState: {
+      selection: SelectionSnapshot | null
+      context: ContextSnapshot | null
+      /** Omitted for a selection in this frame's page. */
+      noteOrigin?: NoteOriginInput | null
+    },
   ) => {
-    set(selectionSessionAtom, createSelectionSession(nextState.selection, nextState.context))
+    set(
+      selectionSessionAtom,
+      createSelectionSession(nextState.selection, nextState.context, nextState.noteOrigin),
+    )
   },
 )
 

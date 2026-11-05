@@ -13,6 +13,7 @@ import { classifyResolvedProvider } from "@/utils/analytics-provider"
 import { configFieldsAtomMap, writeConfigAtom } from "@/utils/atoms/config"
 import { getSourceDocumentTitle } from "@/utils/content/document-title"
 import { findSelectionToolbarAction, patchSelectionToolbarAction } from "@/utils/custom-actions"
+import { withVideoNoteOriginSeconds } from "@/utils/note-origin"
 import {
   getSelectableProvidersForCapability,
   resolveProviderRefForCapability,
@@ -41,7 +42,12 @@ function CustomActionFooterContent({
   return <SelectionToolbarFooterContent providers={customActionProviders} {...props} />
 }
 
-export function CustomActionPanel() {
+export function CustomActionPanel({
+  getVideoSeconds,
+}: {
+  /** The playing video's time, for a card on video subtitles: saved with its notes. */
+  getVideoSeconds?: () => number | undefined
+} = {}) {
   const bodyRef = useRef<HTMLDivElement>(null)
   const [request, setRequest] = useAtom(customActionRequestAtom)
   const language = useAtomValue(configFieldsAtomMap.language)
@@ -180,6 +186,9 @@ export function CustomActionPanel() {
               isRunning={isRunning}
               result={result}
               surface={cardSurface}
+              getNoteOrigin={() =>
+                withVideoNoteOriginSeconds(request.noteOrigin, getVideoSeconds?.())
+              }
             />
             <CustomActionToolButton action={action} />
           </>

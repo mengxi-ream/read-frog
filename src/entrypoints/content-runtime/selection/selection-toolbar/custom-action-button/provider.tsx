@@ -16,6 +16,7 @@ import { classifyResolvedProvider, UNKNOWN_FEATURE_PROVIDER } from "@/utils/anal
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { findSelectionToolbarAction, getSelectionToolbarActions } from "@/utils/custom-actions"
 import { onMessage } from "@/utils/message"
+import { getWebPageNoteOrigin } from "@/utils/note-origin"
 import { resolveProviderRefForCapability } from "@/utils/providers/provider-registry"
 import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-host"
 import { normalizeSelectedText } from "../../utils"
@@ -104,6 +105,7 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
               cleanSelection,
               contextText: cleanSelection ? session?.contextSnapshot.text || cleanSelection : "",
               surface: pendingRequest.surface,
+              noteOrigin: session?.noteOrigin ?? null,
               sessionKey: sessionKeyRef.current,
               // A reuse forces a rerun even when the retriggered request
               // resolves to an identical execution key.
@@ -167,6 +169,7 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
                   text: "",
                   paragraphs: [],
                 },
+                noteOrigin: getWebPageNoteOrigin(),
               }
             : null),
       })
