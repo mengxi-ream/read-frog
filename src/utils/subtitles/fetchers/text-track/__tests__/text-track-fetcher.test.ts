@@ -119,6 +119,21 @@ describe("TextTrackFetcher", () => {
     await expect(fetcher.shouldUseSameTrack()).resolves.toBe(true)
   })
 
+  it("answers for the track the reader switches to while an empty one is checked", async () => {
+    const english = new FakeTrack("subtitles", "English", "en", "showing")
+    const spanish = new FakeTrack("subtitles", "Español", "es", "disabled")
+    spanish.loadCues("hola")
+    const fetcher = createFetcher(videoWith(english, spanish))
+    const check = fetcher.hasAvailableSubtitles()
+
+    english.mode = "disabled"
+    spanish.mode = "showing"
+    await vi.advanceTimersByTimeAsync(TEXT_TRACK_CUE_WAIT_TIMEOUT_MS)
+
+    await expect(check).resolves.toBe(true)
+    expect(fetcher.getSourceLanguage()).toBe("es")
+  })
+
   it("reports no subtitles when the track the reader switches to never gets a cue", async () => {
     const english = new FakeTrack("subtitles", "English", "en", "showing")
     const spanish = new FakeTrack("subtitles", "Español", "es", "disabled")

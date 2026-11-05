@@ -72,26 +72,26 @@ export class TextTrackFetcher implements SubtitlesFetcher {
   // A track can be there and never get a cue, so checking loads the cues and `fetch` reuses them.
   // A missing video is not a captionless one, so that error goes to the caller.
   async hasAvailableSubtitles(): Promise<boolean> {
-    try {
-      // The reader can pick another track while the cues load; the answer is for the one picked.
-      do {
-        await this.fetch()
-      } while (!(await this.shouldUseSameTrack()))
-      return true
-    } catch (error) {
-      if (error instanceof NoSubtitlesError) return false
-      throw error
+    // The reader can pick another track while the cues load; the answer is for the one picked.
+    for (;;) {
+      const picked = this.pickedTrackHash()
+      const found = await this.fetch().then(
+        () => true,
+        (error: unknown) => {
+          if (error instanceof NoSubtitlesError) return false
+          throw error
+        },
+      )
+      if (this.pickedTrackHash() === picked) return found
     }
   }
 
   async shouldUseSameTrack(): Promise<boolean> {
-    if (this.subtitles.length === 0 || !this.cachedTrackHash) {
-      return false
-    }
-
-    const video = this.options.resolveVideo()
-    const track = video ? this.selectTrack(video) : null
-    return !!track && this.buildTrackHash(track) === this.cachedTrackHash
+    return (
+      this.subtitles.length > 0 &&
+      !!this.cachedTrackHash &&
+      this.pickedTrackHash() === this.cachedTrackHash
+    )
   }
 
   hideNativeSubtitles(): void {
@@ -126,6 +126,12 @@ export class TextTrackFetcher implements SubtitlesFetcher {
 
   private buildTrackHash(track: TextTrack): string {
     return [this.options.getVideoId() ?? "", track.language, track.label, track.kind].join(":")
+  }
+
+  private pickedTrackHash(): string | null {
+    const video = this.options.resolveVideo()
+    const track = video ? this.selectTrack(video) : null
+    return track ? this.buildTrackHash(track) : null
   }
 
   private selectTrack(video: HTMLVideoElement): TextTrack | null {
