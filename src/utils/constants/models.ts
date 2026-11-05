@@ -140,7 +140,8 @@ export const LLM_PROVIDER_MODELS = {
   // https://www.jalapeno-cloud.ai/token-api/v1/models). Narrowed to what suits translation:
   // the code-specialised (Kimi-K2.7-Code) and video-generation (Doubao-Seedance-*) entries
   // are left out, since neither buys anything here.
-  // GLM-5.2, Hy3 and Qwen3-Next-80B-A3B-Instruct were delisted; v119-to-v120 moves them off.
+  // Hy3 and Qwen3-Next-80B-A3B-Instruct were delisted. GLM-5.2 is still in the catalog but is
+  // dropped because GLM-5.3 supersedes it. v119-to-v120 moves all three off.
   jalapenocloud: [
     "GLM-5.3",
     "GLM-5.3-Flash",

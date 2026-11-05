@@ -9,7 +9,7 @@ import type { TestSeriesObject } from "./types"
  * from the retired `deepseek-chat` to `deepseek-v4-flash`. Every other
  * provider, including each series' Jalapeno Cloud provider on
  * `DeepSeek-V4-Flash`, is on a model that is still listed and stays as it
- * was. The delisted Jalapeno models and the custom-model case are covered in
+ * was. The removed Jalapeno models and the custom-model case are covered in
  * `migration-scripts/v119-to-v120.test.ts`.
  */
 

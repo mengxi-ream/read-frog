@@ -4,7 +4,8 @@
  * Moves saved provider configs off models that were dropped from the built-in
  * model lists, onto that provider's default as of v120:
  * - DeepSeek retired `deepseek-chat` and `deepseek-reasoner` on 2026-07-24.
- * - Jalapeno Cloud delisted `GLM-5.2`, `Hy3` and `Qwen3-Next-80B-A3B-Instruct`.
+ * - Jalapeno Cloud delisted `Hy3` and `Qwen3-Next-80B-A3B-Instruct`. `GLM-5.2`
+ *   is still in its catalog but is dropped because `GLM-5.3` supersedes it.
  *
  * Two shapes are moved:
  * - Custom-model mode is on and `customModel` is a removed id. Ticking "enter

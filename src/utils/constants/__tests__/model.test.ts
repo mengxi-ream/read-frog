@@ -168,7 +168,7 @@ describe("getProviderOptions", () => {
       ])
     })
 
-    it("should not list models that providers retired or delisted", () => {
+    it("should not list the retired, delisted or superseded models", () => {
       for (const model of ["GLM-5.2", "Hy3", "Qwen3-Next-80B-A3B-Instruct"]) {
         expect(LLM_PROVIDER_MODELS.jalapenocloud).not.toContain(model)
       }
