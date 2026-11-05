@@ -15,6 +15,7 @@ import { TooltipProvider } from "@/components/ui/base-ui/tooltip"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { configAtom } from "@/utils/atoms/config"
 import { CONFIG_STORAGE_KEY, DEFAULT_CONFIG } from "@/utils/constants/config"
+import { GOOGLE_TRANSLATE_PROVIDER_ID } from "@/utils/constants/providers"
 import { getBuiltInDictionaryAction } from "@/utils/custom-actions"
 import { prepareTranslationText } from "@/utils/host/translate/text-preparation"
 import { buildContextSnapshot, createRangeSnapshot, normalizeSelectedText } from "../../utils"
@@ -1082,6 +1083,38 @@ describe("selection toolbar requests", () => {
     })
 
     expect(screen.getByTestId("translation-result").textContent).toBe("Selected text")
+  })
+
+  // #2466: Google collapsed the newlines of a multi-paragraph selection, and
+  // its zh-TW model then cut the run-on text short after the second paragraph.
+  it("asks translate providers to keep a multi-paragraph selection's line breaks", async () => {
+    translateTextCoreMock.mockResolvedValue("第一段。\n\n第二段。")
+    getOrCreateWebPageContextMock.mockResolvedValue(null)
+
+    const config = cloneConfig(DEFAULT_CONFIG)
+    setSelectionToolbarTranslateProvider(config, GOOGLE_TRANSLATE_PROVIDER_ID)
+    const store = createStore()
+    store.set(configAtom, config)
+    setSelectionState(store, { text: "First paragraph.\n\nSecond paragraph." })
+    renderWithProviders(<TranslateButton />, store)
+
+    fireEvent.click(screen.getByRole("button", { name: "action.translation" }))
+
+    await waitFor(() => {
+      expect(translateTextCoreMock).toHaveBeenCalledTimes(1)
+    })
+    expect(translateTextCoreMock.mock.calls[0]?.[0]).toMatchObject({
+      text: "First paragraph.\n\nSecond paragraph.",
+      providerConfig: {
+        kind: "local",
+        config: expect.objectContaining({ provider: "google-translate" }),
+      },
+      preserveLineBreaks: true,
+    })
+
+    await waitFor(() => {
+      expect(screen.getByTestId("translation-status").textContent).toBe("false")
+    })
   })
 
   // A note keeps the selection as a custom action run keeps it. Translation

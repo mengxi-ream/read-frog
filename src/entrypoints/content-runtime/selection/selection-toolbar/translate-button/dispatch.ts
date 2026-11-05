@@ -269,6 +269,11 @@ export async function translateWithStandardProvider({
     glossaryEnabled: translateRequest.glossaryEnabled,
     extraHashTags: ["selectionTranslation"],
     webPageContext,
+    // Selection.toString() only puts a newline where the page shows a line
+    // break (a <br>, a new block, a pre-wrap newline), so every one is
+    // structure. Google's transport collapses unprotected newlines, and on
+    // the resulting run-on text its zh-TW model can stop mid-text (#2466).
+    preserveLineBreaks: true,
   })
 
   return translatedText
