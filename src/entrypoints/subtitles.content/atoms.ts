@@ -68,6 +68,8 @@ export const subtitlesSettingsPanelOpenAtom = atom<boolean>(false)
 
 export const subtitlesSettingsPanelViewAtom = atom<ViewId>(ROOT_VIEW)
 
+export const subtitlesTranslateButtonAtom = atom<HTMLElement | null>(null)
+
 export const subtitlesSidebarOpenAtom = atom<boolean>(false)
 
 export const videoSummaryPartialAtom = atom<string>("")
