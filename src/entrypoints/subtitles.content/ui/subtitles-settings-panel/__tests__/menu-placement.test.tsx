@@ -1,5 +1,4 @@
 // @vitest-environment jsdom
-import type { MockInstance } from "vitest"
 import { act, cleanup, render, screen } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import {
@@ -39,7 +38,7 @@ describe("getMenuLeft", () => {
 })
 
 describe("settings panel placement", () => {
-  let boxRect: MockInstance<() => DOMRect>
+  let videoBox = box
   let observers: FakeResizeObserver[] = []
 
   class FakeResizeObserver {
@@ -68,9 +67,9 @@ describe("settings panel placement", () => {
     })
   }
 
-  function renderPanel() {
+  function renderPanel(embedded = false) {
     render(
-      <SubtitlesProviders adapter={{ embedded: false, getControlsConfig: () => undefined } as any}>
+      <SubtitlesProviders adapter={{ embedded, getControlsConfig: () => undefined } as any}>
         <SubtitlesSettingsPanel />
       </SubtitlesProviders>,
     )
@@ -85,13 +84,31 @@ describe("settings panel placement", () => {
     return button
   }
 
+  // Mirrors createReactShadowHost: the button renders in a shadow root inside its own host.
+  function shadowHost(button: HTMLElement) {
+    const host = document.createElement("div")
+    host.attachShadow({ mode: "open" }).append(button)
+    return host
+  }
+
   beforeEach(() => {
     observers = []
+    videoBox = box
     vi.stubGlobal("ResizeObserver", FakeResizeObserver)
-    vi.spyOn(HTMLElement.prototype, "offsetWidth", "get").mockReturnValue(MENU_WIDTH)
-    boxRect = vi
-      .spyOn(HTMLElement.prototype, "getBoundingClientRect")
-      .mockReturnValue(box as DOMRect)
+    // Only the menu and the video root measure as such, so measuring the wrong element fails.
+    vi.spyOn(HTMLElement.prototype, "offsetWidth", "get").mockImplementation(function (
+      this: HTMLElement,
+    ) {
+      return this.dataset.slot === "subtitles-settings-panel" ? MENU_WIDTH : 0
+    })
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (
+      this: HTMLElement,
+    ) {
+      const panel = document.querySelector("[data-slot='subtitles-settings-panel']")
+      return (
+        this === panel?.parentElement?.parentElement ? videoBox : { left: 0, width: 0 }
+      ) as DOMRect
+    })
     subtitlesStore.set(subtitlesSettingsPanelOpenAtom, true)
   })
 
@@ -119,6 +136,20 @@ describe("settings panel placement", () => {
     expect(menu).toHaveClass("right-4")
   })
 
+  it("re-places the menu when the video box resizes on its own", async () => {
+    const button = fakeButton(500)
+    subtitlesStore.set(subtitlesTranslateButtonAtom, button)
+    const menu = renderPanel()
+
+    videoBox = { left: 0, width: 1400 }
+    button.getBoundingClientRect = () => ({ left: 1200, width: 48 }) as DOMRect
+    await resized(menu.parentElement!)
+
+    expect(menu.style.left).toBe(
+      `${getMenuLeft({ left: 1200, width: 48 }, videoBox, MENU_WIDTH)}px`,
+    )
+  })
+
   it("moves to a remounted button once its host is in the page", async () => {
     subtitlesStore.set(subtitlesTranslateButtonAtom, fakeButton(500))
     const menu = renderPanel()
@@ -135,7 +166,7 @@ describe("settings panel placement", () => {
   it("follows the button when a control beside it changes width", async () => {
     const button = fakeButton(500)
     const row = document.createElement("div")
-    row.append(button)
+    row.append(shadowHost(button))
     subtitlesStore.set(subtitlesTranslateButtonAtom, button)
     const menu = renderPanel()
 
@@ -145,6 +176,22 @@ describe("settings panel placement", () => {
     expect(menu.style.left).toBe(`${getMenuLeft({ left: 511, width: 48 }, box, MENU_WIDTH)}px`)
   })
 
+  it("watches the row a remounted button lands in", async () => {
+    subtitlesStore.set(subtitlesTranslateButtonAtom, fakeButton(500))
+    const menu = renderPanel()
+    const remounted = fakeButton(800)
+    const host = shadowHost(remounted)
+    await act(async () => subtitlesStore.set(subtitlesTranslateButtonAtom, remounted))
+
+    const row = document.createElement("div")
+    row.append(host)
+    await resized(remounted)
+    remounted.getBoundingClientRect = () => ({ left: 811, width: 48 }) as DOMRect
+    await resized(row)
+
+    expect(menu.style.left).toBe(`${getMenuLeft({ left: 811, width: 48 }, box, MENU_WIDTH)}px`)
+  })
+
   it("stays inside a shrunken video while the button is gone with the controls", async () => {
     const button = fakeButton(900)
     subtitlesStore.set(subtitlesTranslateButtonAtom, button)
@@ -152,13 +199,26 @@ describe("settings panel placement", () => {
     const placed = getMenuLeft({ left: 900, width: 48 }, box, MENU_WIDTH)
 
     button.getBoundingClientRect = () => ({ left: 0, width: 0 }) as DOMRect
-    boxRect.mockReturnValue({ left: 100, width: 600 } as DOMRect)
+    videoBox = { left: 100, width: 600 }
     await act(async () => {
       window.dispatchEvent(new Event("resize"))
     })
 
     expect(clampMenuLeft(placed, 600, MENU_WIDTH)).toBeLessThan(placed)
     expect(menu.style.left).toBe(`${clampMenuLeft(placed, 600, MENU_WIDTH)}px`)
+  })
+
+  it("places the menu in the frame's viewport when it lives in an embedded player's controls", () => {
+    vi.stubGlobal("self", {})
+    vi.spyOn(document.documentElement, "clientWidth", "get").mockReturnValue(800)
+    subtitlesStore.set(subtitlesTranslateButtonAtom, fakeButton(500))
+
+    const menu = renderPanel(true)
+
+    expect(menu).toHaveClass("fixed")
+    expect(menu.style.left).toBe(
+      `${getMenuLeft({ left: 500, width: 48 }, { left: 0, width: 800 }, MENU_WIDTH)}px`,
+    )
   })
 
   it("registers the mounted translate button and lets it go on unmount", () => {
@@ -173,5 +233,23 @@ describe("settings panel placement", () => {
     )
     unmount()
     expect(subtitlesStore.get(subtitlesTranslateButtonAtom)).toBeNull()
+  })
+
+  it("keeps a newer button registered when the old one unmounts after it", () => {
+    const renderButton = () =>
+      render(
+        <SubtitlesProviders
+          adapter={{ embedded: false, getControlsConfig: () => undefined } as any}
+        >
+          <SubtitlesTranslateButton />
+        </SubtitlesProviders>,
+      )
+    const old = renderButton()
+    renderButton()
+    const [, newer] = screen.getAllByRole("button", { name: "Subtitle Translation Panel" })
+
+    old.unmount()
+
+    expect(subtitlesStore.get(subtitlesTranslateButtonAtom)).toBe(newer)
   })
 })
