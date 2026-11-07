@@ -1,5 +1,13 @@
 # @read-frog/extension
 
+## 1.58.1
+
+### Patch Changes
+
+- [#2477](https://github.com/mengxi-ream/read-frog/pull/2477) [`174027d`](https://github.com/mengxi-ream/read-frog/commit/174027d2bdfb6013dfc41d54c1cb87ee8c13274c) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(subtitles): line the video subtitles menu up with the Read Frog button instead of always opening it at the video's right edge, which left it far from the button on Bilibili
+
+- [#2469](https://github.com/mengxi-ream/read-frog/pull/2469) [`da75567`](https://github.com/mengxi-ream/read-frog/commit/da75567e24cd3ed4b11fe39a95bf4a7458ae39f3) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(subtitles): show video subtitles, the sidebar and their error toasts again on pages that stayed open while Firefox updated the extension, instead of leaving the old, unresponsive overlay in place
+
 ## 1.58.0
 
 ### Minor Changes
