@@ -43,7 +43,10 @@ let mountedSidebar: { host: HTMLElement; stopFollowing: () => void } | null = nu
 
 export function mountSubtitlesSidebar(adapter: SubtitlesProvidersAdapter): void {
   if (!adapter.supportsSidebar) return
-  if (mountedSidebar || document.getElementById(SUBTITLES_SIDEBAR_HOST_ID)) return
+  if (mountedSidebar) return
+  // Left by a dead instance of this script, e.g. after Firefox injects into open tabs on update.
+  const staleHost = document.getElementById(SUBTITLES_SIDEBAR_HOST_ID)
+  if (staleHost) removeReactShadowHost(staleHost)
 
   const shadowHost = createReactShadowHost(
     <SubtitlesProviders adapter={adapter}>

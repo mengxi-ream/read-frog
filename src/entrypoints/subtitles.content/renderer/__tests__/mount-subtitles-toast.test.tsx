@@ -30,4 +30,26 @@ describe("mountSubtitlesToast", () => {
     expect(toast).toBeTruthy()
     expect(toast?.closest(`.${SUBTITLES_THEME}`)).toBeTruthy()
   })
+
+  it("replaces a toast host left by a dead instance of the script", async () => {
+    const staleHost = document.createElement("div")
+    staleHost.id = "read-frog-subtitles-toast-host"
+    document.body.appendChild(staleHost)
+
+    await act(async () => {
+      cleanup = mountSubtitlesToast()
+    })
+
+    const host = document.getElementById("read-frog-subtitles-toast-host")
+    expect(staleHost.isConnected).toBe(false)
+    expect(host?.shadowRoot).toBeTruthy()
+  })
+
+  it("returns the same cleanup while its host is mounted", async () => {
+    await act(async () => {
+      cleanup = mountSubtitlesToast()
+    })
+
+    expect(mountSubtitlesToast()).toBe(cleanup)
+  })
 })

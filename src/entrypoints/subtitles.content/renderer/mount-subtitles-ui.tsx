@@ -52,14 +52,10 @@ export async function mountSubtitlesUI({
     parentEl.style.position = "relative"
   }
 
-  const existingHost = mountedHost ?? document.getElementById(READ_FROG_SUBTITLES_UI_HOST_ID)
-  if (existingHost) {
-    if (existingHost.parentElement === parentEl) {
-      return
-    }
-
-    unmountSubtitlesUI()
-  }
+  if (mountedHost?.parentElement === parentEl) return
+  // A host found only by id was left by a dead instance of this script (Firefox injects
+  // into open tabs on update); its React tree no longer runs, so replace it.
+  unmountSubtitlesUI()
 
   const shadowHost = document.createElement("div")
   shadowHost.id = READ_FROG_SUBTITLES_UI_HOST_ID
