@@ -87,17 +87,27 @@ export interface SubtitlesVideoContext {
   summary?: string | null
 }
 
+/**
+ * Which video a session belongs to, as far as caching is concerned: the
+ * transcript itself, hashed the way the background keys the summary
+ * (`getSubtitlesSummary`). Unlike the page's title and meta description, it
+ * reads the same on every visit.
+ */
+function getSubtitlesTranscriptIdentity(subtitlesTextContent: string): string | undefined {
+  const preparedText = cleanText(subtitlesTextContent)
+  return preparedText ? Sha256Hex(preparedText) : undefined
+}
+
 export function buildSubtitlesSummaryContextHash(
   videoContext: Pick<SubtitlesVideoContext, "subtitlesTextContent">,
   providerRef?: SerializableProviderRef,
 ): string | undefined {
-  const preparedText = cleanText(videoContext.subtitlesTextContent)
-  if (!preparedText) {
+  const transcriptIdentity = getSubtitlesTranscriptIdentity(videoContext.subtitlesTextContent)
+  if (!transcriptIdentity) {
     return undefined
   }
 
-  const textHash = Sha256Hex(preparedText)
-  return Sha256Hex(textHash, providerRef ? getProviderCacheIdentity(providerRef) : "")
+  return Sha256Hex(transcriptIdentity, providerRef ? getProviderCacheIdentity(providerRef) : "")
 }
 
 function normalizeSubtitlePromptContext(
@@ -118,12 +128,10 @@ async function buildSubtitleHashComponents(
     targetCode: Config["language"]["targetCode"]
   },
   enableAIContentAware: boolean,
-  subtitlePromptContext: SubtitlePromptContext,
   subtitlesTextContent: string,
   glossaryTerms: readonly MatchedTerm[],
 ): Promise<string[]> {
   const preparedText = prepareTranslationText(text)
-  const normalizedSubtitlesTextContent = normalizePromptContextValue(subtitlesTextContent)
   const hashComponents = [
     preparedText,
     getProviderCacheIdentity(providerRef),
@@ -138,14 +146,20 @@ async function buildSubtitleHashComponents(
   }
 
   const targetLangName = LANG_CODE_TO_EN_NAME[partialLangConfig.targetCode]
-  const promptContext = enableAIContentAware
-    ? subtitlePromptContext
-    : { ...subtitlePromptContext, videoSummary: undefined }
-  // Passed in rather than resolved here, so the prompt this hash is taken over
-  // is built from exactly the terms the request will carry.
+  // Hashed for the template and the glossary only, with the video context left
+  // empty. That context is the page title, the meta description and the AI
+  // summary, and none of it is stable across visits: the first two are read
+  // from a DOM that differs between an in-app navigation and a reload (YouTube
+  // keeps the previous page's description until a full load, and its title
+  // trails the navigation), and the summary lands after the first cues are
+  // already in flight. Keyed on them, rewatching after a refresh missed every
+  // cue and paid for the whole video again (#2472). The request still carries
+  // the real context; only the key leaves it out. Glossary terms are passed in
+  // rather than resolved here, so the prompt this hash is taken over is built
+  // from exactly the terms the request will carry.
   const { systemPrompt, prompt } = await getSubtitlesTranslatePrompt(targetLangName, preparedText, {
     isBatch: true,
-    context: promptContext,
+    context: {},
     glossaryTerms,
   })
   hashComponents.push(systemPrompt, prompt)
@@ -153,19 +167,14 @@ async function buildSubtitleHashComponents(
     enableAIContentAware ? "enableAIContentAware=true" : "enableAIContentAware=false",
   )
 
-  if (subtitlePromptContext.webTitle) {
-    hashComponents.push(`webTitle:${subtitlePromptContext.webTitle}`)
-  }
-  if (subtitlePromptContext.webDescription) {
-    hashComponents.push(`webDescription:${subtitlePromptContext.webDescription}`)
-  }
-  if (enableAIContentAware) {
-    if (normalizedSubtitlesTextContent) {
-      hashComponents.push(`subtitlesTextContent:${normalizedSubtitlesTextContent.slice(0, 1000)}`)
-    }
-    if (subtitlePromptContext.videoSummary) {
-      hashComponents.push(`videoSummary:${subtitlePromptContext.videoSummary}`)
-    }
+  // The video, in place of the context above. The summary is a function of
+  // the transcript and the provider, both already in the key, so dropping the
+  // summary loses nothing a rewatch would need — and it also keeps this key
+  // shared with the translated-subtitles download, which builds its context
+  // without a description and only after the summary is ready.
+  const transcriptIdentity = getSubtitlesTranscriptIdentity(subtitlesTextContent)
+  if (transcriptIdentity) {
+    hashComponents.push(`transcript:${transcriptIdentity}`)
   }
 
   return hashComponents
@@ -198,15 +207,9 @@ async function translateSingleSubtitle(
     providerRef,
     { sourceCode: langConfig.sourceCode, targetCode: langConfig.targetCode },
     enableAIContentAware,
-    subtitlePromptContext,
     videoContext.subtitlesTextContent,
     glossaryTerms,
   )
-
-  if (enableAIContentAware) {
-    const summary = subtitlePromptContext.videoSummary
-    hashComponents.push(summary ? "subtitleSummary=ready" : "subtitleSummary=missing")
-  }
 
   return await sendMessage("enqueueSubtitlesTranslateRequest", {
     text,
