@@ -74,18 +74,14 @@ export default defineConfig({
         resources: ["assets/*.png", "assets/*.svg", "assets/*.webp"],
         matches: ["*://*/*", "file:///*"],
       },
-      // The shared content runtime the loader content script imports. Pages
-      // can request it too; the dynamic URL keeps it from a fixed address.
+      // The shared content runtime the loader content script imports, and its
+      // chunks. No `use_dynamic_url`: Chrome 130 and 131 block a content
+      // script's import() of a dynamic URL with the content script CSP
+      // (crbug.com/363027634, fixed in 132), so nothing would load there. The
+      // chunks couldn't use one anyway, since Chrome resolves a module's
+      // relative imports against the extension's static id.
       {
-        resources: [`${CONTENT_RUNTIME_NAME}.js`],
-        matches: ["*://*/*", "file:///*"],
-        use_dynamic_url: true,
-      },
-      // Its chunks can't have one: Chrome resolves a module's relative imports
-      // against the extension's static id, even when the module itself came
-      // from the dynamic URL. Their names change with their content.
-      {
-        resources: [`${CONTENT_RUNTIME_NAME}/*`],
+        resources: [`${CONTENT_RUNTIME_NAME}.js`, `${CONTENT_RUNTIME_NAME}/*`],
         matches: ["*://*/*", "file:///*"],
       },
     ],
