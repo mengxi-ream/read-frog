@@ -56,7 +56,7 @@ async function getServiceWorker(browser) {
  *   EvalError -> inline your mutations in the evaluated function below;
  *   pass only plain data as evaluate args, never code strings
  * - background init/migration clobbers early writes -> patch, wait, re-patch
- * - onboarding overwrites targetCode with the browser UI language -> force cmn
+ * - onboarding overwrites targetCode with the browser UI language -> force zh-Hans
  *   or the same-language skip silently translates nothing on English fixtures */
 async function patchConfig(browser) {
   const worker = await getServiceWorker(browser)
@@ -64,7 +64,7 @@ async function patchConfig(browser) {
     worker.evaluate(async () => {
       const { config } = await chrome.storage.local.get('config')
       if (!config) return 'no-config-yet'
-      config.language.targetCode = 'cmn'
+      config.language.targetCode = 'zh-Hans'
       config.language.sourceCode = 'auto'
       // Top-level key is `pageTranslation` (NOT `translate` — that name is gone).
       // The schema is non-strict, so a stale key is silently stripped and the
