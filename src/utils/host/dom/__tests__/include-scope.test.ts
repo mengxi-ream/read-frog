@@ -226,6 +226,67 @@ describe("includeSelectors whitelist", () => {
     expect(document.querySelector("#issue-title")!.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(true)
   })
 
+  // Markup trimmed from lowendtalk.com (Vanilla Forums): the category list,
+  // a search result, a comment and the sidebar. The built-in rule used to
+  // whitelist headings, post bodies, the sidebar and discussion-list meta, so
+  // descriptions, search results and comment headers were never labeled.
+  it("labels LowEndTalk descriptions, search results and comment headers but not usernames", () => {
+    setUrl("https://lowendtalk.com/categories")
+    document.body.innerHTML = `
+      <div class="Column PanelColumn" id="Panel">
+        <div class="Box BoxInThisDiscussion">
+          <h4 id="panel-heading">In this Discussion</h4>
+          <ul class="PanelInfo PanelInThisDiscussion" id="participants">
+            <li><a href="/profile/batra"><span class="Aside"><span><time>12:21PM</time></span></span> <span><span class="Username">batra</span></span></a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="Column ContentColumn">
+        <div class="P PageDescription" id="page-description">LowEndTalk is a leading community forum for hosting professionals and enthusiasts.</div>
+        <div class="ItemContent Category">
+          <div role="heading" aria-level="3" class="TitleWrap"><a href="/categories/offers" class="Title">Offers</a></div>
+          <div class="CategoryDescription" id="category-description">Hosting providers may post promotional offers that meet community rules.</div>
+        </div>
+        <ol id="search-results">
+          <li class="Item-Search">
+            <h3 id="search-title"><a href="/discussion/1">Paid for a dedicated server, still waiting on delivery</a></h3>
+            <div class="Media-Body"><div class="Summary" id="search-summary">The provider has not answered a ticket in two weeks.</div></div>
+          </li>
+        </ol>
+        <div class="Comment">
+          <div class="Item-Header CommentHeader">
+            <div class="AuthorWrap" id="author-wrap">
+              <span class="Author"><a href="/profile/PuDLeZ" class="Username" id="username">PuDLeZ</a></span>
+              <span class="AuthorInfo"><span class="MItem RoleTitle">Member</span></span>
+            </div>
+          </div>
+          <div class="Message userContent"><p id="comment-body">Thanks for running the giveaway again.</p></div>
+          <div class="ThankedByBox" id="thanked-by"><span class="ThankedBy">Thanked by <span>2</span></span><a href="/profile/dsbnoob">dsbnoob</a> <a href="/profile/noob404">noob404</a></div>
+        </div>
+      </div>
+    `
+
+    walkAndLabelElement(document.body, "w1", structuredClone(DEFAULT_CONFIG))
+
+    const has = (id: string, attribute: string) =>
+      document.getElementById(id)!.hasAttribute(attribute)
+    const unlabeled = [
+      "page-description",
+      "category-description",
+      "search-title",
+      "search-summary",
+      "author-wrap",
+      "comment-body",
+      "panel-heading",
+    ].filter((id) => !has(id, PARAGRAPH_ATTRIBUTE))
+    const walkedNames = ["username", "thanked-by", "participants"].filter((id) =>
+      has(id, WALKED_ATTRIBUTE),
+    )
+
+    expect(unlabeled).toEqual([])
+    expect(walkedNames).toEqual([])
+  })
+
   it("keeps X usernames excluded when a nested span matches a broad include selector", () => {
     setHost("x.com")
     document.body.innerHTML = `

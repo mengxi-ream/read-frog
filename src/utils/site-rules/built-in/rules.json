@@ -1240,16 +1240,9 @@
   },
   {
     "id": "lowendtalk",
+    "description": "Was an include whitelist (headings, post bodies, the sidebar, discussion-list meta) that left category and page descriptions, latest-post titles, search results and comment headers in English. The whole page translates now; the excludes keep out only what machine translation garbles: usernames, which get transliterated; the Thanked by box, a list of names whose `.ThankedBy > span` CSS wraps an inserted translation in parentheses; the In this Discussion list of names and times; and the sidebar category counts",
     "matches": "lowendtalk.com",
-    "excludeSelectors": [".ClearFix .Count"],
-    "includeSelectors": [
-      "[role=heading]",
-      "h1",
-      ".userContent",
-      ".DismissMessage",
-      ".PanelColumn",
-      ".Meta-Discussion"
-    ]
+    "excludeSelectors": [".ClearFix .Count", ".Username", ".ThankedByBox", ".PanelInThisDiscussion"]
   },
   {
     "id": "linkedin",

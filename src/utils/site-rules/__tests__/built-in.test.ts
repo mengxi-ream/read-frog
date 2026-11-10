@@ -542,6 +542,9 @@ describe("built-in site rules", () => {
         "wandb",
         "https://wandb.ai/stacey/estuary/reports/When-Inception-ResNet-V2-is-too-slow--Vmlldzo3MDcxMA",
       ],
+      ["lowendtalk", "https://lowendtalk.com/categories"],
+      ["lowendtalk", "https://lowendtalk.com/search?Search=ipv6+tunnel"],
+      ["lowendtalk", "https://lowendtalk.com/discussion/222844/example"],
     ] as const
 
     for (const [id, url] of restoredSites) {
@@ -549,6 +552,26 @@ describe("built-in site rules", () => {
       expect(resolved.matchedRuleIds).toContain(id)
       expect(resolved.includeSelector).toBeNull()
     }
+  })
+
+  // The whole page translates, so the excludes are all that keeps LowEndTalk's
+  // name lists out: usernames come back transliterated, and the Thanked by box
+  // gets an inserted translation wrapped in parentheses by the site's own
+  // `div.ThankedByBox > span.ThankedBy > span::before/::after` rules.
+  it("keeps LowEndTalk usernames and name lists out of the translation", () => {
+    const resolved = resolveSiteRule(
+      "https://lowendtalk.com/discussion/222844/example",
+      BUILT_IN_SITE_RULES,
+      [],
+      [],
+    )
+
+    expect(resolved.excludeSelector?.split(",")).toEqual([
+      ".ClearFix .Count",
+      ".Username",
+      ".ThankedByBox",
+      ".PanelInThisDiscussion",
+    ])
   })
 
   it("matches current Microsoft Store URLs without a dead PRE-only scope", () => {
