@@ -257,6 +257,30 @@ describe("built-in site rules", () => {
     expect(resolved.injectedCss).toContain("max-height: unset !important")
   })
 
+  // Both clamps belong to the page's own design, so they are lifted only once a
+  // translation lands inside the clamped element (issue #2483).
+  it("lifts X web app line clamps and GitHub repo-list truncation only after translation", () => {
+    const x = resolveSiteRule(
+      "https://x.com/superalesha/status/2119911942227959883",
+      BUILT_IN_SITE_RULES,
+      [],
+      [],
+    )
+    expect(x.injectedCss).toContain(
+      "main [dir=auto].whitespace-pre-wrap[class*='line-clamp-']:has(.read-frog-translated-content-wrapper) {-webkit-line-clamp: unset!important;}",
+    )
+
+    const github = resolveSiteRule(
+      "https://github.com/orgs/facebookresearch/repositories",
+      BUILT_IN_SITE_RULES,
+      [],
+      [],
+    )
+    expect(github.injectedCss).toContain(
+      ".repos-list-description:has(.read-frog-translated-content-wrapper) [class*='prc-Truncate-Truncate'] {white-space: normal!important;overflow: visible!important;}",
+    )
+  })
+
   it("lets JavDB titles and their inline translations wrap instead of clipping", () => {
     const resolved = resolveSiteRule("https://javdb.com/", BUILT_IN_SITE_RULES, [], [])
     expect(resolved.injectedCss).toContain("white-space: normal !important")

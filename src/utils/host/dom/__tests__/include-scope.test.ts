@@ -4,7 +4,7 @@ import type { SiteRule } from "@/types/config/site-rules"
 import { afterEach, describe, expect, it } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { PARAGRAPH_ATTRIBUTE, WALKED_ATTRIBUTE } from "@/utils/constants/dom-labels"
-import { walkAndLabelElement } from "../traversal"
+import { extractTextContent, walkAndLabelElement } from "../traversal"
 
 function setHost(host: string) {
   setUrl(`https://${host}/some/path`)
@@ -250,5 +250,84 @@ describe("includeSelectors whitelist", () => {
     expect(document.querySelector("#handle")!.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(false)
     expect(document.querySelector("#tweet-text")!.hasAttribute(WALKED_ATTRIBUTE)).toBe(true)
     expect(document.querySelector("#tweet-text")!.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(true)
+  })
+
+  // Logged-out x.com serves a Tailwind web app with no data-testid attributes,
+  // so none of the twitter rule's older selectors match it (issue #2483). Post
+  // text, quoted posts, link-card descriptions, and the profile bio all render
+  // as div[dir=auto].whitespace-pre-wrap; names, handles, and timestamps carry
+  // neither marker, and the trends sidebar sits outside <main>.
+  it("labels X web app posts and bios that carry no data-testid (issue #2483)", () => {
+    setUrl("https://x.com/superalesha/status/2119911942227959883")
+    document.body.innerHTML = `
+      <main>
+        <div>
+          <span class="max-w-full text-body font-normal text-secondary line-clamp-1" id="profile-handle">@superalesha</span>
+          <div dir="auto" class="max-w-full text-body font-normal text-primary whitespace-pre-wrap wrap-anywhere" id="bio"><span>Writing GPU kernels and reading launch posts</span></div>
+        </div>
+        <section>
+          <ul>
+            <li>
+              <article class="flex flex-col gap-1">
+                <a href="/superalesha">
+                  <div class="max-w-full text-body font-bold text-primary line-clamp-1 break-all min-w-0" id="display-name">Alexey Fateev</div>
+                  <span class="max-w-full text-body font-normal text-secondary line-clamp-1" id="handle">@superalesha</span>
+                </a>
+                <div dir="auto" class="max-w-full text-lead font-normal text-primary whitespace-pre-wrap wrap-anywhere" id="post-text"><span>Kernel optimization now sits next to hacking in the safeguards section, says </span><a href="/AnthropicAI" class="rounded-xs x-link" id="mention">@AnthropicAI</a><button class="max-w-full font-normal text-brand" id="show-more">Show more</button></div>
+                <a href="/superalesha/status/2119911942227959883" class="rounded-xs x-link" id="timestamp">2:56 PM · Nov 9, 2026</a>
+              </article>
+            </li>
+          </ul>
+        </section>
+      </main>
+      <aside>
+        <section>
+          <div role="link">
+            <div dir="auto" class="max-w-full text-body font-normal text-primary line-clamp-3 whitespace-pre-wrap wrap-anywhere" id="trend">how far can 4x RTX 3090s go?</div>
+          </div>
+        </section>
+      </aside>
+    `
+    const config = structuredClone(DEFAULT_CONFIG)
+
+    walkAndLabelElement(document.body, "w1", config)
+
+    const postText = document.querySelector("#post-text") as HTMLElement
+    expect(postText.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(true)
+    expect(document.querySelector("#bio")!.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(true)
+    const labeledChrome = ["display-name", "handle", "profile-handle", "timestamp", "trend"].filter(
+      (id) => document.querySelector(`#${id}`)!.hasAttribute(PARAGRAPH_ATTRIBUTE),
+    )
+    expect(labeledChrome).toEqual([])
+    // Mentions stay inline in the post's source text; the "Show more" button
+    // inside the post body does not.
+    const sourceText = extractTextContent(postText, config)
+    expect(sourceText).toContain("@AnthropicAI")
+    expect(sourceText).not.toContain("Show more")
+  })
+
+  it("labels repository descriptions in GitHub's React org repository list (issue #2483)", () => {
+    setUrl("https://github.com/orgs/facebookresearch/repositories")
+    document.body.innerHTML = `
+      <h1 id="org-name">Meta Research</h1>
+      <main>
+        <ul>
+          <li class="listItem__X41oTe">
+            <div class="container__W45oI6">
+              <h3><a href="/facebookresearch/atlas" data-testid="list-row-repo-name-and-number" id="repo-name">atlas</a></h3>
+              <div class="repos-list-description width-full FormattedDescription__JqeVHv">
+                <div class="prc-Truncate-Truncate-2G1eo" title="ATLAS Autoformalized Textbook Library At Scale" id="description">ATLAS Autoformalized Textbook Library At Scale</div>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </main>
+    `
+
+    walkAndLabelElement(document.body, "w1", structuredClone(DEFAULT_CONFIG))
+
+    expect(document.querySelector("#description")!.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(true)
+    expect(document.querySelector("#org-name")!.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(true)
+    expect(document.querySelector("#repo-name")!.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(false)
   })
 })
