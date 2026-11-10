@@ -1,7 +1,7 @@
 import type { SyncedGlossary, SyncedTerm } from "../document"
 import { describe, expect, it } from "vitest"
 import { MAX_GLOSSARIES, MAX_GLOSSARY_TERMS } from "@/utils/constants/glossary"
-import { countLocalChanges, mergeGlossaryDocuments } from "../merge-document"
+import { countLocalChanges, mergeGlossaryDocuments, withStoredTargetLangs } from "../merge-document"
 
 const T0 = new Date("2026-01-01T00:00:00.000Z")
 const T1 = new Date("2026-02-01T00:00:00.000Z")
@@ -510,5 +510,58 @@ describe("countLocalChanges", () => {
     const before = snapshot([g, glossary("h")], [term("g", "token"), term("h", "widget")])
     const after = snapshot([g], [term("g", "token")])
     expect(countLocalChanges(before, after)).toEqual({ added: 0, updated: 0, removed: 2 })
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Terms written by builds from before languages were keyed by tag
+// ---------------------------------------------------------------------------
+
+describe("withStoredTargetLangs", () => {
+  it("stores a term written under an ISO 639-3 code under the language's tag", () => {
+    expect(withStoredTargetLangs([term("g", "Go")]).map((t) => t.targetLang)).toEqual(["zh-Hans"])
+  })
+
+  it("keeps the all-languages value and a language this build does not list", () => {
+    const terms = [term("g", "Go", { targetLang: "all" }), term("g", "Rust", { targetLang: "tok" })]
+    expect(withStoredTargetLangs(terms).map((t) => t.targetLang)).toEqual(["all", "tok"])
+  })
+
+  it("keeps the newer of one term written under both spellings", () => {
+    const coded = term("g", "Go", { id: "coded", target: "围棋", updatedAt: T0 })
+    const tagged = term("g", "Go", { id: "tagged", targetLang: "zh-Hans", updatedAt: T1 })
+    expect(withStoredTargetLangs([tagged, coded])).toEqual([tagged])
+    expect(withStoredTargetLangs([coded, tagged])).toEqual([tagged])
+  })
+})
+
+describe("mergeGlossaryDocuments — terms written by builds from before tags", () => {
+  it("merges an edit made under the code into the term this device stores under the tag", () => {
+    const g = glossary("g")
+    // Synced under the code before this device updated; it now stores the tag.
+    const base = snapshot([g], [term("g", "Go")])
+    const local = snapshot([g], [term("g", "Go", { targetLang: "zh-Hans" })])
+    // A device still on an old build reworded it, under the code.
+    const remote = snapshot([g], [term("g", "Go", { target: "围棋", updatedAt: T1 })])
+
+    const result = merge(base, local, remote)
+
+    expect(result.terms.map((t) => [t.targetLang, t.target])).toEqual([["zh-Hans", "围棋"]])
+    expect(result.conflicts).toEqual([])
+  })
+
+  it("writes one row for a term the cloud holds under both spellings", () => {
+    const g = glossary("g")
+    const remote = snapshot(
+      [g],
+      [
+        term("g", "Go", { id: "coded", target: "围棋", updatedAt: T0 }),
+        term("g", "Go", { id: "tagged", targetLang: "zh-Hans", target: "Go 语言", updatedAt: T2 }),
+      ],
+    )
+
+    const result = merge(snapshot([]), snapshot([g]), remote)
+
+    expect(result.terms.map((t) => [t.targetLang, t.target])).toEqual([["zh-Hans", "Go 语言"]])
   })
 })

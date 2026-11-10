@@ -2,7 +2,7 @@ import type { EntityTable } from "dexie"
 import { upperCamelCase } from "case-anything"
 import { Dexie } from "dexie"
 import { APP_NAME } from "@/utils/constants/app"
-import { normalizeStoredTargetLang } from "@/utils/glossary/target-language"
+import { withStoredTargetLangs } from "@/utils/glossary/sync/merge-document"
 import AiSegmentationCache from "./tables/ai-segmentation-cache"
 import ArticleSummaryCache from "./tables/article-summary-cache"
 import BatchRequestRecord from "./tables/batch-request-record"
@@ -158,9 +158,12 @@ export default class AppDB extends Dexie {
     // v7 changes no store. A term's `targetLang` moves from the ISO 639-3 code
     // it was written with (`cmn`) to the BCP 47 tag languages are keyed by now
     // (`zh-Hans`); unmoved, every existing term would stop matching. Codes map
-    // one to one, so the unique [glossaryId+targetLang+matchKey] index cannot
-    // collide. The sync snapshots keep their codes: the next sync sees the
-    // moved terms as a local change and uploads them.
+    // one to one, but a device that synced with an upgraded one before
+    // upgrading itself can already hold a term under both spellings. Moving
+    // both onto one [glossaryId+targetLang+matchKey] would abort the upgrade,
+    // and the database, every table of it, would then never open, so the older
+    // row goes. The sync snapshots keep their codes; the sync reads every side
+    // in the stored form (`withStoredTargetLangs`).
     this.version(7)
       .stores({
         translationCache: `
@@ -192,14 +195,14 @@ export default class AppDB extends Dexie {
         glossarySyncSnapshot: `
           id`,
       })
-      .upgrade((tx) =>
-        tx
-          .table("glossaryTerm")
-          .toCollection()
-          .modify((term: { targetLang: string }) => {
-            term.targetLang = normalizeStoredTargetLang(term.targetLang)
-          }),
-      )
+      .upgrade(async (tx) => {
+        const table = tx.table("glossaryTerm")
+        const terms = await table.toArray()
+        const kept = withStoredTargetLangs(terms)
+        const keptIds = new Set(kept.map((term) => term.id))
+        await table.bulkDelete(terms.filter((term) => !keptIds.has(term.id)).map((term) => term.id))
+        await table.bulkPut(kept)
+      })
     this.translationCache.mapToClass(TranslationCache)
     this.batchRequestRecord.mapToClass(BatchRequestRecord)
     this.articleSummaryCache.mapToClass(ArticleSummaryCache)

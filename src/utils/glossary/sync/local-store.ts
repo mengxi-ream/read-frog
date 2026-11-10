@@ -10,7 +10,7 @@ import {
 } from "@/utils/db/dexie/tables/glossary-sync-snapshot"
 import { bumpGlossaryRevision } from "../repository"
 import { normalizeStoredTargetLang } from "../target-language"
-import { countLocalChanges, termIdentity, withDistinctIds } from "./merge-document"
+import { countLocalChanges, withDistinctIds, withStoredTargetLangs } from "./merge-document"
 
 /** Everything the sync sends, in the shape the merge works on. */
 export async function readLocalGlossary(): Promise<GlossarySnapshot> {
@@ -190,7 +190,9 @@ export async function restoreUndoSnapshot({
       await db.glossary.clear()
       await db.glossaryTerm.clear()
       await db.glossary.bulkPut(undo.glossaries.map((glossary) => ({ ...glossary })))
-      await db.glossaryTerm.bulkPut(undo.terms.map(toStoredTerm))
+      // Taken by a build from before tags, the snapshot can hold codes, and a
+      // term under both spellings.
+      await db.glossaryTerm.bulkPut(withStoredTargetLangs(undo.terms).map(toStoredTerm))
 
       if (clearBase) await db.glossarySyncSnapshot.delete(GLOSSARY_SYNC_BASE_ID)
       await db.glossarySyncSnapshot.delete(GLOSSARY_SYNC_UNDO_ID)
@@ -287,14 +289,14 @@ export async function replaceGlossary(document: {
   // Two rows the database cannot hold at once, deduped here rather than left to
   // `bulkPut`. A file is not required to have come from this extension, and a
   // hand-edited one can carry the same `(glossaryId, targetLang, matchKey)`
-  // twice under different uuids: the unique index rejects that, the transaction
-  // rolls back, and the settings import that already replaced the config
-  // reports failure with the new settings installed. Last wins, which is what
-  // `mergeSets` does with the same shape.
-  const byIdentity = new Map(owned.map((term) => [termIdentity(term), term]))
+  // twice under different uuids — as can a backup holding one term under both
+  // its ISO 639-3 code and its tag: the unique index rejects that, the
+  // transaction rolls back, and the settings import that already replaced the
+  // config reports failure with the new settings installed. The newer row wins,
+  // as in the merge.
   // ...and two rows sharing one primary key, which `bulkPut` would silently
   // collapse to whichever came last.
-  const terms = withDistinctIds([...byIdentity.values()])
+  const terms = withDistinctIds(withStoredTargetLangs(owned))
 
   await db.transaction("rw", db.glossary, db.glossaryTerm, db.glossarySyncSnapshot, async () => {
     const current = await readLocalGlossary()
