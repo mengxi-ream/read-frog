@@ -9,7 +9,10 @@ import {
   getGuideDictionaryNotebaseState,
   startGuideDictionaryNotebaseTracking,
 } from "@/utils/guide/dictionary-notebase"
-import { resolveGuideTargetLanguage } from "@/utils/guide/target-language"
+import {
+  getGuideTargetLanguageAnswer,
+  resolveGuideTargetLanguage,
+} from "@/utils/guide/target-language"
 import { logger } from "@/utils/logger"
 import { onMessage, sendMessage } from "@/utils/message"
 import { createExtensionStatusResponse } from "./extension-status"
@@ -68,8 +71,8 @@ export default defineContentScript({
         if (!config) return
 
         if (type === "setTargetLanguage") {
-          const langCodeISO6393 = resolveGuideTargetLanguage(e.data)
-          if (!langCodeISO6393) {
+          const targetCode = resolveGuideTargetLanguage(e.data)
+          if (!targetCode) {
             logger.warn("guide setTargetLanguage ignored: missing or invalid language code", e.data)
             return
           }
@@ -80,15 +83,14 @@ export default defineContentScript({
           await new Promise((resolve) => setTimeout(resolve, 500))
           await storage.setItem<Config>(`local:${CONFIG_STORAGE_KEY}`, {
             ...config,
-            language: { ...config.language, targetCode: langCodeISO6393 },
+            language: { ...config.language, targetCode },
           })
         } else if (type === "getTargetLanguage") {
-          const targetLanguage = config.language.targetCode
           window.postMessage(
             {
               source: `${kebabCase(APP_NAME)}-ext`,
               type: "getTargetLanguage",
-              data: { targetLanguage },
+              data: getGuideTargetLanguageAnswer(config.language.targetCode),
             },
             "*",
           )

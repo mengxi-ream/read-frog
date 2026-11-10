@@ -37,7 +37,7 @@ vi.mock("@/utils/subtitles/srt", () => ({ downloadSubtitlesAsSrt: mocks.download
 
 function createConfig({
   aiSegmentation = false,
-  targetCode = "cmn",
+  targetCode = "zh-Hans",
 }: {
   aiSegmentation?: boolean
   targetCode?: Config["language"]["targetCode"]
@@ -45,7 +45,7 @@ function createConfig({
   const provider = DEFAULT_PROVIDER_CONFIG.openai
   return {
     ...DEFAULT_CONFIG,
-    language: { ...DEFAULT_CONFIG.language, sourceCode: "eng", targetCode },
+    language: { ...DEFAULT_CONFIG.language, sourceCode: "en", targetCode },
     providersConfig: [provider],
     videoSubtitles: { ...DEFAULT_CONFIG.videoSubtitles, providerId: provider.id, aiSegmentation },
   }
@@ -275,7 +275,7 @@ describe("translatedSubtitlesDownloader", () => {
   })
 
   it("rejects same-language export before showing the preparing state", async () => {
-    mocks.getLocalConfig.mockResolvedValue(createConfig({ targetCode: "eng" }))
+    mocks.getLocalConfig.mockResolvedValue(createConfig({ targetCode: "en" }))
     const statuses: Array<ReturnType<typeof status>> = []
     const unsubscribe = subtitlesStore.sub(translatedSubtitlesDownloadStatusAtom, () =>
       statuses.push(status()),

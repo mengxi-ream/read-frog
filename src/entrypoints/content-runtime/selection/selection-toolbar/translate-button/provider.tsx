@@ -3,7 +3,7 @@ import type { NoteSuggestionProviderRef, SelectionSession } from "../atoms"
 import type { SelectionPopoverActions } from "@/components/ui/selection-popover"
 import type { SelectionToolbarInlineError } from "@/components/ui/selection-popover/inline-error"
 import type { ThinkingSnapshot } from "@/types/background-stream"
-import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
+import { LANGUAGE_ENGLISH_NAMES } from "@read-frog/definitions"
 import { useAtomValue, useSetAtom } from "jotai"
 import {
   createContext,
@@ -172,7 +172,7 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
         // not as prepared for translation.
         savedSelectionText: normalizeSelectedText(selectionText),
         paragraphsText: paragraphsText ?? preparedText,
-        targetLangName: LANG_CODE_TO_EN_NAME[translateRequest.language.targetCode],
+        targetLangName: LANGUAGE_ENGLISH_NAMES[translateRequest.language.targetCode],
         webTitle: titleText ?? "",
         provider,
       })

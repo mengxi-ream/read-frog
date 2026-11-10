@@ -13,32 +13,33 @@ import {
 describe("tts config defaults", () => {
   it("uses Andrew Multilingual as the fallback/default US English voice", () => {
     expect(EDGE_TTS_FALLBACK_VOICE).toBe("en-US-AndrewMultilingualNeural")
-    expect(getDefaultTTSVoiceForLanguage("eng")).toBe("en-US-AndrewMultilingualNeural")
+    expect(getDefaultTTSVoiceForLanguage("en")).toBe("en-US-AndrewMultilingualNeural")
   })
 
   it("uses ISO 639-3 defaults without collapsing Chinese language variants", () => {
-    expect(getDefaultTTSVoiceForLanguage("cmn")).toBe("zh-CN-XiaoxiaoMultilingualNeural")
-    expect(getDefaultTTSVoiceForLanguage("cmn-Hant")).toBe("zh-TW-YunJheNeural")
+    expect(getDefaultTTSVoiceForLanguage("zh-Hans")).toBe("zh-CN-XiaoxiaoMultilingualNeural")
+    expect(getDefaultTTSVoiceForLanguage("zh-Hant")).toBe("zh-TW-YunJheNeural")
     expect(getDefaultTTSVoiceForLanguage("yue")).toBe("yue-CN-XiaoMinNeural")
   })
 
   it("seeds language voices with multilingual defaults when available", () => {
     const languageVoices = createDefaultTTSLanguageVoices()
 
-    expect(languageVoices.eng).toBe("en-US-AndrewMultilingualNeural")
-    expect(languageVoices.cmn).toBe("zh-CN-XiaoxiaoMultilingualNeural")
+    expect(languageVoices.en).toBe("en-US-AndrewMultilingualNeural")
+    expect(languageVoices["zh-Hans"]).toBe("zh-CN-XiaoxiaoMultilingualNeural")
     expect(languageVoices.yue).toBe("yue-CN-XiaoMinNeural")
-    expect(languageVoices.deu).toBe("de-DE-FlorianMultilingualNeural")
-    expect(languageVoices.spa).toBe("es-ES-TristanMultilingualNeural")
-    expect(languageVoices.fra).toBe("fr-FR-RemyMultilingualNeural")
-    expect(languageVoices.ita).toBe("it-IT-AlessioMultilingualNeural")
-    expect(languageVoices.jpn).toBe("ja-JP-MasaruMultilingualNeural")
-    expect(languageVoices.kor).toBe("ko-KR-HyunsuMultilingualNeural")
-    expect(languageVoices.por).toBe("pt-BR-MacerioMultilingualNeural")
-    expect(languageVoices.bre).toBe("fr-FR-RemyMultilingualNeural")
-    expect(languageVoices.grn).toBe("es-ES-TristanMultilingualNeural")
-    expect(languageVoices.lat).toBe("it-IT-AlessioMultilingualNeural")
-    expect(languageVoices.bod).toBe("zh-CN-XiaoxiaoMultilingualNeural")
+    expect(languageVoices.de).toBe("de-DE-FlorianMultilingualNeural")
+    expect(languageVoices.es).toBe("es-ES-TristanMultilingualNeural")
+    expect(languageVoices.fr).toBe("fr-FR-RemyMultilingualNeural")
+    expect(languageVoices.it).toBe("it-IT-AlessioMultilingualNeural")
+    expect(languageVoices.ja).toBe("ja-JP-MasaruMultilingualNeural")
+    expect(languageVoices.ko).toBe("ko-KR-HyunsuMultilingualNeural")
+    expect(languageVoices["pt-BR"]).toBe("pt-BR-MacerioMultilingualNeural")
+    expect(languageVoices["pt-PT"]).toBe("pt-PT-DuarteNeural")
+    expect(languageVoices.br).toBe("fr-FR-RemyMultilingualNeural")
+    expect(languageVoices.gn).toBe("es-ES-TristanMultilingualNeural")
+    expect(languageVoices.la).toBe("it-IT-AlessioMultilingualNeural")
+    expect(languageVoices.bo).toBe("zh-CN-XiaoxiaoMultilingualNeural")
   })
 
   it("only uses known Edge TTS voices in the default language voice map", () => {

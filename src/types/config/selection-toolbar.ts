@@ -1,5 +1,5 @@
 import { HostedAiOutputFieldTypeSchema } from "@read-frog/api-contract"
-import { langCodeISO6393Schema } from "@read-frog/definitions"
+import { languageTagSchema } from "@read-frog/definitions"
 import { z } from "zod"
 import { isBuiltInActionId } from "@/utils/constants/custom-action"
 import { BUILT_IN_AI_PROVIDER_ID } from "@/utils/constants/provider-ids"
@@ -41,7 +41,7 @@ export const selectionToolbarCustomActionOutputFieldSchema = z.object({
 // way a model answers; the layout scope converts a number field's text.
 export const selectionToolbarCustomActionSampleDataSchema = z.object({
   selection: z.string().max(MAX_CUSTOM_ACTION_SAMPLE_TEXT_LENGTH),
-  targetCode: langCodeISO6393Schema,
+  targetCode: languageTagSchema,
   values: z.record(z.string(), z.string().max(MAX_CUSTOM_ACTION_SAMPLE_TEXT_LENGTH)),
 })
 

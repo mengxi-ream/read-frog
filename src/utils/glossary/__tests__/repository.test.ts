@@ -123,7 +123,7 @@ function storedTerm(overrides: Partial<(typeof dexie.state.rows)[number]>) {
     id: "seed",
     glossaryId: GLOSSARY_ID,
     matchKey: "i:seed",
-    targetLang: "cmn",
+    targetLang: "zh-Hans",
     source: "seed",
     target: "种子",
     caseSensitive: false,
@@ -151,7 +151,7 @@ function csvRow(
   target: string,
   overrides: Partial<ParsedGlossaryRow> = {},
 ): ParsedGlossaryRow {
-  return { source, target, targetLanguage: "cmn", caseSensitive: false, ...overrides }
+  return { source, target, targetLanguage: "zh-Hans", caseSensitive: false, ...overrides }
 }
 
 /** Exactly what `exportGlossaryCsv` writes for a set of stored rows. */
@@ -229,8 +229,8 @@ describe("importGlossaryRows — a round trip through the CSV", () => {
   })
 
   it("files a row under the language the file names, not a default", async () => {
-    await importRows([csvRow("Go", "囲碁", { targetLanguage: "jpn" })], "merge")
-    expect(dexie.state.rows[0]?.targetLang).toBe("jpn")
+    await importRows([csvRow("Go", "囲碁", { targetLanguage: "ja" })], "merge")
+    expect(dexie.state.rows[0]?.targetLang).toBe("ja")
   })
 
   /**
@@ -297,8 +297,8 @@ describe("importGlossaryRows", () => {
      * one table holding text the user typed, and there is no undo.
      *
      * Through the real parser, because that is now the first line of defence:
-     * BCP 47 tags are not the ISO 639-3 codes terms are filed under, so every
-     * row is dropped before the importer sees it and `rows` arrives empty.
+     * a row naming no language the extension knows is dropped before the
+     * importer sees it, so `rows` arrives empty.
      */
     it("keeps the list when every row names a language we do not know", async () => {
       dexie.state.rows = [
@@ -307,7 +307,7 @@ describe("importGlossaryRows", () => {
       ]
 
       const parsed = parseGlossaryCsv(
-        "source,target,targetLanguage,caseSensitive\nGPU,显卡,zh-CN,false\nCPU,处理器,en,false",
+        "source,target,targetLanguage,caseSensitive\nGPU,显卡,Klingon,false\nCPU,处理器,xx,false",
       )
       if (!parsed.ok) throw new Error("header should have been accepted")
       expect(parsed.rows).toEqual([])
@@ -360,9 +360,10 @@ describe("importGlossaryRows", () => {
       ]
 
       // Through the parser, because that is where "partially valid" now lives:
-      // the first row names a BCP 47 tag and is dropped, the second survives.
+      // the first row names no language and is dropped; the second names one
+      // by the ISO 639-3 code older exports wrote, and survives under its tag.
       const parsed = parseGlossaryCsv(
-        "source,target,targetLanguage,caseSensitive\nGPU,显卡,zh-CN,false\nHelldiver,地狱潜兵,cmn,false",
+        "source,target,targetLanguage,caseSensitive\nGPU,显卡,Klingon,false\nHelldiver,地狱潜兵,cmn,false",
       )
       if (!parsed.ok) throw new Error("header should have been accepted")
       expect(parsed.skipped.map((skip) => skip.reason)).toEqual(["unknown-language"])
@@ -378,8 +379,8 @@ describe("importGlossaryRows", () => {
       expect(dexie.deleteSpy).toHaveBeenCalledWith(GLOSSARY_ID)
       expect(dexie.transactionSpy).toHaveBeenCalledWith("rw")
       expect(identify(dexie.state.rows)).toEqual([
-        { glossaryId: OTHER_GLOSSARY_ID, source: "elsewhere", targetLang: "cmn" },
-        { glossaryId: GLOSSARY_ID, source: "Helldiver", targetLang: "cmn" },
+        { glossaryId: OTHER_GLOSSARY_ID, source: "elsewhere", targetLang: "zh-Hans" },
+        { glossaryId: GLOSSARY_ID, source: "Helldiver", targetLang: "zh-Hans" },
       ])
       expect(storageValues.get(GLOSSARY_REVISION_KEY)).toBe(1)
     })
@@ -413,8 +414,8 @@ describe("importGlossaryRows", () => {
     it("files each row under the language its own row names", async () => {
       const result = await importRows(
         [
-          csvRow("GPU", "显卡", { targetLanguage: "jpn" }),
-          csvRow("CPU", "处理器", { targetLanguage: "jpn" }),
+          csvRow("GPU", "显卡", { targetLanguage: "ja" }),
+          csvRow("CPU", "处理器", { targetLanguage: "ja" }),
         ],
         "merge",
       )
@@ -426,8 +427,8 @@ describe("importGlossaryRows", () => {
         duplicatesInFile: 0,
       })
       expect(identify(dexie.state.rows)).toEqual([
-        { glossaryId: GLOSSARY_ID, source: "GPU", targetLang: "jpn" },
-        { glossaryId: GLOSSARY_ID, source: "CPU", targetLang: "jpn" },
+        { glossaryId: GLOSSARY_ID, source: "GPU", targetLang: "ja" },
+        { glossaryId: GLOSSARY_ID, source: "CPU", targetLang: "ja" },
       ])
       expect(dexie.state.rows.map((row) => row.matchKey)).toEqual(["i:gpu", "i:cpu"])
       expect(storageValues.get(GLOSSARY_REVISION_KEY)).toBe(1)
@@ -503,8 +504,8 @@ describe("loadGlossaryEntries — which wording a page gets", () => {
       }),
     ]
 
-    expect(wordings(await loadGlossaryEntries("cmn"))).toEqual(["React=>"])
-    expect(wordings(await loadGlossaryEntries("jpn"))).toEqual(["React=>"])
+    expect(wordings(await loadGlossaryEntries("zh-Hans"))).toEqual(["React=>"])
+    expect(wordings(await loadGlossaryEntries("ja"))).toEqual(["React=>"])
   })
 
   it("still keeps a wording written for another language out", async () => {
@@ -516,12 +517,12 @@ describe("loadGlossaryEntries — which wording a page gets", () => {
         matchKey: "i:go",
         source: "Go",
         target: "囲碁",
-        targetLang: "jpn",
+        targetLang: "ja",
       }),
     ]
 
-    expect(await loadGlossaryEntries("cmn")).toEqual([])
-    expect(wordings(await loadGlossaryEntries("jpn"))).toEqual(["Go=>囲碁"])
+    expect(await loadGlossaryEntries("zh-Hans")).toEqual([])
+    expect(wordings(await loadGlossaryEntries("ja"))).toEqual(["Go=>囲碁"])
   })
 
   /**
@@ -546,12 +547,12 @@ describe("loadGlossaryEntries — which wording a page gets", () => {
         matchKey: "i:go",
         source: "Go",
         target: "围棋",
-        targetLang: "cmn",
+        targetLang: "zh-Hans",
       }),
     ]
 
-    expect(wordings(await loadGlossaryEntries("cmn"))).toEqual(["Go=>围棋"])
-    expect(wordings(await loadGlossaryEntries("jpn"))).toEqual(["Go=>"])
+    expect(wordings(await loadGlossaryEntries("zh-Hans"))).toEqual(["Go=>围棋"])
+    expect(wordings(await loadGlossaryEntries("ja"))).toEqual(["Go=>"])
   })
 
   /**
@@ -568,7 +569,7 @@ describe("loadGlossaryEntries — which wording a page gets", () => {
         matchKey: "i:go",
         source: "Go",
         target: "围棋",
-        targetLang: "cmn",
+        targetLang: "zh-Hans",
       }),
       storedTerm({
         id: "go-all",
@@ -580,7 +581,7 @@ describe("loadGlossaryEntries — which wording a page gets", () => {
       }),
     ]
 
-    expect(wordings(await loadGlossaryEntries("cmn"))).toEqual(["Go=>围棋"])
+    expect(wordings(await loadGlossaryEntries("zh-Hans"))).toEqual(["Go=>围棋"])
   })
 
   /**
@@ -601,7 +602,7 @@ describe("loadGlossaryEntries — which wording a page gets", () => {
         matchKey: "i:go",
         source: "Go",
         target: "围棋",
-        targetLang: "cmn",
+        targetLang: "zh-Hans",
       }),
       storedTerm({
         id: "new-all",
@@ -613,7 +614,7 @@ describe("loadGlossaryEntries — which wording a page gets", () => {
       }),
     ]
 
-    expect(wordings(await loadGlossaryEntries("cmn"))).toEqual(["Go=>"])
+    expect(wordings(await loadGlossaryEntries("zh-Hans"))).toEqual(["Go=>"])
   })
 
   it("drops a disabled all-languages row like any other", async () => {
@@ -630,6 +631,6 @@ describe("loadGlossaryEntries — which wording a page gets", () => {
       }),
     ]
 
-    expect(await loadGlossaryEntries("cmn")).toEqual([])
+    expect(await loadGlossaryEntries("zh-Hans")).toEqual([])
   })
 })

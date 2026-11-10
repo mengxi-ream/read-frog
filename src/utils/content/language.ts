@@ -1,6 +1,6 @@
-import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { LanguageTag } from "@read-frog/definitions"
 import type { PromptableProviderRef } from "@/utils/providers/provider-ref"
-import { langCodeISO6393Schema } from "@read-frog/definitions"
+import { resolveLanguage } from "@read-frog/definitions"
 import { franc } from "franc"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { getLocalConfig } from "@/utils/config/storage"
@@ -39,7 +39,7 @@ export interface DetectLanguageOptions {
 }
 
 export interface DetectLanguageResult {
-  code: LangCodeISO6393 | "und"
+  code: LanguageTag | "und"
   source: DetectionSource
 }
 
@@ -92,12 +92,14 @@ export async function detectLanguageWithSource(
     return { code: "und", source: "fallback" }
   }
 
-  const parsedFrancResult = langCodeISO6393Schema.safeParse(francResult)
-  if (!parsedFrancResult.success) {
+  // franc answers in ISO 639-3 (`cmn`, `por`, `als`). This is the only place
+  // that code is read; from here on the language is a BCP 47 tag.
+  const francLanguage = resolveLanguage(francResult)
+  if (!francLanguage) {
     return { code: "und", source: "fallback" }
   }
 
-  return { code: parsedFrancResult.data, source: "franc" }
+  return { code: francLanguage, source: "franc" }
 }
 
 /**
@@ -109,7 +111,7 @@ export async function detectLanguageWithSource(
 export async function detectLanguage(
   text: string,
   options?: DetectLanguageOptions,
-): Promise<LangCodeISO6393 | null> {
+): Promise<LanguageTag | null> {
   const result = await detectLanguageWithSource(text, options)
   return result.code === "und" ? null : result.code
 }
@@ -123,7 +125,7 @@ export async function detectLanguage(
 export async function detectLanguageWithLLM(
   text: string,
   providerRef?: PromptableProviderRef,
-): Promise<LangCodeISO6393 | "und" | null> {
+): Promise<LanguageTag | "und" | null> {
   const MAX_ATTEMPTS = 3 // 1 original + 2 retries
 
   if (!text.trim()) {

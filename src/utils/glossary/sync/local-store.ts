@@ -1,4 +1,4 @@
-import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { LanguageTag } from "@read-frog/definitions"
 import type { SyncedGlossary, SyncedTerm } from "./document"
 import type { GlossaryChangeCounts, GlossarySnapshot } from "./merge-document"
 import type GlossaryTerm from "@/utils/db/dexie/tables/glossary-term"
@@ -9,6 +9,7 @@ import {
   GLOSSARY_SYNC_UNDO_ID,
 } from "@/utils/db/dexie/tables/glossary-sync-snapshot"
 import { bumpGlossaryRevision } from "../repository"
+import { normalizeStoredTargetLang } from "../target-language"
 import { countLocalChanges, termIdentity, withDistinctIds } from "./merge-document"
 
 /** Everything the sync sends, in the shape the merge works on. */
@@ -213,7 +214,10 @@ export async function clearSyncBase(): Promise<void> {
  * recognise simply never matches a page, and reaches the other device intact.
  */
 function toStoredTerm(term: SyncedTerm): GlossaryTerm {
-  return { ...term, targetLang: term.targetLang as LangCodeISO6393 } as GlossaryTerm
+  return {
+    ...term,
+    targetLang: normalizeStoredTargetLang(term.targetLang) as LanguageTag,
+  } as GlossaryTerm
 }
 
 export type GlossaryCapOverflow = {

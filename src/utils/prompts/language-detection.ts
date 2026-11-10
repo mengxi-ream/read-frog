@@ -11,14 +11,14 @@
  * the latency-sensitive TTS path, the task is simple, and reasoning toggles are
  * provider-specific while this prompt must stay provider-agnostic.
  */
-import type { LangCodeISO6393 } from "@read-frog/definitions"
-import { LANG_CODE_TO_EN_NAME, langCodeISO6393Schema } from "@read-frog/definitions"
+import type { LanguageTag } from "@read-frog/definitions"
+import { LANGUAGES, resolveLanguage } from "@read-frog/definitions"
 import { z } from "zod"
 import { logger } from "../logger"
 
-const supportedLanguageList = Object.entries(LANG_CODE_TO_EN_NAME)
-  .map(([code, name]) => `- ${code}: ${name}`)
-  .join("\n")
+const supportedLanguageList = LANGUAGES.map(
+  ({ tag, englishName }) => `- ${tag}: ${englishName}`,
+).join("\n")
 
 export const languageDetectionOutputSchema = z.object({
   // Optional for lenient validation
@@ -26,13 +26,15 @@ export const languageDetectionOutputSchema = z.object({
     .string()
     .optional()
     .describe("The reason why LLM pick this code. Just for soft reasoning. No need to consume."),
-  code: z.union([langCodeISO6393Schema, z.literal("und")]),
+  // Any string: the output is lower-cased before parsing, and a model sometimes
+  // answers in ISO 639-3. `parseDetectedLanguageCode` resolves it to a tag.
+  code: z.string(),
 })
 
 export type LanguageDetectionOutput = z.infer<typeof languageDetectionOutputSchema>
 
 export function getLanguageDetectionSystemPrompt(): string {
-  return `You are a language detection assistant. Your task is to identify the language of text and to give its ISO 639-3 language code.
+  return `You are a language detection assistant. Your task is to identify the language of text and to give its language tag from the supported list.
 
 ## Output format
 
@@ -42,7 +44,7 @@ You should give a raw JSON string which satisfies following schema:
 type Output = {
   /** The reason why you pick this code. Be concise. */
   reason: string
-  /** ISO 639-3 code */
+  /** A language tag from the supported list */
   code: string
 }
 
@@ -57,8 +59,8 @@ User input:
 Your output:
 
 {
-  "reason": "This is a Simplified Chinese sentence, so the code should be \\"cmn\\".",
-  "code": "cmn"
+  "reason": "This is a Simplified Chinese sentence, so the code should be \\"zh-Hans\\".",
+  "code": "zh-Hans"
 }
 
 ## Rules
@@ -66,7 +68,7 @@ Your output:
 - Return ONLY raw JSON string
 - Give "und" as code if the language is not in the supported list
 
-## Supported ISO 639-3 language codes
+## Supported language tags
 
 ${supportedLanguageList}`
 }
@@ -83,7 +85,7 @@ export function normalizeLanguageDetectionOutput(rawOutput: string): string {
     .toLowerCase()
 }
 
-export function parseDetectedLanguageCode(rawOutput: string): LangCodeISO6393 | "und" | null {
+export function parseDetectedLanguageCode(rawOutput: string): LanguageTag | "und" | null {
   const cleanedOutput = normalizeLanguageDetectionOutput(rawOutput)
   let data: unknown
 
@@ -97,7 +99,8 @@ export function parseDetectedLanguageCode(rawOutput: string): LangCodeISO6393 | 
   const parseResult = languageDetectionOutputSchema.safeParse(data)
 
   if (parseResult.success) {
-    return parseResult.data.code
+    const { code } = parseResult.data
+    return code === "und" ? "und" : resolveLanguage(code)
   }
   logger.warn("Failed to parse language detection output. Fallback to null.", data)
   return null

@@ -1,4 +1,4 @@
-import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { LanguageTag } from "@read-frog/definitions"
 import type { JSONValue } from "ai"
 import type { RefObject } from "react"
 import type { SelectionToolbarInlineError } from "@/components/ui/selection-popover/inline-error"
@@ -19,7 +19,7 @@ export interface SelectionToolbarCustomActionRequestSlice {
   action: SelectionToolbarCustomAction | null
   provider: CustomActionProviderRef | null
 }
-import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
+import { LANGUAGE_ENGLISH_NAMES } from "@read-frog/definitions"
 import { useEffect, useRef, useState } from "react"
 import {
   createSelectionToolbarPrecheckError,
@@ -52,7 +52,7 @@ export interface CustomActionExecutionContext {
   action: SelectionToolbarCustomAction
   provider: CustomActionProviderRef
   // The target language the run asks for; promptTokens.targetLanguage names it.
-  targetCode: LangCodeISO6393
+  targetCode: LanguageTag
   promptTokens: {
     selection: string
     paragraphs: string
@@ -196,7 +196,7 @@ export function buildCustomActionExecutionPlan(
       promptTokens: {
         selection: cleanSelection,
         paragraphs: truncateContextTextForCustomAction(contextText || cleanSelection),
-        targetLanguage: LANG_CODE_TO_EN_NAME[customActionRequest.language.targetCode],
+        targetLanguage: LANGUAGE_ENGLISH_NAMES[customActionRequest.language.targetCode],
         webTitle: webPageContext?.webTitle ?? getSourceDocumentTitle(),
         webUrl: webPageContext?.url ?? window.location.href,
         webContent: webPageContext?.webContent || "",

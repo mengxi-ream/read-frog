@@ -2,7 +2,7 @@ import type { SubtitlesFragment } from "./types"
 import type { BackgroundStreamTextSerializablePayload } from "@/types/background-stream"
 import type { Config } from "@/types/config/config"
 import type { ProviderRefForCapability } from "@/utils/providers/provider-registry"
-import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
+import { LANGUAGE_ENGLISH_NAMES } from "@read-frog/definitions"
 import { getLocalConfig } from "@/utils/config/storage"
 import { VIDEO_SUMMARY_TRANSCRIPT_CHAR_BUDGET } from "@/utils/constants/subtitles"
 import { streamBackgroundText } from "@/utils/content-script/background-stream-client"
@@ -141,7 +141,7 @@ export async function requestVideoSummary(
     return null
   }
 
-  const targetLanguage = LANG_CODE_TO_EN_NAME[config.language.targetCode]
+  const targetLanguage = LANGUAGE_ENGLISH_NAMES[config.language.targetCode]
 
   const cached = await sendMessage("getCachedVideoSummary", {
     transcript,

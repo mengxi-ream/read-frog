@@ -19,9 +19,9 @@ const DEFAULT_FEATURE_PROVIDER = {
 
 const PAGE_EVENT_FIELDS = {
   ...DEFAULT_FEATURE_PROVIDER,
-  target_language: "cmn",
+  target_language: "zh-Hans",
   translation_mode: "bilingual",
-  source_language: "jpn",
+  source_language: "ja",
 } as const
 
 const TTS_EVENT = {
@@ -222,7 +222,7 @@ describe("background analytics", () => {
         outcome: "success",
         latency_ms: 100,
         char_count: 42,
-        target_language: "kor",
+        target_language: "ko",
         ...DEFAULT_FEATURE_PROVIDER,
       },
       { id: 42, url: "https://github.com/org/repo/issues/1?q=secret#frag" },
@@ -234,7 +234,7 @@ describe("background analytics", () => {
       outcome: "success",
       latency_ms: 100,
       char_count: 42,
-      target_language: "kor",
+      target_language: "ko",
       ...DEFAULT_FEATURE_PROVIDER,
       site_domain: "github.com",
     })
@@ -287,8 +287,8 @@ describe("background analytics", () => {
     await captureFeatureUsedEventInBackground({
       ...TTS_EVENT,
       char_count: 7,
-      target_language: "cmn",
-      source_language: "jpn",
+      target_language: "zh-Hans",
+      source_language: "ja",
       translation_mode: "bilingual",
     } as unknown as FeatureUsedEventProperties)
 
@@ -887,7 +887,7 @@ describe("background analytics", () => {
         new_safe_business_field: "automatically-kept",
         action_id: "dictionary",
         action_name: "Dictionary",
-        target_language: "cmn",
+        target_language: "zh-Hans",
         $browser: "Chrome",
         $browser_version: "145.0.0.0",
         $os: "Mac OS X",
@@ -918,7 +918,7 @@ describe("background analytics", () => {
       new_safe_business_field: "automatically-kept",
       action_id: "dictionary",
       action_name: "Dictionary",
-      target_language: "cmn",
+      target_language: "zh-Hans",
       $browser: "Chrome",
       $browser_version: "145.0.0.0",
       $os: "Mac OS X",

@@ -103,7 +103,7 @@ describe("selectFreshTranslateProviders", () => {
   it("preserves unrelated config while promoting the untouched defaults", async () => {
     isGoogleTranslateReachableMock.mockResolvedValue(true)
     const config = structuredClone(DEFAULT_CONFIG)
-    config.language.targetCode = "jpn"
+    config.language.targetCode = "ja"
     config.pageTranslation.page.autoTranslatePatterns = ["example.com"]
     getLocalConfigAndMetaMock.mockResolvedValue({
       value: config,
@@ -113,7 +113,7 @@ describe("selectFreshTranslateProviders", () => {
     await selectFreshProviders()
 
     const written = setLocalConfigMock.mock.calls[0]?.[0] as Config
-    expect(written.language.targetCode).toBe("jpn")
+    expect(written.language.targetCode).toBe("ja")
     expect(written.pageTranslation.page.autoTranslatePatterns).toEqual(["example.com"])
     expect(written.pageTranslation.providerId).toBe(GOOGLE_TRANSLATE_PROVIDER_ID)
   })

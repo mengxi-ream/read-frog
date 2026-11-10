@@ -1,4 +1,4 @@
-import { LANG_CODE_ISO6393_OPTIONS, LOCALE_TO_ISO6393 } from "@read-frog/definitions"
+import { LANGUAGE_TAGS, resolveLanguage } from "@read-frog/definitions"
 import { describe, expect, it } from "vitest"
 import { SUPPORTED_UI_LOCALES } from "@/utils/i18n/locales"
 import {
@@ -16,17 +16,16 @@ describe("contentLocaleFor", () => {
   })
 
   it("names each UI locale's language as the definitions do", () => {
-    const byLocale: Partial<Record<string, string>> = LOCALE_TO_ISO6393
     for (const locale of SUPPORTED_UI_LOCALES) {
       const code = langCodeOfLocale(locale)
-      expect(LANG_CODE_ISO6393_OPTIONS).toContain(code)
-      expect(code).toBe(byLocale[locale] ?? byLocale[locale.split("-")[0]!])
+      expect(LANGUAGE_TAGS).toContain(code)
+      expect(code).toBe(resolveLanguage(locale))
     }
   })
 
   it("falls back to the UI language for a target language it has no words in", () => {
     // The i18n mock's UI language is en.
-    expect(contentLocaleFor("fra")).toBe("en")
+    expect(contentLocaleFor("fr")).toBe("en")
     expect(contentLocaleFor("yue")).toBe("en")
   })
 })

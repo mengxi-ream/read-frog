@@ -707,7 +707,7 @@ describe("selection toolbar requests", () => {
     expect(translateTextCoreMock).toHaveBeenCalledTimes(1)
 
     const updatedConfig = cloneConfig(store.get(configAtom))
-    updatedConfig.language.targetCode = "jpn"
+    updatedConfig.language.targetCode = "ja"
 
     act(() => {
       store.set(configAtom, updatedConfig)
@@ -719,7 +719,7 @@ describe("selection toolbar requests", () => {
 
     expect(translateTextCoreMock.mock.calls[1]?.[0]).toMatchObject({
       langConfig: expect.objectContaining({
-        targetCode: "jpn",
+        targetCode: "ja",
       }),
     })
 

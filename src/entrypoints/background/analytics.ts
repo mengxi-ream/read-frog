@@ -1,4 +1,4 @@
-import type { LangCodeISO6393, NoteSaveSurface } from "@read-frog/definitions"
+import type { LanguageTag, NoteSaveSurface } from "@read-frog/definitions"
 import type { CaptureResult } from "posthog-js/dist/module.no-external"
 import type {
   AnalyticsFailureReason,
@@ -6,7 +6,7 @@ import type {
   FeatureUsedEventProperties,
   SurfaceByFeature,
 } from "@/types/analytics"
-import { langCodeISO6393Schema, NOTE_SAVE_SURFACES } from "@read-frog/definitions"
+import { languageTagSchema, NOTE_SAVE_SURFACES } from "@read-frog/definitions"
 import { posthog } from "posthog-js/dist/module.no-external"
 import { match } from "ts-pattern"
 import { storage } from "#imports"
@@ -360,8 +360,8 @@ export function filterAnalyticsCaptureResult(data: CaptureResult | null): Captur
   return mutableFilteredData
 }
 
-function isLanguageCode(value: unknown): value is LangCodeISO6393 {
-  return langCodeISO6393Schema.safeParse(value).success
+function isLanguageCode(value: unknown): value is LanguageTag {
+  return languageTagSchema.safeParse(value).success
 }
 
 function isCharCount(value: unknown): value is number {

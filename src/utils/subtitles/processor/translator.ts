@@ -4,7 +4,7 @@ import type { Config } from "@/types/config/config"
 import type { SubtitlePromptContext } from "@/types/content"
 import type { MatchedTerm } from "@/utils/glossary/types"
 import type { PromptableProviderRef, SerializableProviderRef } from "@/utils/providers/provider-ref"
-import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
+import { LANGUAGE_ENGLISH_NAMES } from "@read-frog/definitions"
 import { APICallError } from "ai"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { isLLMProviderConfig } from "@/types/config/provider"
@@ -145,7 +145,7 @@ async function buildSubtitleHashComponents(
     return hashComponents
   }
 
-  const targetLangName = LANG_CODE_TO_EN_NAME[partialLangConfig.targetCode]
+  const targetLangName = LANGUAGE_ENGLISH_NAMES[partialLangConfig.targetCode]
   // Hashed for the template and the glossary only, with the video context left
   // empty. That context is the page title, the meta description and the AI
   // summary, and none of it is stable across visits: the first two are read

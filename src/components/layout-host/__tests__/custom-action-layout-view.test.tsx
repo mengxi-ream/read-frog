@@ -35,7 +35,7 @@ describe("customActionLayoutView", () => {
         outputSchema={[{ id: "f", name: "Formula", type: "string", description: "" }]}
         value={{ Formula: "\\(x^2\\)" }}
         selection=""
-        targetCode="eng"
+        targetCode="en"
         status="done"
         theme="light"
       />,

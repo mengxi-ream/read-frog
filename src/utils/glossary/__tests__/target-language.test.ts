@@ -1,9 +1,10 @@
-import { LANG_CODE_TO_EN_NAME, langCodeISO6393Schema } from "@read-frog/definitions"
+import { LANGUAGE_ENGLISH_NAMES, languageTagSchema } from "@read-frog/definitions"
 import { describe, expect, it } from "vitest"
 import {
   ALL_LANGUAGES,
   appliesToLanguage,
   defaultGlossaryTargetLang,
+  normalizeStoredTargetLang,
   targetLangPrecedence,
 } from "../target-language"
 
@@ -16,24 +17,24 @@ describe("aLL_LANGUAGES as a stored value", () => {
    * and a user's Allar terms would become language-independent ones.
    */
   it("is not a code the extension can translate into", () => {
-    expect(langCodeISO6393Schema.options).not.toContain(ALL_LANGUAGES)
-    expect(Object.hasOwn(LANG_CODE_TO_EN_NAME, ALL_LANGUAGES)).toBe(false)
+    expect(languageTagSchema.options).not.toContain(ALL_LANGUAGES)
+    expect(Object.hasOwn(LANGUAGE_ENGLISH_NAMES, ALL_LANGUAGES)).toBe(false)
   })
 })
 
 describe("appliesToLanguage", () => {
   it("passes a row written for the language in play", () => {
-    expect(appliesToLanguage("cmn", "cmn")).toBe(true)
+    expect(appliesToLanguage("zh-Hans", "zh-Hans")).toBe(true)
   })
 
   it("blocks a row written for another language", () => {
-    expect(appliesToLanguage("jpn", "cmn")).toBe(false)
+    expect(appliesToLanguage("ja", "zh-Hans")).toBe(false)
   })
 
   it("passes an all-languages row whatever the page is translating into", () => {
-    expect(appliesToLanguage(ALL_LANGUAGES, "cmn")).toBe(true)
-    expect(appliesToLanguage(ALL_LANGUAGES, "jpn")).toBe(true)
-    expect(appliesToLanguage(ALL_LANGUAGES, "eng")).toBe(true)
+    expect(appliesToLanguage(ALL_LANGUAGES, "zh-Hans")).toBe(true)
+    expect(appliesToLanguage(ALL_LANGUAGES, "ja")).toBe(true)
+    expect(appliesToLanguage(ALL_LANGUAGES, "en")).toBe(true)
   })
 })
 
@@ -45,22 +46,40 @@ describe("targetLangPrecedence", () => {
    * rather than left to the sort's callers.
    */
   it("ranks an all-languages row ahead of a language-specific one", () => {
-    expect(targetLangPrecedence(ALL_LANGUAGES)).toBeLessThan(targetLangPrecedence("cmn"))
+    expect(targetLangPrecedence(ALL_LANGUAGES)).toBeLessThan(targetLangPrecedence("zh-Hans"))
   })
 
   it("gives every specific language the same rank", () => {
-    expect(targetLangPrecedence("cmn")).toBe(targetLangPrecedence("jpn"))
+    expect(targetLangPrecedence("zh-Hans")).toBe(targetLangPrecedence("ja"))
   })
 })
 
 describe("defaultGlossaryTargetLang", () => {
   it("files a term with no wording under every language", () => {
-    expect(defaultGlossaryTargetLang("", "cmn")).toBe(ALL_LANGUAGES)
-    expect(defaultGlossaryTargetLang("   ", "cmn")).toBe(ALL_LANGUAGES)
+    expect(defaultGlossaryTargetLang("", "zh-Hans")).toBe(ALL_LANGUAGES)
+    expect(defaultGlossaryTargetLang("   ", "zh-Hans")).toBe(ALL_LANGUAGES)
   })
 
   it("files a wording under the language it was written in", () => {
-    expect(defaultGlossaryTargetLang("围棋", "cmn")).toBe("cmn")
-    expect(defaultGlossaryTargetLang("囲碁", "jpn")).toBe("jpn")
+    expect(defaultGlossaryTargetLang("围棋", "zh-Hans")).toBe("zh-Hans")
+    expect(defaultGlossaryTargetLang("囲碁", "ja")).toBe("ja")
+  })
+})
+
+// What the glossary database's version 7 upgrade and incoming synced glossaries
+// run every stored `targetLang` through.
+describe("normalizeStoredTargetLang", () => {
+  it("moves a term written under an ISO 639-3 code to the language's tag", () => {
+    expect(normalizeStoredTargetLang("cmn")).toBe("zh-Hans")
+    expect(normalizeStoredTargetLang("cmn-Hant")).toBe("zh-Hant")
+    expect(normalizeStoredTargetLang("por")).toBe("pt-BR")
+    expect(normalizeStoredTargetLang("eng")).toBe("en")
+  })
+
+  it("keeps tags, the all-languages value and anything it does not know", () => {
+    expect(normalizeStoredTargetLang("pt-PT")).toBe("pt-PT")
+    expect(normalizeStoredTargetLang("yue")).toBe("yue")
+    expect(normalizeStoredTargetLang(ALL_LANGUAGES)).toBe(ALL_LANGUAGES)
+    expect(normalizeStoredTargetLang("xx")).toBe("xx")
   })
 })

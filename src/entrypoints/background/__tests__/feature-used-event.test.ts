@@ -38,7 +38,7 @@ const BASE_EVENT = {
   latency_ms: 100,
   provider: "openai",
   backend_kind: "llm",
-  target_language: "cmn",
+  target_language: "zh-Hans",
   translation_mode: "bilingual",
 } as const
 

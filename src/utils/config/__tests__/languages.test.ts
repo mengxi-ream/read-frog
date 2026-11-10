@@ -16,15 +16,17 @@ describe("getDetectedCodeFromStorage", () => {
   })
 
   it("normalizes detected code values", () => {
-    expect(normalizeDetectedCode("jpn")).toBe("jpn")
+    expect(normalizeDetectedCode("ja")).toBe("ja")
+    // A code stored before languages were keyed by tag.
+    expect(normalizeDetectedCode("jpn")).toBe("ja")
     expect(normalizeDetectedCode("vmw")).toBe(DEFAULT_DETECTED_CODE)
     expect(normalizeDetectedCode(null)).toBe(DEFAULT_DETECTED_CODE)
   })
 
   it("returns a supported detected code from background", async () => {
-    sendMessageMock.mockResolvedValue("jpn")
+    sendMessageMock.mockResolvedValue("ja")
 
-    await expect(getDetectedCodeFromStorage()).resolves.toBe("jpn")
+    await expect(getDetectedCodeFromStorage()).resolves.toBe("ja")
     expect(sendMessageMock).toHaveBeenCalledWith("getDetectedCode", undefined)
   })
 

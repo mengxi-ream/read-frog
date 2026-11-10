@@ -40,7 +40,7 @@ function createAction(): SelectionToolbarCustomAction {
     })),
     sampleData: {
       selection: "A word",
-      targetCode: "eng",
+      targetCode: "en",
       values: { meaning: "Its meaning", example: "An example" },
     },
     notebaseConnection: {

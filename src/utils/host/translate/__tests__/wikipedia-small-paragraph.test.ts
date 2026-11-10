@@ -17,7 +17,7 @@ vi.mock("@/utils/host/translate/translate-variants", () => ({
 
 function createConfig(mode: Config["pageTranslation"]["mode"] = "bilingual"): Config {
   const config = structuredClone(DEFAULT_CONFIG)
-  config.language.sourceCode = "eng"
+  config.language.sourceCode = "en"
   config.pageTranslation.mode = mode
   return config
 }

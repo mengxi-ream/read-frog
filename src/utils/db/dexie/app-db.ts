@@ -2,6 +2,7 @@ import type { EntityTable } from "dexie"
 import { upperCamelCase } from "case-anything"
 import { Dexie } from "dexie"
 import { APP_NAME } from "@/utils/constants/app"
+import { normalizeStoredTargetLang } from "@/utils/glossary/target-language"
 import AiSegmentationCache from "./tables/ai-segmentation-cache"
 import ArticleSummaryCache from "./tables/article-summary-cache"
 import BatchRequestRecord from "./tables/batch-request-record"
@@ -154,6 +155,51 @@ export default class AppDB extends Dexie {
       glossarySyncSnapshot: `
         id`,
     })
+    // v7 changes no store. A term's `targetLang` moves from the ISO 639-3 code
+    // it was written with (`cmn`) to the BCP 47 tag languages are keyed by now
+    // (`zh-Hans`); unmoved, every existing term would stop matching. Codes map
+    // one to one, so the unique [glossaryId+targetLang+matchKey] index cannot
+    // collide. The sync snapshots keep their codes: the next sync sees the
+    // moved terms as a local change and uploads them.
+    this.version(7)
+      .stores({
+        translationCache: `
+          key,
+          translation,
+          createdAt`,
+        batchRequestRecord: `
+          key,
+          createdAt,
+          originalRequestCount,
+          provider,
+          model`,
+        articleSummaryCache: `
+          key,
+          createdAt`,
+        aiSegmentationCache: `
+          key,
+          createdAt`,
+        glossary: `
+          id,
+          enabled,
+          createdAt`,
+        glossaryTerm: `
+          id,
+          glossaryId,
+          &[glossaryId+targetLang+matchKey],
+          enabled,
+          updatedAt`,
+        glossarySyncSnapshot: `
+          id`,
+      })
+      .upgrade((tx) =>
+        tx
+          .table("glossaryTerm")
+          .toCollection()
+          .modify((term: { targetLang: string }) => {
+            term.targetLang = normalizeStoredTargetLang(term.targetLang)
+          }),
+      )
     this.translationCache.mapToClass(TranslationCache)
     this.batchRequestRecord.mapToClass(BatchRequestRecord)
     this.articleSummaryCache.mapToClass(ArticleSummaryCache)

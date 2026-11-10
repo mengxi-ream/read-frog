@@ -1,4 +1,4 @@
-import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { LanguageTag } from "@read-frog/definitions"
 import type { SelectionToolbarCustomActionOutputField } from "@/types/config/selection-toolbar"
 import type { SupportedUiLocale } from "@/utils/i18n/locales"
 import { compileLayout, renderLayoutHtml } from "@read-frog/layout-engine/core"
@@ -49,7 +49,7 @@ function renderWithJson(source: string, text: unknown, selection = ""): string {
       outputSchema: [field("json", "json")],
       value: { json: text },
       selection,
-      targetCode: "cmn",
+      targetCode: "zh-Hans",
       status: "done",
     }),
   )
@@ -139,7 +139,7 @@ describe("createLayoutSampleData", () => {
     expect(sample.values[slots.contextTerm!.id]).toBe('[{"text":"珍惜"}]')
     expect(sample.values[slots.definition!.id]).toBe("to cherish; to treasure; to value highly")
     // A target language the extension has no words in gets the UI language's.
-    expect(createLayoutSampleData(schema, "fra")).toEqual(sample)
+    expect(createLayoutSampleData(schema, "fr")).toEqual(sample)
   })
 
   it.each(SUPPORTED_UI_LOCALES)("gives %s a sample whose term quotes anchor", (locale) => {
@@ -272,37 +272,37 @@ describe("createLayoutSampleData", () => {
   // A sample is an answer written in the locale's language, so that language
   // is its target language: the card's words follow it like the notes do.
   it("picks the selection by the action's shape and the answer's language", () => {
-    const pick = (schema: Field[], targetCode: LangCodeISO6393) => {
+    const pick = (schema: Field[], targetCode: LanguageTag) => {
       const { selection, targetCode: written } = createLayoutSampleData(schema, targetCode)
       return { selection, targetCode: written }
     }
     const sentenceAnalysis = presetSchema("sentence-analysis")
-    expect(pick(sentenceAnalysis, "jpn")).toEqual({
+    expect(pick(sentenceAnalysis, "ja")).toEqual({
       selection: expect.stringMatching(/^The committee has postponed/),
-      targetCode: "jpn",
+      targetCode: "ja",
     })
-    expect(pick(sentenceAnalysis, "eng")).toEqual({
+    expect(pick(sentenceAnalysis, "en")).toEqual({
       selection: expect.stringMatching(/^虽然/),
-      targetCode: "eng",
+      targetCode: "en",
     })
-    expect(pick(sentenceAnalysis, "fra")).toEqual(pick(sentenceAnalysis, "eng"))
-    expect(pick(dictionarySchema(), "eng")).toEqual({ selection: "珍惜", targetCode: "eng" })
-    expect(pick(dictionarySchema(), "cmn-Hant")).toEqual({
+    expect(pick(sentenceAnalysis, "fr")).toEqual(pick(sentenceAnalysis, "en"))
+    expect(pick(dictionarySchema(), "en")).toEqual({ selection: "珍惜", targetCode: "en" })
+    expect(pick(dictionarySchema(), "zh-Hant")).toEqual({
       selection: "blossoms",
-      targetCode: "cmn-Hant",
+      targetCode: "zh-Hant",
     })
     const improveWriting = presetSchema("improve-writing")
-    expect(pick(improveWriting, "vie")).toEqual({
+    expect(pick(improveWriting, "vi")).toEqual({
       selection: expect.stringMatching(/^Dear Professor Lee/),
-      targetCode: "vie",
+      targetCode: "vi",
     })
-    expect(pick(improveWriting, "eng")).toEqual({
+    expect(pick(improveWriting, "en")).toEqual({
       selection: expect.stringMatching(/^我昨天/),
-      targetCode: "eng",
+      targetCode: "en",
     })
-    expect(pick([field("a", "Summary")], "kor")).toEqual({
+    expect(pick([field("a", "Summary")], "ko")).toEqual({
       selection: "blossoms",
-      targetCode: "kor",
+      targetCode: "ko",
     })
   })
 
@@ -310,33 +310,33 @@ describe("createLayoutSampleData", () => {
     expect(
       createLayoutSampleData(
         [field("a", "Summary"), field("b", "Score", { type: "number" })],
-        "eng",
+        "en",
       ),
-    ).toEqual({ selection: "珍惜", targetCode: "eng", values: { a: "Summary", b: "3" } })
+    ).toEqual({ selection: "珍惜", targetCode: "en", values: { a: "Summary", b: "3" } })
   })
 })
 
 describe("syncLayoutSampleData", () => {
   const schema = [field("a", "Summary"), field("b", "Score", { type: "number" })]
-  const saved = { selection: "My text", targetCode: "jpn" as const, values: { a: "Mine", b: "12" } }
+  const saved = { selection: "My text", targetCode: "ja" as const, values: { a: "Mine", b: "12" } }
 
   it("keeps the saved sample while the fields stay, by id through a rename", () => {
-    expect(syncLayoutSampleData(saved, schema, "eng")).toEqual(saved)
+    expect(syncLayoutSampleData(saved, schema, "en")).toEqual(saved)
     const renamed = [field("a", "Gist"), field("b", "Score", { type: "number" })]
-    expect(syncLayoutSampleData(saved, renamed, "eng")).toEqual(saved)
+    expect(syncLayoutSampleData(saved, renamed, "en")).toEqual(saved)
   })
 
   it("keeps an emptied value, so the preview can show a blank field", () => {
     const emptied = { ...saved, values: { a: "", b: "12" } }
-    expect(syncLayoutSampleData(emptied, schema, "eng")).toEqual(emptied)
+    expect(syncLayoutSampleData(emptied, schema, "en")).toEqual(emptied)
   })
 
   it("drops a removed field's value and gives a new field one in the sample's language", () => {
     const definition = getDictionarySlots(dictionarySchema()).definition!
-    const next = syncLayoutSampleData(saved, [field("b", "Score"), definition], "eng")
+    const next = syncLayoutSampleData(saved, [field("b", "Score"), definition], "en")
     expect(next).toEqual({
       selection: "My text",
-      targetCode: "jpn",
+      targetCode: "ja",
       values: {
         b: "12",
         [definition.id]: sampleIn(dictionarySchema(), "ja").values[definition.id],
@@ -346,15 +346,15 @@ describe("syncLayoutSampleData", () => {
   })
 
   it("creates a new sample for the reader when there is none", () => {
-    expect(syncLayoutSampleData(undefined, schema, "kor")).toEqual(
-      createLayoutSampleData(schema, "kor"),
+    expect(syncLayoutSampleData(undefined, schema, "ko")).toEqual(
+      createLayoutSampleData(schema, "ko"),
     )
   })
 })
 
 describe("layoutSampleValues", () => {
   it("keys the values by field name, like a model's answer", () => {
-    const sample = { selection: "s", targetCode: "eng" as const, values: { a: "Mine", b: "12" } }
+    const sample = { selection: "s", targetCode: "en" as const, values: { a: "Mine", b: "12" } }
     expect(
       layoutSampleValues(sample, [field("a", "Gist"), field("b", "Score", { type: "number" })]),
     ).toEqual({ Gist: "Mine", Score: "12" })
@@ -364,7 +364,7 @@ describe("layoutSampleValues", () => {
   it("keeps odd field names as own keys", () => {
     const sample = createLayoutSampleData(
       [field("a", "__proto__"), field("b", "constructor")],
-      "eng",
+      "en",
     )
     const values = layoutSampleValues(sample, [field("a", "__proto__"), field("b", "constructor")])
     expect(Object.hasOwn(values, "__proto__")).toBe(true)

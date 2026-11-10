@@ -1,4 +1,4 @@
-import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { LanguageTag } from "@read-frog/definitions"
 import type { LayoutStatus } from "@read-frog/layout-engine/contract"
 import type { SurfaceByFeature } from "@/types/analytics"
 import type { ThinkingSnapshot } from "@/types/background-stream"
@@ -18,7 +18,7 @@ interface CustomActionContentProps {
   // What the run used: its selection prompt token (ctx.selection) and target
   // language (ctx.targetLanguage, and the language of the card's own words).
   selection: string
-  targetCode: LangCodeISO6393
+  targetCode: LanguageTag
   selectionContent: string | null | undefined
   value: Record<string, unknown> | null
   thinking: ThinkingSnapshot | null

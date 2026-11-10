@@ -1,4 +1,4 @@
-import type { LangCodeISO6393, LangLevel } from "@read-frog/definitions"
+import type { LanguageTag, LangLevel } from "@read-frog/definitions"
 import type { HostedAiTextStreamRoute } from "@/types/background-stream"
 import type { Config } from "@/types/config/config"
 import type { LLMProviderConfig, TranslateProviderConfig } from "@/types/config/provider"
@@ -7,7 +7,7 @@ import type { WebPagePromptContext } from "@/types/content"
 import type { MatchedTerm } from "@/utils/glossary/types"
 import type { PromptableProviderRef, SerializableProviderRef } from "@/utils/providers/provider-ref"
 import type { ResolvedProviderRef } from "@/utils/providers/provider-registry"
-import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
+import { isSameLanguage, LANGUAGE_ENGLISH_NAMES } from "@read-frog/definitions"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { isAPIProviderConfig, isLLMProviderConfig } from "@/types/config/provider"
 import { classifyResolvedProvider } from "@/utils/analytics-provider"
@@ -61,7 +61,7 @@ export const MIN_LENGTH_FOR_SKIP_LANGUAGE_DETECTION = 10
  */
 export async function shouldSkipByLanguage(
   text: string,
-  skipLanguages: LangCodeISO6393[],
+  skipLanguages: LanguageTag[],
 ): Promise<boolean> {
   const detectedLang = await detectLanguage(text, {
     minLength: MIN_LENGTH_FOR_SKIP_LANGUAGE_DETECTION,
@@ -72,7 +72,7 @@ export async function shouldSkipByLanguage(
     return false
   }
 
-  return skipLanguages.includes(detectedLang)
+  return skipLanguages.some((language) => isSameLanguage(language, detectedLang))
 }
 
 export function normalizePromptContextValue(
@@ -102,7 +102,7 @@ function normalizeWebPagePromptContext(
 async function buildWebPageHashComponents(
   text: string,
   providerRef: SerializableProviderRef,
-  partialLangConfig: { sourceCode: LangCodeISO6393 | "auto"; targetCode: LangCodeISO6393 },
+  partialLangConfig: { sourceCode: LanguageTag | "auto"; targetCode: LanguageTag },
   enableAIContentAware: boolean,
   textFormat: TranslationTextFormat,
   preserveLineBreaks: boolean,
@@ -143,7 +143,7 @@ async function buildWebPageHashComponents(
     return hashComponents
   }
 
-  const targetLangName = LANG_CODE_TO_EN_NAME[partialLangConfig.targetCode]
+  const targetLangName = LANGUAGE_ENGLISH_NAMES[partialLangConfig.targetCode]
   // The terms are passed in rather than resolved here, so the prompt this hash
   // is taken over is built from exactly the terms the request will carry.
   const { systemPrompt, prompt } = await getTranslatePrompt(targetLangName, preparedText, {
@@ -278,8 +278,8 @@ export async function resolvePageProviderRef(
 export interface TranslateTextOptions {
   text: string
   langConfig: {
-    sourceCode: LangCodeISO6393 | "auto"
-    targetCode: LangCodeISO6393
+    sourceCode: LanguageTag | "auto"
+    targetCode: LanguageTag
     level: LangLevel
   }
   providerConfig: ResolvedProviderRef<TranslateProviderConfig>
@@ -455,7 +455,10 @@ export function validateTranslationConfigAndToast(
     return false
   }
 
-  if (languageConfig.sourceCode === languageConfig.targetCode) {
+  if (
+    languageConfig.sourceCode !== "auto" &&
+    isSameLanguage(languageConfig.sourceCode, languageConfig.targetCode)
+  ) {
     toastManager.add({ type: "error", title: i18n.t("translation.sameLanguage") })
     logger.info("validateTranslationConfig: returning false (same language)")
     return false

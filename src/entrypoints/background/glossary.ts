@@ -1,4 +1,4 @@
-import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { LanguageTag } from "@read-frog/definitions"
 import type { GlossarySnapshot } from "@/utils/glossary/active-matcher"
 import { setGlossarySnapshotLoader } from "@/utils/glossary/active-matcher"
 import {
@@ -22,7 +22,7 @@ const EMPTY_SNAPSHOT: GlossarySnapshot = { revision: 0, scopeKey: "", entries: [
  */
 async function readSnapshot(
   url: string | undefined,
-  targetLang: LangCodeISO6393,
+  targetLang: LanguageTag,
 ): Promise<GlossarySnapshot> {
   const [revision, glossaries, entries] = await Promise.all([
     getGlossaryRevision(),

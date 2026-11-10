@@ -44,7 +44,7 @@ describe("parseGlossaryCsv — the header is required", () => {
 
   it("accepts the header this module writes", () => {
     expect(parse("GPU,显卡,cmn,false").rows).toEqual([
-      { source: "GPU", target: "显卡", targetLanguage: "cmn", caseSensitive: false },
+      { source: "GPU", target: "显卡", targetLanguage: "zh-Hans", caseSensitive: false },
     ])
   })
 
@@ -56,7 +56,7 @@ describe("parseGlossaryCsv — the header is required", () => {
   ])("accepts the alias header %s", (header) => {
     expect(parseGlossaryCsv(`${header}\nGPU,显卡,cmn,true`)).toMatchObject({
       ok: true,
-      rows: [{ source: "GPU", target: "显卡", targetLanguage: "cmn", caseSensitive: true }],
+      rows: [{ source: "GPU", target: "显卡", targetLanguage: "zh-Hans", caseSensitive: true }],
     })
   })
 
@@ -70,14 +70,14 @@ describe("parseGlossaryCsv — the header is required", () => {
 describe("parseGlossaryCsv — rows", () => {
   it("keeps an empty target, which means keep the original wording", () => {
     expect(parse("Acheron,,cmn,false").rows).toEqual([
-      { source: "Acheron", target: "", targetLanguage: "cmn", caseSensitive: false },
+      { source: "Acheron", target: "", targetLanguage: "zh-Hans", caseSensitive: false },
     ])
   })
 
   it("honours quoted fields with embedded commas and escaped quotes", () => {
     expect(parse('"Smith, John",史密斯,cmn,false\n"say ""hi""",打招呼,cmn,false').rows).toEqual([
-      { source: "Smith, John", target: "史密斯", targetLanguage: "cmn", caseSensitive: false },
-      { source: 'say "hi"', target: "打招呼", targetLanguage: "cmn", caseSensitive: false },
+      { source: "Smith, John", target: "史密斯", targetLanguage: "zh-Hans", caseSensitive: false },
+      { source: 'say "hi"', target: "打招呼", targetLanguage: "zh-Hans", caseSensitive: false },
     ])
   })
 
@@ -105,7 +105,7 @@ describe("parseGlossaryCsv — rows", () => {
       ].join("\n"),
     )
     expect(rows).toEqual([
-      { source: "Good", target: "好", targetLanguage: "cmn", caseSensitive: false },
+      { source: "Good", target: "好", targetLanguage: "zh-Hans", caseSensitive: false },
     ])
     expect(skipped).toEqual([
       { line: 3, reason: "empty" },
@@ -149,10 +149,10 @@ describe("parseGlossaryCsv — a quoted field spanning lines", () => {
       {
         source: "Chort Bay",
         target: "雀特湾\n（港口）",
-        targetLanguage: "cmn",
+        targetLanguage: "zh-Hans",
         caseSensitive: false,
       },
-      { source: "Helldiver", target: "地狱潜兵", targetLanguage: "cmn", caseSensitive: false },
+      { source: "Helldiver", target: "地狱潜兵", targetLanguage: "zh-Hans", caseSensitive: false },
     ])
     expect(skipped).toEqual([])
   })
@@ -187,9 +187,9 @@ describe("parseGlossaryCsv — a quoted field spanning lines", () => {
 
 describe("formatGlossaryCsv", () => {
   const rows = [
-    { source: "Smith, John", target: "史密斯", targetLanguage: "cmn", caseSensitive: false },
-    { source: 'say "hi"', target: "打招呼", targetLanguage: "jpn", caseSensitive: false },
-    { source: "Acheron", target: "", targetLanguage: "cmn", caseSensitive: true },
+    { source: "Smith, John", target: "史密斯", targetLanguage: "zh-Hans", caseSensitive: false },
+    { source: 'say "hi"', target: "打招呼", targetLanguage: "ja", caseSensitive: false },
+    { source: "Acheron", target: "", targetLanguage: "zh-Hans", caseSensitive: true },
   ] as const
 
   it("round-trips through the parser", () => {
@@ -216,8 +216,8 @@ describe("formatGlossaryCsv", () => {
    */
   it("round-trips the case flag, which is half of a term's identity", () => {
     const cased: ParsedGlossaryRow[] = [
-      { source: "Go", target: "围棋", targetLanguage: "cmn", caseSensitive: true },
-      { source: "api", target: "接口", targetLanguage: "cmn", caseSensitive: false },
+      { source: "Go", target: "围棋", targetLanguage: "zh-Hans", caseSensitive: true },
+      { source: "api", target: "接口", targetLanguage: "zh-Hans", caseSensitive: false },
     ]
     expect(parseGlossaryCsv(formatGlossaryCsv(cased))).toMatchObject({ ok: true, rows: cased })
   })
@@ -267,7 +267,7 @@ describe("decodeGlossaryCsv", () => {
 
 describe("parseTargetLanguageCell", () => {
   it("keeps the language the cell names", () => {
-    expect(parseTargetLanguageCell("jpn")).toBe("jpn")
+    expect(parseTargetLanguageCell("ja")).toBe("ja")
   })
 
   /**

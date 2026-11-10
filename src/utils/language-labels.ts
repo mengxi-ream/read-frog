@@ -1,16 +1,18 @@
-import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { LanguageTag } from "@read-frog/definitions"
 import type { GlossaryTargetLang } from "@/utils/glossary/target-language"
-import { LANG_CODE_TO_LOCALE_NAME } from "@read-frog/definitions"
-import { camelCase } from "case-anything"
+import { getLanguageDisplayName, getLanguageEndonym } from "@read-frog/definitions"
 import { ALL_LANGUAGES } from "@/utils/glossary/target-language"
-import { i18n } from "@/utils/i18n"
+import { getUiLocale, i18n } from "@/utils/i18n"
 
-export function getLanguageName(code: LangCodeISO6393) {
-  return i18n.t(`languages.${camelCase(code)}` as never)
+// Names come from @read-frog/definitions' table for the interface language, so
+// no locale file has to list every language and every browser shows the same
+// names.
+export function getLanguageName(code: LanguageTag) {
+  return getLanguageDisplayName(code, getUiLocale())
 }
 
-export function getLanguageLabel(code: LangCodeISO6393) {
-  return `${getLanguageName(code)} (${LANG_CODE_TO_LOCALE_NAME[code]})`
+export function getLanguageLabel(code: LanguageTag) {
+  return `${getLanguageName(code)} (${getLanguageEndonym(code)})`
 }
 
 /**
