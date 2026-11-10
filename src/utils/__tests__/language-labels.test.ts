@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { getLanguageLabel } from "../language-labels"
+import { getGlossaryTargetLangLabel, getLanguageLabel } from "../language-labels"
 
 const ui = vi.hoisted(() => ({ locale: "en" }))
 
@@ -33,5 +33,17 @@ describe("getLanguageLabel", () => {
     // Chrome has no name for Wallisian in any locale. The names are kept in
     // @read-frog/definitions, not taken from Intl.DisplayNames.
     expect(getLanguageLabel("wls")).toBe("Wallisian (Fakaʻuvea)")
+  })
+})
+
+describe("getGlossaryTargetLangLabel", () => {
+  it("names a listed language, and every language for the all-languages value", () => {
+    expect(getGlossaryTargetLangLabel("ja")).toBe("Japanese")
+    expect(getGlossaryTargetLangLabel("all")).toBe("options.advanced.glossary.allLanguages")
+  })
+
+  it("shows a language no build lists as it is stored", () => {
+    // From an imported file or a newer build; it must not blank the glossary page.
+    expect(getGlossaryTargetLangLabel("tok" as never)).toBe("tok")
   })
 })

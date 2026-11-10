@@ -1,6 +1,10 @@
 import type { LanguageTag } from "@read-frog/definitions"
 import type { GlossaryTargetLang } from "@/utils/glossary/target-language"
-import { getLanguageDisplayName, getLanguageEndonym } from "@read-frog/definitions"
+import {
+  getLanguageDisplayName,
+  getLanguageEndonym,
+  languageTagSchema,
+} from "@read-frog/definitions"
 import { ALL_LANGUAGES } from "@/utils/glossary/target-language"
 import { getUiLocale, i18n } from "@/utils/i18n"
 
@@ -23,7 +27,9 @@ export function getLanguageLabel(code: LanguageTag) {
  * is what lets every call site render `term.targetLang` without one.
  */
 export function getGlossaryTargetLangLabel(value: GlossaryTargetLang): string {
-  return value === ALL_LANGUAGES
-    ? i18n.t("options.advanced.glossary.allLanguages")
-    : getLanguageName(value)
+  if (value === ALL_LANGUAGES) return i18n.t("options.advanced.glossary.allLanguages")
+  // A stored term can carry a language this build does not list — a newer
+  // build's, or one from an imported file, which `normalizeStoredTargetLang`
+  // keeps as it is. Shown as stored, since it has no name here.
+  return languageTagSchema.safeParse(value).success ? getLanguageName(value) : value
 }
