@@ -555,9 +555,11 @@ describe("built-in site rules", () => {
   })
 
   // The whole page translates, so the excludes are all that keeps LowEndTalk's
-  // name lists out: usernames come back transliterated, and the Thanked by box
-  // gets an inserted translation wrapped in parentheses by the site's own
-  // `div.ThankedByBox > span.ThankedBy > span::before/::after` rules.
+  // names out: usernames come back transliterated, and the Thanked by box gets
+  // an inserted translation wrapped in parentheses by the site's own
+  // `div.ThankedByBox > span.ThankedBy > span::before/::after` rules. `.Author`
+  // goes out whole because translation-only mode serializes a header's run as
+  // HTML, which carried the excluded `.Username` and the avatar's title/alt.
   it("keeps LowEndTalk usernames and name lists out of the translation", () => {
     const resolved = resolveSiteRule(
       "https://lowendtalk.com/discussion/222844/example",
@@ -568,6 +570,7 @@ describe("built-in site rules", () => {
 
     expect(resolved.excludeSelector?.split(",")).toEqual([
       ".ClearFix .Count",
+      ".Author",
       ".Username",
       ".ThankedByBox",
       ".PanelInThisDiscussion",

@@ -256,7 +256,7 @@ describe("includeSelectors whitelist", () => {
         <div class="Comment">
           <div class="Item-Header CommentHeader">
             <div class="AuthorWrap" id="author-wrap">
-              <span class="Author"><a href="/profile/PuDLeZ" class="Username" id="username">PuDLeZ</a></span>
+              <span class="Author" id="author"><a href="/profile/PuDLeZ" class="PhotoWrap" title="PuDLeZ"><img alt="PuDLeZ"></a><a href="/profile/PuDLeZ" class="Username" id="username">PuDLeZ</a></span>
               <span class="AuthorInfo"><span class="MItem RoleTitle">Member</span></span>
             </div>
           </div>
@@ -279,7 +279,7 @@ describe("includeSelectors whitelist", () => {
       "comment-body",
       "panel-heading",
     ].filter((id) => !has(id, PARAGRAPH_ATTRIBUTE))
-    const walkedNames = ["username", "thanked-by", "participants"].filter((id) =>
+    const walkedNames = ["author", "username", "thanked-by", "participants"].filter((id) =>
       has(id, WALKED_ATTRIBUTE),
     )
 

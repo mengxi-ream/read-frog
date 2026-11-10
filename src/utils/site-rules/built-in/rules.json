@@ -1240,9 +1240,15 @@
   },
   {
     "id": "lowendtalk",
-    "description": "Was an include whitelist (headings, post bodies, the sidebar, discussion-list meta) that left category and page descriptions, latest-post titles, search results and comment headers in English. The whole page translates now; the excludes keep out only what machine translation garbles: usernames, which get transliterated; the Thanked by box, a list of names whose `.ThankedBy > span` CSS wraps an inserted translation in parentheses; the In this Discussion list of names and times; and the sidebar category counts",
+    "description": "Was an include whitelist (headings, post bodies, the sidebar, discussion-list meta) that left category and page descriptions, latest-post titles, search results and comment headers in English. The whole page translates now; the excludes keep out only what machine translation garbles. Usernames get transliterated, so the author block of each post and comment header is excluded whole (.Author: the avatar link's title, the img's alt and the name), because translation-only mode sends a header's run as HTML and swaps the reply into every text node and title/alt under it, and excluding .Username alone left the name inside the serialized .Author. Also kept out: usernames elsewhere; the Thanked by box, a list of names whose `.ThankedBy > span` CSS wraps an inserted translation in parentheses; the In this Discussion list of names and times; and the sidebar category counts",
     "matches": "lowendtalk.com",
-    "excludeSelectors": [".ClearFix .Count", ".Username", ".ThankedByBox", ".PanelInThisDiscussion"]
+    "excludeSelectors": [
+      ".ClearFix .Count",
+      ".Author",
+      ".Username",
+      ".ThankedByBox",
+      ".PanelInThisDiscussion"
+    ]
   },
   {
     "id": "linkedin",
