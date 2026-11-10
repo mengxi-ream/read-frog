@@ -307,7 +307,7 @@
     "injectedCss": "span,.x569fbc { max-height:unset;-webkit-line-clamp:unset;height:unset;white-space:unset; }",
     "excludeSelectors.add": [
       ".x6s0dn4.x40hh3e.xrvj5dj.xxfwaov",
-      ".x6s0dn4.x78zum5",
+      ".x6s0dn4.x78zum5:not(:has([data-pressable-container]))",
       ".xpvyfi4.x1xdureb.x1agbcgv,.xqcrz7y.x1xdureb.x1agbcgv",
       ".xpvyfi4.x1npkx4u.x1ms6mhf"
     ],
