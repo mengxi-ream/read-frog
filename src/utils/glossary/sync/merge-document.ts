@@ -45,8 +45,7 @@ export function withStoredTargetLangs(terms: readonly SyncedTerm[]): SyncedTerm[
     const stored = { ...term, targetLang: normalizeStoredTargetLang(term.targetLang) }
     const identity = termIdentity(stored)
     const kept = byIdentity.get(identity)
-    // `Number`, not `getTime()`: the database upgrade runs this over stored rows,
-    // and a row without a valid date must not throw there.
+    // `Number`, not `getTime()`: a stored row without a valid date must not throw.
     if (kept === undefined || Number(stored.updatedAt) >= Number(kept.updatedAt)) {
       byIdentity.set(identity, stored)
     }

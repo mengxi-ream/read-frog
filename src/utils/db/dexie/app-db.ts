@@ -2,7 +2,6 @@ import type { EntityTable } from "dexie"
 import { upperCamelCase } from "case-anything"
 import { Dexie } from "dexie"
 import { APP_NAME } from "@/utils/constants/app"
-import { withStoredTargetLangs } from "@/utils/glossary/sync/merge-document"
 import AiSegmentationCache from "./tables/ai-segmentation-cache"
 import ArticleSummaryCache from "./tables/article-summary-cache"
 import BatchRequestRecord from "./tables/batch-request-record"
@@ -10,6 +9,7 @@ import Glossary from "./tables/glossary"
 import GlossarySyncSnapshot from "./tables/glossary-sync-snapshot"
 import GlossaryTerm from "./tables/glossary-term"
 import TranslationCache from "./tables/translation-cache"
+import { moveGlossaryTermsToTags } from "./upgrades/v7-glossary-term-tags"
 
 export default class AppDB extends Dexie {
   translationCache!: EntityTable<TranslationCache, "key">
@@ -155,15 +155,10 @@ export default class AppDB extends Dexie {
       glossarySyncSnapshot: `
         id`,
     })
-    // v7 changes no store. A term's `targetLang` moves from the ISO 639-3 code
-    // it was written with (`cmn`) to the BCP 47 tag languages are keyed by now
-    // (`zh-Hans`); unmoved, every existing term would stop matching. Codes map
-    // one to one, but a device that synced with an upgraded one before
-    // upgrading itself can already hold a term under both spellings. Moving
-    // both onto one [glossaryId+targetLang+matchKey] would abort the upgrade,
-    // and the database, every table of it, would then never open, so the older
-    // row goes. The sync snapshots keep their codes; the sync reads every side
-    // in the stored form (`withStoredTargetLangs`).
+    // v7 changes no store: glossary terms move from ISO 639-3 codes to BCP 47
+    // tags (./upgrades/v7-glossary-term-tags.ts). The sync snapshots keep their
+    // codes; the sync reads every side in the stored form
+    // (`withStoredTargetLangs`).
     this.version(7)
       .stores({
         translationCache: `
@@ -197,10 +192,8 @@ export default class AppDB extends Dexie {
       })
       .upgrade(async (tx) => {
         const table = tx.table("glossaryTerm")
-        const terms = await table.toArray()
-        const kept = withStoredTargetLangs(terms)
-        const keptIds = new Set(kept.map((term) => term.id))
-        await table.bulkDelete(terms.filter((term) => !keptIds.has(term.id)).map((term) => term.id))
+        const { kept, droppedIds } = moveGlossaryTermsToTags(await table.toArray())
+        await table.bulkDelete(droppedIds)
         await table.bulkPut(kept)
       })
     this.translationCache.mapToClass(TranslationCache)

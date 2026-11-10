@@ -16,7 +16,7 @@
  * frozen snapshots - never import constants, helpers, or shared types.
  */
 
-const TAG_BY_CODE: Readonly<Record<string, string>> = {
+export const TAG_BY_CODE: Readonly<Record<string, string>> = {
   eng: "en",
   cmn: "zh-Hans",
   "cmn-Hant": "zh-Hant",
