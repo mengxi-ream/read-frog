@@ -51,12 +51,16 @@ function createConfig({
   }
 }
 
-function createDownloader(fragments: SubtitlesFragment[], preSegmented = true) {
+function createDownloader(
+  fragments: SubtitlesFragment[],
+  preSegmented = true,
+  trackLanguage = "en",
+) {
   const fetcher = {
     fetch: vi.fn<(...args: any[]) => any>().mockResolvedValue(fragments),
     cleanup: vi.fn<(...args: any[]) => any>(),
     shouldUseSameTrack: vi.fn<(...args: any[]) => any>().mockResolvedValue(false),
-    getSourceLanguage: () => "en",
+    getSourceLanguage: () => trackLanguage,
     hasAvailableSubtitles: vi.fn<(...args: any[]) => any>().mockResolvedValue(true),
     isPreSegmented: () => preSegmented,
   }
@@ -272,6 +276,19 @@ describe("translatedSubtitlesDownloader", () => {
       title: "subtitles.errors.translatedExportIncomplete",
     })
     expect(status()).toEqual({ phase: TranslatedDownloadPhase.Idle, progress: null })
+  })
+
+  it("rejects export of a track in another region of the target language", async () => {
+    // A pt-PT track for a pt-BR reader: one language, as on pages.
+    mocks.getLocalConfig.mockResolvedValue(createConfig({ targetCode: "pt-BR" }))
+
+    await createDownloader(lines(1), true, "pt-PT").downloader.download()
+
+    expect(mocks.translateSubtitles).not.toHaveBeenCalled()
+    expect(mocks.toastAdd).toHaveBeenCalledWith({
+      type: "error",
+      title: "subtitles.errors.translatedExportSameLanguage",
+    })
   })
 
   it("rejects same-language export before showing the preparing state", async () => {
