@@ -82,36 +82,51 @@ export function compareExtensionVersions(left: string, right: string): number {
 // `image-set()` also accept a bare string URL.
 const LOADING_CSS_PATTERN = /url\(|src\(|image\(|image-set\(|@import/i
 
-function decodeCssEscapes(css: string): string {
-  // Before tokenizing, CSS turns CR LF, a lone CR and FF into one LF (CSS
-  // Syntax 3, §3.3), and a hex escape then takes that LF as its terminating
-  // whitespace. Normalize first so this reads the text the way a browser does:
-  // otherwise `\75` + CR LF + `rl(` would look like "u" + LF + "rl(" here.
-  return css
-    .replaceAll(/\r\n?|\f/g, "\n")
-    .replaceAll(
-      /\\(?:([\da-f]{1,6})[\t\n ]?|([\s\S]))/gi,
-      (_match, hex: string | undefined, char: string | undefined) => {
-        if (hex === undefined) {
-          return char ?? ""
-        }
-        const codePoint = Number.parseInt(hex, 16)
-        return codePoint > 0 && codePoint <= 0x10ffff && (codePoint < 0xd800 || codePoint > 0xdfff)
-          ? String.fromCodePoint(codePoint)
-          : "�"
-      },
-    )
+// Before tokenizing, CSS turns CR LF, a lone CR and FF into one LF (CSS
+// Syntax 3, §3.3), and a hex escape then takes that LF as its terminating
+// whitespace. Checking the normalized text reads it the way a browser does:
+// otherwise `\75` + CR LF + `rl(` would look like "u" + LF + "rl(".
+function normalizeCssNewlines(css: string): string {
+  return css.replaceAll(/\r\n?|\f/g, "\n")
 }
+
+function decodeCssEscapes(css: string): string {
+  return css.replaceAll(
+    /\\(?:([\da-f]{1,6})[\t\n ]?|([\s\S]))/gi,
+    (_match, hex: string | undefined, char: string | undefined) => {
+      if (hex === undefined) {
+        return char ?? ""
+      }
+      const codePoint = Number.parseInt(hex, 16)
+      return codePoint > 0 && codePoint <= 0x10ffff && (codePoint < 0xd800 || codePoint > 0xdfff)
+        ? String.fromCodePoint(codePoint)
+        : "�"
+    },
+  )
+}
+
+// The CSS of every rule matching a page is joined with "\n" into one
+// stylesheet (see resolveSiteRule), and a hex escape also takes the whitespace
+// after it. A block ending in an unfinished hex escape would take that newline
+// and run into the next block, so `\75` then `rl(` would read as url(. An odd
+// run of backslashes before the digits makes an escape; an even run is
+// escaped backslashes.
+const DANGLING_HEX_ESCAPE_PATTERN = /(?:^|[^\\])(?:\\\\)*\\[\da-f]{1,6}$/i
 
 /**
  * CSS from the document may not load anything. The signature keeps strangers
  * from publishing rules; this keeps even a leaked key from turning rule CSS
  * into a beacon or a reader of page attributes (`input[value^="a"]` with a
  * background URL). No built-in rule needs to load anything. Escapes are decoded
- * first, because `\75 rl(` is a `url(` as well.
+ * first, because `\75 rl(` is a `url(` as well, and no block may end in one,
+ * because blocks are joined before the browser reads them.
  */
 export function isRemoteCssAllowed(css: string): boolean {
-  return !LOADING_CSS_PATTERN.test(decodeCssEscapes(css))
+  const normalized = normalizeCssNewlines(css)
+  return (
+    !DANGLING_HEX_ESCAPE_PATTERN.test(normalized) &&
+    !LOADING_CSS_PATTERN.test(decodeCssEscapes(normalized))
+  )
 }
 
 /** The rule as this build can apply it, or null when it cannot. */

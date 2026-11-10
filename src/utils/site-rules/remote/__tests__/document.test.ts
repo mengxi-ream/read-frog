@@ -1,6 +1,7 @@
 import type { RemoteSiteRulesDocument } from "../document"
 import type { SiteRule } from "@/types/config/site-rules"
 import { describe, expect, it } from "vitest"
+import { resolveSiteRule } from "../../resolve"
 import {
   compareExtensionVersions,
   isRemoteCssAllowed,
@@ -135,6 +136,46 @@ describe("parseRemoteSiteRule", () => {
       parseRemoteSiteRule({ id: "a", matches: "a.com", minExtensionVersion: "next" }, "1.0"),
     ).toBeNull()
   })
+
+  it("refuses a url( split across a rule's CSS blocks", () => {
+    expect(
+      parseRemoteSiteRule(
+        {
+          id: "split",
+          matches: "x.test",
+          injectedCss: "input[value^=a]{background:\\75",
+          "injectedCss.add": ["rl(https://x.test/a)}"],
+        },
+        "1.0",
+      ),
+    ).toBeNull()
+  })
+})
+
+describe("remote rule CSS once joined for a page", () => {
+  it("cannot be split into a url( across two matching rules", () => {
+    const halves = ["input[value^=a]{background:\\75", "rl(https://x.test/a)}"]
+    // Joined the way resolveSiteRule joins them, the halves read as url(.
+    expect(isRemoteCssAllowed(halves.join("\n"))).toBe(false)
+
+    const selected = selectBuiltInSiteRules(
+      [],
+      {
+        format: 1,
+        revision: 1,
+        extensionVersion: "1.0",
+        rules: [
+          { id: "everywhere", matches: "<all_urls>", injectedCss: halves[0] },
+          { id: "site", matches: "x.test", injectedCss: halves[1] },
+        ],
+      },
+      "1.0",
+    )
+    const resolved = resolveSiteRule("https://x.test/", selected, [], [])
+
+    expect(resolved.matchedRuleIds).toEqual(["site"])
+    expect(isRemoteCssAllowed(resolved.injectedCss ?? "")).toBe(true)
+  })
 })
 
 describe("isRemoteCssAllowed", () => {
@@ -143,6 +184,11 @@ describe("isRemoteCssAllowed", () => {
     '.a::before { content: "\\2014"; }',
     ".a { background-image: linear-gradient(red, blue); }",
     ".a { -webkit-line-clamp: unset !important; }",
+    // An escape finished by whitespace inside the block takes nothing from the join.
+    ".a { x: \\75 }",
+    ".a { x: y } \\75\r\n",
+    // An even run of backslashes is escaped backslashes, not an escape.
+    ".a { x: y } \\\\75",
   ])("allows %s", (css) => {
     expect(isRemoteCssAllowed(css)).toBe(true)
   })
@@ -159,6 +205,13 @@ describe("isRemoteCssAllowed", () => {
     ".a { background: \\75\frl(x) }",
     ".a { background: \\75\nrl(x) }",
     ".a { background: image-\\73\r\net('x.png' 1x) }",
+    // A block ending in an unfinished hex escape would take the newline that
+    // joins it to the next rule's CSS.
+    ".a { background: \\75",
+    "@\\69",
+    "x: image-\\73",
+    ".a { x: y } \\000075",
+    ".a { x: y } \\\\\\75",
     "@import 'https://x.test/x.css';",
     "@\\69mport 'x.css';",
     "@\\69\r\nmport 'x.css';",
