@@ -42,7 +42,7 @@ describe("BuiltInAiUsageConfig", () => {
       isPending: false,
       isError: false,
       status: {
-        credits: [
+        pools: [
           {
             periodKind: "weekly",
             usedPercent: 37.6,
@@ -86,7 +86,7 @@ describe("BuiltInAiUsageConfig", () => {
       isPending: false,
       isError: false,
       status: {
-        credits: [
+        pools: [
           {
             periodKind: "daily",
             usedPercent: 120,
@@ -126,9 +126,7 @@ describe("BuiltInAiUsageConfig", () => {
       isPending: false,
       isError: false,
       status: {
-        credits: [
-          { periodKind: "daily", usedPercent: 0, resetAt: null, features: ["customAction"] },
-        ],
+        pools: [{ periodKind: "daily", usedPercent: 0, resetAt: null, features: ["customAction"] }],
         features: {} as never,
       },
     }
@@ -138,12 +136,12 @@ describe("BuiltInAiUsageConfig", () => {
     expect(container).toBeEmptyDOMElement()
   })
 
-  it("treats an empty credits list like an unavailable status", () => {
+  it("treats an empty pool list like an unavailable status", () => {
     hostedAiState.value = {
       isSignedIn: true,
       isPending: false,
       isError: false,
-      status: { credits: [], features: {} as never },
+      status: { pools: [], features: {} as never },
     }
 
     render(<BuiltInAiUsageConfig />)
@@ -157,7 +155,6 @@ describe("BuiltInAiUsageConfig", () => {
       isPending: false,
       isError: false,
       status: {
-        credits: [],
         pools: [
           { periodKind: "daily", usedPercent: 10, resetAt: null, features: ["customAction"] },
           { periodKind: "weekly", usedPercent: 5, resetAt: null, features: ["pageTranslation"] },
@@ -180,7 +177,6 @@ describe("BuiltInAiUsageConfig", () => {
       isPending: false,
       isError: false,
       status: {
-        credits: [],
         pools: [
           {
             periodKind: "weekly",
@@ -206,9 +202,6 @@ describe("BuiltInAiUsageConfig", () => {
       isPending: false,
       isError: false,
       status: {
-        credits: [
-          { periodKind: "daily", usedPercent: 40, resetAt: null, features: ["customAction"] },
-        ],
         pools: [
           { periodKind: "daily", usedPercent: 40, resetAt: null, features: ["customAction"] },
           {
@@ -246,7 +239,6 @@ describe("BuiltInAiUsageConfig", () => {
       isPending: false,
       isError: false,
       status: {
-        credits: [],
         pools: [
           {
             periodKind: "once",
@@ -272,7 +264,6 @@ describe("BuiltInAiUsageConfig", () => {
       isPending: false,
       isError: false,
       status: {
-        credits: [],
         pools: [
           {
             periodKind: "once",
@@ -289,25 +280,5 @@ describe("BuiltInAiUsageConfig", () => {
 
     expect(screen.getByText("options.apiProviders.builtInAiUsage.oneTime")).toBeInTheDocument()
     expect(screen.queryByText(/builtInAiUsage\.expiresAt/)).not.toBeInTheDocument()
-  })
-
-  // TODO(2026-11-07): delete with the `credits` fallback (mengxi-ream/read-frog-monorepo#710).
-  it("reads the recurring pools from credits when the server predates pools", () => {
-    hostedAiState.value = {
-      isSignedIn: true,
-      isPending: false,
-      isError: false,
-      status: {
-        credits: [
-          { periodKind: "weekly", usedPercent: 25, resetAt: null, features: ["pageTranslation"] },
-        ],
-        features: {} as never,
-      },
-    }
-
-    render(<BuiltInAiUsageConfig />)
-
-    expect(screen.getByRole("progressbar")).toHaveAttribute("aria-valuenow", "75")
-    expect(screen.getByText("options.apiProviders.builtInAiUsage.weekly")).toBeInTheDocument()
   })
 })

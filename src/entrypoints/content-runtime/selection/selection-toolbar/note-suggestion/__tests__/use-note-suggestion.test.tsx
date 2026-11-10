@@ -87,7 +87,7 @@ function createHostedStatus(available: boolean) {
           : { available: false, unavailableReason: "quota_exhausted" },
       },
     },
-    credits: [],
+    pools: [],
   }
 }
 

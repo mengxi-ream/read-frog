@@ -177,7 +177,7 @@ function makeUltraAccessStatus(accessAllowed: boolean) {
     ? { accessAllowed: true, available: true, unavailableReason: null }
     : { accessAllowed: false, available: false, unavailableReason: "ultra_required" as const }
   return {
-    credits: [],
+    pools: [],
     features: {
       pageTranslation: { advance },
       selectionTranslation: { advance },

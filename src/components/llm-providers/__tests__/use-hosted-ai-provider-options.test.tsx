@@ -31,7 +31,6 @@ function tier(overrides: Partial<HostedAiTierStatus> = {}): HostedAiTierStatus {
     available: true,
     unavailableReason: null,
     upgradeTo: null,
-    requiresUltra: false,
     modelRevision: "r1",
     ...overrides,
   }
@@ -40,27 +39,23 @@ function tier(overrides: Partial<HostedAiTierStatus> = {}): HostedAiTierStatus {
 /**
  * The tier pair the server sends for a feature this plan does not fund.
  *
- * `unavailableReason` carries it, not the absence of a `credits` pool:
- * `createTierStatus` maps an unfunded Ultra-gated tier to `ultra_required`
- * ("an upgrade wall, not an outage"), and `tierRequiresUltra` is true for the
- * normal tier of every feature outside `customAction`. An unfunded feature
- * whose tiers still report `unavailableReason: null` is not a state the server
- * can produce.
+ * `unavailableReason` carries it, not the absence of a pool: `createTierStatus`
+ * maps an unfunded plan-gated tier to `pro_required` or `ultra_required` ("an
+ * upgrade wall, not an outage"). An unfunded feature whose tiers still report
+ * `unavailableReason: null` is not a state the server can produce.
  */
 function unfundedTiers(): { normal: HostedAiTierStatus; advance: HostedAiTierStatus } {
   return {
     normal: tier({
       available: false,
-      unavailableReason: "ultra_required",
-      upgradeTo: "ultra",
-      requiresUltra: true,
+      unavailableReason: "pro_required",
+      upgradeTo: "pro",
     }),
     advance: tier({
       accessAllowed: false,
       available: false,
       unavailableReason: "ultra_required",
       upgradeTo: "ultra",
-      requiresUltra: true,
     }),
   }
 }
@@ -114,7 +109,7 @@ describe("useHostedAiProviderOptions", () => {
       isPending: false,
       isError: false,
       status: {
-        credits: [customActionDailyCredit()],
+        pools: [customActionDailyCredit()],
         features: allFeatures({
           customAction: {
             normal: tier(),
@@ -139,19 +134,11 @@ describe("useHostedAiProviderOptions", () => {
       isPending: false,
       isError: false,
       status: {
-        credits: [customActionDailyCredit()],
+        pools: [customActionDailyCredit()],
         features: allFeatures({
-          pageTranslation: {
-            normal: tier({ requiresUltra: true }),
-            advance: tier({ requiresUltra: true }),
-          },
           customAction: {
             normal: tier({ upgradeTo: "pro" }),
-            advance: tier({ upgradeTo: "ultra", requiresUltra: true }),
-          },
-          noteSuggestion: {
-            normal: tier({ requiresUltra: true }),
-            advance: tier({ requiresUltra: true }),
+            advance: tier({ upgradeTo: "ultra" }),
           },
         }),
       },
@@ -163,7 +150,7 @@ describe("useHostedAiProviderOptions", () => {
     expect(badges).toEqual(["pro", "ultra"])
   })
 
-  it("leaves an option the account can already run unbadged, whatever the plan fact", () => {
+  it("leaves an option the account can already run unbadged", () => {
     // An Ultra account: the tier is Ultra-only as a product fact, but this
     // account lacks nothing, so the server reports no plan to buy.
     hostedAiState.value = {
@@ -171,13 +158,8 @@ describe("useHostedAiProviderOptions", () => {
       isPending: false,
       isError: false,
       status: {
-        credits: [customActionDailyCredit()],
-        features: allFeatures({
-          customAction: {
-            normal: tier(),
-            advance: tier({ requiresUltra: true }),
-          },
-        }),
+        pools: [customActionDailyCredit()],
+        features: allFeatures(),
       },
     }
 
@@ -197,7 +179,7 @@ describe("useHostedAiProviderOptions", () => {
       isError: false,
       status: {
         // A free plan funds customAction only — pageTranslation has no pool.
-        credits: [customActionDailyCredit()],
+        pools: [customActionDailyCredit()],
         features: allFeatures({ pageTranslation: unfundedTiers() }),
       },
     }
@@ -213,7 +195,7 @@ describe("useHostedAiProviderOptions", () => {
       isPending: false,
       isError: false,
       status: {
-        credits: [dailyCredit(["selectionTranslation"])],
+        pools: [dailyCredit(["selectionTranslation"])],
         features: allFeatures({
           selectionTranslation: {
             normal: tier(),
@@ -240,7 +222,7 @@ describe("useHostedAiProviderOptions", () => {
       isPending: false,
       isError: false,
       status: {
-        credits: [customActionDailyCredit()],
+        pools: [customActionDailyCredit()],
         features: allFeatures({ selectionTranslation: unfundedTiers() }),
       },
     }
@@ -258,7 +240,7 @@ describe("useHostedAiProviderOptions", () => {
       isPending: false,
       isError: false,
       status: {
-        credits: [dailyCredit(["noteSuggestion"])],
+        pools: [dailyCredit(["noteSuggestion"])],
         features: allFeatures({
           noteSuggestion: {
             normal: tier(),
@@ -267,7 +249,6 @@ describe("useHostedAiProviderOptions", () => {
               available: false,
               unavailableReason: "ultra_required",
               upgradeTo: "ultra",
-              requiresUltra: true,
             }),
           },
         }),
@@ -287,7 +268,7 @@ describe("useHostedAiProviderOptions", () => {
       isPending: false,
       isError: false,
       status: {
-        credits: [customActionDailyCredit()],
+        pools: [customActionDailyCredit()],
         features: allFeatures({ noteSuggestion: unfundedTiers() }),
       },
     }
@@ -303,7 +284,7 @@ describe("useHostedAiProviderOptions", () => {
       isPending: false,
       isError: false,
       status: {
-        credits: [customActionDailyCredit(100)],
+        pools: [customActionDailyCredit(100)],
         features: allFeatures({
           customAction: {
             normal: tier({ available: false, unavailableReason: "quota_exhausted" }),
