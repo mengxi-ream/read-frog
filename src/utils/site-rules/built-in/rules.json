@@ -174,7 +174,8 @@
       "[data-testid='inlinePrompt']",
       "span[class='css-1jxf684 r-bcqeeo r-1ttztb7 r-qvutc0 r-poiln3 r-n6v787 r-1cwl3u0']",
       "[data-testid=primaryColumn] [class='css-175oi2r r-kzbkwu r-3pj75a'] > div > span[class='css-1jxf684 r-bcqeeo r-1ttztb7 r-qvutc0 r-poiln3']",
-      ".font-chirp.text-body.font-normal"
+      ".font-chirp.text-body.font-normal",
+      "main [dir=auto].whitespace-pre-wrap"
     ],
     "forceInlineStyleSelectors": [
       "[data-testid=\"tweetText\"] div.r-xoduu5",
@@ -205,7 +206,8 @@
       "h2[role=heading]",
       "[class='css-175oi2r r-1awozwy r-18u37iz r-1wtj0ep r-6gpygo'],[class='css-175oi2r r-1d09ksm r-18u37iz r-1wbh5a2 r-1471scf'],[class='css-175oi2r r-1kbdv8c r-18u37iz r-1wtj0ep r-1ye8kvj r-1s2bzr4']",
       ".imt-caption-container *",
-      "[data-testid=videoComponent]"
+      "[data-testid=videoComponent]",
+      "main [dir=auto].whitespace-pre-wrap > button"
     ],
     "forceBlockNodeSelectors.add": ["[data-testid=\"tweetText\"] div.r-6koalj"],
     "forceBlockStyleSelectors.add": ["[data-testid=\"tweetText\"] div.r-6koalj"],
@@ -223,7 +225,8 @@
       "[data-testid='tweetText'],[style*='-webkit-line-clamp'] {-webkit-line-clamp: unset!important;}",
       "[role=dialog] [style*='webkit-line-clamp'] {-webkit-line-clamp: unset!important;}",
       ".r-h9hxbl{width:unset;}",
-      "[aria-label=Grok] [data-testid=ScrollSnap-SwipeableList] [role=presentation] > div > div { max-height: unset !important; }"
+      "[aria-label=Grok] [data-testid=ScrollSnap-SwipeableList] [role=presentation] > div > div { max-height: unset !important; }",
+      "main [dir=auto].whitespace-pre-wrap[class*='line-clamp-']:has(.read-frog-translated-content-wrapper) {-webkit-line-clamp: unset!important;}"
     ]
   },
   {
@@ -307,7 +310,7 @@
     "injectedCss": "span,.x569fbc { max-height:unset;-webkit-line-clamp:unset;height:unset;white-space:unset; }",
     "excludeSelectors.add": [
       ".x6s0dn4.x40hh3e.xrvj5dj.xxfwaov",
-      ".x6s0dn4.x78zum5",
+      ".x6s0dn4.x78zum5:not(:has([data-pressable-container]))",
       ".xpvyfi4.x1xdureb.x1agbcgv,.xqcrz7y.x1xdureb.x1agbcgv",
       ".xpvyfi4.x1npkx4u.x1ms6mhf"
     ],
@@ -616,7 +619,8 @@
       "[class='col-lg-9 position-relative pr-lg-5 mb-6 mr-lg-5']",
       "[class*='IssueIndexPage-module__middlePaneGrid'] div[class='p-4 text-center rounded-2 border color-border-muted']",
       "[class*='ModelsPlaygroundRoute-module__playgroundContainer']",
-      "article [class='f6 color-fg-muted mt-1']"
+      "article [class='f6 color-fg-muted mt-1']",
+      ".repos-list-description"
     ],
     "forceInlineStyleSelectors": ["g-emoji", "a.anchor"],
     "injectedCss": ".TimelineItem-body .Link--primary { -webkit-line-clamp: unset; }",
@@ -663,7 +667,8 @@
       ".bpDald,.discussion-title {-webkit-line-clamp:unset!important;}",
       "li>div[class*='Box-sc'],div[class*='Box-sc']>button[class*='prc-Token-TokenBase'],li[class*='card-label-module']>button[class*='prc-Token-TokenBase'] {height:unset!important;}",
       "#memex-project-view-root [class*=table-row__StyledTableRow-sc],#memex-project-view-root [class*=base-cell-module__Box] {height:unset!important;}",
-      "[class*='GridCard-module__description'] {-webkit-line-clamp: unset;}"
+      "[class*='GridCard-module__description'] {-webkit-line-clamp: unset;}",
+      ".repos-list-description:has(.read-frog-translated-content-wrapper) [class*='prc-Truncate-Truncate'] {white-space: normal!important;overflow: visible!important;}"
     ]
   },
   {
