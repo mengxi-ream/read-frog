@@ -1,7 +1,7 @@
 import type { LanguageTag } from "@read-frog/definitions"
 import type { ProviderConfig } from "@/types/config/provider"
 import type { TranslationTextFormat } from "@/types/config/translate"
-import { toDeepLLanguageCode } from "./language-codes"
+import { toDeepLSourceCode, toDeepLTargetCode } from "./language-codes"
 
 type DeepLProviderConfig = Extract<ProviderConfig, { provider: "deepl" }>
 
@@ -124,7 +124,7 @@ export function normalizeDeepLLanguages(
   toLang: LanguageTag,
 ): DeepLLanguagePair {
   return {
-    source: fromLang === "auto" ? undefined : toDeepLLanguageCode(fromLang, "source"),
-    target: toDeepLLanguageCode(toLang, "target"),
+    source: toDeepLSourceCode(fromLang),
+    target: toDeepLTargetCode(toLang),
   }
 }

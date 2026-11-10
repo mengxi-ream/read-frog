@@ -2,7 +2,7 @@ import type { LanguageTag } from "@read-frog/definitions"
 import type { ProviderConfig } from "@/types/config/provider"
 import type { TranslationTextFormat } from "@/types/config/translate"
 import { DEFAULT_PROVIDER_CONFIG } from "@/utils/constants/providers"
-import { toDeepLLanguageCode } from "./language-codes"
+import { toDeepLSourceCode, toDeepLTargetCode } from "./language-codes"
 
 type DeepLXProviderConfig = Extract<ProviderConfig, { provider: "deeplx" }>
 const API_KEY_PLACEHOLDER_RE = /\{\{apiKey\}\}/g
@@ -25,9 +25,9 @@ export async function deeplxTranslate(
 
   const requestBody = JSON.stringify({
     text: sourceText,
-    source_lang: fromLang === "auto" ? "auto" : toDeepLLanguageCode(fromLang, "source"),
+    source_lang: toDeepLSourceCode(fromLang) ?? "auto",
     // DeepLX servers have always been sent a bare `ZH` for Simplified Chinese.
-    target_lang: toLang === "zh-Hans" ? "ZH" : toDeepLLanguageCode(toLang, "target"),
+    target_lang: toLang === "zh-Hans" ? "ZH" : toDeepLTargetCode(toLang),
     ...(options?.textFormat === "html" ? { tag_handling: "html" } : {}),
   })
 

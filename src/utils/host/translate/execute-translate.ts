@@ -9,7 +9,12 @@ import { aiTranslate } from "./api/ai"
 import { deeplTranslate } from "./api/deepl"
 import { deeplxTranslate } from "./api/deeplx"
 import { googleTranslate } from "./api/google"
-import { toGoogleLanguageCode, toMicrosoftLanguageCode } from "./api/language-codes"
+import {
+  toGoogleLanguageCode,
+  toGoogleSourceCode,
+  toMicrosoftLanguageCode,
+  toMicrosoftSourceCode,
+} from "./api/language-codes"
 import { microsoftTranslate } from "./api/microsoft"
 import { prepareTranslationText } from "./text-preparation"
 import { normalizeTranslationOutput } from "./translation-output-normalization"
@@ -40,11 +45,11 @@ export async function executeTranslate<TContext>(
   let translatedText = ""
 
   if (isNonAPIProvider(provider)) {
-    const toLanguageCode =
-      provider === "google-translate" ? toGoogleLanguageCode : toMicrosoftLanguageCode
-    const sourceLang =
-      langConfig.sourceCode === "auto" ? "auto" : toLanguageCode(langConfig.sourceCode)
-    const targetLang = toLanguageCode(langConfig.targetCode)
+    const google = provider === "google-translate"
+    const sourceLang = (google ? toGoogleSourceCode : toMicrosoftSourceCode)(langConfig.sourceCode)
+    const targetLang = (google ? toGoogleLanguageCode : toMicrosoftLanguageCode)(
+      langConfig.targetCode,
+    )
     if (provider === "google-translate") {
       translatedText = await googleTranslate(preparedText, sourceLang, targetLang, {
         textFormat: options?.textFormat,
