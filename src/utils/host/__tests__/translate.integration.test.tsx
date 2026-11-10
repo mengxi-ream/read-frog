@@ -1611,6 +1611,93 @@ describe("translate", () => {
     })
   })
 
+  // lowendtalk.com (Vanilla Forums): with the whole page translated, a post or
+  // comment header's div.AuthorWrap is a paragraph. Translation-only mode sends
+  // the header run as HTML and swaps the reply into every text node and
+  // translatable attribute below it, so the author block (the avatar link's
+  // title, the img's alt and the username) has to be excluded as a whole.
+  // Excluding only .Username left it inside the serialized span.Author, and
+  // every username, avatar title and alt came back rewritten.
+  describe("LowEndTalk post and comment headers", () => {
+    // Marks every text node and title/alt value it receives, as a provider
+    // translating the whole request would.
+    function markTranslated(request: string, format?: string): string {
+      const mark = (value: string) => (value.trim() ? `ZH(${value.trim()})` : value)
+      if (format !== "html") return mark(request)
+      const template = document.createElement("template")
+      template.innerHTML = request
+      const visit = (node: Node) => {
+        if (node.nodeType === Node.TEXT_NODE) {
+          node.textContent = mark(node.textContent ?? "")
+          return
+        }
+        if (node.nodeType === Node.ELEMENT_NODE) {
+          const element = node as Element
+          for (const name of ["title", "alt"]) {
+            const value = element.getAttribute(name)
+            if (value !== null) element.setAttribute(name, mark(value))
+          }
+        }
+        node.childNodes.forEach(visit)
+      }
+      template.content.childNodes.forEach(visit)
+      return template.innerHTML
+    }
+
+    beforeEach(() => {
+      vi.mocked(translateTextForPage)
+        .mockReset()
+        .mockImplementation(async (request, format) => markTranslated(request, format))
+    })
+
+    afterEach(() => {
+      vi.mocked(translateTextForPage).mockReset().mockResolvedValue(MOCK_TRANSLATION)
+    })
+
+    it.each(["bilingual", "translationOnly"] as const)(
+      "translates the role but not the author's name, avatar title or alt in %s mode",
+      async (mode) => {
+        await withHost(
+          "lowendtalk.com",
+          async () => {
+            render(
+              <div className="Item-Header CommentHeader">
+                <div className="AuthorWrap" data-testid="author-wrap">
+                  <span className="Author">
+                    <a title="PuDLeZ" href="/profile/PuDLeZ" className="PhotoWrap">
+                      <img src="avatar.png" alt="PuDLeZ" className="ProfilePhoto" />
+                    </a>
+                    <a href="/profile/PuDLeZ" className="Username">
+                      PuDLeZ
+                    </a>
+                  </span>{" "}
+                  <span className="AuthorInfo">
+                    <span className="MItem RoleTitle">Member</span>
+                  </span>
+                </div>
+              </div>,
+            )
+            const authorWrap = screen.getByTestId("author-wrap")
+
+            await removeOrShowPageTranslation(mode, true)
+
+            const requests = vi
+              .mocked(translateTextForPage)
+              .mock.calls.map(([request]) => request)
+              .join("\n")
+            expect(requests).toContain("Member")
+            expect(requests).not.toContain("PuDLeZ")
+            expect(authorWrap.querySelector(".Username")?.textContent).toBe("PuDLeZ")
+            expect(authorWrap.querySelector(".PhotoWrap")?.getAttribute("title")).toBe("PuDLeZ")
+            expect(authorWrap.querySelector("img")?.getAttribute("alt")).toBe("PuDLeZ")
+            expect(authorWrap).toHaveTextContent("ZH(Member)")
+          },
+          "/discussion/222844/example",
+        )
+      },
+    )
+  })
+
   describe("block node with multiple child nodes", () => {
     describe("all inline HTML nodes", () => {
       it("bilingual mode: should insert wrapper after the last inline node", async () => {
