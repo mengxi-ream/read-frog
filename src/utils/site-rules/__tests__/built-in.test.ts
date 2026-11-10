@@ -487,6 +487,34 @@ describe("built-in site rules", () => {
     expect(timeline.matchedRuleIds).not.toContain("readfrog-x-chat")
   })
 
+  // `.x6s0dn4.x78zum5` is only Meta's atomic `align-items:center` + `display:flex`.
+  // It is meant for nav items and the like/reply/repost rows, but on the
+  // logged-in "For you" home the wrapper around the composer and the whole feed
+  // carries the same two classes, so excluding it blanked out every post there.
+  it("excludes Threads nav and action rows without excluding the logged-in home feed", () => {
+    const resolved = resolveSiteRule("https://www.threads.com/", BUILT_IN_SITE_RULES, [], [])
+    expect(resolved.matchedRuleIds).toContain("threads")
+    const excludeSelector = resolved.excludeSelector
+    expect(excludeSelector).not.toBeNull()
+
+    document.body.innerHTML = `
+      <div class="x6s0dn4 x78zum5 x2lah0s" id="nav-item"><span>For you</span></div>
+      <div class="x6s0dn4 x78zum5 x1q0g3np" id="feed-wrapper">
+        <div data-pressable-container="true">
+          <span dir="auto" id="post-body">I just found out iPhones show all your duplicate pictures</span>
+          <div class="x6s0dn4 x78zum5" id="action-row"><span>46</span><span>20</span></div>
+        </div>
+      </div>
+    `
+    const byId = (id: string) => document.getElementById(id)!
+
+    expect(byId("feed-wrapper").matches(excludeSelector!)).toBe(false)
+    expect(byId("post-body").closest(excludeSelector!)).toBeNull()
+    expect(byId("nav-item").matches(excludeSelector!)).toBe(true)
+    expect(byId("action-row").matches(excludeSelector!)).toBe(true)
+    document.body.innerHTML = ""
+  })
+
   it("does not restrict Steam app pages to an obsolete iframe include (issue #1923)", () => {
     const resolved = resolveSiteRule(
       "https://store.steampowered.com/app/2453660/Hoop_Land/",
