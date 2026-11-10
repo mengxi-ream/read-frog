@@ -11,6 +11,7 @@ import {
 } from "@/utils/constants/storage-keys"
 import { getSelectionToolbarActions } from "@/utils/custom-actions"
 import { i18n } from "@/utils/i18n"
+import { logger } from "@/utils/logger"
 import { sendMessage } from "@/utils/message"
 import { ensureInitializedConfig } from "./config"
 import { getPageTranslationEnabled, setPageTranslationEnabled } from "./page-translation-state"
@@ -206,6 +207,14 @@ async function handleContextMenuClick(
 }
 
 /**
+ * A menu click can land on a tab with no content script to receive it: a
+ * browser page, the Web Store, or a tab left open across an extension update.
+ */
+function warnMenuActionNotDelivered(error: unknown) {
+  logger.warn("Failed to deliver context menu action to the tab", error)
+}
+
+/**
  * Handle translate menu click - toggle page translation
  */
 async function handleTranslateClick(tabId: number, tabUrl?: string) {
@@ -214,7 +223,9 @@ async function handleTranslateClick(tabId: number, tabUrl?: string) {
 
   if (!newState) {
     await setPageTranslationEnabled(tabId, false, tabUrl, true)
-    void sendMessage("notifyTranslationStateChanged", { enabled: false }, tabId)
+    void sendMessage("notifyTranslationStateChanged", { enabled: false }, tabId).catch(
+      warnMenuActionNotDelivered,
+    )
   }
 
   // Notify content script in that specific tab
@@ -230,7 +241,7 @@ async function handleTranslateClick(tabId: number, tabUrl?: string) {
         : undefined,
     },
     tabId,
-  )
+  ).catch(warnMenuActionNotDelivered)
 
   // Update menu title immediately
   await updateTranslateMenuTitle(tabId, newState)
@@ -253,7 +264,7 @@ async function handleSelectionTranslateClick(
       selectionText,
     },
     target,
-  )
+  ).catch(warnMenuActionNotDelivered)
 }
 
 async function handleSelectionReadAloudClick(
@@ -267,7 +278,9 @@ async function handleSelectionReadAloudClick(
 
   const target = typeof info.frameId === "number" ? { tabId, frameId: info.frameId } : tabId
 
-  void sendMessage("readAloudSelectionFromContextMenu", { selectionText }, target)
+  void sendMessage("readAloudSelectionFromContextMenu", { selectionText }, target).catch(
+    warnMenuActionNotDelivered,
+  )
 }
 
 async function handleSelectionCustomActionClick(
@@ -289,5 +302,5 @@ async function handleSelectionCustomActionClick(
       selectionText,
     },
     target,
-  )
+  ).catch(warnMenuActionNotDelivered)
 }
