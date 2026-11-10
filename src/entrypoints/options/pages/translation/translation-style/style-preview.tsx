@@ -16,7 +16,7 @@ export const PREVIEW_TEXT = "神谷先生不是在对抗世界，而是在对抗
  */
 export function StylePreview({
   text = PREVIEW_TEXT,
-  language = "zh",
+  language = "zh-Hans",
   dir = "ltr",
   className,
 }: {
