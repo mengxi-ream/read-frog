@@ -11,6 +11,7 @@ import {
 import { logger } from "@/utils/logger"
 import { onMessage } from "@/utils/message"
 import { isSiteEnabled, SITE_CONTROL_URL_WINDOW_KEY } from "@/utils/site-control"
+import { ensureRemoteSiteRulesLoaded } from "@/utils/site-rules/active"
 import { getEffectiveSiteRule } from "@/utils/site-rules/effective"
 import { urlMatchesPattern } from "@/utils/url-pattern"
 import { isSameOriginIframeSender, resolveSiteControlUrl } from "./iframe-injection-utils"
@@ -310,10 +311,12 @@ export function setupIframeInjection() {
     const tabId = sender.tab?.id
     if (tabId === undefined || !sender.frameId) return false
     try {
+      // The site rule lookups below need the remote rules too.
       const [tab, storedConfig, frames] = await Promise.all([
         browser.tabs.get(tabId),
         getLocalConfig(),
         getFrameSnapshot(tabId),
+        ensureRemoteSiteRulesLoaded(),
       ])
       const config = storedConfig ?? DEFAULT_CONFIG
       const frameUrl = resolveSiteControlUrl(sender.frameId, sender.url, frames)
@@ -378,7 +381,7 @@ export function setupIframeInjection() {
   // translation eagerly injects host content into newly completed subframes.
   browser.webNavigation.onCompleted.addListener(async (details) => {
     try {
-      const config = await getLocalConfig()
+      const [config] = await Promise.all([getLocalConfig(), ensureRemoteSiteRulesLoaded()])
       if (details.frameId === 0) {
         if (!isFullRuntimeAutoInjectUrl(details.url, config)) return
 

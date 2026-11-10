@@ -1,0 +1,165 @@
+import type { RemoteSiteRulesDocument } from "../document"
+import type { SiteRule } from "@/types/config/site-rules"
+import { describe, expect, it } from "vitest"
+import {
+  compareExtensionVersions,
+  isRemoteCssAllowed,
+  parseRemoteSiteRule,
+  selectBuiltInSiteRules,
+} from "../document"
+
+const BUNDLED: SiteRule[] = [
+  { id: "a", matches: "a.com", excludeSelectors: [".bundled-a"] },
+  { id: "b", matches: "b.com", excludeSelectors: [".bundled-b"] },
+]
+
+function remoteDocument(rules: unknown[], extensionVersion = "1.58.1"): RemoteSiteRulesDocument {
+  return { format: 1, revision: 1_762_800_000, extensionVersion, rules }
+}
+
+describe("compareExtensionVersions", () => {
+  it.each([
+    ["1.58.1", "1.58.1", 0],
+    ["1.58.1", "1.58.2", -1],
+    ["1.59.0", "1.58.9", 1],
+    ["1.10.0", "1.9.0", 1],
+    ["1.58", "1.58.0", 0],
+  ])("compares %s with %s", (left, right, sign) => {
+    expect(Math.sign(compareExtensionVersions(left, right))).toBe(sign)
+  })
+})
+
+describe("selectBuiltInSiteRules", () => {
+  it("keeps the bundled rules without a document", () => {
+    expect(selectBuiltInSiteRules(BUNDLED, null, "1.58.1")).toBe(BUNDLED)
+  })
+
+  it("keeps the bundled rules when the document predates this build", () => {
+    // Published while 1.58.1 was the latest release: 1.59.0 bundles those
+    // rules or newer ones.
+    const remote = remoteDocument([{ id: "a", matches: "a.com" }], "1.58.1")
+    expect(selectBuiltInSiteRules(BUNDLED, remote, "1.59.0")).toBe(BUNDLED)
+  })
+
+  it("uses the whole document in its order, so a rule left out stops applying", () => {
+    const rules = [
+      { id: "c", matches: "c.com" },
+      { id: "a", matches: "a.com", excludeSelectors: [".remote-a"] },
+    ]
+    expect(selectBuiltInSiteRules(BUNDLED, remoteDocument(rules), "1.58.1")).toEqual(rules)
+    // Builds newer than the document's release take it too.
+    expect(selectBuiltInSiteRules(BUNDLED, remoteDocument(rules, "1.58.1"), "1.58.0")).toEqual(
+      rules,
+    )
+  })
+
+  it("falls back to the bundled copy of a rule that uses a field this build does not know", () => {
+    const selected = selectBuiltInSiteRules(
+      BUNDLED,
+      remoteDocument([
+        { id: "a", matches: "a.com", excludeSelectors: [".remote-a"], scopeFromTheFuture: true },
+        // Without the field that narrows it, this would apply on every page.
+        {
+          id: "new",
+          matches: "<all_urls>",
+          scopeFromTheFuture: true,
+          "dontWalkTags.remove": ["PRE"],
+        },
+      ]),
+      "1.58.1",
+    )
+    expect(selected).toEqual([BUNDLED[0]])
+  })
+
+  it("falls back for a rule that needs a newer build, and takes it once the build is new enough", () => {
+    // Published after 1.58.2 came out, so both builds read it.
+    const remote = remoteDocument(
+      [
+        {
+          id: "a",
+          matches: "a.com",
+          excludeSelectors: [".remote-a"],
+          minExtensionVersion: "1.58.2",
+        },
+        { id: "c", matches: "c.com", minExtensionVersion: "1.58.2" },
+      ],
+      "1.58.2",
+    )
+    expect(selectBuiltInSiteRules(BUNDLED, remote, "1.58.1")).toEqual([BUNDLED[0]])
+    expect(selectBuiltInSiteRules(BUNDLED, remote, "1.58.2")).toEqual([
+      { id: "a", matches: "a.com", excludeSelectors: [".remote-a"] },
+      { id: "c", matches: "c.com" },
+    ])
+  })
+
+  it("falls back for a rule whose CSS loads something", () => {
+    const selected = selectBuiltInSiteRules(
+      BUNDLED,
+      remoteDocument([
+        { id: "a", matches: "a.com", injectedCss: "input { background: url(https://x.test/) }" },
+        { id: "c", matches: "c.com", "injectedCss.add": [".c { color: red }", "@import 'x.css';"] },
+      ]),
+      "1.58.1",
+    )
+    expect(selected).toEqual([BUNDLED[0]])
+  })
+
+  it("keeps the first of duplicate ids and skips malformed rules", () => {
+    const selected = selectBuiltInSiteRules(
+      BUNDLED,
+      remoteDocument([
+        { id: "c", matches: "c.com" },
+        { id: "c", matches: "other.com" },
+        { matches: "no-id.com" },
+        "not a rule",
+        { id: "b", matches: 42 },
+      ]),
+      "1.58.1",
+    )
+    expect(selected).toEqual([{ id: "c", matches: "c.com" }, BUNDLED[1]])
+  })
+})
+
+describe("parseRemoteSiteRule", () => {
+  it("drops the version field from the rule it returns", () => {
+    expect(
+      parseRemoteSiteRule({ id: "a", matches: "a.com", minExtensionVersion: "1.0" }, "1.0"),
+    ).toEqual({
+      id: "a",
+      matches: "a.com",
+    })
+  })
+
+  it("refuses a malformed minimum version", () => {
+    expect(
+      parseRemoteSiteRule({ id: "a", matches: "a.com", minExtensionVersion: "next" }, "1.0"),
+    ).toBeNull()
+  })
+})
+
+describe("isRemoteCssAllowed", () => {
+  it.each([
+    ".a { display: none !important; }",
+    '.a::before { content: "\\2014"; }',
+    ".a { background-image: linear-gradient(red, blue); }",
+    ".a { -webkit-line-clamp: unset !important; }",
+  ])("allows %s", (css) => {
+    expect(isRemoteCssAllowed(css)).toBe(true)
+  })
+
+  it.each([
+    "input[value^='a'] { background: url(https://x.test/a) }",
+    ".a { background: URL(x) }",
+    ".a { background: \\75 rl(x) }",
+    ".a { background: u\\72l(x) }",
+    "@import 'https://x.test/x.css';",
+    "@\\69mport 'x.css';",
+    ".a { background: image-set('x.png' 1x) }",
+    ".a { cursor: -webkit-image-set('x.png' 1x), auto }",
+    ".a { background: image('x.png') }",
+    ".a { background: src('x.png') }",
+    "@font-face { font-family: x; src: url(x.woff) }",
+  ])("refuses %s", (css) => {
+    expect(isRemoteCssAllowed(css)).toBe(false)
+  })
+})

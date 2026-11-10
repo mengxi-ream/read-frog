@@ -11,6 +11,7 @@ import { logger } from "@/utils/logger"
 import { onMessage } from "@/utils/message"
 import { openOptionsPage } from "@/utils/navigation"
 import { SessionCacheGroupRegistry } from "@/utils/session-cache/session-cache-group-registry"
+import { ensureRemoteSiteRulesLoaded } from "@/utils/site-rules/active"
 import { runAiSegmentSubtitles } from "./ai-segmentation"
 import { dispatchBackgroundStreamPort } from "./background-stream"
 import { initializeActionIcons, registerActionIconListeners } from "./browser-action-icon"
@@ -35,6 +36,7 @@ import { setupNotebasePendingSaveProcessor } from "./notebase-pending-save"
 import { setupPageTranslationHandlers } from "./page-translation"
 import { proxyFetch } from "./proxy-fetch"
 import { setupSidePanelMessageHandler } from "./side-panel"
+import { setUpSiteRulesUpdate } from "./site-rules-update"
 import { setupSubtitlesTranslationHandlers } from "./subtitles-translation"
 import { translationMessage } from "./translation-signal"
 import { setupTTSPlaybackMessageHandlers } from "./tts-playback"
@@ -138,6 +140,8 @@ export default defineBackground({
     setupVideoSummaryHandlers()
     void setUpDatabaseCleanup()
     setUpConfigBackup()
+    setUpSiteRulesUpdate()
+    void ensureRemoteSiteRulesLoaded()
 
     // Start config and i18n initialization without delaying synchronous listener
     // registration. Consumers that materialize localized config-derived data await

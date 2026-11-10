@@ -10,6 +10,7 @@ import {
 import { normalizeUrlPattern } from "@/utils/url-pattern"
 import { BUILT_IN_SITE_RULES } from "../built-in"
 import rawBuiltInRules from "../built-in/rules.json"
+import { parseRemoteSiteRule, remoteSiteRuleSchema } from "../remote/document"
 import { resolveSiteRule } from "../resolve"
 
 const RAW_BUILT_IN_SITE_RULES = rawBuiltInRules as unknown as Array<Record<string, unknown>>
@@ -129,14 +130,25 @@ describe("built-in site rules", () => {
   // stored config never fails to parse), which means a typo'd delta key in a
   // built-in rule — e.g. "dontWalkButTranslateTags.removee" — would pass the
   // schema sweep above and silently no-op at resolve time. Catch it here.
+  // `minExtensionVersion` is the one key beyond the schema (see the remote one).
   it("ships no keys outside the canonical schema", () => {
-    const knownKeys = new Set(Object.keys(siteRuleSchema.shape))
+    const knownKeys = new Set(Object.keys(remoteSiteRuleSchema.shape))
     const unknown = RAW_BUILT_IN_SITE_RULES.flatMap((rule) =>
       Object.keys(rule)
         .filter((key) => !knownKeys.has(key))
         .map((key) => `${String(rule.id)}: ${key}`),
     )
     expect(unknown).toEqual([])
+  })
+
+  // This file is also what installed extensions download. A rule this build
+  // would refuse there (unknown key, CSS that loads something) would silently
+  // fall back to its bundled copy on every install.
+  it("every rule is accepted as a remote rule by this build", () => {
+    const refused = RAW_BUILT_IN_SITE_RULES.filter(
+      (rule) => parseRemoteSiteRule(rule, "999.0.0") === null,
+    ).map((rule) => String(rule.id))
+    expect(refused).toEqual([])
   })
 
   it("does not ship legacy force selector keys", () => {
