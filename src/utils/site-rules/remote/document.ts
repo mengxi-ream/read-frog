@@ -83,18 +83,24 @@ export function compareExtensionVersions(left: string, right: string): number {
 const LOADING_CSS_PATTERN = /url\(|src\(|image\(|image-set\(|@import/i
 
 function decodeCssEscapes(css: string): string {
-  return css.replaceAll(
-    /\\(?:([\da-f]{1,6})[\t\n\f\r ]?|([\s\S]))/gi,
-    (_match, hex: string | undefined, char: string | undefined) => {
-      if (hex === undefined) {
-        return char ?? ""
-      }
-      const codePoint = Number.parseInt(hex, 16)
-      return codePoint > 0 && codePoint <= 0x10ffff && (codePoint < 0xd800 || codePoint > 0xdfff)
-        ? String.fromCodePoint(codePoint)
-        : "�"
-    },
-  )
+  // Before tokenizing, CSS turns CR LF, a lone CR and FF into one LF (CSS
+  // Syntax 3, §3.3), and a hex escape then takes that LF as its terminating
+  // whitespace. Normalize first so this reads the text the way a browser does:
+  // otherwise `\75` + CR LF + `rl(` would look like "u" + LF + "rl(" here.
+  return css
+    .replaceAll(/\r\n?|\f/g, "\n")
+    .replaceAll(
+      /\\(?:([\da-f]{1,6})[\t\n ]?|([\s\S]))/gi,
+      (_match, hex: string | undefined, char: string | undefined) => {
+        if (hex === undefined) {
+          return char ?? ""
+        }
+        const codePoint = Number.parseInt(hex, 16)
+        return codePoint > 0 && codePoint <= 0x10ffff && (codePoint < 0xd800 || codePoint > 0xdfff)
+          ? String.fromCodePoint(codePoint)
+          : "�"
+      },
+    )
 }
 
 /**

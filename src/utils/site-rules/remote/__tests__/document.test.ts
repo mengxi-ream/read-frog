@@ -152,8 +152,16 @@ describe("isRemoteCssAllowed", () => {
     ".a { background: URL(x) }",
     ".a { background: \\75 rl(x) }",
     ".a { background: u\\72l(x) }",
+    // A hex escape takes one whitespace after it, and CSS reads CR LF, a lone
+    // CR and FF each as a single LF before that.
+    ".a { background: \\75\r\nrl(x) }",
+    ".a { background: \\75\rrl(x) }",
+    ".a { background: \\75\frl(x) }",
+    ".a { background: \\75\nrl(x) }",
+    ".a { background: image-\\73\r\net('x.png' 1x) }",
     "@import 'https://x.test/x.css';",
     "@\\69mport 'x.css';",
+    "@\\69\r\nmport 'x.css';",
     ".a { background: image-set('x.png' 1x) }",
     ".a { cursor: -webkit-image-set('x.png' 1x), auto }",
     ".a { background: image('x.png') }",
