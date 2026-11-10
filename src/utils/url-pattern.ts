@@ -14,6 +14,9 @@ import { logger } from "@/utils/logger"
  * patterns that had been stored under those semantics.
  */
 
+/** Every web page and local file; see `normalizeUrlPattern`. */
+export const ALL_URLS_PATTERN = "<all_urls>"
+
 /**
  * Normalize a user/built-in rule pattern into a standard browser match pattern.
  *
@@ -24,6 +27,7 @@ import { logger } from "@/utils/logger"
  * - "github.com/settings"   path kept verbatim
  * - "https://example.com"   scheme kept; missing path expands to "/*"
  * - "[::1]"                 IPv6 literal, exact host
+ * - "<all_urls>"            kept as is: every web page and local file
  *
  * Returns `null` for patterns we cannot support (non-http(s) schemes, ports,
  * empty input). Callers drop null patterns with a warning instead of failing
@@ -33,6 +37,13 @@ export function normalizeUrlPattern(raw: string): string | null {
   const trimmed = raw.trim()
   if (!trimmed) {
     return null
+  }
+  // The WebExtension token for every URL a match pattern can name, file://
+  // included, which no other pattern here can reach. MatchPattern understands
+  // it natively; it only has to get past the shorthand expansion below, which
+  // would read it as a host name.
+  if (trimmed === ALL_URLS_PATTERN) {
+    return ALL_URLS_PATTERN
   }
 
   let scheme = "*"
@@ -124,6 +135,9 @@ function escapeForRegex(value: string): string {
  * having no way to tell an address apart from a port.
  */
 function needsWildcardHostPattern(normalized: string): boolean {
+  if (normalized === ALL_URLS_PATTERN) {
+    return false
+  }
   const host = normalized.slice(normalized.indexOf("://") + 3).split("/", 1)[0]!
   if (isBracketedIpv6(host)) {
     return true

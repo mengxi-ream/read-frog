@@ -308,6 +308,11 @@ describe("normalizeUrlPattern", () => {
     expect(normalizeUrlPattern("*")).toBe("*://*/*")
   })
 
+  it("keeps <all_urls> as the WebExtension token instead of reading it as a host", () => {
+    expect(normalizeUrlPattern("<all_urls>")).toBe("<all_urls>")
+    expect(normalizeUrlPattern("  <all_urls>  ")).toBe("<all_urls>")
+  })
+
   it("keeps TLD and mid-host wildcards", () => {
     expect(normalizeUrlPattern("www.amazon.*")).toBe("*://www.amazon.*/*")
     expect(normalizeUrlPattern("javdb*.com")).toBe("*://javdb*.com/*")
@@ -412,6 +417,16 @@ describe("urlMatchesPattern", () => {
     expect(urlMatchesPattern("file:///etc/hosts", "github.com")).toBe(false)
     expect(urlMatchesPattern("about:blank", "github.com")).toBe(false)
     expect(urlMatchesPattern("chrome-extension://abc/options.html", "*")).toBe(false)
+  })
+
+  it("matches web pages and local files for <all_urls>, which * does not reach", () => {
+    expect(urlMatchesPattern("https://memu.so/SKILL.md", "<all_urls>")).toBe(true)
+    expect(urlMatchesPattern("http://localhost:3000/notes.txt", "<all_urls>")).toBe(true)
+    expect(urlMatchesPattern("file:///Users/someone/notes.md", "<all_urls>")).toBe(true)
+    expect(urlMatchesPattern("file:///Users/someone/notes.md", "*")).toBe(false)
+    expect(urlMatchesPattern("chrome-extension://abc/options.html", "<all_urls>")).toBe(false)
+    expect(urlMatchesPattern("about:blank", "<all_urls>")).toBe(false)
+    expect(urlMatchesPattern("not a url", "<all_urls>")).toBe(false)
   })
 
   it("returns false for invalid patterns instead of throwing", () => {

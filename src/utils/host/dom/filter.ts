@@ -10,7 +10,7 @@ import {
   NOTRANSLATE_CLASS,
 } from "@/utils/constants/dom-labels"
 import { DEFAULT_TAG_SETS } from "@/utils/constants/dom-rules"
-import { getEffectiveSiteRule } from "@/utils/site-rules/effective"
+import { getDocumentSiteRule } from "@/utils/site-rules/effective"
 
 const ICON_FONT_FAMILY_NAMES = ["material icons", "material symbols", "font awesome"]
 
@@ -145,11 +145,11 @@ export function getEffectiveTagSet(
   if (config === undefined) {
     return DEFAULT_TAG_SETS[family]
   }
-  return getEffectiveSiteRule(config, window.location.href)[family] ?? DEFAULT_TAG_SETS[family]
+  return getDocumentSiteRule(config)[family] ?? DEFAULT_TAG_SETS[family]
 }
 
 export function isSiteRuleExcludedElement(element: HTMLElement, config: Config): boolean {
-  const { excludeSelector, includeSelector } = getEffectiveSiteRule(config, window.location.href)
+  const { excludeSelector, includeSelector } = getDocumentSiteRule(config)
   if (excludeSelector === null || !element.matches(excludeSelector)) {
     return false
   }
@@ -168,32 +168,32 @@ export function isSiteRuleExcludedElement(element: HTMLElement, config: Config):
 }
 
 export function isSiteRuleForceBlockNodeElement(element: HTMLElement, config: Config): boolean {
-  const { forceBlockNodeSelector } = getEffectiveSiteRule(config, window.location.href)
+  const { forceBlockNodeSelector } = getDocumentSiteRule(config)
   return forceBlockNodeSelector !== null && element.matches(forceBlockNodeSelector)
 }
 
 export function isSiteRuleForceBlockStyleElement(element: HTMLElement, config: Config): boolean {
-  const { forceBlockStyleSelector } = getEffectiveSiteRule(config, window.location.href)
+  const { forceBlockStyleSelector } = getDocumentSiteRule(config)
   return forceBlockStyleSelector !== null && element.matches(forceBlockStyleSelector)
 }
 
 export function isSiteRuleForceInlineNodeElement(element: HTMLElement, config: Config): boolean {
-  const { forceInlineNodeSelector } = getEffectiveSiteRule(config, window.location.href)
+  const { forceInlineNodeSelector } = getDocumentSiteRule(config)
   return forceInlineNodeSelector !== null && element.matches(forceInlineNodeSelector)
 }
 
 export function isSiteRuleForceInlineStyleElement(element: HTMLElement, config: Config): boolean {
-  const { forceInlineStyleSelector } = getEffectiveSiteRule(config, window.location.href)
+  const { forceInlineStyleSelector } = getDocumentSiteRule(config)
   return forceInlineStyleSelector !== null && element.matches(forceInlineStyleSelector)
 }
 
 export function isSiteRulePreserveTextElement(element: HTMLElement, config: Config): boolean {
-  const { preserveTextSelector } = getEffectiveSiteRule(config, window.location.href)
+  const { preserveTextSelector } = getDocumentSiteRule(config)
   return preserveTextSelector !== null && element.matches(preserveTextSelector)
 }
 
 export function isSiteRuleAtomElement(element: HTMLElement, config: Config): boolean {
-  const { atomSelector } = getEffectiveSiteRule(config, window.location.href)
+  const { atomSelector } = getDocumentSiteRule(config)
   return atomSelector !== null && element.matches(atomSelector)
 }
 
@@ -220,7 +220,7 @@ export function isInlineAtomElement(element: HTMLElement, config: Config): boole
  * still carve holes inside included regions.
  */
 export function isWithinIncludeScope(element: HTMLElement, config: Config): boolean {
-  const { includeSelector } = getEffectiveSiteRule(config, window.location.href)
+  const { includeSelector } = getDocumentSiteRule(config)
   return includeSelector === null || element.closest(includeSelector) !== null
 }
 
@@ -253,27 +253,6 @@ export function isDontWalkIntoButTranslateAsChildElement(
   return dontWalkClass || dontWalkTag || dontWalkPreserveText
 }
 
-/**
- * `PRE` is blocked by default because an authored `<pre>` in an HTML document
- * holds code, logs or ASCII art, where translating would corrupt the content.
- * A plain-text document is the opposite case: the browser renders a .txt URL as
- * a single generated `<pre>` wrapping the whole file, so the blanket block
- * leaves the page with no translatable content at all (reported on
- * nifty.org story pages, which serve prose as text/plain).
- *
- * Only the exact `text/plain` type qualifies — JSON, markdown and XML viewers
- * stay blocked. A site rule naming PRE in `dontWalkTags.add` still wins, since
- * this exemption un-blocks what the defaults block; `excludeSelectors` remains
- * available as the per-site escape hatch either way.
- */
-function isPlainTextDocumentPre(element: HTMLElement, config: Config): boolean {
-  if (element.tagName !== "PRE" || element.ownerDocument.contentType !== "text/plain") {
-    return false
-  }
-  const { dontWalkTagsExplicitAdds } = getEffectiveSiteRule(config, window.location.href)
-  return !dontWalkTagsExplicitAdds?.has("PRE")
-}
-
 // https://github.com/mengxi-ream/read-frog/issues/940
 function isInsideContentContainer(element: HTMLElement): boolean {
   let current: HTMLElement | null = element.parentElement
@@ -293,9 +272,12 @@ export function isDontWalkIntoAndDontTranslateAsChildElement(
   // Cheap structural predicates first; the getComputedStyle check runs last
   // because it can force a style recalculation, and the full-page walk
   // evaluates this predicate for every element (#1881).
-  const dontWalkInvalidTag =
-    getEffectiveTagSet(config, "dontWalkTags").has(element.tagName) &&
-    !isPlainTextDocumentPre(element, config)
+  //
+  // PRE is in the default set because an authored <pre> holds code, logs or
+  // ASCII art. The browser's own <pre> around a .txt or .md file is let through
+  // by the built-in `readfrog-plain-text-document` rule, which matches on
+  // document type rather than site, so site and user rules can still override it.
+  const dontWalkInvalidTag = getEffectiveTagSet(config, "dontWalkTags").has(element.tagName)
   if (dontWalkInvalidTag) return true
 
   // The `hidden` attribute hides only through the UA stylesheet's
@@ -343,7 +325,7 @@ function isSiteRuleWalkHiddenElement(
   computedStyle: CSSStyleDeclaration,
   config: Config,
 ): boolean {
-  const { walkHiddenSelector } = getEffectiveSiteRule(config, window.location.href)
+  const { walkHiddenSelector } = getDocumentSiteRule(config)
   if (walkHiddenSelector === null) return false
   if (element.matches(walkHiddenSelector)) return true
   if (computedStyle.display === "none") return false
