@@ -6,7 +6,7 @@ import {
   MARK_ATTRIBUTES,
 } from "@/utils/constants/dom-labels"
 import { logger } from "@/utils/logger"
-import { getEffectiveSiteRule } from "@/utils/site-rules/effective"
+import { getDocumentSiteRule } from "@/utils/site-rules/effective"
 import { isDontWalkIntoAndDontTranslateAsChildElement, isInlineAtomElement } from "../../dom/filter"
 import { extractTextContent } from "../../dom/traversal"
 import {
@@ -72,7 +72,7 @@ export function extractInlineAtomText(
       // stays dropped exactly as before; the wrapper is the atom when a rule
       // says so. Native <math> also never reaches getComputedStyle, which
       // some environments refuse for MathML.
-      const { preserveTextSelector } = getEffectiveSiteRule(config, window.location.href)
+      const { preserveTextSelector } = getDocumentSiteRule(config)
       if (preserveTextSelector !== null && element.parentElement?.closest(preserveTextSelector)) {
         return ""
       }
@@ -283,7 +283,7 @@ export function renderInlineAtomTranslation(
 
 /** Every element `isInlineAtomElement` accepts: native MathML plus the site-rule atoms. */
 export function getInlineAtomSelector(config: Config): string {
-  const { atomSelector } = getEffectiveSiteRule(config, window.location.href)
+  const { atomSelector } = getDocumentSiteRule(config)
   return atomSelector ? `math,${atomSelector}` : "math"
 }
 

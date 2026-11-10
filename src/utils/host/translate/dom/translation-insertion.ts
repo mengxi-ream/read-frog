@@ -1,7 +1,7 @@
 import type { Config } from "@/types/config/config"
 import type { TranslationNodeStyleConfig } from "@/types/config/translate"
 import type { TransNode } from "@/types/dom"
-import { getEffectiveSiteRule } from "@/utils/site-rules/effective"
+import { getDocumentSiteRule } from "@/utils/site-rules/effective"
 import {
   BLOCK_CONTENT_CLASS,
   FLOAT_WRAP_ATTRIBUTE,
@@ -154,10 +154,7 @@ export async function insertTranslatedNodeIntoWrapper(
   const layoutSourceDisplay = isHTMLElement(layoutSource)
     ? window.getComputedStyle(layoutSource).display
     : undefined
-  const { forceBlockStyleSelector, forceInlineStyleSelector } = getEffectiveSiteRule(
-    config,
-    window.location.href,
-  )
+  const { forceBlockStyleSelector, forceInlineStyleSelector } = getDocumentSiteRule(config)
   const wrapperStyleSources = styleSources ?? [layoutSource]
   const siteRuleForceBlockStyle = sourceRunMatchesSelector(
     wrapperStyleSources,

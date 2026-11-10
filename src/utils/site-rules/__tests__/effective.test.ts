@@ -2,7 +2,7 @@
 import type { Config } from "@/types/config/config"
 import { describe, expect, it } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
-import { getEffectiveSiteRule } from "../effective"
+import { getDocumentSiteRule, getEffectiveSiteRule } from "../effective"
 
 function configWithUserRules(userRules: Config["siteRules"]["userRules"]): Config {
   const config = structuredClone(DEFAULT_CONFIG)
@@ -27,6 +27,40 @@ describe("getEffectiveSiteRule", () => {
 
     const offSite = getEffectiveSiteRule(config, "https://other.com/")
     expect(offSite.excludeSelector).toBeNull()
+  })
+
+  it("keys the memo on the document type too", () => {
+    const config = configWithUserRules([
+      {
+        id: "user",
+        matches: "example.com",
+        contentTypes: ["text/plain"],
+        excludeSelectors: ["nav"],
+      },
+    ])
+    const plain = getEffectiveSiteRule(config, "https://example.com/", "text/plain")
+    expect(plain.excludeSelector).toBe("nav")
+    expect(getEffectiveSiteRule(config, "https://example.com/", "text/plain")).toBe(plain)
+
+    expect(
+      getEffectiveSiteRule(config, "https://example.com/", "text/html").excludeSelector,
+    ).toBeNull()
+    expect(getEffectiveSiteRule(config, "https://example.com/").excludeSelector).toBeNull()
+  })
+
+  it("resolves the current document with its own content type", () => {
+    Object.defineProperty(document, "contentType", { value: "text/markdown", configurable: true })
+    try {
+      const resolved = getDocumentSiteRule(configWithUserRules([]))
+      expect(resolved.matchedRuleIds).toContain("readfrog-plain-text-document")
+      expect(resolved.dontWalkTags!.has("PRE")).toBe(false)
+    } finally {
+      // Restore the prototype getter jsdom installs (text/html in tests).
+      Reflect.deleteProperty(document, "contentType")
+    }
+
+    const html = getDocumentSiteRule(configWithUserRules([]))
+    expect(html.matchedRuleIds).not.toContain("readfrog-plain-text-document")
   })
 
   it("recomputes for a fresh config object", () => {

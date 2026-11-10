@@ -2,7 +2,7 @@ import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type { Config } from "@/types/config/config"
 import { ISO6393_TO_6391 } from "@read-frog/definitions"
 import { getDetectedCodeFromStorage, getFinalSourceCode } from "@/utils/config/languages"
-import { getEffectiveSiteRule } from "@/utils/site-rules/effective"
+import { getDocumentSiteRule } from "@/utils/site-rules/effective"
 
 const PURE_HANDLE_RE = /^@\S+$/u
 
@@ -21,7 +21,7 @@ async function getSourceCode(configSourceCode: LangCodeISO6393 | "auto"): Promis
 export async function shouldFilterSmallParagraph(text: string, config: Config): Promise<boolean> {
   if (PURE_HANDLE_RE.test(text.trim())) return true
 
-  const siteRule = getEffectiveSiteRule(config, window.location.href)
+  const siteRule = getDocumentSiteRule(config)
   const minCharactersPerNode =
     siteRule.minCharacters ?? config.pageTranslation.page.minCharactersPerNode
   const minWordsPerNode = siteRule.minWords ?? config.pageTranslation.page.minWordsPerNode

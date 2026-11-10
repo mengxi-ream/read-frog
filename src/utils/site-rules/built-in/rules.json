@@ -62,6 +62,13 @@
     ]
   },
   {
+    "id": "readfrog-plain-text-document",
+    "description": "A browser shows a .txt or .md file as one generated <pre> holding the whole file, which the default PRE block would skip entirely. Walk it so the text translates one blank-line paragraph at a time. Matches on document type, on any URL including local files and data: or blob: frames; an authored <pre> in an HTML page stays blocked. Site and user rules come later and can block PRE again with dontWalkTags.add",
+    "matches": "<all_urls>",
+    "contentTypes": ["text/plain", "text/markdown", "text/x-markdown"],
+    "dontWalkTags.remove": ["PRE"]
+  },
+  {
     "id": "pdf",
     "matches": "https://app.infread.com/pdf/*",
     "includeSelectors": ["#viewerContainer p"],
@@ -4596,7 +4603,7 @@
   },
   {
     "id": "gamefaqs-guides",
-    "description": "GameFAQs serves a text guide as an HTML page whose entire body is a run of <pre id=\"faqspan-N\"> blocks (about 50k characters each) under #faqtext. PRE is hard-blocked by default for authored code, and the plain-text exemption only covers text/plain documents, so the guide was never walked while the page around it translated. Limited to guide pages, where a <pre> holds the author's prose; its blank lines then split it into one translation per paragraph",
+    "description": "GameFAQs serves a text guide as an HTML page whose entire body is a run of <pre id=\"faqspan-N\"> blocks (about 50k characters each) under #faqtext. PRE is hard-blocked by default for authored code, and readfrog-plain-text-document only covers plain-text and markdown documents, so the guide was never walked while the page around it translated. Limited to guide pages, where a <pre> holds the author's prose; its blank lines then split it into one translation per paragraph",
     "matches": "gamefaqs.gamespot.com/*/faqs/*",
     "dontWalkTags.remove": ["PRE"]
   },

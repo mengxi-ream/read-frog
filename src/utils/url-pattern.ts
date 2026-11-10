@@ -15,6 +15,12 @@ import { logger } from "@/utils/logger"
  */
 
 /**
+ * Every URL, whatever its scheme: web pages, local files, and the data:, blob:
+ * and about: frames the extension runs in. See `AllUrlsPattern`.
+ */
+export const ALL_URLS_PATTERN = "<all_urls>"
+
+/**
  * Normalize a user/built-in rule pattern into a standard browser match pattern.
  *
  * Accepted shorthands (bare host expands to scheme "*" and path "/*"):
@@ -24,6 +30,7 @@ import { logger } from "@/utils/logger"
  * - "github.com/settings"   path kept verbatim
  * - "https://example.com"   scheme kept; missing path expands to "/*"
  * - "[::1]"                 IPv6 literal, exact host
+ * - "<all_urls>"            kept as is: every URL, whatever its scheme
  *
  * Returns `null` for patterns we cannot support (non-http(s) schemes, ports,
  * empty input). Callers drop null patterns with a warning instead of failing
@@ -33,6 +40,11 @@ export function normalizeUrlPattern(raw: string): string | null {
   const trimmed = raw.trim()
   if (!trimmed) {
     return null
+  }
+  // Every URL, with a matcher of its own (`AllUrlsPattern`). It only has to get
+  // past the shorthand expansion below, which would read it as a host name.
+  if (trimmed === ALL_URLS_PATTERN) {
+    return ALL_URLS_PATTERN
   }
 
   let scheme = "*"
@@ -67,6 +79,23 @@ function isBracketedIpv6(host: string): boolean {
 
 interface CompiledPattern {
   includes: (url: string | URL | Location) => boolean
+}
+
+/**
+ * `<all_urls>` taken literally. MatchPattern's own version stops at http(s),
+ * file, ftp, urn and ws(s), but the extension also runs in data:, blob: and
+ * about: frames: page translation injects into every frame of the tab, and an
+ * `<iframe src="data:text/plain,...">` is the browser's plain-text viewer just
+ * like a .txt URL. A rule meant for every document has to reach those too.
+ */
+class AllUrlsPattern implements CompiledPattern {
+  includes(url: string | URL | Location): boolean {
+    try {
+      return new URL(url.toString()).protocol !== ""
+    } catch {
+      return false
+    }
+  }
 }
 
 /**
@@ -147,9 +176,12 @@ function getCompiledPattern(rawPattern: string): CompiledPattern | null {
     logger.warn(`[url-pattern] Unsupported URL pattern dropped: "${rawPattern}"`)
   } else {
     try {
-      compiled = needsWildcardHostPattern(normalized)
-        ? new WildcardHostPattern(normalized)
-        : new MatchPattern(normalized)
+      compiled =
+        normalized === ALL_URLS_PATTERN
+          ? new AllUrlsPattern()
+          : needsWildcardHostPattern(normalized)
+            ? new WildcardHostPattern(normalized)
+            : new MatchPattern(normalized)
     } catch (error) {
       logger.warn(`[url-pattern] Invalid URL pattern dropped: "${rawPattern}"`, error)
     }
