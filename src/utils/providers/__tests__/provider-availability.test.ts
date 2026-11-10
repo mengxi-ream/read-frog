@@ -15,7 +15,6 @@ function tier(overrides: Partial<HostedAiTierStatus> = {}): HostedAiTierStatus {
     available: true,
     unavailableReason: null,
     upgradeTo: null,
-    requiresUltra: false,
     modelRevision: "r1",
     ...overrides,
   }
@@ -25,7 +24,7 @@ function tier(overrides: Partial<HostedAiTierStatus> = {}): HostedAiTierStatus {
 function statusWith(normal: HostedAiTierStatus, advance = normal): HostedAiStatus {
   const entry = { normal, advance }
   return {
-    credits: [],
+    pools: [],
     features: {
       pageTranslation: entry,
       customAction: entry,

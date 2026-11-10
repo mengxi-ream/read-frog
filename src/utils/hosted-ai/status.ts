@@ -20,14 +20,10 @@ const REASON_I18N_KEYS = {
 
 /**
  * Every pool that can pay for Built-in AI, in the order the server draws on
- * them: the plan's recurring pools, then one-time pools. A server that predates
- * `pools` sends only `credits`, the recurring pools, which have the same shape.
- *
- * TODO(2026-11-07): read `status.pools` alone once the server stops sending
- * `credits` (mengxi-ream/read-frog-monorepo#710).
+ * them: the plan's recurring pools, then one-time pools.
  */
 export function getHostedAiPools(status: HostedAiStatus | undefined): HostedAiCreditPoolStatus[] {
-  return status?.pools ?? status?.credits ?? []
+  return status?.pools ?? []
 }
 
 /**

@@ -31,8 +31,8 @@ export function useHostedAiProviderOptions(
     // lookup that threw) keeps the option selectable and surfaces at run time.
     //
     // The previous `!accessAllowed || !hasFunding` test inverted that for the
-    // transient half: `credits` is emptied by a billing failure as well as by
-    // genuine unfundedness, so one bad lookup hard-disabled every built-in row.
+    // transient half: a billing failure drops the plan's pools just as genuine
+    // unfundedness does, so one bad lookup hard-disabled every built-in row.
     const tierStatus = getHostedAiTierStatus(status, feature, getHostedAiModelTier(provider.id))
     return {
       ...provider,

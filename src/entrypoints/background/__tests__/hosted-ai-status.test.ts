@@ -19,8 +19,8 @@ vi.mock("@/utils/message", () => ({
 const { clearHostedAiStatusCache, setupHostedAiStatusHandler } = await import("../hosted-ai-status")
 
 const TTL_MS = 30_000
-const STATUS_A = { credits: [], features: { pageTranslation: { normal: { available: true } } } }
-const STATUS_B = { credits: [], features: { pageTranslation: { normal: { available: false } } } }
+const STATUS_A = { pools: [], features: { pageTranslation: { normal: { available: true } } } }
+const STATUS_B = { pools: [], features: { pageTranslation: { normal: { available: false } } } }
 
 /** Stands in for session storage, which is what the real cache lives in. */
 const store = new Map<string, unknown>()

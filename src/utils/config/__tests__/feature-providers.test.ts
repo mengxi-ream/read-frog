@@ -26,7 +26,7 @@ function getProviderById(id: string): ProviderConfig {
 function statusWithAllTiers(tier: HostedAiTierStatus): HostedAiStatus {
   const entry = { normal: tier, advance: tier }
   return {
-    credits: [],
+    pools: [],
     features: {
       pageTranslation: entry,
       customAction: entry,
@@ -319,7 +319,6 @@ describe("feature providers", () => {
         available: false,
         unavailableReason: "ultra_required",
         upgradeTo: "ultra",
-        requiresUltra: true,
         modelRevision: "r1",
       }
       const walledOff = statusWithAllTiers(walledOffTier)
@@ -383,7 +382,6 @@ describe("feature providers", () => {
           available: true,
           unavailableReason: null,
           upgradeTo: null,
-          requiresUltra: false,
           modelRevision: "r1",
         })
         languageDetectionWalledOff.features.languageDetection = {
@@ -407,7 +405,6 @@ describe("feature providers", () => {
           available: false,
           unavailableReason: "quota_exhausted",
           upgradeTo: null,
-          requiresUltra: false,
           modelRevision: "r1",
         })
 

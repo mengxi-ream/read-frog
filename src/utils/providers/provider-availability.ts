@@ -35,13 +35,13 @@ export function getHostedFeatureForCapability(
  * change on its own: sign in, or buy a plan (`pro_required` / `ultra_required`).
  *
  * Read off `unavailableReason` rather than recomputed from `accessAllowed` and
- * the `credits` array. The server already separates the two — it reports an
+ * the `pools` array. The server already separates the two — it reports an
  * unfunded plan-gated tier as `pro_required` or `ultra_required` ("an upgrade
  * wall, not an outage") and routes every transient condition to
  * `service_unavailable`, including a billing lookup that threw. Deriving
- * durability from an empty `credits` array instead conflates them in both
- * directions: a momentary billing failure empties `credits` for an account that
- * is perfectly entitled.
+ * durability from the pools instead conflates them in both directions: a
+ * momentary billing failure drops the plan's pools for an account that is
+ * perfectly entitled.
  *
  * Everything else the server can report — `quota_exhausted`,
  * `service_unavailable` (open circuit, unconfigured model, unreadable quota

@@ -24,7 +24,6 @@ function tier(overrides: Partial<HostedAiTierStatus> = {}): HostedAiTierStatus {
     available: true,
     unavailableReason: null,
     upgradeTo: null,
-    requiresUltra: false,
     modelRevision: "normal-r7",
     ...overrides,
   }
@@ -42,7 +41,7 @@ describe("hosted AI status presentation", () => {
   it("reports no tier status for a feature the status has no entry for", () => {
     // PDF translation draws on the credit pools but has no per-tier status.
     const status: HostedAiStatus = {
-      credits: [],
+      pools: [],
       features: featureMap(() => ({ normal: tier(), advance: tier() })),
     }
 
@@ -52,7 +51,7 @@ describe("hosted AI status presentation", () => {
 
   it("shows one shared weekly credit for both model tiers", () => {
     const status: HostedAiStatus = {
-      credits: [
+      pools: [
         {
           periodKind: "weekly",
           usedPercent: 37.6,
@@ -91,7 +90,7 @@ describe("hosted AI status presentation", () => {
 
   it("shows service unavailability without inventing credit for an unfunded page feature", () => {
     const status: HostedAiStatus = {
-      credits: [
+      pools: [
         {
           periodKind: "daily",
           usedPercent: 10,
@@ -152,7 +151,6 @@ describe("hosted AI status presentation", () => {
       features: ["customAction" as const],
     }
     const status: HostedAiStatus = {
-      credits: [daily],
       pools: [daily, oneTime],
       features: featureMap(() => ({ normal: tier(), advance: tier() })),
     }
@@ -163,14 +161,7 @@ describe("hosted AI status presentation", () => {
     expect(getHostedAiCreditForFeature(status, "pageTranslation")).toBeUndefined()
   })
 
-  // TODO(2026-11-07): delete with the `credits` fallback (mengxi-ream/read-frog-monorepo#710).
-  it("falls back to credits when the server predates pools", () => {
-    const status: HostedAiStatus = {
-      credits: [{ periodKind: "weekly", usedPercent: 5, resetAt: null, features: ALL_FEATURES }],
-      features: featureMap(() => ({ normal: tier(), advance: tier() })),
-    }
-
-    expect(getHostedAiPools(status)).toBe(status.credits)
+  it("reads no pools while there is no status", () => {
     expect(getHostedAiPools(undefined)).toEqual([])
   })
 
