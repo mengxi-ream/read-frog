@@ -522,10 +522,16 @@ describe("urlMatchesRule", () => {
     expect(urlMatchesRule("https://github.com/foo/bar/settings", githubRule)).toBe(false)
   })
 
-  it("covers local files only through <all_urls>", () => {
-    expect(urlMatchesRule("file:///Users/someone/notes.md", { matches: "<all_urls>" })).toBe(true)
+  it("reaches local files and data:/blob: frames only through <all_urls>", () => {
+    for (const url of [
+      "file:///Users/someone/notes.md",
+      "data:text/plain,First%20paragraph.",
+      "blob:https://example.com/0f2b6a3e-1111-4c2e-9a77-2f6f0a1c9d10",
+    ]) {
+      expect(urlMatchesRule(url, { matches: "<all_urls>" })).toBe(true)
+      expect(urlMatchesRule(url, { matches: "*" })).toBe(false)
+    }
     expect(urlMatchesRule("https://memu.so/SKILL.md", { matches: "<all_urls>" })).toBe(true)
-    expect(urlMatchesRule("file:///Users/someone/notes.md", { matches: "*" })).toBe(false)
   })
 })
 

@@ -687,13 +687,16 @@ describe("built-in site rules", () => {
   // A browser shows a .txt or .md file as one generated <pre> holding the whole
   // file. memu.so serves SKILL.md as text/markdown, which the old hard-coded
   // text/plain check left untranslated; the rule keys on document type, so it
-  // covers every host and local files alike.
+  // covers every host, local files, and the data:/blob: frames page
+  // translation injects into (which the hard-coded check also reached).
   it("un-blocks PRE in documents the browser shows as plain text, on any URL", () => {
     for (const [url, contentType] of [
       ["https://memu.so/SKILL.md", "text/markdown"],
       ["https://raw.githubusercontent.com/psf/requests/main/src/requests/api.py", "text/plain"],
       ["http://localhost:8000/notes/README.md", "text/x-markdown"],
       ["file:///Users/someone/notes.txt", "text/plain"],
+      ["data:text/plain;charset=utf-8,First%20paragraph.%0A%0ASecond%20paragraph.", "text/plain"],
+      ["blob:https://example.com/0f2b6a3e-1111-4c2e-9a77-2f6f0a1c9d10", "text/plain"],
     ] as const) {
       const resolved = resolveSiteRule(url, BUILT_IN_SITE_RULES, [], [], contentType)
 

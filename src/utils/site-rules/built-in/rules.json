@@ -63,7 +63,7 @@
   },
   {
     "id": "readfrog-plain-text-document",
-    "description": "A browser shows a .txt or .md file as one generated <pre> holding the whole file, which the default PRE block would skip entirely. Walk it so the text translates one blank-line paragraph at a time. Matches on document type, on any URL including local files; an authored <pre> in an HTML page stays blocked. Site and user rules come later and can block PRE again with dontWalkTags.add",
+    "description": "A browser shows a .txt or .md file as one generated <pre> holding the whole file, which the default PRE block would skip entirely. Walk it so the text translates one blank-line paragraph at a time. Matches on document type, on any URL including local files and data: or blob: frames; an authored <pre> in an HTML page stays blocked. Site and user rules come later and can block PRE again with dontWalkTags.add",
     "matches": "<all_urls>",
     "contentTypes": ["text/plain", "text/markdown", "text/x-markdown"],
     "dontWalkTags.remove": ["PRE"]

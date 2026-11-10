@@ -11,8 +11,8 @@ import { MAX_CUSTOM_CSS_LENGTH } from "./translate"
  * ("*.example.com"), path wildcards (e.g. "github.com/<user>/settings"), and
  * full match patterns ("https://example.com" plus a path wildcard). Query
  * strings are ignored when matching. "*" covers every http(s) page;
- * "<all_urls>" also covers local files. `contentTypes` narrows a rule to kinds
- * of document rather than sites.
+ * "<all_urls>" covers every URL, local files and data:/blob: frames included.
+ * `contentTypes` narrows a rule to kinds of document rather than sites.
  *
  * This schema is deliberately lenient (structure only): an invalid selector or
  * URL pattern is dropped with a warning at resolve time instead of failing the

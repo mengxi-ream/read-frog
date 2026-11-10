@@ -14,7 +14,10 @@ import { logger } from "@/utils/logger"
  * patterns that had been stored under those semantics.
  */
 
-/** Every web page and local file; see `normalizeUrlPattern`. */
+/**
+ * Every URL, whatever its scheme: web pages, local files, and the data:, blob:
+ * and about: frames the extension runs in. See `AllUrlsPattern`.
+ */
 export const ALL_URLS_PATTERN = "<all_urls>"
 
 /**
@@ -27,7 +30,7 @@ export const ALL_URLS_PATTERN = "<all_urls>"
  * - "github.com/settings"   path kept verbatim
  * - "https://example.com"   scheme kept; missing path expands to "/*"
  * - "[::1]"                 IPv6 literal, exact host
- * - "<all_urls>"            kept as is: every web page and local file
+ * - "<all_urls>"            kept as is: every URL, whatever its scheme
  *
  * Returns `null` for patterns we cannot support (non-http(s) schemes, ports,
  * empty input). Callers drop null patterns with a warning instead of failing
@@ -38,10 +41,8 @@ export function normalizeUrlPattern(raw: string): string | null {
   if (!trimmed) {
     return null
   }
-  // The WebExtension token for every URL a match pattern can name, file://
-  // included, which no other pattern here can reach. MatchPattern understands
-  // it natively; it only has to get past the shorthand expansion below, which
-  // would read it as a host name.
+  // Every URL, with a matcher of its own (`AllUrlsPattern`). It only has to get
+  // past the shorthand expansion below, which would read it as a host name.
   if (trimmed === ALL_URLS_PATTERN) {
     return ALL_URLS_PATTERN
   }
@@ -78,6 +79,23 @@ function isBracketedIpv6(host: string): boolean {
 
 interface CompiledPattern {
   includes: (url: string | URL | Location) => boolean
+}
+
+/**
+ * `<all_urls>` taken literally. MatchPattern's own version stops at http(s),
+ * file, ftp, urn and ws(s), but the extension also runs in data:, blob: and
+ * about: frames: page translation injects into every frame of the tab, and an
+ * `<iframe src="data:text/plain,...">` is the browser's plain-text viewer just
+ * like a .txt URL. A rule meant for every document has to reach those too.
+ */
+class AllUrlsPattern implements CompiledPattern {
+  includes(url: string | URL | Location): boolean {
+    try {
+      return new URL(url.toString()).protocol !== ""
+    } catch {
+      return false
+    }
+  }
 }
 
 /**
@@ -135,9 +153,6 @@ function escapeForRegex(value: string): string {
  * having no way to tell an address apart from a port.
  */
 function needsWildcardHostPattern(normalized: string): boolean {
-  if (normalized === ALL_URLS_PATTERN) {
-    return false
-  }
   const host = normalized.slice(normalized.indexOf("://") + 3).split("/", 1)[0]!
   if (isBracketedIpv6(host)) {
     return true
@@ -161,9 +176,12 @@ function getCompiledPattern(rawPattern: string): CompiledPattern | null {
     logger.warn(`[url-pattern] Unsupported URL pattern dropped: "${rawPattern}"`)
   } else {
     try {
-      compiled = needsWildcardHostPattern(normalized)
-        ? new WildcardHostPattern(normalized)
-        : new MatchPattern(normalized)
+      compiled =
+        normalized === ALL_URLS_PATTERN
+          ? new AllUrlsPattern()
+          : needsWildcardHostPattern(normalized)
+            ? new WildcardHostPattern(normalized)
+            : new MatchPattern(normalized)
     } catch (error) {
       logger.warn(`[url-pattern] Invalid URL pattern dropped: "${rawPattern}"`, error)
     }
