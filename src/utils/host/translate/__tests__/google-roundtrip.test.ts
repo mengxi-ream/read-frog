@@ -60,9 +60,9 @@ function simulateTranslateHtmlEndpoint(requestText: string): string {
 const fetchMock = vi.fn<(...args: any[]) => any>()
 
 const langConfig = {
-  sourceCode: "eng" as const,
-  targetCode: "cmn" as const,
-  detectedCode: "eng" as const,
+  sourceCode: "en" as const,
+  targetCode: "zh-Hans" as const,
+  detectedCode: "en" as const,
   level: "intermediate" as const,
 }
 

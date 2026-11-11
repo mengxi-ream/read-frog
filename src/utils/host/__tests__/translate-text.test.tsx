@@ -232,12 +232,12 @@ describe("translate-text", () => {
           page: {
             ...DEFAULT_CONFIG.pageTranslation.page,
             enableTargetLanguageSkip: false,
-            skipLanguages: ["jpn"],
+            skipLanguages: ["ja"],
           },
         },
       }
       mockGetConfigFromStorage.mockResolvedValue(config)
-      mockDetectLanguage.mockResolvedValueOnce("jpn")
+      mockDetectLanguage.mockResolvedValueOnce("ja")
 
       const japaneseText =
         "これは日本語で書かれた十分に長い段落で、明示的なスキップ言語の設定によって翻訳前にスキップされます。"
@@ -319,7 +319,7 @@ describe("translate-text", () => {
         beginPageTranslationSession()
         endPageTranslationSession()
 
-        const result = await translateTextForInput("hello", "eng", "cmn")
+        const result = await translateTextForInput("hello", "en", "zh-Hans")
 
         expect(result).toBe("translated text")
         expect(mockSendMessage).toHaveBeenCalled()
@@ -433,16 +433,16 @@ describe("translate-text", () => {
       mockSendMessage.mockResolvedValue("translated input")
       const onTargetLanguageResolved = vi.fn<(targetLanguage: string) => void>()
 
-      await translateTextForInput("hello", "eng", "cmn", onTargetLanguageResolved)
+      await translateTextForInput("hello", "en", "zh-Hans", onTargetLanguageResolved)
 
       expect(onTargetLanguageResolved).toHaveBeenCalledOnce()
-      expect(onTargetLanguageResolved).toHaveBeenCalledWith("cmn")
+      expect(onTargetLanguageResolved).toHaveBeenCalledWith("zh-Hans")
     })
 
     it("skips webpage context loading for non-llm input translations", async () => {
       mockSendMessage.mockResolvedValue("translated input")
 
-      const result = await translateTextForInput("hello", "eng", "cmn")
+      const result = await translateTextForInput("hello", "en", "zh-Hans")
 
       expect(result).toBe("translated input")
       expect(mockGetOrCreateWebPageContext).not.toHaveBeenCalled()
@@ -482,7 +482,7 @@ describe("translate-text", () => {
         return undefined
       })
 
-      const result = await translateTextForInput("hello", "eng", "cmn")
+      const result = await translateTextForInput("hello", "en", "zh-Hans")
 
       expect(result).toBe("translated input")
       expect(mockGetOrGenerateWebPageSummary).toHaveBeenCalledTimes(1)
@@ -521,7 +521,7 @@ describe("translate-text", () => {
       // resolves a ref inside this optional step. Aborting here would kill the
       // request before the translation — which resolves the same ref and is the
       // thing the user actually invoked — could surface the denial itself.
-      const result = await translateTextForInput("hello", "eng", "cmn")
+      const result = await translateTextForInput("hello", "en", "zh-Hans")
 
       expect(result).toBe("translated input")
       expect(mockSendMessage).toHaveBeenCalledWith(
@@ -566,7 +566,7 @@ describe("translate-text", () => {
     })
 
     it("bills input translation and its summary against inputTranslation", async () => {
-      await translateTextForInput("hello", "eng", "cmn")
+      await translateTextForInput("hello", "en", "zh-Hans")
 
       expect(mockSendMessage).toHaveBeenCalledWith(
         "enqueueTranslateRequest",
@@ -587,9 +587,9 @@ describe("translate-text", () => {
 
   describe("executeTranslate", () => {
     const langConfig = {
-      sourceCode: "eng" as const,
-      targetCode: "cmn" as const,
-      detectedCode: "eng" as const,
+      sourceCode: "en" as const,
+      targetCode: "zh-Hans" as const,
+      detectedCode: "en" as const,
       level: "intermediate" as const,
     }
 
@@ -692,7 +692,7 @@ describe("translate-text", () => {
         textFormat: "html",
       })
 
-      expect(mockDeepLTranslate).toHaveBeenCalledWith(html, "en", "zh", deeplProviderConfig, {
+      expect(mockDeepLTranslate).toHaveBeenCalledWith(html, "en", "zh-Hans", deeplProviderConfig, {
         textFormat: "html",
       })
     })
@@ -713,9 +713,15 @@ describe("translate-text", () => {
         textFormat: "html",
       })
 
-      expect(mockDeepLXTranslate).toHaveBeenCalledWith(html, "en", "zh", deeplxProviderConfig, {
-        textFormat: "html",
-      })
+      expect(mockDeepLXTranslate).toHaveBeenCalledWith(
+        html,
+        "en",
+        "zh-Hans",
+        deeplxProviderConfig,
+        {
+          textFormat: "html",
+        },
+      )
     })
   })
 })

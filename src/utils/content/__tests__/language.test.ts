@@ -1,4 +1,6 @@
 import { franc } from "franc"
+import { data as francData } from "franc/data.js"
+import { expressions as francScripts } from "franc/expressions.js"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 vi.mock("franc", () => ({
@@ -49,7 +51,22 @@ describe("detectLanguageWithSource", () => {
     await expect(
       detectLanguageWithSource("This is enough text to detect language."),
     ).resolves.toEqual({
-      code: "eng",
+      code: "en",
+      source: "franc",
+    })
+  })
+
+  it("reads franc's ISO 639-3 answer as the language's tag", async () => {
+    mockFranc.mockReturnValue("cmn")
+    await expect(detectLanguageWithSource("这是一段足够长的中文文本。")).resolves.toEqual({
+      code: "zh-Hans",
+      source: "franc",
+    })
+
+    // franc's Albanian, which the ISO 639-3 list never matched.
+    mockFranc.mockReturnValue("als")
+    await expect(detectLanguageWithSource("Përshëndetje, si jeni sot?")).resolves.toEqual({
+      code: "sq",
       source: "franc",
     })
   })
@@ -63,6 +80,26 @@ describe("detectLanguageWithSource", () => {
       code: "und",
       source: "fallback",
     })
+  })
+
+  it("reads every language franc can answer with", async () => {
+    // franc names a script it reads as one language by that language's code,
+    // and lists the languages of every other script in its trigram data.
+    const francCodes = [
+      ...new Set([
+        ...Object.keys(francScripts).filter((script) => !(script in francData)),
+        ...Object.values(francData).flatMap((languages) => Object.keys(languages)),
+      ]),
+    ].toSorted()
+
+    const lines: string[] = []
+    for (const francCode of francCodes) {
+      mockFranc.mockReturnValue(francCode)
+      const { code } = await detectLanguageWithSource("This is enough text to detect language.")
+      lines.push(`${francCode} -> ${code}`)
+    }
+
+    await expect(`${lines.join("\n")}\n`).toMatchFileSnapshot("./__snapshots__/franc-languages.txt")
   })
 
   describe("when LLM detection is enabled but the account cannot run it", () => {
@@ -86,7 +123,7 @@ describe("detectLanguageWithSource", () => {
       // same null that means "no LLM detection is configured".
       await expect(
         detectLanguageWithSource("This is enough text to detect language.", { enableLLM: true }),
-      ).resolves.toEqual({ code: "eng", source: "franc" })
+      ).resolves.toEqual({ code: "en", source: "franc" })
 
       expect(toastAddMock).toHaveBeenCalledWith(
         expect.objectContaining({ type: "warning", title: "Ultra plan required" }),
@@ -104,7 +141,7 @@ describe("detectLanguageWithSource", () => {
           enableLLM: true,
           llmFallbackToastContext: "speak",
         }),
-      ).resolves.toEqual({ code: "eng", source: "franc" })
+      ).resolves.toEqual({ code: "en", source: "franc" })
 
       expect(toastAddMock).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -126,7 +163,7 @@ describe("detectLanguageWithSource", () => {
       // report. This is the meaning the denial used to collapse into.
       await expect(
         detectLanguageWithSource("This is enough text to detect language.", { enableLLM: true }),
-      ).resolves.toEqual({ code: "eng", source: "franc" })
+      ).resolves.toEqual({ code: "en", source: "franc" })
 
       expect(toastAddMock).not.toHaveBeenCalled()
     })

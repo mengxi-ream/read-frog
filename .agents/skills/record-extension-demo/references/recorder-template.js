@@ -66,7 +66,7 @@ async function patchConfig(browser) {
   const patch = () => worker.evaluate(async () => {
     const { config } = await chrome.storage.local.get('config')
     if (!config) return 'no-config-yet'
-    config.language.targetCode = 'cmn'
+    config.language.targetCode = 'zh-Hans'
     config.language.sourceCode = 'auto'
     // Top-level key is `pageTranslation`, NOT `translate`: the schema is
     // non-strict, so a stale key is stripped and the patch silently does nothing.

@@ -1,5 +1,5 @@
 import { Icon } from "@iconify/react"
-import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
+import { LANGUAGE_ENGLISH_NAMES } from "@read-frog/definitions"
 import { useMutation } from "@tanstack/react-query"
 import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { useEffect, useEffectEvent, useRef } from "react"
@@ -114,7 +114,7 @@ export function TranslationCard({
           let result: string
           if (provider.kind === "system") {
             const { systemPrompt, prompt } = await promptResolver(
-              LANG_CODE_TO_EN_NAME[req.targetLanguage],
+              LANGUAGE_ENGLISH_NAMES[req.targetLanguage],
               preparedText,
             )
             const response = await streamBackgroundText(

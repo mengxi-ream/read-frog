@@ -43,7 +43,7 @@ describe("the custom action layout host", () => {
         ],
         value: { "the term": "blossom <b>" },
         selection: "blossoms",
-        targetCode: "cmn",
+        targetCode: "zh-Hans",
         status: "streaming",
       }),
     )
@@ -55,12 +55,12 @@ describe("the custom action layout host", () => {
 
   // The words come from the i18n mock, tagged with the locale they were asked in.
   it.each([
-    ["cmn", "zh-CN"],
-    ["cmn-Hant", "zh-TW"],
-    ["jpn", "ja"],
-    ["eng", "en"],
+    ["zh-Hans", "zh-CN"],
+    ["zh-Hant", "zh-TW"],
+    ["ja", "ja"],
+    ["en", "en"],
     // No words in French: the UI language's (the mock's is en).
-    ["fra", "en"],
+    ["fr", "en"],
   ] as const)("puts the card's words in ctx in the language of %s", (targetCode, locale) => {
     const compiled = compileLayout(
       "{{ ctx.sentenceAnalysisLabels.roles.subject }}|{{ ctx.sentenceAnalysisLabels.forms['present-participle'] }}|{{ ctx.improveWritingLabels.types['word-choice'] }}",

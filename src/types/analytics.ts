@@ -1,4 +1,4 @@
-import type { LangCodeISO6393, NoteSaveSurface } from "@read-frog/definitions"
+import type { LanguageTag, NoteSaveSurface } from "@read-frog/definitions"
 import type { AllProviderTypes } from "@/types/config/provider"
 import type { TranslationMode } from "@/types/config/translate"
 
@@ -121,14 +121,14 @@ export type FeatureUsageContext<F extends AnalyticsFeature = AnalyticsFeature> =
 export interface ObservedByFeature {
   page_translation: {
     translation_mode: TranslationMode
-    target_language: LangCodeISO6393
-    source_language?: LangCodeISO6393
+    target_language: LanguageTag
+    source_language?: LanguageTag
   }
-  selection_translation: { char_count: number; target_language: LangCodeISO6393 }
+  selection_translation: { char_count: number; target_language: LanguageTag }
   custom_ai_action: { action_id: string; action_name?: string }
-  input_translation: { char_count: number; target_language: LangCodeISO6393 }
-  translation_hub: { char_count: number; target_language: LangCodeISO6393 }
-  video_subtitles: { target_language: LangCodeISO6393 }
+  input_translation: { char_count: number; target_language: LanguageTag }
+  translation_hub: { char_count: number; target_language: LanguageTag }
+  video_subtitles: { target_language: LanguageTag }
   text_to_speech: unknown
   note_suggestion:
     | { action_id: "suggestion_shown" }
@@ -142,8 +142,8 @@ export interface ObservedByFeature {
         path: NoteSavePath
         is_guide: boolean
       }
-  glossary: { target_language: LangCodeISO6393 }
-  word_annotation: { char_count: number; target_language: LangCodeISO6393 }
+  glossary: { target_language: LanguageTag }
+  word_annotation: { char_count: number; target_language: LanguageTag }
 }
 
 export interface FeatureUsedEventBase extends FeatureProviderAnalytics {

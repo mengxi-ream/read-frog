@@ -1,4 +1,4 @@
-import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { LanguageTag } from "@read-frog/definitions"
 import type { GlossaryEntry, GlossaryMatcher, MatchedTerm } from "./types"
 import { storage } from "#imports"
 import { GLOSSARY_REVISION_KEY } from "../constants/glossary"
@@ -32,7 +32,7 @@ interface CachedMatcher {
   /** The URL the snapshot was requested for; `undefined` where there is no page. */
   url: string | undefined
   /** Terms are stored per target language, so a compiled matcher is for one. */
-  targetLang: LangCodeISO6393
+  targetLang: LanguageTag
   revision: number
   scopeKey: string
   matcher: GlossaryMatcher
@@ -92,12 +92,12 @@ export interface ActiveGlossary {
  */
 let loadSnapshot: (
   url: string | undefined,
-  targetLang: LangCodeISO6393,
+  targetLang: LanguageTag,
 ) => Promise<GlossarySnapshot> = async (url, targetLang) =>
   await sendMessage("getGlossarySnapshot", { url, targetLang })
 
 export function setGlossarySnapshotLoader(
-  loader: (url: string | undefined, targetLang: LangCodeISO6393) => Promise<GlossarySnapshot>,
+  loader: (url: string | undefined, targetLang: LanguageTag) => Promise<GlossarySnapshot>,
 ): void {
   loadSnapshot = loader
 }
@@ -153,7 +153,7 @@ function watchGlossaryRevision(): void {
   }
 }
 
-async function getActiveGlossary(targetLang: LangCodeISO6393): Promise<ActiveGlossary> {
+async function getActiveGlossary(targetLang: LanguageTag): Promise<ActiveGlossary> {
   watchGlossaryRevision()
   const url = currentDocumentUrl()
   if (cached && cached.url === url && cached.targetLang === targetLang) {
@@ -224,9 +224,7 @@ async function getActiveGlossary(targetLang: LangCodeISO6393): Promise<ActiveGlo
   return load
 }
 
-export async function getActiveGlossaryMatcher(
-  targetLang: LangCodeISO6393,
-): Promise<GlossaryMatcher> {
+export async function getActiveGlossaryMatcher(targetLang: LanguageTag): Promise<GlossaryMatcher> {
   return (await getActiveGlossary(targetLang)).matcher
 }
 
@@ -247,7 +245,7 @@ export interface ResolvedGlossaryTerms {
 export async function resolveGlossaryTerms(
   input: string,
   enabled: boolean,
-  targetLang: LangCodeISO6393,
+  targetLang: LanguageTag,
 ): Promise<ResolvedGlossaryTerms> {
   if (!enabled || input.trim() === "") return { terms: [], revision: 0 }
   const { matcher, revision } = await getActiveGlossary(targetLang)
@@ -269,7 +267,7 @@ export function invalidateActiveGlossaryMatcher(): void {
  * Called once when a content script starts, so the interactive paths never have
  * to wait on a message round trip while a user watches.
  */
-export function primeGlossaryMatcher(targetLang: LangCodeISO6393): void {
+export function primeGlossaryMatcher(targetLang: LanguageTag): void {
   // Explicitly swallowed: nothing awaits this, so an escaping rejection would
   // surface as an unhandled one on a page we do not own.
   void getActiveGlossaryMatcher(targetLang).catch(() => {})
@@ -289,7 +287,7 @@ export function primeGlossaryMatcher(targetLang: LangCodeISO6393): void {
 export function resolveGlossaryTermsFromCache(
   input: string,
   enabled: boolean,
-  targetLang: LangCodeISO6393,
+  targetLang: LanguageTag,
 ): MatchedTerm[] {
   if (!enabled || input.trim() === "") return []
   if (!cached || cached.url !== currentDocumentUrl() || cached.targetLang !== targetLang) {

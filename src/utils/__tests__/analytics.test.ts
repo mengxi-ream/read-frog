@@ -47,8 +47,8 @@ describe("analytics helpers", () => {
         provider: "openai",
         backend_kind: "llm",
         translation_mode: "bilingual",
-        target_language: "cmn",
-        source_language: "jpn",
+        target_language: "zh-Hans",
+        source_language: "ja",
       }),
     ).toEqual({
       feature: ANALYTICS_FEATURE.PAGE_TRANSLATION,
@@ -58,8 +58,8 @@ describe("analytics helpers", () => {
       provider: "openai",
       backend_kind: "llm",
       translation_mode: "bilingual",
-      target_language: "cmn",
-      source_language: "jpn",
+      target_language: "zh-Hans",
+      source_language: "ja",
     })
   })
 
@@ -104,7 +104,7 @@ describe("analytics helpers", () => {
         provider: "openai",
         backend_kind: "llm",
         char_count: 42,
-        target_language: "cmn",
+        target_language: "zh-Hans",
       },
       async () => "translated",
     )
@@ -131,7 +131,7 @@ describe("analytics helpers", () => {
       provider: "openai" as const,
       backend_kind: "llm" as const,
       translation_mode: "bilingual" as const,
-      target_language: "cmn" as const,
+      target_language: "zh-Hans" as const,
     }
 
     await expect(trackFeatureUsed(input)).resolves.toBeUndefined()
@@ -156,7 +156,7 @@ describe("analytics helpers", () => {
         provider: "openai",
         backend_kind: "llm",
         translation_mode: "bilingual",
-        target_language: "cmn",
+        target_language: "zh-Hans",
       }),
     ).resolves.toBeUndefined()
 

@@ -28,7 +28,7 @@ function createConfig({
   userRules?: SiteRule[]
 } = {}): Config {
   const config = structuredClone(DEFAULT_CONFIG)
-  config.language.sourceCode = "eng"
+  config.language.sourceCode = "en"
   config.pageTranslation.mode = mode
   config.pageTranslation.page.minCharactersPerNode = minCharacters
   config.pageTranslation.page.minWordsPerNode = minWords

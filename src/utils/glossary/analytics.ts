@@ -1,4 +1,4 @@
-import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { LanguageTag } from "@read-frog/definitions"
 import type { GlossaryFeatureKey } from "./features"
 import type { MatchedTerm } from "./types"
 import type { AnalyticsSurface, FeatureProviderAnalytics } from "@/types/analytics"
@@ -72,7 +72,7 @@ const lastReportedAt = new Map<AnalyticsSurface, number>()
 export function trackGlossaryUsed(
   feature: HostedAiTextStreamRoute,
   terms: readonly MatchedTerm[],
-  targetLanguage: LangCodeISO6393,
+  targetLanguage: LanguageTag,
   provider?: FeatureProviderAnalytics,
 ): void {
   if (terms.length === 0) return

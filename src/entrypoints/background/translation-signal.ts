@@ -1,4 +1,4 @@
-import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { LanguageTag } from "@read-frog/definitions"
 import type { FeatureUsageContext } from "@/types/analytics"
 import type { Config } from "@/types/config/config"
 import { browser, storage } from "#imports"
@@ -43,12 +43,12 @@ function isIframe(frameId: number | undefined): boolean {
   return frameId !== undefined && frameId !== 0
 }
 
-async function getDetectedCodeForTab(tabId: number): Promise<LangCodeISO6393> {
+async function getDetectedCodeForTab(tabId: number): Promise<LanguageTag> {
   const storedCode = await storage.getItem<unknown>(getDetectedCodeStateKey(tabId))
   return normalizeDetectedCode(storedCode)
 }
 
-function notifyDetectedCodeChanged(detectedCode: LangCodeISO6393) {
+function notifyDetectedCodeChanged(detectedCode: LanguageTag) {
   void sendMessage("detectedPageLanguageChanged", { detectedCode })
     // The popup is often closed, so having no receiver is expected.
     .catch(() => {})
@@ -116,7 +116,7 @@ export function translationMessage() {
     const { url, detectedCodeOrUnd } = msg.data
     if (typeof tabId === "number") {
       const detectedCode = normalizeDetectedCode(detectedCodeOrUnd)
-      await storage.setItem<LangCodeISO6393>(getDetectedCodeStateKey(tabId), detectedCode)
+      await storage.setItem<LanguageTag>(getDetectedCodeStateKey(tabId), detectedCode)
 
       if (await isActiveCurrentWindowTab(tabId)) {
         notifyDetectedCodeChanged(detectedCode)

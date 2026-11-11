@@ -143,7 +143,7 @@ describe("pageTranslationManager mutation observer root", () => {
   })
 
   it("reports the selected page language and mode before the event reaches background", async () => {
-    const manager = new PageTranslationManager({}, () => "jpn")
+    const manager = new PageTranslationManager({}, () => "ja")
     await manager.start(
       createFeatureUsageContext(ANALYTICS_FEATURE.PAGE_TRANSLATION, ANALYTICS_SURFACE.POPUP),
     )
@@ -152,7 +152,7 @@ describe("pageTranslationManager mutation observer root", () => {
       "trackFeatureUsedEvent",
       expect.objectContaining({
         feature: "page_translation",
-        source_language: "jpn",
+        source_language: "ja",
         target_language: DEFAULT_CONFIG.language.targetCode,
         translation_mode: DEFAULT_CONFIG.pageTranslation.mode,
       }),
@@ -176,16 +176,16 @@ describe("pageTranslationManager mutation observer root", () => {
   it("uses the configured source when it is explicit", async () => {
     mockGetLocalConfig.mockResolvedValue({
       ...DEFAULT_CONFIG,
-      language: { ...DEFAULT_CONFIG.language, sourceCode: "eng" },
+      language: { ...DEFAULT_CONFIG.language, sourceCode: "en" },
     })
-    const manager = new PageTranslationManager({}, () => "jpn")
+    const manager = new PageTranslationManager({}, () => "ja")
     await manager.start(
       createFeatureUsageContext(ANALYTICS_FEATURE.PAGE_TRANSLATION, ANALYTICS_SURFACE.POPUP),
     )
 
     expect(mockSendMessage).toHaveBeenCalledWith(
       "trackFeatureUsedEvent",
-      expect.objectContaining({ source_language: "eng" }),
+      expect.objectContaining({ source_language: "en" }),
     )
     manager.stop()
   })

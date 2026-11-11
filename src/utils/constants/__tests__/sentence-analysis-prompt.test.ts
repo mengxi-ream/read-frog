@@ -127,7 +127,7 @@ function anchoredSpans(example: Example): string[] {
       outputSchema: [{ id: "json", name: "json", type: "string", description: "" }],
       value: { json: JSON.stringify(example.items) },
       selection: example.selection,
-      targetCode: "eng",
+      targetCode: "en",
       status: "done",
     }),
   )

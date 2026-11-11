@@ -1,15 +1,16 @@
-import type { LangCodeISO6391 } from "@read-frog/definitions"
+import type { LanguageTag } from "@read-frog/definitions"
 import type { ProviderConfig } from "@/types/config/provider"
 import type { TranslationTextFormat } from "@/types/config/translate"
 import { DEFAULT_PROVIDER_CONFIG } from "@/utils/constants/providers"
+import { toDeepLSourceCode, toDeepLTargetCode } from "./language-codes"
 
 type DeepLXProviderConfig = Extract<ProviderConfig, { provider: "deeplx" }>
 const API_KEY_PLACEHOLDER_RE = /\{\{apiKey\}\}/g
 
 export async function deeplxTranslate(
   sourceText: string,
-  fromLang: LangCodeISO6391 | "auto",
-  toLang: LangCodeISO6391,
+  fromLang: LanguageTag | "auto",
+  toLang: LanguageTag,
   providerConfig: DeepLXProviderConfig,
   options?: { textFormat?: TranslationTextFormat; signal?: AbortSignal },
 ): Promise<string> {
@@ -20,19 +21,13 @@ export async function deeplxTranslate(
     throw new Error("DeepLX baseURL is not configured")
   }
 
-  const formatLang = (lang: LangCodeISO6391 | "auto") => {
-    if (lang === "auto") return "auto"
-    let formattedLang = lang.toUpperCase()
-    if (formattedLang === "ZH-TW") formattedLang = "ZH-HANT"
-    return formattedLang
-  }
-
   const url = buildDeepLXUrl(baseURL, apiKey)
 
   const requestBody = JSON.stringify({
     text: sourceText,
-    source_lang: formatLang(fromLang),
-    target_lang: formatLang(toLang),
+    source_lang: toDeepLSourceCode(fromLang) ?? "auto",
+    // DeepLX servers have always been sent a bare `ZH` for Simplified Chinese.
+    target_lang: toLang === "zh-Hans" ? "ZH" : toDeepLTargetCode(toLang),
     ...(options?.textFormat === "html" ? { tag_handling: "html" } : {}),
   })
 

@@ -1,4 +1,4 @@
-import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { LanguageTag } from "@read-frog/definitions"
 import type { Config } from "@/types/config/config"
 import { atom } from "jotai"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
@@ -17,7 +17,7 @@ export const sourceLangCodeAtom = atom(
       get(configFieldsAtomMap.language).sourceCode
     )
   },
-  (_get, set, value: LangCodeISO6393 | "auto") =>
+  (_get, set, value: LanguageTag | "auto") =>
     set(configFieldsAtomMap.translationHub, { sourceCode: value }),
 )
 
@@ -28,18 +28,17 @@ export const targetLangCodeAtom = atom(
       get(configFieldsAtomMap.language).targetCode
     )
   },
-  (_get, set, value: LangCodeISO6393) =>
-    set(configFieldsAtomMap.translationHub, { targetCode: value }),
+  (_get, set, value: LanguageTag) => set(configFieldsAtomMap.translationHub, { targetCode: value }),
 )
 
 // === Input Atom ===
 export const inputTextAtom = atom("")
 
 // === Detected Source LangCode (from input text) ===
-export const detectedSourceLangCodeAtom = atom<LangCodeISO6393 | null>(null)
+export const detectedSourceLangCodeAtom = atom<LanguageTag | null>(null)
 
 /** Named after the empty input, which detects as nothing but still has to name the auto row. */
-const FALLBACK_DETECTED_LANG_CODE: LangCodeISO6393 = "eng"
+const FALLBACK_DETECTED_LANG_CODE: LanguageTag = "en"
 
 /**
  * The language the auto row stands for: what the source selector reads while `auto` is
@@ -100,8 +99,8 @@ export const exchangeLangCodesAtom = atom(null, (get, set) => {
 // When translate button is clicked, store snapshot here. Cards watch timestamp to trigger.
 export interface TranslateRequest {
   inputText: string
-  sourceLanguage: LangCodeISO6393 | "auto"
-  targetLanguage: LangCodeISO6393
+  sourceLanguage: LanguageTag | "auto"
+  targetLanguage: LanguageTag
   timestamp: number
   promptConfig: Config["pageTranslation"]["customPromptsConfig"]
 }

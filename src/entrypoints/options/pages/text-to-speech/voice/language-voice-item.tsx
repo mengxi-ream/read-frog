@@ -1,4 +1,4 @@
-import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { LanguageTag } from "@read-frog/definitions"
 import type { TTSVoice } from "@/types/config/tts"
 import { IconLoader2, IconPlayerPlayFilled } from "@tabler/icons-react"
 import { useAtom } from "jotai"
@@ -19,7 +19,7 @@ import { TTSVoiceCombobox } from "./voice-combobox"
  */
 export function LanguageVoiceItem() {
   const [ttsConfig, setTtsConfig] = useAtom(configFieldsAtomMap.tts)
-  const [selectedLanguage, setSelectedLanguage] = useState<LangCodeISO6393>("eng")
+  const [selectedLanguage, setSelectedLanguage] = useState<LanguageTag>("en")
   const { play, isFetching, isPlaying } = useTextToSpeech(ANALYTICS_SURFACE.TTS_SETTINGS)
   const isFetchingOrPlaying = isFetching || isPlaying
 

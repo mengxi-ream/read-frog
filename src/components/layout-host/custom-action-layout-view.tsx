@@ -1,4 +1,4 @@
-import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { LanguageTag } from "@read-frog/definitions"
 import type { LayoutStatus } from "@read-frog/layout-engine/contract"
 import type { LayoutRenderReport, LayoutWarnCode } from "@read-frog/layout-engine/dom"
 import type { SurfaceByFeature } from "@/types/analytics"
@@ -31,7 +31,7 @@ interface CustomActionLayoutViewProps {
   value: Record<string, unknown> | null
   selection: string
   // The target language the answer is in; the card's own words follow it.
-  targetCode: LangCodeISO6393
+  targetCode: LanguageTag
   status: LayoutStatus
   theme: "light" | "dark"
   speakSurface?: SurfaceByFeature["text_to_speech"]

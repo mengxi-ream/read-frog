@@ -1,10 +1,6 @@
-import type { LangCodeISO6391, LangCodeISO6393 } from "@read-frog/definitions"
+import type { LanguageTag } from "@read-frog/definitions"
 import type { DetectionSource } from "./language"
-import {
-  ISO6393_TO_6391,
-  LANG_CODE_ISO6393_OPTIONS,
-  LOCALE_TO_ISO6393,
-} from "@read-frog/definitions"
+import { resolveLanguage } from "@read-frog/definitions"
 import { detectLanguageWithSource } from "./language"
 
 export const PAGE_LANGUAGE_TEXT_SAMPLE_LIMIT = 3000
@@ -25,77 +21,22 @@ const LANGUAGE_META_KEYS = new Set([
 
 const SKIPPED_TEXT_PARENT_TAGS = new Set(["SCRIPT", "STYLE", "NOSCRIPT", "IFRAME", "SVG"])
 
-const TRADITIONAL_CHINESE_REGIONS = new Set(["hk", "mo", "tw"])
-
-const ISO6393_BY_LOWERCASE = new Map(
-  LANG_CODE_ISO6393_OPTIONS.map((code) => [code.toLowerCase(), code] as const),
-)
-
-const ISO6391_TO_ISO6393 = createISO6391ToISO6393Map()
-
 export type PageLanguageDetectionSource = DetectionSource | "metadata"
 
 export interface PageLanguageDetectionResult {
-  detectedCodeOrUnd: LangCodeISO6393 | "und"
+  detectedCodeOrUnd: LanguageTag | "und"
   detectionSource: PageLanguageDetectionSource
-}
-
-function createISO6391ToISO6393Map() {
-  const localeMap = new Map<string, LangCodeISO6393>()
-
-  for (const [iso6393, iso6391] of Object.entries(ISO6393_TO_6391) as Array<
-    [LangCodeISO6393, LangCodeISO6391 | undefined]
-  >) {
-    if (iso6391 && !localeMap.has(iso6391.toLowerCase())) {
-      localeMap.set(iso6391.toLowerCase(), iso6393)
-    }
-  }
-
-  for (const [locale, iso6393] of Object.entries(LOCALE_TO_ISO6393) as Array<
-    [LangCodeISO6391, LangCodeISO6393 | undefined]
-  >) {
-    if (iso6393) {
-      localeMap.set(locale.toLowerCase(), iso6393)
-    }
-  }
-
-  return localeMap
-}
-
-function resolveLanguageToken(token: string): LangCodeISO6393 | null {
-  const normalizedToken = token.replace(/_/g, "-").replace(/\..*$/, "").trim()
-
-  if (!normalizedToken) return null
-
-  const lowercaseToken = normalizedToken.toLowerCase()
-  const exactISO6393 = ISO6393_BY_LOWERCASE.get(lowercaseToken)
-  if (exactISO6393) return exactISO6393
-
-  const parts = lowercaseToken.split("-").filter(Boolean)
-  if (parts[0] === "zh") {
-    if (parts.includes("yue")) return "yue"
-
-    if (parts.includes("hant") || parts.some((part) => TRADITIONAL_CHINESE_REGIONS.has(part)))
-      return "cmn-Hant"
-
-    return "cmn"
-  }
-
-  const exactLocale = ISO6391_TO_ISO6393.get(lowercaseToken)
-  if (exactLocale) return exactLocale
-
-  const primaryLanguage = parts[0]
-  return primaryLanguage ? (ISO6391_TO_ISO6393.get(primaryLanguage) ?? null) : null
 }
 
 export function resolveLanguageCodeFromLocale(
   value: string | null | undefined,
-): LangCodeISO6393 | null {
+): LanguageTag | null {
   if (!value) return null
 
-  const tokens = value.split(/[,;]/)
-  for (const token of tokens) {
-    const code = resolveLanguageToken(token)
+  // `Content-Language` may list several languages (`en-US, fr`): the first one
+  // this list has wins.
+  for (const token of value.split(/[,;]/)) {
+    const code = resolveLanguage(token)
     if (code) return code
   }
 
@@ -173,17 +114,23 @@ function collectPageTextSample(
   return sample
 }
 
+// franc tells neither scripts nor regions apart: it reads Traditional Chinese
+// as `zh-Hans` and European Portuguese as `pt-BR`. A page's own declaration
+// agrees with it when the language matches.
 function areCompatibleDetectedCodes(
-  metadataCode: LangCodeISO6393,
-  textCode: LangCodeISO6393 | "und",
+  metadataCode: LanguageTag,
+  textCode: LanguageTag | "und",
 ): boolean {
-  return textCode === metadataCode || (metadataCode === "cmn-Hant" && textCode === "cmn")
+  return (
+    textCode !== "und" &&
+    new Intl.Locale(metadataCode).language === new Intl.Locale(textCode).language
+  )
 }
 
 export async function detectPageLanguageLightweight(
   doc: Document = document,
 ): Promise<PageLanguageDetectionResult> {
-  let metadataCode: LangCodeISO6393 | null = null
+  let metadataCode: LanguageTag | null = null
 
   for (const candidate of getMetaLanguageCandidates(doc)) {
     const code = resolveLanguageCodeFromLocale(candidate)

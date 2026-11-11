@@ -1,4 +1,4 @@
-import { langCodeISO6393Schema, langLevel } from "@read-frog/definitions"
+import { langLevel } from "@read-frog/definitions"
 import { z } from "zod"
 import {
   BUILT_IN_ACTION_IDS,
@@ -20,6 +20,7 @@ import { normalizeSelectionToolbarLists } from "@/utils/selection-toolbar-order"
 import { floatingButtonSchema } from "./floating-button"
 import { glossaryConfigSchema } from "./glossary"
 import { languageDetectionConfigSchema } from "./language-detection"
+import { storedLanguageTagSchema } from "./language-tag"
 import { providersConfigSchema } from "./provider"
 import {
   selectionToolbarBuiltInActionsSchema,
@@ -32,8 +33,8 @@ import { translateConfigSchema } from "./translate"
 import { ttsConfigSchema } from "./tts"
 // Language schema
 const languageSchema = z.object({
-  sourceCode: langCodeISO6393Schema.or(z.literal("auto")),
-  targetCode: langCodeISO6393Schema,
+  sourceCode: storedLanguageTagSchema.or(z.literal("auto")),
+  targetCode: storedLanguageTagSchema,
   level: langLevel,
 })
 
@@ -130,8 +131,8 @@ const translationHubSchema = z
   .object({
     shortcut: shortcutSchema,
     selectedProviderIds: z.array(z.string().min(1)).nullable().default(null),
-    sourceCode: langCodeISO6393Schema.or(z.literal("auto")).nullable().default(null),
-    targetCode: langCodeISO6393Schema.nullable().default(null),
+    sourceCode: storedLanguageTagSchema.or(z.literal("auto")).nullable().default(null),
+    targetCode: storedLanguageTagSchema.nullable().default(null),
     // A missing ID in a pre-migration config must stay unset until v102 copies
     // the page prompt; another UI context may write this config first.
     promptId: z.string().min(1).nullable().default(null),
@@ -158,7 +159,7 @@ const contextMenuSchema = z.object({
 const inputTranslationLangSchema = z.union([
   z.literal("sourceCode"),
   z.literal("targetCode"),
-  langCodeISO6393Schema,
+  storedLanguageTagSchema,
 ])
 
 // input translation schema (triple-space trigger)

@@ -51,11 +51,11 @@ afterEach(() => {
 describe("useExtensionSpeakAdapter", () => {
   it("reads a trigger in the voice of the language its layout names", async () => {
     expect(await play("hola", { lang: "es-ES" })).toEqual({
-      forcedVoice: languageVoices.spa,
+      forcedVoice: languageVoices.es,
       quiet: false,
     })
     // Chinese goes by region: Taiwan reads in the Traditional Mandarin voice.
-    expect((await play("你好", { lang: "zh-TW" }))?.forcedVoice).toBe(languageVoices["cmn-Hant"])
+    expect((await play("你好", { lang: "zh-TW" }))?.forcedVoice).toBe(languageVoices["zh-Hant"])
   })
 
   it("leaves the voice to language detection when the layout names no language it knows", async () => {
@@ -65,7 +65,7 @@ describe("useExtensionSpeakAdapter", () => {
 
   it("plays a run nobody pressed for quietly, so a failure shows no toast", async () => {
     expect(await play("hola", { lang: "es", autoplay: true })).toEqual({
-      forcedVoice: languageVoices.spa,
+      forcedVoice: languageVoices.es,
       quiet: true,
     })
   })

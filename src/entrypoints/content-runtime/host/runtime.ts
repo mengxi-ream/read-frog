@@ -1,4 +1,4 @@
-import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { LanguageTag } from "@read-frog/definitions"
 import type { ContentScriptContext } from "#imports"
 import type { Config } from "@/types/config/config"
 import { storage } from "#imports"
@@ -31,7 +31,7 @@ export async function bootstrapHostContent(
 
   const preloadConfig =
     initialConfig?.pageTranslation.page.preload ?? DEFAULT_CONFIG.pageTranslation.page.preload
-  let detectedPageLanguage: { url: string; code: LangCodeISO6393 | "und" } | undefined
+  let detectedPageLanguage: { url: string; code: LanguageTag | "und" } | undefined
   let detectionGeneration = 0
   const manager = new PageTranslationManager(
     {

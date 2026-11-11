@@ -7,7 +7,7 @@ import type { ProviderRequestRouting } from "@/types/hosted-request"
 import type { MatchedTerm } from "@/utils/glossary/types"
 import type { PromptResolver } from "@/utils/host/translate/api/ai"
 import type { SerializableProviderRef } from "@/utils/providers/provider-ref"
-import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
+import { LANGUAGE_ENGLISH_NAMES } from "@read-frog/definitions"
 import { storage } from "#imports"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { putBatchRequestRecord } from "@/utils/batch-request-record"
@@ -93,7 +93,7 @@ async function executeQueuedTranslation<TContext>(
   if (!options.hostedRequestId) {
     throw new Error("Hosted page translation requires a stable requestId")
   }
-  const targetLangName = LANG_CODE_TO_EN_NAME[langConfig.targetCode]
+  const targetLangName = LANGUAGE_ENGLISH_NAMES[langConfig.targetCode]
   const { systemPrompt, prompt } = await promptResolver(targetLangName, text, {
     isBatch: options.isBatch,
     context: options.context,

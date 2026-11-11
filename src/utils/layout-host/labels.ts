@@ -1,4 +1,4 @@
-import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { LanguageTag } from "@read-frog/definitions"
 import type {
   ImproveWritingLayoutLabels,
   SentenceAnalysisLayoutLabels,
@@ -15,17 +15,17 @@ import { getUiLocale, translateIn } from "@/utils/i18n"
 // language outside them gets the UI language's, which the reader reads too.
 
 // The language each UI locale is written in.
-const LANG_CODE_OF_UI_LOCALE: Readonly<Record<SupportedUiLocale, LangCodeISO6393>> = {
-  en: "eng",
-  "zh-CN": "cmn",
-  "zh-TW": "cmn-Hant",
-  ja: "jpn",
-  ko: "kor",
-  ru: "rus",
-  tr: "tur",
-  vi: "vie",
-  es: "spa",
-  az: "azj",
+const LANG_CODE_OF_UI_LOCALE: Readonly<Record<SupportedUiLocale, LanguageTag>> = {
+  en: "en",
+  "zh-CN": "zh-Hans",
+  "zh-TW": "zh-Hant",
+  ja: "ja",
+  ko: "ko",
+  ru: "ru",
+  tr: "tr",
+  vi: "vi",
+  es: "es",
+  az: "az",
 }
 
 const UI_LOCALE_OF_LANG_CODE = new Map(
@@ -36,12 +36,12 @@ const UI_LOCALE_OF_LANG_CODE = new Map(
 )
 
 // The locale whose words a card shows a reader of `targetCode`.
-export function contentLocaleFor(targetCode: LangCodeISO6393): SupportedUiLocale {
+export function contentLocaleFor(targetCode: LanguageTag): SupportedUiLocale {
   return UI_LOCALE_OF_LANG_CODE.get(targetCode) ?? getUiLocale()
 }
 
 // The language a locale's words are in.
-export function langCodeOfLocale(locale: SupportedUiLocale): LangCodeISO6393 {
+export function langCodeOfLocale(locale: SupportedUiLocale): LanguageTag {
   return LANG_CODE_OF_UI_LOCALE[locale]
 }
 

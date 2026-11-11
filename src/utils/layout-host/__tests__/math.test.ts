@@ -13,7 +13,7 @@ function render(source: string, formula: string, math?: LayoutMath) {
       outputSchema: [{ id: "f", name: "Formula", type: "string", description: "" }],
       value: { Formula: formula },
       selection: "",
-      targetCode: "eng",
+      targetCode: "en",
       status: "done",
     }),
     math ? { math } : {},

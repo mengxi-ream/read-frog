@@ -17,7 +17,7 @@ vi.mock("@/utils/message", () => ({ sendMessage: sendMessageMock }))
 const provider = { ...DEFAULT_PROVIDER_CONFIG.openai, temperature: 0.3 }
 const config: Config = {
   ...DEFAULT_CONFIG,
-  language: { ...DEFAULT_CONFIG.language, targetCode: "eng" },
+  language: { ...DEFAULT_CONFIG.language, targetCode: "en" },
   providersConfig: [provider],
   videoSubtitles: { ...DEFAULT_CONFIG.videoSubtitles, providerId: provider.id },
 }

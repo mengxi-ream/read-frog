@@ -1,24 +1,33 @@
-import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { LanguageTag } from "@read-frog/definitions"
+import { resolveLanguage } from "@read-frog/definitions"
 
 /**
  * The value a term carries when its wording is not written for any one
  * language — the keep-the-original case, which is #942's first ask.
  *
- * A three-letter string sitting where a language code sits, so it must not BE
- * one: the extension translates into a curated 179 of ISO 639-3, and `all`
- * (Allar) is not among them. A test asserts that, because the guarantee is the
- * language list's to keep, not this file's.
+ * A three-letter string sitting where a language tag sits, so it must not BE
+ * one: `all` (Allar) is not among the languages the extension translates into.
+ * A test asserts that, because the guarantee is the language list's to keep,
+ * not this file's.
  */
 export const ALL_LANGUAGES = "all"
 
 /** Which target language a term's wording is for, or every language. */
-export type GlossaryTargetLang = LangCodeISO6393 | typeof ALL_LANGUAGES
+export type GlossaryTargetLang = LanguageTag | typeof ALL_LANGUAGES
+
+/**
+ * A stored term's language as the tag it is matched by. Terms written before
+ * languages were keyed by BCP 47 tag hold an ISO 639-3 code (`cmn`), on this
+ * device and in what other devices sync. A value this build does not know is
+ * kept as it is, so it reaches the other device intact.
+ */
+export function normalizeStoredTargetLang(value: string): string {
+  if (value === ALL_LANGUAGES) return value
+  return resolveLanguage(value) ?? value
+}
 
 /** Whether a term written for `termLang` belongs in a prompt targeting `pageLang`. */
-export function appliesToLanguage(
-  termLang: GlossaryTargetLang,
-  pageLang: LangCodeISO6393,
-): boolean {
+export function appliesToLanguage(termLang: GlossaryTargetLang, pageLang: LanguageTag): boolean {
   return termLang === ALL_LANGUAGES || termLang === pageLang
 }
 
@@ -47,7 +56,7 @@ export function targetLangPrecedence(termLang: GlossaryTargetLang): number {
  */
 export function defaultGlossaryTargetLang(
   target: string,
-  current: LangCodeISO6393,
+  current: LanguageTag,
 ): GlossaryTargetLang {
   return target.trim() === "" ? ALL_LANGUAGES : current
 }

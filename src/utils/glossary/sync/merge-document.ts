@@ -1,6 +1,7 @@
 import type { SyncedGlossary, SyncedTerm } from "./document"
 import type { RowConflict, SetMergeStats, Side, Triple } from "./merge"
 import { MAX_GLOSSARIES, MAX_GLOSSARY_TERMS } from "@/utils/constants/glossary"
+import { normalizeStoredTargetLang } from "../target-language"
 import { fieldwiseMerge, mergeSets, mergeStringSet } from "./merge"
 
 /** A glossary is the same glossary on two devices when it has the same id, and only then. */
@@ -24,6 +25,32 @@ function glossaryIdentity(glossary: SyncedGlossary): string {
  */
 export function termIdentity(term: SyncedTerm): string {
   return `${term.glossaryId}\u0000${term.targetLang}\u0000${term.matchKey}`
+}
+
+/**
+ * Terms with `targetLang` as this build stores it, one row per term.
+ *
+ * Builds from before languages were keyed by BCP 47 tag wrote ISO 639-3 codes
+ * (`cmn`), so a sync document, a stored base, an undo snapshot or an imported
+ * file can hold terms in code form — and, once devices on different builds have
+ * synced, the same term under both spellings. Normalized before any identity is
+ * taken, because the two spellings are one term to the unique
+ * [glossaryId+targetLang+matchKey] index: identities taken from the raw strings
+ * let both rows through to a write that the index then rejects. The newer row
+ * wins; on a tie the later one, as `mergeSets` does.
+ */
+export function withStoredTargetLangs(terms: readonly SyncedTerm[]): SyncedTerm[] {
+  const byIdentity = new Map<string, SyncedTerm>()
+  for (const term of terms) {
+    const stored = { ...term, targetLang: normalizeStoredTargetLang(term.targetLang) }
+    const identity = termIdentity(stored)
+    const kept = byIdentity.get(identity)
+    // `Number`, not `getTime()`: a stored row without a valid date must not throw.
+    if (kept === undefined || Number(stored.updatedAt) >= Number(kept.updatedAt)) {
+      byIdentity.set(identity, stored)
+    }
+  }
+  return [...byIdentity.values()]
 }
 
 const GLOSSARY_FIELDS = ["name", "description", "enabled"] as const
@@ -274,8 +301,15 @@ function addStats(into: SetMergeStats, from: SetMergeStats): void {
  * success.
  */
 export function mergeGlossaryDocuments(
-  triple: Triple<GlossarySnapshot>,
+  sides: Triple<GlossarySnapshot>,
 ): MergeGlossaryDocumentsResult {
+  // The base keeps the codes it was stored with, and the cloud may hold a term
+  // in both spellings: every side is merged in the form this device writes.
+  const triple: Triple<GlossarySnapshot> = {
+    base: { ...sides.base, terms: withStoredTargetLangs(sides.base.terms) },
+    local: { ...sides.local, terms: withStoredTargetLangs(sides.local.terms) },
+    remote: { ...sides.remote, terms: withStoredTargetLangs(sides.remote.terms) },
+  }
   const conflicts: GlossaryConflict[] = []
 
   const localTermChanges = glossariesWithTermChanges(triple.base, triple.local)

@@ -1,4 +1,4 @@
-import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { LanguageTag } from "@read-frog/definitions"
 import { Icon } from "@iconify/react"
 import { Button } from "@/components/ui/base-ui/button"
 import { getLanguageLabel } from "@/utils/language-labels"
@@ -14,8 +14,8 @@ export function LanguageChips({
   onRemove,
   className,
 }: {
-  languages: LangCodeISO6393[]
-  onRemove: (language: LangCodeISO6393) => void
+  languages: LanguageTag[]
+  onRemove: (language: LanguageTag) => void
   className?: string
 }) {
   if (languages.length === 0) {

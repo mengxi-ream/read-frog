@@ -1,4 +1,4 @@
-import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { LanguageTag } from "@read-frog/definitions"
 import type { GuideDictionaryNotebaseCompletionInput } from "./guide/dictionary-notebase"
 import type { FeatureUsageContext, FeatureUsedEventProperties } from "@/types/analytics"
 import type {
@@ -49,7 +49,7 @@ interface ProtocolMap {
   // out of the answer rather than filtered on arrival.
   getGlossarySnapshot: (data: {
     url: string | undefined
-    targetLang: LangCodeISO6393
+    targetLang: LanguageTag
   }) => Promise<GlossarySnapshot>
   // translation state
   getEnablePageTranslationByTabId: (data: { tabId: number }) => boolean | undefined
@@ -73,12 +73,12 @@ interface ProtocolMap {
   injectCurrentIframesAfterTopFrameNodeTranslation: () => void
   activateSameOriginIframeSelectionRuntime: () => boolean
   reportDetectedPageLanguage: (data: {
-    detectedCodeOrUnd: LangCodeISO6393 | "und"
+    detectedCodeOrUnd: LanguageTag | "und"
     url: string
   }) => void
   refreshDetectedPageLanguage: () => void
-  getDetectedCode: () => LangCodeISO6393
-  detectedPageLanguageChanged: (data: { detectedCode: LangCodeISO6393 }) => void
+  getDetectedCode: () => LanguageTag
+  detectedPageLanguageChanged: (data: { detectedCode: LanguageTag }) => void
   // ask host to start page translation
   askManagerToTogglePageTranslation: (data: {
     enabled: boolean

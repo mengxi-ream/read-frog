@@ -1,4 +1,4 @@
-import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { LanguageTag } from "@read-frog/definitions"
 import { useAtomValue } from "jotai"
 import { useCallback, useEffect, useRef } from "react"
 import { toastManager } from "@/components/ui/base-ui/toast"
@@ -196,7 +196,7 @@ export function useInputTranslation() {
         ANALYTICS_SURFACE.INPUT_TRANSLATION,
       )
       let providerAnalytics = UNKNOWN_FEATURE_PROVIDER
-      let targetLanguage: LangCodeISO6393 | undefined
+      let targetLanguage: LanguageTag | undefined
 
       try {
         // Capability-resolved so Built-in AI is not reported as unknown.

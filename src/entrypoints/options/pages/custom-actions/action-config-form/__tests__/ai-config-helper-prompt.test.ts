@@ -21,7 +21,7 @@ function renderExample(value: Record<string, unknown> | null, status: "streaming
       outputSchema: EXAMPLE_SCHEMA,
       value,
       selection: "The plane will take off soon.",
-      targetCode: "eng",
+      targetCode: "en",
       status,
     }),
   )
@@ -90,7 +90,7 @@ describe("buildAiConfigHelperPrompt", () => {
   const input = {
     otherActionNames: ["Explain", "Summarize"],
     uiLocale: "zh-CN",
-    targetCode: "cmn",
+    targetCode: "zh-Hans",
   } as const
 
   it("asks the assistant to find out the user's intent before designing anything", () => {

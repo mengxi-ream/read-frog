@@ -5,8 +5,8 @@ import { selectTTSVoice } from "../use-text-to-speech"
 const baseTtsConfig = {
   defaultVoice: "en-US-DavisNeural",
   languageVoices: {
-    eng: "en-US-DavisNeural",
-    jpn: "ja-JP-KeitaNeural",
+    en: "en-US-DavisNeural",
+    ja: "ja-JP-KeitaNeural",
   },
   rate: 0,
   pitch: 0,
@@ -15,15 +15,15 @@ const baseTtsConfig = {
 
 describe("selectTTSVoice", () => {
   it("prefers a forced preview voice over language detection", () => {
-    expect(selectTTSVoice(baseTtsConfig, "eng", "ja-JP-KeitaNeural")).toBe("ja-JP-KeitaNeural")
+    expect(selectTTSVoice(baseTtsConfig, "en", "ja-JP-KeitaNeural")).toBe("ja-JP-KeitaNeural")
   })
 
   it("uses the detected language voice when present", () => {
-    expect(selectTTSVoice(baseTtsConfig, "jpn")).toBe("ja-JP-KeitaNeural")
+    expect(selectTTSVoice(baseTtsConfig, "ja")).toBe("ja-JP-KeitaNeural")
   })
 
   it("falls back to the default voice when there is no language match", () => {
-    expect(selectTTSVoice(baseTtsConfig, "fra")).toBe("en-US-DavisNeural")
+    expect(selectTTSVoice(baseTtsConfig, "fr")).toBe("en-US-DavisNeural")
     expect(selectTTSVoice(baseTtsConfig, null)).toBe("en-US-DavisNeural")
   })
 })

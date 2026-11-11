@@ -37,7 +37,7 @@ vi.mock("@/utils/subtitles/srt", () => ({ downloadSubtitlesAsSrt: mocks.download
 
 function createConfig({
   aiSegmentation = false,
-  targetCode = "cmn",
+  targetCode = "zh-Hans",
 }: {
   aiSegmentation?: boolean
   targetCode?: Config["language"]["targetCode"]
@@ -45,18 +45,22 @@ function createConfig({
   const provider = DEFAULT_PROVIDER_CONFIG.openai
   return {
     ...DEFAULT_CONFIG,
-    language: { ...DEFAULT_CONFIG.language, sourceCode: "eng", targetCode },
+    language: { ...DEFAULT_CONFIG.language, sourceCode: "en", targetCode },
     providersConfig: [provider],
     videoSubtitles: { ...DEFAULT_CONFIG.videoSubtitles, providerId: provider.id, aiSegmentation },
   }
 }
 
-function createDownloader(fragments: SubtitlesFragment[], preSegmented = true) {
+function createDownloader(
+  fragments: SubtitlesFragment[],
+  preSegmented = true,
+  trackLanguage = "en",
+) {
   const fetcher = {
     fetch: vi.fn<(...args: any[]) => any>().mockResolvedValue(fragments),
     cleanup: vi.fn<(...args: any[]) => any>(),
     shouldUseSameTrack: vi.fn<(...args: any[]) => any>().mockResolvedValue(false),
-    getSourceLanguage: () => "en",
+    getSourceLanguage: () => trackLanguage,
     hasAvailableSubtitles: vi.fn<(...args: any[]) => any>().mockResolvedValue(true),
     isPreSegmented: () => preSegmented,
   }
@@ -274,8 +278,21 @@ describe("translatedSubtitlesDownloader", () => {
     expect(status()).toEqual({ phase: TranslatedDownloadPhase.Idle, progress: null })
   })
 
+  it("rejects export of a track in another region of the target language", async () => {
+    // A pt-PT track for a pt-BR reader: one language, as on pages.
+    mocks.getLocalConfig.mockResolvedValue(createConfig({ targetCode: "pt-BR" }))
+
+    await createDownloader(lines(1), true, "pt-PT").downloader.download()
+
+    expect(mocks.translateSubtitles).not.toHaveBeenCalled()
+    expect(mocks.toastAdd).toHaveBeenCalledWith({
+      type: "error",
+      title: "subtitles.errors.translatedExportSameLanguage",
+    })
+  })
+
   it("rejects same-language export before showing the preparing state", async () => {
-    mocks.getLocalConfig.mockResolvedValue(createConfig({ targetCode: "eng" }))
+    mocks.getLocalConfig.mockResolvedValue(createConfig({ targetCode: "en" }))
     const statuses: Array<ReturnType<typeof status>> = []
     const unsubscribe = subtitlesStore.sub(translatedSubtitlesDownloadStatusAtom, () =>
       statuses.push(status()),

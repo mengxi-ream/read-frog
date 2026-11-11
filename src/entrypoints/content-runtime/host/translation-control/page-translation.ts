@@ -1,4 +1,4 @@
-import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { LanguageTag } from "@read-frog/definitions"
 import type { FeatureUsageContext } from "@/types/analytics"
 import type { Config } from "@/types/config/config"
 import debounce from "debounce"
@@ -315,7 +315,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     intersectionOptions: SimpleIntersectionOptions = {},
     private readonly getDetectedPageLanguage: (
       url: string,
-    ) => LangCodeISO6393 | "und" | undefined = () => undefined,
+    ) => LanguageTag | "und" | undefined = () => undefined,
   ) {
     if (intersectionOptions.threshold !== undefined) {
       if (intersectionOptions.threshold < 0 || intersectionOptions.threshold > 1) {
