@@ -137,27 +137,28 @@ describe("parseRemoteSiteRule", () => {
     ).toBeNull()
   })
 
-  it("refuses a url( split across a rule's CSS blocks", () => {
-    expect(
-      parseRemoteSiteRule(
-        {
-          id: "split",
-          matches: "x.test",
-          injectedCss: "input[value^=a]{background:\\75",
-          "injectedCss.add": ["rl(https://x.test/a)}"],
-        },
-        "1.0",
-      ),
-    ).toBeNull()
-  })
+  it.each(["input[value^=a]{background:\\75", "input[value^=a]{background:\\75\r"])(
+    "refuses a url( split across a rule's CSS blocks after %j",
+    (firstHalf) => {
+      expect(
+        parseRemoteSiteRule(
+          {
+            id: "split",
+            matches: "x.test",
+            injectedCss: firstHalf,
+            "injectedCss.add": ["rl(https://x.test/a)}"],
+          },
+          "1.0",
+        ),
+      ).toBeNull()
+    },
+  )
 })
 
 describe("remote rule CSS once joined for a page", () => {
-  it("cannot be split into a url( across two matching rules", () => {
-    const halves = ["input[value^=a]{background:\\75", "rl(https://x.test/a)}"]
-    // Joined the way resolveSiteRule joins them, the halves read as url(.
-    expect(isRemoteCssAllowed(halves.join("\n"))).toBe(false)
+  const SECOND_HALF = "rl(https://x.test/a)}"
 
+  function resolveTwoRules(firstHalf: string) {
     const selected = selectBuiltInSiteRules(
       [],
       {
@@ -165,15 +166,37 @@ describe("remote rule CSS once joined for a page", () => {
         revision: 1,
         extensionVersion: "1.0",
         rules: [
-          { id: "everywhere", matches: "<all_urls>", injectedCss: halves[0] },
-          { id: "site", matches: "x.test", injectedCss: halves[1] },
+          { id: "everywhere", matches: "<all_urls>", injectedCss: firstHalf },
+          { id: "site", matches: "x.test", injectedCss: SECOND_HALF },
         ],
       },
       "1.0",
     )
-    const resolved = resolveSiteRule("https://x.test/", selected, [], [])
+    return resolveSiteRule("https://x.test/", selected, [], [])
+  }
+
+  it.each([
+    "input[value^=a]{background:\\75",
+    // The CR and the joining LF read as one CR LF, which the escape takes.
+    "input[value^=a]{background:\\75\r",
+  ])("cannot be split into a url( across two matching rules after %j", (firstHalf) => {
+    // Joined the way resolveSiteRule joins them, the halves read as url(.
+    expect(isRemoteCssAllowed([firstHalf, SECOND_HALF].join("\n"))).toBe(false)
+
+    const resolved = resolveTwoRules(firstHalf)
 
     expect(resolved.matchedRuleIds).toEqual(["site"])
+    expect(isRemoteCssAllowed(resolved.injectedCss ?? "")).toBe(true)
+  })
+
+  it.each([
+    "input[value^=a]{background:\\75 ",
+    "input[value^=a]{background:\\75\r\n",
+    "input[value^=a]{background:\\75\f",
+  ])("keeps both rules when the escape ends inside its own block: %j", (firstHalf) => {
+    const resolved = resolveTwoRules(firstHalf)
+
+    expect(resolved.matchedRuleIds).toEqual(["everywhere", "site"])
     expect(isRemoteCssAllowed(resolved.injectedCss ?? "")).toBe(true)
   })
 })
@@ -187,6 +210,10 @@ describe("isRemoteCssAllowed", () => {
     // An escape finished by whitespace inside the block takes nothing from the join.
     ".a { x: \\75 }",
     ".a { x: y } \\75\r\n",
+    // An FF or a second CR is a newline of its own: the escape takes it and leaves
+    // the joining one.
+    ".a { x: y } \\75\f",
+    ".a { x: y } \\75\r\r",
     // An even run of backslashes is escaped backslashes, not an escape.
     ".a { x: y } \\\\75",
   ])("allows %s", (css) => {
@@ -212,6 +239,10 @@ describe("isRemoteCssAllowed", () => {
     "x: image-\\73",
     ".a { x: y } \\000075",
     ".a { x: y } \\\\\\75",
+    // So would one ending in the escape and a lone CR, which forms one CR LF with
+    // that newline.
+    ".a { background: \\75\r",
+    "@\\69\r",
     "@import 'https://x.test/x.css';",
     "@\\69mport 'x.css';",
     "@\\69\r\nmport 'x.css';",

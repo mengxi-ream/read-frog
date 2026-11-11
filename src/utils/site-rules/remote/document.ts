@@ -107,25 +107,28 @@ function decodeCssEscapes(css: string): string {
 
 // The CSS of every rule matching a page is joined with "\n" into one
 // stylesheet (see resolveSiteRule), and a hex escape also takes the whitespace
-// after it. A block ending in an unfinished hex escape would take that newline
-// and run into the next block, so `\75` then `rl(` would read as url(. An odd
-// run of backslashes before the digits makes an escape; an even run is
-// escaped backslashes.
-const DANGLING_HEX_ESCAPE_PATTERN = /(?:^|[^\\])(?:\\\\)*\\[\da-f]{1,6}$/i
+// after it. An escape that takes the joining newline runs into the next block,
+// so `\75` then `rl(` would read as url(. With that newline appended and
+// newlines normalized, such a block ends in the escape and a single LF: either
+// the escape ended the block, or a lone CR did and formed one CR LF with the
+// newline. An odd run of backslashes before the digits makes an escape; an even
+// run is escaped backslashes.
+const JOIN_TAKING_HEX_ESCAPE_PATTERN = /(?:^|[^\\])(?:\\\\)*\\[\da-f]{1,6}\n$/i
 
 /**
  * CSS from the document may not load anything. The signature keeps strangers
  * from publishing rules; this keeps even a leaked key from turning rule CSS
  * into a beacon or a reader of page attributes (`input[value^="a"]` with a
- * background URL). No built-in rule needs to load anything. Escapes are decoded
- * first, because `\75 rl(` is a `url(` as well, and no block may end in one,
- * because blocks are joined before the browser reads them.
+ * background URL). No built-in rule needs to load anything. Each block is read
+ * the way the browser reads it in the joined stylesheet: followed by the
+ * newline that joins it to the next block, which no escape may take, with
+ * newlines normalized and escapes decoded (`\75 rl(` is a `url(` as well).
  */
 export function isRemoteCssAllowed(css: string): boolean {
-  const normalized = normalizeCssNewlines(css)
+  const joined = normalizeCssNewlines(`${css}\n`)
   return (
-    !DANGLING_HEX_ESCAPE_PATTERN.test(normalized) &&
-    !LOADING_CSS_PATTERN.test(decodeCssEscapes(normalized))
+    !JOIN_TAKING_HEX_ESCAPE_PATTERN.test(joined) &&
+    !LOADING_CSS_PATTERN.test(decodeCssEscapes(joined))
   )
 }
 
