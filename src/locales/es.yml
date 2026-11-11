@@ -171,12 +171,14 @@ options:
         pdfTranslation: Traducción de PDF
     sponsorCta: Obtén IA rápida y rentable
     sponsorCtaJalapenoCloud: Obtén un 50 % de descuento en GLM 5.3
+    sponsorCtaIfapi: Regístrate y usa READFROG
     setApiKeyWarning:
       message: Configura tu clave de API en la página $1
     badges:
       featureCount: $1 funciones
       sponsor: Patrocinador
       sponsorJalapenoCloud: $$1 gratis
+      sponsorIfapi: +10 % de saldo
     dialog:
       title: Añadir nuevo proveedor
       groups:
@@ -269,6 +271,7 @@ options:
         xai: Empresa de AI de Elon Musk que ofrece modelos Grok con acceso a datos en tiempo real
         atlascloud: Plataforma unificada compatible con OpenAI para modelos recientes como DeepSeek, Kimi, Qwen, Doubao y GLM
         jalapenocloud: IA de nivel empresarial que utilizan los mejores equipos, ¡ahora para ti!
+        ifapi: GPT, Claude, Gemini y más, desde el 10 % del precio oficial
         siliconflow: Plataforma de inferencia de alto rendimiento para modelos chinos e internacionales
         tensdaq: Plataforma revolucionaria de pujas AI MaaS con precios impulsados por el mercado, que elimina los altos precios fijos
         openaiCompatible: Conecta un endpoint personalizado compatible con la API Chat Completions de OpenAI

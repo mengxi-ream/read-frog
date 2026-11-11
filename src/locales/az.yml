@@ -171,12 +171,14 @@ options:
         pdfTranslation: PDF tərcüməsi
     sponsorCta: Sürətli və sərfəli süni intellekt əldə et
     sponsorCtaJalapenoCloud: GLM 5.3 üçün 50% endirim əldə et
+    sponsorCtaIfapi: Qeydiyyat, READFROG kodu
     setApiKeyWarning:
       message: API açarını $1 səhifəsində təyin edin
     badges:
       featureCount: $1 funksiya
       sponsor: Dəstəkçi
       sponsorJalapenoCloud: $$1 hədiyyə
+      sponsorIfapi: +10% balans
     dialog:
       title: Yeni provayder əlavə et
       groups:
@@ -269,6 +271,7 @@ options:
         xai: Real vaxt məlumatlarına çıxışı olan Grok modellərini təqdim edən, Elon Musk tərəfindən qurulmuş süni intellekt şirkəti
         atlascloud: Yeni DeepSeek, Kimi, Qwen, Doubao, GLM və digər modellərə OpenAI ilə uyğun vahid çıxış
         jalapenocloud: Aparıcı komandaların istifadə etdiyi korporativ səviyyəli süni intellekt indi sizin üçün də əlçatandır!
+        ifapi: GPT, Claude, Gemini və digərləri, rəsmi qiymətin 10%-indən başlayaraq
         siliconflow: Çin və beynəlxalq modellər üçün yüksək məhsuldarlıqlı model icrası platforması
         tensdaq: Bazar əsasında qiymət qoyan, baha sabit tarifləri aradan qaldıran yenilikçi hərrac əsaslı süni intellekt MaaS platforması
         openaiCompatible: OpenAI Chat Completions API ilə uyğun fərdi xidmət ünvanına qoşulun

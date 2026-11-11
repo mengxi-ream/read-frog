@@ -91,6 +91,7 @@ describe("provider constants", () => {
     expect(OPENAI_COMPATIBLE_LLM_PROVIDER_TYPES).toEqual([
       "openai-compatible",
       "jalapenocloud",
+      "ifapi",
       "atlascloud",
       "openrouter",
       "minimax",
@@ -103,8 +104,8 @@ describe("provider constants", () => {
       "openai-compatible",
       "open-responses",
       "jalapenocloud",
+      "ifapi",
       "atlascloud",
-      "openrouter",
     ])
     expect(CUSTOM_MODEL_ONLY_PROVIDER_TYPES).toEqual(["openai-compatible", "open-responses"])
 

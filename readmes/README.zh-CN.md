@@ -310,6 +310,10 @@ ReadFrog 采用 GPLv3 和商业许可双重授权。
 
 [![Sponsors][sponsor-image]][sponsor-link]
 
+<a href="https://ifapi.org/?aff=readfrog&utm_source=readfrog&utm_medium=readme">
+  <img src="../assets/promotion/ifapi-zh.png" alt="IF API：一个 Key，用上主流大模型。陪读蛙用户首充加赠 10%，优惠码 READFROG">
+</a>
+
 <div align="right">
 
 [![Back to top][back-to-top]](#readme-top)

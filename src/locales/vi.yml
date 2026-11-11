@@ -171,12 +171,14 @@ options:
         pdfTranslation: Dịch PDF
     sponsorCta: Nhận AI nhanh, tiết kiệm chi phí
     sponsorCtaJalapenoCloud: Nhận ưu đãi giảm 50% GLM 5.3
+    sponsorCtaIfapi: Đăng ký, nhập mã READFROG
     setApiKeyWarning:
       message: Hãy đặt API Key ở trang $1
     badges:
       featureCount: $1 tính năng
       sponsor: Tài trợ
       sponsorJalapenoCloud: Miễn phí $$1
+      sponsorIfapi: Tặng thêm 10%
     dialog:
       title: Thêm nhà cung cấp mới
       groups:
@@ -268,6 +270,7 @@ options:
         xai: Công ty AI của Elon Musk cung cấp các mô hình Grok với truy cập dữ liệu thời gian thực
         atlascloud: Nền tảng hợp nhất tương thích OpenAI cho các mô hình mới như DeepSeek, Kimi, Qwen, Doubao và GLM
         jalapenocloud: AI cấp doanh nghiệp được các đội ngũ hàng đầu sử dụng, nay dành cho bạn!
+        ifapi: GPT, Claude, Gemini và nhiều mô hình khác, chỉ từ 10% giá chính thức
         siliconflow: Nền tảng suy luận hiệu suất cao cho các mô hình Trung Quốc và quốc tế
         tensdaq: Nền tảng MaaS đấu giá AI cách mạng với giá thị trường, loại bỏ giá cố định cao
         openaiCompatible: Kết nối với endpoint tùy chỉnh tương thích với OpenAI Chat Completions API
