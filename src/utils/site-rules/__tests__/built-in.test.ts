@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from "vitest"
+import { validateUserRulesDocument } from "@/entrypoints/options/pages/translation/translation-control/site-rules/validate-user-rules"
 import { siteRuleSchema } from "@/types/config/site-rules"
 import {
   STATE_MESSAGE_CLASS,
@@ -8,8 +9,9 @@ import {
   YOUTUBE_NATIVE_SUBTITLES_CLASS,
 } from "@/utils/constants/subtitles"
 import { normalizeUrlPattern } from "@/utils/url-pattern"
-import { BUILT_IN_SITE_RULES } from "../built-in"
+import { BUILT_IN_SITE_RULES, toBundledSiteRule } from "../built-in"
 import rawBuiltInRules from "../built-in/rules.json"
+import { parseRemoteSiteRule, remoteSiteRuleSchema } from "../remote/document"
 import { resolveSiteRule } from "../resolve"
 
 const RAW_BUILT_IN_SITE_RULES = rawBuiltInRules as unknown as Array<Record<string, unknown>>
@@ -129,14 +131,55 @@ describe("built-in site rules", () => {
   // stored config never fails to parse), which means a typo'd delta key in a
   // built-in rule — e.g. "dontWalkButTranslateTags.removee" — would pass the
   // schema sweep above and silently no-op at resolve time. Catch it here.
+  // `minExtensionVersion` is the one key beyond the schema (see the remote one).
   it("ships no keys outside the canonical schema", () => {
-    const knownKeys = new Set(Object.keys(siteRuleSchema.shape))
+    const knownKeys = new Set(Object.keys(remoteSiteRuleSchema.shape))
     const unknown = RAW_BUILT_IN_SITE_RULES.flatMap((rule) =>
       Object.keys(rule)
         .filter((key) => !knownKeys.has(key))
         .map((key) => `${String(rule.id)}: ${key}`),
     )
     expect(unknown).toEqual([])
+  })
+
+  // This file is also what installed extensions download. A rule this build
+  // would refuse there (unknown key, CSS that loads something) would silently
+  // fall back to its bundled copy on every install.
+  it("every rule is accepted as a remote rule by this build", () => {
+    const refused = RAW_BUILT_IN_SITE_RULES.filter(
+      (rule) => parseRemoteSiteRule(rule, "999.0.0") === null,
+    ).map((rule) => String(rule.id))
+    expect(refused).toEqual([])
+  })
+
+  // The options page copies a built-in rule as JSON, and the user rules editor
+  // refuses keys it does not know, so the bundled rules drop the version gate
+  // that only the published copy uses, as the remote parse does.
+  it("drops minExtensionVersion from bundled rules, so a copied rule pastes into user rules", () => {
+    const published = {
+      id: "needs-new-code",
+      matches: "example.com",
+      excludeSelectors: [".chrome"],
+      minExtensionVersion: "1.59.0",
+    }
+    expect(validateUserRulesDocument(JSON.stringify([published]))).toMatchObject({
+      ok: false,
+      kind: "schema",
+    })
+
+    const bundled = toBundledSiteRule(published)
+
+    expect(bundled).toEqual({
+      id: "needs-new-code",
+      matches: "example.com",
+      excludeSelectors: [".chrome"],
+    })
+    expect(bundled).toEqual(parseRemoteSiteRule(published, "1.59.0"))
+    expect(validateUserRulesDocument(JSON.stringify([bundled]))).toEqual({
+      ok: true,
+      rules: [bundled],
+    })
+    expect(BUILT_IN_SITE_RULES.filter((rule) => "minExtensionVersion" in rule)).toEqual([])
   })
 
   it("does not ship legacy force selector keys", () => {

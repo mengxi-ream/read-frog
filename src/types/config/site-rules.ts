@@ -2,8 +2,9 @@ import { z } from "zod"
 import { MAX_CUSTOM_CSS_LENGTH } from "./translate"
 
 /**
- * A per-site translation rule. Built-in rules ship with the extension and user
- * rules live in config; every rule whose `matches` hits the current URL applies.
+ * A per-site translation rule. Built-in rules ship with the extension (and
+ * update between releases, see utils/site-rules/remote) and user rules live in
+ * config; every rule whose `matches` hits the current URL applies.
  * Array fields are unioned across matching rules; scalar fields are last-wins
  * (user rules come after built-in rules, so user values take precedence).
  *

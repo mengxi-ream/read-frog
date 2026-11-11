@@ -1,19 +1,26 @@
 import type { ResolvedSiteRule } from "./resolve"
 import type { Config } from "@/types/config/config"
-import { BUILT_IN_SITE_RULES } from "./built-in"
+import type { SiteRule } from "@/types/config/site-rules"
+import { getActiveBuiltInSiteRules } from "./active"
 import { resolveSiteRule } from "./resolve"
 
 const cache = new WeakMap<
   Config,
-  { url: string; contentType: string | undefined; rule: ResolvedSiteRule }
+  {
+    url: string
+    contentType: string | undefined
+    builtInRules: SiteRule[]
+    rule: ResolvedSiteRule
+  }
 >()
 
 /**
  * Resolve the effective site rule for `url` under `config`, memoized on the
  * config object identity. Within one walk/translation batch the same config
  * object is threaded everywhere, so hot-path callers (per-element filters) get
- * an O(1) lookup; a fresh config fetch or an SPA navigation (new URL) misses
- * the cache and re-resolves naturally.
+ * an O(1) lookup; a fresh config fetch, an SPA navigation (new URL) or a
+ * remote rules update (new built-in rules array) misses the cache and
+ * re-resolves naturally.
  *
  * `contentType` is the document's MIME type, which rules declaring
  * `contentTypes` need. Callers without a document (the background, resolving a
@@ -25,8 +32,13 @@ export function getEffectiveSiteRule(
   url: string,
   contentType?: string,
 ): ResolvedSiteRule {
+  const builtInRules = getActiveBuiltInSiteRules()
   const cached = cache.get(config)
-  if (cached?.url === url && cached.contentType === contentType) {
+  if (
+    cached?.url === url &&
+    cached.contentType === contentType &&
+    cached.builtInRules === builtInRules
+  ) {
     return cached.rule
   }
 
@@ -34,12 +46,12 @@ export function getEffectiveSiteRule(
   // (upgrade window) and partial test fixtures.
   const rule = resolveSiteRule(
     url,
-    BUILT_IN_SITE_RULES,
+    builtInRules,
     config.siteRules?.userRules ?? [],
     config.siteRules?.disabledBuiltInRules ?? [],
     contentType,
   )
-  cache.set(config, { url, contentType, rule })
+  cache.set(config, { url, contentType, builtInRules, rule })
   return rule
 }
 
