@@ -1,5 +1,29 @@
 # @read-frog/extension
 
+## 1.59.0
+
+### Minor Changes
+
+- [#2489](https://github.com/mengxi-ream/read-frog/pull/2489) [`b52aae2`](https://github.com/mengxi-ream/read-frog/commit/b52aae2349d67198a1908c29b0397e94d140b661) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(languages): translate into European Portuguese. Portuguese is now listed as Brazilian Portuguese and European Portuguese. Existing Portuguese settings become Brazilian Portuguese, which DeepL is now asked for by name; to get European Portuguese from DeepL, pick European Portuguese
+
+- [#2490](https://github.com/mengxi-ream/read-frog/pull/2490) [`409b8ed`](https://github.com/mengxi-ream/read-frog/commit/409b8edb09d0e85253036b51001122367f81d9d4) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(site-rules): get site translation fixes without waiting for an extension update. Built-in site rules now update every six hours from rules.readfrog.app. Each update is signed and checked against what the installed version supports, and the rules bundled with the extension stay in use whenever an update is unavailable
+
+### Patch Changes
+
+- [#2479](https://github.com/mengxi-ream/read-frog/pull/2479) [`38e0091`](https://github.com/mengxi-ream/read-frog/commit/38e00917aa5c1b0646cbd0ab52a74394a2a4e67b) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(content): make page translation, the selection toolbar and the floating button work again in Chrome 130 and 131, where they had not loaded since 1.52.1
+
+- [#2489](https://github.com/mengxi-ream/read-frog/pull/2489) [`b52aae2`](https://github.com/mengxi-ream/read-frog/commit/b52aae2349d67198a1908c29b0397e94d140b661) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(languages): send each language to translation services under its own code. Cantonese is translated into Cantonese instead of Mandarin, Central Kurdish into Sorani instead of Kurmanji on Google, and Filipino works on Microsoft; 20 languages that failed on Google, and 6 on Microsoft, now translate. Malay translations run left to right, AI translation no longer asks for Malay in Arabic script or Azerbaijani, Uzbek and Bosnian in Cyrillic, and Albanian and Mongolian pages are recognized. Translations carry the language's full tag in their `lang` attribute (`zh-Hans`, `pt-BR`, `yue`) instead of a two-letter code, so custom CSS that matches `[lang="zh"]` should use `:lang(zh)`
+
+- [#2488](https://github.com/mengxi-ream/read-frog/pull/2488) [`70f1c5a`](https://github.com/mengxi-ream/read-frog/commit/70f1c5ac26a802999778c3b19bfaf3db99266459) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(site-rules): translate all of LowEndTalk, including the category and page descriptions, latest-post titles, search results and comment headers that the built-in rule had left in English
+
+- [#2482](https://github.com/mengxi-ream/read-frog/pull/2482) [`9abe9a7`](https://github.com/mengxi-ream/read-frog/commit/9abe9a7a1be9c273799b0ba72405bc2118232c7e) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(page-translation): translate Markdown files that the browser shows as plain text, such as a raw SKILL.md. Site rules can now target a kind of document with `contentTypes`, and every URL, local files included, with `<all_urls>`
+
+- [#2484](https://github.com/mengxi-ream/read-frog/pull/2484) [`df6aa54`](https://github.com/mengxi-ream/read-frog/commit/df6aa54bee4456549061f74359272cea4e0a2730) Thanks [@xuing](https://github.com/xuing)! - fix(context-menu): stop logging an uncaught "Receiving end does not exist" error when a context menu item is clicked on a page Read Frog cannot run on
+
+- [#2486](https://github.com/mengxi-ream/read-frog/pull/2486) [`b84bbc6`](https://github.com/mengxi-ream/read-frog/commit/b84bbc6ca6b6f5fcf016dc6dced2e57ce36c13ce) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(site-rules): translate the "For you" home feed on Threads when you are logged in. A site rule meant to skip Threads' nav items and like/reply counts also covered the container around the whole feed, so nothing on that page was translated
+
+- [#2487](https://github.com/mengxi-ream/read-frog/pull/2487) [`ee31f32`](https://github.com/mengxi-ream/read-frog/commit/ee31f322576fc09c943c5fdf803993b2a21f730c) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(site-rules): translate X posts when logged out and GitHub org repository descriptions
+
 ## 1.58.1
 
 ### Patch Changes
