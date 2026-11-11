@@ -1,5 +1,3 @@
-// @vitest-environment jsdom
-
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { NO_TRANSLATION_SENTINEL } from "@/utils/constants/prompt"
 import { sendMessage } from "@/utils/message"

@@ -1,4 +1,3 @@
-// @vitest-environment jsdom
 import { ORPCError } from "@orpc/client"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 

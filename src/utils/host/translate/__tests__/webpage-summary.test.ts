@@ -1,5 +1,3 @@
-// @vitest-environment jsdom
-
 import type { PromptableProviderRef } from "@/utils/providers/provider-ref"
 import { describe, expect, it, vi } from "vitest"
 

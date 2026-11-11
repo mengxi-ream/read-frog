@@ -1,4 +1,3 @@
-// @vitest-environment jsdom
 // oxlint-disable typescript/unbound-method -- Storage methods are arrow-function mocks.
 
 import type { Config } from "@/types/config/config"
