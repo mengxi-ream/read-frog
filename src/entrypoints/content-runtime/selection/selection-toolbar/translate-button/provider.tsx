@@ -580,6 +580,7 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
             <TranslationContent
               selectionContent={selectionText}
               translatedText={translatedText}
+              targetLanguage={translateRequest.language.targetCode}
               isTranslating={isTranslating}
               thinking={thinking}
             />

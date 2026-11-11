@@ -30,7 +30,8 @@ const {
   streamBackgroundTextMock: vi.fn<(...args: unknown[]) => Promise<{ output: string }>>(),
   executeTranslateMock: vi.fn<(...args: unknown[]) => Promise<string>>(),
   ttsAtom: {},
-  ttsPlayMock: vi.fn<(text: string, config: object) => Promise<void>>(),
+  ttsPlayMock:
+    vi.fn<(text: string, config: object, options?: { forcedVoice?: string }) => Promise<void>>(),
   ttsStopMock: vi.fn<() => void>(),
   providerRefState: { kind: "local" },
   mutationFnState: { current: null as null | ((request: unknown) => Promise<string | undefined>) },
@@ -41,6 +42,7 @@ const ttsConfig = vi.hoisted(() => ({ defaultVoice: "en-US-AriaNeural" }))
 
 interface UseMutationMockShape {
   data: string | undefined
+  variables?: { targetLanguage: string }
   isError: boolean
   isPending: boolean
   mutate: (request: unknown) => void
@@ -91,6 +93,7 @@ vi.mock("@/components/ui/base-ui/toast", () => ({
 }))
 
 vi.mock("@/hooks/use-text-to-speech", () => ({
+  selectTTSVoice: (_config: unknown, language: string) => `voice:${language}`,
   useTextToSpeech: () => ({
     play: ttsPlayMock,
     stop: ttsStopMock,
@@ -115,6 +118,7 @@ describe("TranslationCard speech", () => {
     ttsState.isPlaying = false
     useMutationMock.current = {
       data: "Translated text",
+      variables: { targetLanguage: "pt-PT" },
       isError: false,
       isPending: false,
       mutate: vi.fn<(request: unknown) => void>(),
@@ -122,7 +126,7 @@ describe("TranslationCard speech", () => {
     }
   })
 
-  it("plays the card's translated text using the configured voice settings", () => {
+  it("plays the card's translation with the voice for the language it was translated into", () => {
     render(
       <TranslationCard
         providerId="provider-1"
@@ -133,7 +137,9 @@ describe("TranslationCard speech", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "translationHub.speakTranslation" }))
 
-    expect(ttsPlayMock).toHaveBeenCalledWith("Translated text", ttsConfig)
+    expect(ttsPlayMock).toHaveBeenCalledWith("Translated text", ttsConfig, {
+      forcedVoice: "voice:pt-PT",
+    })
   })
 
   it("stops speech while audio is loading or playing", () => {
