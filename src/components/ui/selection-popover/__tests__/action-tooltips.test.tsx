@@ -10,9 +10,14 @@ import { CopyButton } from "../copy-button"
 import { ContextDetailsButton, RegenerateButton } from "../selection-toolbar-footer-content"
 import { SpeakButton } from "../speak-button"
 
+const { ttsPlayMock } = vi.hoisted(() => ({
+  ttsPlayMock: vi.fn<(...args: any[]) => any>(),
+}))
+
 vi.mock("@/hooks/use-text-to-speech", () => ({
+  selectTTSVoice: (_config: unknown, language: string) => `voice:${language}`,
   useTextToSpeech: () => ({
-    play: vi.fn<(...args: any[]) => any>(),
+    play: ttsPlayMock,
     stop: vi.fn<(...args: any[]) => any>(),
     isFetching: false,
     isPlaying: false,
@@ -145,6 +150,23 @@ describe("selection action tooltips", () => {
 
     expect(tooltip).toHaveTextContent("action.viewContextDetails")
     expect(positioner).toHaveClass("z-50")
+  })
+
+  it("speaks with the voice for the text's language when the caller knows it", () => {
+    const { container, unmount } = renderWithProviders(
+      <SpeakButton text="Bom dia" language="pt-PT" />,
+    )
+    fireEvent.click(container.querySelector("[data-slot='tooltip-trigger']")!)
+
+    expect(ttsPlayMock).toHaveBeenLastCalledWith("Bom dia", DEFAULT_CONFIG.tts, {
+      forcedVoice: "voice:pt-PT",
+    })
+
+    unmount()
+    const unknown = renderWithProviders(<SpeakButton text="Bom dia" />)
+    fireEvent.click(unknown.container.querySelector("[data-slot='tooltip-trigger']")!)
+
+    expect(ttsPlayMock).toHaveBeenLastCalledWith("Bom dia", DEFAULT_CONFIG.tts, undefined)
   })
 
   it("keeps the speak tooltip open after click", async () => {

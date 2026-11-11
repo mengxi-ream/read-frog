@@ -328,15 +328,18 @@ vi.mock("../translate-button/translation-content", () => ({
   TranslationContent: ({
     selectionContent,
     translatedText,
+    targetLanguage,
     isTranslating,
   }: {
     selectionContent: string | null | undefined
     translatedText: string | undefined
+    targetLanguage: string
     isTranslating: boolean
   }) => (
     <div data-testid="translation-content">
       <span data-testid="translation-selection">{selectionContent}</span>
       <span data-testid="translation-result">{translatedText ?? ""}</span>
+      <span data-testid="translation-language">{targetLanguage}</span>
       <span data-testid="translation-status">{String(isTranslating)}</span>
     </div>
   ),
@@ -726,6 +729,8 @@ describe("selection toolbar requests", () => {
     await waitFor(() => {
       expect(screen.getByTestId("translation-status").textContent).toBe("false")
     })
+    // Speaking the translation uses the voice for the language it is in.
+    expect(screen.getByTestId("translation-language").textContent).toBe("ja")
   })
 
   it("renders the translation tooltip as non-interactive and closes it on hover leave", async () => {
