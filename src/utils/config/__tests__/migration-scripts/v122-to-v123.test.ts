@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { configSchema } from "@/types/config/config"
+import { migrateConfig } from "../../migration"
 import { migrate } from "../../migration-scripts/v122-to-v123"
 import { testSeries as v122TestSeries } from "../example/v122"
 
@@ -104,18 +104,27 @@ describe("v122 to v123 migration", () => {
     expect(two.providersConfig.at(-1).name).toBe("IF API 2")
   })
 
-  it('keeps every v122 example valid when one of its cards is already named "IF API"', () => {
+  it('keeps every v122 example valid when one of its cards is already named "IF API"', async () => {
     // Duplicate names fail the schema, and a config that fails after migrating is replaced with
     // fresh defaults, so this is the difference between a new card and a wiped profile.
     for (const [seriesId, series] of Object.entries(v122TestSeries)) {
       const config = structuredClone(series.config)
       config.providersConfig.push(customCardNamed("IF API"))
-      const issuesBefore = configSchema.safeParse(config).error?.issues ?? []
-      expect({ seriesId, issues: issuesBefore }).toEqual({ seriesId, issues: [] })
+      const namesBefore = config.providersConfig.map((provider: any) => provider.name)
+      expect({ seriesId, unique: new Set(namesBefore).size === namesBefore.length }).toEqual({
+        seriesId,
+        unique: true,
+      })
 
-      const issuesAfter = configSchema.safeParse(migrate(config)).error?.issues ?? []
+      const migrated = migrate(config)
+      const ifapiNames = migrated.providersConfig
+        .map((provider: any) => provider.name)
+        .filter((name: string) => name.startsWith("IF API"))
+      expect({ seriesId, ifapiNames }).toEqual({ seriesId, ifapiNames: ["IF API", "IF API 1"] })
 
-      expect({ seriesId, issues: issuesAfter }).toEqual({ seriesId, issues: [] })
+      // Later migrations bring the rest of the config up to the current schema, and migrateConfig
+      // throws if the result still fails it — as a duplicate name would.
+      await expect(migrateConfig(migrated, 123)).resolves.toBeDefined()
     }
   })
 
