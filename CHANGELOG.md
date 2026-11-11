@@ -1,5 +1,11 @@
 # @read-frog/extension
 
+## 1.59.1
+
+### Patch Changes
+
+- [#2493](https://github.com/mengxi-ream/read-frog/pull/2493) [`b5bf671`](https://github.com/mengxi-ream/read-frog/commit/b5bf67197650750715d3f48de46c5c471d3396d3) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(tts): read translations aloud in the voice for the language they were translated into, in the selection toolbar and the Translation Hub. A European Portuguese translation no longer gets the Brazilian Portuguese voice, and a Cantonese one no longer gets a Mandarin voice
+
 ## 1.59.0
 
 ### Minor Changes
