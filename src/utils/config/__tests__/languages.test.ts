@@ -1,6 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_DETECTED_CODE } from "@/utils/constants/config"
-import { getDetectedCodeFromStorage, normalizeDetectedCode } from "../languages"
+import {
+  getDetectedCodeFromStorage,
+  normalizeDetectedCode,
+  normalizeLanguageConfig,
+} from "../languages"
 
 const { sendMessageMock } = vi.hoisted(() => ({
   sendMessageMock: vi.fn<(...args: any[]) => any>(),
@@ -40,5 +44,33 @@ describe("getDetectedCodeFromStorage", () => {
     sendMessageMock.mockRejectedValue(new Error("no receiver"))
 
     await expect(getDetectedCodeFromStorage()).resolves.toBe(DEFAULT_DETECTED_CODE)
+  })
+})
+
+describe("normalizeLanguageConfig", () => {
+  it("reads the codes a content script from before tags sends as their tags", () => {
+    expect(
+      normalizeLanguageConfig({
+        sourceCode: "eng",
+        targetCode: "cmn",
+        level: "intermediate",
+      } as never),
+    ).toEqual({ sourceCode: "en", targetCode: "zh-Hans", level: "intermediate" })
+  })
+
+  it("keeps tags and auto as they are", () => {
+    expect(
+      normalizeLanguageConfig({ sourceCode: "auto", targetCode: "pt-PT", level: "intermediate" }),
+    ).toEqual({ sourceCode: "auto", targetCode: "pt-PT", level: "intermediate" })
+  })
+
+  it("leaves a source it cannot read to detection", () => {
+    expect(
+      normalizeLanguageConfig({
+        sourceCode: "xx",
+        targetCode: "ja",
+        level: "intermediate",
+      } as never),
+    ).toEqual({ sourceCode: "auto", targetCode: "ja", level: "intermediate" })
   })
 })

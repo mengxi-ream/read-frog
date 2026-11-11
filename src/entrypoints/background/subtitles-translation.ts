@@ -1,4 +1,5 @@
 import type { SubtitlePromptContext } from "@/types/content"
+import { normalizeLanguageConfig } from "@/utils/config/languages"
 import { cleanText } from "@/utils/content/utils"
 import { db } from "@/utils/db/dexie/db"
 import { Sha256Hex } from "@/utils/hash"
@@ -23,7 +24,7 @@ export function setupSubtitlesTranslationHandlers(): void {
     const {
       data: {
         text,
-        langConfig,
+        langConfig: sentLangConfig,
         providerRef,
         scheduleAt,
         hash,
@@ -34,6 +35,7 @@ export function setupSubtitlesTranslationHandlers(): void {
         glossaryRevision,
       },
     } = message
+    const langConfig = normalizeLanguageConfig(sentLangConfig)
 
     if (hash) {
       const cached = await db.translationCache.get(hash)

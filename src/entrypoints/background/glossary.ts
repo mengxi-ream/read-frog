@@ -1,5 +1,6 @@
 import type { LanguageTag } from "@read-frog/definitions"
 import type { GlossarySnapshot } from "@/utils/glossary/active-matcher"
+import { resolveLanguage } from "@read-frog/definitions"
 import { setGlossarySnapshotLoader } from "@/utils/glossary/active-matcher"
 import {
   getGlossaryRevision,
@@ -50,7 +51,9 @@ export function setupGlossaryMessageHandlers() {
 
   onMessage("getGlossarySnapshot", async ({ data }): Promise<GlossarySnapshot> => {
     try {
-      return await readSnapshot(data.url, data.targetLang)
+      // A content script from before tags, still running after an update, sends
+      // an ISO 639-3 code, while the stored terms are keyed by tag now.
+      return await readSnapshot(data.url, resolveLanguage(data.targetLang) ?? data.targetLang)
     } catch (error) {
       logger.error("Failed to build glossary snapshot", error)
       return EMPTY_SNAPSHOT
