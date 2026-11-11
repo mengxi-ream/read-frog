@@ -6,7 +6,7 @@ import type {
   FeatureUsedEventProperties,
   SurfaceByFeature,
 } from "@/types/analytics"
-import { languageTagSchema, NOTE_SAVE_SURFACES } from "@read-frog/definitions"
+import { languageTagSchema, NOTE_SAVE_SURFACES, resolveLanguage } from "@read-frog/definitions"
 import { posthog } from "posthog-js/dist/module.no-external"
 import { match } from "ts-pattern"
 import { storage } from "#imports"
@@ -364,6 +364,18 @@ function isLanguageCode(value: unknown): value is LanguageTag {
   return languageTagSchema.safeParse(value).success
 }
 
+// A content script from before languages were keyed by tag reports ISO 639-3
+// codes (`eng`); read as their tags rather than dropping the event. Anything
+// that does not resolve stays as it is, and the checks below still refuse it.
+function withLanguageTags<T extends object>(properties: T): T {
+  const event = { ...properties } as Record<string, unknown>
+  for (const key of ["target_language", "source_language"]) {
+    const value = event[key]
+    if (typeof value === "string") event[key] = resolveLanguage(value) ?? value
+  }
+  return event as T
+}
+
 function isCharCount(value: unknown): value is number {
   return typeof value === "number" && Number.isInteger(value) && value >= 0
 }
@@ -413,7 +425,7 @@ function normalizeFeatureUsedEvent(
 
   // Unknown steps (e.g. from a newer content script) fall through to null at
   // runtime, while a step added to the types without a branch fails to compile.
-  return match(properties)
+  return match(withLanguageTags(properties))
     .with({ feature: "page_translation" }, (event) => {
       if (!isLanguageCode(event.target_language)) return null
       if (!translationModeSchema.safeParse(event.translation_mode).success) return null

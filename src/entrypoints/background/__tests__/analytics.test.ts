@@ -280,6 +280,31 @@ describe("background analytics", () => {
     })
   })
 
+  it("reads the ISO 639-3 codes an older content script reports as tags", async () => {
+    storageGetItemMock.mockResolvedValueOnce(true).mockResolvedValueOnce("install-123")
+
+    const { captureFeatureUsedEventInBackground } = createAnalytics()
+    await captureFeatureUsedEventInBackground({
+      feature: "page_translation",
+      surface: "popup",
+      outcome: "success",
+      latency_ms: 100,
+      ...PAGE_EVENT_FIELDS,
+      target_language: "cmn",
+      source_language: "jpn",
+    } as unknown as FeatureUsedEventProperties)
+
+    expect(posthogCaptureMock).toHaveBeenCalledWith("feature_used", {
+      feature: "page_translation",
+      surface: "popup",
+      outcome: "success",
+      latency_ms: 100,
+      ...PAGE_EVENT_FIELDS,
+      target_language: "zh-Hans",
+      source_language: "ja",
+    })
+  })
+
   it("drops properties that the reported feature does not define", async () => {
     storageGetItemMock.mockResolvedValueOnce(true).mockResolvedValueOnce("install-123")
 
