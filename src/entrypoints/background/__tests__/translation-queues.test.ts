@@ -1,6 +1,6 @@
 import type { ProviderConfig } from "@/types/config/provider"
 import type { MatchedTerm } from "@/utils/glossary/types"
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { BATCH_SEPARATOR, NO_TRANSLATION_SENTINEL } from "@/utils/constants/prompt"
 import { isTranslationCancelledError } from "@/utils/request/cancellation"
@@ -109,7 +109,27 @@ const deepLProvider: ProviderConfig = {
   apiKey: "test-key",
 }
 
+/**
+ * Settles `pending` under fake timers, fast-forwarding through the queues' retry
+ * backoff (1 s, 2 s, 4 s…) instead of sleeping it out. Steps in small increments
+ * so timers armed after a real async hop (hashing, mocked promises) still fire.
+ */
+async function fastForward<T>(pending: Promise<T>): Promise<T> {
+  const settled = pending.then(
+    () => true,
+    () => true,
+  )
+  while (!(await Promise.race([settled, Promise.resolve(false)]))) {
+    await vi.advanceTimersByTimeAsync(250)
+  }
+  return pending
+}
+
 describe("translation queue helpers", () => {
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
   beforeEach(() => {
     vi.resetModules()
     vi.clearAllMocks()
@@ -207,6 +227,7 @@ describe("translation queue helpers", () => {
   })
 
   it("reuses the hosted requestId when RequestQueue retries the same model call", async () => {
+    vi.useFakeTimers()
     runStreamTextInBackgroundMock
       .mockRejectedValueOnce(new Error("network error"))
       .mockResolvedValueOnce({
@@ -219,21 +240,23 @@ describe("translation queue helpers", () => {
     const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
 
     await expect(
-      handler({
-        data: {
-          text: "hello",
-          langConfig: DEFAULT_CONFIG.language,
-          providerRef: {
-            kind: "system",
-            providerId: "read-frog-free-ai",
-            modelTier: "normal",
-            modelRevision: "normal-r1",
+      fastForward(
+        handler({
+          data: {
+            text: "hello",
+            langConfig: DEFAULT_CONFIG.language,
+            providerRef: {
+              kind: "system",
+              providerId: "read-frog-free-ai",
+              modelTier: "normal",
+              modelRevision: "normal-r1",
+            },
+            scheduleAt: Date.now(),
+            hash: "hosted-retry-hash",
+            hostedFeature: "pageTranslation",
           },
-          scheduleAt: Date.now(),
-          hash: "hosted-retry-hash",
-          hostedFeature: "pageTranslation",
-        },
-      }),
+        }),
+      ),
     ).resolves.toBe("hosted translation")
 
     expect(runStreamTextInBackgroundMock).toHaveBeenCalledTimes(2)
@@ -643,6 +666,7 @@ describe("translation queue helpers", () => {
   })
 
   it("preserves the previous cache entry when forced translation fails", async () => {
+    vi.useFakeTimers()
     translationCacheGetMock.mockResolvedValue({
       key: "webpage-hash",
       translation: "still usable",
@@ -654,16 +678,18 @@ describe("translation queue helpers", () => {
     const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
 
     await expect(
-      handler({
-        data: {
-          text: "hello",
-          langConfig: DEFAULT_CONFIG.language,
-          providerRef: localProviderRef(googleProvider),
-          scheduleAt: Date.now(),
-          hash: "webpage-hash",
-          forceRetranslation: true,
-        },
-      }),
+      fastForward(
+        handler({
+          data: {
+            text: "hello",
+            langConfig: DEFAULT_CONFIG.language,
+            providerRef: localProviderRef(googleProvider),
+            scheduleAt: Date.now(),
+            hash: "webpage-hash",
+            forceRetranslation: true,
+          },
+        }),
+      ),
     ).rejects.toThrow("provider unavailable")
 
     expect(translationCacheGetMock).not.toHaveBeenCalled()
@@ -1597,6 +1623,7 @@ describe("translation queue helpers", () => {
 
   describe("glossary terms on the individual fallback", () => {
     it("sends each item's own terms when a batch exhausts its retries", async () => {
+      vi.useFakeTimers()
       ensureInitializedConfigMock.mockResolvedValue({
         ...DEFAULT_CONFIG,
         pageTranslation: {
@@ -1630,30 +1657,32 @@ describe("translation queue helpers", () => {
       setupPageTranslationHandlers()
       const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
 
-      const results = await Promise.all([
-        handler({
-          data: {
-            text: "alpha",
-            langConfig: DEFAULT_CONFIG.language,
-            providerRef: localProviderRef(llmProvider),
-            scheduleAt: Date.now(),
-            hash: "fallback-glossary-one",
-            glossaryTerms: [apiTerm],
-            glossaryRevision: 4,
-          },
-        }),
-        handler({
-          data: {
-            text: "beta",
-            langConfig: DEFAULT_CONFIG.language,
-            providerRef: localProviderRef(llmProvider),
-            scheduleAt: Date.now(),
-            hash: "fallback-glossary-two",
-            glossaryTerms: [queueTerm],
-            glossaryRevision: 4,
-          },
-        }),
-      ])
+      const results = await fastForward(
+        Promise.all([
+          handler({
+            data: {
+              text: "alpha",
+              langConfig: DEFAULT_CONFIG.language,
+              providerRef: localProviderRef(llmProvider),
+              scheduleAt: Date.now(),
+              hash: "fallback-glossary-one",
+              glossaryTerms: [apiTerm],
+              glossaryRevision: 4,
+            },
+          }),
+          handler({
+            data: {
+              text: "beta",
+              langConfig: DEFAULT_CONFIG.language,
+              providerRef: localProviderRef(llmProvider),
+              scheduleAt: Date.now(),
+              hash: "fallback-glossary-two",
+              glossaryTerms: [queueTerm],
+              glossaryRevision: 4,
+            },
+          }),
+        ]),
+      )
 
       expect(results).toEqual(["translated alpha", "translated beta"])
 
@@ -1675,7 +1704,7 @@ describe("translation queue helpers", () => {
       expect(optionsFor("alpha").glossaryTerms).toEqual([apiTerm])
       expect(optionsFor("beta").glossaryTerms).toEqual([queueTerm])
       expect(optionsFor("alpha").isBatch).toBeUndefined()
-    }, 15_000)
+    })
   })
 
   // The merge above runs BELOW the batch key, so it can only ever see members

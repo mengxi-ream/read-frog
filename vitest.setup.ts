@@ -1,5 +1,12 @@
 import { vi } from "vitest"
-import "@testing-library/jest-dom"
+
+// jest-dom's matchers only make sense against a DOM, and every file that uses them
+// declares the jsdom environment. Loading it (with @testing-library/dom, aria-query
+// and friends) costs every node-environment file a chunk of its setup time, so
+// only jsdom files pay for it.
+if (typeof document !== "undefined") {
+  await import("@testing-library/jest-dom/vitest")
+}
 
 // Keep test output quiet by default. Individual tests can still spy on these
 // methods when they need to assert logging behavior.
