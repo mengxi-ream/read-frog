@@ -1,5 +1,5 @@
 import type { LanguageTag } from "@read-frog/definitions"
-import { LANGUAGE_TAGS, languageTagSchema } from "@read-frog/definitions"
+import { LANGUAGE_TAGS, languageTagSchema, resolveLanguage } from "@read-frog/definitions"
 import { z } from "zod"
 
 export type TTSVoice = string
@@ -3241,9 +3241,34 @@ export const ttsRateSchema = z.coerce.number().int().min(MIN_TTS_RATE).max(MAX_T
 export const ttsPitchSchema = z.coerce.number().int().min(MIN_TTS_PITCH).max(MAX_TTS_PITCH)
 export const ttsVolumeSchema = z.coerce.number().int().min(MIN_TTS_VOLUME).max(MAX_TTS_VOLUME)
 
+const languageVoicesRecordSchema = z.record(languageTagSchema, ttsVoiceSchema)
+
+// A voice per language, every language present. A config from before tags is
+// keyed by ISO 639-3 codes and has no voice for European Portuguese until the
+// v121 → v122 migration runs; read with its keys as tags and the default voice
+// for a missing language, it still parses in a UI context that loads first.
+// The input type stays keyed by tag, as `storedLanguageTagSchema`'s does.
+const languageVoicesSchema = z.preprocess<
+  unknown,
+  typeof languageVoicesRecordSchema,
+  Record<LanguageTag, TTSVoice>
+>((value: unknown) => {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return value
+  const voices: Record<string, unknown> = {}
+  for (const [key, voice] of Object.entries(value)) {
+    const tag = resolveLanguage(key) ?? key
+    // A key already written as the tag wins over a code for the same language.
+    if (!Object.hasOwn(voices, tag) || key === tag) voices[tag] = voice
+  }
+  for (const tag of LANGUAGE_TAGS) {
+    if (!Object.hasOwn(voices, tag)) voices[tag] = getDefaultTTSVoiceForLanguage(tag)
+  }
+  return voices
+}, languageVoicesRecordSchema)
+
 export const ttsConfigSchema = z.object({
   defaultVoice: ttsVoiceSchema,
-  languageVoices: z.record(languageTagSchema, ttsVoiceSchema),
+  languageVoices: languageVoicesSchema,
   rate: ttsRateSchema,
   pitch: ttsPitchSchema,
   volume: ttsVolumeSchema,

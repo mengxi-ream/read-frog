@@ -1,4 +1,3 @@
-import { languageTagSchema } from "@read-frog/definitions"
 import { z } from "zod"
 import { DEFAULT_NODE_TRANSLATION_SHORTCUT_KEY, HOTKEYS } from "@/utils/constants/hotkeys"
 import {
@@ -18,6 +17,7 @@ import {
   MIN_WORDS_PER_NODE,
 } from "@/utils/constants/translate"
 import { TRANSLATION_NODE_STYLE } from "@/utils/constants/translation-node-style"
+import { storedLanguageTagSchema } from "./language-tag"
 import { shortcutSchema } from "./shortcut"
 
 export const requestQueueConfigSchema = z.object({
@@ -198,13 +198,13 @@ export const translateConfigSchema = z.object({
     translateTitle: z.boolean().default(true),
     autoTranslatePatterns: z.array(z.string()),
     neverAutoTranslatePatterns: z.array(z.string()),
-    autoTranslateLanguages: z.array(languageTagSchema),
+    autoTranslateLanguages: z.array(storedLanguageTagSchema),
     shortcut: shortcutSchema,
     preload: preloadConfigSchema,
     minCharactersPerNode: z.number().min(MIN_CHARACTERS_PER_NODE),
     minWordsPerNode: z.number().min(MIN_WORDS_PER_NODE),
     enableTargetLanguageSkip: z.boolean(),
-    skipLanguages: z.array(languageTagSchema),
+    skipLanguages: z.array(storedLanguageTagSchema),
   }),
   enableAIContentAware: z.boolean(),
   customPromptsConfig: customPromptsConfigSchema,
