@@ -4,7 +4,9 @@ import { addBackup, isSameAsLatestBackup } from "@/utils/backup/storage"
 import { EXTENSION_VERSION } from "@/utils/constants/app"
 import { BACKUP_INTERVAL_MINUTES } from "@/utils/constants/backup"
 import { CONFIG_SCHEMA_VERSION, CONFIG_STORAGE_KEY } from "@/utils/constants/config"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
+
+const log = createLogger("background/config-backup")
 
 const CONFIG_BACKUP_ALARM = "config-backup"
 
@@ -28,7 +30,7 @@ export function setUpConfigBackup() {
     }
   })
 
-  logger.info("Config auto-backup scheduled every", BACKUP_INTERVAL_MINUTES, "minutes")
+  log.debug("Config auto-backup scheduled", { intervalMinutes: BACKUP_INTERVAL_MINUTES })
 }
 
 async function performAutoBackup() {
@@ -37,20 +39,20 @@ async function performAutoBackup() {
     const config = await storage.getItem<Config>(`local:${CONFIG_STORAGE_KEY}`)
 
     if (!config) {
-      logger.warn("No config found to backup")
+      log.warn("No config found to backup")
       return
     }
 
     if (await isSameAsLatestBackup(config, CONFIG_SCHEMA_VERSION)) {
-      logger.info("Skipping backup: config is identical to latest backup")
+      log.debug("Skipping backup: config is identical to latest backup")
       return
     }
 
     // Add backup
     await addBackup(config, EXTENSION_VERSION)
 
-    logger.info("Auto backup completed successfully")
+    log.info("Auto backup completed successfully")
   } catch (error) {
-    logger.error("Failed to perform auto backup:", error)
+    log.error("Failed to perform auto backup", { error })
   }
 }

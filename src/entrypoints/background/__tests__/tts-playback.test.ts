@@ -2,7 +2,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 const onMessageMock = vi.fn<(...args: any[]) => any>()
 const sendMessageMock = vi.fn<(...args: any[]) => any>()
-const loggerWarnMock = vi.fn<(...args: any[]) => any>()
 const createObjectURLDescriptor = Object.getOwnPropertyDescriptor(URL, "createObjectURL")
 const revokeObjectURLDescriptor = Object.getOwnPropertyDescriptor(URL, "revokeObjectURL")
 
@@ -17,12 +16,6 @@ vi.mock("#imports", () => ({
 vi.mock("@/utils/message", () => ({
   onMessage: onMessageMock,
   sendMessage: sendMessageMock,
-}))
-
-vi.mock("@/utils/logger", () => ({
-  logger: {
-    warn: loggerWarnMock,
-  },
 }))
 
 function getRegisteredMessageHandler<TResult = unknown>(
@@ -168,6 +161,8 @@ describe("setupTTSPlaybackMessageHandlers", () => {
       throw new Error(`Unexpected message: ${type}`)
     })
 
+    // vi.resetModules() brings a fresh logger with the fresh module; capture that one.
+    const logs = (await import("@/utils/logging/testing")).captureLogs()
     const { setupTTSPlaybackMessageHandlers } = await import("../tts-playback")
     setupTTSPlaybackMessageHandlers()
     const startHandler = getRegisteredMessageHandler<{ ok: boolean }>("ttsPlaybackStart")
@@ -184,7 +179,7 @@ describe("setupTTSPlaybackMessageHandlers", () => {
     expect(
       sendMessageMock.mock.calls.filter((call) => call[0] === "ttsOffscreenPlay"),
     ).toHaveLength(2)
-    expect(loggerWarnMock).toHaveBeenCalled()
+    expect(logs.filter((record) => record.level === "warn")).not.toHaveLength(0)
   })
 
   it("uses offscreen playback whenever the offscreen API is available", async () => {

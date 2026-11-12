@@ -24,7 +24,7 @@ import { classifyFailureReason } from "@/utils/analytics-failure-reason"
 import { backgroundAuthClient } from "@/utils/auth/background-auth-client"
 import { getLocalConfig, setLocalConfig } from "@/utils/config/storage"
 import { patchSelectionToolbarAction } from "@/utils/custom-actions"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
 import { buildCustomActionOptionsRoute } from "@/utils/navigation"
 import { createNoteSaveCompletedEvent } from "@/utils/note-save/analytics"
 import {
@@ -58,6 +58,8 @@ import { backgroundOrpcClient } from "@/utils/orpc/background-client"
 import { captureFeatureUsedEventInBackground } from "./analytics"
 import { completeGuideDictionaryNotebaseAndNotify } from "./new-user-guide"
 
+const log = createLogger("background/notebase-pending-save")
+
 interface PendingNotebaseSaveProcessorDeps {
   waitUntilReady: () => Promise<void>
   getPendingNotebaseSave: () => Promise<PendingNotebaseSave | null>
@@ -75,7 +77,6 @@ interface PendingNotebaseSaveProcessorDeps {
   completeGuideDictionaryNotebase: (input: GuideDictionaryNotebaseCompletionInput) => Promise<void>
   reportNoteSave: (completion: NoteSaveCompletion) => void
   now: () => number
-  log: Pick<typeof logger, "info" | "warn" | "error">
 }
 
 type PendingProcessingStatus = PendingNotebaseSaveActionStatus | "expired" | "missing_config"
@@ -127,7 +128,7 @@ async function getAuthenticatedAccount() {
 
     return createNotebaseConnectedAccountSnapshot(session.user) ?? null
   } catch (error) {
-    logger.warn("[NotebasePendingSave] Failed to probe auth session", error)
+    log.warn("Failed to probe auth session", { error })
     return null
   }
 }
@@ -154,7 +155,7 @@ async function completeGuideDictionaryNotebaseIfNeeded(
       sourceUrl: tracking.sourceUrl,
     })
   } catch (error) {
-    deps.log.warn("[NotebasePendingSave] Failed to complete guide Dictionary Notebase flow", error)
+    log.warn("Failed to complete guide Dictionary Notebase flow", { error })
   }
 }
 
@@ -165,7 +166,7 @@ async function completePendingSave(
 ) {
   const config = await deps.getConfig()
   if (!config) {
-    deps.log.warn("[NotebasePendingSave] Config unavailable after create; keeping pending save")
+    log.warn("Config unavailable after create; keeping pending save")
     return false
   }
 
@@ -176,7 +177,7 @@ async function completePendingSave(
     await deps.clearPendingNotebaseSave()
     // The Notebase and its notes exist; only connecting the action failed.
     reportPendingSaveOutcome(deps, pendingNotebaseSave)
-    deps.log.info("[NotebasePendingSave] Cleared pending save before writing connection", {
+    log.info("Cleared pending save before writing connection", {
       status: applied.status,
       pendingId: pendingNotebaseSave.id,
     })
@@ -191,7 +192,7 @@ async function completePendingSave(
     pendingNotebaseSave,
     pendingNotebaseSave.notebaseId,
   )
-  deps.log.info("[NotebasePendingSave] Pending save completed", {
+  log.info("Pending save completed", {
     pendingId: pendingNotebaseSave.id,
     actionId: pendingNotebaseSave.actionId,
     notebaseId: pendingNotebaseSave.notebaseId,
@@ -200,7 +201,7 @@ async function completePendingSave(
   try {
     await deps.openNotebasePage(pendingNotebaseSave.notebaseId)
   } catch (error) {
-    deps.log.warn("[NotebasePendingSave] Failed to open Notebase detail page", error)
+    log.warn("Failed to open Notebase detail page", { error })
   }
 
   return true
@@ -214,19 +215,16 @@ async function tryDuplicateCreateRecovery(
   try {
     const schema = await deps.getSchema(pendingNotebaseSave.notebaseId)
     if (!doesSchemaMatchPendingColumns(schema, pendingNotebaseSave)) {
-      deps.log.warn(
-        "[NotebasePendingSave] Duplicate recovery schema did not match pending columns",
-        {
-          pendingId: pendingNotebaseSave.id,
-          notebaseId: pendingNotebaseSave.notebaseId,
-        },
-      )
+      log.warn("Duplicate recovery schema did not match pending columns", {
+        pendingId: pendingNotebaseSave.id,
+        notebaseId: pendingNotebaseSave.notebaseId,
+      })
       return false
     }
 
     return await completePendingSave(deps, pendingNotebaseSave, connectedAccount)
   } catch (error) {
-    deps.log.warn("[NotebasePendingSave] Duplicate recovery failed", error)
+    log.warn("Duplicate recovery failed", { error })
     return false
   }
 }
@@ -248,12 +246,6 @@ async function getPendingLocalValidationStatus<TPending extends PendingNotebaseS
   return validate(config, pendingNotebaseSave).status
 }
 
-function getPendingSaveLogSubject(pendingNotebaseSave: PendingNotebaseSave) {
-  return pendingNotebaseSave.kind === "save_to_connected_notebase"
-    ? "connected pending save"
-    : "pending save"
-}
-
 async function handlePendingLocalValidationFailure(
   deps: PendingNotebaseSaveProcessorDeps,
   pendingNotebaseSave: PendingNotebaseSave,
@@ -263,17 +255,18 @@ async function handlePendingLocalValidationFailure(
     return false
   }
 
-  const pendingSaveLogSubject = getPendingSaveLogSubject(pendingNotebaseSave)
   if (pendingStatus === "missing_config") {
-    deps.log.warn(`[NotebasePendingSave] Config unavailable; keeping ${pendingSaveLogSubject}`, {
+    log.warn("Config unavailable; keeping the pending save", {
       pendingId: pendingNotebaseSave.id,
+      kind: pendingNotebaseSave.kind,
     })
     return true
   }
 
   await deps.clearPendingNotebaseSave()
-  deps.log.info(`[NotebasePendingSave] Cleared invalid ${pendingSaveLogSubject}`, {
+  log.info("Cleared an invalid pending save", {
     pendingId: pendingNotebaseSave.id,
+    kind: pendingNotebaseSave.kind,
     status: pendingStatus,
   })
   return true
@@ -286,22 +279,17 @@ async function createReplacementNotebaseFromConnectedPending(
 ) {
   const config = await deps.getConfig()
   if (!config) {
-    deps.log.warn(
-      "[NotebasePendingSave] Config unavailable before replacement create; keeping pending save",
-    )
+    log.warn("Config unavailable before replacement create; keeping pending save")
     return false
   }
 
   const validation = validateStillCanSavePendingConnectedNotebaseSave(config, pendingNotebaseSave)
   if (validation.status !== "valid" || !validation.action) {
     await deps.clearPendingNotebaseSave()
-    deps.log.info(
-      "[NotebasePendingSave] Cleared connected pending save before replacement create",
-      {
-        pendingId: pendingNotebaseSave.id,
-        status: validation.status,
-      },
-    )
+    log.info("Cleared connected pending save before replacement create", {
+      pendingId: pendingNotebaseSave.id,
+      status: validation.status,
+    })
     return false
   }
 
@@ -324,37 +312,28 @@ async function createReplacementNotebaseFromConnectedPending(
     )
   } catch (error) {
     if (isORPCUnauthorizedError(error)) {
-      deps.log.info(
-        "[NotebasePendingSave] Auth disappeared during replacement create; keeping pending save",
-        {
-          pendingId: pendingNotebaseSave.id,
-        },
-      )
+      log.info("Auth disappeared during replacement create; keeping pending save", {
+        pendingId: pendingNotebaseSave.id,
+      })
       return false
     }
 
     if (shouldClearCreateError(error)) {
       await deps.clearPendingNotebaseSave()
       reportPendingSaveOutcome(deps, pendingNotebaseSave, error)
-      deps.log.warn(
-        "[NotebasePendingSave] Cleared connected pending save after unrecoverable replacement create error",
+      log.warn("Cleared connected pending save after unrecoverable replacement create error", {
         error,
-      )
+      })
       return false
     }
 
-    deps.log.warn(
-      "[NotebasePendingSave] Replacement create failed; keeping pending save until expiry",
-      error,
-    )
+    log.warn("Replacement create failed; keeping pending save until expiry", { error })
     return false
   }
 
   const latestConfig = await deps.getConfig()
   if (!latestConfig) {
-    deps.log.warn(
-      "[NotebasePendingSave] Config unavailable after replacement create; keeping pending save",
-    )
+    log.warn("Config unavailable after replacement create; keeping pending save")
     return false
   }
 
@@ -370,13 +349,10 @@ async function createReplacementNotebaseFromConnectedPending(
     await deps.clearPendingNotebaseSave()
     // The replacement Notebase and its notes exist; only connecting the action failed.
     reportPendingSaveOutcome(deps, pendingNotebaseSave)
-    deps.log.info(
-      "[NotebasePendingSave] Cleared connected pending save before writing replacement connection",
-      {
-        pendingId: pendingNotebaseSave.id,
-        status: applied.status,
-      },
-    )
+    log.info("Cleared connected pending save before writing replacement connection", {
+      pendingId: pendingNotebaseSave.id,
+      status: applied.status,
+    })
     return false
   }
 
@@ -388,19 +364,16 @@ async function createReplacementNotebaseFromConnectedPending(
     replacementPendingNotebaseSave,
     replacementPendingNotebaseSave.notebaseId,
   )
-  deps.log.info(
-    "[NotebasePendingSave] Connected pending save completed with replacement Notebase",
-    {
-      pendingId: pendingNotebaseSave.id,
-      actionId: pendingNotebaseSave.actionId,
-      notebaseId: replacementPendingNotebaseSave.notebaseId,
-    },
-  )
+  log.info("Connected pending save completed with replacement Notebase", {
+    pendingId: pendingNotebaseSave.id,
+    actionId: pendingNotebaseSave.actionId,
+    notebaseId: replacementPendingNotebaseSave.notebaseId,
+  })
 
   try {
     await deps.openNotebasePage(replacementPendingNotebaseSave.notebaseId)
   } catch (error) {
-    deps.log.warn("[NotebasePendingSave] Failed to open replacement Notebase detail page", error)
+    log.warn("Failed to open replacement Notebase detail page", { error })
   }
 
   return true
@@ -423,22 +396,18 @@ async function clearConnectedPendingAndOpenActionOptions(
   deps: PendingNotebaseSaveProcessorDeps,
   pendingNotebaseSave: PendingConnectedNotebaseSave,
   message: string,
-  details?: unknown,
 ) {
   await deps.clearPendingNotebaseSave()
-  deps.log.warn(
-    message,
-    details ?? {
-      pendingId: pendingNotebaseSave.id,
-      actionId: pendingNotebaseSave.actionId,
-      notebaseId: pendingNotebaseSave.connectionSnapshot.notebaseId,
-    },
-  )
+  log.warn(message, {
+    pendingId: pendingNotebaseSave.id,
+    actionId: pendingNotebaseSave.actionId,
+    notebaseId: pendingNotebaseSave.connectionSnapshot.notebaseId,
+  })
 
   try {
     await deps.openActionOptions(pendingNotebaseSave.actionId)
   } catch (error) {
-    deps.log.warn("[NotebasePendingSave] Failed to open action options", error)
+    log.warn("Failed to open action options", { error })
   }
 }
 
@@ -457,7 +426,7 @@ async function processCreatePendingSave(
 
   const connectedAccount = await deps.getAuthenticatedAccount()
   if (!connectedAccount) {
-    deps.log.info("[NotebasePendingSave] User is not authenticated; keeping pending save", {
+    log.info("User is not authenticated; keeping pending save", {
       pendingId: pendingNotebaseSave.id,
     })
     return
@@ -471,7 +440,7 @@ async function processCreatePendingSave(
     await completePendingSave(deps, pendingNotebaseSave, connectedAccount)
   } catch (error) {
     if (isORPCUnauthorizedError(error)) {
-      deps.log.info("[NotebasePendingSave] Auth disappeared during create; keeping pending save", {
+      log.info("Auth disappeared during create; keeping pending save", {
         pendingId: pendingNotebaseSave.id,
       })
       return
@@ -480,10 +449,7 @@ async function processCreatePendingSave(
     if (shouldClearCreateError(error)) {
       await deps.clearPendingNotebaseSave()
       reportPendingSaveOutcome(deps, pendingNotebaseSave, error)
-      deps.log.warn(
-        "[NotebasePendingSave] Cleared pending save after unrecoverable create error",
-        error,
-      )
+      log.warn("Cleared pending save after unrecoverable create error", { error })
       return
     }
 
@@ -491,7 +457,7 @@ async function processCreatePendingSave(
       return
     }
 
-    deps.log.warn("[NotebasePendingSave] Create failed; keeping pending save until expiry", error)
+    log.warn("Create failed; keeping pending save until expiry", { error })
   }
 }
 
@@ -510,12 +476,9 @@ async function processConnectedPendingSave(
 
   const connectedAccount = await deps.getAuthenticatedAccount()
   if (!connectedAccount) {
-    deps.log.info(
-      "[NotebasePendingSave] User is not authenticated; keeping connected pending save",
-      {
-        pendingId: pendingNotebaseSave.id,
-      },
-    )
+    log.info("User is not authenticated; keeping connected pending save", {
+      pendingId: pendingNotebaseSave.id,
+    })
     return
   }
 
@@ -524,29 +487,20 @@ async function processConnectedPendingSave(
     notebases = await deps.listNotebases()
   } catch (error) {
     if (isORPCUnauthorizedError(error)) {
-      deps.log.info(
-        "[NotebasePendingSave] Auth disappeared while listing Notebases; keeping connected pending save",
-        {
-          pendingId: pendingNotebaseSave.id,
-        },
-      )
+      log.info("Auth disappeared while listing Notebases; keeping connected pending save", {
+        pendingId: pendingNotebaseSave.id,
+      })
       return
     }
 
     if (isORPCForbiddenError(error)) {
       await deps.clearPendingNotebaseSave()
       reportPendingSaveOutcome(deps, pendingNotebaseSave, error)
-      deps.log.warn(
-        "[NotebasePendingSave] Cleared connected pending save after Notebase list permission error",
-        error,
-      )
+      log.warn("Cleared connected pending save after Notebase list permission error", { error })
       return
     }
 
-    deps.log.warn(
-      "[NotebasePendingSave] Failed to list Notebases; keeping connected pending save",
-      error,
-    )
+    log.warn("Failed to list Notebases; keeping connected pending save", { error })
     return
   }
 
@@ -566,12 +520,9 @@ async function processConnectedPendingSave(
     schema = await deps.getSchema(pendingNotebaseSave.connectionSnapshot.notebaseId)
   } catch (error) {
     if (isORPCUnauthorizedError(error)) {
-      deps.log.info(
-        "[NotebasePendingSave] Auth disappeared while loading connected schema; keeping pending save",
-        {
-          pendingId: pendingNotebaseSave.id,
-        },
-      )
+      log.info("Auth disappeared while loading connected schema; keeping pending save", {
+        pendingId: pendingNotebaseSave.id,
+      })
       return
     }
 
@@ -587,32 +538,24 @@ async function processConnectedPendingSave(
     if (isORPCForbiddenError(error)) {
       await deps.clearPendingNotebaseSave()
       reportPendingSaveOutcome(deps, pendingNotebaseSave, error)
-      deps.log.warn(
-        "[NotebasePendingSave] Cleared connected pending save after connected schema permission error",
-        error,
-      )
+      log.warn("Cleared connected pending save after connected schema permission error", { error })
       return
     }
 
-    deps.log.warn(
-      "[NotebasePendingSave] Failed to load connected schema; keeping pending save",
-      error,
-    )
+    log.warn("Failed to load connected schema; keeping pending save", { error })
     return
   }
 
   const config = await deps.getConfig()
   if (!config) {
-    deps.log.warn(
-      "[NotebasePendingSave] Config unavailable before connected row save; keeping pending save",
-    )
+    log.warn("Config unavailable before connected row save; keeping pending save")
     return
   }
 
   const validation = validateStillCanSavePendingConnectedNotebaseSave(config, pendingNotebaseSave)
   if (validation.status !== "valid" || !validation.action) {
     await deps.clearPendingNotebaseSave()
-    deps.log.info("[NotebasePendingSave] Cleared connected pending save before row save", {
+    log.info("Cleared connected pending save before row save", {
       pendingId: pendingNotebaseSave.id,
       status: validation.status,
     })
@@ -643,7 +586,7 @@ async function processConnectedPendingSave(
     await clearConnectedPendingAndOpenActionOptions(
       deps,
       pendingNotebaseSave,
-      "[NotebasePendingSave] Cleared connected pending save with invalid mappings",
+      "Cleared connected pending save with invalid mappings",
     )
     // Dropped like the server's validation error below, which retrying cannot fix either.
     reportPendingSaveOutcome(deps, pendingNotebaseSave, {
@@ -682,12 +625,9 @@ async function processConnectedPendingSave(
     }
   } catch (error) {
     if (isORPCUnauthorizedError(error)) {
-      deps.log.info(
-        "[NotebasePendingSave] Auth disappeared during connected row save; keeping pending save",
-        {
-          pendingId: pendingNotebaseSave.id,
-        },
-      )
+      log.info("Auth disappeared during connected row save; keeping pending save", {
+        pendingId: pendingNotebaseSave.id,
+      })
       return
     }
 
@@ -703,10 +643,7 @@ async function processConnectedPendingSave(
     if (isORPCForbiddenError(error)) {
       await deps.clearPendingNotebaseSave()
       reportPendingSaveOutcome(deps, pendingNotebaseSave, error)
-      deps.log.warn(
-        "[NotebasePendingSave] Cleared connected pending save after row permission error",
-        error,
-      )
+      log.warn("Cleared connected pending save after row permission error", { error })
       return
     }
 
@@ -716,17 +653,11 @@ async function processConnectedPendingSave(
     if (isORPCValidationError(error)) {
       await deps.clearPendingNotebaseSave()
       reportPendingSaveOutcome(deps, pendingNotebaseSave, error)
-      deps.log.warn(
-        "[NotebasePendingSave] Cleared connected pending save after the server rejected a cell",
-        error,
-      )
+      log.warn("Cleared connected pending save after the server rejected a cell", { error })
       return
     }
 
-    deps.log.warn(
-      "[NotebasePendingSave] Connected row save failed; keeping pending save until expiry",
-      error,
-    )
+    log.warn("Connected row save failed; keeping pending save until expiry", { error })
     return
   }
 
@@ -737,7 +668,7 @@ async function processConnectedPendingSave(
     pendingNotebaseSave,
     refreshedConnection.notebaseId,
   )
-  deps.log.info("[NotebasePendingSave] Connected pending row save completed", {
+  log.info("Connected pending row save completed", {
     pendingId: pendingNotebaseSave.id,
     actionId: pendingNotebaseSave.actionId,
     notebaseId: refreshedConnection.notebaseId,
@@ -746,7 +677,7 @@ async function processConnectedPendingSave(
   try {
     await deps.openNotebasePage(refreshedConnection.notebaseId)
   } catch (error) {
-    deps.log.warn("[NotebasePendingSave] Failed to open connected Notebase detail page", error)
+    log.warn("Failed to open connected Notebase detail page", { error })
   }
 }
 
@@ -755,7 +686,7 @@ export function createNotebasePendingSaveProcessor(deps: PendingNotebaseSaveProc
 
   return async function processPendingNotebaseSave(reason: string) {
     if (isProcessing) {
-      deps.log.info("[NotebasePendingSave] Skipping duplicate processor run", { reason })
+      log.info("Skipping duplicate processor run", { reason })
       return
     }
 
@@ -775,7 +706,7 @@ export function createNotebasePendingSaveProcessor(deps: PendingNotebaseSaveProc
 
       await processCreatePendingSave(deps, pendingNotebaseSave)
     } catch (error) {
-      deps.log.error("[NotebasePendingSave] Processor failed", error)
+      log.error("Processor failed", { error })
     } finally {
       isProcessing = false
     }
@@ -803,7 +734,7 @@ export function setupNotebasePendingSaveProcessor(waitUntilReady: () => Promise<
       void captureFeatureUsedEventInBackground(
         buildFeatureUsedEventProperties(createNoteSaveCompletedEvent(completion)),
       ).catch((error) => {
-        logger.warn("[NotebasePendingSave] Failed to report the save outcome", error)
+        log.warn("Failed to report the save outcome", { error })
       })
     },
     openNotebasePage: async (notebaseId) => {
@@ -821,7 +752,6 @@ export function setupNotebasePendingSaveProcessor(waitUntilReady: () => Promise<
       })
     },
     now: () => Date.now(),
-    log: logger,
   })
 
   void processPendingNotebaseSave("startup")

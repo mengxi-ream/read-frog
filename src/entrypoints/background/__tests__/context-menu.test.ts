@@ -2,7 +2,7 @@ import type { Config } from "@/types/config/config"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { browser, storage } from "#imports"
 import { i18n } from "@/utils/i18n"
-import { logger } from "@/utils/logger"
+import { captureLogs, loggedError, logRecord } from "@/utils/logging/testing"
 import {
   initializeContextMenu,
   MENU_ID_SELECTION_CUSTOM_ACTION_PREFIX,
@@ -277,7 +277,7 @@ describe("background context menu", () => {
   it("logs a warning when the clicked tab has no content script to receive the action", async () => {
     const noReceiver = new Error("Could not establish connection. Receiving end does not exist.")
     sendMessageMock.mockRejectedValue(noReceiver)
-    const warnSpy = vi.spyOn(logger, "warn").mockImplementation(() => {})
+    const logs = captureLogs()
     registerContextMenuListeners()
 
     const clickHandler = contextMenuClickListeners[0]
@@ -299,7 +299,11 @@ describe("background context menu", () => {
     await Promise.resolve()
 
     expect(sendMessageMock).toHaveBeenCalledTimes(5)
-    expect(warnSpy).toHaveBeenCalledTimes(5)
-    expect(warnSpy).toHaveBeenCalledWith(expect.any(String), noReceiver)
+    expect(logs).toHaveLength(5)
+    expect(logs).toContainEqual(
+      logRecord("warn", "Failed to deliver context menu action to the tab", {
+        error: loggedError(noReceiver.message),
+      }),
+    )
   })
 })

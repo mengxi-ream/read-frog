@@ -13,9 +13,12 @@ import {
 } from "@/components/ui/base-ui/alert-dialog"
 import { Button } from "@/components/ui/base-ui/button"
 import { i18n } from "@/utils/i18n"
+import { createLogger } from "@/utils/logging/logger"
 import { sendMessage } from "@/utils/message"
 import { ConfigItem } from "../../../components/config-item"
 import { ConfigSection } from "../../../components/config-section"
+
+const log = createLogger("options/pages/video-subtitles/cache")
 
 /** Segmentation results Read Frog keeps so a video it has cut before costs nothing to replay. */
 export function CacheSection() {
@@ -27,7 +30,7 @@ export function CacheSection() {
       setIsClearing(true)
       await sendMessage("clearAiSegmentationCache")
     } catch (error) {
-      console.error("Failed to clear AI segmentation cache:", error)
+      log.error("Failed to clear the AI segmentation cache", { error })
     } finally {
       setIsClearing(false)
       setOpen(false)

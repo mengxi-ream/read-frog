@@ -19,9 +19,12 @@ import type {
   TTSPlaybackStartResponse,
   TTSPlaybackStopRequest,
 } from "@/types/tts-playback"
+import type { DiagnosticsReport } from "@/utils/diagnostics/report"
 import type { GlossarySnapshot } from "@/utils/glossary/active-matcher"
 import type { MatchedTerm } from "@/utils/glossary/types"
 import type { HostedAiStatus } from "@/utils/hosted-ai/types"
+import type { LogRecord } from "@/utils/logging/logger"
+import type { ForwardingLogContext } from "@/utils/logging/stored-record"
 import type { PromptableProviderRef, SerializableProviderRef } from "@/utils/providers/provider-ref"
 import type { EdgeTTSVoice } from "@/utils/server/edge-tts/types"
 import { defineExtensionMessaging } from "@webext-core/messaging"
@@ -90,6 +93,8 @@ interface ProtocolMap {
     selectionText: string
   }) => void
   readAloudSelectionFromContextMenu: (data: { selectionText: string }) => void
+  // popup → the tab's top frame: open or close the "Diagnose this page" panel
+  togglePageTranslationDiagnostics: () => void
   // analytics
   trackFeatureUsedEvent: (data: FeatureUsedEventProperties) => void
   // user guide
@@ -187,6 +192,10 @@ interface ProtocolMap {
   getHostedAiStatus: () => Promise<HostedAiStatus | null>
   // network proxy
   backgroundFetch: (data: ProxyRequest) => Promise<ProxyResponse>
+  // local log — the background owns it; every other context hands it its
+  // records (utils/logging/sinks/forward.ts)
+  storeLogRecords: (data: { context: ForwardingLogContext; records: LogRecord[] }) => void
+  getDiagnosticsReport: () => Promise<DiagnosticsReport>
   // cache management
   clearAllTranslationRelatedCache: () => Promise<void>
   clearAiSegmentationCache: () => Promise<void>

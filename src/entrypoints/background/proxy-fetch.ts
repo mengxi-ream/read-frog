@@ -3,10 +3,12 @@ import { AUTH_COOKIE_PATTERNS } from "@read-frog/definitions"
 import { browser, storage } from "#imports"
 import { env } from "@/env"
 import { AUTH_CACHE_GROUP_KEY, DEFAULT_PROXY_CACHE_TTL_MS } from "@/utils/constants/proxy-fetch"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
 import { onMessage } from "@/utils/message"
 import { SessionCacheGroupRegistry } from "../../utils/session-cache/session-cache-group-registry"
 import { clearHostedAiStatusCache } from "./hosted-ai-status"
+
+const log = createLogger("background/proxy-fetch")
 
 // Last-seen auth cookie values, kept in session storage so the comparison
 // survives service-worker restarts (cleared with the browser session)
@@ -33,7 +35,7 @@ export function proxyFetch() {
 
   // Global cache invalidation function
   async function invalidateAllCache() {
-    logger.info("[ProxyFetch] Invalidating all cache")
+    log.debug("Invalidating all cache")
     await SessionCacheGroupRegistry.clearAllCacheGroup()
   }
 
@@ -90,17 +92,19 @@ export function proxyFetch() {
         await storage.setItem(AUTH_COOKIE_LAST_SEEN_KEY, lastSeen)
       } catch (error) {
         // Can't tell whether the token changed — invalidate to stay correct
-        logger.warn("[ProxyFetch] Could not read last-seen auth cookie state:", error)
+        log.warn("Could not read last-seen auth cookie state", { error })
       }
 
-      logger.info("[ProxyFetch] Auth cookie changed, invalidating auth cache:", {
-        cookieName: cookie.name,
+      // `name`, not `cookieName`: a key with "cookie" in it is redacted, and these
+      // names are fixed and public (the value is never logged).
+      log.info("Auth cookie changed, invalidating auth cache", {
+        name: cookie.name,
         domain: cookie.domain,
         removed,
         cause,
       })
       invalidateAuthCache().catch((error) =>
-        logger.error("[ProxyFetch] Failed to invalidate auth cache:", error),
+        log.error("Failed to invalidate auth cache", { error }),
       )
     })
   }
@@ -115,11 +119,11 @@ export function proxyFetch() {
     browser.permissions.onAdded.addListener((permissions) => {
       if (!permissions.origins?.length) return
 
-      logger.info("[ProxyFetch] Host permission granted, invalidating auth cache:", {
+      log.info("Host permission granted, invalidating auth cache", {
         origins: permissions.origins,
       })
       invalidateAuthCache().catch((error) =>
-        logger.error("[ProxyFetch] Failed to invalidate auth cache:", error),
+        log.error("Failed to invalidate auth cache", { error }),
       )
     })
   }
@@ -132,7 +136,7 @@ export function proxyFetch() {
 
   // Proxy cross-origin fetches for content scripts and other contexts
   onMessage("backgroundFetch", async (message): Promise<ProxyResponse> => {
-    logger.info("[ProxyFetch] Background fetch:", message.data)
+    log.debug("Background fetch", { data: message.data })
 
     const {
       url,
@@ -173,7 +177,7 @@ export function proxyFetch() {
     }
 
     async function invalidateCache(groupKey?: string): Promise<void> {
-      logger.info("[ProxyFetch] Invalidate cache:", { groupKey })
+      log.debug("Invalidate cache", { groupKey })
       if (groupKey) {
         const sessionCache = await getSessionCache(groupKey)
         await sessionCache.clear()
@@ -217,7 +221,7 @@ export function proxyFetch() {
       bodyEncoding: responseType,
     }
 
-    logger.info("[ProxyFetch] Response without cache:", result)
+    log.debug("Response without cache", { result })
 
     // Handle caching based on response
     if (cacheEnabled) {

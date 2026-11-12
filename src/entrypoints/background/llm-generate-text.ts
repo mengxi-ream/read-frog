@@ -3,9 +3,11 @@ import type {
   BackgroundGenerateTextResponse,
 } from "@/types/background-generate-text"
 import { validateProviderHostedFeature } from "@/utils/hosted-ai/routing"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
 import { onMessage } from "@/utils/message"
 import { generateTextForProviderRef } from "./background-stream"
+
+const log = createLogger("background/llm-generate-text")
 
 export async function runGenerateTextInBackground(
   payload: BackgroundGenerateTextPayload,
@@ -19,7 +21,7 @@ export function setupLLMGenerateTextMessageHandlers() {
     try {
       return await runGenerateTextInBackground(message.data)
     } catch (error) {
-      logger.error("[Background] backgroundGenerateText failed", error)
+      log.error("backgroundGenerateText failed", { error })
       throw error
     }
   })

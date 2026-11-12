@@ -12,7 +12,6 @@ const streamTextMock = vi.fn<(...args: any[]) => any>()
 const outputObjectMock = vi.fn<(...args: any[]) => any>((params: Record<string, unknown>) => params)
 const getModelByIdMock = vi.fn<(...args: any[]) => any>()
 const getLanguageModelForConfigMock = vi.fn<(...args: any[]) => any>()
-const loggerErrorMock = vi.fn<(...args: any[]) => any>()
 const hostedStreamTextMock = vi.fn<(...args: any[]) => any>()
 const hostedSelectionStreamTextMock = vi.fn<(...args: any[]) => any>()
 const hostedStreamStructuredObjectMock = vi.fn<(...args: any[]) => any>()
@@ -69,12 +68,6 @@ vi.mock("@/utils/orpc/background-client", () => ({
         streamStructuredObject: hostedNoteSuggestionStreamMock,
       },
     },
-  },
-}))
-
-vi.mock("@/utils/logger", () => ({
-  logger: {
-    error: loggerErrorMock,
   },
 }))
 
@@ -1156,6 +1149,8 @@ describe("background-stream", () => {
       }
     })
 
+    // vi.resetModules() brings a fresh logger with the fresh module; capture that one.
+    const logs = (await import("@/utils/logging/testing")).captureLogs()
     const { handleStreamTextPort } = await import("../background-stream")
     const mockPort = createMockPort("stream-text")
 
@@ -1177,7 +1172,7 @@ describe("background-stream", () => {
     await startPromise
 
     expect(streamSignal?.aborted).toBe(true)
-    expect(loggerErrorMock).not.toHaveBeenCalled()
+    expect(logs.filter((record) => record.level === "error")).toEqual([])
     expect(mockPort.postMessage).not.toHaveBeenCalledWith(
       expect.objectContaining({
         type: "error",

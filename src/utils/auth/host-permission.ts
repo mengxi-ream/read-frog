@@ -1,6 +1,8 @@
 import { browser } from "#imports"
 import { env } from "@/env"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
+
+const log = createLogger("auth/host-permission")
 
 function toOriginPattern(url: string): string {
   return `${new URL(url).origin}/*`
@@ -30,7 +32,7 @@ export async function hasAccountHostPermission(): Promise<boolean> {
   } catch (error) {
     // Can't tell. Assume granted: a probe failure turning every signed-out user
     // into a "grant access" prompt is worse than missing the real case.
-    logger.warn("[HostPermission] Could not read host permission state:", error)
+    log.warn("Could not read host permission state", { error })
     return true
   }
 }

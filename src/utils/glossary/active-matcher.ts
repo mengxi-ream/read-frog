@@ -1,10 +1,12 @@
 import type { LanguageTag } from "@read-frog/definitions"
 import type { GlossaryEntry, GlossaryMatcher, MatchedTerm } from "./types"
 import { storage } from "#imports"
+import { createLogger } from "@/utils/logging/logger"
 import { GLOSSARY_REVISION_KEY } from "../constants/glossary"
-import { logger } from "../logger"
 import { sendMessage } from "../message"
 import { createGlossaryMatcher } from "./matcher"
+
+const log = createLogger("glossary/active-matcher")
 
 export interface GlossarySnapshot {
   revision: number
@@ -149,7 +151,7 @@ function watchGlossaryRevision(): void {
   } catch (error) {
     // Never worth failing a translation over: the matcher is still correct, it
     // just will not notice an edit until the page reloads.
-    logger.warn("Could not watch the glossary revision", error)
+    log.warn("Could not watch the glossary revision", { error })
   }
 }
 
@@ -204,7 +206,7 @@ async function getActiveGlossary(targetLang: LanguageTag): Promise<ActiveGlossar
     } catch (error) {
       // A glossary that cannot be loaded must never fail a translation; the
       // page simply translates without it.
-      logger.warn("Failed to load glossary snapshot", error)
+      log.warn("Failed to load glossary snapshot", { error })
       // Revision 0 loses every conflict in `mergeBatchGlossaryTerms`, which is
       // exactly right: this context has no terms to contribute to one.
       return { matcher: createGlossaryMatcher([]), revision: 0 }

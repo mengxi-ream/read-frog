@@ -69,6 +69,7 @@ popup:
     emailUs: 電子郵件聯絡
     featureRequest: 功能建議
     bugReport: 回報問題
+    diagnosePage: "診斷此頁面"
     community: 社群
     joinDiscord: 加入 Discord
     joinWechat: 加入微信群
@@ -135,6 +136,13 @@ options:
     bugReport:
       title: 回報問題
       description: 建立支援工單，並追蹤到問題解決為止
+    troubleshooting:
+      title: "疑難排解"
+    diagnostics:
+      title: "匯出診斷資訊"
+      description: "儲存最近的日誌和設定（不含 API 金鑰），附在問題回報中"
+      exportSuccess: "診斷資訊已儲存"
+      exportFailed: "無法匯出診斷資訊"
     community:
       title: 社群
     discord:
@@ -1592,6 +1600,24 @@ translation:
   sameLanguage: 來源語言和目標語言必須不同
   autoModeSameLanguage: 偵測到的語言「$1」與目標語言相同
   extensionContextInvalidated: 擴充功能已更新，請重新整理此頁面後再試一次。
+pageDiagnosis:
+  title: "頁面診斷"
+  summary: "已翻譯 $1 段，未翻譯 $2 段"
+  empty: "目前沒有內容。請先開啟網頁翻譯，再開啟此面板。"
+  emptyWhileTranslating: "目前沒有內容。網頁翻譯處理到的段落會顯示在這裡。"
+  framesNotIncluded: "嵌入框架（iframe）中的文字不在此統計範圍內。"
+  hint: "點選原因，在頁面上框出對應段落。"
+  close: "關閉"
+  unavailable: "陪讀蛙無法在此頁面執行"
+  reasons:
+    noProse: "沒有可翻譯的文字"
+    tooShort: "太短，不翻譯"
+    targetLanguage: "已是目標語言"
+    skipLanguage: "屬於你設定略過的語言"
+    noTranslationNeeded: "AI 認為無需翻譯"
+    sameAsSource: "譯文與原文相同"
+    emptyResult: "翻譯服務沒有傳回內容"
+    error: "翻譯失敗"
 annotation:
   annotate: "劃詞標註"
   enterMode: "進入標註模式"

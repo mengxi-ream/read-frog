@@ -69,6 +69,7 @@ popup:
     emailUs: Escríbenos
     featureRequest: Sugerir una función
     bugReport: Informar de un fallo
+    diagnosePage: "Diagnosticar esta página"
     community: Comunidad
     joinDiscord: Unirse a Discord
     joinWechat: Unirse al grupo de WeChat
@@ -135,6 +136,13 @@ options:
     bugReport:
       title: Informar de un fallo
       description: Abre un ticket de soporte y síguelo hasta que se resuelva
+    troubleshooting:
+      title: "Solución de problemas"
+    diagnostics:
+      title: "Exportar diagnóstico"
+      description: "Guarda los registros recientes y tu configuración, sin las claves de API, para adjuntarlos a un informe de error"
+      exportSuccess: "Diagnóstico guardado"
+      exportFailed: "No se pudo exportar el diagnóstico"
     community:
       title: Comunidad
     discord:
@@ -1587,6 +1595,24 @@ translation:
   sameLanguage: Los idiomas de origen y destino deben ser diferentes
   autoModeSameLanguage: El idioma detectado '$1' es el mismo que el idioma de destino
   extensionContextInvalidated: La extensión se actualizó. Actualiza esta página e inténtalo de nuevo.
+pageDiagnosis:
+  title: "Diagnóstico de la página"
+  summary: "$1 traducidos, $2 sin traducir"
+  empty: "Aún no hay nada que mostrar. Activa la traducción de la página y vuelve a abrir esto."
+  emptyWhileTranslating: "Aún no hay nada que mostrar. Los párrafos aparecerán aquí a medida que la traducción de la página llegue a ellos."
+  framesNotIncluded: "El texto dentro de marcos incrustados no se incluye aquí."
+  hint: "Haz clic en un motivo para resaltar sus párrafos en la página."
+  close: "Cerrar"
+  unavailable: "Read Frog no puede ejecutarse en esta página"
+  reasons:
+    noProse: "No hay palabras que traducir"
+    tooShort: "Demasiado corto para traducir"
+    targetLanguage: "Ya está en tu idioma de destino"
+    skipLanguage: "En un idioma que omites"
+    noTranslationNeeded: "La IA indicó que no necesita traducción"
+    sameAsSource: "La traducción es igual al original"
+    emptyResult: "El servicio no devolvió nada"
+    error: "Error de traducción"
 annotation:
   annotate: "Anotar"
   enterMode: "Modo de anotación"

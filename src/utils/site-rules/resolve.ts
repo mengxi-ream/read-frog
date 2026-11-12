@@ -1,7 +1,9 @@
 import type { SiteRule } from "@/types/config/site-rules"
 import { DEFAULT_TAG_SETS } from "@/utils/constants/dom-rules"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
 import { urlMatchesPattern } from "@/utils/url-pattern"
+
+const log = createLogger("site-rules/resolve")
 
 /**
  * Whether one rule claims `url`: any of its `matches` hits, and none of its
@@ -145,7 +147,7 @@ function isValidSelector(selector: string): boolean {
       document.createDocumentFragment().querySelector(selector)
       valid = true
     } catch {
-      logger.warn(`[site-rules] Invalid CSS selector dropped: "${selector}"`)
+      log.warn("Invalid CSS selector dropped", { selector })
       valid = false
     }
     selectorValidity.set(selector, valid)
@@ -248,7 +250,7 @@ function mergeTagSetDelta(
       if (TAG_NAME_RE.test(trimmed)) {
         tagNames.push(trimmed)
       } else {
-        logger.warn(`[site-rules] Invalid tag name dropped: "${String(entry)}"`)
+        log.warn("Invalid tag name dropped", { entry })
       }
     }
     return tagNames
@@ -262,7 +264,7 @@ function mergeTagSetDelta(
     }
     for (const tagName of validTagNames(rule[removeKey])) {
       if (protectedTags?.has(tagName.toUpperCase())) {
-        logger.warn(`[site-rules] Protected tag cannot be removed: "${tagName}"`)
+        log.warn("Protected tag cannot be removed", { tagName })
         continue
       }
       merged.delete(tagName)

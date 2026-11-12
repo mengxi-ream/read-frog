@@ -1,6 +1,8 @@
 import { z } from "zod"
-import { logger } from "../logger"
+import { createLogger } from "@/utils/logging/logger"
 import { clearAccessToken, getValidAccessToken } from "./auth"
+
+const log = createLogger("google-drive/api")
 
 const GOOGLE_DRIVE_API_BASE = "https://www.googleapis.com/drive/v3"
 const GOOGLE_DRIVE_UPLOAD_API_BASE = "https://www.googleapis.com/upload/drive/v3"
@@ -70,7 +72,7 @@ export async function findFilesInAppData(
 
     return result.data.files
   } catch (error) {
-    logger.error("Failed to find files in appData", error)
+    log.error("Failed to find files in appData", { error })
     throw error
   }
 }
@@ -111,7 +113,7 @@ export async function downloadFile(fileId: string, token?: string): Promise<stri
 
     return await response.text()
   } catch (error) {
-    logger.error("Failed to download file", error)
+    log.error("Failed to download file", { error })
     throw error
   }
 }
@@ -173,7 +175,7 @@ export async function uploadFile(
 
     return result.data
   } catch (error) {
-    logger.error("Failed to upload file", error)
+    log.error("Failed to upload file", { error })
     throw error
   }
 }
@@ -198,7 +200,7 @@ export async function deleteFile(fileId: string): Promise<void> {
       throw new Error(`Failed to delete file: ${response.statusText}`)
     }
   } catch (error) {
-    logger.error("Failed to delete file", error)
+    log.error("Failed to delete file", { error })
     throw error
   }
 }

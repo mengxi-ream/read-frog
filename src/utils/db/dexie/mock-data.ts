@@ -4,8 +4,10 @@ import {
   REQUEST_RECORD_MAX_COUNT,
 } from "@/entrypoints/background/db-cleanup"
 import { LLM_PROVIDER_MODELS, LLM_PROVIDER_TYPES } from "@/types/config/provider"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
 import { db } from "./db"
+
+const log = createLogger("db/dexie/mock-data")
 
 export async function generateMockBatchRequestRecords(
   count = REQUEST_RECORD_MAX_COUNT,
@@ -25,7 +27,7 @@ export async function generateMockBatchRequestRecords(
   })
 
   await db.batchRequestRecord.bulkAdd(records)
-  logger.info(`✅ Generated ${count} mock batch request records`)
+  log.debug("Generated mock batch request records", { count })
 }
 
 /**
@@ -33,5 +35,5 @@ export async function generateMockBatchRequestRecords(
  */
 export async function clearMockData() {
   await db.batchRequestRecord.clear()
-  logger.info("🗑️  Cleared all batch request records")
+  log.debug("🗑️  Cleared all batch request records")
 }

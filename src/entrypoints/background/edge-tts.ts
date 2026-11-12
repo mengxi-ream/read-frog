@@ -1,10 +1,12 @@
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
 import { onMessage } from "@/utils/message"
 import {
   getEdgeTTSHealthStatus,
   listEdgeTTSVoices,
   synthesizeEdgeTTS,
 } from "@/utils/server/edge-tts"
+
+const log = createLogger("background/edge-tts")
 
 function arrayBufferToBase64(buffer: ArrayBuffer): string {
   const bytes = new Uint8Array(buffer)
@@ -19,7 +21,7 @@ export function setupEdgeTTSMessageHandlers() {
   onMessage("edgeTtsSynthesize", async (message) => {
     const response = await synthesizeEdgeTTS(message.data)
     if (!response.ok) {
-      logger.warn("[Background][EdgeTTS] synthesize failed:", response.error)
+      log.warn("[EdgeTTS] synthesize failed", { error: response.error })
       return response
     }
 

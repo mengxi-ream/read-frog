@@ -69,6 +69,7 @@ popup:
     emailUs: Написать нам
     featureRequest: Предложить функцию
     bugReport: Сообщить об ошибке
+    diagnosePage: "Диагностика страницы"
     community: Сообщество
     joinDiscord: Присоединиться к Discord
     joinWechat: Присоединиться к группе WeChat
@@ -135,6 +136,13 @@ options:
     bugReport:
       title: Сообщить об ошибке
       description: Создайте обращение в поддержку и следите за ним до решения
+    troubleshooting:
+      title: "Устранение неполадок"
+    diagnostics:
+      title: "Экспорт диагностики"
+      description: "Сохраните недавние журналы и настройки (без ключей API), чтобы приложить их к сообщению об ошибке"
+      exportSuccess: "Диагностика сохранена"
+      exportFailed: "Не удалось экспортировать диагностику"
     community:
       title: Сообщество
     discord:
@@ -1582,6 +1590,24 @@ translation:
   sameLanguage: Исходный и целевой языки должны различаться
   autoModeSameLanguage: Обнаруженный язык '$1' совпадает с целевым языком
   extensionContextInvalidated: Расширение обновлено. Обновите эту страницу и повторите попытку.
+pageDiagnosis:
+  title: "Диагностика страницы"
+  summary: "Переведено: $1, не переведено: $2"
+  empty: "Пока нечего показать. Включите перевод страницы и откройте это снова."
+  emptyWhileTranslating: "Пока нечего показать. Абзацы появятся здесь, когда до них дойдёт перевод страницы."
+  framesNotIncluded: "Текст во встроенных фреймах здесь не учитывается."
+  hint: "Нажмите на причину, чтобы выделить её абзацы на странице."
+  close: "Закрыть"
+  unavailable: "Read Frog не может работать на этой странице"
+  reasons:
+    noProse: "Нет слов для перевода"
+    tooShort: "Слишком коротко для перевода"
+    targetLanguage: "Уже на целевом языке"
+    skipLanguage: "На языке, который вы пропускаете"
+    noTranslationNeeded: "ИИ счёл, что перевод не нужен"
+    sameAsSource: "Перевод совпал с оригиналом"
+    emptyResult: "Сервис ничего не вернул"
+    error: "Ошибка перевода"
 annotation:
   annotate: "Аннотировать"
   enterMode: "Режим аннотаций"

@@ -6,15 +6,20 @@ import {
   PARTNER_BRIDGE_REQUEST_SOURCE,
   PARTNER_BRIDGE_RESPONSE_SOURCE,
 } from "@/utils/constants/partner-bridge"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
+import { setupContentScriptLogging } from "@/utils/logging/setup"
 import { sendMessage } from "@/utils/message"
 import { buildProviderTypeConfigRoute } from "@/utils/navigation"
+
+const log = createLogger("partner-bridge.content")
 
 const ALLOWED_ORIGINS = new Set<string>(PARTNER_BRIDGE_ORIGINS)
 
 export default defineContentScript({
   matches: PARTNER_BRIDGE_ORIGINS.map((origin) => `${origin}/*`),
   main() {
+    setupContentScriptLogging()
+
     window.addEventListener("message", (event) => {
       // `matches` already keeps this script off every other site, so these two checks are about
       // the page itself: they stop a cross-origin iframe embedded in the partner page from
@@ -27,7 +32,7 @@ export default defineContentScript({
       if (type !== PARTNER_BRIDGE_OPEN_PROVIDER_CONFIG) return
 
       if (typeof providerType !== "string" || !isAPIProvider(providerType)) {
-        logger.warn("[partner-bridge] ignored openProviderConfig for unknown provider type", {
+        log.warn("ignored openProviderConfig for unknown provider type", {
           providerType,
         })
         return

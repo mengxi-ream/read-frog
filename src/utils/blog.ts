@@ -6,8 +6,10 @@ import {
   latestBlogResponseSchema,
 } from "@read-frog/definitions"
 import { browser, storage } from "#imports"
-import { logger } from "./logger"
+import { createLogger } from "@/utils/logging/logger"
 import { sendMessage } from "./message"
+
+const log = createLogger("blog")
 
 const LAST_VIEWED_BLOG_DATE_KEY = "lastViewedBlogDate"
 const ONE_DAY_MS = 24 * 60 * 60 * 1000
@@ -174,7 +176,7 @@ export async function getLatestBlogDate(
 
     return latestBlogResponseSchema.parse(JSON.parse(response.body))
   } catch (error) {
-    logger.error("Error fetching latest blog post:", error)
+    log.error("Error fetching latest blog post", { error })
     return null
   }
 }

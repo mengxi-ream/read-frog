@@ -13,7 +13,7 @@ import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { resolveNoteSuggestionAction } from "@/utils/custom-actions"
 import { getOrCreateWebPageContext } from "@/utils/host/translate/webpage-context"
 import { getHostedAiTierStatus } from "@/utils/hosted-ai/status"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
 import { noteSuggestionEnvelopeSchema } from "@/utils/note-suggestion/types"
 import { validateNoteSuggestion } from "@/utils/note-suggestion/validate"
 import { resolveModelId } from "@/utils/providers/model-id"
@@ -21,6 +21,10 @@ import { getProviderOptionsWithOverride } from "@/utils/providers/options"
 import { fetchHostedAiStatus } from "@/utils/providers/provider-ref"
 import { getTopLevelReasoning } from "@/utils/providers/reasoning"
 import { buildNoteSuggestionPrompts } from "./prompt"
+
+const log = createLogger(
+  "content-runtime/selection/selection-toolbar/note-suggestion/use-note-suggestion",
+)
 
 export interface NoteSuggestionSessionResult {
   /** Composite key: popoverSessionKey:translateRequestKey:rerunNonce. */
@@ -148,10 +152,9 @@ export function useNoteSuggestion() {
         }
         const tierStatus = getHostedAiTierStatus(status, "noteSuggestion", provider.modelTier)
         if (tierStatus && !tierStatus.available) {
-          logger.info(
-            "[NoteSuggestion] Skipped: hosted tier unavailable",
-            tierStatus.unavailableReason,
-          )
+          log.debug("Skipped: hosted tier unavailable", {
+            unavailableReason: tierStatus.unavailableReason,
+          })
           completedSessionKeysRef.current.add(input.sessionKey)
           return
         }
@@ -222,7 +225,7 @@ export function useNoteSuggestion() {
         : null
 
       if (!validated) {
-        logger.info("[NoteSuggestion] Discarded schema/semantically invalid suggestion output")
+        log.info("Discarded schema/semantically invalid suggestion output")
         return
       }
 
@@ -246,12 +249,12 @@ export function useNoteSuggestion() {
         // treat it like an abort so it does not block a later attempt for
         // this session.
         if (error instanceof Error && error.message === STREAM_PORT_DISCONNECTED_MESSAGE) {
-          logger.info("[NoteSuggestion] Suggestion stream port disconnected", error)
+          log.debug("Suggestion stream port disconnected", { error })
           return
         }
 
         completedSessionKeysRef.current.add(input.sessionKey)
-        logger.info("[NoteSuggestion] Suggestion request failed", error)
+        log.warn("Suggestion request failed", { error })
       })
       .finally(() => {
         if (abortControllerRef.current === abortController) {

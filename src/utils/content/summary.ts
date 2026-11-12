@@ -1,10 +1,12 @@
 import type { BackgroundGenerateTextPayload } from "@/types/background-generate-text"
 import type { ProviderRequestRouting } from "@/types/hosted-request"
 import type { PromptableProviderRef } from "@/utils/providers/provider-ref"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
 import { getArticleSummaryPrompt } from "@/utils/prompts/summary"
 import { MAX_TEXT_LENGTH } from "./utils"
 import { cleanText } from "./utils"
+
+const log = createLogger("content/summary")
 
 /** The article title is untrusted page text; bound it like the body. */
 const MAX_TITLE_LENGTH = 200
@@ -53,11 +55,11 @@ export async function generateArticleSummary(
     const summary = await options.generate(payload, { signal: options.signal })
 
     const cleanedSummary = summary.trim()
-    logger.info("Generated article summary:", `${cleanedSummary.slice(0, 100)}...`)
+    log.debug("Generated article summary", { text: cleanedSummary })
 
     return cleanedSummary
   } catch (error) {
-    logger.error("Failed to generate article summary:", error)
+    log.error("Failed to generate article summary", { error })
     return null
   }
 }
