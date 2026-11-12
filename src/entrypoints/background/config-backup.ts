@@ -30,7 +30,7 @@ export function setUpConfigBackup() {
     }
   })
 
-  log.info("Config auto-backup scheduled", { intervalMinutes: BACKUP_INTERVAL_MINUTES })
+  log.debug("Config auto-backup scheduled", { intervalMinutes: BACKUP_INTERVAL_MINUTES })
 }
 
 async function performAutoBackup() {

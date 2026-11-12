@@ -25,9 +25,11 @@ import {
 
 const log = createLogger("background/translation-signal")
 
+// Tabs Read Frog does not run in (browser pages, the store) have no receiver,
+// so this failing is routine and kept out of the local log.
 function notifyPageTranslationStateChanged(tabId: number, enabled: boolean) {
   void sendMessage("notifyTranslationStateChanged", { enabled }, tabId).catch((error) =>
-    log.warn("Failed to notify page translation state change", { error }),
+    log.debug("Failed to notify page translation state change", { error }),
   )
 }
 
@@ -65,9 +67,10 @@ async function publishCachedDetectedCodeForTab(tabId: number): Promise<void> {
   notifyDetectedCodeChanged(await getDetectedCodeForTab(tabId))
 }
 
+// Sent to every tab that becomes active, including those with no receiver.
 function requestDetectedPageLanguageRefresh(tabId: number) {
   void sendMessage("refreshDetectedPageLanguage", undefined, tabId).catch((error) =>
-    log.warn("Failed to refresh detected page language", { error }),
+    log.debug("Failed to refresh detected page language", { error }),
   )
 }
 

@@ -121,9 +121,9 @@ function getRunText(nodes: readonly TransNode[]): string {
   return nodes.map((node) => node.textContent ?? "").join("")
 }
 
-/** The blank-line paragraphs of one container share it as their anchor. */
+/** The blank-line paragraphs of one container are outlined as the container. */
 function diagnoseVirtualParagraphUnit(layoutSource: HTMLElement, unit: VirtualParagraphUnit) {
-  return diagnoseParagraph(layoutSource, unit.text, `unit:${unit.id}`)
+  return diagnoseParagraph([layoutSource], unit.text, `unit:${unit.id}`)
 }
 
 async function filterVirtualParagraphUnits(
@@ -465,11 +465,11 @@ export async function translateNodesBilingualMode(
       : null
     const atomExtraction = preparePageTranslationSource(transNodes, config)
     if (!atomExtraction) {
-      diagnoseParagraph(transNodes[0]!, getRunText(transNodes)).untranslated("noProse")
+      diagnoseParagraph(transNodes, getRunText(transNodes)).untranslated("noProse")
       return
     }
     const requestText = atomExtraction.requestText
-    const diagnosis = diagnoseParagraph(transNodes[0]!, atomExtraction.filterText)
+    const diagnosis = diagnoseParagraph(transNodes, atomExtraction.filterText)
 
     let bilingualState: BilingualTranslationState | undefined
     if (isHTMLElement(layoutSource) && sourceTextBeforeFilter !== null) {
@@ -914,13 +914,18 @@ async function translateTranslationOnlyRun(
 
   let transNodes: TransNode[] = []
   let allChildNodes: ChildNode[] = []
+  // What the paragraph diagnosis outlines. A lone block is outlined as itself:
+  // the translation may displace its children.
+  let paragraphNodes: TransNode[]
   if (outerTransNodes.length === 1 && isHTMLElement(outerTransNodes[0]!)) {
     const unwrappedHTMLChild = unwrapDeepestOnlyHTMLChild(outerTransNodes[0], config)
     allChildNodes = [...unwrappedHTMLChild.childNodes]
     transNodes = allChildNodes.filter(isTransNodeAndNotTranslatedWrapper)
+    paragraphNodes = outerTransNodes
   } else {
     transNodes = outerTransNodes
     allChildNodes = nodes
+    paragraphNodes = transNodes
   }
 
   if (transNodes.length === 0) {
@@ -1016,10 +1021,10 @@ async function translateTranslationOnlyRun(
 
     const source = preparePageTranslationSource(transNodes, config)
     if (!source) {
-      diagnoseParagraph(transNodes[0]!, getRunText(transNodes)).untranslated("noProse")
+      diagnoseParagraph(paragraphNodes, getRunText(transNodes)).untranslated("noProse")
       return
     }
-    const diagnosis = diagnoseParagraph(transNodes[0]!, source.filterText)
+    const diagnosis = diagnoseParagraph(paragraphNodes, source.filterText)
     const skipReason = await getPageTranslationSkipReason(source.filterText, config)
     if (skipReason) {
       diagnosis.untranslated(skipReason)

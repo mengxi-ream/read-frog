@@ -292,7 +292,7 @@ async function createTranslationQueues<TContext>(config: TranslationQueueSetupCo
   const { promptResolver, isScopeCancelled, queueName, configSource } = config
   const queueLog = log.with({ queue: queueName })
 
-  queueLog.info("Queue initialized", {
+  queueLog.debug("Queue initialized", {
     rate,
     capacity,
     maxCharactersPerBatch,
@@ -459,7 +459,7 @@ function watchQueueConfig(
         requestQueue.setQueueOptions(selected.requestQueueConfig)
         batchQueue.setBatchConfig(selected.batchQueueConfig)
         lastAppliedJson = json
-        log.info("Queue config updated", { queue: queueName, selected })
+        log.debug("Queue config updated", { queue: queueName, selected })
       } catch (error) {
         log.error("Failed to apply a queue config change", { queue: queueName, error })
       }

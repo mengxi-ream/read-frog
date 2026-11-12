@@ -47,40 +47,77 @@ function useDiagnosedParagraphs(): DiagnosedParagraph[] {
   return getDiagnosedParagraphs()
 }
 
-// Outline keys follow the element, so a box keeps its node while the list changes.
-const outlineKeys = new WeakMap<Element, number>()
-let nextOutlineKey = 0
+/** Where a paragraph is drawn now: its element's box, or the box around its run of nodes. */
+function getParagraphRect({ first, last }: DiagnosedParagraph): DOMRect {
+  if (first === last && first.nodeType === Node.ELEMENT_NODE) {
+    return (first as Element).getBoundingClientRect()
+  }
+  const range = document.createRange()
+  range.setStartBefore(first)
+  range.setEndAfter(last)
+  // Collapsed whitespace at the edges of a run reports empty boxes that would stretch the outline.
+  const boxes = [...range.getClientRects()].filter((box) => box.width > 0 && box.height > 0)
+  if (boxes.length === 0) return range.getBoundingClientRect()
+  const left = Math.min(...boxes.map((box) => box.left))
+  const top = Math.min(...boxes.map((box) => box.top))
+  const right = Math.max(...boxes.map((box) => box.right))
+  const bottom = Math.max(...boxes.map((box) => box.bottom))
+  return new DOMRect(left, top, right - left, bottom - top)
+}
 
-function outlineKeyOf(element: Element): number {
-  let key = outlineKeys.get(element)
+function scrollToParagraph(paragraph: DiagnosedParagraph): void {
+  const { first, last } = paragraph
+  if (first === last && first.nodeType === Node.ELEMENT_NODE) {
+    ;(first as Element).scrollIntoView({ block: "center", behavior: "smooth" })
+    return
+  }
+  // A run of nodes has no element to scroll to; bring its box to the middle instead.
+  const rect = getParagraphRect(paragraph)
+  window.scrollBy({ top: rect.top + rect.height / 2 - window.innerHeight / 2, behavior: "smooth" })
+}
+
+// Outline keys follow the nodes, so a box keeps its DOM node while the list changes.
+const nodeKeys = new WeakMap<Node, number>()
+let nextNodeKey = 0
+
+function nodeKeyOf(node: Node): number {
+  let key = nodeKeys.get(node)
   if (key === undefined) {
-    key = nextOutlineKey++
-    outlineKeys.set(element, key)
+    key = nextNodeKey++
+    nodeKeys.set(node, key)
   }
   return key
 }
 
 interface Outline {
-  key: number
+  key: string
   rect: DOMRect
 }
 
 /** Boxes over the page's own paragraphs, so the page itself is never touched. */
-function ParagraphOutlines({ elements, color }: { elements: Element[]; color: string }) {
+function ParagraphOutlines({
+  paragraphs,
+  color,
+}: {
+  paragraphs: DiagnosedParagraph[]
+  color: string
+}) {
   const [outlines, setOutlines] = React.useState<Outline[]>([])
 
   React.useLayoutEffect(() => {
-    // Paragraphs split out of one container share it, and one box is enough.
-    const outlined = [...new Set(elements)].slice(0, MAX_OUTLINES)
+    // The paragraphs split out of one container are all outlined as it: one box is enough.
+    const outlined = [
+      ...new Map(
+        paragraphs.map((paragraph) => [
+          `${nodeKeyOf(paragraph.first)}:${nodeKeyOf(paragraph.last)}`,
+          paragraph,
+        ]),
+      ),
+    ].slice(0, MAX_OUTLINES)
     let frame: number | undefined
     const measure = () => {
       frame = undefined
-      setOutlines(
-        outlined.map((element) => ({
-          key: outlineKeyOf(element),
-          rect: element.getBoundingClientRect(),
-        })),
-      )
+      setOutlines(outlined.map(([key, paragraph]) => ({ key, rect: getParagraphRect(paragraph) })))
     }
     const scheduleMeasure = () => {
       frame ??= requestAnimationFrame(measure)
@@ -93,7 +130,7 @@ function ParagraphOutlines({ elements, color }: { elements: Element[]; color: st
       window.removeEventListener("resize", scheduleMeasure)
       if (frame !== undefined) cancelAnimationFrame(frame)
     }
-  }, [elements])
+  }, [paragraphs])
 
   return (
     <div aria-hidden className="pointer-events-none fixed inset-0" style={{ zIndex: TOP_LAYER }}>
@@ -139,24 +176,19 @@ export function PageDiagnosisPanel({ onClose }: { onClose: () => void }) {
   for (const { verdict } of paragraphs) counts.set(verdict, (counts.get(verdict) ?? 0) + 1)
   const translatedCount = counts.get("translated") ?? 0
   const reasons = UNTRANSLATED_REASONS.filter((reason) => counts.has(reason))
-  const outlinedElements = paragraphs
-    .filter(({ verdict }) => verdict === outlinedReason)
-    .map(({ element }) => element)
+  const outlinedParagraphs = paragraphs.filter(({ verdict }) => verdict === outlinedReason)
 
   const toggleOutline = (reason: UntranslatedReason) => {
     const next = outlinedReason === reason ? null : reason
     setOutlinedReason(next)
-    if (next) {
-      paragraphs
-        .find(({ verdict }) => verdict === next)
-        ?.element.scrollIntoView({ block: "center", behavior: "smooth" })
-    }
+    const firstOutlined = next && paragraphs.find(({ verdict }) => verdict === next)
+    if (firstOutlined) scrollToParagraph(firstOutlined)
   }
 
   return (
     <>
       {outlinedReason && (
-        <ParagraphOutlines elements={outlinedElements} color={REASON_COLORS[outlinedReason]} />
+        <ParagraphOutlines paragraphs={outlinedParagraphs} color={REASON_COLORS[outlinedReason]} />
       )}
       <aside
         aria-label={i18n.t("pageDiagnosis.title")}

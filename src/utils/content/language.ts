@@ -194,7 +194,7 @@ export async function detectLanguageWithLLM(
         const detectedCode = parseDetectedLanguageCode(response.text)
 
         if (detectedCode) {
-          log.info("LLM language detection succeeded", { attempt, detectedCode })
+          log.debug("LLM language detection succeeded", { attempt, detectedCode })
           return detectedCode
         }
         log.warn("LLM returned an invalid language code", { attempt, text: response.text })

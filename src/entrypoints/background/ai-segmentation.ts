@@ -103,7 +103,7 @@ export async function runAiSegmentSubtitles(data: AiSegmentSubtitlesData): Promi
       createdAt: new Date(),
     })
 
-    log.info("AI subtitle segmentation completed")
+    log.debug("AI subtitle segmentation completed")
     return result
   } catch (error) {
     log.error("AI subtitle segmentation failed", { error })

@@ -48,7 +48,8 @@ const SUMMARY_DELAY_MS = 10_000
 
 interface TrackedParagraph {
   // Weak: on an endless feed, the paragraphs the site throws away must not stay alive here.
-  element: WeakRef<Element>
+  first: WeakRef<Node>
+  last: WeakRef<Node>
   verdict: ParagraphVerdict
 }
 
@@ -105,22 +106,22 @@ function addToTotal(verdict: ParagraphVerdict, delta: number): void {
 }
 
 function record(
-  anchor: Node,
+  first: Node,
+  last: Node,
   part: string | undefined,
-  element: Element,
   text: string,
   verdict: ParagraphVerdict,
   fields: LogFields,
 ): void {
   const current = getCurrentSession()
-  const key = getParagraphKey(anchor, part)
+  const key = getParagraphKey(first, part)
 
   const previous = current.paragraphs.get(key)
   if (previous) {
     addToTotal(previous.verdict, -1)
     current.paragraphs.delete(key)
   }
-  current.paragraphs.set(key, { element: new WeakRef(element), verdict })
+  current.paragraphs.set(key, { first: new WeakRef(first), last: new WeakRef(last), verdict })
   addToTotal(verdict, 1)
   if (current.paragraphs.size > MAX_TRACKED_PARAGRAPHS) {
     current.paragraphs.delete(current.paragraphs.keys().next().value!)
@@ -142,20 +143,30 @@ function record(
   listeners.forEach((listener) => listener())
 }
 
+const IGNORED_DIAGNOSIS: ParagraphDiagnosis = { translated: () => {}, untranslated: () => {} }
+
 /**
- * Starts the record of one paragraph: `anchor` is its first node, and the
- * overlay outlines it, or the element around it when it is text. `part` tells
- * apart paragraphs that share an anchor, such as the blank-line paragraphs of
- * one pre-wrapped container. A later verdict for the same paragraph replaces
- * the earlier one.
+ * Starts the record of one paragraph: `nodes` is the run it is made of, which
+ * the overlay outlines, and `text` what a summary may quote of it. `part` tells
+ * apart paragraphs of one run, such as the blank-line paragraphs of one
+ * pre-wrapped container. A later verdict for the same paragraph replaces the
+ * earlier one. A run with no visible text, such as the whitespace between two
+ * blocks, is no paragraph to anyone reading the page and gets no verdict.
  */
-export function diagnoseParagraph(anchor: Node, text: string, part?: string): ParagraphDiagnosis {
-  const element = anchor.nodeType === Node.ELEMENT_NODE ? (anchor as Element) : anchor.parentElement
-  let settled = element === null
+export function diagnoseParagraph(
+  nodes: readonly Node[],
+  text: string,
+  part?: string,
+): ParagraphDiagnosis {
+  const first = nodes[0]
+  const last = nodes.at(-1)
+  if (!first || !last || !nodes.some((node) => node.textContent?.trim())) return IGNORED_DIAGNOSIS
+
+  let settled = false
   const settle = (verdict: ParagraphVerdict, fields: LogFields = {}) => {
     if (settled) return
     settled = true
-    record(anchor, part, element!, text, verdict, fields)
+    record(first, last, part, text, verdict, fields)
   }
   return {
     translated: () => settle("translated"),
@@ -203,19 +214,23 @@ export function logSessionSummary(): void {
 }
 
 export interface DiagnosedParagraph {
-  element: Element
+  key: string
   verdict: ParagraphVerdict
+  /** The first and last node of its run; the same element for a paragraph that is one. */
+  first: Node
+  last: Node
 }
 
 /** The paragraphs of the current session that are still on the page, with their latest verdict. */
 export function getDiagnosedParagraphs(): DiagnosedParagraph[] {
   const paragraphs: DiagnosedParagraph[] = []
-  for (const [key, { element: ref, verdict }] of session.paragraphs) {
-    const element = ref.deref()
-    if (!element) {
+  for (const [key, tracked] of session.paragraphs) {
+    const first = tracked.first.deref()
+    const last = tracked.last.deref()
+    if (!first || !last) {
       session.paragraphs.delete(key)
-    } else if (element.isConnected) {
-      paragraphs.push({ element, verdict })
+    } else if (first.isConnected && last.isConnected) {
+      paragraphs.push({ key, verdict: tracked.verdict, first, last })
     }
   }
   return paragraphs

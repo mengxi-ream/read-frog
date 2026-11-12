@@ -337,7 +337,7 @@ export class PageTranslationManager implements IPageTranslationManager {
 
   async start(analyticsContext?: FeatureUsageContext<"page_translation">): Promise<void> {
     if (this.isPageTranslating) {
-      log.info("Ignored a start: page translation is already on")
+      log.debug("Ignored a start: page translation is already on")
       return
     }
     if (this.pendingStart) {
@@ -609,7 +609,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     this.pendingStart = null
 
     if (!this.isPageTranslating) {
-      log.info("Ignored a stop: page translation is already off")
+      log.debug("Ignored a stop: page translation is already off")
       return
     }
 

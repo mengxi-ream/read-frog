@@ -19,7 +19,7 @@ function paragraph(text: string): HTMLParagraphElement {
 }
 
 function verdicts() {
-  return getDiagnosedParagraphs().map(({ element, verdict }) => [element.textContent, verdict])
+  return getDiagnosedParagraphs().map(({ first, verdict }) => [first.textContent, verdict])
 }
 
 describe("paragraph diagnosis", () => {
@@ -37,7 +37,7 @@ describe("paragraph diagnosis", () => {
 
   it("keeps the first verdict a paragraph gets", () => {
     const element = paragraph("Hello there")
-    const diagnosis = diagnoseParagraph(element, "Hello there")
+    const diagnosis = diagnoseParagraph([element], "Hello there")
 
     diagnosis.untranslated("noTranslationNeeded")
     diagnosis.untranslated("emptyResult")
@@ -49,8 +49,8 @@ describe("paragraph diagnosis", () => {
   it("replaces a paragraph's verdict when it is translated again", () => {
     const element = paragraph("Hello there")
 
-    diagnoseParagraph(element, "Hello there").untranslated("error")
-    diagnoseParagraph(element, "Hello there").translated()
+    diagnoseParagraph([element], "Hello there").untranslated("error")
+    diagnoseParagraph([element], "Hello there").translated()
 
     expect(verdicts()).toEqual([["Hello there", "translated"]])
   })
@@ -58,8 +58,8 @@ describe("paragraph diagnosis", () => {
   it("tells apart paragraphs that share an anchor", () => {
     const container = paragraph("First\n\nSecond")
 
-    diagnoseParagraph(container, "First", "unit:0").translated()
-    diagnoseParagraph(container, "Second", "unit:1").untranslated("tooShort")
+    diagnoseParagraph([container], "First", "unit:0").translated()
+    diagnoseParagraph([container], "Second", "unit:1").untranslated("tooShort")
 
     expect(getDiagnosedParagraphs().map(({ verdict }) => verdict)).toEqual([
       "translated",
@@ -67,15 +67,31 @@ describe("paragraph diagnosis", () => {
     ])
   })
 
-  it("outlines the element around a text anchor and skips paragraphs no longer on the page", () => {
-    const kept = paragraph("Kept text")
+  it("keeps the first and last node of a run, and skips paragraphs no longer on the page", () => {
+    const container = paragraph("")
+    container.innerHTML = "Kept <b>text</b> here"
+    const run = [...container.childNodes]
     const removed = paragraph("Removed text")
 
-    diagnoseParagraph(kept.firstChild!, "Kept text").translated()
-    diagnoseParagraph(removed, "Removed text").translated()
+    diagnoseParagraph(run, "Kept text here").translated()
+    diagnoseParagraph([removed], "Removed text").translated()
     removed.remove()
 
-    expect(getDiagnosedParagraphs()).toEqual([{ element: kept, verdict: "translated" }])
+    expect(getDiagnosedParagraphs()).toEqual([
+      { key: expect.any(String), verdict: "translated", first: run[0], last: run.at(-1) },
+    ])
+  })
+
+  it("gives a run with no visible text no verdict", () => {
+    const logs = captureLogs()
+    const gap = document.createTextNode("\n    ")
+    document.body.append(gap)
+
+    diagnoseParagraph([gap], "\n    ").untranslated("noProse")
+    vi.advanceTimersByTime(10_000)
+
+    expect(getDiagnosedParagraphs()).toEqual([])
+    expect(logs).toEqual([])
   })
 
   it("logs paragraphs that point at a problem, a few per reason", () => {
@@ -83,14 +99,14 @@ describe("paragraph diagnosis", () => {
     const error = new Error("429 Too Many Requests")
 
     for (let index = 0; index < 12; index++) {
-      diagnoseParagraph(paragraph(`Paragraph ${index}`), `Paragraph ${index}`).untranslated(
+      diagnoseParagraph([paragraph(`Paragraph ${index}`)], `Paragraph ${index}`).untranslated(
         "error",
         {
           error,
         },
       )
     }
-    diagnoseParagraph(paragraph("Short"), "Short").untranslated("tooShort")
+    diagnoseParagraph([paragraph("Short")], "Short").untranslated("tooShort")
 
     const warnings = logs.filter((record) => record.level === "warn")
     expect(warnings).toHaveLength(10)
@@ -106,8 +122,8 @@ describe("paragraph diagnosis", () => {
   it("logs a summary of the session once it goes quiet, and only when it changed", () => {
     const logs = captureLogs("info")
 
-    diagnoseParagraph(paragraph("One"), "One").translated()
-    diagnoseParagraph(paragraph("Two"), "Two").untranslated("noTranslationNeeded")
+    diagnoseParagraph([paragraph("One")], "One").translated()
+    diagnoseParagraph([paragraph("Two")], "Two").untranslated("noTranslationNeeded")
     expect(logs).toEqual([])
 
     vi.advanceTimersByTime(10_000)
@@ -124,11 +140,11 @@ describe("paragraph diagnosis", () => {
 
   it("closes the previous session's summary when a new session starts", () => {
     const logs = captureLogs("info")
-    diagnoseParagraph(paragraph("Old"), "Old").translated()
+    diagnoseParagraph([paragraph("Old")], "Old").translated()
 
     endPageTranslationSession()
     beginPageTranslationSession()
-    diagnoseParagraph(paragraph("New"), "New").untranslated("tooShort")
+    diagnoseParagraph([paragraph("New")], "New").untranslated("tooShort")
 
     expect(logs).toEqual([
       logRecord("info", "Page translation outcome", { counts: { translated: 1 } }),
@@ -140,9 +156,9 @@ describe("paragraph diagnosis", () => {
     const listener = vi.fn<() => void>()
     const unsubscribe = subscribeParagraphDiagnosis(listener)
 
-    diagnoseParagraph(paragraph("One"), "One").translated()
+    diagnoseParagraph([paragraph("One")], "One").translated()
     unsubscribe()
-    diagnoseParagraph(paragraph("Two"), "Two").translated()
+    diagnoseParagraph([paragraph("Two")], "Two").translated()
 
     expect(listener).toHaveBeenCalledTimes(1)
   })
@@ -153,7 +169,7 @@ describe("paragraph diagnosis", () => {
       ["the translation repeats the original", "Hello", "", "sameAsSource"],
       ["nothing came back", "", "", "emptyResult"],
     ])("records when %s", (_, returned, displayed, verdict) => {
-      const diagnosis = diagnoseParagraph(paragraph("Hello"), "Hello")
+      const diagnosis = diagnoseParagraph([paragraph("Hello")], "Hello")
 
       settleDisplayedTranslation(diagnosis, returned, displayed)
 
@@ -162,7 +178,7 @@ describe("paragraph diagnosis", () => {
 
     it("leaves a failed or abandoned request without a verdict", () => {
       settleDisplayedTranslation(
-        diagnoseParagraph(paragraph("Hello"), "Hello"),
+        diagnoseParagraph([paragraph("Hello")], "Hello"),
         undefined,
         undefined,
       )
@@ -171,7 +187,7 @@ describe("paragraph diagnosis", () => {
     })
 
     it("keeps the reason an earlier step gave for an empty answer", () => {
-      const diagnosis = diagnoseParagraph(paragraph("Hello"), "Hello")
+      const diagnosis = diagnoseParagraph([paragraph("Hello")], "Hello")
       diagnosis.untranslated("skipLanguage")
 
       settleDisplayedTranslation(diagnosis, "", "")
