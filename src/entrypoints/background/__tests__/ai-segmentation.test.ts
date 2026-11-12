@@ -19,13 +19,6 @@ vi.mock("@/utils/db/dexie/db", () => ({
   },
 }))
 
-vi.mock("@/utils/logger", () => ({
-  logger: {
-    info: vi.fn<(...args: any[]) => any>(),
-    error: vi.fn<(...args: any[]) => any>(),
-  },
-}))
-
 // The trust-boundary guard is real here, so the fixture must name a provider
 // that actually has a model to prompt.
 const providerRef = {

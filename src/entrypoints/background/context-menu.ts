@@ -17,10 +17,12 @@ import {
   MENU_ID_TRANSLATE,
 } from "@/utils/context-menu"
 import { i18n } from "@/utils/i18n"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
 import { sendMessage } from "@/utils/message"
 import { ensureInitializedConfig } from "./config"
 import { getPageTranslationEnabled, setPageTranslationEnabled } from "./page-translation-state"
+
+const log = createLogger("background/context-menu")
 
 /**
  * Register all context menu event listeners synchronously
@@ -185,7 +187,7 @@ async function handleContextMenuClick(
  * browser page, the Web Store, or a tab left open across an extension update.
  */
 function warnMenuActionNotDelivered(error: unknown) {
-  logger.warn("Failed to deliver context menu action to the tab", error)
+  log.warn("Failed to deliver context menu action to the tab", { error })
 }
 
 /**

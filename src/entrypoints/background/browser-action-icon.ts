@@ -4,12 +4,14 @@ import {
   parseTabIdFromStorageKey,
   TRANSLATION_STATE_KEY_PREFIX,
 } from "@/utils/constants/storage-keys"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
 import {
   getPageTranslationEnabled,
   getPageTranslationState,
   isPageTranslationStateInUrlScope,
 } from "./page-translation-state"
+
+const log = createLogger("background/browser-action-icon")
 
 type ActionIconSize = 16 | 32 | 48
 type ActionIconPathMap = Record<ActionIconSize, string>
@@ -63,7 +65,7 @@ export function registerActionIconListeners() {
         isPageTranslationStateInUrlScope(state, details.url),
       )
     } catch (error) {
-      logger.warn("Failed to restore action icon after navigation", {
+      log.warn("Failed to restore action icon after navigation", {
         error,
         tabId: details.tabId,
       })
@@ -83,7 +85,7 @@ export async function initializeActionIcons() {
       try {
         await updateActionIconForPageTranslation(tab.id, await getPageTranslationEnabled(tab.id))
       } catch (error) {
-        logger.warn("Failed to initialize action icon for tab", { error, tabId: tab.id })
+        log.warn("Failed to initialize action icon for tab", { error, tabId: tab.id })
       }
     }),
   )

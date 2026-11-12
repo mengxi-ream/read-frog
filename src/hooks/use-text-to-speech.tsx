@@ -16,9 +16,11 @@ import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { detectLanguage } from "@/utils/content/language"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { i18n } from "@/utils/i18n"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
 import { sendMessage } from "@/utils/message"
 import { splitTextByUtf8Bytes } from "@/utils/server/edge-tts/chunk"
+
+const log = createLogger("use-text-to-speech")
 
 interface PlayAudioParams {
   text: string
@@ -67,7 +69,7 @@ async function resolveVoiceForText(
   forcedVoice?: string,
 ): Promise<string> {
   if (forcedVoice) {
-    logger.info("[TextToSpeech] Using forced voice for text", {
+    log.debug("Using forced voice for text", {
       text,
       forcedVoice,
     })
@@ -81,7 +83,7 @@ async function resolveVoiceForText(
     // what happened and how to choose a working detection mode.
     llmFallbackToastContext: "speak",
   })
-  logger.info("[TextToSpeech] Resolving voice for text", {
+  log.debug("Resolving voice for text", {
     text,
     detectedLanguage,
     enableLLM,
@@ -234,7 +236,7 @@ export function useTextToSpeech(
     }
 
     const fetchChunkAudio = async (chunk: string) => {
-      logger.info("[TextToSpeech] Fetching chunk audio", {
+      log.debug("Fetching chunk audio", {
         text: chunk,
         voice: selectedVoice,
         rate: ttsConfig.rate,

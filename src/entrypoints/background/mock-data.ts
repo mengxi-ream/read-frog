@@ -1,6 +1,8 @@
 import { db } from "@/utils/db/dexie/db"
 import { generateMockBatchRequestRecords } from "@/utils/db/dexie/mock-data"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
+
+const log = createLogger("background/mock-data")
 
 /**
  * Initialize mock data for development
@@ -10,17 +12,17 @@ export async function initMockData() {
   if (import.meta.env.DEV && import.meta.env.WXT_MOCK_DATA === "true") {
     const existingCount = await db.batchRequestRecord.count()
     if (existingCount > 0) {
-      logger.info(`[Mock Data] Skipping initialization - ${existingCount} records already exist`)
+      log.debug("Skipping mock data: records already exist", { existingCount })
       return
     }
 
-    logger.info("[Mock Data] Initializing mock batch request records...")
+    log.debug("Initializing mock batch request records...")
     generateMockBatchRequestRecords()
       .then(() => {
-        logger.info("[Mock Data] Mock data generation completed")
+        log.debug("Mock data generation completed")
       })
       .catch((error) => {
-        logger.error("[Mock Data] Failed to generate mock data:", error)
+        log.error("Failed to generate mock data", { error })
       })
   }
 }

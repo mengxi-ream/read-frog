@@ -10,8 +10,11 @@ import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { INPUT_REPLACE_REQUEST_TYPE } from "@/utils/constants/input-injector"
 import { getDeepActiveElement } from "@/utils/dom/active-element"
 import { translateTextForInput } from "@/utils/host/translate/translate-variants"
+import { createLogger } from "@/utils/logging/logger"
 import { HostedAiProviderUnavailableError } from "@/utils/providers/provider-ref"
 import { resolveProviderRefForCapability } from "@/utils/providers/provider-registry"
+
+const log = createLogger("selection/input-translation")
 
 const SPACE_KEY = " "
 const TRIGGER_COUNT = 3
@@ -255,7 +258,7 @@ export function useInputTranslation() {
             id: HOSTED_UNAVAILABLE_TOAST_ID,
           })
         }
-        console.error("Input translation error:", error)
+        log.error("Input translation failed", { error })
       } finally {
         hideSpinner()
         isTranslatingRef.current = false

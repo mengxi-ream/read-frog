@@ -1,5 +1,5 @@
 import { browser } from "#imports"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
 import {
   MAX_REMOTE_SITE_RULES_LENGTH,
   REMOTE_SITE_RULES_ENABLED,
@@ -15,6 +15,8 @@ import {
   getStoredRemoteSiteRules,
   setStoredRemoteSiteRules,
 } from "@/utils/site-rules/remote/storage"
+
+const log = createLogger("background/site-rules-update")
 
 export const SITE_RULES_UPDATE_ALARM = "site-rules-update"
 // Every six hours to start with, while the rules endpoint is new.
@@ -60,10 +62,10 @@ export async function updateRemoteSiteRules(
       return "unchanged"
     }
     await setStoredRemoteSiteRules({ ...remote, fetchedAt: Date.now() })
-    logger.info("[SiteRules] Remote rules updated to revision", remote.revision)
+    log.info("Remote rules updated to revision", { revision: remote.revision })
     return "updated"
   } catch (error) {
-    logger.warn("[SiteRules] Remote rules update failed; keeping the current rules", error)
+    log.warn("Remote rules update failed; keeping the current rules", { error })
     return "failed"
   }
 }

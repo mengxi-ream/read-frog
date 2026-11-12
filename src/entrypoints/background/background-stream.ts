@@ -43,13 +43,15 @@ import { upgradeAction } from "@/utils/error-action"
 import { extractAISDKErrorMessage } from "@/utils/error/extract-message"
 import { hostedTextStreamRouteSchema, requireHostedFeature } from "@/utils/hosted-ai/routing"
 import { i18n } from "@/utils/i18n"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
 import { noteSuggestionEnvelopeSchema } from "@/utils/note-suggestion/types"
 import { backgroundOrpcClient } from "@/utils/orpc/background-client"
 import { buildLocalGenerateTextParams } from "@/utils/providers/generate-params"
 import { getLanguageModelForConfig, getModelById } from "@/utils/providers/model"
 import { isBuiltInAiProviderId } from "@/utils/providers/provider-registry"
 import { attachRequestErrorMeta } from "@/utils/request/retry-policy"
+
+const log = createLogger("background/background-stream")
 
 const invalidStreamStartPayloadMessage = "Invalid stream start payload"
 const aiStreamProtocolErrorMessage = "Invalid AI stream response."
@@ -188,7 +190,7 @@ function createStreamPortHandler<TSerializablePayload, TResponse>(
         }
         port.postMessage(message)
       } catch (error) {
-        logger.error("[Background] Stream port post failed", error)
+        log.error("Stream port post failed", { error })
       }
     }
 
@@ -275,7 +277,7 @@ function createStreamPortHandler<TSerializablePayload, TResponse>(
           return
         }
 
-        logger.error("[Background] Stream Function failed", finalError)
+        log.error("Stream Function failed", { error: finalError })
         safePost({
           type: "error",
           error: {

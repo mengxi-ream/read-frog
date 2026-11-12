@@ -48,14 +48,6 @@ vi.mock("@/utils/host/translate/ui/style-injector", () => ({
   ensurePresetStyles: mockEnsurePresetStyles,
 }))
 
-vi.mock("@/utils/logger", () => ({
-  logger: {
-    error: vi.fn<(...args: any[]) => any>(),
-    info: vi.fn<(...args: any[]) => any>(),
-    warn: vi.fn<(...args: any[]) => any>(),
-  },
-}))
-
 vi.mock("@/utils/message", () => ({
   onMessage: mockOnMessage,
   sendMessage: mockSendMessage,

@@ -1,6 +1,8 @@
 import { storage } from "#imports"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
 import { SessionCache } from "./session-cache-group"
+
+const log = createLogger("session-cache/session-cache-group-registry")
 
 // TODO: solve race condition of cache group registry
 const REGISTRY_KEY = "session:__system_cache_registry" as const
@@ -12,10 +14,10 @@ export const SessionCacheGroupRegistry = {
       if (!registry.includes(groupKey)) {
         registry.push(groupKey)
         await storage.setItem(REGISTRY_KEY, registry)
-        logger.info("[CacheRegistry] Registered group:", groupKey)
+        log.debug("Registered group", { groupKey })
       }
     } catch (error) {
-      logger.error("[CacheRegistry] Failed to register group:", error)
+      log.error("Failed to register group", { error })
     }
   },
 
@@ -23,7 +25,7 @@ export const SessionCacheGroupRegistry = {
     try {
       return (await storage.getItem<string[]>(REGISTRY_KEY)) || []
     } catch (error) {
-      logger.error("[CacheRegistry] Failed to get registry:", error)
+      log.error("Failed to get registry", { error })
       return []
     }
   },
@@ -36,22 +38,22 @@ export const SessionCacheGroupRegistry = {
   async clearAllCacheGroup(): Promise<void> {
     try {
       const registry = await SessionCacheGroupRegistry.getAllCacheGroup()
-      logger.info("[CacheRegistry] Clearing all cache groups:", registry)
+      log.debug("Clearing all cache groups", { registry })
 
       // Clear each group
       const clearPromises = registry.map(async (groupKey) => {
         const cache = new SessionCache(groupKey)
         await cache.clear()
-        logger.info("[CacheRegistry] Cleared cache group:", groupKey)
+        log.debug("Cleared cache group", { groupKey })
       })
 
       await Promise.all(clearPromises)
 
       // Clear the registry itself
       await storage.removeItem(REGISTRY_KEY)
-      logger.info("[CacheRegistry] All caches cleared")
+      log.debug("All caches cleared")
     } catch (error) {
-      logger.error("[CacheRegistry] Failed to clear all caches:", error)
+      log.error("Failed to clear all caches", { error })
     }
   },
 
@@ -65,9 +67,9 @@ export const SessionCacheGroupRegistry = {
       const updatedRegistry = registry.filter((key) => key !== groupKey)
       await storage.setItem(REGISTRY_KEY, updatedRegistry)
 
-      logger.info("[CacheRegistry] Removed group completely:", groupKey)
+      log.debug("Removed group completely", { groupKey })
     } catch (error) {
-      logger.error("[CacheRegistry] Failed to remove group:", error)
+      log.error("Failed to remove group", { error })
     }
   },
 }

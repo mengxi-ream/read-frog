@@ -6,8 +6,10 @@ import type {
 } from "@/types/analytics"
 import { classifyFailureReason } from "@/utils/analytics-failure-reason"
 import { ANALYTICS_FEATURE_USED_EVENT } from "@/utils/constants/analytics"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
 import { sendMessage } from "@/utils/message"
+
+const log = createLogger("analytics")
 
 type WithTiming<T> = T extends unknown
   ? Omit<T, "latency_ms"> & { startedAt: number; finishedAt?: number }
@@ -49,9 +51,7 @@ export async function trackFeatureUsed(input: FeatureUsedEventInput): Promise<vo
   try {
     await sendMessage("trackFeatureUsedEvent", buildFeatureUsedEventProperties(input))
   } catch (error) {
-    if (typeof logger.warn === "function") {
-      logger.warn(`[Analytics] Failed to track ${ANALYTICS_FEATURE_USED_EVENT}`, error)
-    }
+    log.warn(`Failed to track ${ANALYTICS_FEATURE_USED_EVENT}`, { error })
   }
 }
 

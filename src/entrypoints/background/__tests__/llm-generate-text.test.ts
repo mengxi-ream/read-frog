@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 
 const onMessageMock = vi.fn<(...args: any[]) => any>()
 const generateTextForProviderRefMock = vi.fn<(...args: any[]) => any>()
-const loggerErrorMock = vi.fn<(...args: any[]) => any>()
 
 vi.mock("@/utils/message", () => ({
   onMessage: onMessageMock,
@@ -13,12 +12,6 @@ vi.mock("@/utils/message", () => ({
 // message adapter over it, so that is the boundary worth mocking.
 vi.mock("../background-stream", () => ({
   generateTextForProviderRef: generateTextForProviderRefMock,
-}))
-
-vi.mock("@/utils/logger", () => ({
-  logger: {
-    error: loggerErrorMock,
-  },
 }))
 
 const localPayload = {
@@ -78,12 +71,14 @@ describe("llm-generate-text", () => {
   it("logs and rethrows handler errors", async () => {
     generateTextForProviderRefMock.mockRejectedValue(new Error("provider unavailable"))
 
+    // vi.resetModules() brings a fresh logger with the fresh module; capture that one.
+    const logs = (await import("@/utils/logging/testing")).captureLogs()
     const { setupLLMGenerateTextMessageHandlers } = await import("../llm-generate-text")
     setupLLMGenerateTextMessageHandlers()
     const handler = getRegisteredMessageHandler("backgroundGenerateText")
 
     await expect(handler({ data: localPayload })).rejects.toThrow("provider unavailable")
-    expect(loggerErrorMock).toHaveBeenCalled()
+    expect(logs.filter((record) => record.level === "error")).not.toHaveLength(0)
   })
 
   it.each([undefined, null, "", "unknownFeature", "toString"])(

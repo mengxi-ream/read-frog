@@ -683,10 +683,9 @@ describe("background analytics", () => {
 
     expect(posthogCaptureMock).toHaveBeenCalledOnce()
     expect(featureUsageCache.setLastReportedDay).toHaveBeenCalledOnce()
-    expect(loggerWarnMock).toHaveBeenCalledWith(
-      "[Analytics] Failed to read the daily feature usage cache",
-      expect.any(Error),
-    )
+    expect(loggerWarnMock).toHaveBeenCalledWith("Failed to read the daily feature usage cache", {
+      error: expect.any(Error),
+    })
   })
 
   it("keeps a captured event when the feature cache cannot be written", async () => {
@@ -710,10 +709,9 @@ describe("background analytics", () => {
     })
 
     expect(posthogCaptureMock).toHaveBeenCalledOnce()
-    expect(loggerWarnMock).toHaveBeenCalledWith(
-      "[Analytics] Failed to write the daily feature usage cache",
-      expect.any(Error),
-    )
+    expect(loggerWarnMock).toHaveBeenCalledWith("Failed to write the daily feature usage cache", {
+      error: expect.any(Error),
+    })
   })
 
   it("does not cache a feature when capture fails", async () => {

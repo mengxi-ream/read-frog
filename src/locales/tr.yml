@@ -69,6 +69,7 @@ popup:
     emailUs: Bize e-posta gönderin
     featureRequest: Özellik önerisi
     bugReport: Hata bildir
+    diagnosePage: "Bu sayfayı tanıla"
     community: Topluluk
     joinDiscord: Discord'a Katıl
     joinWechat: WeChat Grubuna Katıl
@@ -135,6 +136,13 @@ options:
     bugReport:
       title: Hata bildir
       description: Destek talebi açın ve çözülene kadar takip edin
+    troubleshooting:
+      title: "Sorun giderme"
+    diagnostics:
+      title: "Tanılama verilerini dışa aktar"
+      description: "Hata bildirimine eklemek için son günlükleri ve ayarlarınızı (API anahtarları hariç) kaydedin"
+      exportSuccess: "Tanılama verileri kaydedildi"
+      exportFailed: "Tanılama verileri dışa aktarılamadı"
     community:
       title: Topluluk
     discord:
@@ -1582,6 +1590,24 @@ translation:
   sameLanguage: Kaynak ve hedef diller farklı olmalıdır
   autoModeSameLanguage: Algılanan dil '$1' hedef dille aynı
   extensionContextInvalidated: Uzantı güncellendi. Bu sayfayı yenileyip tekrar deneyin.
+pageDiagnosis:
+  title: "Sayfa tanılaması"
+  summary: "$1 çevrildi, $2 çevrilmedi"
+  empty: "Henüz gösterilecek bir şey yok. Sayfa çevirisini açın, ardından bunu yeniden açın."
+  emptyWhileTranslating: "Henüz gösterilecek bir şey yok. Sayfa çevirisi paragraflara ulaştıkça burada görünürler."
+  framesNotIncluded: "Gömülü çerçevelerin içindeki metin burada yer almaz."
+  hint: "Paragraflarını sayfada işaretlemek için bir nedene tıklayın."
+  close: "Kapat"
+  unavailable: "Read Frog bu sayfada çalışamıyor"
+  reasons:
+    noProse: "Çevrilecek kelime yok"
+    tooShort: "Çevrilemeyecek kadar kısa"
+    targetLanguage: "Zaten hedef dilinizde"
+    skipLanguage: "Atladığınız bir dilde"
+    noTranslationNeeded: "Yapay zekâ çeviriye gerek olmadığını söyledi"
+    sameAsSource: "Çeviri orijinalle aynı"
+    emptyResult: "Hizmet hiçbir şey döndürmedi"
+    error: "Çeviri başarısız oldu"
 annotation:
   annotate: "Not ekle"
   enterMode: "Not modu"

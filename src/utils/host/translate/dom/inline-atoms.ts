@@ -5,7 +5,7 @@ import {
   INLINE_ATOM_CLASS,
   MARK_ATTRIBUTES,
 } from "@/utils/constants/dom-labels"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
 import { getDocumentSiteRule } from "@/utils/site-rules/effective"
 import { isDontWalkIntoAndDontTranslateAsChildElement, isInlineAtomElement } from "../../dom/filter"
 import { extractTextContent } from "../../dom/traversal"
@@ -14,6 +14,8 @@ import {
   encodeInlineAtomToken,
   nextFreeInlineAtomIndex,
 } from "../inline-atom-tokens"
+
+const log = createLogger("host/translate/dom/inline-atoms")
 
 /**
  * Inline atoms for bilingual page translation.
@@ -269,9 +271,9 @@ export function renderInlineAtomTranslation(
 
   const missing = atoms.map((_, index) => index).filter((index) => !inserted.has(index))
   if (missing.length > 0) {
-    logger.warn(
-      `[inline-atoms] translation dropped ${missing.length} placeholder(s); appending the formulas`,
-    )
+    log.warn("Translation dropped placeholders; appending the formulas", {
+      missing: missing.length,
+    })
     for (const index of missing) {
       fragment.append(ownerDoc.createTextNode(" "))
       fragment.append(sanitizeInlineAtomClone(atoms[index]!))

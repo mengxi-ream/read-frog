@@ -10,8 +10,10 @@ import {
   MICROSOFT_TRANSLATE_PROVIDER_ID,
 } from "@/utils/constants/providers"
 import { isGoogleTranslateReachable } from "@/utils/host/translate/api/google"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
 import { getLocalConfigAndMeta, setLocalConfig } from "./storage"
+
+const log = createLogger("config/default-translate-provider")
 
 /**
  * Pick better translate providers once, after a fresh install.
@@ -47,5 +49,5 @@ async function promoteMicrosoftDefaultsToGoogle(): Promise<void> {
   }
 
   await setLocalConfig(mergeWithArrayOverwrite(config, buildFeatureProviderPatch(assignments)))
-  logger.info("[Config] Google Translate reachable, promoted it to the default translate provider")
+  log.info("Google Translate reachable, promoted it to the default translate provider")
 }

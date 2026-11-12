@@ -1,8 +1,10 @@
 import type { HostedAiStatus } from "@/utils/hosted-ai/types"
 import { storage } from "#imports"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
 import { onMessage } from "@/utils/message"
 import { backgroundOrpcClient } from "@/utils/orpc/background-client"
+
+const log = createLogger("background/hosted-ai-status")
 
 /**
  * Long enough to collapse the serialized per-batch resolves that dominate
@@ -45,7 +47,7 @@ export async function clearHostedAiStatusCache(): Promise<void> {
   try {
     await storage.removeItem(CACHE_KEY)
   } catch (error) {
-    logger.warn("[HostedAiStatus] Failed to clear cache:", error)
+    log.warn("Failed to clear cache", { error })
   }
 }
 
@@ -57,7 +59,7 @@ async function readCachedStatus(): Promise<HostedAiStatus | null> {
     }
     return cached.status
   } catch (error) {
-    logger.warn("[HostedAiStatus] Failed to read cache:", error)
+    log.warn("Failed to read cache", { error })
     return null
   }
 }
@@ -74,14 +76,14 @@ function fetchAndCache(): Promise<HostedAiStatus | null> {
       try {
         await storage.setItem<CachedStatus>(CACHE_KEY, { status, cachedAt: Date.now() })
       } catch (error) {
-        logger.warn("[HostedAiStatus] Failed to write cache:", error)
+        log.warn("Failed to write cache", { error })
       }
       return status
     })
     .catch((error) => {
       // Fail open: the caller treats null as "no verdict", and the generation
       // endpoints enforce access on their own.
-      logger.warn("[HostedAiStatus] Status fetch failed:", error)
+      log.warn("Status fetch failed", { error })
       return null
     })
     .finally(() => {

@@ -25,9 +25,12 @@ import {
 } from "@/utils/config/helpers"
 import { PROVIDER_ITEMS } from "@/utils/constants/providers"
 import { i18n } from "@/utils/i18n"
+import { createLogger } from "@/utils/logging/logger"
 import { getProviderLogo, isSystemProviderSelectorItem } from "@/utils/providers/provider-display"
 import { getSelectableProvidersForCapability } from "@/utils/providers/provider-registry"
 import { selectedProviderIdsAtom } from "../atoms"
+
+const log = createLogger("translation-hub/translation-service-dropdown")
 
 export function TranslationServiceDropdown() {
   const { theme } = useTheme()
@@ -42,7 +45,7 @@ export function TranslationServiceDropdown() {
         url: browser.runtime.getURL("/options.html#/api-providers"),
       })
     } catch (error) {
-      console.error("Error opening configure API:", error)
+      log.error("Failed to open the API provider settings", { error })
     }
   }
 

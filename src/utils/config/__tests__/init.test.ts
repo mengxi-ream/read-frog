@@ -9,7 +9,6 @@ const getMetaMock = vi.fn<(...args: any[]) => any>()
 const setItemMock = vi.fn<(...args: any[]) => any>()
 const setMetaMock = vi.fn<(...args: any[]) => any>()
 const runMigrationMock = vi.fn<(...args: any[]) => any>()
-const loggerWarnMock = vi.fn<(...args: any[]) => any>()
 
 vi.mock("#imports", () => ({
   storage: {
@@ -31,12 +30,6 @@ vi.mock("wxt/utils/storage", () => ({
 
 vi.mock("../migration", () => ({
   runMigration: runMigrationMock,
-}))
-
-vi.mock("@/utils/logger", () => ({
-  logger: {
-    warn: loggerWarnMock,
-  },
 }))
 
 function buildStableConfig(): Config {

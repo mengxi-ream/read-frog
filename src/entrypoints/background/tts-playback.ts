@@ -4,9 +4,11 @@ import type {
   TTSPlaybackStopRequest,
 } from "@/types/tts-playback"
 import { browser } from "#imports"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
 import { onMessage, sendMessage } from "@/utils/message"
 import { DOMAudioPlaybackController } from "@/utils/tts-playback/dom-audio-controller"
+
+const log = createLogger("background/tts-playback")
 
 const OFFSCREEN_DOCUMENT_PATH = "/offscreen.html" as const
 const OFFSCREEN_DOCUMENT_URL = browser.runtime.getURL(OFFSCREEN_DOCUMENT_PATH)
@@ -126,7 +128,7 @@ class ChromeOffscreenPlaybackAdapter implements TTSPlaybackAdapter {
         throw error
       }
 
-      logger.warn("[Background][TTSPlayback] offscreen receiver missing, retrying once", error)
+      log.warn("[TTSPlayback] offscreen receiver missing, retrying once", { error })
 
       // Offscreen documents can be reclaimed by the browser and briefly lose handlers.
       await this.prepare()
@@ -226,7 +228,7 @@ export function setupTTSPlaybackMessageHandlers() {
         reason: message.data.reason ?? "stopped",
       })
     } catch (error) {
-      logger.warn("[Background][TTSPlayback] stop failed", error)
+      log.warn("[TTSPlayback] stop failed", { error })
       throw error
     }
 

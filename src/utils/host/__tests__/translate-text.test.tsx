@@ -182,6 +182,43 @@ describe("translate-text", () => {
       expect(result).toBe(mixed)
     })
 
+    describe("tells the paragraph's diagnosis why the answer is empty", () => {
+      function createDiagnosis() {
+        return { translated: vi.fn<() => void>(), untranslated: vi.fn<(reason: string) => void>() }
+      }
+
+      it.each([
+        ["the model says no translation is needed", NO_TRANSLATION_SENTINEL, "noTranslationNeeded"],
+        ["the service answers with nothing", "", "emptyResult"],
+      ])("when %s", async (_, response, reason) => {
+        mockSendMessage.mockResolvedValue(response)
+        const diagnosis = createDiagnosis()
+
+        expect(await translateTextForPage("test text", "plain", { diagnosis })).toBe("")
+        expect(diagnosis.untranslated).toHaveBeenCalledExactlyOnceWith(reason)
+      })
+
+      it("when the text is already in the target language", async () => {
+        mockDetectLanguage.mockResolvedValueOnce(DEFAULT_CONFIG.language.targetCode)
+        const diagnosis = createDiagnosis()
+
+        await translateTextForPage(
+          "这是一个已经使用目标语言写成的较长段落，用于触发翻译前目标语言检测并跳过请求，同时确保文本长度超过检测阈值。",
+          "plain",
+          { diagnosis },
+        )
+        expect(diagnosis.untranslated).toHaveBeenCalledExactlyOnceWith("targetLanguage")
+      })
+
+      it("and says nothing about a real translation", async () => {
+        mockSendMessage.mockResolvedValue("translated text")
+        const diagnosis = createDiagnosis()
+
+        await translateTextForPage("test text", "plain", { diagnosis })
+        expect(diagnosis.untranslated).not.toHaveBeenCalled()
+      })
+    })
+
     it("skips target-language text before sending a translation request by default", async () => {
       mockDetectLanguage.mockResolvedValueOnce(DEFAULT_CONFIG.language.targetCode)
 

@@ -8,8 +8,10 @@ import {
   loadGlossaryEntries,
 } from "@/utils/glossary/repository"
 import { isGlossaryActiveForUrl } from "@/utils/glossary/scope"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
 import { onMessage } from "@/utils/message"
+
+const log = createLogger("background/glossary")
 
 const EMPTY_SNAPSHOT: GlossarySnapshot = { revision: 0, scopeKey: "", entries: [] }
 
@@ -55,7 +57,7 @@ export function setupGlossaryMessageHandlers() {
       // an ISO 639-3 code, while the stored terms are keyed by tag now.
       return await readSnapshot(data.url, resolveLanguage(data.targetLang) ?? data.targetLang)
     } catch (error) {
-      logger.error("Failed to build glossary snapshot", error)
+      log.error("Failed to build glossary snapshot", { error })
       return EMPTY_SNAPSHOT
     }
   })
