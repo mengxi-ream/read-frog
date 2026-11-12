@@ -1,5 +1,17 @@
 # @read-frog/extension
 
+## 1.59.2
+
+### Patch Changes
+
+- [#2498](https://github.com/mengxi-ream/read-frog/pull/2498) [`4d986d2`](https://github.com/mengxi-ream/read-frog/commit/4d986d28272e3757c0fa1dba3252a523ae184457) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(providers): let the IF API site open its config card in Read Frog
+
+- [#2495](https://github.com/mengxi-ream/read-frog/pull/2495) [`a833430`](https://github.com/mengxi-ream/read-frog/commit/a83343031c504093c95d480c05c12dade7881269) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(providers): add IF API as a sponsored provider, seeded for new and existing users
+
+- [#2497](https://github.com/mengxi-ream/read-frog/pull/2497) [`c968bfd`](https://github.com/mengxi-ream/read-frog/commit/c968bfdfef54be823d55f5851d7e14ea88bc2352) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(diagnostics): keep a local log, export it for bug reports, and show why paragraphs on a page were not translated
+
+- [#2499](https://github.com/mengxi-ream/read-frog/pull/2499) [`9fab1cf`](https://github.com/mengxi-ream/read-frog/commit/9fab1cffa82deac2fba371aa659e9584c5ba88a6) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(options): replace outdated settings screenshots with live previews. The floating button, selection toolbar and context menu pages showed screenshots of buttons the extension no longer has; they now draw the real UI on a watercolor background and follow your settings: the floating button's side and lock, the toolbar's pinned buttons, annotation and opacity, and the context menu's actions. The subtitle style preview now sits on a video frame, so white text with no background shows. The Simplified Chinese context menu items now quote the selection with matching quotation marks
+
 ## 1.59.1
 
 ### Patch Changes
