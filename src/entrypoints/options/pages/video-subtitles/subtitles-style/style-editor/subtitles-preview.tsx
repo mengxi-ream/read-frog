@@ -37,11 +37,13 @@ export function SubtitlesPreview({ previewCSS }: SubtitlesPreviewProps) {
 
   // A still from a video in a player-like frame, dark along the bottom like most footage, so the
   // subtitles read against what they will be read against: white text with no background shows.
+  // At 680px the default first line, the sample translation (about 480px at the default size),
+  // stays on one line; at 600px it broke before its last character.
   return (
     <PreviewBackdrop className="py-9">
       <div
         className={cn(
-          "w-[600px] shrink-0 rounded-[18px] bg-white p-1.5 dark:bg-neutral-800",
+          "w-[680px] shrink-0 rounded-[18px] bg-white p-1.5 dark:bg-neutral-800",
           "shadow-[0_1px_2px_rgb(0_0_0/0.06),0_18px_40px_-14px_rgb(28_36_18/0.3)]",
           PREVIEW_ZOOM_STEPS,
         )}
