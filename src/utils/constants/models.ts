@@ -163,6 +163,17 @@ export const LLM_PROVIDER_MODELS = {
     "Qwen3.5-122B-A10B",
     "Qwen3.5-397B-A17B",
   ],
+  // IF API is a relay in front of many vendors, so its catalog runs to dozens of models. These
+  // are the six it recommends for translation, each confirmed by IF API on 2026-11-11 to answer
+  // through cn.ifapi.org with reasoning turned off; any other id goes in as a custom model.
+  ifapi: [
+    "gpt-6-luna",
+    "claude-haiku-5-5",
+    "gpt-6.1-terra",
+    "deepseek-v4.1-flash",
+    "glm-5.3-flash",
+    "minimax-m3.1-flash",
+  ],
   "openai-compatible": ["use-custom-model"],
   "open-responses": ["use-custom-model"],
   xai: [

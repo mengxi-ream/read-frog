@@ -87,6 +87,10 @@ const llmProviderConfigSchemaList = [
     model: createProviderModelSchema<"jalapenocloud">("jalapenocloud"),
   }),
   baseOpenAICompatibleLLMProviderConfigSchema.extend({
+    provider: z.literal("ifapi"),
+    model: createProviderModelSchema<"ifapi">("ifapi"),
+  }),
+  baseOpenAICompatibleLLMProviderConfigSchema.extend({
     provider: z.literal("siliconflow"),
     model: createProviderModelSchema<"siliconflow">("siliconflow"),
   }),

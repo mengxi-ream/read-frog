@@ -171,12 +171,14 @@ options:
         pdfTranslation: PDF 翻译
     sponsorCta: 获取高速性价比 AI
     sponsorCtaJalapenoCloud: 获取 GLM 5.3 五折优惠
+    sponsorCtaIfapi: 免费注册，充值填 READFROG
     setApiKeyWarning:
       message: 请在 $1 页面设置 API Key
     badges:
       featureCount: $1 个功能
       sponsor: 赞助
       sponsorJalapenoCloud: $$1 免费额度
+      sponsorIfapi: 首充加赠 10%
     dialog:
       title: 添加新提供商
       groups:
@@ -269,6 +271,7 @@ options:
         xai: 马斯克的 AI 公司，提供具有实时数据访问能力的 Grok 模型
         atlascloud: 统一的 OpenAI 兼容模型平台，提供 DeepSeek、Kimi、Qwen、豆包、GLM 等较新模型
         jalapenocloud: 顶尖团队都在用的企业级 AI，现在为你而来！
+        ifapi: GPT、Claude、Gemini 等主流模型，低至官方价 1 折，国内专线直连
         siliconflow: 面向中国和国际模型的高性能推理平台
         tensdaq: 革命性竞价 AI MaaS 平台，价格由市场供需决定，告别高成本固定定价
         openaiCompatible: 连接兼容 OpenAI Chat Completions API 的自定义端点

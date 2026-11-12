@@ -235,6 +235,10 @@ ReadFrog 採用 GPLv3 與商業授權雙重授權。
 
 [![Sponsors][sponsor-image]][sponsor-link]
 
+<a href="https://ifapi.org/?aff=readfrog&utm_source=readfrog&utm_medium=readme">
+  <img src="../assets/promotion/ifapi.png" alt="IF API: GPT, Claude, Gemini and more from one key. Read Frog users get +10% credit with code READFROG">
+</a>
+
 <div align="right">
 
 [![Back to top][back-to-top]](#readme-top)

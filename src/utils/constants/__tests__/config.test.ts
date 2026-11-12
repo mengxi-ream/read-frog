@@ -74,6 +74,7 @@ describe("dEFAULT_CONFIG", () => {
       "microsoft-translate-default",
       "openai-default",
       "jalapenocloud-default",
+      "ifapi-default",
       "deepseek-default",
     ])
     expect(DEFAULT_CONFIG.pageTranslation.providerId).toBe("microsoft-translate-default")
@@ -91,6 +92,19 @@ describe("dEFAULT_CONFIG", () => {
           isCustomModel: false,
           customModel: null,
         },
+      }),
+    )
+    expect(
+      DEFAULT_CONFIG.providersConfig.find((provider) => provider.id === "ifapi-default"),
+    ).toEqual(
+      expect.objectContaining({
+        baseURL: "https://cn.ifapi.org/v1",
+        model: {
+          model: "gpt-6-luna",
+          isCustomModel: false,
+          customModel: null,
+        },
+        providerOptions: { reasoning_effort: "none" },
       }),
     )
     expect(

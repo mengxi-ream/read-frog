@@ -171,12 +171,14 @@ options:
         pdfTranslation: PDF 翻訳
     sponsorCta: 高速で高コスパのAIを入手
     sponsorCtaJalapenoCloud: GLM 5.3 を 50% オフで入手
+    sponsorCtaIfapi: 無料登録・コード READFROG
     setApiKeyWarning:
       message: API キーは $1 ページで設定してください
     badges:
       featureCount: $1 件の機能
       sponsor: スポンサー
       sponsorJalapenoCloud: $$1 無料
+      sponsorIfapi: 初回チャージ +10%
     dialog:
       title: 新しいプロバイダーを追加
       groups:
@@ -268,6 +270,7 @@ options:
         xai: リアルタイムデータアクセス可能なGrokモデルを提供するイーロン・マスクのAI企業
         atlascloud: DeepSeek、Kimi、Qwen、Doubao、GLMなどの新しめのモデルにOpenAI互換でアクセスできる統合プラットフォーム
         jalapenocloud: トップチームが使うエンタープライズ級 AI を、あなたにも！
+        ifapi: GPT・Claude・Gemini など主要モデルを公式価格の最大 90% オフで
         siliconflow: 中国および国際モデル向けの高性能推論プラットフォーム
         tensdaq: 革命的入札型AI MaaSプラットフォーム、市場の需給で価格が決まり高コスト固定料金を排除
         openaiCompatible: OpenAI Chat Completions API 互換のカスタムエンドポイントに接続

@@ -15,6 +15,8 @@ import customProviderLogo from "@/assets/providers/custom-provider.svg?url&no-in
 import customResponsesLogo from "@/assets/providers/custom-responses.svg?url&no-inline"
 import deeplxLogoDark from "@/assets/providers/deeplx-dark.svg?url&no-inline"
 import deeplxLogoLight from "@/assets/providers/deeplx-light.svg?url&no-inline"
+import ifapiLogoDark from "@/assets/providers/ifapi-dark.svg?url&no-inline"
+import ifapiLogoLight from "@/assets/providers/ifapi-light.svg?url&no-inline"
 import jalapenoCloudLogo from "@/assets/providers/jalapeno-cloud.png?url&no-inline"
 import tensdaqLogoColor from "@/assets/providers/tensdaq-color.svg?url&no-inline"
 import { env } from "@/env"
@@ -42,6 +44,11 @@ export const DEFAULT_LLM_PROVIDER_MODELS: LLMProviderModels = {
   },
   jalapenocloud: {
     model: "GLM-5.3",
+    isCustomModel: false,
+    customModel: null,
+  },
+  ifapi: {
+    model: "gpt-6-luna",
     isCustomModel: false,
     customModel: null,
   },
@@ -230,6 +237,20 @@ export const PROVIDER_ITEMS: Record<
       ctaI18nKey: "options.apiProviders.sponsorCtaJalapenoCloud",
     },
   },
+  ifapi: {
+    logo: (theme: Theme) => (theme === "light" ? ifapiLogoLight : ifapiLogoDark),
+    name: "IF API",
+    website: "https://ifapi.org/?aff=readfrog&utm_source=readfrog&utm_medium=app",
+    // The sign-up page sends someone already signed in straight to their console, so one link
+    // serves both new and returning users.
+    apiKeyUrl: "https://ifapi.org/sign-up?aff=readfrog&utm_source=readfrog&utm_medium=app",
+    sponsor: {
+      sponsoring: true,
+      referUrl: "https://ifapi.org/sign-up?aff=readfrog&utm_source=readfrog&utm_medium=app",
+      badgeI18nKey: "options.apiProviders.badges.sponsorIfapi",
+      ctaI18nKey: "options.apiProviders.sponsorCtaIfapi",
+    },
+  },
   atlascloud: {
     logo: getLobeIconsCDNUrlFn("atlascloud"),
     name: "Atlas Cloud",
@@ -402,6 +423,21 @@ export const DEFAULT_PROVIDER_CONFIG = {
       chat_template_kwargs: {
         thinking: false,
       },
+    },
+  },
+  ifapi: {
+    id: "ifapi-default",
+    name: PROVIDER_ITEMS.ifapi.name,
+    enabled: true,
+    provider: "ifapi",
+    // The mainland China route. ifapi.org/v1 serves the same accounts and keys for anyone it
+    // is slow for.
+    baseURL: "https://cn.ifapi.org/v1",
+    model: DEFAULT_LLM_PROVIDER_MODELS.ifapi,
+    // The GPT-6 models reason before answering unless told not to. Translation gains nothing
+    // from it, so it starts off; written into config, like Jalapeno's, so the user can undo it.
+    providerOptions: {
+      reasoning_effort: "none",
     },
   },
   atlascloud: {
@@ -666,6 +702,7 @@ export const FORCED_PROVIDER_HEADERS: Partial<Record<LLMProviderTypes, Record<st
 
 export const PROVIDER_URL_PLACEHOLDERS: Partial<Record<APIProviderTypes, string>> = {
   jalapenocloud: DEFAULT_PROVIDER_CONFIG.jalapenocloud.baseURL,
+  ifapi: DEFAULT_PROVIDER_CONFIG.ifapi.baseURL,
   atlascloud: DEFAULT_PROVIDER_CONFIG.atlascloud.baseURL,
   siliconflow: DEFAULT_PROVIDER_CONFIG.siliconflow.baseURL,
   tensdaq: DEFAULT_PROVIDER_CONFIG.tensdaq.baseURL,
@@ -702,6 +739,7 @@ export const DEFAULT_PROVIDER_CONFIG_LIST: ProvidersConfig = [
   DEFAULT_PROVIDER_CONFIG["microsoft-translate"],
   DEFAULT_PROVIDER_CONFIG.openai,
   DEFAULT_PROVIDER_CONFIG.jalapenocloud,
+  DEFAULT_PROVIDER_CONFIG.ifapi,
   DEFAULT_PROVIDER_CONFIG.deepseek,
 ]
 
