@@ -1,6 +1,8 @@
+import type { LogRecord } from "@/utils/logging/logger"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import { loggedError, logRecord } from "@/utils/logging/testing"
 
-const { alarms, cacheTables, requestTable, loggerMock } = vi.hoisted(() => {
+const { alarms, cacheTables, requestTable } = vi.hoisted(() => {
   function createTableMock() {
     const deleteEntries = vi.fn<() => Promise<number>>()
     const below = vi.fn<(cutoff: Date) => { delete: typeof deleteEntries }>()
@@ -32,10 +34,6 @@ const { alarms, cacheTables, requestTable, loggerMock } = vi.hoisted(() => {
       toArray,
       bulkDelete: vi.fn<(keys: string[]) => Promise<void>>(),
     },
-    loggerMock: {
-      info: vi.fn<(message: string) => void>(),
-      error: vi.fn<(message: string, error: unknown) => void>(),
-    },
   }
 })
 
@@ -44,7 +42,6 @@ vi.mock("wxt/browser", () => ({ browser: { alarms } }))
 vi.mock("@/utils/db/dexie/db", () => ({
   db: { ...cacheTables, batchRequestRecord: requestTable },
 }))
-vi.mock("@/utils/logger", () => ({ logger: loggerMock }))
 
 const caches = [
   {
@@ -72,7 +69,11 @@ const jobs = [
   { alarm: "request-record-cleanup", table: requestTable, clear: "cleanupAllRequestRecords" },
 ] as const
 
+let logs: LogRecord[] = []
+
 async function setUpAlarmListener() {
+  // vi.resetModules() brings a fresh logger with the fresh module; capture that one.
+  logs = (await import("@/utils/logging/testing")).captureLogs()
   const { setUpDatabaseCleanup } = await import("../db-cleanup")
   await setUpDatabaseCleanup()
   return alarms.onAlarm.addListener.mock.calls[0]![0]
@@ -178,7 +179,9 @@ describe("database cleanup", () => {
       expect(table.where).toHaveBeenCalledExactlyOnceWith("createdAt")
       expect(table.below).toHaveBeenCalledExactlyOnceWith(new Date("2026-08-29T12:30:00.000Z"))
       expect(table.delete).toHaveBeenCalledTimes(1)
-      expect(loggerMock.info).toHaveBeenCalledWith(`${label} cleanup: Deleted 3 old entries`)
+      expect(logs).toContainEqual(
+        logRecord("info", "Deleted expired entries", { label, deletedCount: 3 }),
+      )
 
       vi.setSystemTime(new Date("2026-09-06T12:30:00.000Z"))
       await listener({ name: alarm })
@@ -190,7 +193,7 @@ describe("database cleanup", () => {
     const listener = await setUpAlarmListener()
     await listener({ name: alarm })
 
-    expect(loggerMock.info).not.toHaveBeenCalled()
+    expect(logs.filter((record) => record.level === "info")).toEqual([])
   })
 
   it.each(caches)(
@@ -201,15 +204,19 @@ describe("database cleanup", () => {
       const listener = await setUpAlarmListener()
 
       await expect(listener({ name: alarm })).resolves.toBeUndefined()
-      expect(loggerMock.error).toHaveBeenCalledExactlyOnceWith(
-        `Failed to cleanup old ${label}:`,
-        error,
-      )
-      expect(loggerMock.info).not.toHaveBeenCalled()
+      expect(logs.filter((record) => record.level === "error")).toEqual([
+        logRecord("error", "Failed to delete expired entries", {
+          label,
+          error: loggedError("Database unavailable"),
+        }),
+      ])
+      expect(logs.filter((record) => record.level === "info")).toEqual([])
 
       table.delete.mockResolvedValueOnce(2)
       await listener({ name: alarm })
-      expect(loggerMock.info).toHaveBeenCalledWith(`${label} cleanup: Deleted 2 old entries`)
+      expect(logs).toContainEqual(
+        logRecord("info", "Deleted expired entries", { label, deletedCount: 2 }),
+      )
     },
   )
 
@@ -249,7 +256,11 @@ describe("database cleanup", () => {
     const listener = await setUpAlarmListener()
 
     await expect(listener({ name: "request-record-cleanup" })).resolves.toBeUndefined()
-    expect(loggerMock.error).toHaveBeenCalledWith("Failed to cleanup old request records:", error)
+    expect(logs).toContainEqual(
+      logRecord("error", "Failed to cleanup old request records", {
+        error: loggedError("Database unavailable"),
+      }),
+    )
   })
 
   it.each(jobs)("propagates manual $clear failures to the caller", async ({ table, clear }) => {

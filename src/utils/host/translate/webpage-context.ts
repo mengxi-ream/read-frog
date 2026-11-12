@@ -1,8 +1,10 @@
 import type { WebPageContext } from "@/types/content"
 import { getSourceDocumentTitle } from "@/utils/content/document-title"
 import { getDocumentDescription } from "@/utils/content/metadata"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
 import { truncateWebPageContent, WEB_PAGE_CONTENT_CHAR_LIMIT } from "./webpage-content"
+
+const log = createLogger("host/translate/webpage-context")
 
 export interface CachedWebPageContext extends WebPageContext {
   url: string
@@ -69,7 +71,7 @@ async function extractWebpageContent(): Promise<string> {
       return createMarkdownContent(prepareMarkdownSource(result.content), window.location.href)
     }
   } catch (error) {
-    logger.warn("Defuddle parsing failed, falling back to body text:", error)
+    log.warn("Defuddle parsing failed, falling back to body text", { error })
   }
   return document.body?.textContent || ""
 }

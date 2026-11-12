@@ -13,13 +13,18 @@ import {
   getGuideTargetLanguageAnswer,
   resolveGuideTargetLanguage,
 } from "@/utils/guide/target-language"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
+import { setupContentScriptLogging } from "@/utils/logging/setup"
 import { onMessage, sendMessage } from "@/utils/message"
 import { createExtensionStatusResponse } from "./extension-status"
+
+const log = createLogger("guide.content")
 
 export default defineContentScript({
   matches: env.WXT_OFFICIAL_SITE_ORIGINS.map((origin: string) => `${origin}/*`),
   async main() {
+    setupContentScriptLogging()
+
     onMessage("pinStateChanged", (msg) => {
       window.postMessage({ source: `${kebabCase(APP_NAME)}-ext`, ...msg }, "*")
     })
@@ -73,7 +78,9 @@ export default defineContentScript({
         if (type === "setTargetLanguage") {
           const targetCode = resolveGuideTargetLanguage(e.data)
           if (!targetCode) {
-            logger.warn("guide setTargetLanguage ignored: missing or invalid language code", e.data)
+            log.warn("guide setTargetLanguage ignored: missing or invalid language code", {
+              data: e.data,
+            })
             return
           }
           // If we set storage too early, react of side content has not been mounted yet,

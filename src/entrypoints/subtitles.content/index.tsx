@@ -2,6 +2,7 @@ import "@/utils/zod-config"
 import { defineContentScript } from "#imports"
 import { getLocalConfig } from "@/utils/config/storage"
 import { initI18n } from "@/utils/i18n"
+import { setupContentScriptLogging } from "@/utils/logging/setup"
 import { subtitlesContentScriptMatches } from "./content-script-matches"
 
 declare global {
@@ -17,6 +18,7 @@ export default defineContentScript({
   async main(ctx) {
     if (window.__READ_FROG_SUBTITLES_INJECTED__) return
     window.__READ_FROG_SUBTITLES_INJECTED__ = true
+    setupContentScriptLogging()
 
     const config = await getLocalConfig()
     if (!config?.videoSubtitles?.enabled) {

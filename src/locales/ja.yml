@@ -69,6 +69,7 @@ popup:
     emailUs: メールで問い合わせ
     featureRequest: 機能リクエスト
     bugReport: 不具合を報告
+    diagnosePage: "このページを診断"
     community: コミュニティ
     joinDiscord: Discordに参加
     joinWechat: WeChatグループに参加
@@ -135,6 +136,13 @@ options:
     bugReport:
       title: 不具合を報告
       description: サポートチケットを作成し、解決までの状況を追えます
+    troubleshooting:
+      title: "トラブルシューティング"
+    diagnostics:
+      title: "診断情報をエクスポート"
+      description: "最近のログと設定（API キーは除く）を保存して、不具合の報告に添付できます"
+      exportSuccess: "診断情報を保存しました"
+      exportFailed: "診断情報をエクスポートできませんでした"
     community:
       title: コミュニティ
     discord:
@@ -1582,6 +1590,22 @@ translation:
   sameLanguage: ソース言語とターゲット言語は異なる必要があります
   autoModeSameLanguage: 検出された言語 '$1' はターゲット言語と同じです
   extensionContextInvalidated: 拡張機能が更新されました。このページを再読み込みしてからもう一度お試しください。
+pageDiagnosis:
+  title: "ページ診断"
+  summary: "翻訳済み $1 段落、未翻訳 $2 段落"
+  empty: "まだ表示する内容がありません。ページ翻訳をオンにしてから、もう一度開いてください。"
+  hint: "理由をクリックすると、該当する段落をページ上で囲んで表示します。"
+  close: "閉じる"
+  unavailable: "このページでは Read Frog を実行できません"
+  reasons:
+    noProse: "翻訳する文字がありません"
+    tooShort: "短すぎるため翻訳しません"
+    targetLanguage: "すでに翻訳先の言語です"
+    skipLanguage: "スキップする言語に設定されています"
+    noTranslationNeeded: "AI が翻訳不要と判断しました"
+    sameAsSource: "訳文が原文と同じでした"
+    emptyResult: "翻訳サービスから何も返されませんでした"
+    error: "翻訳に失敗しました"
 annotation:
   annotate: "注釈を付ける"
   enterMode: "注釈モード"

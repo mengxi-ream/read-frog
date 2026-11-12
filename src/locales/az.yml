@@ -69,6 +69,7 @@ popup:
     emailUs: Bizə e-poçt göndər
     featureRequest: Funksiya təklif et
     bugReport: Xəta bildir
+    diagnosePage: "Bu səhifəni diaqnoz et"
     community: İcma
     joinDiscord: Discord icmasına qoşul
     joinWechat: WeChat qrupuna qoşul
@@ -135,6 +136,13 @@ options:
     bugReport:
       title: Xəta bildir
       description: Dəstək sorğusu açın və problem həll edilənədək onu izləyin
+    troubleshooting:
+      title: "Problemlərin həlli"
+    diagnostics:
+      title: "Diaqnostika məlumatlarını ixrac et"
+      description: "Xəta hesabatına əlavə etmək üçün son jurnalları və ayarlarınızı (API açarları olmadan) yadda saxlayın"
+      exportSuccess: "Diaqnostika məlumatları yadda saxlanıldı"
+      exportFailed: "Diaqnostika məlumatlarını ixrac etmək mümkün olmadı"
     community:
       title: İcma
     discord:
@@ -1587,6 +1595,22 @@ translation:
   sameLanguage: Mənbə və hədəf dilləri fərqli olmalıdır
   autoModeSameLanguage: Aşkarlanan '$1' dili hədəf dili ilə eynidir
   extensionContextInvalidated: Genişlənmə yeniləndi. Bu səhifəni yeniləyib yenidən cəhd edin.
+pageDiagnosis:
+  title: "Səhifə diaqnostikası"
+  summary: "$1 tərcümə olundu, $2 tərcümə olunmadı"
+  empty: "Hələ göstəriləcək heç nə yoxdur. Səhifə tərcüməsini yandırın, sonra bunu yenidən açın."
+  hint: "Abzaslarını səhifədə işarələmək üçün bir səbəbə klikləyin."
+  close: "Bağla"
+  unavailable: "Read Frog bu səhifədə işləyə bilmir"
+  reasons:
+    noProse: "Tərcümə ediləcək söz yoxdur"
+    tooShort: "Tərcümə üçün çox qısadır"
+    targetLanguage: "Artıq hədəf dilinizdədir"
+    skipLanguage: "Atladığınız dildədir"
+    noTranslationNeeded: "Süni intellekt tərcüməyə ehtiyac olmadığını dedi"
+    sameAsSource: "Tərcümə orijinalla eynidir"
+    emptyResult: "Xidmət heç nə qaytarmadı"
+    error: "Tərcümə alınmadı"
 annotation:
   annotate: "Qeyd əlavə et"
   enterMode: "Qeyd rejimi"

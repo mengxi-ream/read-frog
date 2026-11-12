@@ -1,7 +1,9 @@
 import type { ProxyResponse } from "@/types/proxy-fetch"
 import { storage } from "#imports"
 import { DEFAULT_PROXY_CACHE_TTL_MS } from "@/utils/constants/proxy-fetch"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
+
+const log = createLogger("session-cache/session-cache-group")
 
 interface CacheMetadata extends Record<string, unknown> {
   timestamp: number
@@ -55,10 +57,10 @@ export class SessionCache {
         return undefined
       }
 
-      logger.info("[SessionCache] Cache hit:", { reqMethod, targetUrl })
+      log.debug("Cache hit", { reqMethod, targetUrl })
       return item
     } catch (error) {
-      logger.error("[SessionCache] Get error:", error)
+      log.error("Get error", { error })
       return undefined
     }
   }
@@ -85,9 +87,9 @@ export class SessionCache {
         await storage.setItem(this.keysListKey, keysList)
       }
 
-      logger.info("[SessionCache] Cache set:", { reqMethod, targetUrl })
+      log.debug("Cache set", { reqMethod, targetUrl })
     } catch (error) {
-      logger.error("[SessionCache] Set error:", error)
+      log.error("Set error", { error })
     }
   }
 
@@ -105,7 +107,7 @@ export class SessionCache {
       const updatedKeysList = keysList.filter((k) => k !== key)
       await storage.setItem(this.keysListKey, updatedKeysList)
     } catch (error) {
-      logger.error("[SessionCache] Delete error:", error)
+      log.error("Delete error", { error })
     }
   }
 
@@ -130,9 +132,9 @@ export class SessionCache {
       await storage.removeItem(this.keysListKey)
       this.isInitialized = false // Reset initialization flag
 
-      logger.info("[SessionCache] Cleared cache:", { count: keysList.length })
+      log.debug("Cleared cache", { count: keysList.length })
     } catch (error) {
-      logger.error("[SessionCache] Clear error:", error)
+      log.error("Clear error", { error })
     }
   }
 }

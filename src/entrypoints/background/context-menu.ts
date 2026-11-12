@@ -11,10 +11,12 @@ import {
 } from "@/utils/constants/storage-keys"
 import { getSelectionToolbarActions } from "@/utils/custom-actions"
 import { i18n } from "@/utils/i18n"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
 import { sendMessage } from "@/utils/message"
 import { ensureInitializedConfig } from "./config"
 import { getPageTranslationEnabled, setPageTranslationEnabled } from "./page-translation-state"
+
+const log = createLogger("background/context-menu")
 
 export const MENU_ID_TRANSLATE = "read-frog-translate"
 export const MENU_ID_SELECTION_TRANSLATE = "read-frog-selection-translate"
@@ -211,7 +213,7 @@ async function handleContextMenuClick(
  * browser page, the Web Store, or a tab left open across an extension update.
  */
 function warnMenuActionNotDelivered(error: unknown) {
-  logger.warn("Failed to deliver context menu action to the tab", error)
+  log.warn("Failed to deliver context menu action to the tab", { error })
 }
 
 /**

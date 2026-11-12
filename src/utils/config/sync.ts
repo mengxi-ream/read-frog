@@ -1,9 +1,11 @@
 import type { Config } from "@/types/config/config"
 import type { LastSyncedConfigMeta, LastSyncedConfigValueAndMeta } from "@/types/config/meta"
 import { storage } from "#imports"
+import { createLogger } from "@/utils/logging/logger"
 import { LAST_SYNCED_CONFIG_STORAGE_KEY } from "../constants/config"
-import { logger } from "../logger"
 import { migrateConfig } from "./migration"
+
+const log = createLogger("config/sync")
 
 export async function getLastSyncedConfigAndMeta(): Promise<LastSyncedConfigValueAndMeta | null> {
   const [rawValue, meta] = await Promise.all([
@@ -19,7 +21,7 @@ export async function getLastSyncedConfigAndMeta(): Promise<LastSyncedConfigValu
     const value = await migrateConfig(rawValue, meta.schemaVersion)
     return { value, meta }
   } catch (error) {
-    logger.error("Failed to migrate last synced config", error)
+    log.error("Failed to migrate last synced config", { error })
     return null
   }
 }

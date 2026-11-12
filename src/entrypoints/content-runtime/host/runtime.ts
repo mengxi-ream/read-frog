@@ -6,16 +6,19 @@ import { configSchema } from "@/types/config/config"
 import { CONFIG_STORAGE_KEY, DEFAULT_CONFIG } from "@/utils/constants/config"
 import { detectPageLanguageLightweight } from "@/utils/content/page-language"
 import { ensurePresetStyles } from "@/utils/host/translate/ui/style-injector"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
 import { onMessage, sendMessage } from "@/utils/message"
 import { clearEffectiveSiteControlUrl } from "@/utils/site-control"
 import { areSamePageTranslationOrigin } from "@/utils/url"
 import { bindTranslationHubShortcutKey } from "./bind-translation-hub-shortcut"
 import { setupUrlChangeListener } from "./listen"
+import { closePageDiagnosisPanel, togglePageDiagnosisPanel } from "./page-diagnosis"
 import { bindTranslationModeShortcutKey } from "./translation-control/bind-translation-mode-shortcut"
 import { bindTranslationShortcutKey } from "./translation-control/bind-translation-shortcut"
 import { registerNodeTranslationTriggers } from "./translation-control/node-translation"
 import { PageTranslationManager } from "./translation-control/page-translation"
+
+const log = createLogger("content-runtime/host/runtime")
 
 export async function bootstrapHostContent(
   ctx: ContentScriptContext,
@@ -80,7 +83,7 @@ export async function bootstrapHostContent(
     translationEnabled = await sendMessage("getEnablePageTranslationFromContentScript", undefined)
   } catch (error) {
     // Extension context may be invalidated during update, proceed without auto-start
-    logger.error("Failed to check translation state:", error)
+    log.error("Failed to check translation state", { error })
   }
   if (translationEnabled) {
     void manager.start()
@@ -90,7 +93,7 @@ export async function bootstrapHostContent(
     if (from !== to) {
       detectionGeneration += 1
       detectedPageLanguage = undefined
-      logger.info("URL changed from", from, "to", to)
+      log.debug("URL changed", { from, to })
       if (manager.isActive) {
         if (areSamePageTranslationOrigin(from, to)) {
           // Same-document route change: keep the session and wrappers
@@ -151,6 +154,12 @@ export async function bootstrapHostContent(
         })
       : () => {}
 
+  // The popup sends this to the top frame only; the panel covers the whole tab.
+  const cleanupPageDiagnosisListener =
+    window === window.top
+      ? onMessage("togglePageTranslationDiagnostics", () => togglePageDiagnosisPanel())
+      : () => {}
+
   ctx.onInvalidated(() => {
     cleanupUrlListener()
     teardownNodeTranslation()
@@ -162,6 +171,8 @@ export async function bootstrapHostContent(
     cleanupTranslationStateListener()
     cleanupFrameTranslationStateListener()
     cleanupDetectedLanguageRefreshListener()
+    cleanupPageDiagnosisListener()
+    closePageDiagnosisPanel()
     window.removeEventListener("extension:URLChange", handleExtensionUrlChange)
     window.__READ_FROG_HOST_INJECTED__ = false
     clearEffectiveSiteControlUrl()

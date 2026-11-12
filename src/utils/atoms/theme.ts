@@ -1,9 +1,11 @@
 import type { ThemeMode } from "@/types/config/theme"
 import { atom } from "jotai"
 import { DEFAULT_THEME_MODE, themeModeSchema } from "@/types/config/theme"
+import { createLogger } from "@/utils/logging/logger"
 import { THEME_STORAGE_KEY } from "../constants/config"
-import { logger } from "../logger"
 import { storageAdapter } from "./storage-adapter"
+
+const log = createLogger("atoms/theme")
 
 // Private base atom. Only export this for top-level hydration before ThemeProvider mounts.
 export const baseThemeModeAtom = atom<ThemeMode>(DEFAULT_THEME_MODE)
@@ -17,7 +19,7 @@ export const themeModeAtom = atom(
     try {
       await storageAdapter.set(THEME_STORAGE_KEY, newValue, themeModeSchema)
     } catch (error) {
-      console.error("Failed to set themeMode to storage:", newValue, error)
+      log.error("Failed to persist theme mode", { themeMode: newValue, error })
       set(baseThemeModeAtom, prev)
     }
   },
@@ -31,7 +33,7 @@ baseThemeModeAtom.onMount = (setAtom: (newValue: ThemeMode) => void) => {
 
   const handleVisibilityChange = () => {
     if (document.visibilityState === "visible") {
-      logger.info("baseThemeModeAtom onMount handleVisibilityChange when: ", new Date())
+      log.debug("baseThemeModeAtom reloaded on visibility change")
       void storageAdapter
         .get<ThemeMode>(THEME_STORAGE_KEY, DEFAULT_THEME_MODE, themeModeSchema)
         .then(setAtom)

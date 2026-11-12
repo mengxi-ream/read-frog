@@ -1,6 +1,8 @@
+import type { UntranslatedReason } from "../paragraph-diagnosis"
 import type { Config } from "@/types/config/config"
 import type { TranslationMode } from "@/types/config/translate"
 import type { TransNode } from "@/types/dom"
+import { createLogger } from "@/utils/logging/logger"
 import {
   CONTENT_WRAPPER_CLASS,
   NOTRANSLATE_CLASS,
@@ -57,14 +59,15 @@ import {
   insertVirtualParagraphWrappers,
   materializeVirtualParagraphUnitRuns,
 } from "../dom/virtual-paragraph-insertion"
+import { diagnoseParagraph, settleDisplayedTranslation } from "../paragraph-diagnosis"
 import { translateTextForPage } from "../translate-variants"
 import { setTranslationDirAndLang } from "../translation-attributes"
 import { createSpinnerInside, getTranslatedTextAndRemoveSpinner } from "../ui/spinner"
 import {
   createPageTranslationRequest,
+  getPageTranslationSkipReason,
   getDisplayTranslation,
   preparePageTranslationSource,
-  shouldSkipPageTranslationText,
 } from "./translation-request"
 import {
   attachBilingualTranslationWrapper,
@@ -91,6 +94,8 @@ import {
   type VirtualParagraphSourceSnapshot,
 } from "./translation-state"
 
+const log = createLogger("host/translate/core/translation-modes")
+
 let virtualParagraphGroupSequence = 0
 let virtualTranslationOnlyGenerationSequence = 0
 
@@ -111,14 +116,31 @@ function createBilingualWrapper(
   return { spinner: createSpinnerInside(wrapper), wrapper }
 }
 
+/** What `diagnoseParagraph` is told about the run of `nodes`, when there is no prose to tell. */
+function getRunText(nodes: readonly TransNode[]): string {
+  return nodes.map((node) => node.textContent ?? "").join("")
+}
+
+/** The blank-line paragraphs of one container share it as their anchor. */
+function diagnoseVirtualParagraphUnit(layoutSource: HTMLElement, unit: VirtualParagraphUnit) {
+  return diagnoseParagraph(layoutSource, unit.text, `unit:${unit.id}`)
+}
+
 async function filterVirtualParagraphUnits(
   units: VirtualParagraphUnit[],
+  layoutSource: HTMLElement,
   config: Config,
 ): Promise<VirtualParagraphUnit[]> {
-  const included = await Promise.all(
-    units.map(async (unit) => !(await shouldSkipPageTranslationText(unit.text, config))),
+  const skipReasons = await Promise.all(
+    units.map((unit) => getPageTranslationSkipReason(unit.text, config)),
   )
-  return units.filter((_, index) => included[index])
+  const included: VirtualParagraphUnit[] = []
+  units.forEach((unit, index) => {
+    const skipReason = skipReasons[index]
+    if (skipReason) diagnoseVirtualParagraphUnit(layoutSource, unit).untranslated(skipReason)
+    else included.push(unit)
+  })
+  return included
 }
 
 async function translateVirtualParagraph(
@@ -134,6 +156,7 @@ async function translateVirtualParagraph(
   const isCurrent = () => isVirtualParagraphGroupCurrent(group, wrapper)
   if (!isCurrent()) return
 
+  const diagnosis = diagnoseVirtualParagraphUnit(group.layoutSource, unit)
   const realTranslatedText = await getTranslatedTextAndRemoveSpinner(
     nodes,
     unit.text,
@@ -147,7 +170,9 @@ async function translateVirtualParagraph(
       translateTextForPage(unit.text, "plain", {
         preserveLineBreaks: true,
         forceRetranslation,
+        diagnosis,
       }),
+    diagnosis,
   )
   if (!isCurrent()) {
     disposeVirtualParagraphGroup(group)
@@ -155,6 +180,7 @@ async function translateVirtualParagraph(
   }
 
   const translatedText = getDisplayTranslation(unit.text, realTranslatedText)
+  settleDisplayedTranslation(diagnosis, realTranslatedText, translatedText)
   if (translatedText === "") {
     dropVirtualParagraphWrapper(group, wrapper)
     return
@@ -203,7 +229,7 @@ async function translateVirtualParagraphs(
   const sourceTextSnapshot = collectSourceTextExcludingWrappers(layoutSource)
   let includedUnits: VirtualParagraphUnit[]
   try {
-    includedUnits = await filterVirtualParagraphUnits(units, config)
+    includedUnits = await filterVirtualParagraphUnits(units, layoutSource, config)
   } catch (error) {
     disposeVirtualParagraphGroup(group)
     throw error
@@ -438,8 +464,12 @@ export async function translateNodesBilingualMode(
       ? collectSourceTextExcludingWrappers(layoutSource)
       : null
     const atomExtraction = preparePageTranslationSource(transNodes, config)
-    if (!atomExtraction) return
+    if (!atomExtraction) {
+      diagnoseParagraph(transNodes[0]!, getRunText(transNodes)).untranslated("noProse")
+      return
+    }
     const requestText = atomExtraction.requestText
+    const diagnosis = diagnoseParagraph(transNodes[0]!, atomExtraction.filterText)
 
     let bilingualState: BilingualTranslationState | undefined
     if (isHTMLElement(layoutSource) && sourceTextBeforeFilter !== null) {
@@ -454,11 +484,11 @@ export async function translateNodesBilingualMode(
       registerBilingualTranslationState(bilingualState)
     }
 
-    let shouldFilter: boolean
+    let skipReason: UntranslatedReason | null
     try {
       // Target-language skip runs here, BEFORE the wrapper/spinner is inserted,
       // so same-language paragraphs never touch the DOM.
-      shouldFilter = await shouldSkipPageTranslationText(atomExtraction.filterText, config)
+      skipReason = await getPageTranslationSkipReason(atomExtraction.filterText, config)
     } catch (error) {
       if (bilingualState) unregisterBilingualTranslationState(bilingualState)
       throw error
@@ -482,7 +512,8 @@ export async function translateNodesBilingualMode(
       }
       return
     }
-    if (shouldFilter) {
+    if (skipReason) {
+      diagnosis.untranslated(skipReason)
       if (bilingualState) unregisterBilingualTranslationState(bilingualState)
       return
     }
@@ -547,6 +578,7 @@ export async function translateNodesBilingualMode(
     const request = createPageTranslationRequest(atomExtraction, config, "plain", {
       preserveLineBreaks,
       forceRetranslation,
+      diagnosis,
     })
     const realTranslatedText = await getTranslatedTextAndRemoveSpinner(
       nodes,
@@ -556,6 +588,7 @@ export async function translateNodesBilingualMode(
       isCurrent,
       request.textFormat,
       request.translate,
+      diagnosis,
     )
 
     if (!isCurrent()) {
@@ -565,6 +598,7 @@ export async function translateNodesBilingualMode(
 
     // Compared on the tokenized strings: an echo comes back with its tokens.
     const translatedText = request.getDisplayText(realTranslatedText)
+    settleDisplayedTranslation(diagnosis, realTranslatedText, translatedText)
 
     if (translatedText === "") {
       removeTranslatedWrapperWithRestore(translatedWrapperNode)
@@ -925,7 +959,7 @@ async function translateTranslationOnlyRun(
 
     const parentNode = targetNode.parentElement
     if (!parentNode) {
-      console.error("targetNode.parentElement is not HTMLElement", targetNode.parentElement)
+      log.warn("Paragraph has no parent element to translate into")
       return
     }
     // An in-place swap leaves no wrapper — the anchor marker is the handle.
@@ -981,7 +1015,16 @@ async function translateTranslationOnlyRun(
     }
 
     const source = preparePageTranslationSource(transNodes, config)
-    if (!source || (await shouldSkipPageTranslationText(source.filterText, config))) return
+    if (!source) {
+      diagnoseParagraph(transNodes[0]!, getRunText(transNodes)).untranslated("noProse")
+      return
+    }
+    const diagnosis = diagnoseParagraph(transNodes[0]!, source.filterText)
+    const skipReason = await getPageTranslationSkipReason(source.filterText, config)
+    if (skipReason) {
+      diagnosis.untranslated(skipReason)
+      return
+    }
 
     const ownerDoc = getOwnerDocument(targetNode)
     // The translation is swapped into the run's own text nodes, so their
@@ -991,8 +1034,12 @@ async function translateTranslationOnlyRun(
     const request = createPageTranslationRequest(source, config, "html", {
       preserveLineBreaks: isNewlinePreservingElement(parentNode),
       forceRetranslation,
+      diagnosis,
     })
-    if (!request.sourceText) return
+    if (!request.sourceText) {
+      diagnosis.untranslated("noProse")
+      return
+    }
 
     // Taken before the provider request; the response handler compares against
     // it to detect host mutations that happened while the request was in
@@ -1028,8 +1075,10 @@ async function translateTranslationOnlyRun(
       isCurrent,
       request.textFormat,
       request.translate,
+      diagnosis,
     )
     const translatedText = request.getDisplayText(realTranslatedText)
+    settleDisplayedTranslation(diagnosis, realTranslatedText, translatedText)
 
     if (!translatedText) {
       // Keep the wrapper when translation failed so the injected error UI remains visible.

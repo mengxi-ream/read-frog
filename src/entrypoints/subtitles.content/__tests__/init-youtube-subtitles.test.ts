@@ -62,10 +62,6 @@ vi.mock("../bind-subtitles-toggle-shortcut", () => ({
   bindSubtitlesToggleShortcut: mocks.bindToggleShortcut,
 }))
 
-vi.mock("@/utils/logger", () => ({
-  logger: { error: vi.fn<(...args: any[]) => any>() },
-}))
-
 interface FakeAdapter {
   config: { mode: string }
   initialize: ReturnType<typeof vi.fn>

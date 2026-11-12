@@ -2,8 +2,10 @@ import type { GuideDictionaryNotebaseCompletionInput } from "@/utils/guide/dicti
 import { browser } from "#imports"
 import { env } from "@/env"
 import { markGuideDictionaryNotebaseCompleted } from "@/utils/guide/dictionary-notebase"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
 import { onMessage, sendMessage } from "@/utils/message"
+
+const log = createLogger("background/new-user-guide")
 
 let lastIsPinned = false
 
@@ -37,7 +39,7 @@ async function checkPinnedAndNotify() {
     (tabs) => {
       for (const tab of tabs) {
         void sendMessage("pinStateChanged", { isPinned: isOnToolbar }, tab.id).catch((error) => {
-          logger.warn("[NewUserGuide] Failed to notify pin state", error)
+          log.warn("Failed to notify pin state", { error })
         })
       }
     },
@@ -69,7 +71,7 @@ async function notifyGuideDictionaryNotebaseStateChanged(state: { completed: boo
     }
 
     void sendMessage("guideDictionaryNotebaseStateChanged", state, tab.id).catch((error) => {
-      logger.warn("[NewUserGuide] Failed to notify guide dictionary Notebase state", error)
+      log.warn("Failed to notify guide dictionary Notebase state", { error })
     })
   }
 }

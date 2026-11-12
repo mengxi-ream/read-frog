@@ -398,15 +398,6 @@ vi.mock("@/components/ui/base-ui/toast", () => ({
   },
 }))
 
-vi.mock("@/utils/logger", () => ({
-  logger: {
-    info: vi.fn<(...args: any[]) => any>(),
-    log: vi.fn<(...args: any[]) => any>(),
-    error: vi.fn<(...args: any[]) => any>(),
-    warn: vi.fn<(...args: any[]) => any>(),
-  },
-}))
-
 vi.mock("@/utils/message", () => ({
   onMessage: (...args: unknown[]) => onMessageMock(...args),
   sendMessage: vi.fn<(...args: any[]) => any>(),

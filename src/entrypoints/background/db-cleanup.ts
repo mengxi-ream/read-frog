@@ -1,7 +1,9 @@
 import type { Table } from "dexie"
 import { browser } from "#imports"
 import { db } from "@/utils/db/dexie/db"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
+
+const log = createLogger("background/db-cleanup")
 
 export const CHECK_INTERVAL_MINUTES = 24 * 60
 
@@ -77,10 +79,10 @@ function createCacheCleanup({
       const deletedCount = await table.where("createdAt").below(cutoffDate).delete()
 
       if (deletedCount > 0) {
-        logger.info(`${label} cleanup: Deleted ${deletedCount} old entries`)
+        log.info("Deleted expired entries", { label, deletedCount })
       }
     } catch (error) {
-      logger.error(`Failed to cleanup old ${label}:`, error)
+      log.error("Failed to delete expired entries", { label, error })
     }
   }
 }
@@ -90,9 +92,9 @@ export async function cleanupAllTranslationCache() {
     // Delete all translation cache entries
     await db.translationCache.clear()
 
-    logger.info(`Cache cleanup: Deleted all translation cache entries`)
+    log.info("Deleted all translation cache entries")
   } catch (error) {
-    logger.error("Failed to cleanup all cache:", error)
+    log.error("Failed to cleanup all cache", { error })
     throw error
   }
 }
@@ -114,9 +116,10 @@ async function cleanupOldRequestRecords() {
       const keysToDelete = oldestRecords.map((record) => record.key)
       await db.batchRequestRecord.bulkDelete(keysToDelete)
 
-      logger.info(
-        `Request records cleanup: Deleted ${excessCount} oldest records (count exceeded ${REQUEST_RECORD_MAX_COUNT})`,
-      )
+      log.info("Deleted the oldest request records over the limit", {
+        deletedCount: excessCount,
+        maxCount: REQUEST_RECORD_MAX_COUNT,
+      })
     }
 
     // Delete records older than max age
@@ -129,12 +132,13 @@ async function cleanupOldRequestRecords() {
       .delete()
 
     if (deletedByAgeCount > 0) {
-      logger.info(
-        `Request records cleanup: Deleted ${deletedByAgeCount} records older than ${REQUEST_RECORD_MAX_AGE_DAYS} days`,
-      )
+      log.info("Deleted expired request records", {
+        deletedCount: deletedByAgeCount,
+        maxAgeDays: REQUEST_RECORD_MAX_AGE_DAYS,
+      })
     }
   } catch (error) {
-    logger.error("Failed to cleanup old request records:", error)
+    log.error("Failed to cleanup old request records", { error })
   }
 }
 
@@ -143,9 +147,9 @@ export async function cleanupAllRequestRecords() {
     // Delete all batch request records
     await db.batchRequestRecord.clear()
 
-    logger.info(`Request records cleanup: Deleted all batch request records`)
+    log.info("Deleted all batch request records")
   } catch (error) {
-    logger.error("Failed to cleanup all request records:", error)
+    log.error("Failed to cleanup all request records", { error })
     throw error
   }
 }
@@ -155,9 +159,9 @@ export async function cleanupAllSummaryCache() {
     // Delete all article summary cache entries
     await db.articleSummaryCache.clear()
 
-    logger.info(`Summary cache cleanup: Deleted all article summary cache entries`)
+    log.info("Deleted all article summary cache entries")
   } catch (error) {
-    logger.error("Failed to cleanup all summary cache:", error)
+    log.error("Failed to cleanup all summary cache", { error })
     throw error
   }
 }
@@ -165,9 +169,9 @@ export async function cleanupAllSummaryCache() {
 export async function cleanupAllAiSegmentationCache() {
   try {
     await db.aiSegmentationCache.clear()
-    logger.info("AI segmentation cache cleanup: Deleted all entries")
+    log.info("AI segmentation cache cleanup: Deleted all entries")
   } catch (error) {
-    logger.error("Failed to cleanup all AI segmentation cache:", error)
+    log.error("Failed to cleanup all AI segmentation cache", { error })
     throw error
   }
 }

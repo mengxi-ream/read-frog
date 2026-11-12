@@ -22,7 +22,7 @@ import { authClient } from "@/utils/auth/auth-client"
 import { SELECTION_CONTENT_OVERLAY_LAYERS } from "@/utils/constants/selection-overlay-layers"
 import { patchSelectionToolbarAction } from "@/utils/custom-actions"
 import { i18n } from "@/utils/i18n"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
 import { sendMessage } from "@/utils/message"
 import { buildCustomActionOptionsRoute } from "@/utils/navigation"
 import { trackNoteSaveCompleted } from "@/utils/note-save/analytics"
@@ -48,6 +48,8 @@ import { orpc, orpcClient } from "@/utils/orpc/client"
 import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-host"
 import { showNotebaseLimitExceededToast } from "./notebase-limit-toast"
 import { saveToNotebaseDialogAtom } from "./save-to-notebase-dialog-atom"
+
+const log = createLogger("custom-action/save-to-notebase-dialog-host")
 
 function getAccountFallback(account: SelectionToolbarCustomActionNotebaseAccount | undefined) {
   const label = formatNotebaseConnectedAccountLabel(account)
@@ -92,10 +94,7 @@ async function completeGuideDictionaryNotebaseFromPending(pendingSave: PendingCr
       sourceUrl: tracking.sourceUrl,
     })
   } catch (error) {
-    logger.warn(
-      "[SaveToNotebaseDialogHost] Failed to complete guide Dictionary Notebase flow",
-      error,
-    )
+    log.warn("Failed to complete guide Dictionary Notebase flow", { error })
   }
 }
 
@@ -208,7 +207,7 @@ export function SaveToNotebaseDialogHost() {
           active: true,
         })
       } catch (error) {
-        logger.warn("[SaveToNotebaseDialogHost] Failed to open Notebase detail page", error)
+        log.warn("Failed to open Notebase detail page", { error })
       }
     },
     onError: (error: unknown, variables) => {

@@ -137,11 +137,6 @@ function createDeps({
     completeGuideDictionaryNotebase: vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined),
     reportNoteSave: vi.fn<(...args: any[]) => any>(),
     now: () => 1_000,
-    log: {
-      info: vi.fn<(...args: any[]) => any>(),
-      warn: vi.fn<(...args: any[]) => any>(),
-      error: vi.fn<(...args: any[]) => any>(),
-    },
   }
 }
 

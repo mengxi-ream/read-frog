@@ -17,7 +17,7 @@ import { Sha256Hex } from "@/utils/hash"
 import { prepareTranslationText } from "@/utils/host/translate/text-preparation"
 import { normalizePromptContextValue } from "@/utils/host/translate/translate-text"
 import { i18n } from "@/utils/i18n"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
 import { sendMessage } from "@/utils/message"
 import { getSubtitlesTranslatePrompt } from "@/utils/prompts/subtitles"
 import {
@@ -27,6 +27,8 @@ import {
   serializeProviderRef,
 } from "@/utils/providers/provider-ref"
 import { resolveProviderRefForCapability } from "@/utils/providers/provider-registry"
+
+const log = createLogger("subtitles/processor/translator")
 
 /**
  * One toast for the whole run, not one per batch: the provider is re-resolved
@@ -278,7 +280,7 @@ export async function resolveSubtitlesProvider(
     // Nothing else is expected to throw here (serializeProviderRef already
     // fails open on an unreachable status endpoint). Keep degrading rather
     // than introducing a new throw into the render path, but leave a trace.
-    logger.warn("[Subtitles] Provider ref resolution failed", error)
+    log.warn("Provider ref resolution failed", { error })
     return { status: "none" }
   }
 }

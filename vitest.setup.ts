@@ -1,4 +1,5 @@
-import { vi } from "vitest"
+import { afterEach, vi } from "vitest"
+import { resetLogging } from "@/utils/logging/logger"
 
 // jest-dom's matchers only make sense against a DOM, and every file that uses them
 // declares the jsdom environment. Loading it (with @testing-library/dom, aria-query
@@ -14,8 +15,16 @@ if (typeof document !== "undefined") {
 console.log = () => {}
 // eslint-disable-next-line no-console
 console.info = () => {}
+// eslint-disable-next-line no-console
+console.debug = () => {}
 console.warn = () => {}
 console.error = () => {}
+
+// A test that captures logs (utils/logging/testing.ts) must not leave its sink
+// in place for the next one.
+afterEach(() => {
+  resetLogging()
+})
 
 class MemoryStorage implements Storage {
   #store = new Map<string, string>()

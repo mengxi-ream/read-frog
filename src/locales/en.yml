@@ -69,6 +69,7 @@ popup:
     emailUs: Email us
     featureRequest: Feature request
     bugReport: Report a bug
+    diagnosePage: "Diagnose this page"
     community: Community
     joinDiscord: Join Discord
     joinWechat: Join WeChat Group
@@ -135,6 +136,13 @@ options:
     bugReport:
       title: Report a bug
       description: Open a support ticket and follow it until it is fixed
+    troubleshooting:
+      title: "Troubleshooting"
+    diagnostics:
+      title: "Export diagnostics"
+      description: "Save recent logs and settings, with API keys removed, to attach to a bug report"
+      exportSuccess: "Diagnostics saved"
+      exportFailed: "Couldn't export diagnostics"
     community:
       title: Community
     discord:
@@ -1729,6 +1737,22 @@ translation:
   sameLanguage: Source and target languages must be different
   autoModeSameLanguage: Detected language '$1' is the same as target language
   extensionContextInvalidated: The extension was updated. Refresh this page and try again.
+pageDiagnosis:
+  title: "Page diagnosis"
+  summary: "$1 translated, $2 not translated"
+  empty: "Nothing to show yet. Turn on page translation, then open this again."
+  hint: "Click a reason to outline its paragraphs on the page."
+  close: "Close"
+  unavailable: "Read Frog isn't running on this page"
+  reasons:
+    noProse: "No words to translate"
+    tooShort: "Too short to translate"
+    targetLanguage: "Already in your target language"
+    skipLanguage: "In a language you skip"
+    noTranslationNeeded: "The AI said no translation is needed"
+    sameAsSource: "The translation matched the original"
+    emptyResult: "The service returned nothing"
+    error: "Translation failed"
 annotation:
   annotate: "Annotate"
   enterMode: "Annotation mode"

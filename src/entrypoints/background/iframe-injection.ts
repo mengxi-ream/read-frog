@@ -8,7 +8,7 @@ import {
   CONTENT_LOADER_SCRIPT_FILE,
   CONTENT_RUNTIME_PARTS_WINDOW_KEY,
 } from "@/utils/content-runtime/parts"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
 import { onMessage } from "@/utils/message"
 import { isSiteEnabled, SITE_CONTROL_URL_WINDOW_KEY } from "@/utils/site-control"
 import { ensureRemoteSiteRulesLoaded } from "@/utils/site-rules/active"
@@ -16,6 +16,8 @@ import { getEffectiveSiteRule } from "@/utils/site-rules/effective"
 import { urlMatchesPattern } from "@/utils/url-pattern"
 import { isSameOriginIframeSender, resolveSiteControlUrl } from "./iframe-injection-utils"
 import { getPageTranslationEnabled } from "./page-translation-state"
+
+const log = createLogger("background/iframe-injection")
 
 // The parts of the content runtime an iframe can get; the side UI is top-frame only
 type IframeContentPart = Extract<ContentRuntimePart, "host" | "selection">
@@ -206,10 +208,7 @@ async function injectHostContentIntoFrame(
         return
       }
     } catch (error) {
-      logger.error(
-        "[Background][IframeInjection] Failed to resolve iframe injection prerequisites",
-        error,
-      )
+      log.error("[IframeInjection] Failed to resolve iframe injection prerequisites", { error })
       return
     }
 
@@ -240,7 +239,7 @@ async function injectHostContentIntoFrame(
         )
       }
     } catch (error) {
-      logger.warn("[Background][IframeInjection] Failed to inject iframe content scripts", error)
+      log.warn("[IframeInjection] Failed to inject iframe content scripts", { error })
     }
   } finally {
     for (const part of partsToInject) {
@@ -262,7 +261,7 @@ export async function injectHostContentIntoTabIframes(
       options,
     ))
   } catch (error) {
-    logger.warn("[Background][IframeInjection] Failed to resolve iframe injection state", error)
+    log.warn("[IframeInjection] Failed to resolve iframe injection state", { error })
     return
   }
 
@@ -272,10 +271,7 @@ export async function injectHostContentIntoTabIframes(
   try {
     frames = await getFrameSnapshot(tabId)
   } catch (error) {
-    logger.error(
-      "[Background][IframeInjection] Failed to resolve tab iframe injection prerequisites",
-      error,
-    )
+    log.error("[IframeInjection] Failed to resolve tab iframe injection prerequisites", { error })
     return
   }
 
@@ -359,10 +355,7 @@ export function setupIframeInjection() {
           pendingScriptDocumentKeys.has(getScriptDocumentInjectionKey(details, part)),
       )
     } catch (error) {
-      logger.warn(
-        "[Background][IframeInjection] Failed to activate same-origin selection runtime",
-        error,
-      )
+      log.warn("[IframeInjection] Failed to activate same-origin selection runtime", { error })
       return false
     }
   })
@@ -414,7 +407,7 @@ export function setupIframeInjection() {
 
       await injectHostContentIntoFrame(details, undefined, config)
     } catch (error) {
-      logger.warn("[Background][IframeInjection] Failed to resolve iframe injection state", error)
+      log.warn("[IframeInjection] Failed to resolve iframe injection state", { error })
     }
   })
 }

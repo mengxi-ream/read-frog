@@ -22,7 +22,7 @@ import {
 } from "@/utils/constants/analytics"
 import { EXTENSION_VERSION } from "@/utils/constants/app"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
-import { logger } from "@/utils/logger"
+import { createLogger, type Logger } from "@/utils/logging/logger"
 import { getAnalyticsSiteDomain } from "@/utils/url"
 import {
   createStorageFeatureUsageCache,
@@ -30,6 +30,9 @@ import {
   type FeatureUsageCache,
   type FeatureUsageCacheKey,
 } from "./analytics-feature-cache"
+
+const log = createLogger("background/analytics")
+
 type BackgroundFeatureUsedEventProperties = FeatureUsedEventProperties & { site_domain?: string }
 
 type FeatureSurfaceLists = { [F in AnalyticsFeature]: readonly SurfaceByFeature[F][] }
@@ -139,7 +142,7 @@ interface BackgroundAnalyticsRuntime {
   getStorageItem: (key: LocalStorageKey) => Promise<unknown>
   posthog: BackgroundAnalyticsClient
   setStorageItem: (key: LocalStorageKey, value: unknown) => Promise<void>
-  warn: typeof logger.warn
+  warn: Logger["warn"]
 }
 
 const DEV_POSTHOG_TEST_UUID = "00000000-0000-0000-0000-000000000001"
@@ -186,7 +189,7 @@ function createDefaultRuntime(): BackgroundAnalyticsRuntime {
     getStorageItem,
     posthog,
     setStorageItem,
-    warn: logger.warn,
+    warn: log.warn,
   }
 }
 
@@ -614,7 +617,7 @@ export function createBackgroundAnalytics(
       if (!missingConfigWarned) {
         missingConfigWarned = true
         runtime.warn(
-          "[Analytics] PostHog is disabled because WXT_POSTHOG_API_KEY or WXT_POSTHOG_HOST is missing",
+          "PostHog is disabled because WXT_POSTHOG_API_KEY or WXT_POSTHOG_HOST is missing",
         )
       }
       return null
@@ -666,10 +669,7 @@ export function createBackgroundAnalytics(
       client.capture(ANALYTICS_FEATURE_USED_EVENT, properties)
       return true
     } catch (error) {
-      runtime.warn(
-        `[Analytics] Failed to capture ${ANALYTICS_FEATURE_USED_EVENT} in background`,
-        error,
-      )
+      runtime.warn(`Failed to capture ${ANALYTICS_FEATURE_USED_EVENT} in background`, { error })
       return false
     }
   }
@@ -703,7 +703,7 @@ export function createBackgroundAnalytics(
       try {
         lastReportedDay = await featureUsageCache.getLastReportedDay(cacheKey)
       } catch (error) {
-        runtime.warn("[Analytics] Failed to read the daily feature usage cache", error)
+        runtime.warn("Failed to read the daily feature usage cache", { error })
       }
 
       if (lastReportedDay === currentDay) {
@@ -717,7 +717,7 @@ export function createBackgroundAnalytics(
       try {
         await featureUsageCache.setLastReportedDay(cacheKey, currentDay)
       } catch (error) {
-        runtime.warn("[Analytics] Failed to write the daily feature usage cache", error)
+        runtime.warn("Failed to write the daily feature usage cache", { error })
       }
     })
   }
@@ -736,7 +736,7 @@ export function createBackgroundAnalytics(
 
     const normalizedProperties = normalizeFeatureUsedEvent(properties, tab)
     if (!normalizedProperties) {
-      runtime.warn("[Analytics] Dropped an incomplete feature_used event")
+      runtime.warn("Dropped an incomplete feature_used event")
       return
     }
 

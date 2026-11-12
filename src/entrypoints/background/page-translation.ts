@@ -1,5 +1,8 @@
 import type { WebPagePromptContext } from "@/types/content"
+import type TranslationCache from "@/utils/db/dexie/tables/translation-cache"
+import type { SerializableProviderRef } from "@/utils/providers/provider-ref"
 import { browser } from "#imports"
+import { isLLMProviderConfig } from "@/types/config/provider"
 import { normalizeLanguageConfig } from "@/utils/config/languages"
 import { isNoTranslationSentinel } from "@/utils/constants/prompt"
 import { cleanText } from "@/utils/content/utils"
@@ -17,7 +20,7 @@ import {
 } from "@/utils/host/translate/inline-atom-tokens"
 import { normalizePromptContextValue } from "@/utils/host/translate/translate-text"
 import { validateProviderHostedFeature } from "@/utils/hosted-ai/routing"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
 import { onMessage } from "@/utils/message"
 import { getTranslatePrompt } from "@/utils/prompts/translate"
 import { canProviderRefGenerateText } from "@/utils/providers/provider-ref"
@@ -31,25 +34,38 @@ import {
   shouldUseBatchQueue,
 } from "./translation-queues"
 
+const log = createLogger("background/page-translation")
+
 async function getValidatedCachedTranslation(
   hash: string,
   sourceText: string,
   validateHtmlAttributeMarkers: boolean,
-): Promise<string | undefined> {
+): Promise<TranslationCache | undefined> {
   const cached = await db.translationCache.get(hash)
   if (!cached) return undefined
-  if (!validateHtmlAttributeMarkers) return cached.translation
+  if (!validateHtmlAttributeMarkers) return cached
 
   try {
     assertHtmlAttributeMarkerIntegrity(sourceText, cached.translation)
-    return cached.translation
+    return cached
   } catch (error) {
     if (!isHtmlAttributeMarkerIntegrityError(error)) throw error
 
     await db.translationCache.delete(hash)
-    logger.warn("Deleted cached translation with invalid HTML attribute markers", error)
+    log.warn("Deleted cached translation with invalid HTML attribute markers", { error })
     return undefined
   }
+}
+
+/** Which service answered, for the log; never its config, which holds the key. */
+function describeProvider(providerRef: SerializableProviderRef): Record<string, string | null> {
+  if (providerRef.kind === "system") {
+    return { provider: providerRef.providerId, modelTier: providerRef.modelTier }
+  }
+  const { config } = providerRef
+  if (!isLLMProviderConfig(config)) return { provider: config.provider }
+  const { model, isCustomModel, customModel } = config.model
+  return { provider: config.provider, model: isCustomModel ? customModel : model }
 }
 
 /** Register handlers synchronously while queue initialization runs in the background. */
@@ -90,12 +106,15 @@ export function setupPageTranslationHandlers(): void {
     // Check cache first — unless the user asked for a fresh translation. The
     // existing entry is left untouched unless the fresh request succeeds below.
     if (hash && !forceRetranslation) {
-      const cachedTranslation = await getValidatedCachedTranslation(
-        hash,
-        text,
-        validateHtmlAttributeMarkers,
-      )
-      if (cachedTranslation !== undefined) return cachedTranslation
+      const cached = await getValidatedCachedTranslation(hash, text, validateHtmlAttributeMarkers)
+      if (cached) {
+        // A "no translation needed" answer is cached like any other, so one
+        // wrong verdict keeps a paragraph untranslated until the entry expires.
+        if (isNoTranslationSentinel(cached.translation)) {
+          log.info("Served a cached no-translation verdict", { text, cachedAt: cached.createdAt })
+        }
+        return cached.translation
+      }
     }
 
     // The cache lookup above yielded — the session's cancel may have drained
@@ -148,6 +167,10 @@ export function setupPageTranslationHandlers(): void {
       assertHtmlAttributeMarkerIntegrity(text, result)
     }
 
+    if (isNoTranslationSentinel(result)) {
+      log.info("The model found no translation needed", { text, ...describeProvider(providerRef) })
+    }
+
     // A response that dropped, invented or duplicated an inline-atom
     // placeholder is still rendered by the content script (the formulas are
     // appended) but must not be persisted: the next visit deserves a fresh
@@ -160,7 +183,7 @@ export function setupPageTranslationHandlers(): void {
       isNoTranslationSentinel(result) ||
       auditInlineAtomTokens(text, result).ok
     if (result && !inlineAtomTokensIntact) {
-      logger.warn("Inline atom placeholders were not preserved; result not cached")
+      log.warn("Inline atom placeholders were not preserved; result not cached")
     }
 
     // Cache the translation result if successful
@@ -214,9 +237,10 @@ export function setupPageTranslationHandlers(): void {
     const cancelledBatch = batchQueue.cancelByScope(scope)
     const cancelledRequests = requestQueue.cancelByScope(scope)
     if (cancelledBatch + cancelledRequests > 0) {
-      logger.info(
-        `Cancelled ${cancelledBatch + cancelledRequests} page-translation requests (scope: ${scope})`,
-      )
+      log.info("Cancelled page-translation requests", {
+        count: cancelledBatch + cancelledRequests,
+        scope,
+      })
     }
   })
 

@@ -1,10 +1,13 @@
 import "@/utils/zod-config"
 import type { ContentRuntime, ContentRuntimePart } from "@/utils/content-runtime/parts"
 import { ContentScriptContext, defineUnlistedScript } from "#imports"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
+import { setupContentScriptLogging } from "@/utils/logging/setup"
 import { runHostContent } from "./host/main"
 import { runSelectionContent } from "./selection/main"
 import { runSideContent } from "./side/main"
+
+const log = createLogger("content-runtime")
 
 // The shared ES module behind every page's content scripts. The manifest only
 // injects the small loader (entrypoints/loader.content.ts); it imports this
@@ -35,10 +38,13 @@ async function runContentParts(parts: readonly ContentRuntimePart[]) {
           // so stopping old scripts and invalidation behave as before.
           await RUNNERS[part](new ContentScriptContext(part, { cssInjectionMode: "manual" }))
         } catch (error) {
-          logger.error(`[content-runtime] "${part}" crashed on startup`, error)
+          log.error("Content part crashed on startup", { part, error })
         }
       }),
   )
 }
 
-export default defineUnlistedScript((): ContentRuntime => ({ runContentParts }))
+export default defineUnlistedScript((): ContentRuntime => {
+  setupContentScriptLogging()
+  return { runContentParts }
+})

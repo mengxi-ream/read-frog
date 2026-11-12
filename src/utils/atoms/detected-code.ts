@@ -1,9 +1,11 @@
 import type { LanguageTag } from "@read-frog/definitions"
 import { atom } from "jotai"
 import { normalizeDetectedCode } from "@/utils/config/languages"
+import { createLogger } from "@/utils/logging/logger"
 import { DEFAULT_DETECTED_CODE } from "../constants/config"
-import { logger } from "../logger"
 import { onMessage, sendMessage } from "../message"
+
+const log = createLogger("atoms/detected-code")
 
 // Private base atom - not exported to prevent direct writes
 const baseDetectedCodeAtom = atom<LanguageTag>(DEFAULT_DETECTED_CODE)
@@ -22,7 +24,7 @@ baseDetectedCodeAtom.onMount = (setAtom: (newValue: LanguageTag) => void) => {
     void sendMessage("getDetectedCode", undefined)
       .then((detectedCode) => setAtom(normalizeDetectedCode(detectedCode)))
       .catch((error) => {
-        logger.warn("Failed to refresh active tab detected language", error)
+        log.warn("Failed to refresh active tab detected language", { error })
         setAtom(DEFAULT_DETECTED_CODE)
       })
   }
@@ -35,7 +37,7 @@ baseDetectedCodeAtom.onMount = (setAtom: (newValue: LanguageTag) => void) => {
 
   const handleVisibilityChange = () => {
     if (document.visibilityState === "visible") {
-      logger.info("detectedCodeAtom onMount handleVisibilityChange when: ", new Date())
+      log.debug("detectedCodeAtom reloaded on visibility change")
       refreshDetectedCode()
     }
   }

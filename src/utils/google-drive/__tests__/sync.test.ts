@@ -36,15 +36,6 @@ vi.mock("../auth", async (importOriginal) => ({
   getGoogleUserInfo: vi.fn<(...args: any[]) => any>(),
 }))
 
-// Mock the logger
-vi.mock("@/utils/logger", () => ({
-  logger: {
-    info: vi.fn<(...args: any[]) => any>(),
-    warn: vi.fn<(...args: any[]) => any>(),
-    error: vi.fn<(...args: any[]) => any>(),
-  },
-}))
-
 // Simple test config - just needs matching shape
 interface TestConfig {
   setting1: string

@@ -7,7 +7,8 @@ import { selectFreshTranslateProviders } from "@/utils/config/default-translate-
 import { CONFIG_STORAGE_KEY } from "@/utils/constants/config"
 import { initI18n, setUiLanguage } from "@/utils/i18n"
 import { ensureInstalledAtRecorded } from "@/utils/install-time"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
+import { setupBackgroundLogging } from "@/utils/logging/setup-background"
 import { onMessage } from "@/utils/message"
 import { openOptionsPage } from "@/utils/navigation"
 import { SessionCacheGroupRegistry } from "@/utils/session-cache/session-cache-group-registry"
@@ -24,6 +25,7 @@ import {
   cleanupAllTranslationCache,
   setUpDatabaseCleanup,
 } from "./db-cleanup"
+import { setupDiagnosticsHandlers } from "./diagnostics"
 import { setupEdgeTTSMessageHandlers } from "./edge-tts"
 import { setupFeatureUsedEventHandlers } from "./feature-used-event"
 import { setupGlossaryMessageHandlers } from "./glossary"
@@ -43,10 +45,15 @@ import { setupTTSPlaybackMessageHandlers } from "./tts-playback"
 import { setupUninstallSurvey } from "./uninstall-survey"
 import { setupVideoSummaryHandlers } from "./video-summary"
 
+const log = createLogger("background")
+
 export default defineBackground({
   type: "module",
   main: () => {
-    logger.info("Hello background!", { id: browser.runtime.id })
+    // First, so nothing below logs before the local log is there to keep it.
+    setupBackgroundLogging()
+    setupDiagnosticsHandlers()
+    log.debug("Hello background!", { id: browser.runtime.id })
 
     browser.runtime.onInstalled.addListener(async (details) => {
       // First, and for every reason rather than just "install": this is the only place the
@@ -77,25 +84,24 @@ export default defineBackground({
 
       // Clear blog cache on extension update to fetch latest blog posts
       if (details.reason === "update") {
-        logger.info("[Background] Extension updated, clearing blog cache")
+        log.info("Extension updated, clearing blog cache")
         await SessionCacheGroupRegistry.removeCacheGroup("blog-fetch")
       }
     })
 
     onMessage("openPage", async (message) => {
       const { url, active } = message.data
-      logger.info("openPage", { url, active })
+      log.debug("openPage", { url, active })
       await browser.tabs.create({ url, active: active ?? true })
     })
 
     onMessage("openOptionsPage", async (message) => {
-      logger.info("openOptionsPage", message.data)
+      log.debug("openOptionsPage", { data: message.data })
       await openOptionsPage(message.data)
     })
 
     setupSidePanelMessageHandler({
       extensionBrowser: browser,
-      logger,
       registerMessageHandler: onMessage,
     })
 
@@ -103,7 +109,7 @@ export default defineBackground({
       try {
         return await runAiSegmentSubtitles(message.data)
       } catch (error) {
-        logger.error("[Background] aiSegmentSubtitles failed", error)
+        log.error("aiSegmentSubtitles failed", { error })
         throw error
       }
     })

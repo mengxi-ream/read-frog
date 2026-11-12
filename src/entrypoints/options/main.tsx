@@ -18,6 +18,7 @@ import { getLocalConfig } from "@/utils/config/storage"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { initI18n } from "@/utils/i18n"
 import { LocaleBoundary } from "@/utils/i18n/locale-boundary"
+import { setupExtensionPageLogging } from "@/utils/logging/setup"
 import { renderPersistentReactRoot } from "@/utils/react-root"
 import { queryClient } from "@/utils/tanstack-query"
 import { applyTheme, getLocalThemeMode, isDarkMode } from "@/utils/theme"
@@ -28,6 +29,8 @@ import { ScrollRestoration } from "./navigation/scroll-restoration"
 import "@fontsource-variable/inter/index.css"
 import "@/assets/styles/theme.css"
 import "./style.css"
+
+setupExtensionPageLogging("options")
 
 function HydrateAtoms({
   initialValues,
