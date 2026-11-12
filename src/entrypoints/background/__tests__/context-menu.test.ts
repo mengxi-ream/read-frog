@@ -1,16 +1,15 @@
 import type { Config } from "@/types/config/config"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { browser, storage } from "#imports"
-import { i18n } from "@/utils/i18n"
-import { logger } from "@/utils/logger"
 import {
-  initializeContextMenu,
   MENU_ID_SELECTION_CUSTOM_ACTION_PREFIX,
   MENU_ID_SELECTION_READ_ALOUD,
   MENU_ID_SELECTION_TRANSLATE,
   MENU_ID_TRANSLATE,
-  registerContextMenuListeners,
-} from "../context-menu"
+} from "@/utils/context-menu"
+import { i18n } from "@/utils/i18n"
+import { logger } from "@/utils/logger"
+import { initializeContextMenu, registerContextMenuListeners } from "../context-menu"
 
 // vi.mock factories run during the static imports above, before this module's
 // own top-level code, so the mocks they return must be hoisted with them.
