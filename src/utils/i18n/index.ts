@@ -58,6 +58,10 @@ const I18NEXT_OPTIONS = {
   // Preserve the pre-migration `browser.i18n.getMessage` behaviour of returning "" for
   // a key missing in *all* locales, so guards like `i18n.t(key) || fallback` keep working.
   parseMissingKeyHandler: () => "",
+  // Render an empty translation as "" instead of falling back to English, as the
+  // locale files use "" for sentence fragments some languages leave out.
+  // (Default true in i18next 26, false since 27; pinned here.)
+  returnEmptyString: true,
   interpolation: {
     escapeValue: false,
     // Leave `{{token}}` untouched when no matching value is passed. This keeps literal
@@ -100,7 +104,7 @@ function rawT(key: string, substitutions?: Substitution[]): string {
   const options = substitutions
     ? Object.fromEntries(substitutions.map((value, index) => [String(index), value]))
     : undefined
-  return translate(key, options)
+  return options ? translate(key, options) : translate(key)
 }
 
 export const i18n: { t: FacadeT } = { t: rawT }
