@@ -5,6 +5,10 @@ import {
   diagnoseParagraph,
   resetParagraphDiagnosis,
 } from "@/utils/host/translate/paragraph-diagnosis"
+import {
+  beginPageTranslationSession,
+  endPageTranslationSession,
+} from "@/utils/host/translate/translation-session"
 import { PageDiagnosisPanel } from "../panel"
 
 function paragraph(text: string): HTMLParagraphElement {
@@ -26,6 +30,7 @@ describe("page diagnosis panel", () => {
   })
 
   afterEach(() => {
+    endPageTranslationSession()
     // @ts-expect-error -- put jsdom back the way it was
     delete Element.prototype.scrollIntoView
   })
@@ -52,6 +57,23 @@ describe("page diagnosis panel", () => {
     })
 
     expect(await screen.findByRole("button", { name: /reasons\.error/ })).toBeInTheDocument()
+    expect(screen.queryByText("pageDiagnosis.framesNotIncluded")).not.toBeInTheDocument()
+  })
+
+  it("does not ask to turn on page translation while it is on", () => {
+    beginPageTranslationSession()
+
+    render(<PageDiagnosisPanel onClose={() => {}} />)
+
+    expect(screen.getByText("pageDiagnosis.emptyWhileTranslating")).toBeInTheDocument()
+  })
+
+  it("says that text inside frames is not included, on a page with frames", () => {
+    document.body.append(document.createElement("iframe"))
+
+    render(<PageDiagnosisPanel onClose={() => {}} />)
+
+    expect(screen.getByText("pageDiagnosis.framesNotIncluded")).toBeInTheDocument()
   })
 
   it("outlines a reason's paragraphs and brings the first into view", () => {

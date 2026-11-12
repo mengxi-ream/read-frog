@@ -110,8 +110,10 @@ export function setupPageTranslationHandlers(): void {
       if (cached) {
         // A "no translation needed" answer is cached like any other, so one
         // wrong verdict keeps a paragraph untranslated until the entry expires.
+        // Debug only: it comes back on every visit, and the page's own summary
+        // already counts these paragraphs and quotes a few.
         if (isNoTranslationSentinel(cached.translation)) {
-          log.info("Served a cached no-translation verdict", { text, cachedAt: cached.createdAt })
+          log.debug("Served a cached no-translation verdict", { text, cachedAt: cached.createdAt })
         }
         return cached.translation
       }
@@ -167,8 +169,9 @@ export function setupPageTranslationHandlers(): void {
       assertHtmlAttributeMarkerIntegrity(text, result)
     }
 
+    // Debug for the same reason as the cached verdict above: routine, once per paragraph.
     if (isNoTranslationSentinel(result)) {
-      log.info("The model found no translation needed", { text, ...describeProvider(providerRef) })
+      log.debug("The model found no translation needed", { text, ...describeProvider(providerRef) })
     }
 
     // A response that dropped, invented or duplicated an inline-atom

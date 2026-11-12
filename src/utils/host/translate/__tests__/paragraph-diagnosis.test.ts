@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { captureLogs, loggedError, logRecord } from "@/utils/logging/testing"
 import {
   diagnoseParagraph,
+  endParagraphDiagnosisSession,
   getDiagnosedParagraphs,
   logSessionSummary,
   resetParagraphDiagnosis,
@@ -150,6 +151,27 @@ describe("paragraph diagnosis", () => {
       logRecord("info", "Page translation outcome", { counts: { translated: 1 } }),
     ])
     expect(verdicts()).toEqual([["New", "tooShort"]])
+  })
+
+  it("ends the record when page translation is turned off, and tells subscribers", () => {
+    const logs = captureLogs("info")
+    const listener = vi.fn<() => void>()
+    subscribeParagraphDiagnosis(listener)
+    diagnoseParagraph([paragraph("Translated")], "Translated").translated()
+    listener.mockClear()
+
+    endPageTranslationSession()
+    endParagraphDiagnosisSession()
+
+    expect(verdicts()).toEqual([])
+    expect(listener).toHaveBeenCalledOnce()
+    expect(logs).toEqual([
+      logRecord("info", "Page translation outcome", { counts: { translated: 1 } }),
+    ])
+
+    // A paragraph translated on hover afterwards starts a record of its own.
+    diagnoseParagraph([paragraph("Hovered")], "Hovered").translated()
+    expect(verdicts()).toEqual([["Hovered", "translated"]])
   })
 
   it("tells subscribers about every verdict", () => {

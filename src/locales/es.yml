@@ -1599,6 +1599,8 @@ pageDiagnosis:
   title: "Diagnóstico de la página"
   summary: "$1 traducidos, $2 sin traducir"
   empty: "Aún no hay nada que mostrar. Activa la traducción de la página y vuelve a abrir esto."
+  emptyWhileTranslating: "Aún no hay nada que mostrar. Los párrafos aparecerán aquí a medida que la traducción de la página llegue a ellos."
+  framesNotIncluded: "El texto dentro de marcos incrustados no se incluye aquí."
   hint: "Haz clic en un motivo para resaltar sus párrafos en la página."
   close: "Cerrar"
   unavailable: "Read Frog no puede ejecutarse en esta página"

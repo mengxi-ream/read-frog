@@ -154,7 +154,8 @@ export async function bootstrapHostContent(
         })
       : () => {}
 
-  // The popup sends this to the top frame only; the panel covers the whole tab.
+  // The popup sends this to the top frame only. Frames translate on their own and
+  // keep their own verdicts, so the panel covers the top frame and says so.
   const cleanupPageDiagnosisListener =
     window === window.top
       ? onMessage("togglePageTranslationDiagnostics", () => togglePageDiagnosisPanel())

@@ -1083,9 +1083,11 @@ async function translateTranslationOnlyRun(
       diagnosis,
     )
     const translatedText = request.getDisplayText(realTranslatedText)
-    settleDisplayedTranslation(diagnosis, realTranslatedText, translatedText)
 
+    // A translation is settled once it is on the page, in the batches below: the
+    // host may change the run before they run, and then the original stays.
     if (!translatedText) {
+      settleDisplayedTranslation(diagnosis, realTranslatedText, translatedText)
       // Keep the wrapper when translation failed so the injected error UI remains visible.
       // Only remove the wrapper when translation returned an empty string.
       if (translatedText === "") {
@@ -1121,6 +1123,7 @@ async function translateTranslationOnlyRun(
           config,
           getTranslationOnlyAnchorState,
         )
+        diagnosis.translated()
       })
       return
     }
@@ -1146,6 +1149,7 @@ async function translateTranslationOnlyRun(
       // retranslation) would reference displaced nodes and read as
       // permanently stale — drop them.
       if (swapAnchor) dropTranslationOnlySwapRecordsForNodes(swapAnchor, transNodes)
+      diagnosis.translated()
     })
   } finally {
     nodes.forEach((node) => translatingNodes.delete(node))

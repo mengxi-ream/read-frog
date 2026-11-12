@@ -52,6 +52,7 @@ import {
   translateNodesBilingualMode,
   translateWalkedElement,
 } from "@/utils/host/translate/node-manipulation"
+import { endParagraphDiagnosisSession } from "@/utils/host/translate/paragraph-diagnosis"
 import { validateTranslationConfigAndToast } from "@/utils/host/translate/translate-text"
 import { translateTextForPageTitle } from "@/utils/host/translate/translate-variants"
 import {
@@ -631,6 +632,7 @@ export class PageTranslationManager implements IPageTranslationManager {
         (error) => log.warn("Failed to cancel pending translation requests", { error }),
       )
     }
+    endParagraphDiagnosisSession()
 
     this.isPageTranslating = false
     this.translationSessionVersion += 1

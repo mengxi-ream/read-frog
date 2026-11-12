@@ -17,25 +17,48 @@ function isOwnStack(stack: unknown, ownOrigin: string): boolean {
   return typeof stack === "string" && stack.includes(ownOrigin)
 }
 
-let installed = false
+interface UncaughtErrorListeners {
+  error: (event: ErrorEvent) => void
+  unhandledrejection: (event: PromiseRejectionEvent) => void
+}
 
-/** Puts errors nothing caught into the log. Installs once per bundle. */
+// On the realm, not in module scope: the extension's content scripts in a frame
+// are separate bundles, each with its own copy of this module, yet they share
+// one isolated world, where every listener would see, and store, every error.
+const LISTENERS_KEY = "__READ_FROG_UNCAUGHT_ERROR_LISTENERS__"
+type Realm = typeof globalThis & { [LISTENERS_KEY]?: UncaughtErrorListeners }
+
+/**
+ * Puts errors nothing caught into the log, once per realm: each call replaces
+ * the listeners of the one before, so the bundle that set up last keeps them.
+ * After an extension update that is the one whose runtime is still alive.
+ */
 export function captureUncaughtErrors({ ownOrigin }: UncaughtErrorOptions = {}): void {
-  if (installed || typeof globalThis.addEventListener !== "function") return
-  installed = true
+  const realm = globalThis as Realm
+  if (typeof realm.addEventListener !== "function") return
 
-  globalThis.addEventListener("error", (event: ErrorEvent) => {
-    if (IGNORED_MESSAGES.some((pattern) => pattern.test(event.message))) return
-    if (ownOrigin && !event.filename?.startsWith(ownOrigin)) return
-    log.error("Uncaught error", {
-      error: event.error ?? event.message,
-      source: event.filename ? `${event.filename}:${event.lineno}:${event.colno}` : undefined,
-    })
-  })
+  const previous = realm[LISTENERS_KEY]
+  if (previous) {
+    realm.removeEventListener("error", previous.error)
+    realm.removeEventListener("unhandledrejection", previous.unhandledrejection)
+  }
 
-  globalThis.addEventListener("unhandledrejection", (event: PromiseRejectionEvent) => {
-    const reason: unknown = event.reason
-    if (ownOrigin && !isOwnStack((reason as { stack?: unknown } | null)?.stack, ownOrigin)) return
-    log.error("Unhandled promise rejection", { error: reason })
-  })
+  const listeners: UncaughtErrorListeners = {
+    error: (event) => {
+      if (IGNORED_MESSAGES.some((pattern) => pattern.test(event.message))) return
+      if (ownOrigin && !event.filename?.startsWith(ownOrigin)) return
+      log.error("Uncaught error", {
+        error: event.error ?? event.message,
+        source: event.filename ? `${event.filename}:${event.lineno}:${event.colno}` : undefined,
+      })
+    },
+    unhandledrejection: (event) => {
+      const reason: unknown = event.reason
+      if (ownOrigin && !isOwnStack((reason as { stack?: unknown } | null)?.stack, ownOrigin)) return
+      log.error("Unhandled promise rejection", { error: reason })
+    },
+  }
+  realm[LISTENERS_KEY] = listeners
+  realm.addEventListener("error", listeners.error)
+  realm.addEventListener("unhandledrejection", listeners.unhandledrejection)
 }

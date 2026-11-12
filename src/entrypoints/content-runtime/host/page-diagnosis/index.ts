@@ -6,12 +6,16 @@ import {
   createReactShadowHost,
   removeReactShadowHost,
 } from "@/utils/react-shadow-host/create-shadow-host"
+import { keepShadowHostRendered } from "@/utils/shadow-root"
 import { PageDiagnosisPanel } from "./panel"
 
 let panelHost: HTMLElement | null = null
+let stopKeepingPanelRendered: (() => void) | null = null
 
 export function closePageDiagnosisPanel(): void {
   if (!panelHost) return
+  stopKeepingPanelRendered?.()
+  stopKeepingPanelRendered = null
   removeReactShadowHost(panelHost)
   panelHost = null
 }
@@ -32,5 +36,6 @@ export function togglePageDiagnosisPanel(): void {
       cssContent: [themeCSS, textSmallCSS],
     },
   )
-  document.body.append(panelHost)
+  // Into <body>, and into the new one when a client-side router replaces it.
+  stopKeepingPanelRendered = keepShadowHostRendered(panelHost)
 }

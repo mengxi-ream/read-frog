@@ -1604,6 +1604,8 @@ pageDiagnosis:
   title: "页面诊断"
   summary: "已翻译 $1 段，未翻译 $2 段"
   empty: "暂无内容。请先开启网页翻译，再打开此面板。"
+  emptyWhileTranslating: "暂无内容。网页翻译处理到的段落会显示在这里。"
+  framesNotIncluded: "嵌入框架（iframe）里的文字不在此统计范围内。"
   hint: "点击原因，在页面上框出对应段落。"
   close: "关闭"
   unavailable: "陪读蛙无法在此页面运行"

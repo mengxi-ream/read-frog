@@ -4,8 +4,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 const OWN_ORIGIN = "chrome-extension://abcdefgh/"
 
 async function setUp(options?: { ownOrigin?: string }) {
-  // Fresh modules: the listeners install once per bundle, and the capture
-  // must use the same logger copy as the code under test.
+  // Fresh modules stand in for another bundle, and the capture must use the
+  // same logger copy as the code under test.
   vi.resetModules()
   const { captureLogs } = await import("../testing")
   const { captureUncaughtErrors } = await import("../uncaught")
@@ -77,6 +77,19 @@ describe("captureUncaughtErrors", () => {
       "Ours",
       "Our rejection",
     ])
+  })
+
+  it("stores an error once, however many bundles in the frame set up logging", async () => {
+    const firstBundle = await setUp({ ownOrigin: OWN_ORIGIN })
+    const secondBundle = await setUp({ ownOrigin: OWN_ORIGIN })
+
+    dispatchError({
+      error: new Error("Boom"),
+      filename: `${OWN_ORIGIN}content-scripts/subtitles.js`,
+    })
+
+    expect(firstBundle).toEqual([])
+    expect(secondBundle).toEqual([expect.objectContaining({ message: "Uncaught error" })])
   })
 
   it("ignores the ResizeObserver loop notice", async () => {

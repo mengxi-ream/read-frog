@@ -4,6 +4,7 @@ import type { PageTranslationRequestOptions } from "../../translate-variants"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE } from "@/utils/constants/dom-labels"
+import { flushBatchedOperations } from "@/utils/host/dom/batch-dom"
 import { removeAllTranslatedWrapperNodes } from "../../dom/translation-cleanup"
 import { getDiagnosedParagraphs, resetParagraphDiagnosis } from "../../paragraph-diagnosis"
 import { translateNodesBilingualMode, translateNodeTranslationOnlyMode } from "../translation-modes"
@@ -45,7 +46,11 @@ const MODES = [
   ["bilingual", (nodes: ChildNode[]) => translateNodesBilingualMode(nodes, "walk", DEFAULT_CONFIG)],
   [
     "translation only",
-    (nodes: ChildNode[]) => translateNodeTranslationOnlyMode(nodes, "walk", DEFAULT_CONFIG),
+    async (nodes: ChildNode[]) => {
+      await translateNodeTranslationOnlyMode(nodes, "walk", DEFAULT_CONFIG)
+      // The translation replaces the original, and is settled, with the next batch of DOM writes.
+      flushBatchedOperations()
+    },
   ],
 ] as const
 
@@ -98,6 +103,11 @@ describe.each(MODES)("%s mode records why a paragraph stays as it was", (_, tran
   })
 
   it("outlines an inline run by its own nodes, not the block around it", async () => {
+    // Shaped like the run, so translation-only mode swaps it in place; a run it
+    // cannot align moves into a wrapper, where the overlay loses it (known gap).
+    mockTranslateTextForPage.mockResolvedValue(
+      "Lisez <b>les notes de version</b> avant la mise à jour",
+    )
     const container = document.createElement("div")
     container.innerHTML = "Read <b>the release notes</b> before you upgrade"
     document.body.append(container)
@@ -146,5 +156,32 @@ describe("bilingual mode", () => {
     expect(getDiagnosedParagraphs()).toEqual([
       { key: expect.any(String), verdict: "sameAsSource", first: source, last: source },
     ])
+  })
+})
+
+describe("translation only mode", () => {
+  beforeEach(() => {
+    document.body.replaceChildren()
+    resetParagraphDiagnosis()
+    mockShouldFilterSmallParagraph.mockReset().mockResolvedValue(false)
+    mockShouldSkipAsTargetLanguage.mockReset().mockResolvedValue(false)
+  })
+
+  afterEach(() => {
+    removeAllTranslatedWrapperNodes(document)
+  })
+
+  it("does not count a paragraph the page changed while its translation was out", async () => {
+    const source = createSource()
+    mockTranslateTextForPage.mockReset().mockImplementation(async () => {
+      source.firstChild!.textContent = "A paragraph the page rewrote meanwhile"
+      return "Un paragraphe traduit"
+    })
+
+    await translateNodeTranslationOnlyMode([source], "walk", DEFAULT_CONFIG)
+    flushBatchedOperations()
+
+    expect(source.textContent).toBe("A paragraph the page rewrote meanwhile")
+    expect(getDiagnosedParagraphs()).toEqual([])
   })
 })

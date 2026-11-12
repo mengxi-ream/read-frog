@@ -95,8 +95,10 @@ export function proxyFetch() {
         log.warn("Could not read last-seen auth cookie state", { error })
       }
 
+      // `name`, not `cookieName`: a key with "cookie" in it is redacted, and these
+      // names are fixed and public (the value is never logged).
       log.info("Auth cookie changed, invalidating auth cache", {
-        cookieName: cookie.name,
+        name: cookie.name,
         domain: cookie.domain,
         removed,
         cause,

@@ -1599,6 +1599,8 @@ pageDiagnosis:
   title: "Səhifə diaqnostikası"
   summary: "$1 tərcümə olundu, $2 tərcümə olunmadı"
   empty: "Hələ göstəriləcək heç nə yoxdur. Səhifə tərcüməsini yandırın, sonra bunu yenidən açın."
+  emptyWhileTranslating: "Hələ göstəriləcək heç nə yoxdur. Səhifə tərcüməsi abzaslara çatdıqca onlar burada görünəcək."
+  framesNotIncluded: "Daxil edilmiş çərçivələrin içindəki mətn burada nəzərə alınmır."
   hint: "Abzaslarını səhifədə işarələmək üçün bir səbəbə klikləyin."
   close: "Bağla"
   unavailable: "Read Frog bu səhifədə işləyə bilmir"

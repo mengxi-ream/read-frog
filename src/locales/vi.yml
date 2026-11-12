@@ -1594,6 +1594,8 @@ pageDiagnosis:
   title: "Chẩn đoán trang"
   summary: "Đã dịch $1, chưa dịch $2"
   empty: "Chưa có gì để hiển thị. Hãy bật dịch trang rồi mở lại mục này."
+  emptyWhileTranslating: "Chưa có gì để hiển thị. Các đoạn sẽ hiện ở đây khi tính năng dịch trang xử lý đến chúng."
+  framesNotIncluded: "Văn bản bên trong các khung nhúng không được tính ở đây."
   hint: "Nhấp vào một lý do để khoanh các đoạn tương ứng trên trang."
   close: "Đóng"
   unavailable: "Read Frog không thể chạy trên trang này"

@@ -1741,6 +1741,8 @@ pageDiagnosis:
   title: "Page diagnosis"
   summary: "$1 translated, $2 not translated"
   empty: "Nothing to show yet. Turn on page translation, then open this again."
+  emptyWhileTranslating: "Nothing to show yet. Paragraphs show up here as page translation reaches them."
+  framesNotIncluded: "Text inside embedded frames isn't included here."
   hint: "Click a reason to outline its paragraphs on the page."
   close: "Close"
   unavailable: "Read Frog isn't running on this page"

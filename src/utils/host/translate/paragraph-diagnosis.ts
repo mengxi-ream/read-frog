@@ -236,7 +236,18 @@ export function getDiagnosedParagraphs(): DiagnosedParagraph[] {
   return paragraphs
 }
 
-/** Called after every new verdict; returns the unsubscribe. */
+/**
+ * Page translation was turned off. Its translations are gone from the page, so
+ * its paragraphs leave the record, and an open overlay shows the page as it is.
+ * Paragraphs translated later without a session (hover, shortcut) start a new one.
+ */
+export function endParagraphDiagnosisSession(): void {
+  logSessionSummary()
+  session = createSessionDiagnosis(null)
+  listeners.forEach((listener) => listener())
+}
+
+/** Called after every new verdict, and when the session ends; returns the unsubscribe. */
 export function subscribeParagraphDiagnosis(listener: () => void): () => void {
   listeners.add(listener)
   return () => listeners.delete(listener)

@@ -9,6 +9,7 @@ import {
   subscribeParagraphDiagnosis,
   UNTRANSLATED_REASONS,
 } from "@/utils/host/translate/paragraph-diagnosis"
+import { getPageTranslationSessionId } from "@/utils/host/translate/translation-session"
 import { i18n } from "@/utils/i18n"
 
 // Outlines must read on any site, so they carry their own colors rather than the theme's.
@@ -177,6 +178,8 @@ export function PageDiagnosisPanel({ onClose }: { onClose: () => void }) {
   const translatedCount = counts.get("translated") ?? 0
   const reasons = UNTRANSLATED_REASONS.filter((reason) => counts.has(reason))
   const outlinedParagraphs = paragraphs.filter(({ verdict }) => verdict === outlinedReason)
+  // Each frame keeps its own verdicts, and this panel only reads the top frame's.
+  const hasFrames = document.querySelector("iframe, frame") !== null
 
   const toggleOutline = (reason: UntranslatedReason) => {
     const next = outlinedReason === reason ? null : reason
@@ -208,7 +211,11 @@ export function PageDiagnosisPanel({ onClose }: { onClose: () => void }) {
         </header>
 
         {paragraphs.length === 0 ? (
-          <p className="text-muted-foreground">{i18n.t("pageDiagnosis.empty")}</p>
+          <p className="text-muted-foreground">
+            {getPageTranslationSessionId() === null
+              ? i18n.t("pageDiagnosis.empty")
+              : i18n.t("pageDiagnosis.emptyWhileTranslating")}
+          </p>
         ) : (
           <>
             <p className="text-muted-foreground">
@@ -243,6 +250,11 @@ export function PageDiagnosisPanel({ onClose }: { onClose: () => void }) {
             )}
             <p className="text-xs text-muted-foreground">{i18n.t("pageDiagnosis.hint")}</p>
           </>
+        )}
+        {hasFrames && (
+          <p className="text-xs text-muted-foreground">
+            {i18n.t("pageDiagnosis.framesNotIncluded")}
+          </p>
         )}
       </aside>
     </>

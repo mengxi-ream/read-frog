@@ -1594,6 +1594,8 @@ pageDiagnosis:
   title: "ページ診断"
   summary: "翻訳済み $1 段落、未翻訳 $2 段落"
   empty: "まだ表示する内容がありません。ページ翻訳をオンにしてから、もう一度開いてください。"
+  emptyWhileTranslating: "まだ表示する内容がありません。ページ翻訳が段落に達すると、ここに表示されます。"
+  framesNotIncluded: "埋め込みフレーム内のテキストはここには含まれません。"
   hint: "理由をクリックすると、該当する段落をページ上で囲んで表示します。"
   close: "閉じる"
   unavailable: "このページでは Read Frog を実行できません"

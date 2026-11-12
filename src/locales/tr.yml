@@ -1594,6 +1594,8 @@ pageDiagnosis:
   title: "Sayfa tanılaması"
   summary: "$1 çevrildi, $2 çevrilmedi"
   empty: "Henüz gösterilecek bir şey yok. Sayfa çevirisini açın, ardından bunu yeniden açın."
+  emptyWhileTranslating: "Henüz gösterilecek bir şey yok. Sayfa çevirisi paragraflara ulaştıkça burada görünürler."
+  framesNotIncluded: "Gömülü çerçevelerin içindeki metin burada yer almaz."
   hint: "Paragraflarını sayfada işaretlemek için bir nedene tıklayın."
   close: "Kapat"
   unavailable: "Read Frog bu sayfada çalışamıyor"

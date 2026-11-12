@@ -187,21 +187,48 @@ export function sanitizeLogMessage(message: string): string {
   return sanitizeString(message, MAX_MESSAGE_LENGTH)
 }
 
+/** Settings that hold a service's address, where some services take the key in the path or query. */
+const ENDPOINT_KEYS = new Set(["baseURL", "url"])
+
+function isEmpty(value: unknown): boolean {
+  return value === "" || value === null || value === undefined
+}
+
+/** An endpoint cut to its origin, the way log records keep URLs; anything else could hold a key. */
+function redactEndpoint(value: string): string {
+  try {
+    const url = new URL(value)
+    return url.protocol === "http:" || url.protocol === "https:" ? url.origin : "[redacted]"
+  } catch {
+    return "[redacted]"
+  }
+}
+
+function redactEntry(key: string, entry: unknown): unknown {
+  // A user's own request headers are free-form and often carry the key under a
+  // name of the service's choosing: keep the names, never the values.
+  if (key === "headers" && entry !== null && typeof entry === "object" && !Array.isArray(entry)) {
+    return Object.fromEntries(
+      Object.entries(entry).map(([name, value]) => [name, isEmpty(value) ? value : "[redacted]"]),
+    )
+  }
+  if (typeof entry !== "string" || entry === "") return redactSecrets(entry)
+  if (SECRET_KEY_PATTERN.test(key)) return "[redacted]"
+  if (ENDPOINT_KEYS.has(key)) return redactEndpoint(entry)
+  return entry
+}
+
 /**
- * A copy of `value` with every non-empty string under a secret-looking key
- * replaced, at any depth and with nothing else cut. For the settings in a
- * diagnostics export; an empty key stays empty, since "no key" is often the
- * very thing to diagnose.
+ * A copy of `value` for the settings in a diagnostics export, with every
+ * credential a user can type in removed, at any depth and with nothing else
+ * cut: strings under secret-looking keys, everything after the origin of a
+ * service address, and the values of custom request headers. An empty value
+ * stays empty, since "no key" is often the very thing to diagnose.
  */
 export function redactSecrets(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(redactSecrets)
   if (value === null || typeof value !== "object") return value
   return Object.fromEntries(
-    Object.entries(value).map(([key, entry]) => [
-      key,
-      typeof entry === "string" && entry !== "" && SECRET_KEY_PATTERN.test(key)
-        ? "[redacted]"
-        : redactSecrets(entry),
-    ]),
+    Object.entries(value).map(([key, entry]) => [key, redactEntry(key, entry)]),
   )
 }

@@ -2,6 +2,7 @@
 import { describe, expect, it } from "vitest"
 import {
   previewText,
+  redactSecrets,
   sanitizeLogFields,
   sanitizeLogMessage,
   TEXT_PREVIEW_LENGTH,
@@ -145,5 +146,43 @@ describe("sanitizeLogFields", () => {
     const result = sanitizeLogFields(wide)
     expect(Object.keys(result)).toEqual(["truncated"])
     expect((result.truncated as string).length).toBeLessThanOrEqual(8001)
+  })
+})
+
+describe("redactSecrets", () => {
+  it("removes keys and tokens but keeps the rest of the settings as they are", () => {
+    expect(
+      redactSecrets({
+        providersConfig: [
+          {
+            id: "deeplx",
+            apiKey: "sk-1",
+            baseURL: "https://deeplx.example.com/abc123secret/translate?token=abc123",
+            headers: { "Ocp-Apim-Subscription-Key": "key-2", "X-Empty": "" },
+          },
+          { id: "open-responses", url: "https://llm.example.com/v1/responses?key=3" },
+          { id: "openai", apiKey: "", baseURL: "https://api.openai.com/v1" },
+        ],
+        siteControl: { patterns: ["https://example.com/docs/*"] },
+      }),
+    ).toEqual({
+      providersConfig: [
+        {
+          id: "deeplx",
+          apiKey: "[redacted]",
+          baseURL: "https://deeplx.example.com",
+          headers: { "Ocp-Apim-Subscription-Key": "[redacted]", "X-Empty": "" },
+        },
+        { id: "open-responses", url: "https://llm.example.com" },
+        { id: "openai", apiKey: "", baseURL: "https://api.openai.com" },
+      ],
+      siteControl: { patterns: ["https://example.com/docs/*"] },
+    })
+  })
+
+  it("redacts a service address it cannot read as a web address", () => {
+    expect(redactSecrets({ baseURL: "deeplx.example.com/abc123secret" })).toEqual({
+      baseURL: "[redacted]",
+    })
   })
 })

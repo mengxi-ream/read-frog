@@ -1594,6 +1594,8 @@ pageDiagnosis:
   title: "페이지 진단"
   summary: "번역됨 $1개, 번역 안 됨 $2개"
   empty: "아직 표시할 내용이 없습니다. 페이지 번역을 켠 다음 다시 열어 주세요."
+  emptyWhileTranslating: "아직 표시할 내용이 없습니다. 페이지 번역이 문단에 도달하면 여기에 표시됩니다."
+  framesNotIncluded: "삽입된 프레임 안의 텍스트는 여기에 포함되지 않습니다."
   hint: "이유를 클릭하면 해당 문단을 페이지에 표시합니다."
   close: "닫기"
   unavailable: "이 페이지에서는 Read Frog를 실행할 수 없습니다"

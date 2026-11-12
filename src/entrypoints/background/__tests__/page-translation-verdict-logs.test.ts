@@ -62,32 +62,34 @@ describe("page translation verdict logs", () => {
     translationCache.get.mockResolvedValue(undefined)
   })
 
-  it("says when a cached answer was the model's 'no translation needed'", async () => {
+  // Debug, not info: these come once per paragraph on every visit and would push
+  // everything else out of the stored log; the page's summary counts them instead.
+  it("says in debug builds when a cached answer was the model's 'no translation needed'", async () => {
     const cachedAt = new Date("2026-11-05T08:00:00.000Z")
     translationCache.get.mockResolvedValue({
       translation: NO_TRANSLATION_SENTINEL,
       createdAt: cachedAt,
     })
-    const logs = captureLogs("info")
+    const logs = captureLogs("debug")
 
     await expect(translate()).resolves.toBe(NO_TRANSLATION_SENTINEL)
 
     expect(logs).toEqual([
-      logRecord("info", "Served a cached no-translation verdict", {
+      logRecord("debug", "Served a cached no-translation verdict", {
         text: expect.objectContaining({ preview: PARAGRAPH }),
         cachedAt: cachedAt.toISOString(),
       }),
     ])
   })
 
-  it("says which model answered 'no translation needed' fresh", async () => {
+  it("says in debug builds which model answered 'no translation needed' fresh", async () => {
     batchEnqueue.mockResolvedValue(NO_TRANSLATION_SENTINEL)
-    const logs = captureLogs("info")
+    const logs = captureLogs("debug")
 
     await translate()
 
     expect(logs).toEqual([
-      logRecord("info", "The model found no translation needed", {
+      logRecord("debug", "The model found no translation needed", {
         text: expect.objectContaining({ preview: PARAGRAPH }),
         provider: "read-frog",
         modelTier: "standard",

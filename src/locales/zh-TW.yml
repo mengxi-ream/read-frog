@@ -1604,6 +1604,8 @@ pageDiagnosis:
   title: "頁面診斷"
   summary: "已翻譯 $1 段，未翻譯 $2 段"
   empty: "目前沒有內容。請先開啟網頁翻譯，再開啟此面板。"
+  emptyWhileTranslating: "目前沒有內容。網頁翻譯處理到的段落會顯示在這裡。"
+  framesNotIncluded: "嵌入框架（iframe）中的文字不在此統計範圍內。"
   hint: "點選原因，在頁面上框出對應段落。"
   close: "關閉"
   unavailable: "陪讀蛙無法在此頁面執行"
