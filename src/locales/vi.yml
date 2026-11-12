@@ -179,14 +179,14 @@ options:
         pdfTranslation: Dịch PDF
     sponsorCta: Nhận AI nhanh, tiết kiệm chi phí
     sponsorCtaJalapenoCloud: Nhận ưu đãi giảm 50% GLM 5.3
-    sponsorCtaIfapi: Đăng ký, nhập mã READFROG
+    sponsorCtaIfapi: Tặng thêm 10% với mã READFROG
     setApiKeyWarning:
       message: Hãy đặt API Key ở trang $1
     badges:
       featureCount: $1 tính năng
       sponsor: Tài trợ
       sponsorJalapenoCloud: Miễn phí $$1
-      sponsorIfapi: Tặng thêm 10%
+      sponsorIfapi: Mô hình -90%
     dialog:
       title: Thêm nhà cung cấp mới
       groups:

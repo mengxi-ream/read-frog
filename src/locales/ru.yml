@@ -179,14 +179,14 @@ options:
         pdfTranslation: Перевод PDF
     sponsorCta: Получить быстрый и выгодный ИИ
     sponsorCtaJalapenoCloud: Получить GLM 5.3 со скидкой 50 %
-    sponsorCtaIfapi: Регистрация и код READFROG
+    sponsorCtaIfapi: "+10% к балансу с кодом READFROG"
     setApiKeyWarning:
       message: Укажите API-ключ на странице $1
     badges:
       featureCount: $1 функций
       sponsor: Спонсор
       sponsorJalapenoCloud: $$1 бесплатно
-      sponsorIfapi: +10% к балансу
+      sponsorIfapi: Модели -90%
     dialog:
       title: Добавить нового провайдера
       groups:

@@ -179,14 +179,14 @@ options:
         pdfTranslation: PDF 翻译
     sponsorCta: 获取高速性价比 AI
     sponsorCtaJalapenoCloud: 获取 GLM 5.3 五折优惠
-    sponsorCtaIfapi: 免费注册，充值填 READFROG
+    sponsorCtaIfapi: 首充加赠 10%，优惠码 READFROG
     setApiKeyWarning:
       message: 请在 $1 页面设置 API Key
     badges:
       featureCount: $1 个功能
       sponsor: 赞助
       sponsorJalapenoCloud: $$1 免费额度
-      sponsorIfapi: 首充加赠 10%
+      sponsorIfapi: 1 折模型
     dialog:
       title: 添加新提供商
       groups:
