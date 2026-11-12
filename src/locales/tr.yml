@@ -179,14 +179,14 @@ options:
         pdfTranslation: PDF çevirisi
     sponsorCta: Hızlı ve uygun maliyetli yapay zekâ al
     sponsorCtaJalapenoCloud: GLM 5.3ʼte %50 indirim al
-    sponsorCtaIfapi: Kaydol, READFROG kodunu gir
+    sponsorCtaIfapi: READFROG koduyla +%10 bakiye
     setApiKeyWarning:
       message: API anahtarınızı $1 sayfasında ayarlayın
     badges:
       featureCount: $1 özellik
       sponsor: Sponsor
       sponsorJalapenoCloud: $$1 ücretsiz
-      sponsorIfapi: +%10 bakiye
+      sponsorIfapi: Modeller -%90
     dialog:
       title: Yeni sağlayıcı ekle
       groups:

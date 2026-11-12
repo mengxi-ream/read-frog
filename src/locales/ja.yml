@@ -179,14 +179,14 @@ options:
         pdfTranslation: PDF 翻訳
     sponsorCta: 高速で高コスパのAIを入手
     sponsorCtaJalapenoCloud: GLM 5.3 を 50% オフで入手
-    sponsorCtaIfapi: 無料登録・コード READFROG
+    sponsorCtaIfapi: 初回チャージ +10%・コード READFROG
     setApiKeyWarning:
       message: API キーは $1 ページで設定してください
     badges:
       featureCount: $1 件の機能
       sponsor: スポンサー
       sponsorJalapenoCloud: $$1 無料
-      sponsorIfapi: 初回チャージ +10%
+      sponsorIfapi: モデル 90% オフ
     dialog:
       title: 新しいプロバイダーを追加
       groups:

@@ -179,14 +179,14 @@ options:
         pdfTranslation: PDF translation
     sponsorCta: Get fast, cost-effective AI
     sponsorCtaJalapenoCloud: Get 50% Off GLM 5.3
-    sponsorCtaIfapi: Sign up, use code READFROG
+    sponsorCtaIfapi: "+10% credit, use code READFROG"
     setApiKeyWarning:
       message: Please set your API key on the $1 page
     badges:
       featureCount: $1 features
       sponsor: Sponsor
       sponsorJalapenoCloud: $$1 Free
-      sponsorIfapi: +10% Credit
+      sponsorIfapi: 90% Off Models
     dialog:
       title: Add new provider
       groups:
