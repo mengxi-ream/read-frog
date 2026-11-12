@@ -385,7 +385,10 @@ describe("batchQueue – error handling", () => {
     vi.advanceTimersByTime(baseBatchConfig.batchDelay)
     vi.advanceTimersByTime(0)
 
-    await expect(Promise.all(promises)).rejects.toThrow("Batch result count mismatch")
+    // Counts only: the error goes to the local log, and the results are the user's page.
+    await expect(Promise.all(promises)).rejects.toThrow(
+      /^Batch result count mismatch: expected 2, got 1$/,
+    )
   })
 
   it("retries BatchCountMismatchError with exponential backoff", async () => {

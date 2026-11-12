@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest"
+import { afterEach, describe, expect, it, vi } from "vitest"
 import { browser } from "#imports"
 import { captureLogs, logRecord } from "@/utils/logging/testing"
 
@@ -12,6 +12,10 @@ vi.mock("@/utils/message", () => ({
 }))
 
 describe("guidePinExtension", () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
   // Every service worker start tells the site's tabs again, and a tab with no
   // content script (after an update, or discarded) has no receiver.
   it("keeps a site tab with no receiver out of the local log", async () => {

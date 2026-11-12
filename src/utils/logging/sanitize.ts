@@ -7,10 +7,13 @@
  * - bulk request content (`body`, `messages`, `prompt`…) becomes "[omitted]";
  * - page text belongs under the key `text`, which keeps only a short preview, the
  *   length and a hash, so two records about one paragraph can still be matched;
- * - every URL is cut to its origin, which drops paths, query strings and the keys
- *   some providers put in them;
+ * - every web URL is cut to its origin, which drops paths, query strings and the
+ *   keys some providers put in them, and a local file's URL loses its path, which
+ *   names the user and their folders; the extension's own URLs, which stack
+ *   frames are made of, stay whole;
  * - Errors become `{ name, message, stack, ... }`, since `JSON.stringify` turns an
- *   Error into `{}`;
+ *   Error into `{}`, and the stack keeps only its frames, since the message is
+ *   kept already, capped;
  * - long strings, big arrays, wide or deep objects and cycles are cut short.
  */
 
@@ -33,7 +36,8 @@ const MAX_FIELDS_JSON_LENGTH = 8000
 const SECRET_KEY_PATTERN =
   /api[-_]?key|secret|password|passwd|token|authorization|cookie|credential|session[-_]?key/i
 const OMITTED_KEYS = new Set(["body", "requestBodyValues", "messages", "prompt", "html"])
-const URL_PATTERN = /\bhttps?:\/\/[^\s"'<>()[\]{}]+/g
+// Not every scheme: chrome-extension:// and moz-extension:// URLs are the stack frames.
+const URL_PATTERN = /\b(?:https?|wss?|file):\/\/[^\s"'<>()[\]{}]+/g
 
 function truncate(value: string, maxLength: number): string {
   return value.length > maxLength
@@ -43,6 +47,8 @@ function truncate(value: string, maxLength: number): string {
 
 function stripUrls(value: string): string {
   return value.replace(URL_PATTERN, (url) => {
+    // Such as a framed local page Chrome would not let the extension into.
+    if (url.startsWith("file:")) return "file:///[path]"
     try {
       return new URL(url).origin
     } catch {
@@ -91,15 +97,35 @@ function isErrorLike(value: object): value is Error {
   )
 }
 
+/**
+ * A V8 stack opens with "Name: message", the whole message however long it is,
+ * which the record keeps already, capped: leave the frames. Firefox and Safari
+ * stacks are frames only.
+ */
+function getStackFrames(stack: string, message: string): string {
+  const index = message ? stack.indexOf(message) : -1
+  if (index !== -1 && /^(?:[^\n]*: )?$/.test(stack.slice(0, index))) {
+    const rest = stack.slice(index + message.length)
+    if (rest === "" || rest.startsWith("\n")) return rest.slice(1)
+  }
+  // The message changed after the stack was written, or there was none: the
+  // opening is whatever comes before the first frame.
+  const firstFrame = stack.search(/^ {4}at /m)
+  return firstFrame === -1 ? stack : stack.slice(firstFrame)
+}
+
 function sanitizeError(error: Error, depth: number, seen: WeakSet<object>): JsonObject {
   const result: JsonObject = {
     name: error.name,
     message: sanitizeString(error.message, MAX_MESSAGE_LENGTH),
   }
-  if (error.stack) result.stack = truncate(stripUrls(error.stack), MAX_STACK_LENGTH)
-  // Status codes and error codes live on the error object itself.
+  const frames = error.stack ? getStackFrames(error.stack, error.message) : ""
+  if (frames) result.stack = truncate(stripUrls(frames), MAX_STACK_LENGTH)
+  // Status codes and error codes live on the error object itself. A plain object
+  // shaped like an error lists its stack among its keys: that stack was handled
+  // above, even when nothing of it was kept.
   for (const key of Object.keys(error).slice(0, MAX_OBJECT_KEYS)) {
-    if (key in result) continue
+    if (key === "stack" || key in result) continue
     result[key] = sanitizeEntry(
       key,
       (error as unknown as Record<string, unknown>)[key],

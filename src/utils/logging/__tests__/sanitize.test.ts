@@ -71,6 +71,26 @@ describe("sanitizeLogFields", () => {
     )
   })
 
+  it("keeps no part of a local file's path, and the extension's own URLs whole", () => {
+    // Chrome's words when it keeps the extension out of a framed local page.
+    const error = new Error(
+      'Cannot access contents of url "file:///Users/jane/Documents/statement.html". Extension manifest must request permission to access this host.',
+    )
+    error.stack = `Error: ${error.message}\n    at injectFrame (chrome-extension://abcdefgh/background.js:12:3)`
+
+    expect(
+      sanitizeLogFields({ error, socket: "wss://speech.example.com/v1/stream?key=sk-1" }),
+    ).toEqual({
+      error: {
+        name: "Error",
+        message:
+          'Cannot access contents of url "file:///[path]". Extension manifest must request permission to access this host.',
+        stack: "    at injectFrame (chrome-extension://abcdefgh/background.js:12:3)",
+      },
+      socket: "wss://speech.example.com",
+    })
+  })
+
   it("turns errors into plain objects with their own properties and cause", () => {
     const error = Object.assign(new TypeError("Bad response"), {
       statusCode: 429,
@@ -81,7 +101,7 @@ describe("sanitizeLogFields", () => {
       error: {
         name: "TypeError",
         message: "Bad response",
-        stack: expect.stringContaining("Bad response"),
+        stack: expect.stringMatching(/^ {4}at /),
         statusCode: 429,
         cause: expect.objectContaining({ name: "Error", message: "Rate limited" }),
       },
@@ -89,10 +109,63 @@ describe("sanitizeLogFields", () => {
   })
 
   it("recognizes errors from another realm", () => {
-    const foreign = { name: "Error", message: "From the page", stack: "Error: From the page" }
+    const foreign = {
+      name: "Error",
+      message: "From the page",
+      stack: "Error: From the page\n    at https://example.com/app.js:1:1",
+    }
     expect(sanitizeLogFields({ error: foreign })).toEqual({
-      error: { name: "Error", message: "From the page", stack: "Error: From the page" },
+      error: { name: "Error", message: "From the page", stack: "    at https://example.com" },
     })
+  })
+
+  it("keeps a long message once, capped, and of the stack only the frames", () => {
+    // V8 opens a stack with the whole message, however long it is.
+    const pageText = "Balance for 123-45-6789: $12,930.22. ".repeat(20)
+    const error = new Error(`Batch failed.\n${pageText}`)
+
+    const { error: sanitized } = sanitizeLogFields({ error }) as {
+      error: { message: string; stack: string }
+    }
+
+    expect(sanitized.message).toMatch(/^Batch failed\.\n.*… \(\+\d+\)$/s)
+    expect(sanitized.stack).toMatch(/^ {4}at /)
+    expect(sanitized.stack).not.toContain("123-45-6789")
+  })
+
+  it("drops the opening of a stack written before the message was shortened", () => {
+    const error = new Error("Bad response: Bonjour à tous")
+    // V8 writes the stack when it is first read.
+    expect(error.stack).toContain("Bonjour")
+    error.message = "Bad response"
+
+    const { error: sanitized } = sanitizeLogFields({ error }) as {
+      error: { message: string; stack: string }
+    }
+
+    expect(sanitized.message).toBe("Bad response")
+    expect(sanitized.stack).toMatch(/^ {4}at /)
+    expect(sanitized.stack).not.toContain("Bonjour")
+  })
+
+  it("keeps nothing of a stack that holds only its opening", () => {
+    const error = {
+      name: "Error",
+      message: "Balance for 123-45-6789",
+      stack: "Error: Balance for 123-45-6789",
+    }
+    expect(sanitizeLogFields({ error })).toEqual({
+      error: { name: "Error", message: "Balance for 123-45-6789" },
+    })
+  })
+
+  it("keeps a stack that lists frames only, as Firefox and Safari write it", () => {
+    const error = {
+      name: "TypeError",
+      message: "translate is undefined",
+      stack: "translate@moz-extension://abcdefgh/background.js:10:5\n",
+    }
+    expect(sanitizeLogFields({ error })).toEqual({ error })
   })
 
   it("survives cycles, deep nesting and big collections", () => {

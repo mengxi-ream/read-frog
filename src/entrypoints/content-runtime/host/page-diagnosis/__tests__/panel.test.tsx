@@ -36,8 +36,6 @@ describe("page diagnosis panel", () => {
     delete Element.prototype.scrollIntoView
     // @ts-expect-error -- put jsdom back the way it was
     delete Range.prototype.getClientRects
-    // @ts-expect-error -- put jsdom back the way it was
-    delete Range.prototype.getBoundingClientRect
   })
 
   it("counts the paragraphs on the page by reason", () => {
@@ -96,9 +94,9 @@ describe("page diagnosis panel", () => {
   })
 
   it("keeps measuring its outlines after the page takes an outlined run off", async () => {
-    // jsdom has no layout, so a range has no boxes to give, and nothing to scroll.
+    // jsdom has no layout, so a range has no boxes to give (vitest.setup.ts
+    // stubs its bounding box only), and nothing to scroll.
     Range.prototype.getClientRects = () => [] as unknown as DOMRectList
-    Range.prototype.getBoundingClientRect = () => new DOMRect()
     vi.spyOn(window, "scrollBy").mockImplementation(() => {})
     const container = document.createElement("div")
     container.innerHTML = "Read <b>the notes</b> first"
