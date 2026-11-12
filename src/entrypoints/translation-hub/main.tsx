@@ -14,12 +14,15 @@ import { getLocalConfig } from "@/utils/config/storage"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { initI18n } from "@/utils/i18n"
 import { LocaleBoundary } from "@/utils/i18n/locale-boundary"
+import { setupExtensionPageLogging } from "@/utils/logging/setup"
 import { renderPersistentReactRoot } from "@/utils/react-root"
 import { queryClient } from "@/utils/tanstack-query"
 import { applyTheme, getLocalThemeMode, isDarkMode } from "@/utils/theme"
 import App from "./app"
 import "@fontsource-variable/inter/index.css"
 import "@/assets/styles/theme.css"
+
+setupExtensionPageLogging("translation-hub")
 
 interface HydrateAtomsProps {
   initialValues: [[typeof configAtom, Config], [typeof baseThemeModeAtom, ThemeMode]]

@@ -1,5 +1,7 @@
 import { MatchPattern } from "@webext-core/match-patterns"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
+
+const log = createLogger("url-pattern")
 
 /**
  * The one URL matcher in the extension.
@@ -173,7 +175,7 @@ function getCompiledPattern(rawPattern: string): CompiledPattern | null {
   let compiled: CompiledPattern | null = null
   const normalized = normalizeUrlPattern(rawPattern)
   if (normalized === null) {
-    logger.warn(`[url-pattern] Unsupported URL pattern dropped: "${rawPattern}"`)
+    log.warn("Unsupported URL pattern dropped", { pattern: rawPattern })
   } else {
     try {
       compiled =
@@ -183,7 +185,7 @@ function getCompiledPattern(rawPattern: string): CompiledPattern | null {
             ? new WildcardHostPattern(normalized)
             : new MatchPattern(normalized)
     } catch (error) {
-      logger.warn(`[url-pattern] Invalid URL pattern dropped: "${rawPattern}"`, error)
+      log.warn("Invalid URL pattern dropped", { pattern: rawPattern, error })
     }
   }
 

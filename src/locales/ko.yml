@@ -69,6 +69,7 @@ popup:
     emailUs: 이메일 문의
     featureRequest: 기능 제안
     bugReport: 버그 신고
+    diagnosePage: "이 페이지 진단"
     community: 커뮤니티
     joinDiscord: Discord 참여
     joinWechat: WeChat 그룹 참여
@@ -135,6 +136,13 @@ options:
     bugReport:
       title: 버그 신고
       description: 지원 티켓을 열고 해결될 때까지 진행 상황을 확인하세요
+    troubleshooting:
+      title: "문제 해결"
+    diagnostics:
+      title: "진단 정보 내보내기"
+      description: "최근 로그와 설정(API 키 제외)을 저장해 버그 신고에 첨부하세요"
+      exportSuccess: "진단 정보를 저장했습니다"
+      exportFailed: "진단 정보를 내보내지 못했습니다"
     community:
       title: 커뮤니티
     discord:
@@ -1582,6 +1590,24 @@ translation:
   sameLanguage: 원본 언어와 대상 언어는 달라야 합니다
   autoModeSameLanguage: 감지된 언어 '$1'은(는) 대상 언어와 같습니다
   extensionContextInvalidated: 확장 프로그램이 업데이트되었습니다. 이 페이지를 새로고침한 후 다시 시도하세요.
+pageDiagnosis:
+  title: "페이지 진단"
+  summary: "번역됨 $1개, 번역 안 됨 $2개"
+  empty: "아직 표시할 내용이 없습니다. 페이지 번역을 켠 다음 다시 열어 주세요."
+  emptyWhileTranslating: "아직 표시할 내용이 없습니다. 페이지 번역이 문단에 도달하면 여기에 표시됩니다."
+  framesNotIncluded: "삽입된 프레임 안의 텍스트는 여기에 포함되지 않습니다."
+  hint: "이유를 클릭하면 해당 문단을 페이지에 표시합니다."
+  close: "닫기"
+  unavailable: "이 페이지에서는 Read Frog를 실행할 수 없습니다"
+  reasons:
+    noProse: "번역할 텍스트가 없음"
+    tooShort: "너무 짧아 번역하지 않음"
+    targetLanguage: "이미 대상 언어임"
+    skipLanguage: "건너뛰도록 설정한 언어임"
+    noTranslationNeeded: "AI가 번역이 필요 없다고 판단함"
+    sameAsSource: "번역이 원문과 같음"
+    emptyResult: "번역 서비스가 아무것도 반환하지 않음"
+    error: "번역 실패"
 annotation:
   annotate: "주석 달기"
   enterMode: "주석 모드"

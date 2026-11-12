@@ -1,19 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
+import { captureLogs } from "@/utils/logging/testing"
 
-const { sendMessageMock, loggerWarnMock } = vi.hoisted(() => ({
+const { sendMessageMock } = vi.hoisted(() => ({
   sendMessageMock: vi.fn<(...args: any[]) => any>(),
-  loggerWarnMock: vi.fn<(...args: any[]) => any>(),
 }))
 
 vi.mock("@/utils/message", () => ({
   sendMessage: sendMessageMock,
-}))
-
-vi.mock("@/utils/logger", () => ({
-  logger: {
-    warn: loggerWarnMock,
-  },
 }))
 
 const {
@@ -27,7 +21,6 @@ const {
 describe("analytics helpers", () => {
   beforeEach(() => {
     sendMessageMock.mockReset()
-    loggerWarnMock.mockReset()
   })
 
   it("derives latency in milliseconds and clamps negative durations", () => {
@@ -144,6 +137,7 @@ describe("analytics helpers", () => {
   })
 
   it("swallows analytics upload failures", async () => {
+    const logs = captureLogs()
     sendMessageMock.mockRejectedValueOnce(new Error("upload failed"))
 
     await expect(
@@ -160,6 +154,6 @@ describe("analytics helpers", () => {
       }),
     ).resolves.toBeUndefined()
 
-    expect(loggerWarnMock).toHaveBeenCalledOnce()
+    expect(logs.filter((record) => record.level === "warn")).toHaveLength(1)
   })
 })

@@ -15,8 +15,8 @@ dataTypes:
   number: 数字
 contextMenu:
   translate: 翻译
-  translateSelection: 翻译”%s”
-  readAloudSelection: 朗读”%s”
+  translateSelection: 翻译“%s”
+  readAloudSelection: 朗读“%s”
   showOriginal: 显示原文
 sidePanel:
   firefoxUserActionHint: 在 Firefox 中，请从浏览器侧边栏打开陪读蛙。
@@ -69,6 +69,7 @@ popup:
     emailUs: 邮件联系
     featureRequest: 功能建议
     bugReport: 报告问题
+    diagnosePage: "诊断此页面"
     community: 社区
     joinDiscord: 加入 Discord
     joinWechat: 加入微信群
@@ -135,6 +136,13 @@ options:
     bugReport:
       title: 报告问题
       description: 提交工单，并跟进直到问题解决
+    troubleshooting:
+      title: "故障排查"
+    diagnostics:
+      title: "导出诊断信息"
+      description: "保存最近的日志和设置（不含 API 密钥），附在问题反馈里"
+      exportSuccess: "诊断信息已保存"
+      exportFailed: "无法导出诊断信息"
     community:
       title: 社区
     discord:
@@ -1592,6 +1600,24 @@ translation:
   sameLanguage: 源语言和目标语言必须不同
   autoModeSameLanguage: 检测到的语言 '$1' 与目标语言相同
   extensionContextInvalidated: 扩展已更新，请刷新此页面后重试。
+pageDiagnosis:
+  title: "页面诊断"
+  summary: "已翻译 $1 段，未翻译 $2 段"
+  empty: "暂无内容。请先开启网页翻译，再打开此面板。"
+  emptyWhileTranslating: "暂无内容。网页翻译处理到的段落会显示在这里。"
+  framesNotIncluded: "嵌入框架（iframe）里的文字不在此统计范围内。"
+  hint: "点击原因，在页面上框出对应段落。"
+  close: "关闭"
+  unavailable: "陪读蛙无法在此页面运行"
+  reasons:
+    noProse: "没有可翻译的文字"
+    tooShort: "太短，不翻译"
+    targetLanguage: "已是目标语言"
+    skipLanguage: "属于你设置跳过的语言"
+    noTranslationNeeded: "AI 认为无需翻译"
+    sameAsSource: "译文与原文相同"
+    emptyResult: "翻译服务没有返回内容"
+    error: "翻译失败"
 annotation:
   annotate: "划词标注"
   enterMode: "进入标注模式"

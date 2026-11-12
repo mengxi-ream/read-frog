@@ -2,7 +2,7 @@ import type { PromptableProviderRef } from "@/utils/providers/provider-ref"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { db } from "@/utils/db/dexie/db"
 import { Sha256Hex } from "@/utils/hash"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
 import { getSubtitlesSegmentationPrompt } from "@/utils/prompts/subtitles-segmentation"
 import {
   canProviderRefGenerateText,
@@ -10,6 +10,8 @@ import {
 } from "@/utils/providers/provider-ref"
 import { parseSimplifiedVttToFragments } from "@/utils/subtitles/processor/ai-segmentation"
 import { generateTextForProviderRef } from "./background-stream"
+
+const log = createLogger("background/ai-segmentation")
 
 const VTT_CODE_BLOCK_RE = /```vtt\n?/g
 const CODE_BLOCK_RE = /```\n?/g
@@ -65,7 +67,7 @@ export async function runAiSegmentSubtitles(data: AiSegmentSubtitlesData): Promi
   const cached = await db.aiSegmentationCache.get(cacheKey)
   if (cached) {
     if (parseSimplifiedVttToFragments(cached.result).length > 0) {
-      logger.info("[Background] AI subtitle segmentation cache hit")
+      log.debug("AI subtitle segmentation cache hit")
       return cached.result
     }
     // Entry written before results were parse-checked; drop it and regenerate
@@ -101,10 +103,10 @@ export async function runAiSegmentSubtitles(data: AiSegmentSubtitlesData): Promi
       createdAt: new Date(),
     })
 
-    logger.info("[Background] AI subtitle segmentation completed")
+    log.debug("AI subtitle segmentation completed")
     return result
   } catch (error) {
-    logger.error("[Background] AI subtitle segmentation failed:", error)
+    log.error("AI subtitle segmentation failed", { error })
     throw error
   }
 }

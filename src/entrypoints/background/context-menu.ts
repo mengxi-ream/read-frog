@@ -9,21 +9,20 @@ import {
   parseTabIdFromStorageKey,
   TRANSLATION_STATE_KEY_PREFIX,
 } from "@/utils/constants/storage-keys"
-import { getSelectionToolbarActions } from "@/utils/custom-actions"
+import {
+  getSelectionContextMenuItems,
+  MENU_ID_SELECTION_CUSTOM_ACTION_PREFIX,
+  MENU_ID_SELECTION_READ_ALOUD,
+  MENU_ID_SELECTION_TRANSLATE,
+  MENU_ID_TRANSLATE,
+} from "@/utils/context-menu"
 import { i18n } from "@/utils/i18n"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
 import { sendMessage } from "@/utils/message"
 import { ensureInitializedConfig } from "./config"
 import { getPageTranslationEnabled, setPageTranslationEnabled } from "./page-translation-state"
 
-export const MENU_ID_TRANSLATE = "read-frog-translate"
-export const MENU_ID_SELECTION_TRANSLATE = "read-frog-selection-translate"
-export const MENU_ID_SELECTION_READ_ALOUD = "read-frog-selection-read-aloud"
-export const MENU_ID_SELECTION_CUSTOM_ACTION_PREFIX = "read-frog-selection-custom-action:"
-
-function getSelectionCustomActionMenuId(actionId: string) {
-  return `${MENU_ID_SELECTION_CUSTOM_ACTION_PREFIX}${actionId}`
-}
+const log = createLogger("background/context-menu")
 
 /**
  * Register all context menu event listeners synchronously
@@ -97,38 +96,15 @@ async function updateContextMenuItems(config: Config) {
   // Remove all existing menu items first
   await browser.contextMenus.removeAll()
 
-  const { enabled: translateEnabled } = config.contextMenu
-  const enabledCustomActions = getSelectionToolbarActions(config.selectionToolbar).filter(
-    (action) => action.enabled !== false,
-  )
-
-  if (translateEnabled) {
+  if (config.contextMenu.enabled) {
     browser.contextMenus.create({
       id: MENU_ID_TRANSLATE,
       title: i18n.t("contextMenu.translate"),
       contexts: ["page"],
     })
 
-    browser.contextMenus.create({
-      id: MENU_ID_SELECTION_TRANSLATE,
-      title: i18n.t("contextMenu.translateSelection"),
-      contexts: ["selection"],
-    })
-
-    browser.contextMenus.create({
-      id: MENU_ID_SELECTION_READ_ALOUD,
-      title: i18n.t("contextMenu.readAloudSelection"),
-      contexts: ["selection"],
-    })
-
-    if (enabledCustomActions.length > 0) {
-      enabledCustomActions.forEach((action) => {
-        browser.contextMenus.create({
-          id: getSelectionCustomActionMenuId(action.id),
-          title: action.name,
-          contexts: ["selection"],
-        })
-      })
+    for (const item of getSelectionContextMenuItems(config.selectionToolbar)) {
+      browser.contextMenus.create({ ...item, contexts: ["selection"] })
     }
   }
 
@@ -211,7 +187,7 @@ async function handleContextMenuClick(
  * browser page, the Web Store, or a tab left open across an extension update.
  */
 function warnMenuActionNotDelivered(error: unknown) {
-  logger.warn("Failed to deliver context menu action to the tab", error)
+  log.warn("Failed to deliver context menu action to the tab", { error })
 }
 
 /**

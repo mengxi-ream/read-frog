@@ -1,10 +1,12 @@
 import type { RemoteSiteRulesDocument } from "./remote/document"
 import type { SiteRule } from "@/types/config/site-rules"
 import { browser } from "#imports"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
 import { BUILT_IN_SITE_RULES } from "./built-in"
 import { REMOTE_SITE_RULES_ENABLED, selectBuiltInSiteRules } from "./remote/document"
 import { getStoredRemoteSiteRules, watchStoredRemoteSiteRules } from "./remote/storage"
+
+const log = createLogger("site-rules/active")
 
 // The built-in rules in effect in this context: the bundled ones until the
 // stored remote document has loaded, then what `selectBuiltInSiteRules` makes
@@ -61,7 +63,7 @@ export async function loadRemoteSiteRules(): Promise<void> {
       setRemoteSiteRulesDocument(stored)
     }
   } catch (error) {
-    logger.warn("[SiteRules] Failed to read the stored remote rules", error)
+    log.warn("Failed to read the stored remote rules", { error })
   }
 }
 

@@ -4,8 +4,10 @@ import { toastManager } from "@/components/ui/base-ui/toast"
 import { restoreUndoSnapshot } from "@/utils/glossary/sync/local-store"
 import { commitGlossarySync, planGlossarySync } from "@/utils/glossary/sync/sync"
 import { i18n } from "@/utils/i18n"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
 import { useGlossaryInvalidation } from "../../../advanced/glossary/use-glossary"
+
+const log = createLogger("options/pages/preference/config/google-drive-sync/use-glossary-sync")
 
 /**
  * One cast, in one place, instead of one at each of the fifteen call sites.
@@ -96,7 +98,7 @@ export function useGlossarySync() {
     try {
       planned = await planGlossarySync(options)
     } catch (error) {
-      logger.error("Glossary sync failed to plan", error)
+      log.error("Glossary sync failed to plan", { error })
       toastManager.add({ type: "error", title: t("failed") })
       return
     }
@@ -137,7 +139,7 @@ export function useGlossarySync() {
     try {
       await commit(planned.plan, new Map())
     } catch (error) {
-      logger.error("Glossary sync failed to commit", error)
+      log.error("Glossary sync failed to commit", { error })
       toastManager.add({ type: "error", title: t("failed") })
     }
   }
@@ -149,7 +151,7 @@ export function useGlossarySync() {
     try {
       await commit(plan, resolutions)
     } catch (error) {
-      logger.error("Glossary sync failed to commit", error)
+      log.error("Glossary sync failed to commit", { error })
       toastManager.add({ type: "error", title: t("failed") })
     }
   }

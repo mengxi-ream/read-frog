@@ -44,10 +44,12 @@ vi.mock("@/utils/host/translate/translate-variants", () => ({
 const DEFAULT_PAGE_TRANSLATION_OPTIONS = {
   preserveLineBreaks: false,
   forceRetranslation: false,
+  diagnosis: expect.anything(),
 }
 const PRESERVE_LINE_BREAKS_TRANSLATION_OPTIONS = {
   preserveLineBreaks: true,
   forceRetranslation: false,
+  diagnosis: expect.anything(),
 }
 
 const BILINGUAL_CONFIG: Config = {

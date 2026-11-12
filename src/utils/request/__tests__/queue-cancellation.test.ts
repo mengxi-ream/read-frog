@@ -477,7 +477,7 @@ describe("batchQueue – cancelByScope", () => {
         meta: { scopes: readonly string[] | undefined },
       ) => Promise<string[]>
     >(async () => {
-      throw new BatchCountMismatchError(2, 1, ["only-one"])
+      throw new BatchCountMismatchError(2, 1)
     })
     const executeIndividual = vi.fn<(data: FakeBatchData) => Promise<string>>(
       async (item) => `solo:${item.text}`,
@@ -518,7 +518,7 @@ describe("batchQueue – cancelByScope", () => {
       ) => Promise<string[]>
     >(async (dataList) => {
       if (executeBatch.mock.calls.length === 1) {
-        throw new BatchCountMismatchError(1, 0, [])
+        throw new BatchCountMismatchError(1, 0)
       }
       return dataList.map((d) => `t:${d.text}`)
     })

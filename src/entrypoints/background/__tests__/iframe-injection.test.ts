@@ -21,13 +21,10 @@ const executeScriptMock = vi.fn<(...args: any[]) => any>()
 const tabsGetMock = vi.fn<(...args: any[]) => any>()
 const storageGetItemMock = vi.fn<(...args: any[]) => any>()
 
-// Hoisted: `@/utils/site-control` reaches `@/utils/logger` through the shared URL
-// matcher, so the mocked module is evaluated before a plain `const` here would be
+// Hoisted: the mocked modules are evaluated before a plain `const` here would be
 // initialised.
-const { getLocalConfigMock, loggerErrorMock, loggerWarnMock, onMessageMock } = vi.hoisted(() => ({
+const { getLocalConfigMock, onMessageMock } = vi.hoisted(() => ({
   getLocalConfigMock: vi.fn<(...args: any[]) => any>(),
-  loggerErrorMock: vi.fn<(...args: any[]) => any>(),
-  loggerWarnMock: vi.fn<(...args: any[]) => any>(),
   onMessageMock: vi.fn<(...args: any[]) => any>(),
 }))
 
@@ -35,13 +32,6 @@ vi.mock("@/utils/message", () => ({ onMessage: onMessageMock }))
 
 vi.mock("@/utils/config/storage", () => ({
   getLocalConfig: getLocalConfigMock,
-}))
-
-vi.mock("@/utils/logger", () => ({
-  logger: {
-    error: loggerErrorMock,
-    warn: loggerWarnMock,
-  },
 }))
 
 interface NavigationDetails {

@@ -2,7 +2,9 @@ import type { ZodError } from "zod"
 import type { Config } from "@/types/config/config"
 import { dequal } from "dequal"
 import { configSchema } from "@/types/config/config"
-import { logger } from "../logger"
+import { createLogger } from "@/utils/logging/logger"
+
+const log = createLogger("google-drive/conflict-merge")
 
 export interface FieldConflict {
   path: string[] // ['language', 'targetCode']
@@ -143,7 +145,7 @@ export function applyResolutions(
 
   const validatedResult = configSchema.safeParse(result)
   if (!validatedResult.success) {
-    logger.error("Resolved config is invalid", validatedResult.error)
+    log.error("Resolved config is invalid", { error: validatedResult.error })
     return {
       config: result,
       validationError: validatedResult.error,

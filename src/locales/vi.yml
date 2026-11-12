@@ -69,6 +69,7 @@ popup:
     emailUs: Gửi email cho chúng tôi
     featureRequest: Đề xuất tính năng
     bugReport: Báo lỗi
+    diagnosePage: "Chẩn đoán trang này"
     community: Cộng đồng
     joinDiscord: Tham gia Discord
     joinWechat: Tham gia nhóm WeChat
@@ -135,6 +136,13 @@ options:
     bugReport:
       title: Báo lỗi
       description: Mở phiếu hỗ trợ và theo dõi cho đến khi được khắc phục
+    troubleshooting:
+      title: "Khắc phục sự cố"
+    diagnostics:
+      title: "Xuất dữ liệu chẩn đoán"
+      description: "Lưu nhật ký gần đây và cài đặt (không gồm khóa API) để đính kèm vào báo cáo lỗi"
+      exportSuccess: "Đã lưu dữ liệu chẩn đoán"
+      exportFailed: "Không thể xuất dữ liệu chẩn đoán"
     community:
       title: Cộng đồng
     discord:
@@ -1582,6 +1590,24 @@ translation:
   sameLanguage: Ngôn ngữ nguồn và đích phải khác nhau
   autoModeSameLanguage: Ngôn ngữ phát hiện '$1' giống với ngôn ngữ đích
   extensionContextInvalidated: Tiện ích đã được cập nhật. Hãy tải lại trang này rồi thử lại.
+pageDiagnosis:
+  title: "Chẩn đoán trang"
+  summary: "Đã dịch $1, chưa dịch $2"
+  empty: "Chưa có gì để hiển thị. Hãy bật dịch trang rồi mở lại mục này."
+  emptyWhileTranslating: "Chưa có gì để hiển thị. Các đoạn sẽ hiện ở đây khi tính năng dịch trang xử lý đến chúng."
+  framesNotIncluded: "Văn bản bên trong các khung nhúng không được tính ở đây."
+  hint: "Nhấp vào một lý do để khoanh các đoạn tương ứng trên trang."
+  close: "Đóng"
+  unavailable: "Read Frog không thể chạy trên trang này"
+  reasons:
+    noProse: "Không có chữ để dịch"
+    tooShort: "Quá ngắn để dịch"
+    targetLanguage: "Đã ở ngôn ngữ đích"
+    skipLanguage: "Thuộc ngôn ngữ bạn bỏ qua"
+    noTranslationNeeded: "AI cho rằng không cần dịch"
+    sameAsSource: "Bản dịch giống bản gốc"
+    emptyResult: "Dịch vụ không trả về gì"
+    error: "Dịch thất bại"
 annotation:
   annotate: "Chú thích"
   enterMode: "Chế độ chú thích"

@@ -22,14 +22,16 @@ import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { Sha256Hex } from "@/utils/hash"
 import { executeTranslate } from "@/utils/host/translate/execute-translate"
 import { requireHostedFeature } from "@/utils/hosted-ai/routing"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
 import { getSubtitlesTranslatePrompt } from "@/utils/prompts/subtitles"
 import { getTranslatePrompt } from "@/utils/prompts/translate"
 import { BatchQueue } from "@/utils/request/batch-queue"
-import { CancelledScopeRegistry } from "@/utils/request/cancellation"
+import { CancelledScopeRegistry, isTranslationCancelledError } from "@/utils/request/cancellation"
 import { RequestQueue } from "@/utils/request/request-queue"
 import { runStreamTextInBackground } from "./background-stream"
 import { ensureInitializedConfig } from "./config"
+
+const log = createLogger("background/translation-queues")
 
 type QueuedTranslationProvider = ProviderConfig | SerializableProviderRef
 
@@ -288,8 +290,9 @@ async function createTranslationQueues<TContext>(config: TranslationQueueSetupCo
   const { rate, capacity } = config.requestQueueConfig
   const { maxCharactersPerBatch, maxItemsPerBatch } = config.batchQueueConfig
   const { promptResolver, isScopeCancelled, queueName, configSource } = config
+  const queueLog = log.with({ queue: queueName })
 
-  logger.info(`[translation-queues] ${queueName} queue init`, {
+  queueLog.debug("Queue initialized", {
     rate,
     capacity,
     maxCharactersPerBatch,
@@ -297,9 +300,7 @@ async function createTranslationQueues<TContext>(config: TranslationQueueSetupCo
     configSource,
   })
   if (configSource === "default") {
-    logger.error(
-      `[translation-queues] ${queueName} queue running on DEFAULT config (rate ${rate}, capacity ${capacity}) — user config unavailable at init`,
-    )
+    queueLog.error("Queue running on the default config: the user config was unavailable at init")
   }
 
   const requestQueue = new RequestQueue({
@@ -391,11 +392,13 @@ async function createTranslationQueues<TContext>(config: TranslationQueueSetupCo
       return requestQueue.enqueue(thunk, scheduleAt, hash, scope ? [scope] : undefined)
     },
     onError: (error, context) => {
-      const errorType = context.isFallback ? "Individual request" : "Batch request"
-      logger.error(
-        `${errorType} failed (batchKey: ${context.batchKey}, retry: ${context.retryCount}):`,
-        error.message,
-      )
+      // Turning page translation off cancels its batches on purpose: no failure to keep.
+      if (isTranslationCancelledError(error)) return
+      queueLog.error(context.isFallback ? "Individual request failed" : "Batch request failed", {
+        error,
+        batchKey: context.batchKey.slice(0, 12),
+        retry: context.retryCount,
+      })
     },
   })
 
@@ -422,7 +425,7 @@ async function loadQueueSetupConfig(
   try {
     config = await ensureInitializedConfig()
   } catch (error) {
-    logger.error(`[translation-queues] failed to load config for ${queueName} queue`, error)
+    log.error("Failed to load the config for a queue", { queue: queueName, error })
   }
   return {
     ...selectConfig(config ?? DEFAULT_CONFIG),
@@ -458,9 +461,9 @@ function watchQueueConfig(
         requestQueue.setQueueOptions(selected.requestQueueConfig)
         batchQueue.setBatchConfig(selected.batchQueueConfig)
         lastAppliedJson = json
-        logger.info(`[translation-queues] ${queueName} queue config updated`, selected)
+        log.debug("Queue config updated", { queue: queueName, selected })
       } catch (error) {
-        logger.error(`[translation-queues] failed to apply ${queueName} queue config change`, error)
+        log.error("Failed to apply a queue config change", { queue: queueName, error })
       }
     })
   })

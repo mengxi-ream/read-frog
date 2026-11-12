@@ -2,11 +2,14 @@ import { batchQueueConfigSchema } from "@/types/config/translate"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { TranslationCancelledError } from "./cancellation"
 
+/**
+ * The service split a batch into a different number of translations than it was
+ * sent. The message holds the counts only: the error goes to the local log, and
+ * the translations are the user's page.
+ */
 export class BatchCountMismatchError extends Error {
-  constructor(expected: number, got: number, results: unknown[]) {
-    super(
-      `Batch result count mismatch: expected ${expected}, got ${got}.\nResults: ["${results.join('",\n"')}"]`,
-    )
+  constructor(expected: number, got: number) {
+    super(`Batch result count mismatch: expected ${expected}, got ${got}`)
     this.name = "BatchCountMismatchError"
   }
 }
@@ -366,7 +369,7 @@ export class BatchQueue<T, R> {
       }
 
       if (results.length !== tasks.length) {
-        throw new BatchCountMismatchError(tasks.length, results.length, results)
+        throw new BatchCountMismatchError(tasks.length, results.length)
       }
 
       tasks.forEach((task, index) => task.resolve(results[index]!))

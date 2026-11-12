@@ -1,5 +1,6 @@
 import { Icon } from "@iconify/react"
 import { useAtomValue } from "jotai"
+import { browser } from "#imports"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,11 +10,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/base-ui/dropdown-menu"
+import { toastManager } from "@/components/ui/base-ui/toast"
 import { env } from "@/env"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { buildFeaturebasePortalUrl } from "@/utils/featurebase"
 import { i18n } from "@/utils/i18n"
 import { resolveUiLocale } from "@/utils/i18n/locale-map"
+import { createLogger } from "@/utils/logging/logger"
+import { sendMessage } from "@/utils/message"
 import { getReviewUrl } from "@/utils/utils"
 
 const SUPPORT_EMAIL = "contact@readfrog.app"
@@ -21,8 +25,24 @@ const DISCORD_INVITE_URL = "https://discord.gg/ej45e3PezJ"
 const GITHUB_REPO_URL = "https://github.com/mengxi-ream/read-frog"
 const WECHAT_QR_URL = `${GITHUB_REPO_URL}/blob/main/assets/wechat-account.jpg`
 
+const log = createLogger("popup/more-menu")
+
 function openExternal(url: string) {
   window.open(url, "_blank", "noopener,noreferrer")
+}
+
+/** Opens the panel on the page itself, then gets out of its way. */
+async function diagnoseCurrentPage() {
+  try {
+    const [tab] = await browser.tabs.query({ active: true, currentWindow: true })
+    if (tab?.id === undefined) throw new Error("No active tab")
+    await sendMessage("togglePageTranslationDiagnostics", undefined, { tabId: tab.id, frameId: 0 })
+    window.close()
+  } catch (error) {
+    // Pages the extension cannot run on (browser pages, the store, disabled sites).
+    log.warn("Could not open the page diagnosis", { error })
+    toastManager.add({ type: "error", title: i18n.t("pageDiagnosis.unavailable") })
+  }
 }
 
 /**
@@ -86,6 +106,11 @@ export function MoreMenu() {
           >
             <Icon icon="tabler:bug" className="size-4" strokeWidth={1.6} />
             {i18n.t("popup.more.bugReport")}
+          </DropdownMenuItem>
+
+          <DropdownMenuItem onClick={() => void diagnoseCurrentPage()} className="cursor-pointer">
+            <Icon icon="tabler:stethoscope" className="size-4" strokeWidth={1.6} />
+            {i18n.t("popup.more.diagnosePage")}
           </DropdownMenuItem>
         </DropdownMenuGroup>
 

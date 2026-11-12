@@ -14,7 +14,9 @@
 import type { LanguageTag } from "@read-frog/definitions"
 import { LANGUAGES, resolveLanguage } from "@read-frog/definitions"
 import { z } from "zod"
-import { logger } from "../logger"
+import { createLogger } from "@/utils/logging/logger"
+
+const log = createLogger("prompts/language-detection")
 
 const supportedLanguageList = LANGUAGES.map(
   ({ tag, englishName }) => `- ${tag}: ${englishName}`,
@@ -92,7 +94,7 @@ export function parseDetectedLanguageCode(rawOutput: string): LanguageTag | "und
   try {
     data = JSON.parse(cleanedOutput)
   } catch {
-    logger.warn("Failed to parse language detection output. Fallback to null.", rawOutput)
+    log.warn("Failed to parse language detection output. Fallback to null.", { rawOutput })
     return null
   }
 
@@ -102,6 +104,6 @@ export function parseDetectedLanguageCode(rawOutput: string): LanguageTag | "und
     const { code } = parseResult.data
     return code === "und" ? "und" : resolveLanguage(code)
   }
-  logger.warn("Failed to parse language detection output. Fallback to null.", data)
+  log.warn("Failed to parse language detection output. Fallback to null.", { data })
   return null
 }
