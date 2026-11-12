@@ -38,8 +38,11 @@ async function checkPinnedAndNotify() {
     { url: env.WXT_OFFICIAL_SITE_ORIGINS.map((origin: string) => `${origin}/*`) },
     (tabs) => {
       for (const tab of tabs) {
+        // Every service worker start sends this again, and a site tab with no
+        // content script (after an update, or discarded) has no receiver: routine,
+        // so kept out of the local log.
         void sendMessage("pinStateChanged", { isPinned: isOnToolbar }, tab.id).catch((error) => {
-          log.warn("Failed to notify pin state", { error })
+          log.debug("Failed to notify pin state", { error })
         })
       }
     },

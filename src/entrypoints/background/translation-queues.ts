@@ -26,7 +26,7 @@ import { createLogger } from "@/utils/logging/logger"
 import { getSubtitlesTranslatePrompt } from "@/utils/prompts/subtitles"
 import { getTranslatePrompt } from "@/utils/prompts/translate"
 import { BatchQueue } from "@/utils/request/batch-queue"
-import { CancelledScopeRegistry } from "@/utils/request/cancellation"
+import { CancelledScopeRegistry, isTranslationCancelledError } from "@/utils/request/cancellation"
 import { RequestQueue } from "@/utils/request/request-queue"
 import { runStreamTextInBackground } from "./background-stream"
 import { ensureInitializedConfig } from "./config"
@@ -392,6 +392,8 @@ async function createTranslationQueues<TContext>(config: TranslationQueueSetupCo
       return requestQueue.enqueue(thunk, scheduleAt, hash, scope ? [scope] : undefined)
     },
     onError: (error, context) => {
+      // Turning page translation off cancels its batches on purpose: no failure to keep.
+      if (isTranslationCancelledError(error)) return
       queueLog.error(context.isFallback ? "Individual request failed" : "Batch request failed", {
         error,
         batchKey: context.batchKey.slice(0, 12),

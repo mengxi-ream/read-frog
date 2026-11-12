@@ -48,8 +48,16 @@ function useDiagnosedParagraphs(): DiagnosedParagraph[] {
   return getDiagnosedParagraphs()
 }
 
+/** The page can take a paragraph off while the panel is open; a range around it would throw. */
+function isOnPage({ first, last }: DiagnosedParagraph): boolean {
+  return first.isConnected && last.isConnected
+}
+
 /** Where a paragraph is drawn now: its element's box, or the box around its run of nodes. */
-function getParagraphRect({ first, last }: DiagnosedParagraph): DOMRect {
+function getParagraphRect(paragraph: DiagnosedParagraph): DOMRect {
+  // An empty box draws no outline.
+  if (!isOnPage(paragraph)) return new DOMRect()
+  const { first, last } = paragraph
   if (first === last && first.nodeType === Node.ELEMENT_NODE) {
     return (first as Element).getBoundingClientRect()
   }
@@ -67,6 +75,7 @@ function getParagraphRect({ first, last }: DiagnosedParagraph): DOMRect {
 }
 
 function scrollToParagraph(paragraph: DiagnosedParagraph): void {
+  if (!isOnPage(paragraph)) return
   const { first, last } = paragraph
   if (first === last && first.nodeType === Node.ELEMENT_NODE) {
     ;(first as Element).scrollIntoView({ block: "center", behavior: "smooth" })

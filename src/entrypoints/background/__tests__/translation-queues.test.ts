@@ -290,6 +290,9 @@ describe("translation queue helpers", () => {
       },
     )
 
+    // Imported after the module reset, so the capture sees the queues' logger.
+    const { captureLogs } = await import("@/utils/logging/testing")
+    const logs = captureLogs("warn")
     const { setupPageTranslationHandlers } = await import("../page-translation")
     setupPageTranslationHandlers()
     const enqueue = getRegisteredMessageHandler("enqueueTranslateRequest")
@@ -333,6 +336,8 @@ describe("translation queue helpers", () => {
     )
     expect(cancelledReasons).toEqual([true, true])
     expect(abortSignals[0]?.aborted).toBe(true)
+    // Cancelled on purpose, so no failure goes to the local log.
+    expect(logs).toEqual([])
   }, 5_000)
 
   it("keeps request-local marker zero isolated across LLM batch items", async () => {

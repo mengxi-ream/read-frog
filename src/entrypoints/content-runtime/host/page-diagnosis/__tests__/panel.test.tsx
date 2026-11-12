@@ -31,8 +31,13 @@ describe("page diagnosis panel", () => {
 
   afterEach(() => {
     endPageTranslationSession()
+    vi.restoreAllMocks()
     // @ts-expect-error -- put jsdom back the way it was
     delete Element.prototype.scrollIntoView
+    // @ts-expect-error -- put jsdom back the way it was
+    delete Range.prototype.getClientRects
+    // @ts-expect-error -- put jsdom back the way it was
+    delete Range.prototype.getBoundingClientRect
   })
 
   it("counts the paragraphs on the page by reason", () => {
@@ -88,6 +93,29 @@ describe("page diagnosis panel", () => {
 
     fireEvent.click(reason)
     expect(reason).toHaveAttribute("aria-pressed", "false")
+  })
+
+  it("keeps measuring its outlines after the page takes an outlined run off", async () => {
+    // jsdom has no layout, so a range has no boxes to give, and nothing to scroll.
+    Range.prototype.getClientRects = () => [] as unknown as DOMRectList
+    Range.prototype.getBoundingClientRect = () => new DOMRect()
+    vi.spyOn(window, "scrollBy").mockImplementation(() => {})
+    const container = document.createElement("div")
+    container.innerHTML = "Read <b>the notes</b> first"
+    document.body.append(container)
+    diagnoseParagraph([...container.childNodes], "Read the notes first").untranslated("tooShort")
+    render(<PageDiagnosisPanel onClose={() => {}} />)
+    fireEvent.click(screen.getByRole("button", { name: /tooShort/ }))
+    const uncaught = vi.fn<(event: ErrorEvent) => void>()
+    window.addEventListener("error", uncaught)
+
+    // The site rewrites the container, which leaves the run's own nodes with no parent.
+    container.textContent = "Rewritten by the site"
+    fireEvent(window, new Event("resize"))
+    await new Promise((resolve) => requestAnimationFrame(resolve))
+
+    window.removeEventListener("error", uncaught)
+    expect(uncaught).not.toHaveBeenCalled()
   })
 
   it("closes on Escape", () => {
