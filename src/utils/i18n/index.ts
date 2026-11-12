@@ -58,8 +58,9 @@ const I18NEXT_OPTIONS = {
   // Preserve the pre-migration `browser.i18n.getMessage` behaviour of returning "" for
   // a key missing in *all* locales, so guards like `i18n.t(key) || fallback` keep working.
   parseMissingKeyHandler: () => "",
-  // Render an empty translation as "" instead of falling back to English, as the
-  // locale files use "" for sentence fragments some languages leave out.
+  // Count "" in a locale file as a translation, not a missing key. Some languages leave
+  // a sentence fragment empty (ru `noAPIKeyConfig.warningWithLink.page`, ja
+  // `...iconField.helpStepBrowsePrefix`); without this, i18next fills it in from English.
   // (Default true in i18next 26, false since 27; pinned here.)
   returnEmptyString: true,
   interpolation: {
@@ -100,11 +101,9 @@ export async function setUiLanguage(uiLanguage: UiLanguage): Promise<void> {
  * interpolation object. No key uses plurals or named substitutions, so no other arg
  * shapes exist.
  */
-function rawT(key: string, substitutions?: Substitution[]): string {
-  const options = substitutions
-    ? Object.fromEntries(substitutions.map((value, index) => [String(index), value]))
-    : undefined
-  return options ? translate(key, options) : translate(key)
+function rawT(key: string, substitutions: Substitution[] = []): string {
+  const options = Object.fromEntries(substitutions.map((value, index) => [String(index), value]))
+  return translate(key, options)
 }
 
 export const i18n: { t: FacadeT } = { t: rawT }
