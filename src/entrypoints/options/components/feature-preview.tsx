@@ -4,11 +4,11 @@ import watercolorLight from "@/assets/preview/watercolor-light.webp"
 import { cn } from "@/utils/styles/utils"
 
 /**
- * The settings page's previews are drawn at one design size and shrink in steps on narrow pages,
- * against the width of the page's content column (`PageLayout` makes it the container). `zoom`
- * rather than `scale` so the box they take up in the page shrinks with them.
+ * The stage is drawn at one design size and shrinks in steps on narrow pages, against the width of
+ * the page's content column (`PageLayout` makes it the container). `zoom` rather than `scale` so
+ * the box it takes up in the page shrinks with it.
  */
-export const PREVIEW_ZOOM_STEPS =
+const PREVIEW_ZOOM_STEPS =
   "@max-3xl:[zoom:0.85] @max-2xl:[zoom:0.75] @max-xl:[zoom:0.62] @max-md:[zoom:0.5] @max-sm:[zoom:0.44]"
 
 /** A sheet of watercolor paper, light or dark with the theme, that a preview sits on. */

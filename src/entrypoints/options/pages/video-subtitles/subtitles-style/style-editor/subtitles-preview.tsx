@@ -8,8 +8,15 @@ import {
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { SUBTITLES_BOX_CLASS, SUBTITLES_VIEW_CLASS } from "@/utils/constants/subtitles"
 import { cn } from "@/utils/styles/utils"
-import { PREVIEW_ZOOM_STEPS, PreviewBackdrop } from "../../../../components/feature-preview"
+import { PreviewBackdrop } from "../../../../components/feature-preview"
 import { ShadowPreviewFrame } from "./shadow-preview-frame"
+
+/**
+ * The card is wider than the stage the other previews share, so it steps down on a scale of its
+ * own: each step keeps it 24px clear of the backdrop's sides in the narrowest column it covers.
+ */
+const CARD_ZOOM_STEPS =
+  "@max-4xl:[zoom:0.84] @max-3xl:[zoom:0.73] @max-2xl:[zoom:0.62] @max-xl:[zoom:0.54] @max-lg:[zoom:0.47] @max-md:[zoom:0.39] @max-sm:[zoom:0.32]"
 
 interface SubtitlesPreviewProps {
   /**
@@ -37,15 +44,16 @@ export function SubtitlesPreview({ previewCSS }: SubtitlesPreviewProps) {
 
   // A still from a video in a player-like frame, dark along the bottom like most footage, so the
   // subtitles read against what they will be read against: white text with no background shows.
-  // At 680px the default first line, the sample translation (about 480px at the default size),
-  // stays on one line; at 600px it broke before its last character.
+  // Both sample lines stay on one line at the default size (the original runs to about 730px): the
+  // box may take the frame's whole width rather than the 90% the overlay allows on a video, so the
+  // card stays narrow enough for the backdrop.
   return (
     <PreviewBackdrop className="py-9">
       <div
         className={cn(
-          "w-[680px] shrink-0 rounded-[18px] bg-white p-1.5 dark:bg-neutral-800",
+          "w-[848px] shrink-0 rounded-[18px] bg-white p-1.5 dark:bg-neutral-800",
           "shadow-[0_1px_2px_rgb(0_0_0/0.06),0_18px_40px_-14px_rgb(28_36_18/0.3)]",
-          PREVIEW_ZOOM_STEPS,
+          CARD_ZOOM_STEPS,
         )}
       >
         <div
@@ -67,7 +75,7 @@ export function SubtitlesPreview({ previewCSS }: SubtitlesPreviewProps) {
               <div
                 className={cn(
                   SUBTITLES_BOX_CLASS,
-                  "flex max-w-[90%] flex-col gap-2 rounded px-3 py-2 text-center text-white",
+                  "flex max-w-full flex-col gap-2 rounded px-3 py-2 text-center text-white",
                 )}
                 style={containerStyle}
               >
