@@ -3,6 +3,7 @@ import { Icon } from "@iconify/react"
 import { RiTranslate } from "@remixicon/react"
 import { IconDotsVertical, IconVolume, IconX } from "@tabler/icons-react"
 import { useAtomValue } from "jotai"
+import { useLayoutEffect, useRef, useState } from "react"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
 import { ANNOTATION_ICON } from "@/utils/iconify/bundled-icons"
@@ -19,6 +20,9 @@ import {
 // The toolbar's own classes (content-runtime/selection/selection-toolbar), less the interaction states.
 const BUTTON_CLASS_NAME = "relative flex h-7 shrink-0 items-center justify-center px-2"
 const SEPARATOR_CLASS_NAME = "w-px shrink-0 self-stretch bg-border"
+
+/** How far from the page's sides the toolbar stays when it has to move to fit. */
+const PAGE_MARGIN = 12
 
 function PinnedItemIcon({ item }: { item: SelectionToolbarItem }) {
   if (item.kind === "action") {
@@ -41,12 +45,52 @@ export function SelectionToolbarPreview() {
   const pinnedItems = getSelectionToolbarItems(selectionToolbar).filter(
     (item) => item.enabled && item.pinned,
   )
+  const pageRef = useRef<HTMLDivElement>(null)
+  const toolbarRef = useRef<HTMLSpanElement>(null)
+  const closeRef = useRef<HTMLSpanElement>(null)
+  const [shift, setShift] = useState(0)
+
+  // Centred over the selection, which sits near the page's right edge, the toolbar runs out of the
+  // page as pinned items widen it. Like the real toolbar, which keeps inside the viewport, it moves
+  // back in: again whenever its width changes, and once the font is in, since where the selection
+  // falls depends on it. The shift is in the page's own pixels, which the zoom steps don't change.
+  useLayoutEffect(() => {
+    const page = pageRef.current
+    const toolbar = toolbarRef.current
+    const close = closeRef.current
+    const selection = toolbar?.parentElement
+    if (!page?.offsetWidth || !toolbar || !close || !selection) return undefined
+
+    let active = true
+    const fit = () => {
+      if (!active) return
+      const pageBox = page.getBoundingClientRect()
+      const scale = pageBox.width / page.offsetWidth
+      const toolbarBox = toolbar.getBoundingClientRect()
+      const selectionBox = selection.getBoundingClientRect()
+      const width = toolbarBox.width / scale
+      // The close button sticks out past the toolbar's top right corner.
+      const overhang = Math.max(0, close.getBoundingClientRect().right - toolbarBox.right) / scale
+      const centredLeft =
+        (selectionBox.left + selectionBox.width / 2 - pageBox.left) / scale - width / 2
+      const maxLeft = Math.max(PAGE_MARGIN, page.offsetWidth - PAGE_MARGIN - width - overhang)
+      setShift(centredLeft - Math.min(Math.max(centredLeft, PAGE_MARGIN), maxLeft))
+    }
+    fit()
+    const observer = new ResizeObserver(fit)
+    observer.observe(toolbar)
+    void document.fonts.ready.then(fit)
+    return () => {
+      active = false
+      observer.disconnect()
+    }
+  }, [])
 
   return (
     <PreviewBackdrop role="img" aria-label={i18n.t("options.selectionToolbar.demoImageAlt")}>
       <PreviewStage>
         <PreviewBrowserWindow className="inset-x-[90px] top-[38px]">
-          <div className="px-8 pt-[22px]">
+          <div ref={pageRef} className="px-8 pt-[22px]">
             <div className="mb-3 text-xl font-semibold tracking-[-0.01em] text-neutral-950 dark:text-neutral-100">
               The quiet craft of Mr. Kamiya
             </div>
@@ -56,7 +100,11 @@ export function SelectionToolbarPreview() {
                 against things that could make the world{" "}
                 <span className={PREVIEW_SELECTION_CLASS_NAME}>
                   take notice
-                  <span className="absolute bottom-[calc(100%+7px)] left-1/2 -translate-x-1/2">
+                  <span
+                    ref={toolbarRef}
+                    className="absolute bottom-[calc(100%+7px)] left-1/2 -translate-x-1/2"
+                    style={{ marginLeft: -shift }}
+                  >
                     <span
                       className="relative block [zoom:1.2] text-foreground"
                       style={{ opacity: selectionToolbar.opacity / 100 }}
@@ -72,8 +120,9 @@ export function SelectionToolbarPreview() {
                           </>
                         )}
                         {/* `clip` rather than `hidden`: it clips the row at the toolbar's width
-                            without clipping the pointer that hangs below it. */}
-                        <span className="flex max-w-105 items-center overflow-x-clip">
+                            without clipping the pointer that hangs below it. 360px where the real
+                            row scrolls past 420px, so the widest toolbar still fits the page. */}
+                        <span className="flex max-w-90 items-center overflow-x-clip">
                           {pinnedItems.map((item, index) => (
                             <span key={item.id} className={BUTTON_CLASS_NAME}>
                               <PinnedItemIcon item={item} />
@@ -86,7 +135,10 @@ export function SelectionToolbarPreview() {
                           <IconDotsVertical className="size-4" strokeWidth={1.6} />
                         </span>
                       </span>
-                      <span className="absolute -top-1 -right-1 rounded-full border border-border bg-neutral-100 dark:bg-neutral-900">
+                      <span
+                        ref={closeRef}
+                        className="absolute -top-1 -right-1 rounded-full border border-border bg-neutral-100 dark:bg-neutral-900"
+                      >
                         <IconX className="h-3 w-3 text-neutral-400 dark:text-neutral-600" />
                       </span>
                     </span>

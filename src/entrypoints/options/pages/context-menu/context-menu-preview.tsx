@@ -1,5 +1,6 @@
 import { IconChevronRight } from "@tabler/icons-react"
 import { useAtomValue } from "jotai"
+import { browser } from "#imports"
 import readFrogLogo from "@/assets/icons/read-frog.png"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { getSelectionContextMenuItems } from "@/utils/context-menu"
@@ -25,6 +26,13 @@ const MENU_CLASS_NAME = cn(
 const ITEM_CLASS_NAME = "relative flex h-[22px] items-center rounded-[5px] pr-3 pl-7"
 const HIGHLIGHTED_ITEM_CLASS_NAME = "bg-black/7 dark:bg-white/10"
 
+// The stage (`PreviewStage`, 330px) holds five rows of Read Frog's submenu, the default list:
+// translate, read aloud and the three built-in actions. Each row past those, 22px like every item,
+// makes it that much taller, so a long list of actions is never cut off at the bottom.
+const STAGE_HEIGHT = 330
+const ROWS_IN_STAGE = 5
+const ROW_HEIGHT = 22
+
 function MenuSeparator() {
   return <span className="mx-2.5 my-[5px] block h-px bg-black/10 dark:bg-white/12" />
 }
@@ -46,18 +54,28 @@ function BrowserMenuItem({ className }: { className: string }) {
 export function ContextMenuPreview() {
   const selectionToolbar = useAtomValue(configFieldsAtomMap.selectionToolbar)
   const items = getSelectionContextMenuItems(selectionToolbar)
+  // The browser names the submenu after the extension in the browser's language, which needn't be
+  // the one Read Frog's settings are in. WXT types `getMessage` for the predefined messages only.
+  const extensionName = (browser.i18n.getMessage as (messageName: string) => string)("extName")
 
   return (
     <PreviewBackdrop role="img" aria-label={i18n.t("options.contextMenu.demoImageAlt")}>
-      <PreviewStage>
-        {/* Left of centre, so the window and the menus that run out of it are centred together. */}
+      <PreviewStage
+        style={{
+          height: STAGE_HEIGHT + Math.max(0, items.length - ROWS_IN_STAGE) * ROW_HEIGHT,
+        }}
+      >
+        {/* Left of centre, so the menus that run out of the window have room. Drawn at the page's
+            scale and with their labels capped, they stay on the stage, which is all a narrow
+            settings page shows: in every language, but for a few pixels of padding when an
+            action's name reaches the cap in the longest one. */}
         <PreviewBrowserWindow className="top-[38px] right-[165px] left-[15px] overflow-visible">
           <div className="px-8 pt-3.5">
             <div className="text-[15px] leading-[26px] whitespace-nowrap">
               <div>
                 <span className={PREVIEW_SELECTION_CLASS_NAME}>
                   {SAMPLE_SELECTION}
-                  <span className="absolute top-[calc(100%+2px)] left-[calc(100%-4px)] flex [zoom:1.1] items-start text-[13px] leading-[22px] text-[#1d1d1f] dark:text-neutral-100">
+                  <span className="absolute top-[calc(100%+2px)] left-[calc(100%-4px)] flex items-start text-[13px] leading-[22px] text-[#1d1d1f] dark:text-neutral-100">
                     <span className={MENU_CLASS_NAME}>
                       <BrowserMenuItem className="w-10" />
                       <BrowserMenuItem className="w-32" />
@@ -68,7 +86,7 @@ export function ContextMenuPreview() {
                           alt=""
                           className="absolute top-[3px] left-[7px] size-4"
                         />
-                        <span className="max-w-72 truncate">{i18n.t("extName")}</span>
+                        <span className="max-w-72 truncate">{extensionName}</span>
                         <IconChevronRight className="ml-auto box-content size-3 pl-[22px]" />
                       </span>
                       <MenuSeparator />
@@ -85,7 +103,7 @@ export function ContextMenuPreview() {
                             index === 0 && HIGHLIGHTED_ITEM_CLASS_NAME,
                           )}
                         >
-                          <span className="max-w-60 truncate">
+                          <span className="max-w-52 truncate">
                             {item.title.replaceAll("%s", SAMPLE_SELECTION)}
                           </span>
                           {index === 0 && <PreviewPointer className="top-2.5 right-6" />}
