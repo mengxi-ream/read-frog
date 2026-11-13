@@ -54,8 +54,8 @@ export function SummarySection() {
     meta: { suppressToast: true },
   })
 
+  // oxlint-disable-next-line query/exhaustive-deps -- Only the target language and resolved provider affect generation; the rest of this config snapshot must not invalidate the summary.
   const query = useQuery({
-    // oxlint-disable-next-line query/exhaustive-deps -- Only the target language and resolved provider affect generation; the rest of this config snapshot must not invalidate the summary.
     queryKey: videoSummaryQueryKey(videoId, config.language.targetCode, providerRef),
     queryFn: async () => {
       const summary = await generateVideoSummary(config, videoId)

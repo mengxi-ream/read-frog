@@ -1933,11 +1933,10 @@ describe("translate", () => {
           expect(node.textContent).toBe(`${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`)
         })
       })
-      // Note: jsdom doesn't implement CSS "float blockifies display" rule,
-      // so floated <span> elements remain display:inline in jsdom.
-      // In real browsers, floated elements would be blockified.
+      // A float is blockified (computed display: block), so a floated <span> is a
+      // block of its own unless it is a large initial letter, which stays inline.
       describe("float: right should NOT be treated as large initial letter", () => {
-        it("bilingual mode: float right span remains inline in jsdom (no blockification)", async () => {
+        it("bilingual mode: float right span is its own block", async () => {
           render(
             <div data-testid="test-node">
               <span style={{ float: "right" }}>{MOCK_ORIGINAL_TEXT}</span>
@@ -1948,13 +1947,13 @@ describe("translate", () => {
           await removeOrShowPageTranslation("bilingual", true)
 
           expectNodeLabels(node, [BLOCK_ATTRIBUTE])
-          // jsdom returns display:inline for floated spans (no blockification)
-          expectNodeLabels(node.children[0]!, [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE])
+          expectNodeLabels(node.children[0]!, [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE])
+          expect(node.children[0]).not.toHaveAttribute(INLINE_ATTRIBUTE)
           expectNodeLabels(node.children[1]!, [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE])
         })
       })
       describe("float: left without inline next sibling should NOT be treated as large initial letter", () => {
-        it("bilingual mode: float left span without next sibling remains inline in jsdom", async () => {
+        it("bilingual mode: float left span without next sibling is its own block", async () => {
           render(
             <div data-testid="test-node">
               <span style={{ float: "left" }}>{MOCK_ORIGINAL_TEXT}</span>
@@ -1964,10 +1963,10 @@ describe("translate", () => {
           await removeOrShowPageTranslation("bilingual", true)
 
           expectNodeLabels(node, [BLOCK_ATTRIBUTE])
-          // jsdom returns display:inline for floated spans (no blockification)
-          expectNodeLabels(node.children[0]!, [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE])
+          expectNodeLabels(node.children[0]!, [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE])
+          expect(node.children[0]).not.toHaveAttribute(INLINE_ATTRIBUTE)
         })
-        it("bilingual mode: float left span with block next sibling remains inline in jsdom", async () => {
+        it("bilingual mode: float left span with block next sibling is its own block", async () => {
           // https://theqoo.net/genrefiction/1771494967
           render(
             <div data-testid="test-node">
@@ -1979,8 +1978,8 @@ describe("translate", () => {
           await removeOrShowPageTranslation("bilingual", true)
 
           expectNodeLabels(node, [BLOCK_ATTRIBUTE])
-          // jsdom returns display:inline for floated spans (no blockification)
-          expectNodeLabels(node.children[0]!, [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE])
+          expectNodeLabels(node.children[0]!, [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE])
+          expect(node.children[0]).not.toHaveAttribute(INLINE_ATTRIBUTE)
           expectNodeLabels(node.children[1]!, [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE])
         })
       })
