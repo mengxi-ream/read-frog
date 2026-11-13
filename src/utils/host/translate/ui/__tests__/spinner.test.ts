@@ -78,7 +78,18 @@ describe("spinner", () => {
     expect(spinner.style.borderRightColor).toBe("transparent")
     expect(spinner.style.borderBottomColor).toBe("transparent")
     expect(spinner.style.borderLeftColor).toBe("transparent")
-    expect(spinner.style.borderTopWidth).toBe("1.5px")
+    expect(spinner.style.borderRightWidth).toBe("1.5px")
+
+    // The arc's own width shares a `border-top` shorthand with var(), which the
+    // inline style reads back as "" until the variable resolves. Resolve it.
+    const host = document.createElement("div")
+    host.style.setProperty("--read-frog-muted-foreground", "rgb(115, 115, 115)")
+    host.appendChild(spinner)
+    document.body.appendChild(host)
+    const computed = window.getComputedStyle(spinner)
+    expect(computed.borderTopStyle).toBe("solid")
+    expect(computed.borderTopWidth).toBe(computed.borderRightWidth)
+    host.remove()
   })
 
   it("keeps the gray segment visible when reduced motion is enabled", () => {

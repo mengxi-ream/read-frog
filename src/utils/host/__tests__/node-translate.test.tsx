@@ -50,6 +50,14 @@ async function translateAt(point: { x: number; y: number }, config: Config) {
   if (block) await removeOrShowNodeTranslation(block, config)
 }
 
+// jsdom supports constructable stylesheets, so site-rule CSS is adopted onto the
+// document, as in the browser, rather than written into a <style> element.
+function adoptedDocumentCss(): string {
+  return document.adoptedStyleSheets
+    .flatMap((sheet) => Array.from(sheet.cssRules, (rule) => rule.cssText))
+    .join("\n")
+}
+
 describe("node translation", () => {
   const originalGetComputedStyle = window.getComputedStyle
 
@@ -118,10 +126,7 @@ describe("node translation", () => {
         flushBatchedOperations()
       })
 
-      const siteRuleStyle = document.head.querySelector<HTMLStyleElement>(
-        "#read-frog-site-rule-styles",
-      )
-      expect(siteRuleStyle?.textContent).toContain(".clamped-title")
+      expect(adoptedDocumentCss()).toContain(".clamped-title")
 
       const wrapper = node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)
       document.elementFromPoint = vi.fn<(...args: any[]) => any>(() => wrapper as Element)
@@ -130,7 +135,7 @@ describe("node translation", () => {
         flushBatchedOperations()
       })
 
-      expect(document.head.querySelector("#read-frog-site-rule-styles")).toBeNull()
+      expect(adoptedDocumentCss()).not.toContain(".clamped-title")
       document.elementFromPoint = originalElementFromPoint
     })
 
@@ -162,7 +167,7 @@ describe("node translation", () => {
         flushBatchedOperations()
       })
 
-      expect(document.head.querySelector("#read-frog-site-rule-styles")).not.toBeNull()
+      expect(adoptedDocumentCss()).toContain(".clamped-title")
 
       const wrapper = node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)
       document.elementFromPoint = vi.fn<(...args: any[]) => any>(() => wrapper as Element)
@@ -171,7 +176,7 @@ describe("node translation", () => {
         flushBatchedOperations()
       })
 
-      expect(document.head.querySelector("#read-frog-site-rule-styles")).toBeNull()
+      expect(adoptedDocumentCss()).not.toContain(".clamped-title")
       document.elementFromPoint = originalElementFromPoint
     })
   })

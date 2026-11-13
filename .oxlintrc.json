@@ -65,9 +65,9 @@
     "typescript/prefer-includes": "error",
     "typescript/prefer-optional-chain": "error",
     "vitest/no-commented-out-tests": "error",
-    "oxlint-plugin-query/exhaustive-deps": "error",
-    "oxlint-plugin-query/no-rest-destructuring": "warn",
-    "oxlint-plugin-query/stable-query-client": "error",
+    "query/exhaustive-deps": "error",
+    "query/no-rest-destructuring": "warn",
+    "query/stable-query-client": "error",
     "vitest/consistent-test-it": ["error", { "fn": "it" }],
     "vitest/expect-expect": [
       "error",

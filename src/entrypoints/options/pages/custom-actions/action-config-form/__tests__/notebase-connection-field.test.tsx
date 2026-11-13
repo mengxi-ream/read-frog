@@ -151,6 +151,9 @@ async function pick(trigger: HTMLElement, optionText: string) {
       trigger.dispatchEvent(new MouseEvent(type, { bubbles: true, button: 0 }))
     }
   })
+  // The mousedown also schedules an open for the next animation frame. Let it run
+  // now: picking first closes the select, and that late open then reopens it.
+  await act(() => new Promise<void>((resolve) => requestAnimationFrame(() => resolve())))
   const option = (await screen.findAllByRole("option")).find(
     (element) => element.textContent === optionText,
   )!

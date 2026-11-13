@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import type { Config } from "@/types/config/config"
-import { describe, expect, it } from "vitest"
+import { afterEach, describe, expect, it } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import {
   BLOCK_CONTENT_CLASS,
@@ -78,9 +78,15 @@ describe("isDontWalkIntoButTranslateAsChildElement", () => {
 })
 
 describe("inline/block display detection", () => {
+  // Like a browser, jsdom computes no style for an element outside the document.
+  afterEach(() => {
+    document.body.replaceChildren()
+  })
+
   it("should treat ruby as inline", () => {
     const ruby = document.createElement("ruby")
     ruby.textContent = "大阪"
+    document.body.appendChild(ruby)
 
     expect(isShallowInlineHTMLElement(ruby)).toBe(true)
     expect(isShallowBlockHTMLElement(ruby)).toBe(false)
@@ -90,6 +96,7 @@ describe("inline/block display detection", () => {
     const element = document.createElement("div")
     element.textContent = "大阪"
     element.style.display = "block ruby"
+    document.body.appendChild(element)
 
     expect(window.getComputedStyle(element).display).toBe("block ruby")
     expect(isShallowInlineHTMLElement(element)).toBe(false)
@@ -100,6 +107,7 @@ describe("inline/block display detection", () => {
     const element = document.createElement("a")
     element.textContent = "Market item"
     element.style.display = "contents"
+    document.body.appendChild(element)
 
     expect(window.getComputedStyle(element).display).toBe("contents")
     expect(isShallowInlineHTMLElement(element)).toBe(false)
@@ -491,9 +499,11 @@ describe("site-rule tag-set overrides", () => {
     })
     const span = document.createElement("span")
     span.textContent = "text"
+    document.body.appendChild(span)
 
     expect(isShallowBlockHTMLElement(span, undefined, config)).toBe(true)
     expect(isShallowInlineHTMLElement(span, undefined, config)).toBe(false)
     expect(isShallowBlockHTMLElement(span)).toBe(false)
+    span.remove()
   })
 })
