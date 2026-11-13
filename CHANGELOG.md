@@ -1,5 +1,11 @@
 # @read-frog/extension
 
+## 1.59.3
+
+### Patch Changes
+
+- [#2506](https://github.com/mengxi-ream/read-frog/pull/2506) [`6e4acc8`](https://github.com/mengxi-ream/read-frog/commit/6e4acc884344d96156cb1d4dba459c5630d2d24a) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(providers): put IF API's 90% off models on its badge and the +10% credit on its button
+
 ## 1.59.2
 
 ### Patch Changes
