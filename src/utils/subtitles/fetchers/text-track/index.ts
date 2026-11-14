@@ -53,7 +53,8 @@ export class TextTrackFetcher implements SubtitlesFetcher {
     }
 
     this.ensureLoading(track)
-    const fragments = alignToVideo(cuesToFragments(await this.waitForCues(track)), video.duration)
+    const cues = await this.waitForCues(track)
+    const fragments = alignToVideo(cuesToFragments(cues), await this.waitForDuration(video))
     if (fragments.length === 0) {
       throw new NoSubtitlesError()
     }
@@ -208,5 +209,14 @@ export class TextTrackFetcher implements SubtitlesFetcher {
       throw new NoSubtitlesError()
     }
     return cues
+  }
+
+  // Cues can land before the video's metadata, and the fragments are cached once aligned.
+  private async waitForDuration(video: HTMLVideoElement): Promise<number> {
+    const duration = await pollUntil(() => (Number.isNaN(video.duration) ? null : video.duration), {
+      timeoutMs: TEXT_TRACK_CUE_WAIT_TIMEOUT_MS,
+      intervalMs: TEXT_TRACK_CUE_POLL_INTERVAL_MS,
+    })
+    return duration ?? Number.NaN
   }
 }
