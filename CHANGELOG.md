@@ -1,5 +1,11 @@
 # @read-frog/extension
 
+## 1.59.4
+
+### Patch Changes
+
+- [#2511](https://github.com/mengxi-ream/read-frog/pull/2511) [`2a51f55`](https://github.com/mengxi-ream/read-frog/commit/2a51f5529d0d2cb215469c1fd5245ba58f0a357b) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(custom-css): keep custom CSS written for the old two-letter `lang` codes (`[lang="zh"]` and so on) working after the move to full language tags
+
 ## 1.59.3
 
 ### Patch Changes
