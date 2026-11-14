@@ -13,6 +13,8 @@ interface TextTrackFetcherOptions {
   resolveVideo: () => HTMLVideoElement | null
   getVideoId: () => string | null
   isSourceTrack?: (track: TextTrack) => boolean
+  // A track that may count from a broadcast hour; only these are moved back onto the video.
+  isBroadcastTimed?: (track: TextTrack) => boolean
 }
 
 const SUBTITLE_KINDS = new Set<TextTrackKind>(["subtitles", "captions"])
@@ -53,8 +55,10 @@ export class TextTrackFetcher implements SubtitlesFetcher {
     }
 
     this.ensureLoading(track)
-    const cues = await this.waitForCues(track)
-    const fragments = alignToVideo(cuesToFragments(cues), await this.waitForDuration(video))
+    const raw = cuesToFragments(await this.waitForCues(track))
+    const fragments = this.options.isBroadcastTimed?.(track)
+      ? alignToVideo(raw, await this.waitForDuration(video))
+      : raw
     if (fragments.length === 0) {
       throw new NoSubtitlesError()
     }
