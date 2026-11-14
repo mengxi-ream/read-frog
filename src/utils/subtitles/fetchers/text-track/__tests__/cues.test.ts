@@ -80,6 +80,24 @@ describe("alignToVideo", () => {
     ])
   })
 
+  it("takes off the broadcast hour when the captions cover only the start of a long video", () => {
+    const fragments = [
+      fragmentAt(HOUR_MS, HOUR_MS + 10_000),
+      fragmentAt(HOUR_MS + 1_790_000, HOUR_MS + 1_800_000),
+    ]
+
+    expect(alignToVideo(fragments, 7200)).toEqual([
+      fragmentAt(0, 10_000),
+      fragmentAt(1_790_000, 1_800_000),
+    ])
+  })
+
+  it("takes off as many hours as a later broadcast start needs", () => {
+    const fragments = [fragmentAt(10 * HOUR_MS + 1000, 10 * HOUR_MS + 2000)]
+
+    expect(alignToVideo(fragments, 87)).toEqual([fragmentAt(1000, 2000)])
+  })
+
   it("keeps the hour when the last line ends a moment after the video", () => {
     const fragments = [fragmentAt(HOUR_MS + 1000, HOUR_MS + 87_500)]
 
@@ -92,7 +110,7 @@ describe("alignToVideo", () => {
     expect(alignToVideo(fragments, 87)).toBe(fragments)
   })
 
-  it("leaves captions that fit the video, or run a moment past its end", () => {
+  it("leaves captions that start before the broadcast hour", () => {
     const fitting = [fragmentAt(1000, 3000)]
     const overrunning = [fragmentAt(9000, 10_500)]
 
