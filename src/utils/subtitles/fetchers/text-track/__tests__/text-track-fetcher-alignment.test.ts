@@ -16,8 +16,12 @@ function videoPlaying(durationSec: number) {
   return { duration: durationSec, textTracks: [track] } as unknown as HTMLVideoElement
 }
 
-function fetcherFor(video: HTMLVideoElement) {
-  return new TextTrackFetcher({ resolveVideo: () => video, getVideoId: () => "1" })
+function fetcherFor(video: HTMLVideoElement, isBroadcastTimed = () => true) {
+  return new TextTrackFetcher({
+    resolveVideo: () => video,
+    getVideoId: () => "1",
+    isBroadcastTimed,
+  })
 }
 
 describe("TextTrackFetcher alignment", () => {
@@ -37,5 +41,11 @@ describe("TextTrackFetcher alignment", () => {
     await vi.advanceTimersByTimeAsync(TEXT_TRACK_CUE_POLL_INTERVAL_MS)
 
     await expect(pending).resolves.toEqual(ALIGNED)
+  })
+
+  it("keeps the times of a track the platform does not mark as broadcast-timed", async () => {
+    await expect(fetcherFor(videoPlaying(87), () => false).fetch()).resolves.toEqual([
+      { text: "Welcome to Max Power.", start: 3_601_583, end: 3_603_083 },
+    ])
   })
 })

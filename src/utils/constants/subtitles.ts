@@ -73,6 +73,8 @@ export const XCOM_STATUS_POLL_INTERVAL_MS = 2000
 export const XCOM_PLAYER_MUTATION_DEBOUNCE_MS = 50
 // x.com renders captions from a partial duplicate track labelled like this.
 export const XCOM_RENDER_TRACK_LABEL = "clone"
+// x.com labels the captions it generates like this; only uploaded ones count from 01:00:00.
+export const XCOM_AUTO_GENERATED_TRACK_MARK = "(auto-generated)"
 
 // Netflix specific
 export const NETFLIX_WATCH_PATH_PATTERN = /^\/watch\/(\d+)/
