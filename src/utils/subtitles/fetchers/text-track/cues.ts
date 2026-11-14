@@ -19,15 +19,16 @@ export function cuesToFragments(cues: ArrayLike<TextTrackCue>): SubtitlesFragmen
 }
 
 // Broadcast captions count from 01:00:00; X's player drops that hour, its text track keeps it.
-// The offset is the fewest whole hours that bring the cues back inside the video.
+// Take off that hour, or as many as a later start needs to bring the cues inside the video.
 export function alignToVideo(
   fragments: SubtitlesFragment[],
   durationSec: number,
 ): SubtitlesFragment[] {
   const firstStart = fragments[0]?.start ?? 0
   const lastEnd = fragments.reduce((latest, fragment) => Math.max(latest, fragment.end), 0)
-  const hours = Math.ceil((lastEnd - durationSec * 1000 - END_SLACK_MS) / HOUR_MS)
-  if (!Number.isFinite(hours) || hours <= 0 || hours * HOUR_MS > firstStart) {
+  const overrunHours = Math.ceil((lastEnd - durationSec * 1000 - END_SLACK_MS) / HOUR_MS)
+  const hours = Math.max(1, overrunHours)
+  if (!Number.isFinite(durationSec) || hours * HOUR_MS > firstStart) {
     return fragments
   }
 
