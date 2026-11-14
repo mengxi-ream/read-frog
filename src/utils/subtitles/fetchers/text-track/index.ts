@@ -7,7 +7,7 @@ import {
 } from "@/utils/constants/subtitles"
 import { pollUntil } from "@/utils/poll"
 import { NoSubtitlesError, VideoNotFoundError } from "@/utils/subtitles/errors"
-import { cuesToFragments } from "./cues"
+import { alignToVideo, cuesToFragments } from "./cues"
 
 interface TextTrackFetcherOptions {
   resolveVideo: () => HTMLVideoElement | null
@@ -53,7 +53,7 @@ export class TextTrackFetcher implements SubtitlesFetcher {
     }
 
     this.ensureLoading(track)
-    const fragments = cuesToFragments(await this.waitForCues(track))
+    const fragments = alignToVideo(cuesToFragments(await this.waitForCues(track)), video.duration)
     if (fragments.length === 0) {
       throw new NoSubtitlesError()
     }
