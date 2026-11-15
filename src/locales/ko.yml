@@ -1332,7 +1332,7 @@ options:
         error: 값은 $1에서 $2 사이여야 합니다
     translationQueue:
       title: 번역 대기열
-      description: 요청을 보내는 속도, 요청당 텍스트 양, 독자보다 얼마나 앞서 번역할지
+      description: 요청을 보내는 속도, 요청당 텍스트 양, 요청당 최대 대기 시간, 독자보다 얼마나 앞서 번역할지
       manageQueue: 대기열 관리
       requestQueueConfig:
         title: 번역 속도
@@ -1347,6 +1347,9 @@ options:
           description: "최대 문자 수: 한 번의 AI 요청에 담는 텍스트 양"
         maxItemsPerBatch:
           description: "최대 단락 수: 한 요청에 묶는 단락 수. AI가 아닌 번역 서비스에는 적용되지 않습니다"
+      requestTimeout:
+        title: 요청 시간 제한
+        description: "응답을 기다리는 초 수. 넘으면 포기하고 다시 시도합니다. AI 일괄 요청은 텍스트 길이에 따라 최대 100초까지 더 기다립니다. 느린 모델에서 시간 초과가 계속되면 늘리세요"
       preloadConfig:
         title: 사전 번역 범위
         description: API 비용을 절약하기 위해 뷰포트 아래 콘텐츠를 얼마나 사전 번역할지 제어합니다
@@ -1518,7 +1521,7 @@ options:
           videoSummary: 동영상 요약 (AI 스마트 컨텍스트 필요)
     subtitlesQueue:
       title: 자막 대기열
-      description: 자막 요청을 보내는 속도와 요청당 자막 줄 수
+      description: 자막 요청을 보내는 속도, 요청당 자막 줄 수, 요청당 최대 대기 시간
       manageQueue: 대기열 관리
       requestQueueConfig:
         title: 번역 속도
@@ -1533,6 +1536,9 @@ options:
           description: "최대 문자 수: 한 번의 AI 요청에 담는 텍스트 양"
         maxItemsPerBatch:
           description: "최대 자막 줄 수: 한 요청에 묶는 자막 수. AI가 아닌 번역 서비스에는 적용되지 않습니다"
+      requestTimeout:
+        title: 요청 시간 제한
+        description: "응답을 기다리는 초 수. 넘으면 포기하고 다시 시도합니다. AI 일괄 요청은 텍스트 길이에 따라 최대 100초까지 더 기다립니다. 느린 모델에서 시간 초과가 계속되면 늘리세요"
     cache:
       title: 캐시
       clearCache:

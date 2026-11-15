@@ -119,6 +119,11 @@ export class RequestQueue {
     return promise
   }
 
+  /** The timeout a task without its own override gets, as last set. */
+  getTimeoutMs(): number {
+    return this.options.timeoutMs
+  }
+
   setQueueOptions(options: Partial<QueueOptions>) {
     const { retryPolicy, ...queueOptions } = options
     const parseConfigStatus = requestQueueConfigSchema.partial().safeParse(queueOptions)

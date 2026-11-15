@@ -1272,6 +1272,17 @@ describe("requestQueue – reconfigure the request queue", () => {
 
     expect(() => q.setQueueOptions({ capacity: -1 })).toThrow(/Too small/)
   })
+
+  it("takes a user timeout within its range and refuses one outside it", () => {
+    const q = new RequestQueue({ ...baseConfig })
+
+    q.setQueueOptions({ timeoutMs: 90_000 })
+    expect(q.getTimeoutMs()).toBe(90_000)
+
+    expect(() => q.setQueueOptions({ timeoutMs: 1_000 })).toThrow(/at least 5 seconds/)
+    expect(() => q.setQueueOptions({ timeoutMs: 600_000 })).toThrow(/at most 180 seconds/)
+    expect(q.getTimeoutMs()).toBe(90_000)
+  })
 })
 
 describe("requestQueue – dispatch ETA and per-task timeout", () => {
