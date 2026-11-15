@@ -1,18 +1,27 @@
 import type { PlatformConfig } from "@/entrypoints/subtitles.content/platforms"
 import type { AiSubtitlesContext } from "@/utils/subtitles/ai/request-ai-subtitles"
+import { xcomMediaIdFromUrl } from "@read-frog/definitions"
 import {
   DEFAULT_CONTROLS_HEIGHT,
   XCOM_PLAYER_CONTAINER_SELECTOR,
 } from "@/utils/constants/subtitles"
 import { getCurrentXcomSubtitlesVideo, getCurrentXcomVideoId } from "./dom"
 
+// The poster's media id tells the playing video apart from the post's others.
 function createXcomAiSubtitlesContext(): AiSubtitlesContext | null {
-  const videoId = getCurrentXcomVideoId()
-  const duration = getCurrentXcomSubtitlesVideo()?.duration
-  if (!videoId || !duration || !Number.isFinite(duration)) {
+  const statusId = getCurrentXcomVideoId()
+  const video = getCurrentXcomSubtitlesVideo()
+  const mediaId = video ? xcomMediaIdFromUrl(video.poster) : null
+  const duration = video?.duration
+  if (!statusId || !mediaId || !duration || !Number.isFinite(duration)) {
     return null
   }
-  return { videoId, url: `https://x.com/i/status/${videoId}`, durationSec: Math.ceil(duration) }
+  return {
+    videoId: mediaId,
+    url: `https://x.com/i/status/${statusId}`,
+    durationSec: Math.ceil(duration),
+    mediaId,
+  }
 }
 
 async function isXcomLiveContent(): Promise<boolean> {

@@ -14,6 +14,8 @@ export interface AiSubtitlesContext {
   url: string
   /** Player-reported duration; an untrusted admission pre-check, never the billing basis. */
   durationSec: number
+  /** Names the video being played where the URL names a post that can hold several. */
+  mediaId?: string
 }
 
 interface VideoTranscriptJob {
@@ -131,12 +133,14 @@ export async function requestAiSubtitles(
   ctx: AiSubtitlesContext,
   opts?: { signal?: AbortSignal },
 ): Promise<{ segments: SubtitlesFragment[]; detectedLanguage: string }> {
-  const { url, durationSec } = ctx
+  const { url, durationSec, mediaId } = ctx
   const signal = opts?.signal
 
   throwIfAborted(signal)
 
-  const { error, data } = await safe(orpcClient.videoTranscript.create({ url, durationSec }))
+  const { error, data } = await safe(
+    orpcClient.videoTranscript.create({ url, durationSec, mediaId }),
+  )
   if (error) {
     // Sign-in, plan and quota are pre-checked before create is called, so the
     // walls reaching here are races (a subscription that lapsed since the
