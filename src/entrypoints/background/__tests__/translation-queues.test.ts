@@ -1968,18 +1968,18 @@ describe("translation queue helpers", () => {
     }
 
     it("keeps the old batch timeouts at the 20 s default and shifts them all when raised", async () => {
-      const { getBatchTimeoutMs } = await import("../translation-queues")
+      const { getBatchExtraTimeoutMs } = await import("../translation-queues")
 
       for (const characters of [0, 330, 1000, 4000, 6667, 10_000]) {
         // The formula before the setting existed.
-        expect(getBatchTimeoutMs(20_000, characters)).toBe(
+        expect(20_000 + getBatchExtraTimeoutMs(characters)).toBe(
           Math.min(20_000 + characters * 15, 120_000),
         )
       }
-      expect(getBatchTimeoutMs(60_000, 1000)).toBe(75_000)
+      expect(60_000 + getBatchExtraTimeoutMs(1000)).toBe(75_000)
       // The 100 s cap is on the batch's extra time, never on the user's timeout.
-      expect(getBatchTimeoutMs(60_000, 10_000)).toBe(160_000)
-      expect(getBatchTimeoutMs(180_000, 10_000)).toBe(280_000)
+      expect(60_000 + getBatchExtraTimeoutMs(10_000)).toBe(160_000)
+      expect(180_000 + getBatchExtraTimeoutMs(10_000)).toBe(280_000)
     })
 
     it("gives up on a request that is not batched after the user's timeout", async () => {
@@ -2030,6 +2030,31 @@ describe("translation queue helpers", () => {
       expect(secondIndex).toBeGreaterThan(-1)
       const after = await waitForAbort(attempts, secondIndex)
       expect(after.abortedAt - after.startedAt).toBe(90_000)
+    })
+
+    it("gives an AI batch that is already running the changed timeout on its retry", async () => {
+      vi.useFakeTimers()
+      vi.spyOn(Math, "random").mockReturnValue(0)
+      ensureInitializedConfigMock.mockResolvedValue(configWithTimeout(20_000))
+      const attempts = hangProviderCalls()
+      const { fakeBrowser } = await import("wxt/testing/fake-browser")
+      const { CONFIG_STORAGE_KEY } = await import("@/utils/constants/config")
+      await setupHandlers()
+
+      sendPageRequest(localProviderRef(llmProvider), "x".repeat(1000), "timeout-batch-live")
+      for (let step = 0; step < 100 && attempts.length === 0; step++) {
+        await vi.advanceTimersByTimeAsync(50)
+      }
+      expect(attempts).toHaveLength(1)
+
+      // Raised while the batch's first attempt waits on a slow model.
+      await vi.advanceTimersByTimeAsync(10_000)
+      await fakeBrowser.storage.local.set({ [CONFIG_STORAGE_KEY]: configWithTimeout(60_000) })
+
+      const first = await waitForAbort(attempts, 0)
+      expect(first.abortedAt - first.startedAt).toBe(20_000 + 1000 * 15)
+      const retry = await waitForAbort(attempts, 1)
+      expect(retry.abortedAt - retry.startedAt).toBe(60_000 + 1000 * 15)
     })
   })
 })

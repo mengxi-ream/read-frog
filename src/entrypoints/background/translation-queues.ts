@@ -120,16 +120,13 @@ export function parseBatchResult(result: string): string[] {
 }
 
 /**
- * A batch gets the user's request timeout plus time for its size, capped at
- * MAX_BATCH_EXTRA_TIMEOUT_MS. The cap is on the extra only, so raising the
- * request timeout lengthens every batch by the same amount: a model slow to
- * start answering is slow for a large batch as much as for a small one.
+ * The time a batch gets on top of the user's request timeout, for its size.
+ * The cap is on this extra only, so raising the request timeout lengthens every
+ * batch by the same amount: a model slow to start answering is slow for a large
+ * batch as much as for a small one.
  */
-export function getBatchTimeoutMs(requestTimeoutMs: number, totalCharacters: number): number {
-  return (
-    requestTimeoutMs +
-    Math.min(totalCharacters * BATCH_TIMEOUT_PER_CHAR_MS, MAX_BATCH_EXTRA_TIMEOUT_MS)
-  )
+export function getBatchExtraTimeoutMs(totalCharacters: number): number {
+  return Math.min(totalCharacters * BATCH_TIMEOUT_PER_CHAR_MS, MAX_BATCH_EXTRA_TIMEOUT_MS)
 }
 
 export function shouldUseBatchQueue(provider: QueuedTranslationProvider): boolean {
@@ -316,8 +313,8 @@ async function createTranslationQueues<TContext>(config: TranslationQueueSetupCo
   const requestQueue = new RequestQueue({
     rate,
     capacity,
-    // The user's request timeout; the background re-applies it from storage on
-    // every change (watchQueueConfig), so it is always read off the queue.
+    // The user's request timeout. watchQueueConfig re-applies it on every
+    // change, and each attempt reads it when it starts, batches included.
     timeoutMs,
     maxRetries: 2,
     baseRetryDelayMs: 1_000,
@@ -360,7 +357,6 @@ async function createTranslationQueues<TContext>(config: TranslationQueueSetupCo
       const hash = Sha256Hex(...dataList.map((d) => d.hash))
       const earliestScheduleAt = Math.min(...dataList.map((d) => d.scheduleAt))
       const totalCharacters = dataList.reduce((sum, d) => sum + d.text.length, 0)
-      const batchTimeoutMs = getBatchTimeoutMs(requestQueue.getTimeoutMs(), totalCharacters)
 
       const batchThunk = async (signal?: AbortSignal): Promise<string[]> => {
         const localProvider = getLocalProviderConfig(provider)
@@ -375,7 +371,7 @@ async function createTranslationQueues<TContext>(config: TranslationQueueSetupCo
       }
 
       return requestQueue.enqueue(batchThunk, earliestScheduleAt, hash, meta.scopes, {
-        timeoutMs: batchTimeoutMs,
+        extraTimeoutMs: getBatchExtraTimeoutMs(totalCharacters),
       })
     },
     executeIndividual: async (data) => {
