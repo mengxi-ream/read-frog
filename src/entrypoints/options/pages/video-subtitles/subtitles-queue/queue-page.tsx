@@ -2,11 +2,11 @@ import { i18n } from "@/utils/i18n"
 import { ConfigDetailSection } from "../../../components/config-detail-section"
 import { PageLayout } from "../../../components/page-layout"
 import { BatchTranslationItems } from "./batch-items"
-import { RequestRateItems } from "./request-rate-items"
+import { RequestRateItems, RequestTimeoutItem } from "./request-rate-items"
 
 /**
- * Drilled into from the Video Subtitles page: how fast subtitle requests go out and how many
- * lines each carries. Both trade the speed subtitles catch up at against API cost.
+ * Drilled into from the Video Subtitles page: how fast subtitle requests go out, how many lines
+ * each carries, and how long each may take.
  */
 export function SubtitlesQueuePage() {
   return (
@@ -22,6 +22,7 @@ export function SubtitlesQueuePage() {
       >
         <RequestRateItems />
         <BatchTranslationItems />
+        <RequestTimeoutItem />
       </ConfigDetailSection>
     </PageLayout>
   )

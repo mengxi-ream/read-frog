@@ -14,12 +14,20 @@ export const DEFAULT_BATCH_CONFIG = {
   maxItemsPerBatch: DEFAULT_MAX_ITEMS_PER_BATCH,
 }
 
-// Request timeout for LLM batch translations scales with batch size: a full
-// 4000-char batch on a slow free-tier model cannot finish in the 20s that fits
-// a single paragraph. 4000 chars → 20s + 60s = 80s.
-export const BATCH_TIMEOUT_BASE_MS = 20_000
+// How long one request attempt may take before it is abandoned and retried.
+// User-set per queue (`requestQueueConfig.timeoutMs`): slow models can take
+// longer than the default just to start answering.
+export const MIN_REQUEST_TIMEOUT_MS = 5_000
+// Kept so one attempt, batch extra included (180s + 100s), ends inside the
+// 5 minutes Chrome lets an extension service worker spend on one event.
+export const MAX_REQUEST_TIMEOUT_MS = 180_000
+export const DEFAULT_REQUEST_TIMEOUT_MS = 20_000
+
+// LLM batches get extra time on top of the request timeout, growing with batch
+// size: a full 4000-char batch on a slow free-tier model cannot finish in the
+// time that fits a single paragraph. 4000 chars → 20s + 60s = 80s.
 export const BATCH_TIMEOUT_PER_CHAR_MS = 15
-export const MAX_BATCH_TIMEOUT_MS = 120_000
+export const MAX_BATCH_EXTRA_TIMEOUT_MS = 100_000
 
 export const DEFAULT_AUTO_TRANSLATE_SHORTCUT_KEY = "Alt+E"
 export const DEFAULT_TRANSLATION_MODE_SHORTCUT_KEY = "Alt+Shift+M"

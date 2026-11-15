@@ -1332,7 +1332,7 @@ options:
         error: Giá trị phải từ $1 đến $2
     translationQueue:
       title: Hàng đợi dịch
-      description: Yêu cầu gửi đi nhanh đến mức nào, mỗi yêu cầu mang bao nhiêu văn bản và dịch trước người đọc bao xa
+      description: Yêu cầu gửi đi nhanh đến mức nào, mỗi yêu cầu mang bao nhiêu văn bản, mỗi yêu cầu được chờ bao lâu và dịch trước người đọc bao xa
       manageQueue: Quản lý hàng đợi
       requestQueueConfig:
         title: Tốc độ dịch
@@ -1347,6 +1347,9 @@ options:
           description: "Số ký tự tối đa: mỗi yêu cầu tới AI mang bao nhiêu văn bản"
         maxItemsPerBatch:
           description: "Số đoạn tối đa: bao nhiêu đoạn gộp chung một yêu cầu. Nhà cung cấp không dùng AI bỏ qua cả hai"
+      requestTimeout:
+        title: Thời gian chờ yêu cầu
+        description: "Số giây chờ phản hồi trước khi bỏ cuộc và thử lại. Yêu cầu AI theo lô được chờ thêm tùy độ dài, tối đa thêm 100 giây. Hãy tăng lên nếu một mô hình chậm liên tục hết thời gian chờ"
       preloadConfig:
         title: Phạm vi dịch trước
         description: Kiểm soát lượng nội dung bên dưới vùng nhìn được dịch trước để tiết kiệm chi phí API
@@ -1518,7 +1521,7 @@ options:
           videoSummary: Tóm tắt video (yêu cầu ngữ cảnh thông minh AI)
     subtitlesQueue:
       title: Hàng đợi phụ đề
-      description: Yêu cầu phụ đề gửi đi nhanh đến mức nào và mỗi yêu cầu mang bao nhiêu dòng
+      description: Yêu cầu phụ đề gửi đi nhanh đến mức nào, mỗi yêu cầu mang bao nhiêu dòng và mỗi yêu cầu được chờ bao lâu
       manageQueue: Quản lý hàng đợi
       requestQueueConfig:
         title: Tốc độ dịch
@@ -1533,6 +1536,9 @@ options:
           description: "Số ký tự tối đa: mỗi yêu cầu tới AI mang bao nhiêu văn bản"
         maxItemsPerBatch:
           description: "Số dòng tối đa: bao nhiêu dòng phụ đề gộp chung một yêu cầu. Nhà cung cấp không dùng AI bỏ qua cả hai"
+      requestTimeout:
+        title: Thời gian chờ yêu cầu
+        description: "Số giây chờ phản hồi trước khi bỏ cuộc và thử lại. Yêu cầu AI theo lô được chờ thêm tùy độ dài, tối đa thêm 100 giây. Hãy tăng lên nếu một mô hình chậm liên tục hết thời gian chờ"
     cache:
       title: Bộ nhớ đệm
       clearCache:

@@ -13,11 +13,7 @@ import { isLLMProviderConfig } from "@/types/config/provider"
 import { putBatchRequestRecord } from "@/utils/batch-request-record"
 import { CONFIG_STORAGE_KEY, DEFAULT_CONFIG } from "@/utils/constants/config"
 import { BATCH_SEPARATOR, BATCH_SEPARATOR_LINE_PATTERN } from "@/utils/constants/prompt"
-import {
-  BATCH_TIMEOUT_BASE_MS,
-  BATCH_TIMEOUT_PER_CHAR_MS,
-  MAX_BATCH_TIMEOUT_MS,
-} from "@/utils/constants/translate"
+import { BATCH_TIMEOUT_PER_CHAR_MS, MAX_BATCH_EXTRA_TIMEOUT_MS } from "@/utils/constants/translate"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { Sha256Hex } from "@/utils/hash"
 import { executeTranslate } from "@/utils/host/translate/execute-translate"
@@ -121,6 +117,16 @@ export function parseBatchResult(result: string): string[] {
     .trim()
     .split(BATCH_SEPARATOR_LINE_PATTERN)
     .map((t) => t.trim())
+}
+
+/**
+ * The time a batch gets on top of the user's request timeout, for its size.
+ * The cap is on this extra only, so raising the request timeout lengthens every
+ * batch by the same amount: a model slow to start answering is slow for a large
+ * batch as much as for a small one.
+ */
+export function getBatchExtraTimeoutMs(totalCharacters: number): number {
+  return Math.min(totalCharacters * BATCH_TIMEOUT_PER_CHAR_MS, MAX_BATCH_EXTRA_TIMEOUT_MS)
 }
 
 export function shouldUseBatchQueue(provider: QueuedTranslationProvider): boolean {
@@ -287,7 +293,7 @@ interface TranslationQueueSetupConfig<TContext = unknown> {
 }
 
 async function createTranslationQueues<TContext>(config: TranslationQueueSetupConfig<TContext>) {
-  const { rate, capacity } = config.requestQueueConfig
+  const { rate, capacity, timeoutMs } = config.requestQueueConfig
   const { maxCharactersPerBatch, maxItemsPerBatch } = config.batchQueueConfig
   const { promptResolver, isScopeCancelled, queueName, configSource } = config
   const queueLog = log.with({ queue: queueName })
@@ -295,6 +301,7 @@ async function createTranslationQueues<TContext>(config: TranslationQueueSetupCo
   queueLog.debug("Queue initialized", {
     rate,
     capacity,
+    timeoutMs,
     maxCharactersPerBatch,
     maxItemsPerBatch,
     configSource,
@@ -306,7 +313,9 @@ async function createTranslationQueues<TContext>(config: TranslationQueueSetupCo
   const requestQueue = new RequestQueue({
     rate,
     capacity,
-    timeoutMs: 20_000,
+    // The user's request timeout. watchQueueConfig re-applies it on every
+    // change, and each attempt reads it when it starts, batches included.
+    timeoutMs,
     maxRetries: 2,
     baseRetryDelayMs: 1_000,
   })
@@ -348,10 +357,6 @@ async function createTranslationQueues<TContext>(config: TranslationQueueSetupCo
       const hash = Sha256Hex(...dataList.map((d) => d.hash))
       const earliestScheduleAt = Math.min(...dataList.map((d) => d.scheduleAt))
       const totalCharacters = dataList.reduce((sum, d) => sum + d.text.length, 0)
-      const timeoutMs = Math.min(
-        BATCH_TIMEOUT_BASE_MS + totalCharacters * BATCH_TIMEOUT_PER_CHAR_MS,
-        MAX_BATCH_TIMEOUT_MS,
-      )
 
       const batchThunk = async (signal?: AbortSignal): Promise<string[]> => {
         const localProvider = getLocalProviderConfig(provider)
@@ -365,7 +370,9 @@ async function createTranslationQueues<TContext>(config: TranslationQueueSetupCo
         return await executeBatchTranslation(dataList, promptResolver, signal, hostedRequestId)
       }
 
-      return requestQueue.enqueue(batchThunk, earliestScheduleAt, hash, meta.scopes, { timeoutMs })
+      return requestQueue.enqueue(batchThunk, earliestScheduleAt, hash, meta.scopes, {
+        extraTimeoutMs: getBatchExtraTimeoutMs(totalCharacters),
+      })
     },
     executeIndividual: async (data) => {
       const { text, langConfig, provider, hash, scheduleAt, context, scope, glossaryTerms } = data
