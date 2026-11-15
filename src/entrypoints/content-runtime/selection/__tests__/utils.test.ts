@@ -586,6 +586,74 @@ describe("readSelectionSnapshot", () => {
     })
     expect(getRangeAt).toHaveBeenCalledWith(0)
   })
+
+  // https://github.com/mengxi-ream/read-frog/issues/2385
+  it("recovers text when a selection across nested shadow roots stringifies empty", () => {
+    document.body.innerHTML = ""
+
+    const outerHost = document.createElement("div")
+    const outerShadowRoot = outerHost.attachShadow({ mode: "open" })
+    document.body.appendChild(outerHost)
+
+    const innerHost = document.createElement("div")
+    const innerShadowRoot = innerHost.attachShadow({ mode: "open" })
+    outerShadowRoot.appendChild(innerHost)
+
+    const comment = document.createTextNode("nested reply")
+    innerShadowRoot.append(comment)
+
+    const unrelatedHost = document.createElement("div")
+    unrelatedHost.attachShadow({ mode: "open" })
+    document.body.appendChild(unrelatedHost)
+
+    const invented = document.createTextNode("invented")
+    const inventedHost = document.createElement("span")
+    inventedHost.append(invented)
+    document.body.appendChild(inventedHost)
+
+    const commentRange = document.createRange()
+    commentRange.setStart(comment, 0)
+    commentRange.setEnd(comment, comment.textContent?.length ?? 0)
+
+    const inventedRange = document.createRange()
+    inventedRange.setStart(invented, 0)
+    inventedRange.setEnd(invented, invented.textContent?.length ?? 0)
+
+    const getComposedRanges = vi.fn<(...args: any[]) => any>(
+      (options?: { shadowRoots?: ShadowRoot[] }) => {
+        const roots = options?.shadowRoots ?? []
+        return roots.includes(outerShadowRoot) && roots.includes(innerShadowRoot)
+          ? [commentRange]
+          : []
+      },
+    )
+    const selection = {
+      toString: () => "",
+      anchorNode: outerHost,
+      focusNode: outerHost,
+      rangeCount: 1,
+      getRangeAt: () => inventedRange,
+      getComposedRanges,
+    } as unknown as Selection
+
+    expect(readSelectionSnapshot(selection)).toMatchObject({
+      text: "nested reply",
+      ranges: [
+        expect.objectContaining({
+          startContainer: comment,
+          startOffset: 0,
+          endContainer: comment,
+          endOffset: comment.textContent?.length ?? 0,
+        }),
+      ],
+    })
+    expect(getComposedRanges).toHaveBeenCalledWith({
+      shadowRoots: [outerShadowRoot, innerShadowRoot],
+    })
+
+    getComposedRanges.mockReturnValue([])
+    expect(readSelectionSnapshot(selection)).toBeNull()
+  })
 })
 
 // https://github.com/mengxi-ream/read-frog/issues/2371

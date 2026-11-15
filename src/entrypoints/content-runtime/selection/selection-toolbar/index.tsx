@@ -527,9 +527,15 @@ export function SelectionToolbar() {
         return
       }
 
-      // if the selected content is cleared, hide the tooltip
+      // https://github.com/mengxi-ream/read-frog/issues/2385
+      // A selection across nested shadow roots stringifies empty. Hide the
+      // toolbar only when composed ranges don't recover any text either.
       if (!selection || selection.toString().trim().length === 0) {
         if (preserveSelectionStateRef.current) {
+          return
+        }
+
+        if (selection && readSelectionSnapshot(selection)) {
           return
         }
 

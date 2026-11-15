@@ -466,6 +466,41 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     expectToolbarHidden()
   })
 
+  it("shows the toolbar when composed ranges recover an empty selection string", async () => {
+    render(
+      <div>
+        <SelectionToolbar />
+        <div data-testid="test-element">Some text</div>
+      </div>,
+    )
+
+    const host = document.createElement("div")
+    const shadowRoot = host.attachShadow({ mode: "open" })
+    const comment = document.createTextNode("nested reply")
+    shadowRoot.append(comment)
+    screen.getByTestId("test-element").append(host)
+
+    const range = document.createRange()
+    range.setStart(comment, 0)
+    range.setEnd(comment, comment.textContent?.length ?? 0)
+
+    window.getSelection = vi.fn<(...args: any[]) => any>(() => ({
+      toString: () => "",
+      anchorNode: host,
+      focusNode: host,
+      containsNode: () => true,
+      getComposedRanges: () => [range],
+    }))
+
+    await triggerMouseUpWithSelection(screen.getByTestId("test-element"))
+    await waitFor(() => expectToolbarVisible())
+
+    await act(async () => {
+      document.dispatchEvent(new Event("selectionchange"))
+    })
+    expectToolbarVisible()
+  })
+
   it("should show toolbar when valid text is selected", async () => {
     render(
       <div>

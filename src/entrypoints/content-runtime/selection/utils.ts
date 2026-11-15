@@ -80,6 +80,10 @@ const PARAGRAPH_LIKE_TAGS = new Set([
 ])
 const SEMANTIC_CONTAINER_TAGS = new Set(["ARTICLE", "ASIDE", "BODY", "MAIN", "NAV", "SECTION"])
 const PARAGRAPH_DISPLAY_VALUES = new Set(["block", "list-item"])
+// How far to walk open shadow roots under a selection boundary. A triple-click
+// can report the host as its only boundary, so the roots inside it are not on
+// the ancestor walk. Deeper trees are left alone.
+const MAX_SELECTION_SHADOW_DESCENT_DEPTH = 8
 
 export function normalizeSelectedText(value: string | null | undefined) {
   return value?.replace(ZERO_WIDTH_CHAR_REGEX, "").trim() ?? ""
@@ -200,6 +204,48 @@ function collectSelectionShadowRoots(selection: Selection) {
   return [...shadowRoots]
 }
 
+function collectNestedOpenShadowRoots(
+  root: ShadowRoot,
+  shadowRoots: Set<ShadowRoot>,
+  visited: Set<ShadowRoot>,
+  depth: number,
+) {
+  if (depth > MAX_SELECTION_SHADOW_DESCENT_DEPTH || visited.has(root)) {
+    return
+  }
+
+  visited.add(root)
+  shadowRoots.add(root)
+  if (depth === MAX_SELECTION_SHADOW_DESCENT_DEPTH) {
+    return
+  }
+
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT)
+  let current = walker.nextNode()
+  while (current) {
+    if (current instanceof Element && current.shadowRoot) {
+      collectNestedOpenShadowRoots(current.shadowRoot, shadowRoots, visited, depth + 1)
+    }
+    current = walker.nextNode()
+  }
+}
+
+// Ancestor roots, the subtitles host, and open shadow roots under a boundary
+// that is itself a host. Descent starts on that host only, so the rest of the
+// document is left alone.
+function collectEmptySelectionShadowRoots(selection: Selection) {
+  const shadowRoots = new Set(collectSelectionShadowRoots(selection))
+  const visited = new Set<ShadowRoot>()
+
+  for (const boundaryNode of collectSelectionBoundaryNodes(selection)) {
+    if (boundaryNode instanceof Element && boundaryNode.shadowRoot) {
+      collectNestedOpenShadowRoots(boundaryNode.shadowRoot, shadowRoots, visited, 1)
+    }
+  }
+
+  return [...shadowRoots]
+}
+
 function readSelectionRangeSnapshots(selection: Selection | null) {
   if (!selection) {
     return []
@@ -270,10 +316,53 @@ function readTextControlSelection(): TextControlSelectionSnapshot | null {
   return { value, selectionStart, selectionEnd }
 }
 
+function readComposedRangeSnapshots(selection: Selection, shadowRoots: ShadowRoot[]) {
+  const composedSelection = selection as Selection & {
+    getComposedRanges?: (options?: { shadowRoots?: ShadowRoot[] }) => SelectionRangeSource[]
+  }
+
+  if (typeof composedSelection.getComposedRanges !== "function") {
+    return []
+  }
+
+  return composedSelection.getComposedRanges({ shadowRoots }).map(createRangeSnapshot)
+}
+
+function readRangesText(ranges: SelectionRangeSnapshot[]) {
+  let text = ""
+  for (const rangeSnapshot of ranges) {
+    try {
+      text += toLiveRange(rangeSnapshot).toString()
+    } catch {
+      continue
+    }
+  }
+
+  return normalizeSelectedText(text)
+}
+
+// Selection.toString() is empty when the selection crosses nested shadow roots.
+// The text is still in the composed ranges, once every open root it touches is
+// passed in. The plain ranges are the ones the browser already reported as
+// empty, so they are not a fallback here.
+function readEmptyStringSelectionSnapshot(selection: Selection): SelectionSnapshot | null {
+  const ranges = readComposedRangeSnapshots(selection, collectEmptySelectionShadowRoots(selection))
+  if (ranges.length === 0) {
+    return null
+  }
+
+  const text = readRangesText(ranges)
+  if (text === "") {
+    return null
+  }
+
+  return { text: removeRubyAnnotationsFromSelectedText(text, ranges), ranges }
+}
+
 export function readSelectionSnapshot(selection: Selection | null): SelectionSnapshot | null {
   const text = normalizeSelectedText(selection?.toString())
   if (text === "") {
-    return null
+    return selection ? readEmptyStringSelectionSnapshot(selection) : null
   }
 
   const ranges = readSelectionRangeSnapshots(selection)
