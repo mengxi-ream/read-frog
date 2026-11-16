@@ -32,7 +32,11 @@ export function setupSelectionToolbarHiddenUntilReload() {
 
   onMessage("isSelectionToolbarHiddenUntilReload", async ({ sender }) => {
     const tabId = sender.tab?.id
-    return tabId !== undefined && (await isSelectionToolbarHiddenInTab(tabId))
+    // A page Chrome prerenders in this tab runs its toolbar before it is shown,
+    // and it is the next page, not the one the user hid the toolbar on. Its
+    // activation commits in the top frame, which clears the flag.
+    const prerendering = "documentLifecycle" in sender && sender.documentLifecycle === "prerender"
+    return tabId !== undefined && !prerendering && (await isSelectionToolbarHiddenInTab(tabId))
   })
 
   browser.tabs.onRemoved.addListener(clearSelectionToolbarHidden)

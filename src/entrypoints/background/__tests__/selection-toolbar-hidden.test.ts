@@ -13,7 +13,7 @@ vi.mock("@/utils/message", () => ({ onMessage: onMessageMock, sendMessage: sendM
 const tabsOnRemovedAddListenerMock = vi.fn<(...args: any[]) => any>()
 const webNavigationOnCommittedAddListenerMock = vi.fn<(...args: any[]) => any>()
 
-type Sender = { tab?: { id?: number } }
+type Sender = { tab?: { id?: number }; documentLifecycle?: string }
 
 async function setupSubject() {
   const { setupSelectionToolbarHiddenUntilReload, isSelectionToolbarHiddenInTab } =
@@ -62,6 +62,16 @@ describe("setupSelectionToolbarHiddenUntilReload", () => {
     expect(await isHiddenInTab(7)).toBe(true)
     // Other tabs keep their toolbar.
     expect(await isHidden({ sender: { tab: { id: 8 } } })).toBe(false)
+  })
+
+  it("does not hide the toolbar of the next page Chrome prerenders in the tab", async () => {
+    const { hide, isHidden } = await setupSubject()
+    await hide({ sender: { tab: { id: 7 } } })
+
+    expect(await isHidden({ sender: { tab: { id: 7 }, documentLifecycle: "prerender" } })).toBe(
+      false,
+    )
+    expect(await isHidden({ sender: { tab: { id: 7 }, documentLifecycle: "active" } })).toBe(true)
   })
 
   it("ignores senders outside a tab", async () => {
