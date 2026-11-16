@@ -301,6 +301,24 @@ describe("buildContextSnapshot", () => {
       paragraphs: ["Alpha beta"],
     })
   })
+  it("leaves Read Frog's own overlays out when the context falls back to body", () => {
+    document.body.innerHTML = `
+      <span id="selection">Alpha beta</span>
+      <div class="notranslate read-frog-react-shadow-host" id="panel"></div>
+      <div class="notranslate" id="layer"></div>
+    `
+    attachShadowTrees(document, {
+      "#panel": { html: "<p>Page diagnosis 3 paragraphs</p>" },
+      "#layer": { html: "<span>gloss</span>" },
+    })
+
+    const selectionNode = document.getElementById("selection")!.firstChild!
+    const range = document.createRange()
+    range.setStart(selectionNode, 0)
+    range.setEnd(selectionNode, selectionNode.textContent!.length)
+
+    expect(buildContextSnapshot(createSelectionSnapshot(range))?.paragraphs).toEqual(["Alpha beta"])
+  })
   it("reads each paragraph's context without rescanning its siblings", () => {
     const count = 200
     document.body.innerHTML = `<article>${Array.from(

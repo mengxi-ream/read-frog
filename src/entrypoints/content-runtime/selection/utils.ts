@@ -1,4 +1,5 @@
 import { browser } from "#imports"
+import { NOTRANSLATE_CLASS, REACT_SHADOW_HOST_CLASS } from "@/utils/constants/dom-labels"
 
 export interface SelectionRangeSnapshot {
   startContainer: Node
@@ -499,6 +500,12 @@ function walkTextPieces(
     if (!inside && !endPaths.has(node)) {
       return
     }
+    // Read Frog's own UI (toolbar, diagnosis panel, annotation layer) hangs off
+    // <body> in shadow roots. It is no part of the page, unless the selection
+    // is in it.
+    if (!endPaths.has(node) && isExtensionOverlayHost(node)) {
+      return
+    }
 
     if (node instanceof Text) {
       let from = 0
@@ -552,6 +559,15 @@ function walkTextPieces(
 
   visit(root, rootVisibility)
   return pieces
+}
+
+function isExtensionOverlayHost(node: Node) {
+  return (
+    node instanceof Element &&
+    (node.classList.contains(REACT_SHADOW_HOST_CLASS) ||
+      node.classList.contains(NOTRANSLATE_CLASS)) &&
+    getShadowRootOf(node) !== null
+  )
 }
 
 function readPieceText(piece: TextPiece) {
