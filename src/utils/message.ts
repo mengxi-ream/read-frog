@@ -75,6 +75,9 @@ interface ProtocolMap {
   ensureIframeHostContentInjected: (data: { tabId?: number }) => void
   injectCurrentIframesAfterTopFrameNodeTranslation: () => void
   activateSameOriginIframeSelectionRuntime: () => boolean
+  // The url of the tab a frame is in: a frame can't read it when the page
+  // around it is on another site.
+  getSenderTabUrl: () => string | null
   reportDetectedPageLanguage: (data: {
     detectedCodeOrUnd: LanguageTag | "und"
     url: string

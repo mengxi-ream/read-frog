@@ -23,6 +23,23 @@ export function isSiteEnabled(url: string, config: Config | null): boolean {
   return whitelistPatterns.some((pattern) => urlMatchesPattern(url, pattern))
 }
 
+/**
+ * Whether the extension runs in a frame whose own url is `frameUrl`, in a tab
+ * showing `pageUrl`. The page decides. In blacklist mode a frame from a listed
+ * site stays off on any page too, such as a disabled video site's player
+ * embedded somewhere else. A whitelist lists the pages people read, not the
+ * sites their frames come from: on an edX course page the popup lists
+ * learning.edx.org, while the videos play in a frame from courses.edx.org.
+ */
+export function isFrameSiteEnabled(
+  frameUrl: string,
+  pageUrl: string,
+  config: Config | null,
+): boolean {
+  if (!isSiteEnabled(pageUrl, config)) return false
+  return config?.siteControl.mode === "whitelist" || isSiteEnabled(frameUrl, config)
+}
+
 // "Effective site-control URL" means the URL we ultimately use to decide
 // whether this frame should enable the extension. For normal pages that is
 // window.location.href. For blank/srcdoc iframes it is the resolved ancestor
