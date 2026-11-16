@@ -1,5 +1,19 @@
 # @read-frog/extension
 
+## 1.60.0
+
+### Minor Changes
+
+- [#2519](https://github.com/mengxi-ream/read-frog/pull/2519) [`a23a1dc`](https://github.com/mengxi-ream/read-frog/commit/a23a1dc5d7b431bf52b87a20b67a370879d5bb56) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(options): link to the current Read Frog survey from the settings sidebar while it takes answers
+
+### Patch Changes
+
+- [#2511](https://github.com/mengxi-ream/read-frog/pull/2511) [`2a51f55`](https://github.com/mengxi-ream/read-frog/commit/2a51f5529d0d2cb215469c1fd5245ba58f0a357b) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(custom-css): keep custom CSS written for the old two-letter `lang` codes (`[lang="zh"]` and so on) working after the move to full language tags
+
+- [#2517](https://github.com/mengxi-ream/read-frog/pull/2517) [`1b0c67d`](https://github.com/mengxi-ream/read-frog/commit/1b0c67d8cbaac4da3db845787ccee376db4f5e78) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(translation-queue): add a request timeout setting to the translation and subtitle queues, so slow models get more time before a request is retried
+
+- [#2516](https://github.com/mengxi-ream/read-frog/pull/2516) [`79502c9`](https://github.com/mengxi-ream/read-frog/commit/79502c92d399f99481e407466ba20bc634ce7173) Thanks [@Yukiniro](https://github.com/Yukiniro)! - fix(site-rules): show translations of the hand-inked letter lines on raea.io. The page draws them on a canvas and makes their text transparent, so translations there were invisible
+
 ## 1.59.3
 
 ### Patch Changes
