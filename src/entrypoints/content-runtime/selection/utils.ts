@@ -47,12 +47,15 @@ const TEXT_CONTROL_INPUT_TYPES = new Set(["email", "search", "tel", "text", "url
 // default value, an SVG's description and metadata are for tools, and a frame,
 // canvas, select box, meter or media element shows something else in place of
 // what it holds. So it must not leak into the selected text or paragraph context.
+// A field's value is read only for a selection in it, never a password's, so
+// its inner shadow root stays out too should a browser ever show it.
 const NON_CONTENT_ELEMENT_NAMES = new Set([
   "audio",
   "canvas",
   "desc",
   "head",
   "iframe",
+  "input",
   "metadata",
   "meter",
   "noscript",
@@ -725,15 +728,35 @@ function readRenderedPieceText(piece: TextPiece) {
   return { value: collapsed, collapsible: true }
 }
 
+// The box a piece of text is laid out in: the innermost paragraph or block-level
+// box around it. Text in another one starts a new line. Unlike a paragraph
+// owner, a <section> or <article> counts here: it is too broad to be one
+// paragraph of context, but the page still breaks lines at it.
+function findLineBox(node: Node): Element | null {
+  for (
+    let current = getFlatParentElement(node);
+    current && current !== current.ownerDocument.documentElement;
+    current = getFlatParentElement(current)
+  ) {
+    if (
+      PARAGRAPH_LIKE_TAGS.has(current.tagName) ||
+      PARAGRAPH_DISPLAY_VALUES.has(window.getComputedStyle(current).display)
+    ) {
+      return current
+    }
+  }
+  return null
+}
+
 // Leaving a <p>, other than for a block inside it, leaves a blank line in
 // Chrome's selection text, as it does in innerText.
-function leavesParagraph(previousOwner: ParagraphOwner | null, owner: ParagraphOwner | null) {
-  if (previousOwner?.localName !== "p") {
+function leavesParagraph(previousBox: Element | null, box: Element | null) {
+  if (previousBox?.localName !== "p") {
     return false
   }
 
-  for (let node: Node | null = owner; node; node = getFlatParent(node)) {
-    if (node === previousOwner) {
+  for (let node: Node | null = box; node; node = getFlatParent(node)) {
+    if (node === previousBox) {
       return false
     }
   }
@@ -741,7 +764,7 @@ function leavesParagraph(previousOwner: ParagraphOwner | null, owner: ParagraphO
 }
 
 // Close to what Selection.toString() gives: whitespace as rendered, and a <br>
-// or text in another paragraph starts a new line.
+// or text in another block starts a new line.
 function readRangesText(ranges: SelectionRangeSnapshot[]) {
   let text = ""
   const startNewLine = (blankLine: boolean) => {
@@ -758,7 +781,7 @@ function readRangesText(ranges: SelectionRangeSnapshot[]) {
   }
 
   for (const range of ranges) {
-    let previousOwner: ParagraphOwner | null | undefined
+    let previousBox: Element | null | undefined
     for (const piece of collectRangeTextPieces(range)) {
       if (!(piece.node instanceof Text)) {
         text = `${text.replace(TRAILING_SPACES_REGEX, "")}\n`
@@ -766,13 +789,13 @@ function readRangesText(ranges: SelectionRangeSnapshot[]) {
       }
 
       const { value, collapsible } = readRenderedPieceText(piece)
-      // Whitespace between two boxes doesn't open a paragraph of its own.
+      // Whitespace between two boxes doesn't open a line of its own.
       if (value.trim() !== "") {
-        const owner = findParagraphOwner(piece.node)
-        if (previousOwner !== undefined && owner !== previousOwner) {
-          startNewLine(leavesParagraph(previousOwner, owner))
+        const box = findLineBox(piece.node)
+        if (previousBox !== undefined && box !== previousBox) {
+          startNewLine(leavesParagraph(previousBox, box))
         }
-        previousOwner = owner
+        previousBox = box
       }
 
       const joinsCollapsedSpace =

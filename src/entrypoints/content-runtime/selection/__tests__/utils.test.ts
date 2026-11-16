@@ -1023,6 +1023,27 @@ describe("readSelectionSnapshot", () => {
       expect(readSelectionSnapshot(selection)?.text).toBe("Start Rendered End")
     })
 
+    it("never reads a field, even if the browser shows its inner shadow root", () => {
+      // Chrome and Firefox keep a field's inner shadow root from extensions.
+      // Were one to show it, a password beside the selection would reach the
+      // prompt.
+      document.body.innerHTML = `<p id="login">Password <input type="password"> please</p>`
+      const field = document.querySelector("input")
+      const label = document.getElementById("login")?.firstChild
+      if (!field || !label) {
+        throw new Error("Fixtures not found")
+      }
+      const inner = document.createElement("div").attachShadow({ mode: "closed" })
+      inner.textContent = "secret"
+      attachClosedShadowRoots(new Map([[field, inner]]))
+      const range = document.createRange()
+      range.selectNodeContents(label)
+
+      expect(buildContextSnapshot(createSelectionSnapshot(range))?.paragraphs).toEqual([
+        "Password please",
+      ])
+    })
+
     it("starts a selection in light DOM slotted into a closed shadow root", () => {
       const { widget, endText } = renderWidget(`<i><slot></slot></i> shown`, `<span>slotted</span>`)
       const slottedSpan = widget.querySelector("span")
@@ -1098,6 +1119,15 @@ describe("readSelectionSnapshot", () => {
         "#boxes",
       ),
     ).toBe("hello\nworld\ncell\ninlineafter")
+  })
+
+  it("starts a new line for text in each section, article, nav or aside", () => {
+    expect(
+      readTextFromShadowRoot(
+        `<div id="parts"><section>hello</section><section>world</section><article>One</article><nav>Home</nav><aside>Side note</aside></div>`,
+        "#parts",
+      ),
+    ).toBe("hello\nworld\nOne\nHome\nSide note")
   })
 
   it("leaves out what the page doesn't show: a closed <details>, a select box, media fallback", () => {
