@@ -31,7 +31,7 @@ import {
   AnnotateReveal,
   useAnnotateReveal,
 } from "../annotation/toolbar-slot"
-import { buildContextSnapshot, readSelectionSnapshot } from "../utils"
+import { buildContextSnapshot, normalizeSelectedText, readSelectionSnapshot } from "../utils"
 import {
   clearSelectionStateAtom,
   createSelectionSession,
@@ -527,11 +527,15 @@ export function SelectionToolbar() {
         return
       }
 
-      // If the selection is cleared, hide the toolbar. Ask its type, not its
-      // text: a selection across shadow roots can stringify blank (and report
-      // isCollapsed) while text is selected.
+      // Once no text is selected, hide the toolbar. A selection across shadow
+      // roots can stringify blank (and report isCollapsed) while text is
+      // selected, so a blank string is checked by reading the selection. Only
+      // then: reading each one would walk a long selection on every change.
       // https://github.com/mengxi-ream/read-frog/issues/2385
-      if (selection?.type !== "Range") {
+      if (
+        selection?.type !== "Range" ||
+        (normalizeSelectedText(selection.toString()) === "" && !readSelectionSnapshot(selection))
+      ) {
         if (preserveSelectionStateRef.current) {
           return
         }

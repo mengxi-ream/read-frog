@@ -42,6 +42,8 @@ interface BlockState {
   glossFits: boolean
   /** The elements carrying a line-height rung one of the block's annotations needed. */
   leadingOwners: Set<Element>
+  /** The shadow root the block sits in, which has the styles adopted for it. */
+  shadowRoot: ShadowRoot | null
 }
 
 const BLOCK_OBSERVE_OPTIONS: MutationObserverInit = {
@@ -164,7 +166,10 @@ export class AnnotationController {
     this.mutations.disconnect()
     this.removals.disconnect()
     this.resizes?.disconnect()
-    for (const block of this.blocks.keys()) this.clearLeading(block)
+    for (const [block, state] of this.blocks) {
+      this.clearLeading(block)
+      if (state.shadowRoot) removeAnnotationDocumentStyles(state.shadowRoot)
+    }
     this.blocks.clear()
     this.ranges.clear()
     this.registry.clear()
@@ -177,7 +182,12 @@ export class AnnotationController {
   private ensureBlock(block: Element): BlockState {
     let state = this.blocks.get(block)
     if (state) return state
-    state = { glossFits: !isLeadingUnsafe(block), leadingOwners: new Set() }
+    // Kept, not looked up again on release: a block taken off the page is
+    // no longer in its shadow root.
+    const root = block.getRootNode()
+    const shadowRoot = root instanceof ShadowRoot ? root : null
+    if (shadowRoot) ensureAnnotationDocumentStyles(shadowRoot)
+    state = { glossFits: !isLeadingUnsafe(block), leadingOwners: new Set(), shadowRoot }
     if (this.blocks.size === 0) {
       this.removals.observe(document.documentElement, { childList: true, subtree: true })
     }
@@ -217,7 +227,12 @@ export class AnnotationController {
     // Records already queued for the other blocks would go with the disconnect.
     this.onMutations(this.mutations.takeRecords())
     this.clearLeading(block)
+    const shadowRoot = this.blocks.get(block)?.shadowRoot
     this.blocks.delete(block)
+    // The last block in a shadow root takes the styles out of it.
+    if (shadowRoot && ![...this.blocks.values()].some((state) => state.shadowRoot === shadowRoot)) {
+      removeAnnotationDocumentStyles(shadowRoot)
+    }
     this.resizes?.unobserve(block)
     // A MutationObserver has no unobserve: start over with the blocks left.
     this.mutations.disconnect()

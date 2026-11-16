@@ -113,6 +113,30 @@ function createSelectionSnapshot(range: Range, text = range.toString()) {
   }
 }
 
+// Selected from the start of `selector`, inside a shadow root, to the end of the
+// page. The ends are in different trees, where the browser's text misses most
+// of the selection, so the text is read from the page.
+function readTextFromShadowRoot(html: string, selector: string) {
+  document.body.innerHTML = `<div id="host"></div>`
+  const shadowRoot = document.getElementById("host")!.attachShadow({ mode: "open" })
+  shadowRoot.innerHTML = html
+  const start = shadowRoot.querySelector(selector)
+  if (!start) {
+    throw new Error(`Selection start ${selector} not found`)
+  }
+
+  const { selection } = createShadowSelection(
+    {
+      startContainer: start,
+      startOffset: 0,
+      endContainer: document.body,
+      endOffset: document.body.childNodes.length,
+    },
+    "",
+  )
+  return readSelectionSnapshot(selection)?.text
+}
+
 // Chrome reports a selection inside an <input>/<textarea> as a range around the
 // control element itself; the selected text is only reachable via toString().
 function createTextControlSelection(
@@ -275,6 +299,47 @@ describe("buildContextSnapshot", () => {
       text: "Alpha beta",
       paragraphs: ["Alpha beta"],
     })
+  })
+})
+
+describe("context of slotted paragraphs", () => {
+  const readContext = (text: Text) => {
+    const range = document.createRange()
+    range.setStart(text, 0)
+    range.setEnd(text, 4)
+    const snapshot = readSelectionSnapshot({
+      type: "Range",
+      toString: () => range.toString(),
+      rangeCount: 1,
+      getRangeAt: () => range,
+      getComposedRanges: () => [range],
+    } as unknown as Selection)
+    return buildContextSnapshot(snapshot)?.paragraphs
+  }
+
+  it("reads only the slotted paragraph, not what its host renders after it", () => {
+    // The whitespace around the paragraph is in no slot, so it isn't rendered.
+    document.body.innerHTML = `<article-card>
+      <p slot="body">Body text</p>
+    </article-card>`
+    attachShadowTrees(document, {
+      "article-card": {
+        html: `<header>Header</header><slot name="body"></slot><footer>Footer</footer>`,
+      },
+    })
+
+    expect(readContext(document.querySelector("p")!.firstChild as Text)).toEqual(["Body text"])
+  })
+
+  it("reads only the slotted paragraph when slots render siblings in another order", () => {
+    document.body.innerHTML = `<div id="reordered"><p slot="a">Alpha text</p><p slot="b">Beta text</p></div>`
+    attachShadowTrees(document, {
+      "#reordered": { html: `<slot name="b"></slot><slot name="a"></slot>` },
+    })
+
+    expect(readContext(document.querySelector('[slot="b"]')!.firstChild as Text)).toEqual([
+      "Beta text",
+    ])
   })
 })
 
@@ -699,7 +764,7 @@ describe("readSelectionSnapshot", () => {
     ])
   })
 
-  it("reads the text a page selection covers inside a shadow root, in the same paragraph", () => {
+  it("keeps the browser's text for a selection whose ends are in one tree", () => {
     document.body.innerHTML = `<p id="commit">Latest commit <relative-time datetime="2026-11-10">Nov 10, 2026</relative-time> · History</p>`
     const relativeTime = document.querySelector("relative-time")
     const paragraph = document.getElementById("commit")
@@ -720,39 +785,102 @@ describe("readSelectionSnapshot", () => {
     } as unknown as Selection
     const snapshot = readSelectionSnapshot(selection)
 
-    expect(snapshot?.text).toBe("Latest commit 5 days ago · History")
+    // The selection's text leaves the shadow root out, as the browser's does.
+    // Its paragraph is read from the page, shadow root and all.
+    expect(snapshot?.text).toBe("Latest commit · History")
     expect(buildContextSnapshot(snapshot)?.paragraphs).toEqual([
       "Latest commit 5 days ago · History",
     ])
   })
 
   it("reads whitespace the way the page renders it", () => {
-    document.body.innerHTML = `
-      <p><span id="normal">勉強  する
-        つもり</span></p>
-      <p><span id="pre-wrap" style="white-space: pre-wrap">勉強  する</span></p>
-      <article><p id="first">Alpha</p>
-        <p id="second">Beta<br>Gamma</p><div id="third">Delta</div></article>
-    `
+    expect(
+      readTextFromShadowRoot(
+        `<p><span id="normal">勉強  する\n        つもり</span></p>`,
+        "#normal",
+      ),
+    ).toBe("勉強 する つもり")
+    expect(
+      readTextFromShadowRoot(
+        `<p><span id="pre-wrap" style="white-space: pre-wrap">勉強  する</span></p>`,
+        "#pre-wrap",
+      ),
+    ).toBe("勉強  する")
+    expect(
+      readTextFromShadowRoot(
+        `<article><p id="first">Alpha</p>\n        <p>Beta<br>Gamma</p><div>Delta</div></article>`,
+        "#first",
+      ),
+    ).toBe("Alpha\n\nBeta\nGamma\n\nDelta")
+  })
 
-    const readText = (range: Range) =>
-      readSelectionSnapshot({
-        toString: () => range.toString(),
-        rangeCount: 1,
-        getRangeAt: () => range,
-        getComposedRanges: () => [range],
-      } as unknown as Selection)?.text
+  it("starts a new line for text in each flex, grid or table box, but not an inline one", () => {
+    expect(
+      readTextFromShadowRoot(
+        `<div id="boxes"><div style="display: flex">hello</div><div style="display: grid">world</div><div style="display: table-cell">cell</div><span style="display: inline-flex">inline</span><span>after</span></div>`,
+        "#boxes",
+      ),
+    ).toBe("hello\nworld\ncell\ninlineafter")
+  })
 
-    const range = document.createRange()
-    range.selectNodeContents(document.getElementById("normal")!)
-    expect(readText(range)).toBe("勉強 する つもり")
+  it("leaves out what the page doesn't show: a closed <details>, a select box, media fallback", () => {
+    expect(
+      readTextFromShadowRoot(
+        `<div id="post"><p>Shown</p><details><summary>More</summary>Folded text<p>Folded paragraph</p></details><details open><summary>Open</summary><p>Unfolded</p></details><p>Pick <select><option>one</option><option>two</option></select> now</p><video>No video support</video><canvas>No canvas support</canvas><p>End</p></div>`,
+        "#post",
+      ),
+    ).toBe("Shown\n\nMore\nOpen\nUnfolded\n\nPick now\n\nEnd")
+  })
 
-    range.selectNodeContents(document.getElementById("pre-wrap")!)
-    expect(readText(range)).toBe("勉強  する")
+  it("reads a slotted paragraph whose range starts in the shadow root after it", () => {
+    document.body.innerHTML = `<x-post><p slot="body">Slotted body paragraph one.</p><p slot="body">Slotted body paragraph two.</p></x-post>`
+    const post = document.querySelector("x-post")!
+    const shadowRoot = post.attachShadow({ mode: "open" })
+    shadowRoot.innerHTML = `<h3>Post title</h3><div><slot name="body"></slot></div><div id="actions">Reply Share Report</div>`
+    const actions = shadowRoot.querySelector("#actions")
+    const secondText = post.lastElementChild?.firstChild
+    if (!actions || !secondText) {
+      throw new Error("Selection boundaries not found")
+    }
 
-    range.setStart(document.getElementById("first")!, 0)
-    range.setEnd(document.getElementById("third")!, 1)
-    expect(readText(range)).toBe("Alpha\n\nBeta\nGamma\n\nDelta")
+    // A triple click on the second paragraph. getComposedRanges() puts the
+    // shadow root before the host's children, so the range runs from the
+    // actions, rendered after the paragraph, back to the paragraph's start.
+    const { selection } = createShadowSelection(
+      { startContainer: actions, startOffset: 0, endContainer: secondText, endOffset: 0 },
+      "Slotted body paragraph one.\n\n",
+    )
+
+    expect(readSelectionSnapshot(selection)?.text).toBe("Slotted body paragraph two.")
+  })
+
+  it("keeps the browser's text for a selection in a closed shadow root, which it can't read", () => {
+    document.body.innerHTML = `<p>Before</p><div id="widget"></div>`
+    const shadowRoot = document.getElementById("widget")!.attachShadow({ mode: "closed" })
+    shadowRoot.innerHTML = `<p>Closed text</p>`
+    const closedText = shadowRoot.querySelector("p")?.firstChild
+    if (!closedText) {
+      throw new Error("Selection node not found")
+    }
+
+    // getComposedRanges() can't be handed the closed root, so it reports a range
+    // around the host.
+    const { selection } = createShadowSelection(
+      { startContainer: closedText, startOffset: 0, endContainer: closedText, endOffset: 11 },
+      "Closed text",
+    )
+
+    expect(readSelectionSnapshot(selection)).toEqual({
+      text: "Closed text",
+      ranges: [
+        {
+          startContainer: document.body,
+          startOffset: 1,
+          endContainer: document.body,
+          endOffset: 2,
+        },
+      ],
+    })
   })
 })
 
@@ -831,16 +959,15 @@ describe("readRangeClientRects", () => {
 
 // https://github.com/mengxi-ream/read-frog/issues/2371
 describe("ruby annotations", () => {
-  // Like the browser's selection text, Range.toString() keeps the furigana. A
-  // browser without getComposedRanges() is left with that text.
-  function createRangeSelection(range: Range): Selection {
+  // Like the browser's selection text, Range.toString() keeps the furigana.
+  function createRangeSelection(range: Range, { composed = true } = {}): Selection {
     return {
       toString: () => range.toString(),
       anchorNode: range.startContainer,
       focusNode: range.endContainer,
       rangeCount: 1,
       getRangeAt: () => range,
-      getComposedRanges: () => [range],
+      ...(composed && { getComposedRanges: () => [range] }),
     } as unknown as Selection
   }
 
@@ -860,6 +987,17 @@ describe("ruby annotations", () => {
     expect(range.toString()).toBe("漢字かんじを勉強(べんきょう)する")
 
     expect(readSelectionSnapshot(createRangeSelection(range))?.text).toBe("漢字を勉強する")
+  })
+
+  it("leaves furigana out in a browser without getComposedRanges() as well", () => {
+    document.body.innerHTML = `<p id="paragraph"><ruby>漢字<rt>かんじ</rt></ruby>を勉強する</p>`
+
+    const range = document.createRange()
+    range.selectNodeContents(document.getElementById("paragraph")!)
+
+    expect(readSelectionSnapshot(createRangeSelection(range, { composed: false }))?.text).toBe(
+      "漢字を勉強する",
+    )
   })
 
   it("keeps only the selected part of the base text", () => {

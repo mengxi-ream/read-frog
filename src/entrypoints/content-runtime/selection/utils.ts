@@ -38,22 +38,32 @@ const PARAGRAPH_SEPARATOR = "\n\n"
 const TEXT_CONTROL_PARAGRAPH_BREAK_REGEX = /(\n[^\S\n]*\n)/
 // Password fields are deliberately absent: their value must never reach a prompt.
 const TEXT_CONTROL_INPUT_TYPES = new Set(["email", "search", "tel", "text", "url"])
-// Text inside these is never rendered as page content (or, for textarea, is
-// only the default value), so it must not leak into paragraph context.
+// Text inside these is never rendered as page content: a textarea's is only its
+// default value, and a frame, canvas, select box, meter or media element shows
+// something else in place of what it holds. So it must not leak into the
+// selected text or paragraph context.
 const NON_CONTENT_ELEMENT_NAMES = new Set([
+  "audio",
+  "canvas",
   "head",
+  "iframe",
+  "meter",
   "noscript",
+  "progress",
   "script",
+  "select",
   "style",
   "template",
   "textarea",
   "title",
+  "video",
 ])
 // Furigana (<rt>) and its fallback parentheses (<rp>). The browser's selection
 // text reads them alongside the base text (漢字かんじ), so speech says each word
 // twice and translation gets the reading as noise. Page translation skips them
 // for the same reason (DONT_WALK_AND_TRANSLATE_TAGS).
 const RUBY_ANNOTATION_ELEMENT_NAMES = new Set(["rp", "rt"])
+const RUBY_ANNOTATION_SELECTOR = "rp, rt"
 const NON_NEWLINE_WHITESPACE_REGEX = /[^\S\n]+/g
 const LEADING_SPACES_REGEX = /^ +/
 const TRAILING_SPACES_REGEX = / +$/
@@ -78,7 +88,21 @@ const PARAGRAPH_LIKE_TAGS = new Set([
   "FIGCAPTION",
 ])
 const SEMANTIC_CONTAINER_TAGS = new Set(["ARTICLE", "ASIDE", "BODY", "MAIN", "NAV", "SECTION"])
-const PARAGRAPH_DISPLAY_VALUES = new Set(["block", "list-item"])
+// Boxes that the browser's selection text puts on lines of their own. Inline-level
+// ones (inline-block, inline-flex) share the line. The browser puts a tab between
+// table cells, but a line break keeps their words apart as well.
+const PARAGRAPH_DISPLAY_VALUES = new Set([
+  "block",
+  "flow-root",
+  "list-item",
+  "flex",
+  "grid",
+  "-webkit-box",
+  "table",
+  "table-caption",
+  "table-row",
+  "table-cell",
+])
 
 export function normalizeSelectedText(value: string | null | undefined) {
   return value?.replace(ZERO_WIDTH_CHAR_REGEX, "").trim() ?? ""
@@ -218,6 +242,30 @@ function readTextControlSelection(): TextControlSelectionSnapshot | null {
   return { value, selectionStart, selectionEnd }
 }
 
+// Whether a range in one tree holds furigana, or sits inside it.
+function holdsRubyAnnotation(range: SelectionRangeSnapshot) {
+  const root = getTraversalRoot(range)
+  if (root instanceof Element && root.closest(RUBY_ANNOTATION_SELECTOR)) {
+    return true
+  }
+  if (!(root instanceof Element || root instanceof Document || root instanceof DocumentFragment)) {
+    return false
+  }
+
+  const liveRange = toLiveRange(range)
+  return [...root.querySelectorAll(RUBY_ANNOTATION_SELECTOR)].some((annotation) =>
+    liveRange.intersectsNode(annotation),
+  )
+}
+
+// Selection.toString() is the browser's own reading of the page, and right for
+// most selections. Two it reads wrong: one whose ends are in different trees,
+// of which it reads only the tree it starts in (#2385), and one holding
+// furigana, which it reads along with the base text.
+function needsOwnReading(range: SelectionRangeSnapshot) {
+  return !isInOneTree(range) || holdsRubyAnnotation(range)
+}
+
 export function readSelectionSnapshot(selection: Selection | null): SelectionSnapshot | null {
   if (!selection) {
     return null
@@ -226,13 +274,14 @@ export function readSelectionSnapshot(selection: Selection | null): SelectionSna
   const composedRanges = readComposedRangeSnapshots(selection)
   const ranges = composedRanges ?? readLegacyRangeSnapshots(selection)
   const textControl = readTextControlSelection()
-  // A text control's text is in its value, out of the ranges' reach. Without
-  // composed ranges, the ranges can't see into shadow roots, so the browser's
-  // own string is the better of the two.
+  // A text control's text is in its value, out of the ranges' reach. Where our
+  // own reading finds nothing, the browser's text is kept, so a selection whose
+  // string has text always has a snapshot.
+  const browserText = normalizeSelectedText(selection.toString())
   const text =
-    textControl || !composedRanges
-      ? normalizeSelectedText(selection.toString())
-      : readRangesText(ranges)
+    !textControl && ranges.some(needsOwnReading)
+      ? readRangesText(ranges) || browserText
+      : browserText
 
   if (text === "" || ranges.length === 0) {
     return null
@@ -330,7 +379,9 @@ function readChildTextVisibility(
 
   const style = window.getComputedStyle(element)
   return {
-    hidden: style.display === "none",
+    // content-visibility: hidden (also how hidden="until-found" hides) keeps the
+    // element's box but skips everything in it.
+    hidden: style.display === "none" || style.contentVisibility === "hidden",
     unselectable:
       style.userSelect === "none" ||
       (unselectable && style.userSelect !== "text" && style.userSelect !== "all"),
@@ -339,49 +390,66 @@ function readChildTextVisibility(
 }
 
 // The text a range covers, in reading order, through every open shadow root and
-// slot on the way.
+// slot on the way. getComposedRanges() puts a range's ends in tree order, where
+// a host's shadow root comes before its slotted children, but the page can show
+// a slotted child first. So the walk starts at whichever end it reaches first.
 function collectRangeTextPieces(range: SelectionRangeSnapshot): TextPiece[] {
-  const start = locateBoundary(range.startContainer, range.startOffset)
-  const end = locateBoundary(range.endContainer, range.endOffset)
-  // The flat-tree branch that holds the start. A slotted node is reached through
+  const ends = [
+    locateBoundary(range.startContainer, range.startOffset),
+    locateBoundary(range.endContainer, range.endOffset),
+  ]
+  // The flat-tree branches that hold the ends. A slotted node is reached through
   // its slot, not its light parent.
-  const startPath = new Set<Node>()
-  for (
-    let node: Node | null = start.text ?? start.before ?? start.endOf;
-    node;
-    node = getFlatParent(node)
-  ) {
-    startPath.add(node)
+  const endPaths = new Set<Node>()
+  for (const end of ends) {
+    for (
+      let node: Node | null = end.text ?? end.before ?? end.endOf;
+      node;
+      node = getFlatParent(node)
+    ) {
+      endPaths.add(node)
+    }
   }
 
   const pieces: TextPiece[] = []
   let inside = false
   let done = false
+  // Reaching an end opens the range, or closes it once it is open.
+  const reachEnd = () => {
+    done = inside
+    inside = true
+  }
 
   const visit = (node: Node, visibility: TextVisibility) => {
-    if (node === start.before) {
-      inside = true
+    for (const end of ends) {
+      if (node === end.before) {
+        reachEnd()
+        if (done) {
+          return
+        }
+      }
     }
-    if (node === end.before) {
-      done = true
-      return
-    }
-    // Until the start, only the branch that holds it needs walking.
-    if (!inside && !startPath.has(node)) {
+    // Until an end, only the branches that hold one need walking.
+    if (!inside && !endPaths.has(node)) {
       return
     }
 
     if (node instanceof Text) {
-      if (node === start.text) {
-        inside = true
+      let from = 0
+      let to = node.data.length
+      // Both ends in one text node are in one tree, so in order.
+      for (const end of ends) {
+        if (end.text === node) {
+          if (inside) {
+            to = end.offset
+          } else {
+            from = end.offset
+          }
+          reachEnd()
+        }
       }
-      const from = node === start.text ? start.offset : 0
-      const to = node === end.text ? end.offset : node.data.length
       if (!isLeftOut(visibility) && to > from) {
         pieces.push({ node, start: from, end: to })
-      }
-      if (node === end.text) {
-        done = true
       }
       return
     }
@@ -392,19 +460,27 @@ function collectRangeTextPieces(range: SelectionRangeSnapshot): TextPiece[] {
       pieces.push({ node, start: 0, end: 0 })
     }
 
+    // A closed <details> shows its summary and nothing else.
+    const summary =
+      node instanceof HTMLDetailsElement && !node.open
+        ? node.querySelector(":scope > summary")
+        : undefined
     for (const child of getFlatChildren(node)) {
-      visit(child, childVisibility)
+      const hidden = summary !== undefined && child !== summary
+      visit(child, hidden ? { ...childVisibility, hidden } : childVisibility)
       if (done) {
         return
       }
     }
 
     const shadowRoot = getShadowRootOf(node)
-    if (node === start.endOf || (shadowRoot !== null && shadowRoot === start.endOf)) {
-      inside = true
-    }
-    if (node === end.endOf || (shadowRoot !== null && shadowRoot === end.endOf)) {
-      done = true
+    for (const end of ends) {
+      if (node === end.endOf || (shadowRoot !== null && shadowRoot === end.endOf)) {
+        reachEnd()
+        if (done) {
+          return
+        }
+      }
     }
   }
 
@@ -584,14 +660,15 @@ function extractOwnerText(owner: ParagraphOwner) {
     return ""
   }
 
-  // The whole owner, the way Range.selectNode() would put it. Offsets inside
-  // the owner would count its light children, not what its shadow root renders.
+  // From just before the owner to its end, which the walk takes as the end of all
+  // it renders, its shadow root included. The owner's next sibling is no end:
+  // slots can render that sibling before the owner, or not at all.
   const index = Array.prototype.indexOf.call(parent.childNodes, owner)
   const pieces = collectRangeTextPieces({
     startContainer: parent,
     startOffset: index,
-    endContainer: parent,
-    endOffset: index + 1,
+    endContainer: owner,
+    endOffset: owner.childNodes.length,
   })
   return normalizeParagraphText(
     pieces.map((piece) => (piece.node instanceof Text ? readPieceText(piece) : " ")).join(""),

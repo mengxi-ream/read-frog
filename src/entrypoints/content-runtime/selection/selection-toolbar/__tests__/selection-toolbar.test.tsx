@@ -515,6 +515,30 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     expectToolbarHidden()
   })
 
+  // Shift+Arrow can shrink a selection down to a space: still a Range, with no text.
+  it("hides the toolbar and forgets the selection once only whitespace is selected", async () => {
+    render(
+      <div>
+        <SelectionToolbar />
+        <div data-testid="test-element">Some text</div>
+      </div>,
+    )
+
+    await clearToolbarState()
+    await triggerMouseUpWithSelection(screen.getByTestId("test-element"))
+    await waitFor(() => expectToolbarVisible())
+    expect(getDefaultStore().get(selectionSessionAtom)?.selectionSnapshot.text).toBe(
+      MOCK_SELECTED_TEXT,
+    )
+
+    setMockSelectionText(" ")
+    await act(async () => {
+      document.dispatchEvent(new Event("selectionchange"))
+    })
+    expectToolbarHidden()
+    expect(getDefaultStore().get(selectionSessionAtom)).toBeNull()
+  })
+
   it("should show toolbar when valid text is selected", async () => {
     render(
       <div>

@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { AnnotationController } from "../controller"
+import { ANNOTATION_LEADING_ATTRIBUTE } from "../styles"
 
-// jsdom has no layout and no constructable stylesheets: the layer and the
-// document styles stand in, and what is under test is whether a gloss fits.
+// jsdom has no layout: the layer stands in, and what is under test is whether
+// a gloss fits.
 vi.mock("../layer", () => ({
   AnnotationLayer: class {
     set() {}
@@ -11,11 +12,6 @@ vi.mock("../layer", () => ({
     dispose() {}
     scheduleRelayout() {}
   },
-}))
-vi.mock("../styles", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("../styles")>()),
-  ensureAnnotationDocumentStyles: () => {},
-  removeAnnotationDocumentStyles: () => {},
 }))
 
 const INLINE = new Set(["a", "b", "span"])
@@ -96,5 +92,48 @@ describe("whether a gloss fits under an annotation", () => {
 
     expect(result.ok && result.record.surface).toBe("frog")
     expect(result.ok && result.record.glossFits).toBe(false)
+  })
+})
+
+describe("annotations in a shadow root", () => {
+  /** Whether the root has the styles that give a gloss its line-height. */
+  function hasLeadingStyles(root: Document | ShadowRoot) {
+    return root.adoptedStyleSheets.some((sheet) =>
+      [...sheet.cssRules].some((rule) => rule.cssText.includes(ANNOTATION_LEADING_ATTRIBUTE)),
+    )
+  }
+
+  function annotateFirstWord(block: Element) {
+    const text = block.firstChild as Text
+    const range = document.createRange()
+    range.setStart(text, 0)
+    range.setEnd(text, text.data.indexOf(" "))
+    const result = controller.annotate(range)
+    if (!result.ok) throw new Error(`not annotated: ${result.reason}`)
+    return result.record.id
+  }
+
+  it("gets the line-height styles there until its last annotated block lets go", () => {
+    // The document's styles stop at the shadow root.
+    const host = document.createElement("div")
+    document.body.append(host)
+    const root = host.attachShadow({ mode: "open" })
+    const first = document.createElement("p")
+    first.textContent = "Anyone from 2026?"
+    const second = document.createElement("p")
+    second.textContent = "Still here today."
+    root.append(first, second)
+    stubComputedStyles(new Map())
+
+    const firstId = annotateFirstWord(first)
+    const secondId = annotateFirstWord(second)
+    expect(hasLeadingStyles(root)).toBe(true)
+
+    controller.remove(firstId)
+    expect(hasLeadingStyles(root)).toBe(true)
+
+    controller.remove(secondId)
+    expect(hasLeadingStyles(root)).toBe(false)
+    expect(hasLeadingStyles(document)).toBe(true)
   })
 })
