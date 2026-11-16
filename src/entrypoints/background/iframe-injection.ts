@@ -16,6 +16,7 @@ import { getEffectiveSiteRule } from "@/utils/site-rules/effective"
 import { urlMatchesPattern } from "@/utils/url-pattern"
 import { isSameOriginIframeSender, resolveSiteControlUrl } from "./iframe-injection-utils"
 import { getPageTranslationEnabled } from "./page-translation-state"
+import { isSelectionToolbarHiddenInTab } from "./selection-toolbar-hidden"
 
 const log = createLogger("background/iframe-injection")
 
@@ -335,6 +336,9 @@ export function setupIframeInjection() {
         )
       )
         return false
+      // Hidden from a toolbar's × until the page reloads: like a site opt-out,
+      // the frame gets no toolbar runtime.
+      if (await isSelectionToolbarHiddenInTab(tabId)) return false
       if (
         getEffectiveSiteRule(config, tab.url).injectIntoIframes === false ||
         getEffectiveSiteRule(config, frameUrl).injectIntoIframes === false

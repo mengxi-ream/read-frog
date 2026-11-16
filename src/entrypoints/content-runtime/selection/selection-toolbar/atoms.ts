@@ -12,9 +12,13 @@ import { atomFamily } from "jotai-family"
 import { selectAtom } from "jotai/utils"
 import { configAtom } from "@/utils/atoms/config"
 import { findSelectionToolbarAction } from "@/utils/custom-actions"
+import { createLogger } from "@/utils/logging/logger"
+import { onMessage, sendMessage } from "@/utils/message"
 import { getWebPageNoteOrigin } from "@/utils/note-origin"
 import { resolveProviderRefForCapability } from "@/utils/providers/provider-registry"
 import { buildContextSnapshot } from "../utils"
+
+const log = createLogger("selection-toolbar/atoms")
 
 export interface SelectionSession {
   id: number
@@ -84,6 +88,30 @@ export const contextAtom = atom(
   },
 )
 export const isSelectionToolbarOpenAtom = atom<boolean>(false)
+
+/**
+ * Hidden from its close menu until the page reloads. It changes no setting:
+ * the background keeps it for the tab, so the toolbar in every frame of the
+ * page follows it, and a reload or a new tab brings the toolbar back. Like a
+ * site opt-out, it hides only the bar; shortcuts keep working.
+ */
+export const isSelectionToolbarHiddenUntilReloadAtom = atom(false)
+isSelectionToolbarHiddenUntilReloadAtom.onMount = (setHidden) => {
+  // A frame whose toolbar starts after another frame hid it, such as an iframe
+  // that loads or navigates later.
+  void (async () => {
+    if (await sendMessage("isSelectionToolbarHiddenUntilReload", undefined)) setHidden(true)
+  })().catch((error) => log.debug("Failed to read the toolbar's hidden state", { error }))
+  return onMessage("selectionToolbarHiddenUntilReload", () => setHidden(true))
+}
+
+/** Hides the toolbar in this frame at once, then in the tab's other frames. */
+export const hideSelectionToolbarUntilReloadAtom = atom(null, (_get, set) => {
+  set(isSelectionToolbarHiddenUntilReloadAtom, true)
+  void (async () => {
+    await sendMessage("hideSelectionToolbarUntilReload", undefined)
+  })().catch((error) => log.debug("Failed to hide the toolbar in other frames", { error }))
+})
 
 export const selectionContentAtom = atom((get) => get(selectionAtom)?.text ?? null)
 

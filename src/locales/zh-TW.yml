@@ -623,8 +623,7 @@ options:
       panel: 開啟側邊欄
       translate: 切換頁面翻譯
     closeMenu:
-      disableForSite: 停用此網站
-      disableGlobally: 全域停用
+      title: 隱藏懸浮按鈕
     tooltips:
       togglePageTranslation: 切換頁面翻譯
       floatingButtonOptions: 懸浮按鈕選項
@@ -673,8 +672,7 @@ options:
         enterUrlPattern: 輸入網址模式
         urlPattern: URL 模式
     closeMenu:
-      disableForSite: 停用此網站
-      disableGlobally: 全域停用
+      title: 隱藏選取工具列
     errors:
       customActionFailed: 自訂操作失敗
       customActionFailedFallback: 自訂操作請求失敗
@@ -1646,6 +1644,11 @@ speak:
   noTextSelected: 未選取文字
   openaiNotConfigured: 尚未設定或啟用 OpenAI 提供者
   openaiApiKeyNotConfigured: 尚未設定 OpenAI API 金鑰
+hideMenu:
+  untilReload: 直到重新整理頁面
+  onSite: 在 $1 上
+  onAllSites: 在所有網站上
+  restoreHint: 可在「$1」中重新開啟。
 action:
   copy: 複製
   copied: 已複製

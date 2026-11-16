@@ -52,6 +52,7 @@ vi.mock("@/utils/atoms/config", () => {
 vi.mock("../../../atoms", () => ({
   enablePageTranslationAtom: atom({ enabled: false }),
   isDraggingButtonAtom: atom(false),
+  isFloatingButtonHiddenUntilReloadAtom: atom(false),
   isSideOpenAtom: atom(false),
 }))
 
@@ -262,7 +263,74 @@ describe("floatingButton controls", () => {
     expect(closeTrigger).toHaveClass("visible")
     expect(closeTrigger).toHaveClass("pointer-events-auto")
     expect(document.querySelector('[data-slot="tooltip-content"][data-open]')).toBeNull()
-    expect(screen.getByText("options.floatingButton.closeMenu.disableForSite")).toBeInTheDocument()
+    expect(screen.getByText("options.floatingButton.closeMenu.title")).toBeInTheDocument()
+  })
+
+  describe("close menu", () => {
+    function chooseHideOption(name: string) {
+      fireEvent.mouseEnter(getMainButton())
+      fireEvent.click(
+        screen.getByRole("button", {
+          name: "options.floatingButton.tooltips.floatingButtonOptions",
+        }),
+      )
+      fireEvent.click(screen.getByRole("menuitem", { name }))
+    }
+
+    it("names what it hides, offers three scopes, and says where to turn it back on", () => {
+      renderFloatingButton()
+      fireEvent.mouseEnter(getMainButton())
+      fireEvent.click(
+        screen.getByRole("button", {
+          name: "options.floatingButton.tooltips.floatingButtonOptions",
+        }),
+      )
+
+      expect(screen.getByText("options.floatingButton.closeMenu.title")).toBeInTheDocument()
+      expect(screen.getAllByRole("menuitem").map((item) => item.textContent)).toEqual([
+        "hideMenu.untilReload",
+        "hideMenu.onSite",
+        "hideMenu.onAllSites",
+      ])
+      expect(screen.getByRole("menuitem", { name: "hideMenu.onSite" })).toHaveAttribute(
+        "title",
+        window.location.hostname,
+      )
+      expect(screen.getByText(/^hideMenu\.restoreHint/)).toHaveTextContent(
+        "popup.options → options.floatingButton.title",
+      )
+    })
+
+    it("hides the button until reload without changing a setting", () => {
+      const { store } = renderFloatingButton()
+      const before = getFloatingButtonConfig(store)
+
+      chooseHideOption("hideMenu.untilReload")
+
+      expect(screen.queryByTestId("floating-button-container")).toBeNull()
+      expect(getFloatingButtonConfig(store)).toEqual(before)
+    })
+
+    it("hides the button on this site with the same pattern the popup stores", () => {
+      const { store } = renderFloatingButton({ disabledFloatingButtonPatterns: ["github.com"] })
+
+      chooseHideOption("hideMenu.onSite")
+
+      expect(getFloatingButtonConfig(store).disabledFloatingButtonPatterns).toEqual([
+        "github.com",
+        `*.${window.location.hostname}`,
+      ])
+      expect(screen.queryByTestId("floating-button-container")).toBeNull()
+    })
+
+    it("turns the button off on all sites", () => {
+      const { store } = renderFloatingButton()
+
+      chooseHideOption("hideMenu.onAllSites")
+
+      expect(getFloatingButtonConfig(store).enabled).toBe(false)
+      expect(screen.queryByTestId("floating-button-container")).toBeNull()
+    })
   })
 
   it("does not show a tooltip for the lock control", () => {

@@ -96,6 +96,10 @@ interface ProtocolMap {
     selectionText: string
   }) => void
   readAloudSelectionFromContextMenu: (data: { selectionText: string }) => void
+  // The selection toolbar's "Until I reload this page", kept for the whole tab
+  hideSelectionToolbarUntilReload: () => void
+  isSelectionToolbarHiddenUntilReload: () => boolean
+  selectionToolbarHiddenUntilReload: () => void
   // popup → the tab's top frame: open or close the "Diagnose this page" panel
   togglePageTranslationDiagnostics: () => void
   // analytics
