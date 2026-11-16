@@ -186,10 +186,13 @@ function lookUpClosedShadowRoot(element: Element): ShadowRoot | null {
 }
 
 // dom.openOrClosedShadowRoot() takes ten times as long as reading shadowRoot,
-// and reading a selection asks about the same elements many times over. So one
-// read keeps the answers it gets. No page script runs during it, so none can
-// attach a shadow root meanwhile.
+// and reading a selection asks about the same elements many times over. A slot
+// in a closed root is hidden from assignedSlot, so finding the slot that shows
+// a node means asking each of the root's slots what it shows. So one read
+// keeps the answers it gets to both. No page script runs during it, so none can
+// attach a shadow root or move a node meanwhile.
 let knownClosedShadowRoots: Map<Element, ShadowRoot | null> | null = null
+let knownClosedSlots: Map<ShadowRoot, Map<Node, HTMLSlotElement>> | null = null
 
 function rememberingClosedShadowRoots<T>(read: () => T): T {
   if (knownClosedShadowRoots) {
@@ -197,10 +200,12 @@ function rememberingClosedShadowRoots<T>(read: () => T): T {
   }
 
   knownClosedShadowRoots = new Map()
+  knownClosedSlots = new Map()
   try {
     return read()
   } finally {
     knownClosedShadowRoots = null
+    knownClosedSlots = null
   }
 }
 
@@ -211,6 +216,21 @@ function readClosedShadowRoot(element: Element) {
     knownClosedShadowRoots?.set(element, shadowRoot)
   }
   return shadowRoot
+}
+
+// The slot that shows each node assigned to a slot in a closed shadow root.
+function readClosedSlots(shadowRoot: ShadowRoot) {
+  let slots = knownClosedSlots?.get(shadowRoot)
+  if (!slots) {
+    slots = new Map()
+    for (const slot of shadowRoot.querySelectorAll("slot")) {
+      for (const node of slot.assignedNodes()) {
+        slots.set(node, slot)
+      }
+    }
+    knownClosedSlots?.set(shadowRoot, slots)
+  }
+  return slots
 }
 
 function getShadowRootOf(node: Node | null | undefined) {
@@ -421,15 +441,7 @@ function getAssignedSlot(node: Node) {
   const host = node.parentNode
   const closedShadowRoot =
     host instanceof Element && !host.shadowRoot ? getShadowRootOf(host) : null
-  if (!closedShadowRoot) {
-    return null
-  }
-
-  return (
-    [...closedShadowRoot.querySelectorAll("slot")].find((slot) =>
-      slot.assignedNodes().includes(node),
-    ) ?? null
-  )
+  return closedShadowRoot ? (readClosedSlots(closedShadowRoot).get(node) ?? null) : null
 }
 
 function getFlatParentElement(node: Node) {
@@ -494,24 +506,24 @@ function locateBoundary(container: Node, offset: number): Boundary {
   if (container instanceof Text) {
     return { text: container, offset, before: null, endOf: null }
   }
+  // A host renders its shadow root in place of its light children. Chrome's
+  // legacy API, all there is without getComposedRanges(), reports a boundary
+  // at the start of what a host renders as offset 0 in the host, whatever
+  // light child a slot shows first.
+  if (getShadowRootOf(container)) {
+    return offset === 0 ? locateStartOf(container) : locateAmongChildren(container, offset)
+  }
 
   // Firefox counts a boundary in slotted content among the slot's assigned
   // nodes, where the DOM counts the slot's own children, its fallback.
   const child = isSlotShowingAssignedNodes(container)
     ? container.assignedNodes()[offset]
     : container.childNodes[offset]
-  if (child && !isShownByFlatParent(child)) {
-    return locateUnshownBoundary(child)
-  }
   return child
     ? { text: null, offset: 0, before: child, endOf: null }
     : { text: null, offset: 0, before: null, endOf: container }
 }
 
-// The walk never meets a boundary at something the page doesn't render, and
-// would read on to the end of the page looking for it. So it moves to the next
-// light child of the host that a slot shows. Failing that, to the start of what
-// the host renders, or past it if the host shows a light child before it.
 function locateUnshownBoundary(unshown: Node): Boundary {
   const parent = getFlatParent(unshown)
   if (!parent) {
@@ -520,17 +532,35 @@ function locateUnshownBoundary(unshown: Node): Boundary {
 
   const siblings: Node[] = [...parent.childNodes]
   // A shadow root comes before the host's light children.
-  const index = unshown instanceof ShadowRoot ? 0 : siblings.indexOf(unshown)
+  return locateAmongChildren(parent, unshown instanceof ShadowRoot ? 0 : siblings.indexOf(unshown))
+}
+
+// A boundary among the children of a node that renders other nodes in their
+// place: a shadow host, or a slot showing its assigned nodes. The walk never
+// meets a boundary at a child the page doesn't render, and would read on to
+// the end of the page looking for it. So it moves to the next child from
+// `index` on that the page renders, such as a host's light child that a slot
+// shows. Failing that, to the start of what the node renders, or past it if
+// the node renders a child before `index`.
+function locateAmongChildren(parent: Node, index: number): Boundary {
+  const children = [...parent.childNodes]
   const isShown = (node: Node) => findUnshownAncestor(node) === null
-  const next = siblings.slice(index).find(isShown)
+  const next = children.slice(index).find(isShown)
   if (next) {
     return { text: null, offset: 0, before: next, endOf: null }
   }
 
-  const first = siblings.slice(0, index).some(isShown) ? undefined : getFlatChildren(parent)[0]
+  return children.slice(0, index).some(isShown)
+    ? { text: null, offset: 0, before: null, endOf: parent }
+    : locateStartOf(parent)
+}
+
+// The start of what `node` renders.
+function locateStartOf(node: Node): Boundary {
+  const first = getFlatChildren(node)[0]
   return first
     ? { text: null, offset: 0, before: first, endOf: null }
-    : { text: null, offset: 0, before: null, endOf: parent }
+    : { text: null, offset: 0, before: null, endOf: node }
 }
 
 interface TextVisibility {

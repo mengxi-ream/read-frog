@@ -422,28 +422,45 @@ describe("context around Read Frog and quotes", () => {
 })
 
 describe("boundaries at what the page doesn't render", () => {
-  // A framework's comment marker is a light child of the host that no slot shows.
-  function renderCard(before: string) {
-    document.body.innerHTML = `<article>${before}<lit-card><!--?lit$1$--></lit-card><p>After the card</p></article>`
-    attachShadowTrees(document, { "lit-card": { html: `<p>Card text</p>` } })
+  // By default the host's only light child is a framework's comment marker,
+  // which no slot shows.
+  function renderCard(
+    before: string,
+    lightChildren = "<!--?lit$1$-->",
+    cardHtml = "<p>Card text</p>",
+  ) {
+    document.body.innerHTML = `<article>${before}<lit-card>${lightChildren}</lit-card><p>After the card</p></article>`
+    attachShadowTrees(document, { "lit-card": { html: cardHtml } })
     return document.querySelector("lit-card")!
   }
 
-  it("ends a triple-clicked paragraph's context at the host after it", () => {
-    const card = renderCard(`<p id="paragraph">Selected paragraph</p>`)
-    const text = document.getElementById("paragraph")!.firstChild!
+  it.each([
+    ["in front of the marker", "<!--?lit$1$-->", "<p>Card text</p>"],
+    ["in a host with no light children", "", "<p>Card text</p>"],
+    [
+      "in a host that shows its first light child after its own text",
+      "<span>Slotted</span>",
+      "<p>Card text <slot></slot></p>",
+    ],
+  ])(
+    "ends a triple-clicked paragraph's context at the host after it, %s",
+    (_, lightChildren, cardHtml) => {
+      const card = renderCard(`<p id="paragraph">Selected paragraph</p>`, lightChildren, cardHtml)
+      const text = document.getElementById("paragraph")!.firstChild!
 
-    // The triple click ends in front of the marker.
-    const snapshot = readSelectionSnapshot(
-      createTreeSelection(
-        { startContainer: text, startOffset: 0, endContainer: card, endOffset: 0 },
-        "Selected paragraph",
-      ),
-    )
+      // A triple click ends at the start of what the host renders, which
+      // Chrome's legacy API reports as the start of the host.
+      const snapshot = readSelectionSnapshot(
+        createTreeSelection(
+          { startContainer: text, startOffset: 0, endContainer: card, endOffset: 0 },
+          "Selected paragraph",
+        ),
+      )
 
-    expect(snapshot?.text).toBe("Selected paragraph")
-    expect(buildContextSnapshot(snapshot)?.paragraphs).toEqual(["Selected paragraph"])
-  })
+      expect(snapshot?.text).toBe("Selected paragraph")
+      expect(buildContextSnapshot(snapshot)?.paragraphs).toEqual(["Selected paragraph"])
+    },
+  )
 
   it("ends the text of a selection across trees there too", () => {
     const card = renderCard(`<div id="reply"></div>`)
@@ -1012,6 +1029,31 @@ describe("readSelectionSnapshot", () => {
       expect(buildContextSnapshot(snapshot)?.paragraphs).toEqual(["Start Rendered slotted End"])
       expect(askedElements()).not.toHaveLength(0)
       expect(new Set(askedElements()).size).toBe(askedElements().length)
+    })
+
+    // Browsers hide a closed root's slots from assignedSlot, so finding the slot
+    // that shows a node means asking the root's slots what they show.
+    it("asks a closed shadow root's slots what they show no more often for more slotted nodes", () => {
+      const countSlotQuestions = (slottedCount: number) => {
+        const { widget, selection } = renderWidget(
+          `<slot></slot>`,
+          `<span>Slotted</span> `.repeat(slottedCount),
+        )
+        for (const node of widget.childNodes) {
+          Object.defineProperty(node, "assignedSlot", { value: null })
+        }
+        const assignedNodes = vi.spyOn(HTMLSlotElement.prototype, "assignedNodes")
+
+        const snapshot = readSelectionSnapshot(selection)
+        expect(snapshot?.text).toBe(`Start ${"Slotted ".repeat(slottedCount)}End`)
+        expect(buildContextSnapshot(snapshot)?.paragraphs).toHaveLength(1)
+
+        const count = assignedNodes.mock.calls.length
+        assignedNodes.mockRestore()
+        return count
+      }
+
+      expect(countSlotQuestions(40)).toBe(countSlotQuestions(2))
     })
 
     it("finds a closed shadow root attached after an earlier read, as an upgrade does", () => {
