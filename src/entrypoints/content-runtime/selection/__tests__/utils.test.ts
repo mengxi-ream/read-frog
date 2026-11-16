@@ -352,6 +352,25 @@ describe("text control selections", () => {
     ])
   })
 
+  it("returns null for a whitespace-only selection in a prefilled textarea", () => {
+    document.body.innerHTML = `<div><textarea id="field">original draft</textarea></div>`
+
+    const textarea = document.getElementById("field")
+    if (!(textarea instanceof HTMLTextAreaElement)) {
+      throw new Error("Textarea not found")
+    }
+
+    textarea.value = "   "
+    textarea.focus()
+    textarea.setSelectionRange(0, 3)
+
+    expect(readSelectionSnapshot(createTextControlSelection(textarea, "   "))).toBeNull()
+
+    // No focused control, so the ranges path runs and must still skip the child text.
+    textarea.blur()
+    expect(readSelectionSnapshot(createTextControlSelection(textarea, "   "))).toBeNull()
+  })
+
   it("uses the value of a focused text input", () => {
     document.body.innerHTML = `
       <p>
