@@ -19,9 +19,10 @@ export interface RequestTask {
   // RequestRetryContext.rateLimitRetryCount).
   rateLimitRetryCount: number
   drained: boolean
-  // Per-task timeout override; falls back to QueueOptions.timeoutMs. Large
-  // LLM batches need proportionally more time than single requests.
-  timeoutMs?: number
+  // Time this task gets on top of QueueOptions.timeoutMs: large LLM batches
+  // need proportionally more than single requests. Added when each attempt
+  // starts, so a timeout change also reaches tasks already queued or retrying.
+  extraTimeoutMs?: number
 }
 
 type QueuedRequestTask = RequestTask & {
@@ -74,7 +75,7 @@ export class RequestQueue {
     scheduleAt: number,
     hash: string,
     scopes?: readonly string[],
-    taskOptions?: { timeoutMs?: number },
+    taskOptions?: { extraTimeoutMs?: number },
   ): Promise<T> {
     const duplicateTask = this.duplicateTask(hash)
     if (duplicateTask) {
@@ -106,7 +107,7 @@ export class RequestQueue {
       retryCount: 0,
       rateLimitRetryCount: 0,
       drained: false,
-      timeoutMs: taskOptions?.timeoutMs,
+      extraTimeoutMs: taskOptions?.extraTimeoutMs,
       cancelScopes: scopes?.length ? new Set(scopes) : null,
     }
 
@@ -276,7 +277,7 @@ export class RequestQueue {
     let timeoutId: NodeJS.Timeout | null = null
     const abortController = new AbortController()
     task.abortController = abortController
-    const timeoutMs = task.timeoutMs ?? this.options.timeoutMs
+    const timeoutMs = this.options.timeoutMs + (task.extraTimeoutMs ?? 0)
 
     try {
       // Create a timeout promise

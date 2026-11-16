@@ -5,13 +5,16 @@ import {
   DEFAULT_TRANSLATE_PROMPT_ID,
 } from "@/utils/constants/prompt"
 import {
+  DEFAULT_REQUEST_TIMEOUT_MS,
   MAX_PRELOAD_MARGIN,
   MAX_PRELOAD_THRESHOLD,
+  MAX_REQUEST_TIMEOUT_MS,
   MIN_BATCH_CHARACTERS,
   MIN_BATCH_ITEMS,
   MIN_CHARACTERS_PER_NODE,
   MIN_PRELOAD_MARGIN,
   MIN_PRELOAD_THRESHOLD,
+  MIN_REQUEST_TIMEOUT_MS,
   MIN_TRANSLATE_CAPACITY,
   MIN_TRANSLATE_RATE,
   MIN_WORDS_PER_NODE,
@@ -23,6 +26,20 @@ import { shortcutSchema } from "./shortcut"
 export const requestQueueConfigSchema = z.object({
   capacity: z.number().gte(MIN_TRANSLATE_CAPACITY),
   rate: z.number().gte(MIN_TRANSLATE_RATE),
+  // Milliseconds, as the request queue takes it; the options page shows seconds,
+  // so the messages do too. `.default()` lets config stored before v125 parse in
+  // UI contexts that load before the migration runs.
+  timeoutMs: z
+    .number()
+    .gte(
+      MIN_REQUEST_TIMEOUT_MS,
+      `Request timeout must be at least ${MIN_REQUEST_TIMEOUT_MS / 1000} seconds`,
+    )
+    .lte(
+      MAX_REQUEST_TIMEOUT_MS,
+      `Request timeout must be at most ${MAX_REQUEST_TIMEOUT_MS / 1000} seconds`,
+    )
+    .default(DEFAULT_REQUEST_TIMEOUT_MS),
 })
 
 export const batchQueueConfigSchema = z.object({

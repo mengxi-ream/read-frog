@@ -1337,7 +1337,7 @@ options:
         error: El valor debe estar entre $1 y $2
     translationQueue:
       title: Cola de traducción
-      description: Con qué rapidez salen las solicitudes, cuánto texto lleva cada una y cuánto se adelantan al lector
+      description: Con qué rapidez salen las solicitudes, cuánto texto lleva cada una, cuánto puede tardar cada una y cuánto se adelantan al lector
       manageQueue: Gestionar cola
       requestQueueConfig:
         title: Tasa de traducción
@@ -1352,6 +1352,9 @@ options:
           description: "Caracteres máximos: cuánto texto lleva cada solicitud a la IA"
         maxItemsPerBatch:
           description: "Párrafos máximos: cuántos párrafos comparten una solicitud. Los proveedores que no son de IA ignoran ambos"
+      requestTimeout:
+        title: Tiempo de espera de la solicitud
+        description: "Segundos que se espera una respuesta antes de abandonar y reintentar. Las solicitudes por lotes de IA reciben tiempo extra según su longitud, hasta 100 segundos más. Auméntalo si un modelo lento agota el tiempo una y otra vez"
       preloadConfig:
         title: Rango de pretraducción
         description: Controla cuánto contenido por debajo de la ventana visible se pretraduce para ahorrar costes de API
@@ -1523,7 +1526,7 @@ options:
           videoSummary: Resumen del video (requiere contexto inteligente de IA)
     subtitlesQueue:
       title: Cola de subtítulos
-      description: Con qué rapidez salen las solicitudes de subtítulos y cuántas líneas lleva cada una
+      description: Con qué rapidez salen las solicitudes de subtítulos, cuántas líneas lleva cada una y cuánto puede tardar cada una
       manageQueue: Gestionar cola
       requestQueueConfig:
         title: Tasa de traducción
@@ -1538,6 +1541,9 @@ options:
           description: "Caracteres máximos: cuánto texto lleva cada solicitud a la IA"
         maxItemsPerBatch:
           description: "Líneas máximas: cuántas líneas de subtítulos comparten una solicitud. Los proveedores que no son de IA ignoran ambos"
+      requestTimeout:
+        title: Tiempo de espera de la solicitud
+        description: "Segundos que se espera una respuesta antes de abandonar y reintentar. Las solicitudes por lotes de IA reciben tiempo extra según su longitud, hasta 100 segundos más. Auméntalo si un modelo lento agota el tiempo una y otra vez"
     cache:
       title: Caché
       clearCache:

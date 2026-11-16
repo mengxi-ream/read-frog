@@ -1272,6 +1272,21 @@ describe("requestQueue – reconfigure the request queue", () => {
 
     expect(() => q.setQueueOptions({ capacity: -1 })).toThrow(/Too small/)
   })
+
+  it("takes a user timeout within its range and refuses one outside it", async () => {
+    vi.useFakeTimers()
+    const q = new RequestQueue({ ...baseConfig })
+
+    q.setQueueOptions({ timeoutMs: 90_000 })
+    expect(() => q.setQueueOptions({ timeoutMs: 1_000 })).toThrow(/at least 5 seconds/)
+    expect(() => q.setQueueOptions({ timeoutMs: 600_000 })).toThrow(/at most 180 seconds/)
+
+    const never = createDeferred<string>()
+    const promise = q.enqueue(() => never.promise, Date.now(), "slow")
+    promise.catch(() => {})
+    await vi.advanceTimersByTimeAsync(90_100)
+    await expect(promise).rejects.toThrow(/timed out after 90000ms/)
+  })
 })
 
 describe("requestQueue – dispatch ETA and per-task timeout", () => {
@@ -1334,18 +1349,53 @@ describe("requestQueue – dispatch ETA and per-task timeout", () => {
     await expect(promise).resolves.toBe("ok")
   })
 
-  it("per-task timeoutMs override wins over the queue default", async () => {
+  it("adds a task's extra time to the queue timeout", async () => {
     vi.useFakeTimers()
 
     const q = new RequestQueue({ ...baseConfig, timeoutMs: 10_000, maxRetries: 0 })
 
     const never = createDeferred<string>()
     const promise = q.enqueue(() => never.promise, Date.now(), "slow", undefined, {
-      timeoutMs: 500,
+      extraTimeoutMs: 500,
     })
     promise.catch(() => {})
 
-    await vi.advanceTimersByTimeAsync(600)
-    await expect(promise).rejects.toThrow(/timed out after 500ms/)
+    await vi.advanceTimersByTimeAsync(10_600)
+    await expect(promise).rejects.toThrow(/timed out after 10500ms/)
+  })
+
+  it("gives a retry of a task with extra time the queue timeout as it is now", async () => {
+    vi.useFakeTimers()
+    vi.spyOn(Math, "random").mockReturnValue(0)
+
+    const q = new RequestQueue({ ...baseConfig, timeoutMs: 10_000, maxRetries: 1 })
+    const attempts: { startedAt: number; abortedAt?: number }[] = []
+    const promise = q.enqueue(
+      (signal) => {
+        const attempt: { startedAt: number; abortedAt?: number } = { startedAt: Date.now() }
+        attempts.push(attempt)
+        signal?.addEventListener("abort", () => {
+          attempt.abortedAt = Date.now()
+        })
+        return new Promise<string>(() => {})
+      },
+      Date.now(),
+      "slow-batch",
+      undefined,
+      { extraTimeoutMs: 500 },
+    )
+    promise.catch(() => {})
+
+    // Raised while the first attempt runs: that attempt keeps the timer it
+    // started with, the retry gets the new timeout.
+    await vi.advanceTimersByTimeAsync(5_000)
+    q.setQueueOptions({ timeoutMs: 30_000 })
+    await vi.advanceTimersByTimeAsync(5_600)
+    expect(attempts[0]!.abortedAt! - attempts[0]!.startedAt).toBe(10_500)
+
+    await vi.advanceTimersByTimeAsync(40_000)
+    expect(attempts).toHaveLength(2)
+    expect(attempts[1]!.abortedAt! - attempts[1]!.startedAt).toBe(30_500)
+    await expect(promise).rejects.toThrow(/timed out after 30500ms/)
   })
 })

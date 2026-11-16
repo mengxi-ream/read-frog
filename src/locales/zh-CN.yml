@@ -1342,7 +1342,7 @@ options:
         error: 数值必须在 $1 到 $2 之间
     translationQueue:
       title: 翻译队列
-      description: 请求发出的速度、每个请求承载的文本量，以及提前于阅读位置多远开始翻译
+      description: 请求发出的速度、每个请求承载的文本量、每个请求最多等多久，以及提前于阅读位置多远开始翻译
       manageQueue: 管理队列
       requestQueueConfig:
         title: 翻译速率
@@ -1357,6 +1357,9 @@ options:
           description: 最大字符数：一次 AI 请求最多带多少文本
         maxItemsPerBatch:
           description: 最大段落数：多少个段落合并成一次请求。非 AI 的翻译服务不受这两项影响
+      requestTimeout:
+        title: 请求超时
+        description: "等待响应的秒数，超时就放弃并重试。AI 批量请求会按文本长度额外多等，最多再加 100 秒。模型响应慢、经常超时可以调大"
       preloadConfig:
         title: 预翻译范围
         description: 控制视口下方多少内容会被预先翻译，以节省 API 费用
@@ -1528,7 +1531,7 @@ options:
           videoSummary: 视频摘要（需启用 AI 智能上下文）
     subtitlesQueue:
       title: 字幕队列
-      description: 字幕请求发出的速度，以及每个请求承载的字幕行数
+      description: 字幕请求发出的速度、每个请求承载的字幕行数，以及每个请求最多等多久
       manageQueue: 管理队列
       requestQueueConfig:
         title: 翻译速率
@@ -1543,6 +1546,9 @@ options:
           description: 最大字符数：一次 AI 请求最多带多少文本
         maxItemsPerBatch:
           description: 最大字幕条数：多少条字幕合并成一次请求。非 AI 的翻译服务不受这两项影响
+      requestTimeout:
+        title: 请求超时
+        description: "等待响应的秒数，超时就放弃并重试。AI 批量请求会按文本长度额外多等，最多再加 100 秒。模型响应慢、经常超时可以调大"
     cache:
       title: 缓存
       clearCache:

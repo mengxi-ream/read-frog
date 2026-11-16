@@ -8,8 +8,10 @@ import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { MIN_TRANSLATE_CAPACITY, MIN_TRANSLATE_RATE } from "@/utils/constants/translate"
 import { i18n } from "@/utils/i18n"
 import { ConfigItem } from "../../../components/config-item"
+import { RequestTimeoutInput } from "../../../components/request-timeout-input"
 
-type KeyOfRequestQueueConfig = keyof RequestQueueConfig
+// The timeout has its own input (RequestTimeoutInput), typed in seconds.
+type KeyOfRequestQueueConfig = Exclude<keyof RequestQueueConfig, "timeoutMs">
 
 /** How fast subtitle requests leave: a burst allowance, then the steady pace it refills at. */
 export function RequestRateItems() {
@@ -32,6 +34,30 @@ export function RequestRateItems() {
         <SubtitlesRateInput property="rate" />
       </ConfigItem>
     </>
+  )
+}
+
+/** How long one subtitle request may take before it is given up on and retried. */
+export function RequestTimeoutItem() {
+  const [videoSubtitlesConfig, setVideoSubtitlesConfig] = useAtom(
+    configFieldsAtomMap.videoSubtitles,
+  )
+
+  return (
+    <ConfigItem
+      id="subtitles-request-timeout"
+      title={i18n.t("options.videoSubtitles.subtitlesQueue.requestTimeout.title")}
+      description={i18n.t("options.videoSubtitles.subtitlesQueue.requestTimeout.description")}
+    >
+      <RequestTimeoutInput
+        timeoutMs={videoSubtitlesConfig.requestQueueConfig.timeoutMs}
+        onTimeoutMsChange={(timeoutMs) =>
+          void setVideoSubtitlesConfig({
+            requestQueueConfig: { ...videoSubtitlesConfig.requestQueueConfig, timeoutMs },
+          })
+        }
+      />
+    </ConfigItem>
   )
 }
 
