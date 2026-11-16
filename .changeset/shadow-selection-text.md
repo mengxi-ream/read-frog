@@ -2,4 +2,4 @@
 "@read-frog/extension": patch
 ---
 
-fix(selection): recover text selected across nested shadow roots so a triple-clicked comment can be translated
+fix(selection): read text selected across shadow roots, so a triple-clicked Bilibili reply or a selection dragged across comments can be translated

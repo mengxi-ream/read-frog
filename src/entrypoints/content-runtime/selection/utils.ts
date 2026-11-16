@@ -1,5 +1,3 @@
-import { READ_FROG_SUBTITLES_UI_HOST_ID } from "@/utils/constants/subtitles"
-
 export interface SelectionRangeSnapshot {
   startContainer: Node
   startOffset: number
@@ -32,7 +30,7 @@ export interface ContextSnapshot {
 
 type SelectionRangeSource = SelectionRangeSnapshot
 
-type ParagraphOwner = Element | ShadowRoot
+type ParagraphOwner = Element
 
 const ZERO_WIDTH_CHAR_REGEX = /\u200B/g
 const WHITESPACE_REGEX = /\s+/g
@@ -56,11 +54,12 @@ const NON_CONTENT_ELEMENT_NAMES = new Set([
 // twice and translation gets the reading as noise. Page translation skips them
 // for the same reason (DONT_WALK_AND_TRANSLATE_TAGS).
 const RUBY_ANNOTATION_ELEMENT_NAMES = new Set(["rp", "rt"])
-const RUBY_ANNOTATION_SELECTOR = "rp, rt"
-const NEWLINE_PADDING_REGEX = / *\n */g
 const NON_NEWLINE_WHITESPACE_REGEX = /[^\S\n]+/g
-// white-space values that render the line breaks written in the source.
-const LINE_BREAK_PRESERVING_WHITE_SPACE = new Set(["break-spaces", "pre", "pre-line", "pre-wrap"])
+const LEADING_SPACES_REGEX = /^ +/
+const TRAILING_SPACES_REGEX = / +$/
+const ENDS_WITH_COLLAPSED_SPACE_REGEX = /[ \n]$/
+// white-space values that render every space written in the source.
+const SPACE_PRESERVING_WHITE_SPACE = new Set(["break-spaces", "pre", "pre-wrap"])
 const PARAGRAPH_LIKE_TAGS = new Set([
   "P",
   "LI",
@@ -80,10 +79,6 @@ const PARAGRAPH_LIKE_TAGS = new Set([
 ])
 const SEMANTIC_CONTAINER_TAGS = new Set(["ARTICLE", "ASIDE", "BODY", "MAIN", "NAV", "SECTION"])
 const PARAGRAPH_DISPLAY_VALUES = new Set(["block", "list-item"])
-// How far to walk open shadow roots under a selection boundary. A triple-click
-// can report the host as its only boundary, so the roots inside it are not on
-// the ancestor walk. Deeper trees are left alone.
-const MAX_SELECTION_SHADOW_DESCENT_DEPTH = 8
 
 export function normalizeSelectedText(value: string | null | undefined) {
   return value?.replace(ZERO_WIDTH_CHAR_REGEX, "").trim() ?? ""
@@ -102,7 +97,17 @@ export function createRangeSnapshot(rangeSource: SelectionRangeSource): Selectio
   }
 }
 
+function isInOneTree({ startContainer, endContainer }: SelectionRangeSnapshot) {
+  return startContainer.getRootNode() === endContainer.getRootNode()
+}
+
+// A live Range sits in one tree. setEnd() would collapse one whose boundaries
+// are in different shadow trees, so refuse instead of handing back an empty range.
 export function toLiveRange(rangeSnapshot: SelectionRangeSnapshot) {
+  if (!isInOneTree(rangeSnapshot)) {
+    throw new Error("A live Range can't span shadow roots")
+  }
+
   const range = document.createRange()
   range.setStart(rangeSnapshot.startContainer, rangeSnapshot.startOffset)
   range.setEnd(rangeSnapshot.endContainer, rangeSnapshot.endOffset)
@@ -122,168 +127,65 @@ function getParentNodeAcrossShadow(node: Node | null) {
   return root instanceof ShadowRoot ? root.host : null
 }
 
-function getParentElementAcrossShadow(element: Element | null) {
-  if (!element) {
-    return null
-  }
-
-  if (element.parentElement) {
-    return element.parentElement
-  }
-
-  const root = element.getRootNode()
-  return root instanceof ShadowRoot ? root.host : null
+function getShadowRootOf(node: Node | null | undefined) {
+  return node instanceof Element ? node.shadowRoot : null
 }
 
-function getNearestParentElement(node: Node | null) {
-  if (!node) {
-    return null
-  }
-
-  if (node instanceof Element) {
-    return node
-  }
-
-  const parentNode = getParentNodeAcrossShadow(node)
-  return parentNode instanceof Element ? parentNode : null
-}
-
-function collectSelectionBoundaryNodes(selection: Selection) {
-  const boundaryNodes = new Set<Node>()
-
-  if (selection.anchorNode) {
-    boundaryNodes.add(selection.anchorNode)
-  }
-  if (selection.focusNode) {
-    boundaryNodes.add(selection.focusNode)
-  }
-
-  const rangeCount = typeof selection.rangeCount === "number" ? selection.rangeCount : 0
-
-  for (let index = 0; index < rangeCount; index += 1) {
-    try {
-      const range = selection.getRangeAt(index)
-      boundaryNodes.add(range.startContainer)
-      boundaryNodes.add(range.endContainer)
-    } catch {
-      break
-    }
-  }
-
-  return [...boundaryNodes]
-}
-
-function getReadFrogSubtitleShadowRoot() {
-  const subtitlesHost = document.getElementById(READ_FROG_SUBTITLES_UI_HOST_ID)
-  const subtitlesRoot = subtitlesHost?.shadowRoot
-  return subtitlesRoot ?? null
-}
-
-function collectSelectionShadowRoots(selection: Selection) {
-  const shadowRoots = new Set<ShadowRoot>()
-
-  for (const boundaryNode of collectSelectionBoundaryNodes(selection)) {
-    let current: Node | null = boundaryNode
-
-    while (current) {
-      const root = current.getRootNode()
-      if (!(root instanceof ShadowRoot)) {
-        break
-      }
-
-      shadowRoots.add(root)
-      current = root.host
-    }
-  }
-
-  const subtitleShadowRoot = getReadFrogSubtitleShadowRoot()
-  if (subtitleShadowRoot) {
-    shadowRoots.add(subtitleShadowRoot)
-  }
-
-  return [...shadowRoots]
-}
-
-function collectNestedOpenShadowRoots(
-  root: ShadowRoot,
-  shadowRoots: Set<ShadowRoot>,
-  visited: Set<ShadowRoot>,
-  depth: number,
-) {
-  if (depth > MAX_SELECTION_SHADOW_DESCENT_DEPTH || visited.has(root)) {
-    return
-  }
-
-  visited.add(root)
-  shadowRoots.add(root)
-  if (depth === MAX_SELECTION_SHADOW_DESCENT_DEPTH) {
-    return
-  }
-
-  const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT)
-  let current = walker.nextNode()
-  while (current) {
-    if (current instanceof Element && current.shadowRoot) {
-      collectNestedOpenShadowRoots(current.shadowRoot, shadowRoots, visited, depth + 1)
-    }
-    current = walker.nextNode()
-  }
-}
-
-// Ancestor roots, the subtitles host, and open shadow roots under a boundary
-// that is itself a host. Descent starts on that host only, so the rest of the
-// document is left alone.
-function collectEmptySelectionShadowRoots(selection: Selection) {
-  const shadowRoots = new Set(collectSelectionShadowRoots(selection))
-  const visited = new Set<ShadowRoot>()
-
-  for (const boundaryNode of collectSelectionBoundaryNodes(selection)) {
-    if (boundaryNode instanceof Element && boundaryNode.shadowRoot) {
-      collectNestedOpenShadowRoots(boundaryNode.shadowRoot, shadowRoots, visited, 1)
-    }
-  }
-
-  return [...shadowRoots]
-}
-
-function readSelectionRangeSnapshots(selection: Selection | null) {
-  if (!selection) {
-    return []
-  }
-
+// https://github.com/mengxi-ream/read-frog/issues/2385
+// Chrome hands the legacy selection API (anchorNode, getRangeAt, toString) a
+// selection inside shadow roots as if it sat in the document: anchorNode becomes
+// the outermost host's parent, and toString() only reads the tree the selection
+// starts in. getComposedRanges() reports the real boundaries, but only inside the
+// shadow roots it is handed, and puts any other boundary just before (start) or
+// after (end) the host it couldn't enter. So keep handing it the shadow root of
+// the host each boundary stopped at, until neither boundary moves.
+// Null where there is no getComposedRanges() or it reports no range.
+function readComposedRangeSnapshots(selection: Selection): SelectionRangeSnapshot[] | null {
   const composedSelection = selection as Selection & {
     getComposedRanges?: (options?: { shadowRoots?: ShadowRoot[] }) => SelectionRangeSource[]
   }
-
-  if (typeof composedSelection.getComposedRanges === "function") {
-    const composedRanges = composedSelection.getComposedRanges({
-      shadowRoots: collectSelectionShadowRoots(selection),
-    })
-
-    if (composedRanges.length > 0) {
-      return composedRanges.map(createRangeSnapshot)
-    }
+  if (typeof composedSelection.getComposedRanges !== "function") {
+    return null
   }
 
-  const snapshots: SelectionRangeSnapshot[] = []
-  const rangeCount = typeof selection.rangeCount === "number" ? selection.rangeCount : 0
+  const shadowRoots = new Set<ShadowRoot>()
+  for (;;) {
+    const ranges = composedSelection.getComposedRanges({ shadowRoots: [...shadowRoots] })
+    if (ranges.length === 0) {
+      return null
+    }
 
-  if (rangeCount > 0) {
-    for (let index = 0; index < rangeCount; index += 1) {
-      try {
-        snapshots.push(createRangeSnapshot(selection.getRangeAt(index)))
-      } catch {
-        return snapshots
+    const knownRootCount = shadowRoots.size
+    for (const range of ranges) {
+      for (const host of [
+        range.startContainer.childNodes[range.startOffset],
+        range.endContainer.childNodes[range.endOffset - 1],
+      ]) {
+        const shadowRoot = getShadowRootOf(host)
+        if (shadowRoot) {
+          shadowRoots.add(shadowRoot)
+        }
       }
     }
 
-    return snapshots
+    if (shadowRoots.size === knownRootCount) {
+      return ranges.map(createRangeSnapshot)
+    }
   }
+}
 
-  try {
-    snapshots.push(createRangeSnapshot(selection.getRangeAt(0)))
-  } catch {
-    return snapshots
+// Browsers without getComposedRanges() (Chrome before 137, Firefox before 142).
+// Their ranges stop at the outermost shadow host.
+function readLegacyRangeSnapshots(selection: Selection) {
+  const snapshots: SelectionRangeSnapshot[] = []
+  const rangeCount = typeof selection.rangeCount === "number" ? selection.rangeCount : 0
+
+  for (let index = 0; index < Math.max(rangeCount, 1); index += 1) {
+    try {
+      snapshots.push(createRangeSnapshot(selection.getRangeAt(index)))
+    } catch {
+      break
+    }
   }
 
   return snapshots
@@ -316,168 +218,298 @@ function readTextControlSelection(): TextControlSelectionSnapshot | null {
   return { value, selectionStart, selectionEnd }
 }
 
-function readComposedRangeSnapshots(selection: Selection, shadowRoots: ShadowRoot[]) {
-  const composedSelection = selection as Selection & {
-    getComposedRanges?: (options?: { shadowRoots?: ShadowRoot[] }) => SelectionRangeSource[]
+export function readSelectionSnapshot(selection: Selection | null): SelectionSnapshot | null {
+  if (!selection) {
+    return null
   }
 
-  if (typeof composedSelection.getComposedRanges !== "function") {
-    return []
+  const composedRanges = readComposedRangeSnapshots(selection)
+  const ranges = composedRanges ?? readLegacyRangeSnapshots(selection)
+  const textControl = readTextControlSelection()
+  // A text control's text is in its value, out of the ranges' reach. Without
+  // composed ranges, the ranges can't see into shadow roots, so the browser's
+  // own string is the better of the two.
+  const text =
+    textControl || !composedRanges
+      ? normalizeSelectedText(selection.toString())
+      : readRangesText(ranges)
+
+  if (text === "" || ranges.length === 0) {
+    return null
   }
 
-  return composedSelection.getComposedRanges({ shadowRoots }).map(createRangeSnapshot)
+  return textControl ? { text, ranges, textControl } : { text, ranges }
 }
 
+// The flat tree is what the page renders: a shadow host shows its shadow root's
+// children, and a <slot> shows the nodes assigned to it. Range, TreeWalker and
+// Selection.toString() each stay inside one tree, so selected text that spans
+// shadow roots is read along the flat tree instead.
+function getFlatChildren(node: Node): Node[] {
+  const shadowRoot = getShadowRootOf(node)
+  if (shadowRoot) {
+    return [...shadowRoot.childNodes]
+  }
+
+  if (node instanceof HTMLSlotElement) {
+    const assignedNodes = node.assignedNodes()
+    if (assignedNodes.length > 0) {
+      return assignedNodes
+    }
+  }
+
+  return [...node.childNodes]
+}
+
+function getFlatParent(node: Node): Node | null {
+  if (node instanceof ShadowRoot) {
+    return node.host
+  }
+
+  const assignedSlot = node instanceof Element || node instanceof Text ? node.assignedSlot : null
+  return assignedSlot ?? getParentNodeAcrossShadow(node)
+}
+
+function getFlatParentElement(node: Node) {
+  let parent = getFlatParent(node)
+  while (parent && !(parent instanceof Element)) {
+    parent = getFlatParent(parent)
+  }
+  return parent
+}
+
+interface TextPiece {
+  node: Text | HTMLBRElement
+  start: number
+  end: number
+}
+
+// Where a boundary point falls in a walk: inside a text node, in front of a
+// node, or after the last child of a node.
+function locateBoundary(container: Node, offset: number) {
+  if (container instanceof Text) {
+    return { text: container, offset, before: null, endOf: null }
+  }
+
+  const child = container.childNodes[offset]
+  return child
+    ? { text: null, offset: 0, before: child, endOf: null }
+    : { text: null, offset: 0, before: null, endOf: container }
+}
+
+interface TextVisibility {
+  // Not rendered: holds for the whole subtree.
+  hidden: boolean
+  // user-select: none, until a descendant opts back in.
+  unselectable: boolean
+  // visibility: hidden, which a descendant can undo with visibility: visible.
+  invisible: boolean
+}
+
+function isLeftOut({ hidden, unselectable, invisible }: TextVisibility) {
+  return hidden || unselectable || invisible
+}
+
+// What the browser leaves out of its selection text, left out here too.
+function readChildTextVisibility(
+  element: Element,
+  range: SelectionRangeSnapshot,
+  { hidden, unselectable, invisible }: TextVisibility,
+): TextVisibility {
+  if (hidden || NON_CONTENT_ELEMENT_NAMES.has(element.localName)) {
+    return { hidden: true, unselectable, invisible }
+  }
+
+  // Furigana the reader selected on its own is what they mean to read.
+  if (
+    RUBY_ANNOTATION_ELEMENT_NAMES.has(element.localName) &&
+    !(element.contains(range.startContainer) && element.contains(range.endContainer))
+  ) {
+    return { hidden: true, unselectable, invisible }
+  }
+
+  const style = window.getComputedStyle(element)
+  return {
+    hidden: style.display === "none",
+    unselectable:
+      style.userSelect === "none" ||
+      (unselectable && style.userSelect !== "text" && style.userSelect !== "all"),
+    invisible: style.visibility !== "visible",
+  }
+}
+
+// The text a range covers, in reading order, through every open shadow root and
+// slot on the way.
+function collectRangeTextPieces(range: SelectionRangeSnapshot): TextPiece[] {
+  const start = locateBoundary(range.startContainer, range.startOffset)
+  const end = locateBoundary(range.endContainer, range.endOffset)
+  // The flat-tree branch that holds the start. A slotted node is reached through
+  // its slot, not its light parent.
+  const startPath = new Set<Node>()
+  for (
+    let node: Node | null = start.text ?? start.before ?? start.endOf;
+    node;
+    node = getFlatParent(node)
+  ) {
+    startPath.add(node)
+  }
+
+  const pieces: TextPiece[] = []
+  let inside = false
+  let done = false
+
+  const visit = (node: Node, visibility: TextVisibility) => {
+    if (node === start.before) {
+      inside = true
+    }
+    if (node === end.before) {
+      done = true
+      return
+    }
+    // Until the start, only the branch that holds it needs walking.
+    if (!inside && !startPath.has(node)) {
+      return
+    }
+
+    if (node instanceof Text) {
+      if (node === start.text) {
+        inside = true
+      }
+      const from = node === start.text ? start.offset : 0
+      const to = node === end.text ? end.offset : node.data.length
+      if (!isLeftOut(visibility) && to > from) {
+        pieces.push({ node, start: from, end: to })
+      }
+      if (node === end.text) {
+        done = true
+      }
+      return
+    }
+
+    const childVisibility =
+      node instanceof Element ? readChildTextVisibility(node, range, visibility) : visibility
+    if (inside && node instanceof HTMLBRElement && !isLeftOut(childVisibility)) {
+      pieces.push({ node, start: 0, end: 0 })
+    }
+
+    for (const child of getFlatChildren(node)) {
+      visit(child, childVisibility)
+      if (done) {
+        return
+      }
+    }
+
+    const shadowRoot = getShadowRootOf(node)
+    if (node === start.endOf || (shadowRoot !== null && shadowRoot === start.endOf)) {
+      inside = true
+    }
+    if (node === end.endOf || (shadowRoot !== null && shadowRoot === end.endOf)) {
+      done = true
+    }
+  }
+
+  visit(getTraversalRoot(range), { hidden: false, unselectable: false, invisible: false })
+  return pieces
+}
+
+function readPieceText(piece: TextPiece) {
+  return piece.node instanceof Text ? piece.node.data.slice(piece.start, piece.end) : "\n"
+}
+
+// Whitespace as the page renders it: kept where white-space keeps it, collapsed
+// to one space elsewhere (pre-line keeps its line breaks).
+function readRenderedPieceText(piece: TextPiece) {
+  const value = readPieceText(piece)
+  const parent = getFlatParentElement(piece.node)
+  const whiteSpace = parent ? window.getComputedStyle(parent).whiteSpace : "normal"
+  if (SPACE_PRESERVING_WHITE_SPACE.has(whiteSpace)) {
+    return { value, collapsible: false }
+  }
+
+  const collapsed = value.replace(
+    whiteSpace === "pre-line" ? NON_NEWLINE_WHITESPACE_REGEX : WHITESPACE_REGEX,
+    " ",
+  )
+  return { value: collapsed, collapsible: true }
+}
+
+// Leaving a <p>, other than for a block inside it, leaves a blank line in
+// Chrome's selection text, as it does in innerText.
+function leavesParagraph(previousOwner: ParagraphOwner | null, owner: ParagraphOwner | null) {
+  if (previousOwner?.localName !== "p") {
+    return false
+  }
+
+  for (let node: Node | null = owner; node; node = getFlatParent(node)) {
+    if (node === previousOwner) {
+      return false
+    }
+  }
+  return true
+}
+
+// Close to what Selection.toString() gives: whitespace as rendered, and a <br>
+// or text in another paragraph starts a new line.
 function readRangesText(ranges: SelectionRangeSnapshot[]) {
   let text = ""
-  for (const rangeSnapshot of ranges) {
-    try {
-      text += toLiveRange(rangeSnapshot).toString()
-    } catch {
-      continue
+  const startNewLine = (blankLine: boolean) => {
+    text = text.replace(TRAILING_SPACES_REGEX, "")
+    if (text === "") {
+      return
     }
+    if (!text.endsWith("\n")) {
+      text += "\n"
+    }
+    if (blankLine && !text.endsWith("\n\n")) {
+      text += "\n"
+    }
+  }
+
+  for (const range of ranges) {
+    let previousOwner: ParagraphOwner | null | undefined
+    for (const piece of collectRangeTextPieces(range)) {
+      if (!(piece.node instanceof Text)) {
+        text = `${text.replace(TRAILING_SPACES_REGEX, "")}\n`
+        continue
+      }
+
+      const { value, collapsible } = readRenderedPieceText(piece)
+      // Whitespace between two boxes doesn't open a paragraph of its own.
+      if (value.trim() !== "") {
+        const owner = findParagraphOwner(piece.node)
+        if (previousOwner !== undefined && owner !== previousOwner) {
+          startNewLine(leavesParagraph(previousOwner, owner))
+        }
+        previousOwner = owner
+      }
+
+      const joinsCollapsedSpace =
+        collapsible && (text === "" || ENDS_WITH_COLLAPSED_SPACE_REGEX.test(text))
+      text += joinsCollapsedSpace ? value.replace(LEADING_SPACES_REGEX, "") : value
+    }
+    startNewLine(false)
   }
 
   return normalizeSelectedText(text)
 }
 
-// Selection.toString() is empty when the selection crosses nested shadow roots.
-// The text is still in the composed ranges, once every open root it touches is
-// passed in. The plain ranges are the ones the browser already reported as
-// empty, so they are not a fallback here.
-function readEmptyStringSelectionSnapshot(selection: Selection): SelectionSnapshot | null {
-  const ranges = readComposedRangeSnapshots(selection, collectEmptySelectionShadowRoots(selection))
-  if (ranges.length === 0) {
-    return null
+// Client rects of what a range covers. A live Range measures a range inside one
+// tree; one that spans shadow roots is measured by the text it covers.
+export function readRangeClientRects(range: SelectionRangeSnapshot): DOMRect[] {
+  if (isInOneTree(range)) {
+    return [...toLiveRange(range).getClientRects()]
   }
 
-  const text = readRangesText(ranges)
-  if (text === "") {
-    return null
-  }
-
-  return { text: removeRubyAnnotationsFromSelectedText(text, ranges), ranges }
-}
-
-export function readSelectionSnapshot(selection: Selection | null): SelectionSnapshot | null {
-  const text = normalizeSelectedText(selection?.toString())
-  if (text === "") {
-    return selection ? readEmptyStringSelectionSnapshot(selection) : null
-  }
-
-  const ranges = readSelectionRangeSnapshots(selection)
-  if (ranges.length === 0) {
-    return null
-  }
-
-  const textControl = readTextControlSelection()
-
-  return textControl
-    ? { text, ranges, textControl }
-    : { text: removeRubyAnnotationsFromSelectedText(text, ranges), ranges }
-}
-
-// Rebuilds the selected text without furigana, but only when the selection holds
-// some: every other selection keeps the browser's own text. A selection of
-// nothing but furigana keeps it too, since there is nothing else to read.
-function removeRubyAnnotationsFromSelectedText(text: string, ranges: SelectionRangeSnapshot[]) {
-  if (!ranges.some(doesRangeIncludeRubyAnnotation)) {
-    return text
-  }
-
-  const textWithoutAnnotations = normalizeSelectedText(
-    ranges.map(readRangeTextWithoutRubyAnnotations).join("\n"),
-  )
-  return textWithoutAnnotations === "" ? text : textWithoutAnnotations
-}
-
-function doesRangeIncludeRubyAnnotation(rangeSnapshot: SelectionRangeSnapshot) {
-  let liveRange: Range
-  try {
-    liveRange = toLiveRange(rangeSnapshot)
-  } catch {
-    return false
-  }
-
-  const root = getTraversalRoot(rangeSnapshot)
-  if (getNearestParentElement(root)?.closest(RUBY_ANNOTATION_SELECTOR)) {
-    return true
-  }
-
-  if (!(root instanceof Element || root instanceof Document || root instanceof DocumentFragment)) {
-    return false
-  }
-
-  return [...root.querySelectorAll(RUBY_ANNOTATION_SELECTOR)].some((annotation) =>
-    doesRangeIntersectNode(liveRange, annotation),
-  )
-}
-
-// Close to what Selection.toString() gives for ordinary page text: whitespace
-// collapses unless the page keeps its line breaks, and a <br> or text in another
-// paragraph starts a new line.
-function readRangeTextWithoutRubyAnnotations(rangeSnapshot: SelectionRangeSnapshot) {
-  let liveRange: Range
-  try {
-    liveRange = toLiveRange(rangeSnapshot)
-  } catch {
-    return ""
-  }
-
-  const walker = document.createTreeWalker(
-    getTraversalRoot(rangeSnapshot),
-    NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT,
-    {
-      acceptNode(node) {
-        if (node instanceof Element) {
-          // Hidden text is left out of the browser's selection text as well.
-          if (
-            !doesRangeIntersectNode(liveRange, node) ||
-            isSkippedTextElement(node) ||
-            window.getComputedStyle(node).display === "none"
-          ) {
-            return NodeFilter.FILTER_REJECT
-          }
-
-          return node.localName === "br" ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP
-        }
-
-        return NodeFilter.FILTER_ACCEPT
-      },
-    },
-  )
-
-  const textParts: string[] = []
-  let previousOwner: ParagraphOwner | null | undefined
-  let currentNode = walker.nextNode()
-  while (currentNode) {
-    // The only element the walker accepts is <br>.
-    if (currentNode instanceof Element) {
-      textParts.push("\n")
-    } else if (currentNode instanceof Text && doesRangeIntersectNode(liveRange, currentNode)) {
-      const start = currentNode === liveRange.startContainer ? liveRange.startOffset : 0
-      const end =
-        currentNode === liveRange.endContainer ? liveRange.endOffset : currentNode.data.length
-      const owner = findParagraphOwner(currentNode)
-      if (previousOwner !== undefined && owner !== previousOwner) {
-        textParts.push("\n")
-      }
-      textParts.push(collapseSelectedWhitespace(currentNode, currentNode.data.slice(start, end)))
-      previousOwner = owner
+  return collectRangeTextPieces(range).flatMap((piece) => {
+    const pieceRange = document.createRange()
+    if (piece.node instanceof Text) {
+      pieceRange.setStart(piece.node, piece.start)
+      pieceRange.setEnd(piece.node, piece.end)
+    } else {
+      pieceRange.selectNode(piece.node)
     }
-
-    currentNode = walker.nextNode()
-  }
-
-  return textParts.join("").replace(NEWLINE_PADDING_REGEX, "\n")
-}
-
-function collapseSelectedWhitespace(textNode: Text, value: string) {
-  const parent = textNode.parentElement
-  const keepsLineBreaks =
-    parent !== null &&
-    LINE_BREAK_PRESERVING_WHITE_SPACE.has(window.getComputedStyle(parent).whiteSpace)
-  return value.replace(keepsLineBreaks ? NON_NEWLINE_WHITESPACE_REGEX : WHITESPACE_REGEX, " ")
+    return [...pieceRange.getClientRects()]
+  })
 }
 
 function getCommonAncestorNode(startContainer: Node, endContainer: Node) {
@@ -514,24 +546,6 @@ function getTraversalRoot(rangeSnapshot: SelectionRangeSnapshot) {
   return commonAncestor
 }
 
-function doesRangeIntersectNode(range: Range, node: Node) {
-  if (typeof range.intersectsNode === "function") {
-    return range.intersectsNode(node)
-  }
-
-  const nodeRange = document.createRange()
-  if (node instanceof Text) {
-    nodeRange.selectNodeContents(node)
-  } else {
-    nodeRange.selectNode(node)
-  }
-
-  return !(
-    range.compareBoundaryPoints(Range.END_TO_START, nodeRange) <= 0 ||
-    range.compareBoundaryPoints(Range.START_TO_END, nodeRange) >= 0
-  )
-}
-
 function isParagraphLikeDisplay(element: Element) {
   if (SEMANTIC_CONTAINER_TAGS.has(element.tagName)) {
     return false
@@ -540,8 +554,10 @@ function isParagraphLikeDisplay(element: Element) {
   return PARAGRAPH_DISPLAY_VALUES.has(window.getComputedStyle(element).display)
 }
 
+// Up the flat tree, the way the page lays text out: text in a shadow root sits
+// in the paragraph around its host, and slotted text in the one around its slot.
 function findParagraphOwner(node: Node | null): ParagraphOwner | null {
-  let current = getNearestParentElement(node)
+  let current = node instanceof Element ? node : node ? getFlatParentElement(node) : null
   let semanticFallback: ParagraphOwner | null = null
 
   // <html> is display:block too, but owning it would pull in <head> text.
@@ -556,100 +572,51 @@ function findParagraphOwner(node: Node | null): ParagraphOwner | null {
       return current
     }
 
-    const parentElement = getParentElementAcrossShadow(current)
-    if (!parentElement) {
-      const root = current.getRootNode()
-      if (root instanceof ShadowRoot) {
-        return semanticFallback ?? root
-      }
-    }
-
-    current = parentElement
+    current = getFlatParentElement(current)
   }
 
   return semanticFallback
 }
 
-// Neither page content nor something a reader means to have selected.
-function isSkippedTextElement(element: Element) {
-  return (
-    NON_CONTENT_ELEMENT_NAMES.has(element.localName) ||
-    RUBY_ANNOTATION_ELEMENT_NAMES.has(element.localName)
+function extractOwnerText(owner: ParagraphOwner) {
+  const parent = owner.parentNode
+  if (!parent) {
+    return ""
+  }
+
+  // The whole owner, the way Range.selectNode() would put it. Offsets inside
+  // the owner would count its light children, not what its shadow root renders.
+  const index = Array.prototype.indexOf.call(parent.childNodes, owner)
+  const pieces = collectRangeTextPieces({
+    startContainer: parent,
+    startOffset: index,
+    endContainer: parent,
+    endOffset: index + 1,
+  })
+  return normalizeParagraphText(
+    pieces.map((piece) => (piece.node instanceof Text ? readPieceText(piece) : " ")).join(""),
   )
 }
 
-function createContentTextWalker(root: Node) {
-  return document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT, {
-    acceptNode(node) {
-      if (node instanceof Element) {
-        return isSkippedTextElement(node) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_SKIP
-      }
-
-      return normalizeParagraphText(node.textContent ?? "") === ""
-        ? NodeFilter.FILTER_REJECT
-        : NodeFilter.FILTER_ACCEPT
-    },
-  })
-}
-
-function extractOwnerText(owner: ParagraphOwner) {
-  const textParts: string[] = []
-  const walker = createContentTextWalker(owner)
-
-  let currentNode = walker.nextNode()
-  while (currentNode) {
-    textParts.push(currentNode.textContent ?? "")
-    currentNode = walker.nextNode()
-  }
-
-  return normalizeParagraphText(textParts.join(""))
-}
-
-function compareNodesInDocumentOrder(left: ParagraphOwner, right: ParagraphOwner) {
-  if (left === right) {
-    return 0
-  }
-
-  const position = left.compareDocumentPosition(right)
-  if (position & Node.DOCUMENT_POSITION_FOLLOWING) {
-    return -1
-  }
-  if (position & Node.DOCUMENT_POSITION_PRECEDING) {
-    return 1
-  }
-
-  return 0
-}
-
+// Owners come out in reading order, since the pieces do.
 function collectParagraphOwners(rangeSnapshots: SelectionRangeSnapshot[]) {
   const paragraphOwners = new Set<ParagraphOwner>()
 
   for (const rangeSnapshot of rangeSnapshots) {
-    let hasIntersectedTextNode = false
-    let liveRange: Range
-
-    try {
-      liveRange = toLiveRange(rangeSnapshot)
-    } catch {
-      continue
-    }
-
-    const walker = createContentTextWalker(getTraversalRoot(rangeSnapshot))
-
-    let currentNode = walker.nextNode()
-    while (currentNode) {
-      if (currentNode instanceof Text && doesRangeIntersectNode(liveRange, currentNode)) {
-        const owner = findParagraphOwner(currentNode)
-        if (owner) {
-          paragraphOwners.add(owner)
-          hasIntersectedTextNode = true
-        }
+    let hasTextPiece = false
+    for (const piece of collectRangeTextPieces(rangeSnapshot)) {
+      if (!(piece.node instanceof Text) || normalizeParagraphText(piece.node.data) === "") {
+        continue
       }
 
-      currentNode = walker.nextNode()
+      const owner = findParagraphOwner(piece.node)
+      if (owner) {
+        paragraphOwners.add(owner)
+        hasTextPiece = true
+      }
     }
 
-    if (!hasIntersectedTextNode) {
+    if (!hasTextPiece) {
       const owner = findParagraphOwner(rangeSnapshot.startContainer)
       if (owner) {
         paragraphOwners.add(owner)
@@ -657,7 +624,7 @@ function collectParagraphOwners(rangeSnapshots: SelectionRangeSnapshot[]) {
     }
   }
 
-  return [...paragraphOwners].sort(compareNodesInDocumentOrder)
+  return [...paragraphOwners]
 }
 
 // Blank-line separated blocks of the control's value that overlap the selection.

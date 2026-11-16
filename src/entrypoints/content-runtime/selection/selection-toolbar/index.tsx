@@ -527,15 +527,12 @@ export function SelectionToolbar() {
         return
       }
 
+      // If the selection is cleared, hide the toolbar. Ask its type, not its
+      // text: a selection across shadow roots can stringify blank (and report
+      // isCollapsed) while text is selected.
       // https://github.com/mengxi-ream/read-frog/issues/2385
-      // A selection across nested shadow roots stringifies empty. Hide the
-      // toolbar only when composed ranges don't recover any text either.
-      if (!selection || selection.toString().trim().length === 0) {
+      if (selection?.type !== "Range") {
         if (preserveSelectionStateRef.current) {
-          return
-        }
-
-        if (selection && readSelectionSnapshot(selection)) {
           return
         }
 

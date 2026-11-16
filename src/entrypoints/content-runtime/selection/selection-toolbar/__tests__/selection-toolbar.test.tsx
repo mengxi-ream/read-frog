@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { DEFERRED_SELECTION_OPEN_EVENT } from "@/utils/constants/selection"
 import { SELECTION_CONTENT_OVERLAY_ROOT_ATTRIBUTE } from "@/utils/constants/selection-overlay-layers"
+import { createShadowSelection } from "../../__tests__/composed-selection"
 import { selectionSessionAtom } from "../atoms"
 import { SelectionToolbar } from "../index"
 import { MODAL_DIALOG_HOST_SLOT_ATTRIBUTE } from "../modal-dialog-host"
@@ -119,6 +120,7 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
 
     // Mock window.getSelection with dynamic text
     window.getSelection = vi.fn<(...args: any[]) => any>(() => ({
+      type: "Range",
       toString: mockSelectionToString,
       getRangeAt: () => ({
         startContainer: document.body,
@@ -139,6 +141,7 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
 
   const setMockSelectionText = (text: string, containsNodeResult = true) => {
     window.getSelection = vi.fn<(...args: any[]) => any>(() => ({
+      type: text ? "Range" : "Caret",
       toString: vi.fn<(...args: any[]) => any>(() => text),
       getRangeAt: () => ({
         startContainer: document.body,
@@ -466,7 +469,8 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     expectToolbarHidden()
   })
 
-  it("shows the toolbar when composed ranges recover an empty selection string", async () => {
+  // https://github.com/mengxi-ream/read-frog/issues/2385
+  it("keeps the toolbar for a selection across shadow roots, which the browser stringifies blank", async () => {
     render(
       <div>
         <SelectionToolbar />
@@ -474,31 +478,41 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
       </div>,
     )
 
+    await clearToolbarState()
+
     const host = document.createElement("div")
     const shadowRoot = host.attachShadow({ mode: "open" })
-    const comment = document.createTextNode("nested reply")
-    shadowRoot.append(comment)
+    shadowRoot.innerHTML = `<p>nested reply</p><span id="date"></span>`
+    const dateShadowRoot = shadowRoot.querySelector("#date")!.attachShadow({ mode: "open" })
+    dateShadowRoot.innerHTML = `<div id="pubdate">5 hours ago</div>`
     screen.getByTestId("test-element").append(host)
 
-    const range = document.createRange()
-    range.setStart(comment, 0)
-    range.setEnd(comment, comment.textContent?.length ?? 0)
-
-    window.getSelection = vi.fn<(...args: any[]) => any>(() => ({
-      toString: () => "",
-      anchorNode: host,
-      focusNode: host,
-      containsNode: () => true,
-      getComposedRanges: () => [range],
-    }))
+    const { selection } = createShadowSelection(
+      {
+        startContainer: shadowRoot.querySelector("p")!.firstChild!,
+        startOffset: 0,
+        endContainer: dateShadowRoot.querySelector("#pubdate")!,
+        endOffset: 0,
+      },
+      " \n",
+    )
+    window.getSelection = vi.fn<(...args: any[]) => any>(() => selection)
 
     await triggerMouseUpWithSelection(screen.getByTestId("test-element"))
     await waitFor(() => expectToolbarVisible())
+    expect(getDefaultStore().get(selectionSessionAtom)?.selectionSnapshot.text).toBe("nested reply")
 
     await act(async () => {
       document.dispatchEvent(new Event("selectionchange"))
     })
     expectToolbarVisible()
+
+    // A click elsewhere collapses it to a caret.
+    setMockSelectionText("")
+    await act(async () => {
+      document.dispatchEvent(new Event("selectionchange"))
+    })
+    expectToolbarHidden()
   })
 
   it("should show toolbar when valid text is selected", async () => {

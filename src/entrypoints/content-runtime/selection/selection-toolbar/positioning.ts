@@ -1,5 +1,5 @@
 import type { SelectionRangeSnapshot } from "../utils"
-import { toLiveRange } from "../utils"
+import { readRangeClientRects } from "../utils"
 
 export interface ViewportPoint {
   x: number
@@ -94,24 +94,12 @@ function readIndexedClientRects(ranges: SelectionRangeSnapshot[]) {
       return null
     }
 
-    let range: Range
-
-    try {
-      range = toLiveRange(rangeSnapshot)
-    } catch {
-      return null
-    }
-
     let clientRects: DOMRect[]
 
+    // A range's bounding rect is the union of these, so it has no area when
+    // none of them does.
     try {
-      clientRects = Array.from(range.getClientRects()).filter(hasArea)
-      if (clientRects.length === 0) {
-        const boundingRect = range.getBoundingClientRect()
-        if (hasArea(boundingRect)) {
-          clientRects.push(boundingRect)
-        }
-      }
+      clientRects = readRangeClientRects(rangeSnapshot).filter(hasArea)
     } catch {
       return null
     }
