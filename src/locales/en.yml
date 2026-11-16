@@ -159,6 +159,7 @@ options:
     configTitle: Provider config
     addProvider: Add provider
     builtInProvider: Built-in provider
+    yourProviders: Your providers
     builtInAiUsage:
       title: Built-in AI quota
       remaining: "$1% left"

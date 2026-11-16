@@ -159,6 +159,7 @@ options:
     configTitle: 提供商配置
     addProvider: 添加提供商
     builtInProvider: 内置提供商
+    yourProviders: 我的提供商
     builtInAiUsage:
       title: 内置 AI 额度
       remaining: "剩余 $1%"

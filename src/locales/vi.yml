@@ -159,6 +159,7 @@ options:
     configTitle: Cấu hình nhà cung cấp
     addProvider: Thêm nhà cung cấp
     builtInProvider: Nhà cung cấp tích hợp
+    yourProviders: Nhà cung cấp của bạn
     builtInAiUsage:
       title: Hạn mức AI tích hợp
       remaining: "Còn lại $1%"

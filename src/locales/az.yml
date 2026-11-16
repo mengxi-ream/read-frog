@@ -159,6 +159,7 @@ options:
     configTitle: Provayder konfiqurasiyası
     addProvider: Provayder əlavə et
     builtInProvider: Daxili provayder
+    yourProviders: Sizin provayderləriniz
     builtInAiUsage:
       title: Daxili süni intellekt kvotası
       remaining: "$1% qalıb"

@@ -159,6 +159,7 @@ options:
     configTitle: Настройка провайдеров
     addProvider: Добавить провайдера
     builtInProvider: Встроенный провайдер
+    yourProviders: Ваши провайдеры
     builtInAiUsage:
       title: Квота встроенного ИИ
       remaining: "Осталось $1%"

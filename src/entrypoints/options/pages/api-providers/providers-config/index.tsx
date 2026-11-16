@@ -179,7 +179,6 @@ function ProviderCardList() {
 
   return (
     <div className="flex flex-col gap-4">
-      <BuiltInProviderSection />
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogTrigger
           render={
@@ -197,15 +196,35 @@ function ProviderCardList() {
         </DialogTrigger>
         <AddProviderDialog onClose={() => setIsAddDialogOpen(false)} />
       </Dialog>
-      <EntityListRail>
-        <SortableList
-          list={apiProvidersConfig}
-          setList={handleReorder}
-          className="flex flex-col gap-4 pt-2"
-          renderItem={(providerConfig) => <ProviderCard providerConfig={providerConfig} />}
-        />
-      </EntityListRail>
+      <ProviderListSection title={i18n.t("options.apiProviders.builtInProvider")}>
+        <div className="flex flex-col gap-4 pt-2">
+          {BUILT_IN_AI_PROVIDER_IDS.map((providerId) => (
+            <BuiltInProviderCard key={providerId} providerId={providerId} />
+          ))}
+        </div>
+      </ProviderListSection>
+      {apiProvidersConfig.length > 0 && (
+        <ProviderListSection title={i18n.t("options.apiProviders.yourProviders")}>
+          <EntityListRail>
+            <SortableList
+              list={apiProvidersConfig}
+              setList={handleReorder}
+              className="flex flex-col gap-4 pt-2"
+              renderItem={(providerConfig) => <ProviderCard providerConfig={providerConfig} />}
+            />
+          </EntityListRail>
+        </ProviderListSection>
+      )}
     </div>
+  )
+}
+
+function ProviderListSection({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="flex flex-col gap-2 pt-1">
+      <h3 className="px-1 text-xs font-medium text-muted-foreground">{title}</h3>
+      {children}
+    </section>
   )
 }
 
@@ -312,21 +331,6 @@ function FeatureCountBadge({ count, children }: { count: number; children: React
         </TooltipContent>
       </Tooltip>
     </div>
-  )
-}
-
-function BuiltInProviderSection() {
-  return (
-    <section className="flex flex-col gap-2 pt-1">
-      <h3 className="px-1 text-xs font-medium text-muted-foreground">
-        {i18n.t("options.apiProviders.builtInProvider" as never)}
-      </h3>
-      <div className="flex flex-col gap-4 pt-2">
-        {BUILT_IN_AI_PROVIDER_IDS.map((providerId) => (
-          <BuiltInProviderCard key={providerId} providerId={providerId} />
-        ))}
-      </div>
-    </section>
   )
 }
 

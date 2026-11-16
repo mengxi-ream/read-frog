@@ -159,6 +159,7 @@ options:
     configTitle: Sağlayıcı yapılandırması
     addProvider: Sağlayıcı ekle
     builtInProvider: Yerleşik sağlayıcı
+    yourProviders: Sağlayıcılarınız
     builtInAiUsage:
       title: Yerleşik AI kotası
       remaining: "%$1 kaldı"
