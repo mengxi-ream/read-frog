@@ -360,6 +360,11 @@ export function setupIframeInjection() {
     }
   })
 
+  // Frames the manifest injects follow the page's site control too, as the
+  // ones injected here do. An embedded video player can't read the url of a
+  // page on another site, so it asks.
+  onMessage("getSenderTabUrl", ({ sender }) => sender.tab?.url ?? null)
+
   browser.tabs.onRemoved.addListener(clearTabDocumentState)
   browser.webNavigation.onBeforeNavigate.addListener((details) => {
     if (details.frameId === 0) {

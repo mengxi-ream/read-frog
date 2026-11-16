@@ -123,6 +123,9 @@ async function setupSubject() {
     activateSelection: onMessageMock.mock.calls.find(
       ([type]) => type === "activateSameOriginIframeSelectionRuntime",
     )![1] as (message: { sender: Record<string, unknown> }) => Promise<boolean>,
+    getSenderTabUrl: onMessageMock.mock.calls.find(
+      ([type]) => type === "getSenderTabUrl",
+    )![1] as (message: { sender: Record<string, unknown> }) => string | null,
   }
 }
 
@@ -857,5 +860,20 @@ describe("setupIframeInjection", () => {
 
     expect(getAllFramesMock).not.toHaveBeenCalled()
     expect(executeScriptMock).not.toHaveBeenCalled()
+  })
+
+  it("tells a frame the url of the tab it is in", async () => {
+    const { getSenderTabUrl } = await setupSubject()
+
+    expect(
+      getSenderTabUrl({
+        sender: {
+          tab: { id: currentTabId, url: "https://blog.example/post" },
+          frameId: 3,
+          url: "https://www.youtube.com/embed/abc",
+        },
+      }),
+    ).toBe("https://blog.example/post")
+    expect(getSenderTabUrl({ sender: { url: "https://www.youtube.com/embed/abc" } })).toBeNull()
   })
 })

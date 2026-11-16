@@ -14,9 +14,18 @@ const EXTENSION_PAGES = ["offscreen", "options", "popup", "sidepanel", "translat
 // They log nothing themselves; what they load sets up its own logging.
 const EXEMPT = new Set([
   "loader.content.ts",
+  "subtitles-loader.content.ts",
   "iframe-selection-trigger.content.ts",
   "ebook-section.content.ts",
 ])
+
+// WXT builds a folder only when it has an index file in it
+function isEntrypoint(name: string): boolean {
+  if (name.includes(".") && !name.endsWith(".content")) return true
+  return readdirSync(path.join(ENTRYPOINTS_DIR, name)).some((file) =>
+    /^index\.(?:html|[jt]sx?)$/.test(file),
+  )
+}
 
 function entryFile(name: string): string {
   const entry = path.join(ENTRYPOINTS_DIR, name)
@@ -31,7 +40,7 @@ function entryFile(name: string): string {
 }
 
 const entrypoints = readdirSync(ENTRYPOINTS_DIR)
-  .filter((name) => name !== "__tests__" && !EXEMPT.has(name))
+  .filter((name) => name !== "__tests__" && !EXEMPT.has(name) && isEntrypoint(name))
   .map((name) => ({ name, source: readFileSync(entryFile(name), "utf8") }))
 
 const isMainWorld = (source: string) => /world:\s*"MAIN"/.test(source)

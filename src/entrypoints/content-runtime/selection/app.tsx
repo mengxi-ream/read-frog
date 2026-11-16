@@ -6,6 +6,7 @@ import {
   SELECTION_CONTENT_OVERLAY_LAYERS,
   SELECTION_CONTENT_OVERLAY_ROOT_ATTRIBUTE,
 } from "@/utils/constants/selection-overlay-layers"
+import { useCornerToastSurface } from "@/utils/content-runtime/corner-toasts"
 import { AnnotationModePill } from "./annotation/mode-pill"
 import { AnnotationProvider } from "./annotation/provider"
 import { useInputTranslation } from "./input-translation"
@@ -38,9 +39,12 @@ export default function App({
 
   // The content runtime's one corner-toast surface. Its parts share one module
   // instance, so one `toastManager`, and each ToastProvider would render every
-  // toast: page translation and the floating button raise theirs here too.
-  // This UI runs in the top frame with every part and in each iframe that gets
-  // the toolbar, and a click on a toast in its overlay root keeps the toolbar open.
+  // toast: page translation, the floating button and subtitles raise theirs
+  // here too. This UI runs in the top frame with every part and in each iframe
+  // that gets the toolbar; in a frame without it, the subtitles render the
+  // corner toasts. A click on a toast in its overlay root keeps the toolbar open.
+  useCornerToastSurface()
+
   return (
     <ToastProvider
       portalProps={{ container: portalContainer }}
