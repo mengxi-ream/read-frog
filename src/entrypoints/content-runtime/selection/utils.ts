@@ -394,10 +394,27 @@ function readChildTextVisibility(
 // a host's shadow root comes before its slotted children, but the page can show
 // a slotted child first. So the walk starts at whichever end it reaches first.
 function collectRangeTextPieces(range: SelectionRangeSnapshot): TextPiece[] {
-  const ends = [
-    locateBoundary(range.startContainer, range.startOffset),
-    locateBoundary(range.endContainer, range.endOffset),
-  ]
+  return walkTextPieces(
+    range,
+    getTraversalRoot(range),
+    [
+      locateBoundary(range.startContainer, range.startOffset),
+      locateBoundary(range.endContainer, range.endOffset),
+    ],
+    { hidden: false, unselectable: false, invisible: false },
+    false,
+  )
+}
+
+// Walks `root` along the flat tree, collecting the text between `ends`. A walk
+// that starts inside the range collects from the start of `root` on.
+function walkTextPieces(
+  range: SelectionRangeSnapshot,
+  root: Node,
+  ends: ReturnType<typeof locateBoundary>[],
+  rootVisibility: TextVisibility,
+  startsInside: boolean,
+): TextPiece[] {
   // The flat-tree branches that hold the ends. A slotted node is reached through
   // its slot, not its light parent.
   const endPaths = new Set<Node>()
@@ -412,7 +429,7 @@ function collectRangeTextPieces(range: SelectionRangeSnapshot): TextPiece[] {
   }
 
   const pieces: TextPiece[] = []
-  let inside = false
+  let inside = startsInside
   let done = false
   // Reaching an end opens the range, or closes it once it is open.
   const reachEnd = () => {
@@ -484,7 +501,7 @@ function collectRangeTextPieces(range: SelectionRangeSnapshot): TextPiece[] {
     }
   }
 
-  visit(getTraversalRoot(range), { hidden: false, unselectable: false, invisible: false })
+  visit(root, rootVisibility)
   return pieces
 }
 
@@ -654,22 +671,59 @@ function findParagraphOwner(node: Node | null): ParagraphOwner | null {
   return semanticFallback
 }
 
+// What the walk from the owner's parent down to the owner leaves out, so the
+// owner can be walked on its own.
+function readOwnerVisibility(owner: ParagraphOwner, range: SelectionRangeSnapshot) {
+  const parent = owner.parentNode
+  const path: Node[] = []
+  for (let node = getFlatParent(owner); node; node = getFlatParent(node)) {
+    path.unshift(node)
+    if (node === parent) {
+      break
+    }
+  }
+
+  let visibility: TextVisibility = { hidden: false, unselectable: false, invisible: false }
+  path.forEach((node, index) => {
+    if (node instanceof Element) {
+      visibility = readChildTextVisibility(node, range, visibility)
+    }
+    const child = path[index + 1] ?? owner
+    if (
+      node instanceof HTMLDetailsElement &&
+      !node.open &&
+      child !== node.querySelector(":scope > summary")
+    ) {
+      visibility = { ...visibility, hidden: true }
+    }
+  })
+  return visibility
+}
+
 function extractOwnerText(owner: ParagraphOwner) {
   const parent = owner.parentNode
   if (!parent) {
     return ""
   }
 
-  // From just before the owner to its end, which the walk takes as the end of all
-  // it renders, its shadow root included. The owner's next sibling is no end:
-  // slots can render that sibling before the owner, or not at all.
-  const index = Array.prototype.indexOf.call(parent.childNodes, owner)
-  const pieces = collectRangeTextPieces({
+  // All the owner renders, its shadow root included. The walk starts at the
+  // owner rather than its parent, so long runs of sibling paragraphs aren't
+  // rescanned once per paragraph. The owner's next sibling is no end: slots can
+  // render that sibling before the owner, or not at all. Furigana is left out
+  // as it is from a range around the owner.
+  const range = {
     startContainer: parent,
-    startOffset: index,
+    startOffset: 0,
     endContainer: owner,
     endOffset: owner.childNodes.length,
-  })
+  }
+  const pieces = walkTextPieces(
+    range,
+    owner,
+    [locateBoundary(owner, owner.childNodes.length)],
+    readOwnerVisibility(owner, range),
+    true,
+  )
   return normalizeParagraphText(
     pieces.map((piece) => (piece.node instanceof Text ? readPieceText(piece) : " ")).join(""),
   )

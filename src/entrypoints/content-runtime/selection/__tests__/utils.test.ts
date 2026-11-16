@@ -300,6 +300,28 @@ describe("buildContextSnapshot", () => {
       paragraphs: ["Alpha beta"],
     })
   })
+  it("reads each paragraph's context without rescanning its siblings", () => {
+    const count = 200
+    document.body.innerHTML = `<article>${Array.from(
+      { length: count },
+      (_, index) => `<p>Paragraph ${index}</p>`,
+    ).join("")}</article>`
+    const article = document.querySelector("article")!
+
+    const range = document.createRange()
+    range.setStart(article.firstChild!.firstChild!, 0)
+    range.setEnd(article.lastChild!.firstChild!, 3)
+    const snapshot = createSelectionSnapshot(range)
+
+    const childNodes = vi.spyOn(Node.prototype, "childNodes", "get")
+    const paragraphs = buildContextSnapshot(snapshot)?.paragraphs
+    const articleReads = childNodes.mock.contexts.filter((node) => node === article).length
+    childNodes.mockRestore()
+
+    expect(paragraphs).toHaveLength(count)
+    expect(paragraphs?.at(-1)).toBe(`Paragraph ${count - 1}`)
+    expect(articleReads).toBeLessThan(10)
+  })
 })
 
 describe("context of slotted paragraphs", () => {
