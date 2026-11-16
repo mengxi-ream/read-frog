@@ -1,3 +1,5 @@
+import { browser } from "#imports"
+
 export interface SelectionRangeSnapshot {
   startContainer: Node
   startOffset: number
@@ -151,8 +153,32 @@ function getParentNodeAcrossShadow(node: Node | null) {
   return root instanceof ShadowRoot ? root.host : null
 }
 
+// A content script can reach closed shadow roots as well: through
+// dom.openOrClosedShadowRoot() (Chrome), or the element's own
+// openOrClosedShadowRoot() (Firefox). Reading a closed root's host as plain
+// light DOM would read its unrendered children instead of what the page shows.
+function readClosedShadowRoot(element: Element): ShadowRoot | null {
+  const openOrClosedShadowRoot = browser.dom?.openOrClosedShadowRoot
+  if (typeof openOrClosedShadowRoot === "function" && element instanceof HTMLElement) {
+    try {
+      return openOrClosedShadowRoot(element) ?? null
+    } catch {
+      return null
+    }
+  }
+
+  const firefoxElement = element as Element & { openOrClosedShadowRoot?: () => ShadowRoot | null }
+  return typeof firefoxElement.openOrClosedShadowRoot === "function"
+    ? (firefoxElement.openOrClosedShadowRoot() ?? null)
+    : null
+}
+
 function getShadowRootOf(node: Node | null | undefined) {
-  return node instanceof Element ? node.shadowRoot : null
+  if (!(node instanceof Element)) {
+    return null
+  }
+
+  return node.shadowRoot ?? readClosedShadowRoot(node)
 }
 
 // https://github.com/mengxi-ream/read-frog/issues/2385
@@ -315,8 +341,31 @@ function getFlatParent(node: Node): Node | null {
     return node.host
   }
 
-  const assignedSlot = node instanceof Element || node instanceof Text ? node.assignedSlot : null
-  return assignedSlot ?? getParentNodeAcrossShadow(node)
+  return getAssignedSlot(node) ?? getParentNodeAcrossShadow(node)
+}
+
+// assignedSlot is null for a slot in a closed shadow root, so look the slot up
+// in the host's closed root.
+function getAssignedSlot(node: Node) {
+  if (!(node instanceof Element || node instanceof Text)) {
+    return null
+  }
+  if (node.assignedSlot) {
+    return node.assignedSlot
+  }
+
+  const host = node.parentNode
+  const closedShadowRoot =
+    host instanceof Element && !host.shadowRoot ? getShadowRootOf(host) : null
+  if (!closedShadowRoot) {
+    return null
+  }
+
+  return (
+    [...closedShadowRoot.querySelectorAll("slot")].find((slot) =>
+      slot.assignedNodes().includes(node),
+    ) ?? null
+  )
 }
 
 function getFlatParentElement(node: Node) {

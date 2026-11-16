@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from "vitest"
+import { fakeBrowser } from "wxt/testing/fake-browser"
 import {
   buildContextSnapshot,
   createRangeSnapshot,
@@ -784,6 +785,64 @@ describe("readSelectionSnapshot", () => {
       "小猫蛋卷OvO",
       "I'm scared",
     ])
+  })
+
+  describe("closed shadow roots", () => {
+    afterEach(() => {
+      vi.restoreAllMocks()
+    })
+
+    // What a content script's dom.openOrClosedShadowRoot() reaches.
+    function attachClosedShadowRoots(roots: Map<Element, ShadowRoot>) {
+      vi.spyOn(fakeBrowser, "dom", "get").mockReturnValue({
+        openOrClosedShadowRoot: (element: HTMLElement) => roots.get(element) ?? null,
+      })
+    }
+
+    function renderWidget(widgetShadowHtml: string, widgetLightHtml: string) {
+      document.body.innerHTML = `<p><span id="start"></span> <x-widget>${widgetLightHtml}</x-widget> <span id="end"></span></p>`
+      attachShadowTrees(document, {
+        "#start": { html: `<b>Start</b>` },
+        "#end": { html: `<b>End</b>` },
+      })
+      const widget = document.querySelector("x-widget")
+      const startText = getShadowRoot("#start").querySelector("b")?.firstChild
+      const endText = getShadowRoot("#end").querySelector("b")?.firstChild
+      if (!widget || !(startText instanceof Text) || !(endText instanceof Text)) {
+        throw new Error("Fixtures not found")
+      }
+      const widgetShadowRoot = widget.attachShadow({ mode: "closed" })
+      widgetShadowRoot.innerHTML = widgetShadowHtml
+      attachClosedShadowRoots(new Map([[widget, widgetShadowRoot]]))
+      return { widget, startText, endText }
+    }
+
+    it("reads what a closed shadow root renders, not its host's light DOM", () => {
+      const { startText, endText } = renderWidget(`Rendered`, `fallback`)
+      const { selection } = createShadowSelection(
+        { startContainer: startText, startOffset: 0, endContainer: endText, endOffset: 3 },
+        "Start",
+      )
+
+      expect(readSelectionSnapshot(selection)?.text).toBe("Start Rendered End")
+    })
+
+    it("starts a selection in light DOM slotted into a closed shadow root", () => {
+      const { widget, endText } = renderWidget(`<i><slot></slot></i> shown`, `<span>slotted</span>`)
+      const slottedSpan = widget.querySelector("span")
+      const slotted = slottedSpan?.firstChild
+      if (!slottedSpan || !(slotted instanceof Text)) {
+        throw new Error("Slotted text not found")
+      }
+      // Browsers hide a slot in a closed shadow root from assignedSlot; jsdom doesn't.
+      Object.defineProperty(slottedSpan, "assignedSlot", { value: null })
+      const { selection } = createShadowSelection(
+        { startContainer: slotted, startOffset: 0, endContainer: endText, endOffset: 3 },
+        "slotted",
+      )
+
+      expect(readSelectionSnapshot(selection)?.text).toBe("slotted shown End")
+    })
   })
 
   it("keeps the browser's text for a selection whose ends are in one tree", () => {
