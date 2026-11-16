@@ -148,9 +148,7 @@ export function ProvidersConfig() {
 function ProviderCardList() {
   const [providersConfig, setProvidersConfig] = useAtom(configFieldsAtomMap.providersConfig)
   const apiProvidersConfig = getAPIProvidersConfig(providersConfig)
-  const [selectedProviderId, setSelectedProviderId] = useAtom(selectedProviderIdAtom)
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
-  const didLockInitialSelectionRef = useRef(false)
 
   const handleReorder = (newList: APIProviderConfig[]) => {
     const desiredOrderIds = newList.map((provider) => provider.id)
@@ -179,16 +177,9 @@ function ProviderCardList() {
     void setProvidersConfig([...nonApiProviders, ...reorderedApiProviders])
   }
 
-  useEffect(() => {
-    if (didLockInitialSelectionRef.current) return
-    if (selectedProviderId) {
-      void setSelectedProviderId(selectedProviderId)
-      didLockInitialSelectionRef.current = true
-    }
-  }, [selectedProviderId, setSelectedProviderId])
-
   return (
     <div className="flex flex-col gap-4">
+      <BuiltInProviderSection />
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogTrigger
           render={
@@ -214,7 +205,6 @@ function ProviderCardList() {
           renderItem={(providerConfig) => <ProviderCard providerConfig={providerConfig} />}
         />
       </EntityListRail>
-      <BuiltInProviderSection />
     </div>
   )
 }

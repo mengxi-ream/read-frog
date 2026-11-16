@@ -1,7 +1,5 @@
 import { atom } from "jotai"
 import { requestEditorNavigationAtom } from "@/components/form/autosave-navigation"
-import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { getAPIProvidersConfig } from "@/utils/config/helpers"
 import { BUILT_IN_AI_PROVIDER_ID } from "@/utils/providers/provider-registry"
 
 /**
@@ -20,19 +18,9 @@ export const PROVIDER_FIELD_HIGHLIGHT_DURATION_MS = 2700
 
 const internalSelectedProviderIdAtom = atom<string | undefined>(undefined)
 
+/** Opens on the normal Built-in AI provider, which leads the list, until something else is picked. */
 export const selectedProviderIdAtom = atom(
-  (get) => {
-    const selected = get(internalSelectedProviderIdAtom)
-    if (selected !== undefined) {
-      return selected
-    }
-
-    const providersConfig = get(configFieldsAtomMap.providersConfig)
-    const apiProvidersConfig = getAPIProvidersConfig(providersConfig)
-    const firstProviderId =
-      apiProvidersConfig.length > 0 ? apiProvidersConfig[0]!.id : BUILT_IN_AI_PROVIDER_ID
-    return firstProviderId
-  },
+  (get) => get(internalSelectedProviderIdAtom) ?? BUILT_IN_AI_PROVIDER_ID,
   (get, set, newValue: string | undefined) => {
     if (get(internalSelectedProviderIdAtom) === newValue) return Promise.resolve(true)
     return set(requestEditorNavigationAtom, () => {

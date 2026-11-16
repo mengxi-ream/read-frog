@@ -290,6 +290,19 @@ describe("ProvidersConfig", () => {
     }
   })
 
+  it("lists the built-in provider cards above the user's providers", () => {
+    const { container } = renderProvidersConfig()
+
+    const cardIds = [...container.querySelectorAll("[data-provider-id]")].map((card) =>
+      card.getAttribute("data-provider-id"),
+    )
+    expect(cardIds).toEqual([
+      BUILT_IN_AI_PROVIDER_ID,
+      BUILT_IN_AI_ADVANCE_PROVIDER_ID,
+      providerConfig.id,
+    ])
+  })
+
   it("lists both built-in provider cards", () => {
     renderProvidersConfig()
 
