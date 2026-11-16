@@ -13,6 +13,7 @@ import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { buildFeaturebasePortalUrl } from "@/utils/featurebase"
 import { i18n } from "@/utils/i18n"
 import { resolveUiLocale } from "@/utils/i18n/locale-map"
+import { SurveyNavItem } from "./survey-nav-item"
 
 export function ProductNav() {
   const uiLanguage = useAtomValue(configFieldsAtomMap.uiLanguage)
@@ -48,6 +49,8 @@ export function ProductNav() {
               <span>{i18n.t("options.helpAndCommunity.title")}</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
+
+          <SurveyNavItem />
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>
