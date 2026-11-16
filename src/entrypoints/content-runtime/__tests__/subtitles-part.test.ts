@@ -10,9 +10,11 @@ import { runSubtitlesContent } from "../subtitles/main"
 const mocks = vi.hoisted(() => ({
   getLocalConfig: vi.fn<() => Promise<Config | null>>(),
   bootstrapSubtitlesRuntime: vi.fn<(ctx: ContentScriptContext) => void>(),
+  getTopPageUrl: vi.fn<() => Promise<string | null>>(),
 }))
 
 vi.mock("@/utils/config/storage", () => ({ getLocalConfig: mocks.getLocalConfig }))
+vi.mock("@/utils/content-runtime/top-page-url", () => ({ getTopPageUrl: mocks.getTopPageUrl }))
 vi.mock("@/utils/i18n", () => ({ initI18n: vi.fn<() => Promise<void>>() }))
 vi.mock("@/entrypoints/subtitles.content/runtime", () => ({
   bootstrapSubtitlesRuntime: mocks.bootstrapSubtitlesRuntime,
@@ -42,6 +44,8 @@ describe("the subtitles part", () => {
   beforeEach(() => {
     vi.clearAllMocks()
     delete window.__READ_FROG_SUBTITLES_INJECTED__
+    // The top frame, unless a test embeds the player
+    mocks.getTopPageUrl.mockResolvedValue(window.location.href)
   })
 
   it("starts subtitles on a site that is not disabled", async () => {
@@ -76,5 +80,43 @@ describe("the subtitles part", () => {
 
     expect(mocks.bootstrapSubtitlesRuntime).not.toHaveBeenCalled()
     expect(window.__READ_FROG_SUBTITLES_INJECTED__).toBe(false)
+  })
+
+  describe("in a player embedded in another site's page", () => {
+    beforeEach(() => {
+      mocks.getTopPageUrl.mockResolvedValue("https://blog.example/post")
+    })
+
+    it("starts subtitles when whitelist mode lists the page, though not the player's site", async () => {
+      await runPart(configWith({ mode: "whitelist", whitelistPatterns: ["*.blog.example"] }))
+
+      expect(mocks.bootstrapSubtitlesRuntime).toHaveBeenCalledTimes(1)
+    })
+
+    it("does not start subtitles when whitelist mode lists the player's site only", async () => {
+      await runPart(configWith({ mode: "whitelist", whitelistPatterns: [THIS_SITE] }))
+
+      expect(mocks.bootstrapSubtitlesRuntime).not.toHaveBeenCalled()
+      expect(window.__READ_FROG_SUBTITLES_INJECTED__).toBe(false)
+    })
+
+    it("does not start subtitles in a page disabled from the popup", async () => {
+      await runPart(configWith({ mode: "blacklist", blacklistPatterns: ["*.blog.example"] }))
+
+      expect(mocks.bootstrapSubtitlesRuntime).not.toHaveBeenCalled()
+    })
+
+    it("does not start subtitles from a video site disabled from the popup", async () => {
+      await runPart(configWith({ mode: "blacklist", blacklistPatterns: [THIS_SITE] }))
+
+      expect(mocks.bootstrapSubtitlesRuntime).not.toHaveBeenCalled()
+    })
+
+    it("judges the player as a page of its own when the page can't be found out", async () => {
+      mocks.getTopPageUrl.mockResolvedValue(null)
+      await runPart(configWith({ mode: "whitelist", whitelistPatterns: [THIS_SITE] }))
+
+      expect(mocks.bootstrapSubtitlesRuntime).toHaveBeenCalledTimes(1)
+    })
   })
 })

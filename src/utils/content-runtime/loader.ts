@@ -2,16 +2,17 @@ import type { ContentRuntime, ContentRuntimePart } from "./parts"
 import type { Config } from "@/types/config/config"
 import { browser } from "#imports"
 import { CONFIG_STORAGE_KEY } from "@/utils/constants/config-storage-key"
-import { getEffectiveSiteControlUrl, isSiteEnabled } from "@/utils/site-control"
+import { getEffectiveSiteControlUrl, isFrameSiteEnabled } from "@/utils/site-control"
 import { shouldSkipDocument } from "./page-guards"
 import { CONTENT_RUNTIME_MODULE_FILE } from "./parts"
 
 export interface ContentLoaderOptions {
   /**
-   * The url of the page this frame is in, for a loader the manifest injects
-   * into frames on other sites' pages, such as an embedded video player. Site
-   * control then follows that page too, as it does for the frames the
-   * background injects.
+   * The url of the page in the tab, for a loader the manifest injects into
+   * frames on other sites' pages, such as an embedded video player. Site
+   * control then goes by that page as well as the frame (see
+   * isFrameSiteEnabled). When it can't be found out, the frame counts as a
+   * page of its own.
    */
   getTopPageUrl?: () => Promise<string | null>
 }
@@ -28,9 +29,13 @@ async function readStoredConfig(): Promise<Config | null> {
   }
 }
 
-function isSiteEnabledByStoredConfig(url: string, config: Config | null) {
+function isFrameSiteEnabledByStoredConfig(
+  frameUrl: string,
+  pageUrl: string,
+  config: Config | null,
+) {
   try {
-    return isSiteEnabled(url, config)
+    return isFrameSiteEnabled(frameUrl, pageUrl, config)
   } catch {
     return true
   }
@@ -49,15 +54,12 @@ export async function selectPartsToRun(
   { getTopPageUrl }: ContentLoaderOptions = {},
 ): Promise<readonly ContentRuntimePart[]> {
   const config = await readStoredConfig()
-  if (!isSiteEnabledByStoredConfig(getEffectiveSiteControlUrl(window.location.href), config)) {
-    return []
-  }
-
   const partsToRun = parts.filter((part) => !isSwitchedOff(part, config))
-  if (partsToRun.length === 0 || !getTopPageUrl) return partsToRun
+  if (partsToRun.length === 0) return []
 
-  const topPageUrl = await getTopPageUrl().catch(() => null)
-  return topPageUrl && !isSiteEnabledByStoredConfig(topPageUrl, config) ? [] : partsToRun
+  const frameUrl = getEffectiveSiteControlUrl(window.location.href)
+  const pageUrl = (await getTopPageUrl?.().catch(() => null)) ?? frameUrl
+  return isFrameSiteEnabledByStoredConfig(frameUrl, pageUrl, config) ? partsToRun : []
 }
 
 /**

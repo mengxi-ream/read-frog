@@ -1,6 +1,6 @@
 import { defineContentScript } from "#imports"
 import { runContentLoader } from "@/utils/content-runtime/loader"
-import { sendMessage } from "@/utils/message"
+import { getTopPageUrl } from "@/utils/content-runtime/top-page-url"
 import { subtitlesContentScriptMatches } from "./subtitles.content/content-script-matches"
 
 /**
@@ -13,8 +13,6 @@ export default defineContentScript({
   matches: subtitlesContentScriptMatches,
   allFrames: true,
   async main() {
-    await runContentLoader(["subtitles"], {
-      getTopPageUrl: window === window.top ? undefined : () => sendMessage("getSenderTabUrl"),
-    })
+    await runContentLoader(["subtitles"], { getTopPageUrl })
   },
 })

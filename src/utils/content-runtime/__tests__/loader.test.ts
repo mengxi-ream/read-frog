@@ -10,15 +10,24 @@ import { selectPartsToRun } from "../loader"
 function configWith({
   subtitles = true,
   blacklistPatterns = [],
+  whitelistPatterns,
 }: {
   subtitles?: boolean
   blacklistPatterns?: string[]
+  /** Switches to whitelist mode */
+  whitelistPatterns?: string[]
 }): Config {
   return {
     ...DEFAULT_CONFIG,
     videoSubtitles: { ...DEFAULT_CONFIG.videoSubtitles, enabled: subtitles },
-    siteControl: { ...DEFAULT_CONFIG.siteControl, mode: "blacklist", blacklistPatterns },
+    siteControl: whitelistPatterns
+      ? { mode: "whitelist", blacklistPatterns: [], whitelistPatterns }
+      : { mode: "blacklist", blacklistPatterns, whitelistPatterns: [] },
   }
+}
+
+function pageAround(url: string) {
+  return vi.fn<() => Promise<string | null>>(async () => url)
 }
 
 async function storeConfig(config: unknown) {
@@ -44,27 +53,43 @@ describe("selectPartsToRun", () => {
 
   it("runs nothing in a player embedded in a disabled page", async () => {
     await storeConfig(configWith({ blacklistPatterns: ["*.blog.example"] }))
-    const getTopPageUrl = vi.fn<() => Promise<string | null>>(
-      async () => "https://blog.example/post",
-    )
+    const getTopPageUrl = pageAround("https://blog.example/post")
 
     expect(await selectPartsToRun(["subtitles"], { getTopPageUrl })).toEqual([])
   })
 
   it("runs a player embedded in an enabled page", async () => {
     await storeConfig(configWith({ blacklistPatterns: ["*.other.example"] }))
-    const getTopPageUrl = vi.fn<() => Promise<string | null>>(
-      async () => "https://blog.example/post",
-    )
+    const getTopPageUrl = pageAround("https://blog.example/post")
 
     expect(await selectPartsToRun(["subtitles"], { getTopPageUrl })).toEqual(["subtitles"])
   })
 
+  it("runs nothing in a player from a disabled site, in an enabled page", async () => {
+    await storeConfig(configWith({ blacklistPatterns: ["*.youtube.com"] }))
+    const getTopPageUrl = pageAround("https://blog.example/post")
+
+    expect(await selectPartsToRun(["subtitles"], { getTopPageUrl })).toEqual([])
+  })
+
+  it("runs a player embedded in a page listed in whitelist mode, though its own site is not", async () => {
+    // What the popup lists for the page; the player comes from youtube.com
+    await storeConfig(configWith({ whitelistPatterns: ["*.blog.example"] }))
+    const getTopPageUrl = pageAround("https://blog.example/post")
+
+    expect(await selectPartsToRun(["subtitles"], { getTopPageUrl })).toEqual(["subtitles"])
+  })
+
+  it("runs nothing in a player embedded in a page not listed in whitelist mode", async () => {
+    await storeConfig(configWith({ whitelistPatterns: ["*.youtube.com"] }))
+    const getTopPageUrl = pageAround("https://blog.example/post")
+
+    expect(await selectPartsToRun(["subtitles"], { getTopPageUrl })).toEqual([])
+  })
+
   it("does not ask for the page around a frame that runs nothing anyway", async () => {
     await storeConfig(configWith({ subtitles: false }))
-    const getTopPageUrl = vi.fn<() => Promise<string | null>>(
-      async () => "https://blog.example/post",
-    )
+    const getTopPageUrl = pageAround("https://blog.example/post")
 
     expect(await selectPartsToRun(["subtitles"], { getTopPageUrl })).toEqual([])
     expect(getTopPageUrl).not.toHaveBeenCalled()
@@ -79,12 +104,18 @@ describe("selectPartsToRun", () => {
     expect(await selectPartsToRun(["host", "subtitles"])).toEqual(["host", "subtitles"])
   })
 
-  it("runs a player when the page around it can't be found out", async () => {
-    await storeConfig(configWith({}))
+  it("judges a player as a page of its own when the page around it can't be found out", async () => {
     const getTopPageUrl = vi.fn<() => Promise<string | null>>(async () => {
       throw new Error("Could not establish connection. Receiving end does not exist.")
     })
 
+    await storeConfig(configWith({}))
     expect(await selectPartsToRun(["subtitles"], { getTopPageUrl })).toEqual(["subtitles"])
+
+    await storeConfig(configWith({ whitelistPatterns: ["*.youtube.com"] }))
+    expect(await selectPartsToRun(["subtitles"], { getTopPageUrl })).toEqual(["subtitles"])
+
+    await storeConfig(configWith({ whitelistPatterns: ["*.blog.example"] }))
+    expect(await selectPartsToRun(["subtitles"], { getTopPageUrl })).toEqual([])
   })
 })
