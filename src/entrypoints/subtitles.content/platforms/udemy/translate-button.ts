@@ -1,4 +1,4 @@
-import type { SubtitlesProvidersAdapter } from "../../universal-adapter"
+import type { SubtitlesProvidersAdapter } from "../../adapter/subtitles-providers-adapter"
 import {
   UDEMY_CAPTIONS_BUTTON_SELECTOR,
   UDEMY_CONTROLS_SELECTOR,

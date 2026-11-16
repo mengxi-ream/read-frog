@@ -46,9 +46,9 @@ describe("the AI subtitles loading message", () => {
       show: vi.fn<() => void>(),
       setState: vi.fn<(...args: unknown[]) => void>(),
     }
-    ;(adapter as any).subtitlesScheduler = scheduler
-    vi.spyOn(adapter as any, "hideNativeSubtitles").mockImplementation(() => {})
-    vi.spyOn(adapter as any, "startTranslation").mockResolvedValue(true)
+    ;(adapter as any).player.subtitlesScheduler = scheduler
+    vi.spyOn((adapter as any).nativeCaptions, "hideNativeSubtitles").mockImplementation(() => {})
+    vi.spyOn((adapter as any).starter, "startTranslation").mockResolvedValue(true)
 
     await adapter.requestAiSubtitles()
 

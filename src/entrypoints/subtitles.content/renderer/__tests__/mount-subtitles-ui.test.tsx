@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import type { SubtitlesProvidersAdapter } from "../../universal-adapter"
+import type { SubtitlesProvidersAdapter } from "../../adapter/subtitles-providers-adapter"
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { READ_FROG_SUBTITLES_UI_HOST_ID } from "@/utils/constants/subtitles"
 import { mountSubtitlesUI, unmountSubtitlesUI } from "../mount-subtitles-ui"

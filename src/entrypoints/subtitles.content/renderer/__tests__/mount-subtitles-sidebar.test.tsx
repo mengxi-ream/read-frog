@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import type { SubtitlesProvidersAdapter } from "../../universal-adapter"
+import type { SubtitlesProvidersAdapter } from "../../adapter/subtitles-providers-adapter"
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { SUBTITLES_SIDEBAR_HOST_ID } from "@/utils/constants/subtitles"
 import { mountSubtitlesSidebar, unmountSubtitlesSidebar } from "../mount-subtitles-sidebar"
