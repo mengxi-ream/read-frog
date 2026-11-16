@@ -488,6 +488,25 @@ describe("boundaries at what the page doesn't render", () => {
     expect(snapshot?.text).toBe("One\n\nTwo")
     expect(buildContextSnapshot(snapshot)?.paragraphs).toEqual(["One", "Two"])
   })
+
+  it("ends a range after a host's last light child right after where a slot shows it", () => {
+    document.body.innerHTML = `<div id="first"></div><x-host>slotted</x-host>`
+    attachShadowTrees(document, {
+      "#first": { html: `<p>first</p>` },
+      "x-host": { html: `<p><slot></slot></p><p>After the slot</p>` },
+    })
+    const firstText = getShadowRoot("#first").querySelector("p")!.firstChild!
+    const host = document.querySelector("x-host")!
+
+    const { selection } = createShadowSelection(
+      { startContainer: firstText, startOffset: 0, endContainer: host, endOffset: 1 },
+      "",
+    )
+    const snapshot = readSelectionSnapshot(selection)
+
+    expect(snapshot?.text).toBe("first\n\nslotted")
+    expect(buildContextSnapshot(snapshot)?.paragraphs).toEqual(["first", "slotted"])
+  })
 })
 
 describe("context of slotted paragraphs", () => {
@@ -1190,6 +1209,34 @@ describe("readSelectionSnapshot", () => {
     ).toBe("Liked 23 times")
   })
 
+  it("reads an <object>'s fallback only while the object shows it", () => {
+    const html = `<p id="figure">Chart <object data="chart.svg"><span>Fallback text</span></object> below</p>`
+    // jsdom has no layout, so Range.getClientRects() stands in for whether the
+    // object's children take up room on the page.
+    const showFallback = (shown: boolean) =>
+      Object.defineProperty(Range.prototype, "getClientRects", {
+        configurable: true,
+        value: () => (shown ? [{ width: 10, height: 10 }] : []),
+      })
+    const originalGetClientRects = Object.getOwnPropertyDescriptor(
+      Range.prototype,
+      "getClientRects",
+    )
+
+    try {
+      showFallback(false)
+      expect(readTextFromShadowRoot(html, "#figure")).toBe("Chart below")
+      showFallback(true)
+      expect(readTextFromShadowRoot(html, "#figure")).toBe("Chart Fallback text below")
+    } finally {
+      if (originalGetClientRects) {
+        Object.defineProperty(Range.prototype, "getClientRects", originalGetClientRects)
+      } else {
+        Reflect.deleteProperty(Range.prototype, "getClientRects")
+      }
+    }
+  })
+
   it("reads a slotted paragraph whose range starts in the shadow root after it", () => {
     document.body.innerHTML = `<x-post><p slot="body">Slotted body paragraph one.</p><p slot="body">Slotted body paragraph two.</p></x-post>`
     const post = document.querySelector("x-post")!
@@ -1518,6 +1565,15 @@ describe("ruby annotations", () => {
     range.selectNodeContents(getTextNode("reading"))
 
     expect(readSelectionSnapshot(createRangeSelection(range))?.text).toBe("かんじ")
+  })
+
+  it("keeps the browser's text for a selection without furigana in a paragraph that has some", () => {
+    document.body.innerHTML = `<p><ruby>漢字<rt>かんじ</rt></ruby>を<span id="plain">勉強  する</span></p>`
+
+    const range = document.createRange()
+    range.selectNodeContents(getTextNode("plain"))
+
+    expect(readSelectionSnapshot(createRangeSelection(range))?.text).toBe("勉強  する")
   })
 
   it("leaves furigana out of the paragraph context", () => {

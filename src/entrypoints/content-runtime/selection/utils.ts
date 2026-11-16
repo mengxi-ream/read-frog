@@ -540,8 +540,8 @@ function locateUnshownBoundary(unshown: Node): Boundary {
 // meets a boundary at a child the page doesn't render, and would read on to
 // the end of the page looking for it. So it moves to the next child from
 // `index` on that the page renders, such as a host's light child that a slot
-// shows. Failing that, to the start of what the node renders, or past it if
-// the node renders a child before `index`.
+// shows. Failing that, to just after the last one before `index`, or to the
+// start of what the node renders.
 function locateAmongChildren(parent: Node, index: number): Boundary {
   const children = [...parent.childNodes]
   const isShown = (node: Node) => findUnshownAncestor(node) === null
@@ -550,9 +550,8 @@ function locateAmongChildren(parent: Node, index: number): Boundary {
     return { text: null, offset: 0, before: next, endOf: null }
   }
 
-  return children.slice(0, index).some(isShown)
-    ? { text: null, offset: 0, before: null, endOf: parent }
-    : locateStartOf(parent)
+  const previous = children.slice(0, index).findLast(isShown)
+  return previous ? locateAfter(previous) : locateStartOf(parent)
 }
 
 // The start of what `node` renders.
@@ -561,6 +560,21 @@ function locateStartOf(node: Node): Boundary {
   return first
     ? { text: null, offset: 0, before: first, endOf: null }
     : { text: null, offset: 0, before: null, endOf: node }
+}
+
+// Just after `node` where the page renders it: a slotted node in its slot,
+// not after all its host renders.
+function locateAfter(node: Node): Boundary {
+  const parent = getFlatParent(node)
+  if (!parent) {
+    return { text: null, offset: 0, before: null, endOf: node }
+  }
+
+  const siblings = getFlatChildren(parent)
+  const next = siblings[siblings.indexOf(node) + 1]
+  return next
+    ? { text: null, offset: 0, before: next, endOf: null }
+    : { text: null, offset: 0, before: null, endOf: parent }
 }
 
 interface TextVisibility {
@@ -576,13 +590,39 @@ function isLeftOut({ hidden, unselectable, invisible }: TextVisibility) {
   return hidden || unselectable || invisible
 }
 
+// A closed <details> shows its summary and nothing else. Undefined for any
+// other node, which shows all its children.
+function findClosedDetailsSummary(node: Node) {
+  return node instanceof HTMLDetailsElement && !node.open
+    ? node.querySelector(":scope > summary")
+    : undefined
+}
+
+// An <object> showing its resource, such as an image, doesn't render its
+// children, which are its fallback. Only layout tells which one it shows: the
+// children take up room on the page only as the fallback. Without layout, the
+// fallback is taken as shown.
+function isShowingObjectResource(element: Element) {
+  if (!(element instanceof HTMLObjectElement)) {
+    return false
+  }
+
+  const range = element.ownerDocument.createRange()
+  range.selectNodeContents(element)
+  return typeof range.getClientRects === "function" && range.getClientRects().length === 0
+}
+
 // What the browser leaves out of its selection text, left out here too.
 function readChildTextVisibility(
   element: Element,
   range: SelectionRangeSnapshot,
   { hidden, unselectable, invisible }: TextVisibility,
 ): TextVisibility {
-  if (hidden || NON_CONTENT_ELEMENT_NAMES.has(element.localName)) {
+  if (
+    hidden ||
+    NON_CONTENT_ELEMENT_NAMES.has(element.localName) ||
+    isShowingObjectResource(element)
+  ) {
     return { hidden: true, unselectable, invisible }
   }
 
@@ -709,11 +749,7 @@ function walkTextPieces(
       pieces.push({ node, start: 0, end: 0 })
     }
 
-    // A closed <details> shows its summary and nothing else.
-    const summary =
-      node instanceof HTMLDetailsElement && !node.open
-        ? node.querySelector(":scope > summary")
-        : undefined
+    const summary = findClosedDetailsSummary(node)
     for (const child of getFlatChildren(node)) {
       const hidden = summary !== undefined && child !== summary
       visit(child, hidden ? { ...childVisibility, hidden } : childVisibility)
@@ -952,11 +988,8 @@ function readOwnerVisibility(owner: ParagraphOwner, range: SelectionRangeSnapsho
       visibility = readChildTextVisibility(node, range, visibility)
     }
     const child = path[index + 1] ?? owner
-    if (
-      node instanceof HTMLDetailsElement &&
-      !node.open &&
-      child !== node.querySelector(":scope > summary")
-    ) {
+    const summary = findClosedDetailsSummary(node)
+    if (summary !== undefined && child !== summary) {
       visibility = { ...visibility, hidden: true }
     }
   })
