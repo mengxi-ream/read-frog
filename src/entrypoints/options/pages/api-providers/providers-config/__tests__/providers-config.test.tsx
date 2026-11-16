@@ -96,7 +96,9 @@ vi.mock("@/components/sortable-list", () => ({
 
 vi.mock("@/components/ui/base-ui/dialog", () => ({
   Dialog: ({ children }: { children: ReactNode }) => <>{children}</>,
-  DialogTrigger: () => null,
+  DialogTrigger: ({ children }: { children: ReactNode }) => (
+    <button type="button">{children}</button>
+  ),
 }))
 
 vi.mock("@/components/ui/base-ui/toast", () => ({
@@ -287,6 +289,34 @@ describe("ProvidersConfig", () => {
     // the Ultra-gated ones with the badge instead of hiding them.
     for (const label of BUILT_IN_ASSIGNMENT_LABELS) {
       expect(screen.getByText(label)).toBeInTheDocument()
+    }
+  })
+
+  it("puts Add provider first, then the built-in providers, then the user's providers", () => {
+    const { container } = renderProvidersConfig()
+
+    const cardIds = [...container.querySelectorAll("[data-provider-id]")].map((card) =>
+      card.getAttribute("data-provider-id"),
+    )
+    expect(cardIds).toEqual([
+      BUILT_IN_AI_PROVIDER_ID,
+      BUILT_IN_AI_ADVANCE_PROVIDER_ID,
+      providerConfig.id,
+    ])
+
+    const inDocumentOrder = [
+      screen.getByRole("button", { name: "options.apiProviders.addProvider" }),
+      screen.getByRole("heading", { name: "options.apiProviders.builtInProvider" }),
+      container.querySelector(`[data-provider-id="${BUILT_IN_AI_ADVANCE_PROVIDER_ID}"]`),
+      screen.getByRole("heading", { name: "options.apiProviders.yourProviders" }),
+      container.querySelector(`[data-provider-id="${providerConfig.id}"]`),
+    ]
+    for (let i = 1; i < inDocumentOrder.length; i++) {
+      const previous = inDocumentOrder[i - 1]!
+      const current = inDocumentOrder[i]!
+      expect(previous.compareDocumentPosition(current) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
+        Node.DOCUMENT_POSITION_FOLLOWING,
+      )
     }
   })
 

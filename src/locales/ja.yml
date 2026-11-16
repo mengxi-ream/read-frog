@@ -159,6 +159,7 @@ options:
     configTitle: プロバイダー設定
     addProvider: プロバイダーを追加
     builtInProvider: 組み込みプロバイダー
+    yourProviders: マイプロバイダー
     builtInAiUsage:
       title: 組み込み AI クォータ
       remaining: "残り $1%"

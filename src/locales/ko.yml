@@ -159,6 +159,7 @@ options:
     configTitle: 제공업체 구성
     addProvider: 제공업체 추가
     builtInProvider: 내장 제공업체
+    yourProviders: 내 제공업체
     builtInAiUsage:
       title: 내장 AI 할당량
       remaining: "$1% 남음"
