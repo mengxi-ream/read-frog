@@ -4622,5 +4622,11 @@
     "description": "The header dropdowns open on pure CSS hover (`.onedepth.twoDepth_hover:hover .twoDepth_wrap`), which changes no DOM, so the walk never came back to them after skipping them as display: none. The all-categories menu needs no entry: opening it sets a style on <body>, which already re-walks it",
     "matches": "*.thenorthfacekorea.co.kr",
     "walkHiddenSelectors": [".header-gnb .twoDepth_wrap"]
+  },
+  {
+    "id": "raea",
+    "description": "raea.io draws its letter's display lines ([data-ink]) as canvas ink and makes their DOM text transparent, so a translation inside them never shows. Recoloring only the translation is not enough: the ink keeps drawing the English over a translation-only swap, and a bilingual translation breaks the ink's resize handler. While a translation is on the page, show the lines as plain text and hide the canvas, the site's own fallback when the ink fails to load. `body` outranks the site's rule without !important, so translation styles keep their colors",
+    "matches": "raea.io",
+    "injectedCss": "body .letter.ink-on [data-ink] { color: var(--foreground); }\n.letter > canvas[aria-hidden='true'] { display: none; }"
   }
 ]
