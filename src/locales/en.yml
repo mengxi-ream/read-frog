@@ -623,8 +623,7 @@ options:
       panel: Open side panel
       translate: Toggle page translation
     closeMenu:
-      disableForSite: Disable for this site
-      disableGlobally: Disable globally
+      title: Hide floating button
     tooltips:
       togglePageTranslation: Toggle page translation
       floatingButtonOptions: Floating button options
@@ -673,8 +672,7 @@ options:
         enterUrlPattern: Enter URL pattern
         urlPattern: URL pattern
     closeMenu:
-      disableForSite: Disable for this site
-      disableGlobally: Disable globally
+      title: Hide selection toolbar
     errors:
       customActionFailed: Custom action failed
       customActionFailedFallback: Custom action request failed
@@ -1783,6 +1781,11 @@ speak:
   noTextSelected: No text selected
   openaiNotConfigured: OpenAI provider is not configured or enabled
   openaiApiKeyNotConfigured: OpenAI API key is not configured
+hideMenu:
+  untilReload: Until I reload this page
+  onSite: On $1
+  onAllSites: On all sites
+  restoreHint: Turn it back on in $1.
 action:
   copy: Copy
   copied: Copied

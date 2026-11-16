@@ -1,13 +1,13 @@
 import type { FloatingButtonSide } from "@/types/config/floating-button"
 import { IconLock, IconLockOpen, IconMessageCircle, IconSettings, IconX } from "@tabler/icons-react"
-import { useAtom, useAtomValue } from "jotai"
+import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { useEffect, useRef, useState } from "react"
 import { browser } from "#imports"
 import readFrogLogo from "@/assets/icons/read-frog.png?url&no-inline"
+import { addSitePattern, HideMenuItems } from "@/components/hide-menu-items"
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/base-ui/dropdown-menu"
 import { anchoredToastManager } from "@/components/ui/base-ui/toast"
@@ -22,7 +22,11 @@ import { resolveUiLocale } from "@/utils/i18n/locale-map"
 import { sendMessage } from "@/utils/message"
 import { cn } from "@/utils/styles/utils"
 import { urlMatchesPattern } from "@/utils/url-pattern"
-import { enablePageTranslationAtom, isDraggingButtonAtom } from "../../atoms"
+import {
+  enablePageTranslationAtom,
+  isDraggingButtonAtom,
+  isFloatingButtonHiddenUntilReloadAtom,
+} from "../../atoms"
 import { shadowWrapper } from "../../main"
 import HiddenButton from "./components/hidden-button"
 import TranslateButton from "./translate-button"
@@ -132,6 +136,7 @@ export default function FloatingButton() {
   const [isHitAreaExpanded, setIsHitAreaExpanded] = useState(false)
   const [dragPreviewPosition, setDragPreviewPosition] = useState<DragPoint | null>(null)
   const isFullscreen = useIsFullscreen()
+  const isHiddenUntilReload = useAtomValue(isFloatingButtonHiddenUntilReloadAtom)
   const containerRef = useRef<HTMLDivElement | null>(null)
   const mainButtonRef = useRef<HTMLDivElement | null>(null)
   const pendingDragRef = useRef<PendingDragState | null>(null)
@@ -360,6 +365,7 @@ export default function FloatingButton() {
 
   if (
     isFullscreen ||
+    isHiddenUntilReload ||
     !floatingButton.enabled ||
     floatingButton.disabledFloatingButtonPatterns.some((pattern) =>
       urlMatchesPattern(window.location.href, pattern),
@@ -490,6 +496,7 @@ function FloatingButtonCloseMenu({
   onDropdownOpenChange,
 }: FloatingButtonCloseMenuProps) {
   const [floatingButton, setFloatingButton] = useAtom(configFieldsAtomMap.floatingButton)
+  const setHiddenUntilReload = useSetAtom(isFloatingButtonHiddenUntilReloadAtom)
   const [open, setOpen] = useState(false)
   const controlOffsetClassName =
     !floatingButton.locked && !expanded
@@ -501,17 +508,17 @@ function FloatingButtonCloseMenu({
     onDropdownOpenChange(nextOpen)
   }
 
-  const handleDisableForSite = () => {
-    const currentDomain = window.location.hostname
-    const currentPatterns = floatingButton.disabledFloatingButtonPatterns || []
-
+  const handleHideOnSite = (hostname: string) => {
     void setFloatingButton({
       ...floatingButton,
-      disabledFloatingButtonPatterns: [...currentPatterns, currentDomain],
+      disabledFloatingButtonPatterns: addSitePattern(
+        floatingButton.disabledFloatingButtonPatterns ?? [],
+        hostname,
+      ),
     })
   }
 
-  const handleDisableGlobally = () => {
+  const handleHideOnAllSites = () => {
     void setFloatingButton({ ...floatingButton, enabled: false })
   }
 
@@ -538,14 +545,16 @@ function FloatingButtonCloseMenu({
         container={shadowWrapper}
         align="start"
         side={side === "right" ? "left" : "right"}
-        className="z-2147483647 w-fit! whitespace-nowrap"
+        className="z-2147483647 w-fit! max-w-72 min-w-48 whitespace-nowrap"
       >
-        <DropdownMenuItem onMouseDown={(e) => e.stopPropagation()} onClick={handleDisableForSite}>
-          {i18n.t("options.floatingButton.closeMenu.disableForSite")}
-        </DropdownMenuItem>
-        <DropdownMenuItem onMouseDown={(e) => e.stopPropagation()} onClick={handleDisableGlobally}>
-          {i18n.t("options.floatingButton.closeMenu.disableGlobally")}
-        </DropdownMenuItem>
+        <HideMenuItems
+          title={i18n.t("options.floatingButton.closeMenu.title")}
+          settingsLocation={`${i18n.t("popup.options")} → ${i18n.t("options.floatingButton.title")}`}
+          onHideUntilReload={() => setHiddenUntilReload(true)}
+          onHideOnSite={handleHideOnSite}
+          onHideOnAllSites={handleHideOnAllSites}
+          onItemMouseDown={(e) => e.stopPropagation()}
+        />
       </DropdownMenuContent>
     </DropdownMenu>
   )

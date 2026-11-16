@@ -623,8 +623,7 @@ options:
       panel: Yan paneli aç
       translate: Səhifə tərcüməsini aktiv və ya deaktiv et
     closeMenu:
-      disableForSite: Bu sayt üçün deaktiv et
-      disableGlobally: Hər yerdə deaktiv et
+      title: Üzən düyməni gizlət
     tooltips:
       togglePageTranslation: Səhifə tərcüməsini aktiv və ya deaktiv et
       floatingButtonOptions: Üzən düymə parametrləri
@@ -673,8 +672,7 @@ options:
         enterUrlPattern: URL şablonu daxil edin
         urlPattern: URL şablonu
     closeMenu:
-      disableForSite: Bu sayt üçün deaktiv et
-      disableGlobally: Hər yerdə deaktiv et
+      title: Seçim alətlər panelini gizlət
     errors:
       customActionFailed: Fərdi əməliyyat alınmadı
       customActionFailedFallback: Fərdi əməliyyat sorğusu alınmadı
@@ -1641,6 +1639,11 @@ speak:
   noTextSelected: Mətn seçilməyib
   openaiNotConfigured: OpenAI provayderi tənzimlənməyib və ya aktiv deyil
   openaiApiKeyNotConfigured: OpenAI API açarı təyin edilməyib
+hideMenu:
+  untilReload: Səhifəni yeniləyənə qədər
+  onSite: $1 saytında
+  onAllSites: Bütün saytlarda
+  restoreHint: $1 bölməsində yenidən aktivləşdirə bilərsiniz.
 action:
   copy: Köçür
   copied: Köçürüldü

@@ -85,6 +85,13 @@ export const contextAtom = atom(
 )
 export const isSelectionToolbarOpenAtom = atom<boolean>(false)
 
+/**
+ * Hidden from its close menu until the page reloads. Kept in memory on purpose:
+ * it changes no setting, and a reload or a new tab brings the toolbar back.
+ * Like a site opt-out, it hides only the bar; shortcuts keep working.
+ */
+export const isSelectionToolbarHiddenUntilReloadAtom = atom(false)
+
 export const selectionContentAtom = atom((get) => get(selectionAtom)?.text ?? null)
 
 export const setSelectionStateAtom = atom(

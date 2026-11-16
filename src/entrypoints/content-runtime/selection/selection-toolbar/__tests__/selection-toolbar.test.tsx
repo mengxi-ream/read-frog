@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { DEFERRED_SELECTION_OPEN_EVENT } from "@/utils/constants/selection"
 import { SELECTION_CONTENT_OVERLAY_ROOT_ATTRIBUTE } from "@/utils/constants/selection-overlay-layers"
-import { selectionSessionAtom } from "../atoms"
+import { isSelectionToolbarHiddenUntilReloadAtom, selectionSessionAtom } from "../atoms"
 import { SelectionToolbar } from "../index"
 import { MODAL_DIALOG_HOST_SLOT_ATTRIBUTE } from "../modal-dialog-host"
 
@@ -297,6 +297,25 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
 
     expect(getOverlayRoot()).toHaveClass("h-0", "w-0")
     expect(getOverlayRoot()).not.toHaveClass("inset-0")
+  })
+
+  it("stays hidden after its close menu hid it until reload", async () => {
+    store.set(isSelectionToolbarHiddenUntilReloadAtom, true)
+    try {
+      render(
+        <div>
+          <SelectionToolbar />
+          <div data-testid="test-element">{MOCK_SELECTED_TEXT}</div>
+        </div>,
+      )
+
+      await triggerMouseUpWithSelection(screen.getByTestId("test-element"))
+
+      expect(getOverlayRoot()).toHaveClass("h-0", "w-0")
+      expect(getOverlayRoot()).not.toHaveClass("inset-0")
+    } finally {
+      store.set(isSelectionToolbarHiddenUntilReloadAtom, false)
+    }
   })
 
   it("keeps the overlay root collapsed when no toolbar item is enabled", async () => {
