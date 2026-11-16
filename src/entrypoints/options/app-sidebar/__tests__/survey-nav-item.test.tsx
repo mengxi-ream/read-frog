@@ -2,7 +2,7 @@
 import type { ReactElement, ReactNode } from "react"
 import type { SurveyPrompt } from "@/utils/survey-prompt"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react"
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import * as React from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
@@ -59,13 +59,15 @@ const PROMPT: SurveyPrompt = {
 
 function renderItem() {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
-  return render(
+  const result = render(
     <QueryClientProvider client={queryClient}>
       <ul>
+        <li>Help & Community</li>
         <SurveyNavItem />
       </ul>
     </QueryClientProvider>,
   )
+  return { ...result, queryClient }
 }
 
 beforeEach(() => {
@@ -97,10 +99,17 @@ describe("SurveyNavItem", () => {
 
   it("shows nothing when there is no survey to show", async () => {
     getSurveyPromptMock.mockResolvedValue(null)
-    const { container } = renderItem()
+    const { container, queryClient } = renderItem()
 
-    await waitFor(() => expect(getSurveyPromptMock).toHaveBeenCalled())
-    expect(container.querySelector("li")).toBeNull()
+    // While loading the item renders nothing either, so wait for the answer, and
+    // for the render it causes: the query tells the component on a later tick.
+    await waitFor(() =>
+      expect(queryClient.getQueryState(["survey-prompt", "zh"])?.status).toBe("success"),
+    )
+    await act(() => new Promise((resolve) => setTimeout(resolve, 0)))
+    // A render error would take the whole list down, the row before it included.
+    expect(container.querySelectorAll("li")).toHaveLength(1)
+    expect(screen.getByText("Help & Community")).toBeInTheDocument()
   })
 
   it("shows no badge or dot for a survey without a badge", async () => {
