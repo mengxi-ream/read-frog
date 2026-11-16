@@ -1479,7 +1479,7 @@ options:
         error: Value must be between $1 and $2
     translationQueue:
       title: Translation queue
-      description: How fast requests go out, how much text each carries, and how far ahead of the reader they run
+      description: How fast requests go out, how much text each carries, how long each may take, and how far ahead of the reader they run
       manageQueue: Manage queue
       requestQueueConfig:
         title: Translation rate
@@ -1494,6 +1494,9 @@ options:
           description: "Maximum characters: how much text one AI request carries"
         maxItemsPerBatch:
           description: "Maximum paragraphs: how many paragraphs share one request. Providers that are not AI ignore both"
+      requestTimeout:
+        title: Request timeout
+        description: "Seconds to wait for a reply before giving up and retrying. AI batch requests get extra time for their length, up to 100 seconds more. Raise it if a slow model keeps timing out"
       preloadConfig:
         title: Pre-translate range
         description: Control how much content below the viewport gets pre-translated to save API costs
@@ -1665,7 +1668,7 @@ options:
           videoSummary: Video summary (requires AI smart context)
     subtitlesQueue:
       title: Subtitle queue
-      description: How fast subtitle requests go out and how many lines each carries
+      description: How fast subtitle requests go out, how many lines each carries, and how long each may take
       manageQueue: Manage queue
       requestQueueConfig:
         title: Translation rate
@@ -1680,6 +1683,9 @@ options:
           description: "Maximum characters: how much text one AI request carries"
         maxItemsPerBatch:
           description: "Maximum subtitle lines: how many lines share one request. Providers that are not AI ignore both"
+      requestTimeout:
+        title: Request timeout
+        description: "Seconds to wait for a reply before giving up and retrying. AI batch requests get extra time for their length, up to 100 seconds more. Raise it if a slow model keeps timing out"
     cache:
       title: Cache
       clearCache:

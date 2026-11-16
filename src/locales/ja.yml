@@ -1332,7 +1332,7 @@ options:
         error: 値は $1 から $2 の間である必要があります
     translationQueue:
       title: 翻訳キュー
-      description: リクエストを送る速さ、1回あたりのテキスト量、読者よりどれだけ先を翻訳するか
+      description: リクエストを送る速さ、1回あたりのテキスト量、1回あたりの最大待ち時間、読者よりどれだけ先を翻訳するか
       manageQueue: キューを管理
       requestQueueConfig:
         title: 翻訳速度
@@ -1347,6 +1347,9 @@ options:
           description: 最大文字数：1 回の AI リクエストで送るテキストの量
         maxItemsPerBatch:
           description: 最大段落数：1 回のリクエストにまとめる段落の数。AI 以外の翻訳サービスには効きません
+      requestTimeout:
+        title: リクエストのタイムアウト
+        description: "応答を待つ秒数。超えると打ち切って再試行します。AI のバッチリクエストは文章の長さに応じて最大 100 秒まで追加で待ちます。遅いモデルでタイムアウトが続くときは大きくしてください"
       preloadConfig:
         title: 事前翻訳範囲
         description: ビューポート下のコンテンツをどれだけ事前翻訳するかを制御し、API コストを節約します
@@ -1518,7 +1521,7 @@ options:
           videoSummary: 動画要約（AI スマートコンテキストが必要）
     subtitlesQueue:
       title: 字幕キュー
-      description: 字幕リクエストを送る速さと、1回あたりの行数
+      description: 字幕リクエストを送る速さ、1回あたりの行数、1回あたりの最大待ち時間
       manageQueue: キューを管理
       requestQueueConfig:
         title: 翻訳速度
@@ -1533,6 +1536,9 @@ options:
           description: 最大文字数：1 回の AI リクエストで送るテキストの量
         maxItemsPerBatch:
           description: 最大字幕行数：1 回のリクエストにまとめる字幕の数。AI 以外の翻訳サービスには効きません
+      requestTimeout:
+        title: リクエストのタイムアウト
+        description: "応答を待つ秒数。超えると打ち切って再試行します。AI のバッチリクエストは文章の長さに応じて最大 100 秒まで追加で待ちます。遅いモデルでタイムアウトが続くときは大きくしてください"
     cache:
       title: キャッシュ
       clearCache:

@@ -1337,7 +1337,7 @@ options:
         error: Dəyər $1 ilə $2 arasında olmalıdır
     translationQueue:
       title: Tərcümə növbəsi
-      description: Sorğuların göndərilmə sürətini, hər sorğudakı mətn miqdarını və oxuduğunuz hissədən nə qədər sonrakı məzmunun əvvəlcədən tərcümə olunacağını təyin edin
+      description: Sorğuların göndərilmə sürətini, hər sorğudakı mətn miqdarını, hər sorğunun nə qədər gözləyə biləcəyini və oxuduğunuz hissədən nə qədər sonrakı məzmunun əvvəlcədən tərcümə olunacağını təyin edin
       manageQueue: Növbəni idarə et
       requestQueueConfig:
         title: Tərcümə sürəti
@@ -1352,6 +1352,9 @@ options:
           description: "Maksimum simvol sayı: bir süni intellekt sorğusunun daşıdığı mətn miqdarı"
         maxItemsPerBatch:
           description: "Maksimum abzas sayı: bir sorğuda neçə abzas birləşdirilir. Süni intellektdən istifadə etməyən provayderlər hər iki parametrə məhəl qoymur"
+      requestTimeout:
+        title: Sorğunun vaxt limiti
+        description: "İmtina edib yenidən cəhd etməzdən əvvəl cavab üçün neçə saniyə gözlənilir. Süni intellektin toplu sorğularına uzunluğuna görə əlavə vaxt verilir, ən çox 100 saniyə. Yavaş model tez-tez vaxt limitini keçirsə, artırın"
       preloadConfig:
         title: Öncədən tərcümə əhatəsi
         description: API xərclərinə qənaət üçün görünən sahənin altındakı məzmunun nə qədərinin öncədən tərcümə ediləcəyini idarə edin
@@ -1523,7 +1526,7 @@ options:
           videoSummary: Videonun xülasəsi (süni intellektlə ağıllı kontekst tələb olunur)
     subtitlesQueue:
       title: Subtitr növbəsi
-      description: Subtitr sorğularının göndərilmə sürəti və hər sorğudakı sətir sayı
+      description: Subtitr sorğularının göndərilmə sürəti, hər sorğudakı sətir sayı və hər sorğunun nə qədər gözləyə biləcəyi
       manageQueue: Növbəni idarə et
       requestQueueConfig:
         title: Tərcümə sürəti
@@ -1538,6 +1541,9 @@ options:
           description: "Maksimum simvol sayı: bir süni intellekt sorğusunun daşıdığı mətn miqdarı"
         maxItemsPerBatch:
           description: "Maksimum subtitr sətri sayı: bir sorğuda neçə sətir birləşdirilir. Süni intellektdən istifadə etməyən provayderlər hər iki parametrə məhəl qoymur"
+      requestTimeout:
+        title: Sorğunun vaxt limiti
+        description: "İmtina edib yenidən cəhd etməzdən əvvəl cavab üçün neçə saniyə gözlənilir. Süni intellektin toplu sorğularına uzunluğuna görə əlavə vaxt verilir, ən çox 100 saniyə. Yavaş model tez-tez vaxt limitini keçirsə, artırın"
     cache:
       title: Keş
       clearCache:

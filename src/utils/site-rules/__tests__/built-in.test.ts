@@ -483,6 +483,48 @@ describe("built-in site rules", () => {
     }
   })
 
+  // raea.io draws [data-ink] lines as canvas ink and sets their text to
+  // transparent, so a translation inside them is invisible. While a translation
+  // is on the page the rule restores the text color and hides that canvas.
+  // See https://github.com/mengxi-ream/read-frog/issues/2515
+  it("shows raea.io inked letter lines as plain text while translated (issue #2515)", () => {
+    const resolved = resolveSiteRule("https://raea.io/why/", BUILT_IN_SITE_RULES, [], [])
+
+    expect(resolved.matchedRuleIds).toContain("raea")
+    expect(resolved.injectedCss).toContain("body .letter.ink-on [data-ink]")
+    expect(resolved.injectedCss).toContain(".letter > canvas[aria-hidden='true']")
+
+    const style = document.createElement("style")
+    style.textContent = `
+      :root { --foreground: rgb(245, 245, 245); }
+      .letter.ink-on [data-ink] { color: #0000; }
+      ${resolved.injectedCss}
+    `
+    const fixture = document.createElement("div")
+    fixture.className = "letter ink-on"
+    fixture.innerHTML = `
+      <canvas aria-hidden="true"></canvas>
+      <p data-ink id="bilingual">English<span class="read-frog-translated-content-wrapper">译文</span></p>
+      <p data-ink data-read-frog-translation-only id="only">译文</p>
+    `
+    document.head.append(style)
+    document.body.append(fixture)
+
+    try {
+      expect(window.getComputedStyle(fixture.querySelector("canvas")!).display).toBe("none")
+      for (const id of ["bilingual", "only"]) {
+        const color = window.getComputedStyle(fixture.querySelector(`#${id}`)!).color
+        expect(color).not.toBe("rgba(0, 0, 0, 0)")
+      }
+    } finally {
+      fixture.remove()
+      style.remove()
+    }
+
+    const elsewhere = resolveSiteRule("https://example.com/", BUILT_IN_SITE_RULES, [], [])
+    expect(elsewhere.matchedRuleIds).not.toContain("raea")
+  })
+
   it("keeps visible Ubiquiti Community release virtual-list items walkable", () => {
     const resolved = resolveSiteRule(
       "https://community.ui.com/releases/Community-Update-2026-08-04/a1179dd3-e973-4495-97de-bb992962b49d",

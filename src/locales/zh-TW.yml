@@ -1342,7 +1342,7 @@ options:
         error: 數值必須在 $1 到 $2 之間
     translationQueue:
       title: 翻譯佇列
-      description: 請求發出的速度、每個請求承載的文字量，以及提前於閱讀位置多遠開始翻譯
+      description: 請求發出的速度、每個請求承載的文字量、每個請求最多等多久，以及提前於閱讀位置多遠開始翻譯
       manageQueue: 管理佇列
       requestQueueConfig:
         title: 翻譯速率
@@ -1357,6 +1357,9 @@ options:
           description: 最大字元數：一次 AI 請求最多帶多少文字
         maxItemsPerBatch:
           description: 最大段落數：多少個段落合併成一次請求。非 AI 的翻譯服務不受這兩項影響
+      requestTimeout:
+        title: 請求逾時
+        description: "等待回應的秒數，逾時就放棄並重試。AI 批次請求會依文字長度額外多等，最多再加 100 秒。模型回應慢、經常逾時可以調大"
       preloadConfig:
         title: 預翻譯範圍
         description: 控制可視區域下方多少內容會被預先翻譯，以節省 API 費用
@@ -1528,7 +1531,7 @@ options:
           videoSummary: 影片摘要（需啟用 AI 智慧上下文）
     subtitlesQueue:
       title: 字幕佇列
-      description: 字幕請求發出的速度，以及每個請求承載的字幕行數
+      description: 字幕請求發出的速度、每個請求承載的字幕行數，以及每個請求最多等多久
       manageQueue: 管理佇列
       requestQueueConfig:
         title: 翻譯速率
@@ -1543,6 +1546,9 @@ options:
           description: 最大字元數：一次 AI 請求最多帶多少文字
         maxItemsPerBatch:
           description: 最大字幕條數：多少條字幕合併成一次請求。非 AI 的翻譯服務不受這兩項影響
+      requestTimeout:
+        title: 請求逾時
+        description: "等待回應的秒數，逾時就放棄並重試。AI 批次請求會依文字長度額外多等，最多再加 100 秒。模型回應慢、經常逾時可以調大"
     cache:
       title: 快取
       clearCache:

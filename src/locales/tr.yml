@@ -1332,7 +1332,7 @@ options:
         error: Değer $1 ile $2 arasında olmalıdır
     translationQueue:
       title: Çeviri kuyruğu
-      description: İsteklerin ne kadar hızlı gittiği, her birinin ne kadar metin taşıdığı ve okuyucunun ne kadar önünden gittikleri
+      description: İsteklerin ne kadar hızlı gittiği, her birinin ne kadar metin taşıdığı, her birinin ne kadar sürebileceği ve okuyucunun ne kadar önünden gittikleri
       manageQueue: Kuyruğu yönet
       requestQueueConfig:
         title: Çeviri hızı
@@ -1347,6 +1347,9 @@ options:
           description: "Maksimum karakter: tek bir yapay zekâ isteği ne kadar metin taşır"
         maxItemsPerBatch:
           description: "Maksimum paragraf: tek istekte kaç paragraf birleşir. Yapay zekâ olmayan sağlayıcılar ikisini de yok sayar"
+      requestTimeout:
+        title: İstek zaman aşımı
+        description: "Vazgeçip yeniden denemeden önce yanıt için kaç saniye beklenir. Yapay zekâ toplu istekleri uzunluklarına göre en fazla 100 saniye ek süre alır. Yavaş bir model sürekli zaman aşımına uğruyorsa artırın"
       preloadConfig:
         title: Ön çeviri aralığı
         description: API maliyetlerinden tasarruf etmek için görünüm alanının altındaki ne kadar içeriğin önceden çevrileceğini kontrol edin
@@ -1518,7 +1521,7 @@ options:
           videoSummary: Video özeti (AI akıllı bağlam gerektirir)
     subtitlesQueue:
       title: Altyazı kuyruğu
-      description: Altyazı isteklerinin ne kadar hızlı gittiği ve her birinin kaç satır taşıdığı
+      description: Altyazı isteklerinin ne kadar hızlı gittiği, her birinin kaç satır taşıdığı ve her birinin ne kadar sürebileceği
       manageQueue: Kuyruğu yönet
       requestQueueConfig:
         title: Çeviri hızı
@@ -1533,6 +1536,9 @@ options:
           description: "Maksimum karakter: tek bir yapay zekâ isteği ne kadar metin taşır"
         maxItemsPerBatch:
           description: "Maksimum altyazı satırı: tek istekte kaç satır birleşir. Yapay zekâ olmayan sağlayıcılar ikisini de yok sayar"
+      requestTimeout:
+        title: İstek zaman aşımı
+        description: "Vazgeçip yeniden denemeden önce yanıt için kaç saniye beklenir. Yapay zekâ toplu istekleri uzunluklarına göre en fazla 100 saniye ek süre alır. Yavaş bir model sürekli zaman aşımına uğruyorsa artırın"
     cache:
       title: Önbellek
       clearCache:
