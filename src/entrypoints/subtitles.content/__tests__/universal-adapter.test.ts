@@ -834,7 +834,7 @@ describe("universalVideoAdapter", () => {
 
       const starting = (adapter as any).tryAutoStartSubtitles()
       adapter.notifyLeave()
-      configRead.resolve({ videoSubtitles: { autoStart: { youtube: true } } })
+      configRead.resolve({ videoSubtitles: { platforms: { youtube: "auto" } } })
       await starting
 
       expect(toggleSpy).not.toHaveBeenCalled()
@@ -1235,7 +1235,7 @@ describe("universalVideoAdapter", () => {
     const { adapter } = createAdapter([{ text: "hello", start: 0, end: 500 }])
     attachScheduler(adapter, false)
     mocks.getLocalConfig.mockResolvedValue({
-      videoSubtitles: { autoStart: { youtube: false, xcom: false, netflix: false } },
+      videoSubtitles: { platforms: { youtube: "manual", xcom: "manual", netflix: "manual" } },
     })
     const toggleSpy = vi
       .spyOn(adapter as any, "toggleSubtitlesWithSource")
@@ -1247,11 +1247,11 @@ describe("universalVideoAdapter", () => {
     expect(toggleSpy).toHaveBeenCalledExactlyOnceWith(true, "auto")
   })
 
-  it("auto-starts subtitles when this platform's switch is on", async () => {
+  it("auto-starts subtitles when this platform is set to auto", async () => {
     const { adapter } = createAdapter([{ text: "hello", start: 0, end: 500 }])
     attachScheduler(adapter, false)
     mocks.getLocalConfig.mockResolvedValue({
-      videoSubtitles: { autoStart: { youtube: true, xcom: false, netflix: false } },
+      videoSubtitles: { platforms: { youtube: "auto", xcom: "manual", netflix: "manual" } },
     })
     const toggleSpy = vi
       .spyOn(adapter as any, "toggleSubtitlesWithSource")
@@ -1262,11 +1262,11 @@ describe("universalVideoAdapter", () => {
     expect(toggleSpy).toHaveBeenCalledExactlyOnceWith(true, "auto")
   })
 
-  it("ignores the switches of other platforms", async () => {
+  it("ignores the modes of other platforms", async () => {
     const { adapter } = createAdapter([{ text: "hello", start: 0, end: 500 }])
     attachScheduler(adapter, false)
     mocks.getLocalConfig.mockResolvedValue({
-      videoSubtitles: { autoStart: { youtube: false, xcom: true, netflix: true } },
+      videoSubtitles: { platforms: { youtube: "manual", xcom: "auto", netflix: "auto" } },
     })
     const toggleSpy = vi
       .spyOn(adapter as any, "toggleSubtitlesWithSource")
@@ -1277,11 +1277,11 @@ describe("universalVideoAdapter", () => {
     expect(toggleSpy).not.toHaveBeenCalled()
   })
 
-  it("leaves subtitles off when neither autoStart nor the learning panel asks", async () => {
+  it("leaves subtitles off when neither the platform mode nor the learning panel asks", async () => {
     const { adapter } = createAdapter([{ text: "hello", start: 0, end: 500 }])
     attachScheduler(adapter, false)
     mocks.getLocalConfig.mockResolvedValue({
-      videoSubtitles: { autoStart: { youtube: false, xcom: false, netflix: false } },
+      videoSubtitles: { platforms: { youtube: "manual", xcom: "manual", netflix: "manual" } },
     })
     const toggleSpy = vi
       .spyOn(adapter as any, "toggleSubtitlesWithSource")

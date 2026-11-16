@@ -1,6 +1,7 @@
 import type { ControlsConfig } from "@/entrypoints/subtitles.content/platforms"
 import type { SubtitlesProvidersAdapter } from "@/entrypoints/subtitles.content/universal-adapter"
 import type { Config } from "@/types/config/config"
+import type { SubtitlesPlatform } from "@/types/config/subtitles"
 import { QueryClientProvider } from "@tanstack/react-query"
 import { Provider as JotaiProvider } from "jotai"
 import { createContext, use, useMemo } from "react"
@@ -9,6 +10,7 @@ import { queryClient } from "@/utils/tanstack-query"
 import { subtitlesStore } from "../atoms"
 
 interface SubtitlesUIContextValue {
+  platform: SubtitlesPlatform
   toggleSubtitles: (enabled: boolean) => void
   requestAiSubtitles: () => Promise<void>
   supportsAiSubtitles: boolean
@@ -48,6 +50,7 @@ export function SubtitlesProviders({
 }) {
   const contextValue = useMemo(
     () => ({
+      platform: adapter.platform,
       toggleSubtitles: adapter.toggleSubtitlesManually,
       requestAiSubtitles: adapter.requestAiSubtitles,
       supportsAiSubtitles: adapter.supportsAiSubtitles,

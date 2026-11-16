@@ -1433,10 +1433,11 @@ options:
       title: Əsas parametrlər
       enable:
         title: Video subtitrlərini aktiv et
-        description: YouTube, X, Netflix, Bilibili, Udemy və edX-də video pleyerin idarəetmə panelinə tərcümə düyməsi əlavə edir.
-      autoStart:
-        title: Açılan kimi tərcümə et
-        description: Düyməyə basmadan video yüklənən kimi tərcüməyə başlayın.
+        description: "Hər sayt üçün seçin: söndürülüb, əl ilə (pleyerdəki tərcümə düyməsi ilə başlayır) və ya avtomatik (video açılan kimi başlayır)."
+        mode:
+          off: "Söndürülüb"
+          manual: "Əl ilə"
+          auto: "Avtomatik"
       aiSegmentation:
         title: Süni intellektlə ağıllı seqmentləşdirmə
         description: Süni intellekt subtitrləri cümlələrə yenidən bölür. Tərcümələr daha gec gəlir. Güclü LLM tələb olunur; zəif modellər sətirləri buraxa və ya sürüşdürə bilər.
@@ -1725,6 +1726,7 @@ subtitles:
   requestAiSubtitles: Süni intellekt subtitrləri istə
   usingAiSubtitles: Süni intellekt subtitrlərindən istifadə olunur
   settings: Subtitr ayarları
+  autoStartOnPlatform: "$1 videolarında avtomatik başlat"
   toggle:
     enabled: Subtitr tərcüməsi aktivdir
     disabled: Subtitr tərcüməsi deaktivdir

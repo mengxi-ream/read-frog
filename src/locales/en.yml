@@ -1575,10 +1575,11 @@ options:
       title: Basics
       enable:
         title: Enable video subtitles
-        description: Puts a translate button in the video player's controls on YouTube, X, Netflix, Bilibili, Udemy and edX.
-      autoStart:
-        title: Translate on open
-        description: Start translating as soon as a video loads, without pressing the button.
+        description: "For each site: Off, Manual (start from the translate button in the player), or Automatic (start as each video opens)."
+        mode:
+          off: "Off"
+          manual: "Manual"
+          auto: "Automatic"
       aiSegmentation:
         title: AI smart segmentation
         description: Lets AI re-cut the subtitles into sentences. Translations take longer. Needs a strong LLM; weaker models may drop or misalign lines.
@@ -1874,6 +1875,7 @@ subtitles:
   requestAiSubtitles: Request AI subtitles
   usingAiSubtitles: Using AI subtitles
   settings: Subtitle settings
+  autoStartOnPlatform: "Start automatically on $1 videos"
   toggle:
     enabled: Subtitle translation on
     disabled: Subtitle translation off

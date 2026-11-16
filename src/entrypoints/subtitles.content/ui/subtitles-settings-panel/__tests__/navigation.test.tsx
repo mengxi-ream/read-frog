@@ -18,6 +18,7 @@ function renderPanel() {
     <SubtitlesProviders
       adapter={
         {
+          platform: "youtube",
           embedded: false,
           supportsAiSubtitles: false,
           supportsSidebar: false,

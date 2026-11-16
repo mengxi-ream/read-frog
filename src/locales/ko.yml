@@ -1428,10 +1428,11 @@ options:
       title: 기본 설정
       enable:
         title: 비디오 자막 켜기
-        description: YouTube, X, Netflix, Bilibili, Udemy, edX의 동영상 플레이어 컨트롤 바에 번역 버튼을 추가합니다.
-      autoStart:
-        title: 영상을 열면 바로 번역
-        description: 영상이 로드되면 버튼을 누르지 않아도 자막 번역을 시작합니다.
+        description: "사이트마다 선택하세요: 끄기, 수동(플레이어의 번역 버튼으로 시작), 자동(영상을 열면 바로 시작)."
+        mode:
+          off: "끄기"
+          manual: "수동"
+          auto: "자동"
       aiSegmentation:
         title: AI 스마트 분할
         description: AI가 자막을 문장 단위로 다시 나눕니다. 번역 응답이 느려집니다. 성능 좋은 LLM이 필요하며, 약한 모델은 줄이 빠지거나 어긋날 수 있습니다.
@@ -1727,6 +1728,7 @@ subtitles:
   requestAiSubtitles: AI 자막 요청
   usingAiSubtitles: AI 자막 사용 중
   settings: 자막 설정
+  autoStartOnPlatform: "$1 영상을 열면 자동으로 시작"
   toggle:
     enabled: 자막 번역을 켰습니다
     disabled: 자막 번역을 껐습니다

@@ -1428,10 +1428,11 @@ options:
       title: 基本設定
       enable:
         title: 動画字幕を有効にする
-        description: YouTube、X、Netflix、Bilibili、Udemy、edX の動画プレーヤーのコントロールバーに翻訳ボタンを表示します。
-      autoStart:
-        title: 動画を開いたら翻訳する
-        description: 動画の読み込みが終わり次第、ボタンを押さなくても字幕の翻訳を始めます。
+        description: "サイトごとに選べます：オフ、手動（プレーヤーの翻訳ボタンで開始）、自動（動画を開いたら開始）。"
+        mode:
+          off: "オフ"
+          manual: "手動"
+          auto: "自動"
       aiSegmentation:
         title: AI スマート区切り
         description: AI が字幕を文単位に切り直します。翻訳の応答が遅くなります。高性能な LLM が必要です。性能の低いモデルでは字幕の欠落やずれが起きることがあります。
@@ -1727,6 +1728,7 @@ subtitles:
   requestAiSubtitles: AI字幕をリクエスト
   usingAiSubtitles: AI字幕を使用中
   settings: 字幕設定
+  autoStartOnPlatform: "$1 の動画を開いたら自動で開始"
   toggle:
     enabled: 字幕翻訳をオンにしました
     disabled: 字幕翻訳をオフにしました

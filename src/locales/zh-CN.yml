@@ -1438,10 +1438,11 @@ options:
       title: 基础设置
       enable:
         title: 开启视频字幕
-        description: 在 YouTube、X、Netflix、哔哩哔哩、Udemy 和 edX 的视频播放器控制栏加上翻译按钮。
-      autoStart:
-        title: 打开视频就翻译
-        description: 视频加载完成后自动开始翻译字幕，不用再点按钮。
+        description: "按网站选择：关闭、手动开启（点播放器里的翻译按钮），或打开视频时自动开启。"
+        mode:
+          off: "关闭"
+          manual: "手动开启"
+          auto: "自动开启"
       aiSegmentation:
         title: AI 智能断句
         description: 让 AI 把字幕重新切成完整句子，会增加翻译响应时间。需要较强的 LLM，弱模型可能漏句或错位。
@@ -1737,6 +1738,7 @@ subtitles:
   requestAiSubtitles: 请求 AI 字幕
   usingAiSubtitles: 正在使用 AI 字幕中
   settings: 字幕设置
+  autoStartOnPlatform: "打开 $1 视频时自动开启"
   toggle:
     enabled: 字幕翻译已开启
     disabled: 字幕翻译已关闭

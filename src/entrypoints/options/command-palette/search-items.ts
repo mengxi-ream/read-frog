@@ -498,18 +498,11 @@ export const SEARCH_ITEMS: SearchItem[] = [
 
   // Video Subtitles page
   {
-    sectionId: "subtitles-enable",
-    route: "/video-subtitles",
+    // Its own page, drilled into from the Enable row of the Basics section.
+    sectionId: "subtitles-sites",
+    route: "/video-subtitles/sites",
     titleKey: "options.videoSubtitles.preference.enable.title",
     descriptionKey: "options.videoSubtitles.preference.enable.description",
-    pageKey: "options.videoSubtitles.title",
-  },
-  {
-    // Its own page, drilled into from the Translate on open row of the Basics section.
-    sectionId: "subtitles-auto-start",
-    route: "/video-subtitles/auto-start",
-    titleKey: "options.videoSubtitles.preference.autoStart.title",
-    descriptionKey: "options.videoSubtitles.preference.autoStart.description",
     pageKey: "options.videoSubtitles.title",
   },
   {

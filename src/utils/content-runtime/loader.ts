@@ -3,6 +3,7 @@ import type { Config } from "@/types/config/config"
 import { browser } from "#imports"
 import { CONFIG_STORAGE_KEY } from "@/utils/constants/config-storage-key"
 import { getEffectiveSiteControlUrl, isFrameSiteEnabled } from "@/utils/site-control"
+import { isSubtitlesOffOnHost } from "@/utils/subtitles/platform-host"
 import { shouldSkipDocument } from "./page-guards"
 import { CONTENT_RUNTIME_MODULE_FILE } from "./parts"
 
@@ -41,11 +42,13 @@ function isFrameSiteEnabledByStoredConfig(
   }
 }
 
-// Subtitles run in every frame of a video site, so with them switched off the
-// loader spares those frames the import. The other parts check their own
-// switches once loaded.
+// Subtitles run in every frame of a video site, so with them off for this
+// frame's site the loader spares the frame the import. The other parts check
+// their own switches once loaded.
 function isSwitchedOff(part: ContentRuntimePart, config: Config | null) {
-  return part === "subtitles" && config?.videoSubtitles?.enabled === false
+  return (
+    part === "subtitles" && isSubtitlesOffOnHost(config?.videoSubtitles, window.location.hostname)
+  )
 }
 
 /** The parts worth importing the runtime for in this document: none on a disabled site. */
