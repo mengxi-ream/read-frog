@@ -75,6 +75,10 @@ interface ProtocolMap {
   ensureIframeHostContentInjected: (data: { tabId?: number }) => void
   injectCurrentIframesAfterTopFrameNodeTranslation: () => void
   activateSameOriginIframeSelectionRuntime: () => boolean
+  // The selection toolbar's "Until I reload this page", kept for the whole tab
+  hideSelectionToolbarUntilReload: () => void
+  isSelectionToolbarHiddenUntilReload: () => boolean
+  selectionToolbarHiddenUntilReload: () => void
   reportDetectedPageLanguage: (data: {
     detectedCodeOrUnd: LanguageTag | "und"
     url: string

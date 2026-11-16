@@ -11,13 +11,13 @@ import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { SELECTION_CONTENT_OVERLAY_LAYERS } from "@/utils/constants/selection-overlay-layers"
 import { i18n } from "@/utils/i18n"
 import { shadowWrapper } from "../main"
-import { isSelectionToolbarHiddenUntilReloadAtom } from "./atoms"
+import { hideSelectionToolbarUntilReloadAtom } from "./atoms"
 
 export const DropEvent = "rf-dropdown-change"
 
 export function CloseButton() {
   const [selectionToolbar, setSelectionToolbar] = useAtom(configFieldsAtomMap.selectionToolbar)
-  const setHiddenUntilReload = useSetAtom(isSelectionToolbarHiddenUntilReloadAtom)
+  const hideUntilReload = useSetAtom(hideSelectionToolbarUntilReloadAtom)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -55,7 +55,7 @@ export function CloseButton() {
         <HideMenuItems
           title={i18n.t("options.selectionToolbar.closeMenu.title")}
           settingsLocation={`${i18n.t("popup.options")} → ${i18n.t("options.selectionToolbar.title")}`}
-          onHideUntilReload={() => setHiddenUntilReload(true)}
+          onHideUntilReload={hideUntilReload}
           onHideOnSite={(hostname) => {
             void setSelectionToolbar({
               ...selectionToolbar,

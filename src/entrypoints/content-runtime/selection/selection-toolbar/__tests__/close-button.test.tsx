@@ -15,6 +15,15 @@ vi.mock("../../main", () => ({
   shadowWrapper: document.body,
 }))
 
+const { sendMessageMock } = vi.hoisted(() => ({
+  sendMessageMock: vi.fn<(...args: any[]) => any>(async () => undefined),
+}))
+
+vi.mock("@/utils/message", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/utils/message")>()),
+  sendMessage: sendMessageMock,
+}))
+
 afterEach(() => {
   cleanup()
   fakeBrowser.reset()
@@ -69,6 +78,8 @@ describe("selection toolbar close menu", () => {
     await choose("hideMenu.untilReload")
 
     expect(store.get(isSelectionToolbarHiddenUntilReloadAtom)).toBe(true)
+    // So the toolbars in the page's other frames hide too.
+    expect(sendMessageMock).toHaveBeenCalledWith("hideSelectionToolbarUntilReload", undefined)
     expect(store.get(configFieldsAtomMap.selectionToolbar)).toEqual(before)
   })
 
