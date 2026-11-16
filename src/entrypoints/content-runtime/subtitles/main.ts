@@ -5,6 +5,7 @@ import { getLocalConfig } from "@/utils/config/storage"
 import { getTopPageUrl } from "@/utils/content-runtime/top-page-url"
 import { initI18n } from "@/utils/i18n"
 import { getEffectiveSiteControlUrl, isFrameSiteEnabled } from "@/utils/site-control"
+import { isSubtitlesOffOnHost } from "@/utils/subtitles/platform-host"
 
 declare global {
   interface Window {
@@ -21,7 +22,11 @@ export async function runSubtitlesContent(ctx: ContentScriptContext) {
   window.__READ_FROG_SUBTITLES_INJECTED__ = true
 
   const config = await getLocalConfig()
-  if (!config?.videoSubtitles.enabled || !(await isSiteEnabledHere(config))) {
+  if (
+    !config ||
+    isSubtitlesOffOnHost(config.videoSubtitles, window.location.hostname) ||
+    !(await isSiteEnabledHere(config))
+  ) {
     window.__READ_FROG_SUBTITLES_INJECTED__ = false
     return
   }

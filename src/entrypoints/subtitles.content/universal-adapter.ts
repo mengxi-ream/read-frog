@@ -93,6 +93,8 @@ const LOADING_MESSAGE: Record<SubtitlesSource, string | undefined> = {
 }
 
 export interface SubtitlesProvidersAdapter {
+  /** Which site's player this is; the settings panel's auto-start switch sets this site's mode. */
+  readonly platform: SubtitlesPlatform
   readonly embedded: boolean | undefined
   readonly containerShrinkRatio: ((container: HTMLElement) => number | null) | undefined
   readonly supportsAiSubtitles: boolean
@@ -164,6 +166,10 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
 
   get supportsSidebar() {
     return this.config.supportsSidebar ?? false
+  }
+
+  get platform() {
+    return this.config.platform
   }
 
   get videoIdChanged() {
@@ -734,7 +740,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
     const generation = this.playerGeneration
     const config = await getLocalConfig()
     if (this.isPlayerSuperseded(generation)) return
-    const autoStart = config?.videoSubtitles?.autoStart?.[this.config.platform] ?? false
+    const autoStart = config?.videoSubtitles?.platforms?.[this.config.platform] === "auto"
 
     const learningOpen = subtitlesStore.get(subtitlesSidebarOpenAtom)
 

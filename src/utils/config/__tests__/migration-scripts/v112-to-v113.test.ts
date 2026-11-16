@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { configSchema } from "@/types/config/config"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import { migrateConfig } from "../../migration"
 import { migrate } from "../../migration-scripts/v112-to-v113"
 
 describe("v112-to-v113 migration", () => {
@@ -40,19 +41,22 @@ describe("v112-to-v113 migration", () => {
     expect(migrate(oldConfig)).toBe(oldConfig)
   })
 
-  it("gives a config that the v113 schema accepts", () => {
+  it("gives a config the current schema accepts once the rest of the chain runs", async () => {
+    // v126 replaced `autoStart` with a mode per platform.
+    const { platforms: _platforms, ...videoSubtitles } = DEFAULT_CONFIG.videoSubtitles
     const config = {
       ...DEFAULT_CONFIG,
-      videoSubtitles: { ...DEFAULT_CONFIG.videoSubtitles, autoStart: true },
+      videoSubtitles: { ...videoSubtitles, enabled: true, autoStart: true },
     }
 
-    const parsed = configSchema.safeParse(migrate(structuredClone(config)))
+    const migrated = await migrateConfig(migrate(structuredClone(config)), 113)
+    const parsed = configSchema.safeParse(migrated)
 
     expect(parsed.success).toBe(true)
-    expect(parsed.data?.videoSubtitles.autoStart).toMatchObject({
-      youtube: true,
-      xcom: true,
-      netflix: true,
+    expect(parsed.data?.videoSubtitles.platforms).toMatchObject({
+      youtube: "auto",
+      xcom: "auto",
+      netflix: "auto",
     })
   })
 

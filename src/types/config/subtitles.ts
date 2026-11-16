@@ -56,11 +56,17 @@ export const subtitlesPlatformSchema = z.enum([
   "edx",
 ])
 
-// Per platform, whether subtitles start as a video loads. `.default()` lets a config stored
-// before a platform was added parse until its migration adds it.
-export const subtitlesAutoStartSchema = z.record(
+/**
+ * How subtitles run on one platform: not at all (no button in the player), from the button, or
+ * on their own as each video loads.
+ */
+export const subtitlesPlatformModeSchema = z.enum(["off", "manual", "auto"])
+
+// One mode per platform. `.default()` lets a config stored before a platform was added parse
+// until its migration adds it.
+export const subtitlesPlatformModesSchema = z.record(
   subtitlesPlatformSchema,
-  z.boolean().default(false),
+  subtitlesPlatformModeSchema.default("manual"),
 )
 
 export const subtitlePositionSchema = z.object({
@@ -69,8 +75,9 @@ export const subtitlePositionSchema = z.object({
 })
 
 export const videoSubtitlesSchema = z.object({
-  enabled: z.boolean(),
-  autoStart: subtitlesAutoStartSchema,
+  // `.prefault()` is load-bearing: a config stored before v126 has `enabled` and `autoStart`
+  // instead, and still has to parse until the v126 migration turns them into this.
+  platforms: subtitlesPlatformModesSchema.prefault({}),
   toggleShortcut: shortcutSchema,
   providerId: z.string().nonempty(),
   style: subtitlesStyleSchema,
@@ -94,6 +101,7 @@ export type SubtitleTextStyle = z.infer<typeof subtitleTextStyleSchema>
 export type SubtitleContainerStyle = z.infer<typeof subtitleContainerStyleSchema>
 export type SubtitlesStyle = z.infer<typeof subtitlesStyleSchema>
 export type SubtitlesPlatform = z.infer<typeof subtitlesPlatformSchema>
-export type SubtitlesAutoStart = z.infer<typeof subtitlesAutoStartSchema>
+export type SubtitlesPlatformMode = z.infer<typeof subtitlesPlatformModeSchema>
+export type SubtitlesPlatformModes = z.infer<typeof subtitlesPlatformModesSchema>
 export type SubtitlePosition = z.infer<typeof subtitlePositionSchema>
 export type VideoSubtitles = z.infer<typeof videoSubtitlesSchema>

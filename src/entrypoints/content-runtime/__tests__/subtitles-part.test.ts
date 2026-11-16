@@ -29,7 +29,13 @@ function configWith(
 ): Config {
   return {
     ...DEFAULT_CONFIG,
-    videoSubtitles: { ...DEFAULT_CONFIG.videoSubtitles, enabled: subtitles },
+    videoSubtitles: {
+      ...DEFAULT_CONFIG.videoSubtitles,
+      platforms: {
+        ...DEFAULT_CONFIG.videoSubtitles.platforms,
+        bilibili: subtitles ? "manual" : "off",
+      },
+    },
     siteControl: { ...DEFAULT_CONFIG.siteControl, ...siteControl },
   }
 }
@@ -75,11 +81,19 @@ describe("the subtitles part", () => {
     expect(mocks.bootstrapSubtitlesRuntime).toHaveBeenCalledTimes(1)
   })
 
-  it("does not start subtitles while they are switched off", async () => {
+  it("does not start subtitles while they are off for Bilibili", async () => {
     await runPart(configWith({}, { subtitles: false }))
 
     expect(mocks.bootstrapSubtitlesRuntime).not.toHaveBeenCalled()
     expect(window.__READ_FROG_SUBTITLES_INJECTED__).toBe(false)
+  })
+
+  it("starts subtitles on Bilibili while another platform is off", async () => {
+    const config = configWith({})
+    config.videoSubtitles.platforms = { ...config.videoSubtitles.platforms, youtube: "off" }
+    await runPart(config)
+
+    expect(mocks.bootstrapSubtitlesRuntime).toHaveBeenCalledTimes(1)
   })
 
   describe("in a player embedded in another site's page", () => {

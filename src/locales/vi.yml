@@ -1426,10 +1426,11 @@ options:
       title: Cơ bản
       enable:
         title: Bật phụ đề video
-        description: Thêm nút dịch vào thanh điều khiển của trình phát trên YouTube, X, Netflix, Bilibili, Udemy và edX.
-      autoStart:
-        title: Mở video là dịch
-        description: Bắt đầu dịch ngay khi video tải xong, không cần bấm nút.
+        description: "Chọn cho từng trang: tắt, thủ công (bắt đầu bằng nút dịch trong trình phát) hoặc tự động (bắt đầu ngay khi mở video)."
+        mode:
+          off: "Tắt"
+          manual: "Thủ công"
+          auto: "Tự động"
       aiSegmentation:
         title: AI phân đoạn thông minh
         description: AI cắt lại phụ đề thành từng câu. Bản dịch sẽ phản hồi chậm hơn. Cần LLM mạnh; mô hình yếu có thể bỏ sót hoặc lệch dòng.
@@ -1730,6 +1731,7 @@ subtitles:
   requestAiSubtitles: Yêu cầu phụ đề AI
   usingAiSubtitles: Đang dùng phụ đề AI
   settings: Cài đặt phụ đề
+  autoStartOnPlatform: "Tự động bật khi mở video $1"
   toggle:
     enabled: Đã bật dịch phụ đề
     disabled: Đã tắt dịch phụ đề

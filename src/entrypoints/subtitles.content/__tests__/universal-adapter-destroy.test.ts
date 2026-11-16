@@ -77,7 +77,7 @@ describe("universalVideoAdapter destroy", () => {
       language: {},
       providersConfig: [],
       videoSubtitles: {
-        autoStart: { youtube: false, xcom: false, netflix: false },
+        platforms: { youtube: "manual", xcom: "manual", netflix: "manual" },
         providerId: null,
       },
     })

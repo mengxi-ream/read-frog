@@ -1,3 +1,5 @@
+import type { SubtitlesPlatform } from "@/types/config/subtitles"
+
 // Timing constants
 export const NAVIGATION_HANDLER_DELAY = 1000
 export const FETCH_CHECK_INTERVAL = 100
@@ -230,3 +232,13 @@ export const SUBTITLE_CSS_PRESETS: Record<SubtitleCssPresetId, string> = {
 // Subtitles source
 export const SUBTITLES_SOURCE = { NATIVE: "native", AI: "ai" } as const
 export type SubtitlesSource = (typeof SUBTITLES_SOURCE)[keyof typeof SUBTITLES_SOURCE]
+
+// Brand names, so they stay the same in every UI language.
+export const SUBTITLES_PLATFORM_NAMES = {
+  youtube: "YouTube",
+  xcom: "X",
+  netflix: "Netflix",
+  bilibili: "Bilibili",
+  udemy: "Udemy",
+  edx: "edX",
+} as const satisfies Record<SubtitlesPlatform, string>

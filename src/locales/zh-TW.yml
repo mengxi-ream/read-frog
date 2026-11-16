@@ -1436,10 +1436,11 @@ options:
       title: 基礎設定
       enable:
         title: 開啟影片字幕
-        description: 在 YouTube、X、Netflix、嗶哩嗶哩、Udemy 和 edX 的影片播放器控制列加上翻譯按鈕。
-      autoStart:
-        title: 打開影片就翻譯
-        description: 影片載入完成後自動開始翻譯字幕，不用再點按鈕。
+        description: "依網站選擇：關閉、手動開啟（點播放器裡的翻譯按鈕），或打開影片時自動開啟。"
+        mode:
+          off: "關閉"
+          manual: "手動開啟"
+          auto: "自動開啟"
       aiSegmentation:
         title: AI 智慧斷句
         description: 讓 AI 把字幕重新切成完整句子，會增加翻譯回應時間。需要較強的 LLM，弱模型可能漏句或錯位。
@@ -1740,6 +1741,7 @@ subtitles:
   requestAiSubtitles: 請求 AI 字幕
   usingAiSubtitles: 正在使用 AI 字幕
   settings: 字幕設定
+  autoStartOnPlatform: "打開 $1 影片時自動開啟"
   toggle:
     enabled: 字幕翻譯已開啟
     disabled: 字幕翻譯已關閉

@@ -16,10 +16,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/base-ui/select"
+import { Switch } from "@/components/ui/base-ui/switch"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { SUBTITLES_PLATFORM_NAMES } from "@/utils/constants/subtitles"
 import { i18n } from "@/utils/i18n"
 import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-host"
 import { subtitlesStore } from "../../../atoms"
+import { useSubtitlesUI } from "../../subtitles-ui-context"
 import { SELECT_CONTENT_CLASS, SELECT_TRIGGER_CLASS } from "./style"
 import { SubpageLink } from "./subpage-link"
 
@@ -32,6 +35,37 @@ function SelectRow({ label, children }: { label: string; children: ReactNode }) 
     <div className="flex items-center justify-between gap-2 border border-transparent px-2 py-1.5">
       <span className="min-w-0 truncate text-xs leading-5">{label}</span>
       {children}
+    </div>
+  )
+}
+
+/**
+ * Whether this site's videos start translated: moves the site between "manual" and "auto".
+ * "Off" is left to the options page, since it takes away the button this panel opens from.
+ * Like the auto-start setting itself, it applies from the next video on.
+ */
+function AutoStartRow() {
+  const { platform } = useSubtitlesUI()
+  const [config, setConfig] = useAtom(configFieldsAtomMap.videoSubtitles, { store: subtitlesStore })
+  const switchId = "read-frog-subtitles-auto-start"
+  const label = i18n.t("subtitles.autoStartOnPlatform", [SUBTITLES_PLATFORM_NAMES[platform]])
+
+  return (
+    // Laid out like SelectRow, but the label wraps: a switch is narrow, and the site name in
+    // the label is what tells this row apart from a general setting.
+    <div className="flex items-center justify-between gap-2 border border-transparent px-2 py-1.5">
+      <label htmlFor={switchId} className="min-w-0 cursor-pointer text-xs leading-5">
+        {label}
+      </label>
+      <Switch
+        id={switchId}
+        checked={config.platforms[platform] === "auto"}
+        onCheckedChange={(checked) => {
+          void setConfig((current) => ({
+            platforms: { ...current.platforms, [platform]: checked ? "auto" : "manual" },
+          }))
+        }}
+      />
     </div>
   )
 }
@@ -105,6 +139,8 @@ export function SettingsView({ onNavigate }: { onNavigate: NavigateToSubpage }) 
             </Select>
           </SelectRow>
         )}
+
+        <AutoStartRow />
 
         <SubpageLink id="style" onNavigate={onNavigate} />
       </div>

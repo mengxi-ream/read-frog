@@ -1426,10 +1426,11 @@ options:
       title: Temel ayarlar
       enable:
         title: Video altyazılarını aç
-        description: YouTube, X, Netflix, Bilibili, Udemy ve edX'te oynatıcı kontrollerine bir çeviri düğmesi ekler.
-      autoStart:
-        title: Video açılınca çevir
-        description: Video yüklenir yüklenmez, düğmeye basmadan altyazıları çevirmeye başlar.
+        description: "Her site için seçin: kapalı, elle (oynatıcıdaki çeviri düğmesiyle başlar) veya otomatik (video açılır açılmaz başlar)."
+        mode:
+          off: "Kapalı"
+          manual: "Elle"
+          auto: "Otomatik"
       aiSegmentation:
         title: AI akıllı bölümlendirme
         description: Yapay zekâ altyazıları cümlelere yeniden böler. Çeviriler daha geç gelir. Güçlü bir LLM gerekir; zayıf modeller satırları atlayabilir veya kaydırabilir.
@@ -1730,6 +1731,7 @@ subtitles:
   requestAiSubtitles: Yapay zeka altyazısı iste
   usingAiSubtitles: Yapay zeka altyazısı kullanılıyor
   settings: Altyazı ayarları
+  autoStartOnPlatform: "$1 videolarında otomatik başlat"
   toggle:
     enabled: Altyazı çevirisi açık
     disabled: Altyazı çevirisi kapalı
