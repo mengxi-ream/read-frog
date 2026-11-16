@@ -31,7 +31,7 @@ import {
   AnnotateReveal,
   useAnnotateReveal,
 } from "../annotation/toolbar-slot"
-import { buildContextSnapshot, readSelectionSnapshot } from "../utils"
+import { buildContextSnapshot, normalizeSelectedText, readSelectionSnapshot } from "../utils"
 import {
   clearSelectionStateAtom,
   createSelectionSession,
@@ -531,8 +531,17 @@ export function SelectionToolbar() {
         return
       }
 
-      // if the selected content is cleared, hide the tooltip
-      if (!selection || selection.toString().trim().length === 0) {
+      // Once no text is selected, hide the toolbar. A selection across shadow
+      // roots can stringify blank (and report isCollapsed) while text is
+      // selected, so a blank string is checked by reading the selection. Only
+      // then: reading each one would walk a long selection on every change.
+      // `type` can't decide it either: Firefox reports "Caret" for text
+      // selected in a text control or a shadow root.
+      // https://github.com/mengxi-ream/read-frog/issues/2385
+      if (
+        !selection ||
+        (normalizeSelectedText(selection.toString()) === "" && !readSelectionSnapshot(selection))
+      ) {
         if (preserveSelectionStateRef.current) {
           return
         }

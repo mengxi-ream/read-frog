@@ -1,6 +1,7 @@
 // The styles a page gets for annotations: a ::highlight() rule for the marks
 // and a ladder of line-heights the glosses can ask for. Both go in the host
-// document through adoptedStyleSheets, as the translation preset styles do,
+// document (and the shadow root of an annotated block that sits in one)
+// through adoptedStyleSheets, as the translation preset styles do,
 // never as inline styles: page translation's mutation observer watches
 // `style` on host blocks, and a data attribute is not a record it sees.
 
@@ -42,21 +43,23 @@ export function buildAnnotationDocumentCss(): string {
 
 let documentSheet: CSSStyleSheet | null = null
 
-export function ensureAnnotationDocumentStyles(): void {
+/**
+ * Into the document, or into the shadow root an annotated block sits in: the
+ * document's styles stop at a shadow root, marks and line-heights alike.
+ */
+export function ensureAnnotationDocumentStyles(root: Document | ShadowRoot = document): void {
   if (!documentSheet) {
     documentSheet = new CSSStyleSheet()
     documentSheet.replaceSync(buildAnnotationDocumentCss())
   }
-  if (!document.adoptedStyleSheets.includes(documentSheet)) {
-    document.adoptedStyleSheets = [...document.adoptedStyleSheets, documentSheet]
+  if (!root.adoptedStyleSheets.includes(documentSheet)) {
+    root.adoptedStyleSheets = [...root.adoptedStyleSheets, documentSheet]
   }
 }
 
-export function removeAnnotationDocumentStyles(): void {
+export function removeAnnotationDocumentStyles(root: Document | ShadowRoot = document): void {
   if (!documentSheet) return
-  document.adoptedStyleSheets = document.adoptedStyleSheets.filter(
-    (sheet) => sheet !== documentSheet,
-  )
+  root.adoptedStyleSheets = root.adoptedStyleSheets.filter((sheet) => sheet !== documentSheet)
 }
 
 /**

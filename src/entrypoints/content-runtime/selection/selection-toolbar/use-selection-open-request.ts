@@ -1,7 +1,7 @@
 import type { SelectionRangeSnapshot } from "../utils"
 import type { SelectionSession } from "./atoms"
 import { useCallback, useEffect, useRef } from "react"
-import { toLiveRange } from "../utils"
+import { readRangeClientRects } from "../utils"
 
 interface SelectionAnchor {
   x: number
@@ -21,13 +21,11 @@ const RECENT_OPEN_REQUEST_TTL_MS = 10_000
 
 function getSelectionAnchorFromRange(rangeSnapshot: SelectionRangeSnapshot) {
   try {
-    const range = toLiveRange(rangeSnapshot)
-    const clientRects = [...range.getClientRects()]
-    const targetRect =
-      clientRects.toReversed().find((rect) => rect.width > 0 || rect.height > 0) ??
-      range.getBoundingClientRect()
+    const targetRect = readRangeClientRects(rangeSnapshot)
+      .toReversed()
+      .find((rect) => rect.width > 0 || rect.height > 0)
 
-    if (targetRect.width === 0 && targetRect.height === 0) {
+    if (!targetRect) {
       return null
     }
 

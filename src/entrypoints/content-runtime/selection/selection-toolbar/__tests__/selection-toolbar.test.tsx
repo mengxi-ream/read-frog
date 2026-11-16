@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { DEFERRED_SELECTION_OPEN_EVENT } from "@/utils/constants/selection"
 import { SELECTION_CONTENT_OVERLAY_ROOT_ATTRIBUTE } from "@/utils/constants/selection-overlay-layers"
+import { createShadowSelection } from "../../__tests__/composed-selection"
 import { isSelectionToolbarHiddenUntilReloadAtom, selectionSessionAtom } from "../atoms"
 import { SelectionToolbar } from "../index"
 import { MODAL_DIALOG_HOST_SLOT_ATTRIBUTE } from "../modal-dialog-host"
@@ -119,6 +120,7 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
 
     // Mock window.getSelection with dynamic text
     window.getSelection = vi.fn<(...args: any[]) => any>(() => ({
+      type: "Range",
       toString: mockSelectionToString,
       getRangeAt: () => ({
         startContainer: document.body,
@@ -139,12 +141,15 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
 
   const setMockSelectionText = (text: string, containsNodeResult = true) => {
     window.getSelection = vi.fn<(...args: any[]) => any>(() => ({
+      type: text ? "Range" : "Caret",
       toString: vi.fn<(...args: any[]) => any>(() => text),
+      // A blank selection covers no text: a caret, or a space, which a
+      // collapsed range stands in for here.
       getRangeAt: () => ({
         startContainer: document.body,
         startOffset: 0,
         endContainer: document.body,
-        endOffset: 1,
+        endOffset: text.trim() ? 1 : 0,
       }),
       containsNode: vi.fn<(...args: any[]) => any>(() => containsNodeResult),
     }))
@@ -483,6 +488,107 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
 
     await triggerMouseUpWithSelection(screen.getByTestId("test-element"))
     expectToolbarHidden()
+  })
+
+  // https://github.com/mengxi-ream/read-frog/issues/2385
+  it("keeps the toolbar for a selection across shadow roots, which the browser stringifies blank", async () => {
+    render(
+      <div>
+        <SelectionToolbar />
+        <div data-testid="test-element">Some text</div>
+      </div>,
+    )
+
+    await clearToolbarState()
+
+    const host = document.createElement("div")
+    const shadowRoot = host.attachShadow({ mode: "open" })
+    shadowRoot.innerHTML = `<p>nested reply</p><span id="date"></span>`
+    const dateShadowRoot = shadowRoot.querySelector("#date")!.attachShadow({ mode: "open" })
+    dateShadowRoot.innerHTML = `<div id="pubdate">5 hours ago</div>`
+    screen.getByTestId("test-element").append(host)
+
+    const { selection } = createShadowSelection(
+      {
+        startContainer: shadowRoot.querySelector("p")!.firstChild!,
+        startOffset: 0,
+        endContainer: dateShadowRoot.querySelector("#pubdate")!,
+        endOffset: 0,
+      },
+      " \n",
+    )
+    window.getSelection = vi.fn<(...args: any[]) => any>(() => selection)
+
+    await triggerMouseUpWithSelection(screen.getByTestId("test-element"))
+    await waitFor(() => expectToolbarVisible())
+    expect(getDefaultStore().get(selectionSessionAtom)?.selectionSnapshot.text).toBe("nested reply")
+
+    await act(async () => {
+      document.dispatchEvent(new Event("selectionchange"))
+    })
+    expectToolbarVisible()
+
+    // A click elsewhere collapses it to a caret.
+    setMockSelectionText("")
+    await act(async () => {
+      document.dispatchEvent(new Event("selectionchange"))
+    })
+    expectToolbarHidden()
+  })
+
+  // Shift+Arrow can shrink a selection down to a space: still a Range, with no text.
+  it("hides the toolbar and forgets the selection once only whitespace is selected", async () => {
+    render(
+      <div>
+        <SelectionToolbar />
+        <div data-testid="test-element">Some text</div>
+      </div>,
+    )
+
+    await clearToolbarState()
+    await triggerMouseUpWithSelection(screen.getByTestId("test-element"))
+    await waitFor(() => expectToolbarVisible())
+    expect(getDefaultStore().get(selectionSessionAtom)?.selectionSnapshot.text).toBe(
+      MOCK_SELECTED_TEXT,
+    )
+
+    setMockSelectionText(" ")
+    await act(async () => {
+      document.dispatchEvent(new Event("selectionchange"))
+    })
+    expectToolbarHidden()
+    expect(getDefaultStore().get(selectionSessionAtom)).toBeNull()
+  })
+
+  it("keeps the toolbar for text Firefox selects in a text control, which it reports as a caret", async () => {
+    render(
+      <div>
+        <SelectionToolbar />
+        <div data-testid="test-element">Some text</div>
+      </div>,
+    )
+
+    await clearToolbarState()
+    await triggerMouseUpWithSelection(screen.getByTestId("test-element"))
+    await waitFor(() => expectToolbarVisible())
+
+    // The page's selection is a caret; the control holds the selected text.
+    window.getSelection = vi.fn<(...args: any[]) => any>(() => ({
+      type: "Caret",
+      isCollapsed: true,
+      toString: () => MOCK_SELECTED_TEXT,
+      getRangeAt: () => ({
+        startContainer: document.body,
+        startOffset: 0,
+        endContainer: document.body,
+        endOffset: 0,
+      }),
+      containsNode: () => true,
+    }))
+    await act(async () => {
+      document.dispatchEvent(new Event("selectionchange"))
+    })
+    expectToolbarVisible()
   })
 
   it("should show toolbar when valid text is selected", async () => {
