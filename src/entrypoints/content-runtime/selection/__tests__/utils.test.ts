@@ -942,9 +942,11 @@ describe("readSelectionSnapshot", () => {
 
     // What a content script's dom.openOrClosedShadowRoot() reaches.
     function attachClosedShadowRoots(roots: Map<Element, ShadowRoot>) {
-      vi.spyOn(fakeBrowser, "dom", "get").mockReturnValue({
-        openOrClosedShadowRoot: (element: HTMLElement) => roots.get(element) ?? null,
-      })
+      const openOrClosedShadowRoot = vi.fn<(element: HTMLElement) => ShadowRoot | null>(
+        (element) => roots.get(element) ?? null,
+      )
+      vi.spyOn(fakeBrowser, "dom", "get").mockReturnValue({ openOrClosedShadowRoot })
+      return openOrClosedShadowRoot
     }
 
     function renderWidget(widgetShadowHtml: string, widgetLightHtml: string) {
@@ -961,17 +963,63 @@ describe("readSelectionSnapshot", () => {
       }
       const widgetShadowRoot = widget.attachShadow({ mode: "closed" })
       widgetShadowRoot.innerHTML = widgetShadowHtml
-      attachClosedShadowRoots(new Map([[widget, widgetShadowRoot]]))
-      return { widget, startText, endText }
-    }
-
-    it("reads what a closed shadow root renders, not its host's light DOM", () => {
-      const { startText, endText } = renderWidget(`Rendered`, `fallback`)
+      const roots = new Map([[widget, widgetShadowRoot]])
+      const openOrClosedShadowRoot = attachClosedShadowRoots(roots)
       const { selection } = createShadowSelection(
         { startContainer: startText, startOffset: 0, endContainer: endText, endOffset: 3 },
         "Start",
       )
+      return {
+        widget,
+        widgetShadowRoot,
+        startText,
+        endText,
+        roots,
+        openOrClosedShadowRoot,
+        selection,
+      }
+    }
 
+    it("reads what a closed shadow root renders, not its host's light DOM", () => {
+      const { selection } = renderWidget(`Rendered`, `fallback`)
+
+      expect(readSelectionSnapshot(selection)?.text).toBe("Start Rendered End")
+    })
+
+    it("reads a closed shadow root in Firefox, which has it as a property of the host", () => {
+      const { widget, widgetShadowRoot, selection } = renderWidget(`Rendered`, `fallback`)
+      // Firefox has no dom API.
+      vi.spyOn(fakeBrowser, "dom", "get").mockReturnValue(undefined as never)
+      Object.defineProperty(widget, "openOrClosedShadowRoot", { value: widgetShadowRoot })
+
+      expect(readSelectionSnapshot(selection)?.text).toBe("Start Rendered End")
+    })
+
+    // Each answer takes an extension call, ten times as slow as reading shadowRoot.
+    it("asks about each element once while reading a selection, and once building its context", () => {
+      const { selection, openOrClosedShadowRoot } = renderWidget(
+        `<i>Rendered</i> <slot></slot>`,
+        `<b>slotted</b>`,
+      )
+      const askedElements = () => openOrClosedShadowRoot.mock.calls.map(([element]) => element)
+
+      const snapshot = readSelectionSnapshot(selection)
+      expect(snapshot?.text).toBe("Start Rendered slotted End")
+      expect(askedElements()).not.toHaveLength(0)
+      expect(new Set(askedElements()).size).toBe(askedElements().length)
+
+      openOrClosedShadowRoot.mockClear()
+      expect(buildContextSnapshot(snapshot)?.paragraphs).toEqual(["Start Rendered slotted End"])
+      expect(askedElements()).not.toHaveLength(0)
+      expect(new Set(askedElements()).size).toBe(askedElements().length)
+    })
+
+    it("finds a closed shadow root attached after an earlier read, as an upgrade does", () => {
+      const { widget, widgetShadowRoot, roots, selection } = renderWidget(`Rendered`, `fallback`)
+      roots.delete(widget)
+      expect(readSelectionSnapshot(selection)?.text).toBe("Start fallback End")
+
+      roots.set(widget, widgetShadowRoot)
       expect(readSelectionSnapshot(selection)?.text).toBe("Start Rendered End")
     })
 

@@ -164,10 +164,11 @@ function getParentNodeAcrossShadow(node: Node | null) {
 }
 
 // A content script can reach closed shadow roots as well: through
-// dom.openOrClosedShadowRoot() (Chrome), or the element's own
-// openOrClosedShadowRoot() (Firefox). Reading a closed root's host as plain
-// light DOM would read its unrendered children instead of what the page shows.
-function readClosedShadowRoot(element: Element): ShadowRoot | null {
+// dom.openOrClosedShadowRoot() (Chrome), or the element's openOrClosedShadowRoot
+// property (Firefox, which has no dom API). Reading a closed root's host as
+// plain light DOM would read its unrendered children instead of what the page
+// shows.
+function lookUpClosedShadowRoot(element: Element): ShadowRoot | null {
   const openOrClosedShadowRoot = browser.dom?.openOrClosedShadowRoot
   if (typeof openOrClosedShadowRoot === "function" && element instanceof HTMLElement) {
     try {
@@ -177,10 +178,36 @@ function readClosedShadowRoot(element: Element): ShadowRoot | null {
     }
   }
 
-  const firefoxElement = element as Element & { openOrClosedShadowRoot?: () => ShadowRoot | null }
-  return typeof firefoxElement.openOrClosedShadowRoot === "function"
-    ? (firefoxElement.openOrClosedShadowRoot() ?? null)
-    : null
+  const firefoxElement = element as Element & { openOrClosedShadowRoot?: ShadowRoot | null }
+  return firefoxElement.openOrClosedShadowRoot ?? null
+}
+
+// dom.openOrClosedShadowRoot() takes ten times as long as reading shadowRoot,
+// and reading a selection asks about the same elements many times over. So one
+// read keeps the answers it gets. No page script runs during it, so none can
+// attach a shadow root meanwhile.
+let knownClosedShadowRoots: Map<Element, ShadowRoot | null> | null = null
+
+function rememberingClosedShadowRoots<T>(read: () => T): T {
+  if (knownClosedShadowRoots) {
+    return read()
+  }
+
+  knownClosedShadowRoots = new Map()
+  try {
+    return read()
+  } finally {
+    knownClosedShadowRoots = null
+  }
+}
+
+function readClosedShadowRoot(element: Element) {
+  let shadowRoot = knownClosedShadowRoots?.get(element)
+  if (shadowRoot === undefined) {
+    shadowRoot = lookUpClosedShadowRoot(element)
+    knownClosedShadowRoots?.set(element, shadowRoot)
+  }
+  return shadowRoot
 }
 
 function getShadowRootOf(node: Node | null | undefined) {
@@ -323,6 +350,10 @@ function needsOwnReading(range: SelectionRangeSnapshot, browserText: string) {
 }
 
 export function readSelectionSnapshot(selection: Selection | null): SelectionSnapshot | null {
+  return rememberingClosedShadowRoots(() => readSelection(selection))
+}
+
+function readSelection(selection: Selection | null): SelectionSnapshot | null {
   if (!selection) {
     return null
   }
@@ -757,6 +788,10 @@ function readRangesText(ranges: SelectionRangeSnapshot[]) {
 // Client rects of what a range covers. A live Range measures a range inside one
 // tree; one that spans shadow roots is measured by the text it covers.
 export function readRangeClientRects(range: SelectionRangeSnapshot): DOMRect[] {
+  return rememberingClosedShadowRoots(() => measureRange(range))
+}
+
+function measureRange(range: SelectionRangeSnapshot): DOMRect[] {
   if (isInOneTree(range)) {
     try {
       return [...toLiveRange(range).getClientRects()]
@@ -1003,6 +1038,10 @@ function collectTextControlParagraphs({
 }
 
 export function buildContextSnapshot(selection: SelectionSnapshot | null): ContextSnapshot | null {
+  return rememberingClosedShadowRoots(() => buildContext(selection))
+}
+
+function buildContext(selection: SelectionSnapshot | null): ContextSnapshot | null {
   if (!selection || selection.text === "") {
     return null
   }
