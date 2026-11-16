@@ -1,5 +1,7 @@
 import { browser } from "#imports"
-import { NOTRANSLATE_CLASS, REACT_SHADOW_HOST_CLASS } from "@/utils/constants/dom-labels"
+import { ANNOTATION_HOST_ATTRIBUTE } from "@/utils/annotate/styles"
+import { REACT_SHADOW_HOST_CLASS } from "@/utils/constants/dom-labels"
+import { PROTECTED_HOST_ATTRIBUTE } from "@/utils/select-all"
 
 export interface SelectionRangeSnapshot {
   startContainer: Node
@@ -42,14 +44,16 @@ const TEXT_CONTROL_PARAGRAPH_BREAK_REGEX = /(\n[^\S\n]*\n)/
 // Password fields are deliberately absent: their value must never reach a prompt.
 const TEXT_CONTROL_INPUT_TYPES = new Set(["email", "search", "tel", "text", "url"])
 // Text inside these is never rendered as page content: a textarea's is only its
-// default value, and a frame, canvas, select box, meter or media element shows
-// something else in place of what it holds. So it must not leak into the
-// selected text or paragraph context.
+// default value, an SVG's description and metadata are for tools, and a frame,
+// canvas, select box, meter or media element shows something else in place of
+// what it holds. So it must not leak into the selected text or paragraph context.
 const NON_CONTENT_ELEMENT_NAMES = new Set([
   "audio",
   "canvas",
+  "desc",
   "head",
   "iframe",
+  "metadata",
   "meter",
   "noscript",
   "progress",
@@ -67,6 +71,11 @@ const NON_CONTENT_ELEMENT_NAMES = new Set([
 // for the same reason (DONT_WALK_AND_TRANSLATE_TAGS).
 const RUBY_ANNOTATION_ELEMENT_NAMES = new Set(["rp", "rt"])
 const RUBY_ANNOTATION_SELECTOR = "rp, rt"
+// Read Frog's own UI, by the marks Read Frog puts on its shadow hosts: the
+// selection toolbar and side panel, the annotation layer, and the React hosts
+// of page translation, subtitles and the diagnosis panel. Not by the
+// notranslate class, which pages put on their own text too.
+const READ_FROG_UI_HOST_SELECTOR = `[${PROTECTED_HOST_ATTRIBUTE}], [${ANNOTATION_HOST_ATTRIBUTE}], .${REACT_SHADOW_HOST_CLASS}`
 const NON_NEWLINE_WHITESPACE_REGEX = /[^\S\n]+/g
 const LEADING_SPACES_REGEX = /^ +/
 const TRAILING_SPACES_REGEX = / +$/
@@ -279,18 +288,38 @@ function holdsRubyAnnotation(range: SelectionRangeSnapshot) {
     return false
   }
 
-  const liveRange = toLiveRange(range)
+  let liveRange: Range
+  try {
+    liveRange = toLiveRange(range)
+  } catch {
+    // Firefox counts a boundary in slotted content among the slot's assigned
+    // nodes, which can be past the end of the slot's own children.
+    return false
+  }
   return [...root.querySelectorAll(RUBY_ANNOTATION_SELECTOR)].some((annotation) =>
     liveRange.intersectsNode(annotation),
   )
 }
 
+function isCollapsed({
+  startContainer,
+  startOffset,
+  endContainer,
+  endOffset,
+}: SelectionRangeSnapshot) {
+  return startContainer === endContainer && startOffset === endOffset
+}
+
 // Selection.toString() is the browser's own reading of the page, and right for
-// most selections. Two it reads wrong: one whose ends are in different trees,
-// of which it reads only the tree it starts in (#2385), and one holding
-// furigana, which it reads along with the base text.
-function needsOwnReading(range: SelectionRangeSnapshot) {
-  return !isInOneTree(range) || holdsRubyAnnotation(range)
+// most selections. It reads these wrong: one whose ends are in different trees,
+// of which it reads only the tree it starts in (#2385), one holding furigana,
+// which it reads along with the base text, and one whose text is all in shadow
+// roots inside it (or any in a shadow root, in Firefox), which it reads as
+// nothing. A caret selects nothing, so it is never read.
+function needsOwnReading(range: SelectionRangeSnapshot, browserText: string) {
+  return (
+    !isCollapsed(range) && (browserText === "" || !isInOneTree(range) || holdsRubyAnnotation(range))
+  )
 }
 
 export function readSelectionSnapshot(selection: Selection | null): SelectionSnapshot | null {
@@ -306,7 +335,7 @@ export function readSelectionSnapshot(selection: Selection | null): SelectionSna
   // string has text always has a snapshot.
   const browserText = normalizeSelectedText(selection.toString())
   const text =
-    !textControl && ranges.some(needsOwnReading)
+    !textControl && ranges.some((range) => needsOwnReading(range, browserText))
       ? readRangesText(ranges) || browserText
       : browserText
 
@@ -385,15 +414,89 @@ interface TextPiece {
 
 // Where a boundary point falls in a walk: inside a text node, in front of a
 // node, or after the last child of a node.
-function locateBoundary(container: Node, offset: number) {
+interface Boundary {
+  text: Text | null
+  offset: number
+  before: Node | null
+  endOf: Node | null
+}
+
+function isSlotShowingAssignedNodes(node: Node): node is HTMLSlotElement {
+  return node instanceof HTMLSlotElement && node.assignedNodes().length > 0
+}
+
+// Whether the flat tree shows `node` where getFlatParent() puts it. It doesn't
+// show a host's light child that no slot takes (a framework's comment marker,
+// whitespace between named slots), a slot's fallback while the slot shows
+// assigned nodes, or a closed shadow root this script can't reach.
+function isShownByFlatParent(node: Node) {
+  if (node instanceof ShadowRoot) {
+    return getShadowRootOf(node.host) === node
+  }
+  if (getAssignedSlot(node)) {
+    return true
+  }
+
+  const parent = node.parentNode
+  return !parent || !(getShadowRootOf(parent) || isSlotShowingAssignedNodes(parent))
+}
+
+// The outermost node from `node` up that the flat tree doesn't show, or null.
+function findUnshownAncestor(node: Node) {
+  let unshown: Node | null = null
+  for (let current: Node | null = node; current; current = getFlatParent(current)) {
+    if (!isShownByFlatParent(current)) {
+      unshown = current
+    }
+  }
+  return unshown
+}
+
+function locateBoundary(container: Node, offset: number): Boundary {
+  const unshown = findUnshownAncestor(container)
+  if (unshown) {
+    return locateUnshownBoundary(unshown)
+  }
   if (container instanceof Text) {
     return { text: container, offset, before: null, endOf: null }
   }
 
-  const child = container.childNodes[offset]
+  // Firefox counts a boundary in slotted content among the slot's assigned
+  // nodes, where the DOM counts the slot's own children, its fallback.
+  const child = isSlotShowingAssignedNodes(container)
+    ? container.assignedNodes()[offset]
+    : container.childNodes[offset]
+  if (child && !isShownByFlatParent(child)) {
+    return locateUnshownBoundary(child)
+  }
   return child
     ? { text: null, offset: 0, before: child, endOf: null }
     : { text: null, offset: 0, before: null, endOf: container }
+}
+
+// The walk never meets a boundary at something the page doesn't render, and
+// would read on to the end of the page looking for it. So it moves to the next
+// light child of the host that a slot shows. Failing that, to the start of what
+// the host renders, or past it if the host shows a light child before it.
+function locateUnshownBoundary(unshown: Node): Boundary {
+  const parent = getFlatParent(unshown)
+  if (!parent) {
+    return { text: null, offset: 0, before: null, endOf: unshown }
+  }
+
+  const siblings: Node[] = [...parent.childNodes]
+  // A shadow root comes before the host's light children.
+  const index = unshown instanceof ShadowRoot ? 0 : siblings.indexOf(unshown)
+  const isShown = (node: Node) => findUnshownAncestor(node) === null
+  const next = siblings.slice(index).find(isShown)
+  if (next) {
+    return { text: null, offset: 0, before: next, endOf: null }
+  }
+
+  const first = siblings.slice(0, index).some(isShown) ? undefined : getFlatChildren(parent)[0]
+  return first
+    ? { text: null, offset: 0, before: first, endOf: null }
+    : { text: null, offset: 0, before: null, endOf: parent }
 }
 
 interface TextVisibility {
@@ -444,6 +547,11 @@ function readChildTextVisibility(
 // a host's shadow root comes before its slotted children, but the page can show
 // a slotted child first. So the walk starts at whichever end it reaches first.
 function collectRangeTextPieces(range: SelectionRangeSnapshot): TextPiece[] {
+  // A removed end is never met, and the walk would read on to the end of the page.
+  if (!range.startContainer.isConnected || !range.endContainer.isConnected) {
+    return []
+  }
+
   return walkTextPieces(
     range,
     getTraversalRoot(range),
@@ -461,7 +569,7 @@ function collectRangeTextPieces(range: SelectionRangeSnapshot): TextPiece[] {
 function walkTextPieces(
   range: SelectionRangeSnapshot,
   root: Node,
-  ends: ReturnType<typeof locateBoundary>[],
+  ends: Boundary[],
   rootVisibility: TextVisibility,
   startsInside: boolean,
 ): TextPiece[] {
@@ -503,7 +611,11 @@ function walkTextPieces(
     // Read Frog's own UI (toolbar, diagnosis panel, annotation layer) hangs off
     // <body> in shadow roots. It is no part of the page, unless the selection
     // is in it.
-    if (!endPaths.has(node) && isExtensionOverlayHost(node)) {
+    if (
+      !endPaths.has(node) &&
+      node instanceof Element &&
+      node.matches(READ_FROG_UI_HOST_SELECTOR)
+    ) {
       return
     }
 
@@ -559,15 +671,6 @@ function walkTextPieces(
 
   visit(root, rootVisibility)
   return pieces
-}
-
-function isExtensionOverlayHost(node: Node) {
-  return (
-    node instanceof Element &&
-    (node.classList.contains(REACT_SHADOW_HOST_CLASS) ||
-      node.classList.contains(NOTRANSLATE_CLASS)) &&
-    getShadowRootOf(node) !== null
-  )
 }
 
 function readPieceText(piece: TextPiece) {
@@ -655,11 +758,18 @@ function readRangesText(ranges: SelectionRangeSnapshot[]) {
 // tree; one that spans shadow roots is measured by the text it covers.
 export function readRangeClientRects(range: SelectionRangeSnapshot): DOMRect[] {
   if (isInOneTree(range)) {
-    return [...toLiveRange(range).getClientRects()]
+    try {
+      return [...toLiveRange(range).getClientRects()]
+    } catch {
+      // Firefox's count among a slot's assigned nodes can be past the end of
+      // the slot's own children. The text pieces don't need the count to fit.
+    }
   }
 
+  // One Range measures every piece: the page updates each live Range on every
+  // change to the DOM until it is collected, and this runs on every scroll frame.
+  const pieceRange = document.createRange()
   return collectRangeTextPieces(range).flatMap((piece) => {
-    const pieceRange = document.createRange()
     if (piece.node instanceof Text) {
       pieceRange.setStart(piece.node, piece.start)
       pieceRange.setEnd(piece.node, piece.end)
@@ -773,28 +883,74 @@ function extractOwnerText(owner: ParagraphOwner) {
 
   // All the owner renders, its shadow root included. The walk starts at the
   // owner rather than its parent, so long runs of sibling paragraphs aren't
-  // rescanned once per paragraph. The owner's next sibling is no end: slots can
-  // render that sibling before the owner, or not at all. Furigana is left out
-  // as it is from a range around the owner.
+  // rescanned once per paragraph, and reads all of it, so it needs no end. The
+  // owner's next sibling would be no end: slots can render that sibling before
+  // the owner, or not at all. Furigana is left out as it is from a range around
+  // the owner.
   const range = {
     startContainer: parent,
     startOffset: 0,
     endContainer: owner,
     endOffset: owner.childNodes.length,
   }
-  const pieces = walkTextPieces(
-    range,
-    owner,
-    [locateBoundary(owner, owner.childNodes.length)],
-    readOwnerVisibility(owner, range),
-    true,
-  )
+  const pieces = walkTextPieces(range, owner, [], readOwnerVisibility(owner, range), true)
   return normalizeParagraphText(
     pieces.map((piece) => (piece.node instanceof Text ? readPieceText(piece) : " ")).join(""),
   )
 }
 
-// Owners come out in reading order, since the pieces do.
+// Paragraphs in the order the page shows them. The pieces give that order for
+// paragraphs side by side, but they reach a paragraph that holds another (a post
+// around a quote) at its first own text, which can come after what it holds.
+// It goes first, as it comes first on the page, so a long quote can't push the
+// rest of the post past the context's length limit.
+function placeHoldersFirst(owners: ParagraphOwner[]) {
+  const ownerSet = new Set(owners)
+  const holders = new Map<ParagraphOwner, ParagraphOwner | null>()
+  const findHolder = (owner: ParagraphOwner) => {
+    let holder = holders.get(owner)
+    if (holder === undefined) {
+      holder = getFlatParentElement(owner)
+      while (holder && !ownerSet.has(holder)) {
+        holder = getFlatParentElement(holder)
+      }
+      holders.set(owner, holder)
+    }
+    return holder
+  }
+
+  // Each holder's paragraphs, in the order the first text in each comes.
+  const held = new Map<ParagraphOwner | null, ParagraphOwner[]>()
+  const placed = new Set<ParagraphOwner>()
+  const place = (owner: ParagraphOwner) => {
+    if (placed.has(owner)) {
+      return
+    }
+    placed.add(owner)
+    const holder = findHolder(owner)
+    if (holder) {
+      place(holder)
+    }
+    const siblings = held.get(holder)
+    if (siblings) {
+      siblings.push(owner)
+    } else {
+      held.set(holder, [owner])
+    }
+  }
+  owners.forEach(place)
+
+  const ordered: ParagraphOwner[] = []
+  const append = (holder: ParagraphOwner | null) => {
+    for (const owner of held.get(holder) ?? []) {
+      ordered.push(owner)
+      append(owner)
+    }
+  }
+  append(null)
+  return ordered
+}
+
 function collectParagraphOwners(rangeSnapshots: SelectionRangeSnapshot[]) {
   const paragraphOwners = new Set<ParagraphOwner>()
 
@@ -820,7 +976,7 @@ function collectParagraphOwners(rangeSnapshots: SelectionRangeSnapshot[]) {
     }
   }
 
-  return [...paragraphOwners]
+  return placeHoldersFirst([...paragraphOwners])
 }
 
 // Blank-line separated blocks of the control's value that overlap the selection.

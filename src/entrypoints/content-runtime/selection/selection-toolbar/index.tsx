@@ -535,9 +535,11 @@ export function SelectionToolbar() {
       // roots can stringify blank (and report isCollapsed) while text is
       // selected, so a blank string is checked by reading the selection. Only
       // then: reading each one would walk a long selection on every change.
+      // `type` can't decide it either: Firefox reports "Caret" for text
+      // selected in a text control or a shadow root.
       // https://github.com/mengxi-ream/read-frog/issues/2385
       if (
-        selection?.type !== "Range" ||
+        !selection ||
         (normalizeSelectedText(selection.toString()) === "" && !readSelectionSnapshot(selection))
       ) {
         if (preserveSelectionStateRef.current) {

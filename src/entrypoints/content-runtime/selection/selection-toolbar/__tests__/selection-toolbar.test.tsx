@@ -143,11 +143,13 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     window.getSelection = vi.fn<(...args: any[]) => any>(() => ({
       type: text ? "Range" : "Caret",
       toString: vi.fn<(...args: any[]) => any>(() => text),
+      // A blank selection covers no text: a caret, or a space, which a
+      // collapsed range stands in for here.
       getRangeAt: () => ({
         startContainer: document.body,
         startOffset: 0,
         endContainer: document.body,
-        endOffset: 1,
+        endOffset: text.trim() ? 1 : 0,
       }),
       containsNode: vi.fn<(...args: any[]) => any>(() => containsNodeResult),
     }))
@@ -556,6 +558,37 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     })
     expectToolbarHidden()
     expect(getDefaultStore().get(selectionSessionAtom)).toBeNull()
+  })
+
+  it("keeps the toolbar for text Firefox selects in a text control, which it reports as a caret", async () => {
+    render(
+      <div>
+        <SelectionToolbar />
+        <div data-testid="test-element">Some text</div>
+      </div>,
+    )
+
+    await clearToolbarState()
+    await triggerMouseUpWithSelection(screen.getByTestId("test-element"))
+    await waitFor(() => expectToolbarVisible())
+
+    // The page's selection is a caret; the control holds the selected text.
+    window.getSelection = vi.fn<(...args: any[]) => any>(() => ({
+      type: "Caret",
+      isCollapsed: true,
+      toString: () => MOCK_SELECTED_TEXT,
+      getRangeAt: () => ({
+        startContainer: document.body,
+        startOffset: 0,
+        endContainer: document.body,
+        endOffset: 0,
+      }),
+      containsNode: () => true,
+    }))
+    await act(async () => {
+      document.dispatchEvent(new Event("selectionchange"))
+    })
+    expectToolbarVisible()
   })
 
   it("should show toolbar when valid text is selected", async () => {

@@ -1,6 +1,10 @@
 // @vitest-environment jsdom
+import type { SelectionRangeSnapshot } from "../utils"
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { fakeBrowser } from "wxt/testing/fake-browser"
+import { ANNOTATION_HOST_ATTRIBUTE } from "@/utils/annotate/styles"
+import { REACT_SHADOW_HOST_CLASS } from "@/utils/constants/dom-labels"
+import { PROTECTED_HOST_ATTRIBUTE } from "@/utils/select-all"
 import {
   buildContextSnapshot,
   createRangeSnapshot,
@@ -112,6 +116,19 @@ function createSelectionSnapshot(range: Range, text = range.toString()) {
       }),
     ],
   }
+}
+
+// A selection whose ends are in one tree, as a browser with getComposedRanges()
+// reports it.
+function createTreeSelection(range: SelectionRangeSnapshot, browserText: string) {
+  return {
+    toString: () => browserText,
+    anchorNode: range.startContainer,
+    focusNode: range.endContainer,
+    rangeCount: 1,
+    getRangeAt: () => range,
+    getComposedRanges: () => [range],
+  } as unknown as Selection
 }
 
 // Selected from the start of `selector`, inside a shadow root, to the end of the
@@ -305,7 +322,7 @@ describe("buildContextSnapshot", () => {
     document.body.innerHTML = `
       <span id="selection">Alpha beta</span>
       <div class="notranslate read-frog-react-shadow-host" id="panel"></div>
-      <div class="notranslate" id="layer"></div>
+      <div class="notranslate" ${ANNOTATION_HOST_ATTRIBUTE} id="layer"></div>
     `
     attachShadowTrees(document, {
       "#panel": { html: "<p>Page diagnosis 3 paragraphs</p>" },
@@ -340,6 +357,119 @@ describe("buildContextSnapshot", () => {
     expect(paragraphs).toHaveLength(count)
     expect(paragraphs?.at(-1)).toBe(`Paragraph ${count - 1}`)
     expect(articleReads).toBeLessThan(10)
+  })
+})
+
+describe("context around Read Frog and quotes", () => {
+  it("leaves Read Frog's own UI out of a paragraph's context", () => {
+    // A failed translation's retry button, and the toolbar and annotation layer
+    // as they sit in a page's modal dialog.
+    document.body.innerHTML = `<div id="dialog">Dialog text <span id="selected">here</span><span class="${REACT_SHADOW_HOST_CLASS}"></span><read-frog-selection ${PROTECTED_HOST_ATTRIBUTE}></read-frog-selection><div ${ANNOTATION_HOST_ATTRIBUTE}></div></div>`
+    attachShadowTrees(document, {
+      [`.${REACT_SHADOW_HOST_CLASS}`]: { html: `Translation failed. Retry` },
+      "read-frog-selection": { html: `<div>Translate Speak</div>` },
+      [`[${ANNOTATION_HOST_ATTRIBUTE}]`]: { html: `<div>gloss</div>` },
+    })
+
+    const range = document.createRange()
+    range.selectNodeContents(document.getElementById("selected")!)
+
+    expect(buildContextSnapshot(createSelectionSnapshot(range))?.paragraphs).toEqual([
+      "Dialog text here",
+    ])
+  })
+
+  it("keeps a page's own web component that the page marks notranslate", () => {
+    // Pages mark code and names notranslate. It is still what the reader selected.
+    document.body.innerHTML = `<p><span id="start"></span> Run <x-code class="notranslate"></x-code> to start</p>`
+    attachShadowTrees(document, {
+      "#start": { html: `<b>Tip:</b>` },
+      "x-code": { html: `<code>npm install</code>` },
+    })
+    const startText = getShadowRoot("#start").querySelector("b")?.firstChild
+    const endText = document.querySelector("p")?.lastChild
+    if (!startText || !endText) {
+      throw new Error("Fixtures not found")
+    }
+    const { selection } = createShadowSelection(
+      { startContainer: startText, startOffset: 0, endContainer: endText, endOffset: 9 },
+      "Tip:",
+    )
+
+    const snapshot = readSelectionSnapshot(selection)
+    expect(snapshot?.text).toBe("Tip: Run npm install to start")
+    expect(buildContextSnapshot(snapshot)?.paragraphs).toEqual(["Tip: Run npm install to start"])
+  })
+
+  it("puts a paragraph before the quote it holds, as the page does", () => {
+    document.body.innerHTML = `<div class="post">Before the quote <blockquote id="quote">Quoted words</blockquote> after the quote</div>`
+    const quoteText = document.getElementById("quote")?.firstChild
+    const afterText = document.querySelector(".post")?.lastChild
+    if (!quoteText || !afterText) {
+      throw new Error("Fixtures not found")
+    }
+
+    // From the quote into the post's own text after it.
+    const range = document.createRange()
+    range.setStart(quoteText, 0)
+    range.setEnd(afterText, 6)
+
+    expect(buildContextSnapshot(createSelectionSnapshot(range))?.paragraphs).toEqual([
+      "Before the quote Quoted words after the quote",
+      "Quoted words",
+    ])
+  })
+})
+
+describe("boundaries at what the page doesn't render", () => {
+  // A framework's comment marker is a light child of the host that no slot shows.
+  function renderCard(before: string) {
+    document.body.innerHTML = `<article>${before}<lit-card><!--?lit$1$--></lit-card><p>After the card</p></article>`
+    attachShadowTrees(document, { "lit-card": { html: `<p>Card text</p>` } })
+    return document.querySelector("lit-card")!
+  }
+
+  it("ends a triple-clicked paragraph's context at the host after it", () => {
+    const card = renderCard(`<p id="paragraph">Selected paragraph</p>`)
+    const text = document.getElementById("paragraph")!.firstChild!
+
+    // The triple click ends in front of the marker.
+    const snapshot = readSelectionSnapshot(
+      createTreeSelection(
+        { startContainer: text, startOffset: 0, endContainer: card, endOffset: 0 },
+        "Selected paragraph",
+      ),
+    )
+
+    expect(snapshot?.text).toBe("Selected paragraph")
+    expect(buildContextSnapshot(snapshot)?.paragraphs).toEqual(["Selected paragraph"])
+  })
+
+  it("ends the text of a selection across trees there too", () => {
+    const card = renderCard(`<div id="reply"></div>`)
+    attachShadowTrees(document, { "#reply": { html: `<p>Reply text</p>` } })
+    const replyText = getShadowRoot("#reply").querySelector("p")!.firstChild!
+
+    const { selection } = createShadowSelection(
+      { startContainer: replyText, startOffset: 0, endContainer: card, endOffset: 0 },
+      "",
+    )
+
+    expect(readSelectionSnapshot(selection)?.text).toBe("Reply text")
+  })
+
+  it("reads a range Firefox reports among a slot's assigned nodes", () => {
+    document.body.innerHTML = `<x-list><p>One</p><p>Two</p></x-list>`
+    attachShadowTrees(document, { "x-list": { html: `<h2>Title</h2><slot></slot>` } })
+    const slot = getShadowRoot("x-list").querySelector("slot")!
+
+    // Firefox counts the ends among the two paragraphs the slot shows. The slot
+    // has no children of its own, so a live Range can't hold the end.
+    const range = { startContainer: slot, startOffset: 0, endContainer: slot, endOffset: 2 }
+    const snapshot = readSelectionSnapshot(createTreeSelection(range, "One\n\nTwo"))
+
+    expect(snapshot?.text).toBe("One\n\nTwo")
+    expect(buildContextSnapshot(snapshot)?.paragraphs).toEqual(["One", "Two"])
   })
 })
 
@@ -931,6 +1061,15 @@ describe("readSelectionSnapshot", () => {
     ).toBe("Shown\n\nMore\nOpen\nUnfolded\n\nPick now\n\nEnd")
   })
 
+  it("leaves out an SVG's description and metadata", () => {
+    expect(
+      readTextFromShadowRoot(
+        `<p id="likes">Liked <svg><desc>Thumbs up</desc><metadata>icon v2</metadata></svg> 23 times</p>`,
+        "#likes",
+      ),
+    ).toBe("Liked 23 times")
+  })
+
   it("reads a slotted paragraph whose range starts in the shadow root after it", () => {
     document.body.innerHTML = `<x-post><p slot="body">Slotted body paragraph one.</p><p slot="body">Slotted body paragraph two.</p></x-post>`
     const post = document.querySelector("x-post")!
@@ -980,6 +1119,35 @@ describe("readSelectionSnapshot", () => {
         },
       ],
     })
+  })
+
+  it("reads a selection whose text is all in shadow roots inside it, which the browser reads as blank", () => {
+    document.body.innerHTML = `<p id="date"><relative-time></relative-time></p>`
+    document.querySelector("relative-time")!.attachShadow({ mode: "open" }).textContent =
+      "5 days ago"
+
+    const range = document.createRange()
+    range.selectNodeContents(document.getElementById("date")!)
+
+    expect(readSelectionSnapshot(createTreeSelection(range, ""))?.text).toBe("5 days ago")
+  })
+
+  it("doesn't search the page for furigana when a click leaves a caret", () => {
+    document.body.innerHTML = `<p><ruby>漢字<rt>かんじ</rt></ruby>を読む</p>`
+    const caret = {
+      startContainer: document.body,
+      startOffset: 0,
+      endContainer: document.body,
+      endOffset: 0,
+    }
+    const querySelectorAll = vi.spyOn(Element.prototype, "querySelectorAll")
+
+    try {
+      expect(readSelectionSnapshot(createTreeSelection(caret, ""))).toBeNull()
+      expect(querySelectorAll).not.toHaveBeenCalled()
+    } finally {
+      querySelectorAll.mockRestore()
+    }
   })
 })
 
@@ -1053,6 +1221,77 @@ describe("readRangeClientRects", () => {
 
     expect(measured).toEqual(["pha", "Beta", "<br>", "Ga"])
     expect(rects).toHaveLength(4)
+  })
+
+  // A live Range is updated on every change to the page until it is collected,
+  // and the toolbar measures on every scroll frame.
+  it("measures every piece with one Range", () => {
+    document.body.innerHTML = `<p id="light">Alpha</p><div id="host"></div>`
+    attachShadowTrees(document, { "#host": { html: `<p>Beta<br>Gamma</p>` } })
+    const lightText = document.getElementById("light")!.firstChild!
+    const lastText = getShadowRoot("#host").querySelector("p")!.lastChild!
+    Object.defineProperty(Range.prototype, "getClientRects", {
+      configurable: true,
+      value: () => [{ width: 10, height: 10 }],
+    })
+    const createRange = vi.spyOn(document, "createRange")
+
+    const rects = readRangeClientRects({
+      startContainer: lightText,
+      startOffset: 2,
+      endContainer: lastText,
+      endOffset: 2,
+    })
+
+    expect(rects).toHaveLength(4)
+    expect(createRange).toHaveBeenCalledTimes(1)
+    createRange.mockRestore()
+  })
+
+  it("measures nothing once an end is gone from the page", () => {
+    document.body.innerHTML = `<div id="host"></div><p id="end">End</p><p>After</p>`
+    attachShadowTrees(document, { "#host": { html: `<p>Start</p>` } })
+    const startText = getShadowRoot("#host").querySelector("p")!.firstChild!
+    const endText = document.getElementById("end")!.firstChild!
+    Object.defineProperty(Range.prototype, "getClientRects", {
+      configurable: true,
+      value: () => [{ width: 10, height: 10 }],
+    })
+
+    document.getElementById("end")!.remove()
+
+    expect(
+      readRangeClientRects({
+        startContainer: startText,
+        startOffset: 0,
+        endContainer: endText,
+        endOffset: 3,
+      }),
+    ).toEqual([])
+  })
+
+  it("measures a range Firefox reports among a slot's assigned nodes", () => {
+    document.body.innerHTML = `<x-list><p>One</p><p>Two</p></x-list>`
+    attachShadowTrees(document, { "x-list": { html: `<h2>Title</h2><slot></slot>` } })
+    const slot = getShadowRoot("x-list").querySelector("slot")!
+    const measured: string[] = []
+    Object.defineProperty(Range.prototype, "getClientRects", {
+      configurable: true,
+      value(this: Range) {
+        measured.push(this.toString())
+        return [{ width: 10, height: 10 }]
+      },
+    })
+
+    const rects = readRangeClientRects({
+      startContainer: slot,
+      startOffset: 0,
+      endContainer: slot,
+      endOffset: 2,
+    })
+
+    expect(measured).toEqual(["One", "Two"])
+    expect(rects).toHaveLength(2)
   })
 })
 
