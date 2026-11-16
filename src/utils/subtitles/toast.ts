@@ -1,6 +1,15 @@
 import type { ErrorAction } from "@/utils/error-action"
-import { anchoredToastManager, toastManager } from "@/components/ui/base-ui/toast"
+import { ToastPrimitive, toastManager } from "@/components/ui/base-ui/toast"
 import { sendMessage } from "@/utils/message"
+
+/**
+ * The player's anchored toasts, rendered inside the player so they survive it
+ * going fullscreen. The page's own anchored toasts, such as the floating
+ * button's, share the content runtime's `anchoredToastManager` and must not
+ * show up in here.
+ */
+export const subtitlesAnchoredToastManager: ReturnType<typeof ToastPrimitive.createToastManager> =
+  ToastPrimitive.createToastManager()
 
 /** Stable, so a double-click refreshes one toast instead of stacking two. */
 const WALL_TOAST_ID = "read-frog-subtitles-wall"
@@ -36,7 +45,7 @@ function usableAnchor(): HTMLElement | null {
 }
 
 function show(title: string, action: ErrorAction | undefined, anchor: HTMLElement | null) {
-  const manager = anchor ? anchoredToastManager : toastManager
+  const manager = anchor ? subtitlesAnchoredToastManager : toastManager
   const toastId = manager.add({
     id: WALL_TOAST_ID,
     type: "error",

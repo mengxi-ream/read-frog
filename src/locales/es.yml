@@ -623,8 +623,7 @@ options:
       panel: Abrir panel lateral
       translate: Alternar traducción de página
     closeMenu:
-      disableForSite: Desactivar para este sitio
-      disableGlobally: Desactivar globalmente
+      title: Ocultar botón flotante
     tooltips:
       togglePageTranslation: Alternar traducción de página
       floatingButtonOptions: Opciones del botón flotante
@@ -673,8 +672,7 @@ options:
         enterUrlPattern: Introduce patrón de URL
         urlPattern: Patrón de URL
     closeMenu:
-      disableForSite: Desactivar para este sitio
-      disableGlobally: Desactivar globalmente
+      title: Ocultar barra de selección
     errors:
       customActionFailed: Falló la acción personalizada
       customActionFailedFallback: Falló la solicitud de acción personalizada
@@ -1641,6 +1639,11 @@ speak:
   noTextSelected: No hay texto seleccionado
   openaiNotConfigured: El proveedor OpenAI no está configurado o activado
   openaiApiKeyNotConfigured: La clave API de OpenAI no está configurada
+hideMenu:
+  untilReload: Hasta que recargue la página
+  onSite: En $1
+  onAllSites: En todos los sitios
+  restoreHint: Se puede volver a activar en $1.
 action:
   copy: Copiar
   copied: Copiado

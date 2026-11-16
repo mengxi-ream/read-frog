@@ -622,8 +622,7 @@ options:
       panel: 사이드 패널 열기
       translate: 페이지 번역 전환
     closeMenu:
-      disableForSite: 이 사이트에서 비활성화
-      disableGlobally: 전역 비활성화
+      title: 플로팅 버튼 숨기기
     tooltips:
       togglePageTranslation: 페이지 번역 전환
       floatingButtonOptions: 플로팅 버튼 옵션
@@ -672,8 +671,7 @@ options:
         enterUrlPattern: URL 패턴 입력
         urlPattern: URL 패턴
     closeMenu:
-      disableForSite: 이 사이트에서 비활성화
-      disableGlobally: 전역 비활성화
+      title: 선택 툴바 숨기기
     errors:
       customActionFailed: 사용자 지정 작업 실패
       customActionFailedFallback: 사용자 지정 작업 요청에 실패했습니다
@@ -1636,6 +1634,11 @@ speak:
   noTextSelected: 텍스트가 선택되지 않았습니다
   openaiNotConfigured: OpenAI 공급자가 구성되지 않았거나 활성화되지 않았습니다
   openaiApiKeyNotConfigured: OpenAI API 키가 구성되지 않았습니다
+hideMenu:
+  untilReload: 페이지를 새로고침할 때까지
+  onSite: $1에서
+  onAllSites: 모든 사이트에서
+  restoreHint: "'$1'에서 다시 켤 수 있습니다."
 action:
   copy: 복사
   copied: 복사됨

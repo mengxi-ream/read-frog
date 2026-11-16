@@ -35,6 +35,7 @@ import { buildContextSnapshot, normalizeSelectedText, readSelectionSnapshot } fr
 import {
   clearSelectionStateAtom,
   createSelectionSession,
+  isSelectionToolbarHiddenUntilReloadAtom,
   isSelectionToolbarOpenAtom,
   setSelectionStateAtom,
 } from "./atoms"
@@ -241,9 +242,12 @@ export function SelectionToolbar() {
   const setSelectionState = useSetAtom(setSelectionStateAtom)
   const clearSelectionState = useSetAtom(clearSelectionStateAtom)
   const selectionToolbar = useAtomValue(configFieldsAtomMap.selectionToolbar)
-  const isSiteDisabled = selectionToolbar.disabledSelectionToolbarPatterns?.some((pattern) =>
-    urlMatchesPattern(window.location.href, pattern),
-  )
+  const isHiddenUntilReload = useAtomValue(isSelectionToolbarHiddenUntilReloadAtom)
+  const isHiddenOnPage =
+    isHiddenUntilReload ||
+    selectionToolbar.disabledSelectionToolbarPatterns?.some((pattern) =>
+      urlMatchesPattern(window.location.href, pattern),
+    )
   const annotation = useAnnotation()
   // With nothing pinned the toolbar still shows its "more" menu; with nothing
   // enabled — and the annotation slot off — there is nothing to show.
@@ -251,7 +255,7 @@ export function SelectionToolbar() {
   const hasAnyEnabledItem = enabledItems.length > 0 || annotation.enabled
   const hasAnyPinnedItem = enabledItems.some((item) => item.pinned)
   const isSelectionToolbarVisible =
-    isSelectionToolbarOpen && selectionToolbar.enabled && !isSiteDisabled && hasAnyEnabledItem
+    isSelectionToolbarOpen && selectionToolbar.enabled && !isHiddenOnPage && hasAnyEnabledItem
   const reveal = useAnnotateReveal(tooltipRef, isSelectionToolbarVisible)
   // In annotation mode a selection is annotated where it is made; the toolbar
   // never opens for it. Selections in text controls have nothing to annotate.
@@ -659,7 +663,7 @@ export function SelectionToolbar() {
       )}
       {...{ [SELECTION_CONTENT_OVERLAY_ROOT_ATTRIBUTE]: "" }}
     >
-      {selectionToolbar.enabled && !isSiteDisabled && hasAnyEnabledItem && (
+      {selectionToolbar.enabled && !isHiddenOnPage && hasAnyEnabledItem && (
         <div
           ref={tooltipRef}
           inert={!isSelectionToolbarVisible}

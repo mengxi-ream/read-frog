@@ -20,7 +20,8 @@ const mocks = vi.hoisted(() => ({
   translateSubtitles: vi.fn<(...args: any[]) => any>(),
 }))
 
-vi.mock("@/components/ui/base-ui/toast", () => ({
+vi.mock("@/components/ui/base-ui/toast", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/components/ui/base-ui/toast")>()),
   toastManager: { add: mocks.toastAdd },
 }))
 vi.mock("@/utils/config/storage", () => ({ getLocalConfig: mocks.getLocalConfig }))

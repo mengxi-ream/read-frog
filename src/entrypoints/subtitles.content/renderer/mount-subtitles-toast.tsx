@@ -3,12 +3,23 @@ import themeCSS from "@/assets/styles/theme.css?inline"
 import { ToastProvider } from "@/components/ui/base-ui/toast"
 import { NOTRANSLATE_CLASS, REACT_SHADOW_HOST_CLASS } from "@/utils/constants/dom-labels"
 import { SUBTITLES_THEME } from "@/utils/constants/subtitles"
+import { useHasCornerToastSurface } from "@/utils/content-runtime/corner-toasts"
 import { ShadowHostBuilder } from "@/utils/react-shadow-host/shadow-host-builder"
 import { applyTheme } from "@/utils/theme"
 
 const SUBTITLES_TOAST_HOST_ID = "read-frog-subtitles-toast-host"
 
 let mountedCleanup: (() => void) | null = null
+
+function CornerToasts({ container }: { container: HTMLElement }) {
+  // The selection UI renders the corner toasts, subtitles' too, in the frames
+  // it runs in. This one renders them in the others, such as an embedded
+  // player's frame.
+  const renderedElsewhere = useHasCornerToastSurface()
+  if (renderedElsewhere) return null
+
+  return <ToastProvider portalProps={{ container }} />
+}
 
 export function mountSubtitlesToast(): () => void {
   if (mountedCleanup) return mountedCleanup
@@ -39,7 +50,7 @@ export function mountSubtitlesToast(): () => void {
   const reactRoot = ReactDOM.createRoot(reactContainer)
   reactRoot.render(
     <div className={NOTRANSLATE_CLASS}>
-      <ToastProvider portalProps={{ container: reactContainer }} />
+      <CornerToasts container={reactContainer} />
     </div>,
   )
 

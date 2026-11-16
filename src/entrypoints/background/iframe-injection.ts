@@ -16,6 +16,7 @@ import { getEffectiveSiteRule } from "@/utils/site-rules/effective"
 import { urlMatchesPattern } from "@/utils/url-pattern"
 import { isSameOriginIframeSender, resolveSiteControlUrl } from "./iframe-injection-utils"
 import { getPageTranslationEnabled } from "./page-translation-state"
+import { isSelectionToolbarHiddenInTab } from "./selection-toolbar-hidden"
 
 const log = createLogger("background/iframe-injection")
 
@@ -335,6 +336,9 @@ export function setupIframeInjection() {
         )
       )
         return false
+      // Hidden from a toolbar's × until the page reloads: like a site opt-out,
+      // the frame gets no toolbar runtime.
+      if (await isSelectionToolbarHiddenInTab(tabId)) return false
       if (
         getEffectiveSiteRule(config, tab.url).injectIntoIframes === false ||
         getEffectiveSiteRule(config, frameUrl).injectIntoIframes === false
@@ -359,6 +363,11 @@ export function setupIframeInjection() {
       return false
     }
   })
+
+  // Site control in the frames the subtitles loader runs in goes by the page
+  // too (see isFrameSiteEnabled). An embedded video player can't read the url
+  // of a page on another site, so it asks.
+  onMessage("getSenderTabUrl", ({ sender }) => sender.tab?.url ?? null)
 
   browser.tabs.onRemoved.addListener(clearTabDocumentState)
   browser.webNavigation.onBeforeNavigate.addListener((details) => {

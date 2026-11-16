@@ -622,8 +622,7 @@ options:
       panel: サイドパネルを開く
       translate: ページ翻訳を切り替え
     closeMenu:
-      disableForSite: このサイトで無効化
-      disableGlobally: グローバルで無効化
+      title: フローティングボタンを非表示
     tooltips:
       togglePageTranslation: ページ翻訳を切り替え
       floatingButtonOptions: フローティングボタンのオプション
@@ -672,8 +671,7 @@ options:
         enterUrlPattern: URL パターンを入力
         urlPattern: URL パターン
     closeMenu:
-      disableForSite: このサイトで無効化
-      disableGlobally: グローバルで無効化
+      title: 選択ツールバーを非表示
     errors:
       customActionFailed: カスタムアクションに失敗しました
       customActionFailedFallback: カスタムアクションのリクエストに失敗しました
@@ -1636,6 +1634,11 @@ speak:
   noTextSelected: テキストが選択されていません
   openaiNotConfigured: OpenAIプロバイダーが設定されていないか有効になっていません
   openaiApiKeyNotConfigured: OpenAI APIキーが設定されていません
+hideMenu:
+  untilReload: ページを再読み込みするまで
+  onSite: $1 で
+  onAllSites: すべてのサイトで
+  restoreHint: 「$1」からいつでも再表示できます。
 action:
   copy: コピー
   copied: コピー済み

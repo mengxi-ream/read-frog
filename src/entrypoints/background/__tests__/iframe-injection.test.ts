@@ -2,6 +2,7 @@ import type { Config } from "@/types/config/config"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { browser, storage } from "#imports"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import { getSelectionToolbarHiddenKey } from "@/utils/constants/storage-keys"
 import {
   CONTENT_LOADER_SCRIPT_FILE,
   CONTENT_RUNTIME_PARTS_WINDOW_KEY,
@@ -123,6 +124,9 @@ async function setupSubject() {
     activateSelection: onMessageMock.mock.calls.find(
       ([type]) => type === "activateSameOriginIframeSelectionRuntime",
     )![1] as (message: { sender: Record<string, unknown> }) => Promise<boolean>,
+    getSenderTabUrl: onMessageMock.mock.calls.find(
+      ([type]) => type === "getSenderTabUrl",
+    )![1] as (message: { sender: Record<string, unknown> }) => string | null,
   }
 }
 
@@ -239,6 +243,27 @@ describe("setupIframeInjection", () => {
       }),
     )
     expect(await activateSelection(message)).toBe(false)
+    expect(executeScriptMock).not.toHaveBeenCalled()
+  })
+
+  it("gives no toolbar runtime to an iframe while the tab's toolbar is hidden until reload", async () => {
+    const { activateSelection } = await setupSubject()
+    getLocalConfigMock.mockResolvedValue(createConfig())
+    storageGetItemMock.mockImplementation(async (key: string) =>
+      key === getSelectionToolbarHiddenKey(currentTabId) ? true : { enabled: false },
+    )
+
+    expect(
+      await activateSelection({
+        sender: {
+          tab: { id: currentTabId },
+          frameId: 2,
+          documentId: "doc-1",
+          url: "https://example.com/frame",
+          origin: "https://example.com",
+        },
+      }),
+    ).toBe(false)
     expect(executeScriptMock).not.toHaveBeenCalled()
   })
 
@@ -857,5 +882,20 @@ describe("setupIframeInjection", () => {
 
     expect(getAllFramesMock).not.toHaveBeenCalled()
     expect(executeScriptMock).not.toHaveBeenCalled()
+  })
+
+  it("tells a frame the url of the tab it is in", async () => {
+    const { getSenderTabUrl } = await setupSubject()
+
+    expect(
+      getSenderTabUrl({
+        sender: {
+          tab: { id: currentTabId, url: "https://blog.example/post" },
+          frameId: 3,
+          url: "https://www.youtube.com/embed/abc",
+        },
+      }),
+    ).toBe("https://blog.example/post")
+    expect(getSenderTabUrl({ sender: { url: "https://www.youtube.com/embed/abc" } })).toBeNull()
   })
 })

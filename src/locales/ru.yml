@@ -622,8 +622,7 @@ options:
       panel: Открыть боковую панель
       translate: Переключить перевод страницы
     closeMenu:
-      disableForSite: Отключить для этого сайта
-      disableGlobally: Отключить глобально
+      title: Скрыть плавающую кнопку
     tooltips:
       togglePageTranslation: Переключить перевод страницы
       floatingButtonOptions: Настройки плавающей кнопки
@@ -672,8 +671,7 @@ options:
         enterUrlPattern: Введите URL-шаблон
         urlPattern: URL-шаблон
     closeMenu:
-      disableForSite: Отключить для этого сайта
-      disableGlobally: Отключить глобально
+      title: Скрыть панель выделения
     errors:
       customActionFailed: Не удалось выполнить пользовательское действие
       customActionFailedFallback: Запрос пользовательского действия не удался
@@ -1636,6 +1634,11 @@ speak:
   noTextSelected: Текст не выделен
   openaiNotConfigured: Провайдер OpenAI не настроен или не включён
   openaiApiKeyNotConfigured: API-ключ OpenAI не настроен
+hideMenu:
+  untilReload: До перезагрузки страницы
+  onSite: На $1
+  onAllSites: На всех сайтах
+  restoreHint: Включить снова можно в разделе «$1».
 action:
   copy: Копировать
   copied: Скопировано

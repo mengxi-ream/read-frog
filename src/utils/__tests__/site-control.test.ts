@@ -1,6 +1,6 @@
 import type { Config } from "@/types/config/config"
 import { describe, expect, it } from "vitest"
-import { isSiteEnabled, resolveEffectiveSiteControlUrl } from "../site-control"
+import { isFrameSiteEnabled, isSiteEnabled, resolveEffectiveSiteControlUrl } from "../site-control"
 
 function createConfig(siteControl: Config["siteControl"]): Config {
   return { siteControl } as Config
@@ -76,6 +76,61 @@ describe("isSiteEnabled", () => {
       })
       expect(isSiteEnabled("https://example.com", config)).toBe(true)
     })
+  })
+})
+
+describe("isFrameSiteEnabled", () => {
+  const EDX_COURSE_PAGE = "https://learning.edx.org/course/course-v1:edX+DemoX+Demo_Course/home"
+  const EDX_VIDEO_FRAME =
+    "https://courses.edx.org/xblock/block-v1:edX+DemoX+Demo_Course+type@vertical+block@intro"
+  const YOUTUBE_EMBED = "https://www.youtube.com/embed/aqz-KE-bpKQ"
+  const BLOG_PAGE = "https://blog.example/post"
+
+  it("runs a frame from another site in a page listed in whitelist mode", () => {
+    // What the popup lists on an edX course page
+    const config = createConfig({
+      mode: "whitelist",
+      blacklistPatterns: [],
+      whitelistPatterns: ["*.learning.edx.org"],
+    })
+    expect(isFrameSiteEnabled(EDX_VIDEO_FRAME, EDX_COURSE_PAGE, config)).toBe(true)
+  })
+
+  it("keeps a frame off in a page not listed in whitelist mode, though its own site is", () => {
+    const config = createConfig({
+      mode: "whitelist",
+      blacklistPatterns: [],
+      whitelistPatterns: ["*.youtube.com"],
+    })
+    expect(isFrameSiteEnabled(YOUTUBE_EMBED, BLOG_PAGE, config)).toBe(false)
+  })
+
+  it("keeps a frame off in a page disabled in blacklist mode", () => {
+    const config = createConfig({
+      mode: "blacklist",
+      blacklistPatterns: ["*.blog.example"],
+      whitelistPatterns: [],
+    })
+    expect(isFrameSiteEnabled(YOUTUBE_EMBED, BLOG_PAGE, config)).toBe(false)
+  })
+
+  it("keeps a frame from a site disabled in blacklist mode off in any page", () => {
+    const config = createConfig({
+      mode: "blacklist",
+      blacklistPatterns: ["*.youtube.com"],
+      whitelistPatterns: [],
+    })
+    expect(isFrameSiteEnabled(YOUTUBE_EMBED, BLOG_PAGE, config)).toBe(false)
+  })
+
+  it("runs a frame when neither its site nor the page's is disabled", () => {
+    const config = createConfig({
+      mode: "blacklist",
+      blacklistPatterns: ["*.other.example"],
+      whitelistPatterns: [],
+    })
+    expect(isFrameSiteEnabled(YOUTUBE_EMBED, BLOG_PAGE, config)).toBe(true)
+    expect(isFrameSiteEnabled(YOUTUBE_EMBED, BLOG_PAGE, null)).toBe(true)
   })
 })
 

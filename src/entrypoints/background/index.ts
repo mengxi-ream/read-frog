@@ -37,6 +37,7 @@ import { newUserGuide } from "./new-user-guide"
 import { setupNotebasePendingSaveProcessor } from "./notebase-pending-save"
 import { setupPageTranslationHandlers } from "./page-translation"
 import { proxyFetch } from "./proxy-fetch"
+import { setupSelectionToolbarHiddenUntilReload } from "./selection-toolbar-hidden"
 import { setupSidePanelMessageHandler } from "./side-panel"
 import { setUpSiteRulesUpdate } from "./site-rules-update"
 import { setupSubtitlesTranslationHandlers } from "./subtitles-translation"
@@ -170,6 +171,7 @@ export default defineBackground({
 
     // Setup on-demand iframe injection after page translation is enabled.
     setupIframeInjection()
+    setupSelectionToolbarHiddenUntilReload()
 
     // i18n bootstrap for the non-React background context. Runs after the synchronous
     // listener registration above (MV3 requires listeners before the first await). The

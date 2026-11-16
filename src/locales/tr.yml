@@ -622,8 +622,7 @@ options:
       panel: Yan paneli aç
       translate: Sayfa çevirisini aç/kapat
     closeMenu:
-      disableForSite: Bu site için devre dışı bırak
-      disableGlobally: Genel olarak devre dışı bırak
+      title: Yüzen butonu gizle
     tooltips:
       togglePageTranslation: Sayfa çevirisini aç/kapat
       floatingButtonOptions: Kayan düğme seçenekleri
@@ -672,8 +671,7 @@ options:
         enterUrlPattern: URL kalıbı girin
         urlPattern: URL kalıbı
     closeMenu:
-      disableForSite: Bu site için devre dışı bırak
-      disableGlobally: Genel olarak devre dışı bırak
+      title: Seçim araç çubuğunu gizle
     errors:
       customActionFailed: Özel eylem başarısız oldu
       customActionFailedFallback: Özel eylem isteği başarısız oldu
@@ -1636,6 +1634,11 @@ speak:
   noTextSelected: Metin seçilmedi
   openaiNotConfigured: OpenAI sağlayıcısı yapılandırılmadı veya etkinleştirilmedi
   openaiApiKeyNotConfigured: OpenAI API anahtarı yapılandırılmadı
+hideMenu:
+  untilReload: Sayfayı yenileyene kadar
+  onSite: $1 sitesinde
+  onAllSites: Tüm sitelerde
+  restoreHint: $1 bölümünden yeniden açabilirsiniz.
 action:
   copy: Kopyala
   copied: Kopyalandı
