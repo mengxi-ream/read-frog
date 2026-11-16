@@ -526,7 +526,7 @@ describe("universalVideoAdapter", () => {
       {
         what: "a newer start began while it waited",
         succeeded: true,
-        overtake: (adapter: any) => adapter.switchOperationId++,
+        overtake: (adapter: any) => adapter.switchGeneration.next(),
       },
       {
         what: "the start it waited on fell back from AI subtitles",
@@ -548,7 +548,10 @@ describe("universalVideoAdapter", () => {
     })
 
     it.each([
-      { what: "a navigation reset came", overtake: (adapter: any) => adapter.switchOperationId++ },
+      {
+        what: "a navigation reset came",
+        overtake: (adapter: any) => adapter.switchGeneration.next(),
+      },
       { what: "a navigation began", overtake: (adapter: any) => adapter.notifyNavigation() },
     ])("stops when $what while it asked about the track", async ({ overtake }) => {
       vi.useFakeTimers()
