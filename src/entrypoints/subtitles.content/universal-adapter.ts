@@ -131,6 +131,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
   private sourceSubtitles: SubtitlesFragment[] = []
   private sourceProcessedSubtitles: SubtitlesFragment[] = []
   private summaryAbortController: AbortController | null = null
+  private firstPlayStartAbortController: AbortController | null = null
   private sourceVideoId: string | null = null
   private sourceCacheVersion = 0
   private navigationVideoId: string | null
@@ -227,6 +228,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
     }
 
     this.clearNavigationReinitTimeout()
+    this.cancelFirstPlayStart()
     this.prepareSummaryForNavigation()
     this.teardownAdObserver()
     this.translatedSubtitlesDownloader?.dispose()
@@ -389,6 +391,8 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
   private resetForNavigation() {
     this.switchOperationId++
     this.playerGeneration++
+    // An attach that finished while the navigation waited may have set one on the old video.
+    this.cancelFirstPlayStart()
     this.pendingStart = null
     this.trackChangeRefreshPromise = null
     this.prepareSummaryForNavigation()
@@ -515,6 +519,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
   }
 
   private clearVisibleStateForNavigation() {
+    this.cancelFirstPlayStart()
     this.prepareSummaryForNavigation()
     this.clearNavigationReinitTimeout()
     this.teardownAdObserver()
@@ -751,23 +756,28 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
       const video = this.subtitlesScheduler?.getVideoElement()
       if (!video) return
 
-      const start = () => {
-        video.removeEventListener("playing", start)
-        this.toggleSubtitlesWithSource(true, "auto")
+      if (video.paused) {
+        this.cancelFirstPlayStart()
+        this.firstPlayStartAbortController = new AbortController()
+        video.addEventListener("playing", () => this.toggleSubtitlesWithSource(true, "auto"), {
+          once: true,
+          signal: this.firstPlayStartAbortController.signal,
+        })
+        return
       }
-
-      if (!video.paused) {
-        this.toggleSubtitlesWithSource(true, "auto")
-      } else {
-        video.addEventListener("playing", start)
-      }
-      return
     }
 
     this.toggleSubtitlesWithSource(true, "auto")
   }
 
+  // A choice the reader makes before the first play outranks the automatic start.
+  private cancelFirstPlayStart() {
+    this.firstPlayStartAbortController?.abort()
+    this.firstPlayStartAbortController = null
+  }
+
   private toggleSubtitlesWithSource(enabled: boolean, source: SubtitlesToggleSource) {
+    if (source !== "auto") this.cancelFirstPlayStart()
     this.handleToggleSubtitles(enabled, {
       analyticsContext: enabled
         ? createFeatureUsageContext(
@@ -798,6 +808,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
       showAiSubtitlesWallToast(i18n.t("subtitles.errors.aiLiveReplayUnsupported"))
       return
     }
+    this.cancelFirstPlayStart()
     return this.switchSubtitlesFetcher(SUBTITLES_SOURCE.AI)
   }
 
