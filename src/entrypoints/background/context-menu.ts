@@ -29,10 +29,13 @@ const log = createLogger("background/context-menu")
  * This must be called during main() execution to ensure listeners are registered
  * before Chrome completes initialization
  */
-export function registerContextMenuListeners() {
+export function registerContextMenuListeners(waitUntilReady: () => Promise<void>) {
   // Listen for config changes to update context menu
   storage.watch<Config>(`local:${CONFIG_STORAGE_KEY}`, async (newConfig) => {
     if (newConfig) {
+      // On first start after an update, config migration writes the config before
+      // i18n is initialized; Chrome rejects a menu item with title "".
+      await waitUntilReady()
       await updateContextMenuItems(newConfig)
     }
   })

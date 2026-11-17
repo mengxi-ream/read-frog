@@ -133,10 +133,6 @@ export default defineBackground({
     translationMessage()
     registerActionIconListeners()
 
-    // Register context menu listeners synchronously
-    // This ensures listeners are registered before Chrome completes initialization
-    registerContextMenuListeners()
-
     // Initialize action icons asynchronously
     void initializeActionIcons()
 
@@ -159,6 +155,10 @@ export default defineBackground({
       currentUiLanguage = config?.uiLanguage ?? "auto"
       await initI18n(currentUiLanguage)
     })()
+
+    // Register context menu listeners synchronously
+    // This ensures listeners are registered before Chrome completes initialization
+    registerContextMenuListeners(() => backgroundReady)
 
     proxyFetch()
     setupHostedAiStatusHandler()
