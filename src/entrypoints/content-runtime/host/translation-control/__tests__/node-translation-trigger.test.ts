@@ -505,6 +505,71 @@ describe("registerNodeTranslationTriggerListeners", () => {
     expect(onTrigger).not.toHaveBeenCalled()
   })
 
+  it("drops a press when the tab is switched away while its config is read", async () => {
+    vi.useFakeTimers()
+    const onTrigger = vi.fn<(...args: any[]) => any>()
+    const preview = createPreview()
+
+    // Reading the config takes a few milliseconds, as storage does.
+    teardown = registerNodeTranslationTriggerListeners({
+      getConfig: () =>
+        new Promise((resolve) => setTimeout(() => resolve(createConfig("control")), 5)),
+      onTrigger,
+      preview,
+    })
+
+    dispatchMouseEvent("mouseover", { clientX: 70, clientY: 80 })
+    // A mouse tool sends Ctrl+PgDn all at once. The browser keeps PgDn and switches tabs,
+    // and the Ctrl release goes to the other tab.
+    dispatchKeyboardEvent("keydown", "Control")
+    window.dispatchEvent(new FocusEvent("blur"))
+    await vi.advanceTimersByTimeAsync(1000)
+
+    expect(preview.show).not.toHaveBeenCalled()
+
+    // Back on the tab, the next press works as usual.
+    dispatchKeyboardEvent("keydown", "Control")
+    await vi.advanceTimersByTimeAsync(600)
+    expect(preview.show).toHaveBeenCalledTimes(1)
+
+    dispatchKeyboardEvent("keyup", "Control")
+    await vi.advanceTimersByTimeAsync(10)
+    expect(onTrigger).toHaveBeenCalledTimes(1)
+    expect(onTrigger).toHaveBeenCalledWith(blockAt({ x: 70, y: 80 }), expect.anything())
+  })
+
+  it("drops a held hotkey when the page is hidden, and ignores one pressed while hidden", async () => {
+    vi.useFakeTimers()
+    const onTrigger = vi.fn<(...args: any[]) => any>()
+    const preview = createPreview()
+
+    teardown = registerNodeTranslationTriggerListeners({
+      getConfig: () => Promise.resolve(createConfig("control")),
+      onTrigger,
+      preview,
+    })
+
+    dispatchMouseEvent("mouseover", { clientX: 70, clientY: 80 })
+    dispatchKeyboardEvent("keydown", "Control")
+    await vi.advanceTimersByTimeAsync(500)
+    expect(preview.show).toHaveBeenCalledTimes(1)
+
+    const visibilityState = vi.spyOn(document, "visibilityState", "get").mockReturnValue("hidden")
+    document.dispatchEvent(new Event("visibilitychange"))
+    expect(preview.hide).toHaveBeenCalledTimes(1)
+
+    dispatchKeyboardEvent("keyup", "Control")
+    await flushMicrotasks()
+    expect(onTrigger).not.toHaveBeenCalled()
+
+    // A key that reaches the page only after it was hidden starts nothing.
+    dispatchKeyboardEvent("keydown", "Control")
+    await vi.advanceTimersByTimeAsync(1000)
+    expect(preview.show).toHaveBeenCalledTimes(1)
+
+    visibilityState.mockRestore()
+  })
+
   it("translates the first tap after another key was pressed and released", async () => {
     const onTrigger = vi.fn<(...args: any[]) => any>()
 
