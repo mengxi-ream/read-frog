@@ -259,6 +259,15 @@ export function registerNodeTranslationTriggerListeners({
     activeShortcutCode = null
   }
 
+  // How often the page lost focus or went out of view. A key let go of after that
+  // goes to another window or tab, so a press from before it never ends here.
+  let focusLosses = 0
+
+  const dropHotkeyOnFocusLoss = () => {
+    focusLosses++
+    resetHotkeySession()
+  }
+
   // Another key or a click made the press part of something else: it translates nothing.
   // A key held before the hotkey does too, until it is released.
   const cancelHotkeySession = () => {
@@ -370,8 +379,14 @@ export function registerNodeTranslationTriggerListeners({
         event.stopPropagation()
       }
 
+      const focusLossesAtPress = focusLosses
       void (async () => {
         const config = await getCurrentConfig()
+        // The page lost focus while the config was read, as when a tool sends Ctrl+PgDn
+        // all at once to switch tabs. The key comes up in the other tab, so a press
+        // started now would never end, and its ring would follow the pointer here.
+        if (focusLosses !== focusLossesAtPress || document.visibilityState === "hidden") return
+
         if (config?.pageTranslation.node.hotkey === "custom") {
           if (!matchesCustomShortcut(event, config)) {
             // Another key while the combination is down. Its own modifiers come before it.
@@ -420,8 +435,15 @@ export function registerNodeTranslationTriggerListeners({
     { signal },
   )
 
-  // Keys released in another window never reach this page.
-  window.addEventListener("blur", resetHotkeySession, { signal })
+  // Keys released in another window or tab never reach this page.
+  window.addEventListener("blur", dropHotkeyOnFocusLoss, { signal })
+  document.addEventListener(
+    "visibilitychange",
+    () => {
+      if (document.visibilityState === "hidden") dropHotkeyOnFocusLoss()
+    },
+    { signal },
+  )
 
   document.addEventListener(
     "keyup",
