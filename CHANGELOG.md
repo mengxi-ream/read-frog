@@ -1,5 +1,23 @@
 # @read-frog/extension
 
+## 1.60.1
+
+### Patch Changes
+
+- [#2525](https://github.com/mengxi-ream/read-frog/pull/2525) [`da84dcc`](https://github.com/mengxi-ream/read-frog/commit/da84dcc0629d391973c802a4a83654eccd214613) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(providers): list the Built-in AI providers above your own providers on the API Providers page and open it on the normal Built-in AI provider
+
+- [#2522](https://github.com/mengxi-ream/read-frog/pull/2522) [`a1528fd`](https://github.com/mengxi-ream/read-frog/commit/a1528fd9cb5b1bb3bb66771c76b5e2501ef44ce8) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(ui): name what the floating button and selection toolbar × menus hide, and let them hide until the page reloads
+
+- [#2527](https://github.com/mengxi-ream/read-frog/pull/2527) [`5bcf9e7`](https://github.com/mengxi-ream/read-frog/commit/5bcf9e7c6b8aa1be9cd155c9546a137397988d26) Thanks [@xuing](https://github.com/xuing)! - fix(context-menu): stop logging "All menu items except for separators must have a title" on first start after an update
+
+- [#2526](https://github.com/mengxi-ream/read-frog/pull/2526) [`cc1d1b8`](https://github.com/mengxi-ream/read-frog/commit/cc1d1b83cb5c34b17d6852e653686f3da1bb51e4) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(hover-translation): stop the paragraph ring from following the pointer after a tool such as MouseInc switches tabs with Ctrl+PgUp/PgDn
+
+- [#2518](https://github.com/mengxi-ream/read-frog/pull/2518) [`188ae36`](https://github.com/mengxi-ream/read-frog/commit/188ae3658922e170eb749697378b7eee0c3f54f2) Thanks [@mvanhorn](https://github.com/mvanhorn)! - fix(selection): read text selected across shadow roots, so a triple-clicked Bilibili reply or a selection dragged across comments can be translated
+
+- [#2524](https://github.com/mengxi-ream/read-frog/pull/2524) [`803214b`](https://github.com/mengxi-ream/read-frog/commit/803214b32b7c22d1558cdb6ef699e18b2455e5ae) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(subtitles): choose per site whether video subtitles are off, started from the button, or started automatically. "Enable video subtitles" now opens one menu per site (YouTube, X, Netflix, Bilibili, Udemy, edX) in place of the global switch and the separate "Translate on open" page, and the player's subtitle settings can switch auto-start for the site you are on. Existing settings carry over: subtitles switched off become off on every site, and sites that translated on open become automatic
+
+- [#2520](https://github.com/mengxi-ream/read-frog/pull/2520) [`6ff4779`](https://github.com/mengxi-ream/read-frog/commit/6ff4779760740ccc556612db044b6d839481b034) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(subtitles): keep video subtitles off on sites where Read Frog is disabled. "Disable on this site" and the site list now apply to subtitles too, including a video embedded in a disabled page; in whitelist mode, subtitles only run on the listed sites, including in videos those pages embed from other sites. Video sites no longer load the subtitle code at all while subtitles are switched off or the site is disabled
+
 ## 1.60.0
 
 ### Minor Changes
