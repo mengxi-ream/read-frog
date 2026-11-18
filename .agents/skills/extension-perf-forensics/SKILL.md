@@ -23,7 +23,7 @@ Never conclude from a single run. A perf report on a live site has at least four
 
 Two hard-won corollaries:
 
-- **Verify the effective config after the run** (dump it from the extension's storage in the same profile). This session's first three runs silently tested the wrong target language because an onboarding page had overwritten it — every conclusion drawn before the dump was mis-attributed.
+- **Verify the effective config after the run** (dump it from the extension's storage in the same profile). Onboarding can overwrite settings such as the target language, so a run that skips the dump can silently test the wrong configuration and mis-attribute every conclusion drawn from it.
 - **Suspect the site, not just the extension.** Sites ship their own unbounded fit-loops (`while (overflows()) moveItem()` inside a ResizeObserver). Any extension that changes element sizes can trip them. If rung (4) with a region excluded is clean while your own code is already loop-free, read the site's bundle — the hot loop may be theirs, and the right fix is an exclusion rule, not more extension code.
 
 ## Quick reference
@@ -44,7 +44,7 @@ Two hard-won corollaries:
    - everything stable but `TaskDuration` runs hot → churn without retention → count your own DOM insert/remove operations per cycle.
 4. If probes hang (evaluate timeouts, `Profiler.start` never returns), the renderer main thread is starved — capture the CPU profile through the **browser-process Tracing domain** instead ([starved-renderer-profiling](references/starved-renderer-profiling.md)).
 5. Attribute the hot frames. Extension frames → fix the extension. Site frames → reproduce the site's trigger without the extension (simulate the DOM change by hand), then neutralize via exclusion/site rule and re-verify.
-6. After each fix: rebuild, rerun the *identical* harness, compare against the recorded broken/control baselines in a pass-criteria table (nodes order-of-magnitude, TaskDuration, freeze count, heap-after-GC delta, feature-still-works count). A fix that only moves one number may have missed a second cooperating root cause — this session's storm fix was correct yet the freeze persisted until the site's own loop was also neutralized.
+6. After each fix: rebuild, rerun the *identical* harness, compare against the recorded broken/control baselines in a pass-criteria table (nodes order-of-magnitude, TaskDuration, freeze count, heap-after-GC delta, feature-still-works count). A fix that only moves one number may have missed a second cooperating root cause: an extension-side fix can be correct while the freeze persists until the site's own loop is also neutralized.
 
 ## Verdict discipline
 

@@ -119,7 +119,7 @@ When the raw recording includes install, onboarding, or unrelated loading prelud
 - remove the prelude before delivery;
 - re-check the new first frame.
 
-Requirements: `ffmpeg` and `ffprobe` on `PATH`, Python ≥ 3.10 with Pillow. Both are already satisfied on this machine (see [references/read-frog.md](references/read-frog.md)). Do not install Python dependencies into the repository.
+Requirements: `ffmpeg` and `ffprobe` on `PATH`, Python ≥ 3.10 with Pillow (see [references/read-frog.md](references/read-frog.md)). Do not install Python dependencies into the repository.
 
 ## 6. Perform functional and visual QA
 
