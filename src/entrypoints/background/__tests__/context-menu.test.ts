@@ -174,8 +174,32 @@ describe("background context menu", () => {
     expect(browser.contextMenus.update).not.toHaveBeenCalled()
   })
 
+  it("waits until the background is ready before rebuilding the menu on a config change", async () => {
+    let configWatcher: ((config: Config) => Promise<void>) | undefined
+    storage.watch = vi.fn<(...args: any[]) => any>((_key, callback) => {
+      configWatcher = callback
+    })
+    const { promise: ready, resolve: markReady } = Promise.withResolvers<void>()
+    registerContextMenuListeners(() => ready)
+    if (!configWatcher) {
+      throw new Error("Config watcher was not registered")
+    }
+
+    const rebuilt = configWatcher(createConfig(true))
+    await Promise.resolve()
+    expect(browser.contextMenus.removeAll).not.toHaveBeenCalled()
+
+    markReady()
+    await rebuilt
+    expect(browser.contextMenus.create).toHaveBeenCalledWith({
+      id: MENU_ID_TRANSLATE,
+      title: "Translate",
+      contexts: ["page"],
+    })
+  })
+
   it("records a scoped user refusal when the translate menu disables translation", async () => {
-    registerContextMenuListeners()
+    registerContextMenuListeners(async () => {})
 
     const clickHandler = contextMenuClickListeners[0]
     if (!clickHandler) {
@@ -196,7 +220,7 @@ describe("background context menu", () => {
   })
 
   it("routes selection menu clicks to the matching tab and frame", async () => {
-    registerContextMenuListeners()
+    registerContextMenuListeners(async () => {})
 
     const clickHandler = contextMenuClickListeners[0]
     if (!clickHandler) {
@@ -222,7 +246,7 @@ describe("background context menu", () => {
   })
 
   it("routes read aloud menu clicks to the matching tab and frame", async () => {
-    registerContextMenuListeners()
+    registerContextMenuListeners(async () => {})
 
     const clickHandler = contextMenuClickListeners[0]
     if (!clickHandler) {
@@ -248,7 +272,7 @@ describe("background context menu", () => {
   })
 
   it("routes custom action menu clicks to the matching tab and frame", async () => {
-    registerContextMenuListeners()
+    registerContextMenuListeners(async () => {})
 
     const clickHandler = contextMenuClickListeners[0]
     if (!clickHandler) {
@@ -277,7 +301,7 @@ describe("background context menu", () => {
     const noReceiver = new Error("Could not establish connection. Receiving end does not exist.")
     sendMessageMock.mockRejectedValue(noReceiver)
     const logs = captureLogs()
-    registerContextMenuListeners()
+    registerContextMenuListeners(async () => {})
 
     const clickHandler = contextMenuClickListeners[0]
     if (!clickHandler) {
