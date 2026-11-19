@@ -51,7 +51,7 @@ function trackListOf(tracks: FakeTrack[]): FakeTrackList {
 }
 
 function videoWith(...tracks: FakeTrack[]): HTMLVideoElement {
-  return { textTracks: trackListOf(tracks) } as unknown as HTMLVideoElement
+  return { textTracks: trackListOf(tracks), duration: 60 } as unknown as HTMLVideoElement
 }
 
 function createFetcher(video: HTMLVideoElement | null, videoId = "1") {
