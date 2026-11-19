@@ -14,5 +14,10 @@ export function initBilibiliSubtitles(ctx: ContentScriptContext) {
     config,
     fetchers: { native: () => new TrackSubtitlesFetcher(bilibiliTrackSource) },
   })
-  pollPlayerSubtitles(ctx, { adapter, config })
+  // The track key carries the player's subtitle selection, so a switch there loads ours again.
+  pollPlayerSubtitles(ctx, {
+    adapter,
+    config,
+    onStay: () => void adapter.handleSourceTrackChanged(),
+  })
 }
