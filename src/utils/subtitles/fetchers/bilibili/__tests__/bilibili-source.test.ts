@@ -3,7 +3,7 @@
 import type { BilibiliSubtitlesResponse } from ".."
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { NoSubtitlesError } from "@/utils/subtitles/errors"
-import { bilibiliTrackSource } from ".."
+import { bilibiliTrackSource, listenForBilibiliPlayerPicks } from ".."
 
 vi.mock("@/utils/i18n", () => ({ i18n: { t: (key: string) => key } }))
 vi.mock("@/utils/sleep", () => ({ sleep: () => Promise.resolve() }))
@@ -39,8 +39,12 @@ function response(overrides: Partial<BilibiliSubtitlesResponse> = {}): BilibiliS
 const PART_ID = "BV1XZn26rE8x:2"
 const fetchMock = vi.fn<typeof fetch>()
 
+let stopListening: () => void
+
 beforeEach(() => {
   readerLanguage.sourceCode = "auto"
+  readerLanguage.targetCode = "zh-Hans"
+  stopListening = listenForBilibiliPlayerPicks()
   window.history.replaceState(null, "", "/video/BV1XZn26rE8x/?p=2")
   postMessageRequest.mockResolvedValue(response())
   fetchMock.mockResolvedValue(Response.json(FILE))
@@ -48,21 +52,41 @@ beforeEach(() => {
 })
 
 afterEach(() => {
+  stopListening()
   document.body.innerHTML = ""
   vi.unstubAllGlobals()
   vi.clearAllMocks()
 })
 
-// As Bilibili's subtitle menu marks the track its player shows.
-function selectInPlayer(lan: string) {
-  document.body.innerHTML = `<div class="bpx-player-ctrl-subtitle-language-item bpx-state-active" data-lan="${lan}"></div>`
+// As Bilibili's subtitle menu marks the track its player shows, whoever chose it.
+function showSelectedInPlayer(lan: string) {
+  document.body.innerHTML = `
+    <div class="bpx-player-ctrl-subtitle-close-switch"></div>
+    <div class="bpx-player-ctrl-subtitle-language-item bpx-state-active" data-lan="${lan}">
+      <span class="bpx-player-ctrl-subtitle-language-item-text"></span>
+    </div>`
+}
+
+function pickInPlayer(lan: string) {
+  showSelectedInPlayer(lan)
+  document
+    .querySelector(".bpx-player-ctrl-subtitle-language-item-text")!
+    .dispatchEvent(new MouseEvent("click", { bubbles: true }))
 }
 
 describe("bilibiliTrackSource", () => {
-  it("keys the track by the video part in the url and the player's selection", () => {
+  it("keys the track by the video part in the url and the reader's pick in the player", () => {
     expect(bilibiliTrackSource.currentKey()).toBe("BV1XZn26rE8x:2#")
-    selectInPlayer("ai-en")
+    pickInPlayer("ai-en")
     expect(bilibiliTrackSource.currentKey()).toBe("BV1XZn26rE8x:2#ai-en")
+  })
+
+  it("forgets the pick once subtitles are turned off in the player", () => {
+    pickInPlayer("ai-en")
+    document
+      .querySelector(".bpx-player-ctrl-subtitle-close-switch")!
+      .dispatchEvent(new MouseEvent("click", { bubbles: true }))
+    expect(bilibiliTrackSource.currentKey()).toBe("BV1XZn26rE8x:2#")
   })
 
   it("asks the page for the part and loads the uploader's subtitles, in milliseconds", async () => {
@@ -99,8 +123,8 @@ describe("bilibiliTrackSource", () => {
 
   const TRANSLATIONS_ONLY = [aiTrack("ai-zh", 1), aiTrack("ai-ja", 1), aiTrack("ai-en", 1)]
 
-  it("takes the track selected in the player first, even over the uploader's", async () => {
-    selectInPlayer("ai-en")
+  it("takes the track picked in the player first, even over the uploader's", async () => {
+    pickInPlayer("ai-en")
     postMessageRequest.mockResolvedValue(response({ subtitles: [HUMAN, aiTrack("ai-en", 1)] }))
 
     await expect(
@@ -109,13 +133,16 @@ describe("bilibiliTrackSource", () => {
     expect(postMessageRequest.mock.lastCall?.[1]).toMatchObject({ partId: PART_ID })
   })
 
-  it("ignores a player selection in the reader's target language, Bilibili's own default", async () => {
-    selectInPlayer("ai-zh")
-    postMessageRequest.mockResolvedValue(response({ subtitles: TRANSLATIONS_ONLY }))
+  it("ignores the track Bilibili selected on its own, whatever the reader's language", async () => {
+    readerLanguage.targetCode = "es"
+    showSelectedInPlayer("ai-zh")
+    postMessageRequest.mockResolvedValue(
+      response({ subtitles: [aiTrack("ai-zh", 1), aiTrack("ai-en", 0)] }),
+    )
 
     await expect(
       bilibiliTrackSource.load(bilibiliTrackSource.currentKey()!),
-    ).resolves.toMatchObject({ language: "ja" })
+    ).resolves.toMatchObject({ language: "en" })
   })
 
   it("without a transcript, takes the reader's source language", async () => {

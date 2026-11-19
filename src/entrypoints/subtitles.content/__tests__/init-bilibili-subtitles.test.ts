@@ -18,7 +18,7 @@ vi.mock("../universal-adapter", () => ({
 
 describe("initBilibiliSubtitles", () => {
   it("checks the source track on every poll that finds the same video", () => {
-    initBilibiliSubtitles({} as any)
+    initBilibiliSubtitles({ onInvalidated: vi.fn<(...args: any[]) => void>() } as any)
 
     const { onStay } = mocks.pollPlayerSubtitles.mock.lastCall![1]
     onStay()
