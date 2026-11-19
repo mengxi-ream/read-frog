@@ -208,11 +208,8 @@ describe("translation coordinator loading state", () => {
         .mockImplementation((batch: any) => Promise.resolve(batch) as any)
 
       const coordinator = new TranslationCoordinator({
-        // near cue (in the 1x window) + far cue (only reachable at higher rates)
-        getFragments: () => [
-          { text: "near", start: 1000, end: 2000 },
-          { text: "far", start: 60_000, end: 61_000 },
-        ],
+        // Only reachable at higher rates.
+        getFragments: () => [{ text: "far", start: 60_000, end: 61_000 }],
         getVideoElement: () =>
           ({
             currentTime: 0,
@@ -236,9 +233,71 @@ describe("translation coordinator loading state", () => {
     }
 
     // 1x: 30s window excludes the 60s cue.
-    expect(await firstBatchStartsAtRate(1)).toEqual([1000])
+    expect(await firstBatchStartsAtRate(1)).toEqual([])
     // 3x: 90s window now reaches the 60s cue.
-    expect(await firstBatchStartsAtRate(3)).toEqual([1000, 60_000])
+    expect(await firstBatchStartsAtRate(3)).toEqual([60_000])
+  })
+
+  async function batchSizesDuringPlayback(
+    batchLimits: { maxItemsPerBatch: number; maxCharactersPerBatch: number },
+    text: (index: number) => string,
+  ): Promise<number[]> {
+    const translator = await import("@/utils/subtitles/processor/translator")
+    const spy = vi
+      .spyOn(translator, "translateSubtitles")
+      .mockImplementation((batch: any) => Promise.resolve(batch) as any)
+    const fragments = Array.from({ length: 60 }, (_, i) => ({
+      text: text(i),
+      start: i * 2000,
+      end: i * 2000 + 2000,
+    }))
+    const video = {
+      currentTime: 0,
+      addEventListener: vi.fn<(...args: any[]) => any>(),
+      removeEventListener: vi.fn<(...args: any[]) => any>(),
+    }
+    const coordinator = new TranslationCoordinator({
+      getFragments: () => fragments,
+      getVideoElement: () => video as unknown as HTMLVideoElement,
+      getCurrentState: () => "idle",
+      segmentationPipeline: null,
+      onTranslated: vi.fn<(...args: any[]) => any>(),
+      onStateChange: vi.fn<(...args: any[]) => any>(),
+      batchLimits,
+    })
+
+    coordinator.start()
+    for (let seconds = 0; seconds <= 60; seconds += 0.5) {
+      video.currentTime = seconds
+      coordinator.requestTick()
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    }
+    coordinator.stop()
+
+    const sizes = spy.mock.calls.map((call) => (call[0] as unknown[]).length)
+    spy.mockRestore()
+    return sizes
+  }
+
+  it("keeps filling requests to the item limit while playback slides the window", async () => {
+    const sizes = await batchSizesDuringPlayback(
+      { maxItemsPerBatch: 5, maxCharactersPerBatch: 1000 },
+      (i) => `line ${i}`,
+    )
+
+    // 30s of look-ahead plus 60s of playback reaches 45 of the 2s cues.
+    expect(sizes.length).toBeGreaterThanOrEqual(9)
+    expect(sizes.every((size) => size === 5)).toBe(true)
+  })
+
+  it("stops a request at the character limit", async () => {
+    const sizes = await batchSizesDuringPlayback(
+      { maxItemsPerBatch: 10, maxCharactersPerBatch: 25 },
+      () => "ten chars!",
+    )
+
+    expect(sizes.length).toBeGreaterThan(0)
+    expect(sizes.every((size) => size === 2)).toBe(true)
   })
 
   it("does not publish stale batch cues on translation failure after a recut", async () => {
