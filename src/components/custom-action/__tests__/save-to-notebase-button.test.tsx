@@ -611,7 +611,7 @@ describe("saveToNotebaseButton notebase availability", () => {
     })
   })
 
-  it("refreshes the review-due counts after a direct save, not after a failed one", async () => {
+  it("refreshes the notebases and counts the review-due tab adds up after a direct save, not after a failed one", async () => {
     const config = cloneConfig(DEFAULT_CONFIG)
     config.betaExperience.enabled = false
     notebaseRowCreateMock.mockRejectedValueOnce(new ORPCError("FORBIDDEN", { status: 403 }))
@@ -624,6 +624,7 @@ describe("saveToNotebaseButton notebase availability", () => {
       expect(toastManagerMock.add).toHaveBeenCalledWith(expect.objectContaining({ type: "error" }))
     })
     expect(isInvalidated(queryClient, SCHEDULE_STATUS_STATS_QUERY_KEY)).toBe(false)
+    expect(isInvalidated(queryClient, NOTEBASE_LIST_QUERY_KEY)).toBe(false)
 
     fireEvent.click(saveButton)
     await waitFor(() => {
@@ -632,8 +633,9 @@ describe("saveToNotebaseButton notebase availability", () => {
       )
     })
     expect(isInvalidated(queryClient, SCHEDULE_STATUS_STATS_QUERY_KEY)).toBe(true)
-    // A note joins an existing notebase, so the list stays as it was.
-    expect(isInvalidated(queryClient, NOTEBASE_LIST_QUERY_KEY)).toBe(false)
+    // The page's cached list may predate the connected notebase, and the count
+    // only covers listed notebases.
+    expect(isInvalidated(queryClient, NOTEBASE_LIST_QUERY_KEY)).toBe(true)
   })
 
   it("marks guide Dictionary Notebase complete after direct connected row save with guide tracking", async () => {
