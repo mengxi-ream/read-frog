@@ -36,11 +36,20 @@ const subtitleEntrySchema = z.object({
 })
 
 type SubtitleEntry = z.infer<typeof subtitleEntrySchema>
-type ReaderLanguages = Pick<Config["language"], "sourceCode" | "targetCode">
 
+interface TrackPreferences {
+  /** The `lan` of the track Bilibili's player has selected; null while subtitles are off. */
+  playerSelectedLan: string | null
+  sourceCode: Config["language"]["sourceCode"] | null
+  targetCode: Config["language"]["targetCode"] | null
+}
+
+// Bilibili names its AI subtitles `ai-<lang>`; the rest are the uploader's.
 const AI_LAN_PREFIX = /^ai-/
-// On an `ai-` entry: speech recognition in the spoken language; translations of it are 1.
+// On an AI entry, the speech-recognition transcript in the spoken language; its translations are 1.
 const AI_TYPE_TRANSCRIPT = 0
+const PLAYER_SELECTED_TRACK_SELECTOR = ".bpx-player-ctrl-subtitle-language-item.bpx-state-active"
+const TRACK_KEY_SEPARATOR = "#"
 
 const subtitleFileSchema = z.object({
   body: z.array(z.object({ from: z.number(), to: z.number(), content: z.string() })),
@@ -56,49 +65,60 @@ async function requestBilibiliSubtitles(partId: string): Promise<BilibiliSubtitl
   return parsed.success ? parsed.data : null
 }
 
+function getPlayerSelectedLan(): string | null {
+  return document.querySelector<HTMLElement>(PLAYER_SELECTED_TRACK_SELECTOR)?.dataset.lan ?? null
+}
+
+function parseEntries(subtitles: unknown[]): SubtitleEntry[] {
+  return subtitles.flatMap((subtitle) => {
+    const parsed = subtitleEntrySchema.safeParse(subtitle)
+    return parsed.success ? [parsed.data] : []
+  })
+}
+
+function isAiEntry(entry: SubtitleEntry): boolean {
+  return AI_LAN_PREFIX.test(entry.lan)
+}
+
 function entryLanguage(entry: SubtitleEntry): string {
   return entry.lan.replace(AI_LAN_PREFIX, "")
 }
 
-function isEntryInLanguage(entry: SubtitleEntry, language: ReaderLanguages["targetCode"]): boolean {
+function isInLanguage(entry: SubtitleEntry, language: TrackPreferences["targetCode"]): boolean {
   const entryCode = resolveLanguageCodeFromLocale(entryLanguage(entry))
-  return !!entryCode && isSameLanguage(entryCode, language)
+  return !!language && !!entryCode && isSameLanguage(entryCode, language)
 }
 
-// Without a transcript every AI track is a translation, and Bilibili lists Chinese first even for
-// a foreign video. The reader's source language names the original; failing that, their own
-// language is the one that cannot be it.
-function pickTranslatedSubtitle(
-  entries: SubtitleEntry[],
-  languages: ReaderLanguages | null,
-): SubtitleEntry | undefined {
-  const sourceCode = languages?.sourceCode
-  const source =
-    sourceCode && sourceCode !== "auto"
-      ? entries.find((entry) => isEntryInLanguage(entry, sourceCode))
-      : undefined
-  const targetCode = languages?.targetCode
-  return (
-    source ??
-    entries.find((entry) => !targetCode || !isEntryInLanguage(entry, targetCode)) ??
-    entries[0]
-  )
-}
-
-// Bilibili names its AI subtitles `ai-<lang>`; the uploader's own are the better source.
+/**
+ * The original-language track, in YouTube's order where Bilibili has the same signal: the player's
+ * selection, the uploader's subtitles, then the AI transcript, before any AI translation.
+ */
 function pickSubtitle(
-  subtitles: unknown[],
-  languages: ReaderLanguages | null,
+  entries: SubtitleEntry[],
+  preferences: TrackPreferences,
 ): SubtitleEntry | null {
-  const entries = subtitles.flatMap((subtitle) => {
-    const parsed = subtitleEntrySchema.safeParse(subtitle)
-    return parsed.success ? [parsed.data] : []
-  })
-  const aiEntries = entries.filter((entry) => AI_LAN_PREFIX.test(entry.lan))
+  const { playerSelectedLan, sourceCode, targetCode } = preferences
+  const notInTargetLanguage = (entry: SubtitleEntry) => !isInLanguage(entry, targetCode)
+
+  // Bilibili selects its Chinese AI translation on its own, so a selection in the reader's target
+  // language is the player's default rather than their pick.
+  const playerSelected = entries.find((entry) => entry.lan === playerSelectedLan)
+  const uploaderSubtitle = entries.find((entry) => !isAiEntry(entry))
+  const aiEntries = entries.filter(isAiEntry)
+  const aiTranscript = aiEntries.find((entry) => entry.ai_type === AI_TYPE_TRANSCRIPT)
+  // With only AI translations left, the reader's source language names the original.
+  const aiInSourceLanguage =
+    sourceCode && sourceCode !== "auto"
+      ? aiEntries.find((entry) => isInLanguage(entry, sourceCode))
+      : undefined
+
   return (
-    entries.find((entry) => !AI_LAN_PREFIX.test(entry.lan)) ??
-    aiEntries.find((entry) => entry.ai_type === AI_TYPE_TRANSCRIPT) ??
-    pickTranslatedSubtitle(aiEntries, languages) ??
+    (playerSelected && notInTargetLanguage(playerSelected) ? playerSelected : undefined) ??
+    uploaderSubtitle ??
+    aiTranscript ??
+    aiInSourceLanguage ??
+    aiEntries.find(notInTargetLanguage) ??
+    aiEntries[0] ??
     null
   )
 }
@@ -116,7 +136,15 @@ async function downloadFragments(subtitle: SubtitleEntry): Promise<SubtitlesFrag
   }))
 }
 
-async function loadTrack(partId: string): Promise<SubtitlesTrack> {
+// The player's selection is part of the key, so switching it in the player loads our track again.
+function currentTrackKey(): string | null {
+  const partId = getBilibiliPartId()
+  if (partId === null) return null
+  return [partId, getPlayerSelectedLan() ?? ""].join(TRACK_KEY_SEPARATOR)
+}
+
+async function loadTrack(trackKey: string): Promise<SubtitlesTrack> {
+  const [partId = "", playerSelectedLan = ""] = trackKey.split(TRACK_KEY_SEPARATOR)
   const response = await requestBilibiliSubtitles(partId)
   // No reply, or a player that never reached this part: either way the wait ran out.
   if (!response || response.cid === null) {
@@ -126,7 +154,11 @@ async function loadTrack(partId: string): Promise<SubtitlesTrack> {
 
   // Bilibili also sends an empty list to a signed-out viewer; signing in is theirs to do.
   const config = await getLocalConfig()
-  const subtitle = pickSubtitle(response.subtitles, config?.language ?? null)
+  const subtitle = pickSubtitle(parseEntries(response.subtitles), {
+    playerSelectedLan: playerSelectedLan || null,
+    sourceCode: config?.language.sourceCode ?? null,
+    targetCode: config?.language.targetCode ?? null,
+  })
   if (!subtitle) throw new NoSubtitlesError()
 
   return {
@@ -136,6 +168,6 @@ async function loadTrack(partId: string): Promise<SubtitlesTrack> {
 }
 
 export const bilibiliTrackSource: SubtitlesTrackSource = {
-  currentKey: getBilibiliPartId,
+  currentKey: currentTrackKey,
   load: loadTrack,
 }

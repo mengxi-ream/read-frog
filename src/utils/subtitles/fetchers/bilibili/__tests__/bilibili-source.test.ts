@@ -48,13 +48,21 @@ beforeEach(() => {
 })
 
 afterEach(() => {
+  document.body.innerHTML = ""
   vi.unstubAllGlobals()
   vi.clearAllMocks()
 })
 
+// As Bilibili's subtitle menu marks the track its player shows.
+function selectInPlayer(lan: string) {
+  document.body.innerHTML = `<div class="bpx-player-ctrl-subtitle-language-item bpx-state-active" data-lan="${lan}"></div>`
+}
+
 describe("bilibiliTrackSource", () => {
-  it("keys the track by the video part in the url", () => {
-    expect(bilibiliTrackSource.currentKey()).toBe("BV1XZn26rE8x:2")
+  it("keys the track by the video part in the url and the player's selection", () => {
+    expect(bilibiliTrackSource.currentKey()).toBe("BV1XZn26rE8x:2#")
+    selectInPlayer("ai-en")
+    expect(bilibiliTrackSource.currentKey()).toBe("BV1XZn26rE8x:2#ai-en")
   })
 
   it("asks the page for the part and loads the uploader's subtitles, in milliseconds", async () => {
@@ -90,6 +98,25 @@ describe("bilibiliTrackSource", () => {
   })
 
   const TRANSLATIONS_ONLY = [aiTrack("ai-zh", 1), aiTrack("ai-ja", 1), aiTrack("ai-en", 1)]
+
+  it("takes the track selected in the player first, even over the uploader's", async () => {
+    selectInPlayer("ai-en")
+    postMessageRequest.mockResolvedValue(response({ subtitles: [HUMAN, aiTrack("ai-en", 1)] }))
+
+    await expect(
+      bilibiliTrackSource.load(bilibiliTrackSource.currentKey()!),
+    ).resolves.toMatchObject({ language: "en" })
+    expect(postMessageRequest.mock.lastCall?.[1]).toMatchObject({ partId: PART_ID })
+  })
+
+  it("ignores a player selection in the reader's target language, Bilibili's own default", async () => {
+    selectInPlayer("ai-zh")
+    postMessageRequest.mockResolvedValue(response({ subtitles: TRANSLATIONS_ONLY }))
+
+    await expect(
+      bilibiliTrackSource.load(bilibiliTrackSource.currentKey()!),
+    ).resolves.toMatchObject({ language: "ja" })
+  })
 
   it("without a transcript, takes the reader's source language", async () => {
     readerLanguage.sourceCode = "ja"
