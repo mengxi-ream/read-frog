@@ -36,7 +36,7 @@ const subtitleEntrySchema = z.object({
 })
 
 type SubtitleEntry = z.infer<typeof subtitleEntrySchema>
-type TargetLanguage = Config["language"]["targetCode"]
+type ReaderLanguages = Pick<Config["language"], "sourceCode" | "targetCode">
 
 const AI_LAN_PREFIX = /^ai-/
 // On an `ai-` entry: speech recognition in the spoken language; translations of it are 1.
@@ -60,27 +60,35 @@ function entryLanguage(entry: SubtitleEntry): string {
   return entry.lan.replace(AI_LAN_PREFIX, "")
 }
 
+function isEntryInLanguage(entry: SubtitleEntry, language: ReaderLanguages["targetCode"]): boolean {
+  const entryCode = resolveLanguageCodeFromLocale(entryLanguage(entry))
+  return !!entryCode && isSameLanguage(entryCode, language)
+}
+
 // Without a transcript every AI track is a translation, and Bilibili lists Chinese first even for
-// a foreign video; the reader's own language is the one that cannot be the original.
+// a foreign video. The reader's source language names the original; failing that, their own
+// language is the one that cannot be it.
 function pickTranslatedSubtitle(
   entries: SubtitleEntry[],
-  targetLanguage: TargetLanguage | null,
+  languages: ReaderLanguages | null,
 ): SubtitleEntry | undefined {
-  const others =
-    targetLanguage === null
-      ? entries
-      : entries.filter((entry) => {
-          const language = resolveLanguageCodeFromLocale(entryLanguage(entry))
-          return !language || !isSameLanguage(language, targetLanguage)
-        })
-  const candidates = others.length > 0 ? others : entries
-  return candidates.find((entry) => entryLanguage(entry).split("-")[0] === "en") ?? candidates[0]
+  const sourceCode = languages?.sourceCode
+  const source =
+    sourceCode && sourceCode !== "auto"
+      ? entries.find((entry) => isEntryInLanguage(entry, sourceCode))
+      : undefined
+  const targetCode = languages?.targetCode
+  return (
+    source ??
+    entries.find((entry) => !targetCode || !isEntryInLanguage(entry, targetCode)) ??
+    entries[0]
+  )
 }
 
 // Bilibili names its AI subtitles `ai-<lang>`; the uploader's own are the better source.
 function pickSubtitle(
   subtitles: unknown[],
-  targetLanguage: TargetLanguage | null,
+  languages: ReaderLanguages | null,
 ): SubtitleEntry | null {
   const entries = subtitles.flatMap((subtitle) => {
     const parsed = subtitleEntrySchema.safeParse(subtitle)
@@ -90,7 +98,7 @@ function pickSubtitle(
   return (
     entries.find((entry) => !AI_LAN_PREFIX.test(entry.lan)) ??
     aiEntries.find((entry) => entry.ai_type === AI_TYPE_TRANSCRIPT) ??
-    pickTranslatedSubtitle(aiEntries, targetLanguage) ??
+    pickTranslatedSubtitle(aiEntries, languages) ??
     null
   )
 }
@@ -118,7 +126,7 @@ async function loadTrack(partId: string): Promise<SubtitlesTrack> {
 
   // Bilibili also sends an empty list to a signed-out viewer; signing in is theirs to do.
   const config = await getLocalConfig()
-  const subtitle = pickSubtitle(response.subtitles, config?.language.targetCode ?? null)
+  const subtitle = pickSubtitle(response.subtitles, config?.language ?? null)
   if (!subtitle) throw new NoSubtitlesError()
 
   return {

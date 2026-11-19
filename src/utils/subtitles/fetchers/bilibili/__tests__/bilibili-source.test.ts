@@ -7,8 +7,9 @@ import { bilibiliTrackSource } from ".."
 
 vi.mock("@/utils/i18n", () => ({ i18n: { t: (key: string) => key } }))
 vi.mock("@/utils/sleep", () => ({ sleep: () => Promise.resolve() }))
+const readerLanguage = vi.hoisted(() => ({ sourceCode: "auto", targetCode: "zh-Hans" }))
 vi.mock("@/utils/config/storage", () => ({
-  getLocalConfig: () => Promise.resolve({ language: { targetCode: "zh-Hans" } }),
+  getLocalConfig: () => Promise.resolve({ language: { ...readerLanguage } }),
 }))
 
 const postMessageRequest = vi.fn<(...args: unknown[]) => Promise<unknown>>()
@@ -39,6 +40,7 @@ const PART_ID = "BV1XZn26rE8x:2"
 const fetchMock = vi.fn<typeof fetch>()
 
 beforeEach(() => {
+  readerLanguage.sourceCode = "auto"
   window.history.replaceState(null, "", "/video/BV1XZn26rE8x/?p=2")
   postMessageRequest.mockResolvedValue(response())
   fetchMock.mockResolvedValue(Response.json(FILE))
@@ -87,18 +89,26 @@ describe("bilibiliTrackSource", () => {
     await expect(bilibiliTrackSource.load(PART_ID)).resolves.toMatchObject({ language: "en" })
   })
 
-  it("without a transcript, skips the reader's language and prefers English", async () => {
+  const TRANSLATIONS_ONLY = [aiTrack("ai-zh", 1), aiTrack("ai-ja", 1), aiTrack("ai-en", 1)]
+
+  it("without a transcript, takes the reader's source language", async () => {
+    readerLanguage.sourceCode = "ja"
     postMessageRequest.mockResolvedValue(
-      response({ subtitles: [aiTrack("ai-zh", 1), aiTrack("ai-ja", 1), aiTrack("ai-en", 1)] }),
+      response({ subtitles: [aiTrack("ai-zh", 1), aiTrack("ai-en", 1), aiTrack("ai-ja", 1)] }),
     )
 
-    await expect(bilibiliTrackSource.load(PART_ID)).resolves.toMatchObject({ language: "en" })
+    await expect(bilibiliTrackSource.load(PART_ID)).resolves.toMatchObject({ language: "ja" })
   })
 
-  it("without a transcript or English, takes the first track not in the reader's language", async () => {
-    postMessageRequest.mockResolvedValue(
-      response({ subtitles: [aiTrack("ai-zh", 1), aiTrack("ai-ja", 1), aiTrack("ai-es", 1)] }),
-    )
+  it("without a transcript or a source language, takes the first track not in the reader's language", async () => {
+    postMessageRequest.mockResolvedValue(response({ subtitles: TRANSLATIONS_ONLY }))
+
+    await expect(bilibiliTrackSource.load(PART_ID)).resolves.toMatchObject({ language: "ja" })
+  })
+
+  it("without a track in the source language, falls back the same way", async () => {
+    readerLanguage.sourceCode = "fr"
+    postMessageRequest.mockResolvedValue(response({ subtitles: TRANSLATIONS_ONLY }))
 
     await expect(bilibiliTrackSource.load(PART_ID)).resolves.toMatchObject({ language: "ja" })
   })
