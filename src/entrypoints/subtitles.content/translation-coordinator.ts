@@ -1,12 +1,16 @@
 import type { SegmentationPipeline } from "./segmentation-pipeline"
+import type { Config } from "@/types/config/config"
 import type { BatchQueueConfig } from "@/types/config/translate"
 import type { SubtitlesVideoContext } from "@/utils/subtitles/processor/translator"
 import type { SubtitlesFragment, SubtitlesState } from "@/utils/subtitles/types"
+import { storage } from "#imports"
+import { configSchema } from "@/types/config/config"
 import { getLocalConfig } from "@/utils/config/storage"
+import { CONFIG_STORAGE_KEY } from "@/utils/constants/config"
 import { TRANSLATE_LOOK_AHEAD_MS } from "@/utils/constants/subtitles"
 import { DEFAULT_BATCH_CONFIG } from "@/utils/constants/translate"
 import { effectiveLookAheadMs } from "@/utils/subtitles/lookahead"
-import { translateSubtitles } from "@/utils/subtitles/processor/translator"
+import { getSubtitlesPassLimits, translateSubtitles } from "@/utils/subtitles/processor/translator"
 import { adPlayingAtom, subtitlesStore } from "./atoms"
 
 export interface TranslationCoordinatorOptions {
@@ -16,7 +20,7 @@ export interface TranslationCoordinatorOptions {
   segmentationPipeline: SegmentationPipeline | null
   onTranslated: (fragments: SubtitlesFragment[]) => void
   onStateChange: (state: SubtitlesState, data?: Record<string, string>) => void
-  /** The subtitles batch limits, so one pass fills one AI request. */
+  /** Limits for one pass (see `getSubtitlesPassLimits`); kept current from config while running. */
   batchLimits?: BatchQueueConfig
 }
 
@@ -59,6 +63,7 @@ export class TranslationCoordinator {
   private onTranslated: (fragments: SubtitlesFragment[]) => void
   private onStateChange: (state: SubtitlesState, data?: Record<string, string>) => void
   private batchLimits: BatchQueueConfig
+  private unwatchConfig: (() => void) | null = null
 
   constructor(options: TranslationCoordinatorOptions) {
     this.batchLimits = options.batchLimits ?? DEFAULT_BATCH_CONFIG
@@ -80,6 +85,7 @@ export class TranslationCoordinator {
 
     this.active = true
     this.attachVideoListeners(video)
+    this.watchPassLimits()
 
     if (this.segmentationPipeline) {
       this.segmentationPipeline.start()
@@ -96,6 +102,7 @@ export class TranslationCoordinator {
     this.isTranslating = false
     this.translatingStarts.clear()
     this.detachVideoListeners()
+    this.unwatchPassLimits()
     this.segmentationPipeline?.stop()
   }
 
@@ -109,6 +116,7 @@ export class TranslationCoordinator {
     this.active = false
     this.runId += 1
     this.detachVideoListeners()
+    this.unwatchPassLimits()
     this.translatingStarts.clear()
     this.translatedStarts.clear()
     this.failedStarts.clear()
@@ -116,6 +124,20 @@ export class TranslationCoordinator {
     this.isTranslating = false
     this.lastEmittedState = "idle"
     this.videoContext = { videoTitle: "", subtitlesTextContent: "" }
+  }
+
+  /** Settings apply mid-video, as they already do for the background queue. */
+  private watchPassLimits() {
+    if (this.unwatchConfig) return
+    this.unwatchConfig = storage.watch<Config>(`local:${CONFIG_STORAGE_KEY}`, (next) => {
+      const parsed = configSchema.safeParse(next)
+      if (parsed.success) this.batchLimits = getSubtitlesPassLimits(parsed.data)
+    })
+  }
+
+  private unwatchPassLimits() {
+    this.unwatchConfig?.()
+    this.unwatchConfig = null
   }
 
   private attachVideoListeners(video: HTMLVideoElement) {

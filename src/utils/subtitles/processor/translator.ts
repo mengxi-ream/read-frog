@@ -1,6 +1,7 @@
 import type { SubtitlesFragment } from "../types"
 import type { HostedAiTextStreamRoute } from "@/types/background-stream"
 import type { Config } from "@/types/config/config"
+import type { BatchQueueConfig } from "@/types/config/translate"
 import type { SubtitlePromptContext } from "@/types/content"
 import type { MatchedTerm } from "@/utils/glossary/types"
 import type { PromptableProviderRef, SerializableProviderRef } from "@/utils/providers/provider-ref"
@@ -10,6 +11,7 @@ import { toastManager } from "@/components/ui/base-ui/toast"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { classifySerializedProvider } from "@/utils/analytics-provider"
 import { getLocalConfig } from "@/utils/config/storage"
+import { TRANSLATION_BATCH_SIZE } from "@/utils/constants/subtitles"
 import { cleanText } from "@/utils/content/utils"
 import { resolveGlossaryTerms } from "@/utils/glossary/active-matcher"
 import { trackGlossaryUsed } from "@/utils/glossary/analytics"
@@ -316,6 +318,27 @@ export async function resolveSubtitlesProviderRef(
   // notPromptable degrades silently: unlike a hosted denial (something the
   // user was refused), it is a configuration state the pre-flight UI explains.
   return resolution.status === "ok" ? resolution.ref : null
+}
+
+/**
+ * How many cues one translation pass may take. Only a provider on the batch
+ * queue (the same rule as the background's `shouldUseBatchQueue`) packs them
+ * into one request, so the AI batch limits apply to it alone; any other
+ * provider sends one request per cue and keeps the fixed group size.
+ */
+export function getSubtitlesPassLimits(config: Config): BatchQueueConfig {
+  const resolved = resolveProviderRefForCapability(
+    "videoSubtitles",
+    config.providersConfig,
+    config.videoSubtitles.providerId,
+  )
+  if (resolved && canResolvedProviderRefGenerateText(resolved)) {
+    return config.videoSubtitles.batchQueueConfig
+  }
+  return {
+    maxItemsPerBatch: TRANSLATION_BATCH_SIZE,
+    maxCharactersPerBatch: Number.POSITIVE_INFINITY,
+  }
 }
 
 export async function fetchSubtitlesSummary(
