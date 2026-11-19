@@ -631,7 +631,6 @@ options:
       lockPosition: Lock position
       unlockPosition: Unlock position
       settings: Settings
-      feedback: Send feedback
   selectionToolbar:
     title: Selection Toolbar
     pageDescription: Set which actions appear when you select text, and where the toolbar shows up.

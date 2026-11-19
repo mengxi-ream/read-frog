@@ -630,7 +630,6 @@ options:
       lockPosition: Khóa vị trí
       unlockPosition: Mở khóa vị trí
       settings: Cài đặt
-      feedback: Gửi phản hồi
   selectionToolbar:
     title: Thanh công cụ chọn
     pageDescription: Đặt các thao tác xuất hiện khi bạn chọn văn bản và nơi hiển thị thanh công cụ.

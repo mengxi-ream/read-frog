@@ -631,7 +631,6 @@ options:
       lockPosition: Bloquear posición
       unlockPosition: Desbloquear posición
       settings: Ajustes
-      feedback: Enviar comentarios
   selectionToolbar:
     title: Barra de selección
     pageDescription: Define qué acciones aparecen al seleccionar texto y dónde se muestra la barra.
