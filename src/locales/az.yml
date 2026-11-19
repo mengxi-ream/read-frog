@@ -631,7 +631,6 @@ options:
       lockPosition: Mövqeyi kilidlə
       unlockPosition: Mövqenin kilidini aç
       settings: Parametrlər
-      feedback: Rəy göndər
   selectionToolbar:
     title: Seçim alətlər paneli
     pageDescription: Mətn seçdikdə hansı əməliyyatların göründüyünü və alətlər panelinin harada açıldığını təyin edin.

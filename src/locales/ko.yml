@@ -630,7 +630,6 @@ options:
       lockPosition: 위치 잠금
       unlockPosition: 위치 잠금 해제
       settings: 설정
-      feedback: 피드백 보내기
   selectionToolbar:
     title: 선택 툴바
     pageDescription: 텍스트를 선택했을 때 나타날 동작과 도구 모음을 표시할 사이트를 설정하세요.

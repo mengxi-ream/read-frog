@@ -631,7 +631,6 @@ options:
       lockPosition: 锁定位置
       unlockPosition: 解锁位置
       settings: 设置
-      feedback: 发送反馈
   selectionToolbar:
     title: 选择工具栏
     pageDescription: 设置选中文本时出现哪些操作，以及工具栏在哪些网站显示。

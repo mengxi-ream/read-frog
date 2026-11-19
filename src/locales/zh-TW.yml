@@ -631,7 +631,6 @@ options:
       lockPosition: 鎖定位置
       unlockPosition: 解鎖位置
       settings: 設定
-      feedback: 傳送意見回饋
   selectionToolbar:
     title: 選取工具列
     pageDescription: 設定選取文字時出現哪些操作，以及工具列在哪些網站顯示。

@@ -630,7 +630,6 @@ options:
       lockPosition: Закрепить положение
       unlockPosition: Открепить положение
       settings: Настройки
-      feedback: Отправить отзыв
   selectionToolbar:
     title: Панель выделения
     pageDescription: Укажите, какие действия появляются при выделении текста и где показывать панель.

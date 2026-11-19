@@ -630,7 +630,6 @@ options:
       lockPosition: 位置を固定
       unlockPosition: 位置の固定を解除
       settings: 設定
-      feedback: フィードバックを送信
   selectionToolbar:
     title: 選択ツールバー
     pageDescription: テキストを選択したときに表示するアクションと、ツールバーを表示するサイトを設定します。

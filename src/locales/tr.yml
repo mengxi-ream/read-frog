@@ -630,7 +630,6 @@ options:
       lockPosition: Konumu kilitle
       unlockPosition: Konum kilidini aç
       settings: Ayarlar
-      feedback: Geri bildirim gönder
   selectionToolbar:
     title: Seçim Araç Çubuğu
     pageDescription: Metin seçtiğinizde hangi eylemlerin görüneceğini ve araç çubuğunun nerede çıkacağını belirleyin.
