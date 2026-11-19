@@ -89,10 +89,13 @@ vi.mock("@/utils/orpc/client", () => ({
           ...(options as object),
         }),
       },
+      list: {
+        key: () => ["notebase", "list"],
+      },
     },
     srs: {
-      recentNotebaseScheduleStatusStats: {
-        key: () => ["srs", "recentNotebaseScheduleStatusStats"],
+      scheduleStatusStats: {
+        key: () => ["srs", "scheduleStatusStats"],
       },
     },
   },
@@ -278,7 +281,21 @@ function renderButton(
       </Provider>
     </QueryClientProvider>,
   )
-  return { ...rendered, store }
+  return { ...rendered, store, queryClient }
+}
+
+// What the selection popover's review-due count is added up from, cached
+// under the signed-in user: the notebases and their study queue counts.
+const NOTEBASE_LIST_QUERY_KEY = ["notebase", "list", "user-1"]
+const SCHEDULE_STATUS_STATS_QUERY_KEY = ["srs", "scheduleStatusStats", "user-1"]
+
+function seedReviewDueCount(queryClient: QueryClient) {
+  queryClient.setQueryData(NOTEBASE_LIST_QUERY_KEY, [])
+  queryClient.setQueryData(SCHEDULE_STATUS_STATS_QUERY_KEY, {})
+}
+
+function isInvalidated(queryClient: QueryClient, queryKey: unknown[]) {
+  return queryClient.getQueryState(queryKey)?.isInvalidated
 }
 
 function getStoredDictionaryConnection(store: ReturnType<typeof createStore>) {
@@ -328,7 +345,7 @@ describe("saveToNotebaseButton notebase availability", () => {
     }
     vi.mocked(orpcClient.notebase.create).mockResolvedValue(createResult)
     vi.mocked(orpcClient.notebase.list).mockResolvedValue([
-      { id: "notebase-1", name: "Summarize Notes" },
+      { id: "notebase-1", name: "Summarize Notes", srsSleepingAt: null },
     ])
     vi.mocked(orpcClient.notebase.getSchema).mockResolvedValue(createSchema())
     notebaseRowCreateMock.mockResolvedValue({ txid: 1 })
@@ -387,6 +404,23 @@ describe("saveToNotebaseButton notebase availability", () => {
         active: true,
       })
     })
+  })
+
+  it("refreshes the notebases and counts the review-due tab adds up after creating a notebase and saving", async () => {
+    const config = cloneConfig(DEFAULT_CONFIG)
+    config.betaExperience.enabled = true
+    const { queryClient } = renderButton(config, createAction())
+    seedReviewDueCount(queryClient)
+
+    fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
+    fireEvent.click(
+      screen.getByRole("button", { name: i18n.t("action.saveToNotebaseCreateAndSaveShort") }),
+    )
+
+    await waitFor(() => {
+      expect(isInvalidated(queryClient, SCHEDULE_STATUS_STATS_QUERY_KEY)).toBe(true)
+    })
+    expect(isInvalidated(queryClient, NOTEBASE_LIST_QUERY_KEY)).toBe(true)
   })
 
   it("shows an upgrade action when creating a Notebase exceeds the note limit", async () => {
@@ -575,6 +609,33 @@ describe("saveToNotebaseButton notebase availability", () => {
       url: expect.stringContaining("/notebase/notebase-1"),
       active: true,
     })
+  })
+
+  it("refreshes the notebases and counts the review-due tab adds up after a direct save, not after a failed one", async () => {
+    const config = cloneConfig(DEFAULT_CONFIG)
+    config.betaExperience.enabled = false
+    notebaseRowCreateMock.mockRejectedValueOnce(new ORPCError("FORBIDDEN", { status: 403 }))
+    const { queryClient } = renderButton(config, createConnectedAction())
+    seedReviewDueCount(queryClient)
+    const saveButton = screen.getByRole("button", { name: i18n.t("action.saveToNotebase") })
+
+    fireEvent.click(saveButton)
+    await waitFor(() => {
+      expect(toastManagerMock.add).toHaveBeenCalledWith(expect.objectContaining({ type: "error" }))
+    })
+    expect(isInvalidated(queryClient, SCHEDULE_STATUS_STATS_QUERY_KEY)).toBe(false)
+    expect(isInvalidated(queryClient, NOTEBASE_LIST_QUERY_KEY)).toBe(false)
+
+    fireEvent.click(saveButton)
+    await waitFor(() => {
+      expect(toastManagerMock.add).toHaveBeenCalledWith(
+        expect.objectContaining({ type: "success" }),
+      )
+    })
+    expect(isInvalidated(queryClient, SCHEDULE_STATUS_STATS_QUERY_KEY)).toBe(true)
+    // The page's cached list may predate the connected notebase, and the count
+    // only covers listed notebases.
+    expect(isInvalidated(queryClient, NOTEBASE_LIST_QUERY_KEY)).toBe(true)
   })
 
   it("marks guide Dictionary Notebase complete after direct connected row save with guide tracking", async () => {
