@@ -7,6 +7,9 @@ import { bilibiliTrackSource } from ".."
 
 vi.mock("@/utils/i18n", () => ({ i18n: { t: (key: string) => key } }))
 vi.mock("@/utils/sleep", () => ({ sleep: () => Promise.resolve() }))
+vi.mock("@/utils/config/storage", () => ({
+  getLocalConfig: () => Promise.resolve({ language: { targetCode: "zh-Hans" } }),
+}))
 
 const postMessageRequest = vi.fn<(...args: unknown[]) => Promise<unknown>>()
 vi.mock("@/utils/subtitles/fetchers/post-message-request", () => ({
@@ -70,6 +73,34 @@ describe("bilibiliTrackSource", () => {
     postMessageRequest.mockResolvedValue(response({ subtitles: [{ lan: 1 }, AI] }))
 
     await expect(bilibiliTrackSource.load(PART_ID)).resolves.toMatchObject({ language: "zh" })
+  })
+
+  function aiTrack(lan: string, aiType: number) {
+    return { lan, subtitle_url: `//aisubtitle.hdslb.com/${lan}.json`, ai_type: aiType }
+  }
+
+  it("takes the AI transcript, not the Chinese translation Bilibili lists first", async () => {
+    postMessageRequest.mockResolvedValue(
+      response({ subtitles: [aiTrack("ai-zh", 1), aiTrack("ai-ja", 1), aiTrack("ai-en", 0)] }),
+    )
+
+    await expect(bilibiliTrackSource.load(PART_ID)).resolves.toMatchObject({ language: "en" })
+  })
+
+  it("without a transcript, skips the reader's language and prefers English", async () => {
+    postMessageRequest.mockResolvedValue(
+      response({ subtitles: [aiTrack("ai-zh", 1), aiTrack("ai-ja", 1), aiTrack("ai-en", 1)] }),
+    )
+
+    await expect(bilibiliTrackSource.load(PART_ID)).resolves.toMatchObject({ language: "en" })
+  })
+
+  it("without a transcript or English, takes the first track not in the reader's language", async () => {
+    postMessageRequest.mockResolvedValue(
+      response({ subtitles: [aiTrack("ai-zh", 1), aiTrack("ai-ja", 1), aiTrack("ai-es", 1)] }),
+    )
+
+    await expect(bilibiliTrackSource.load(PART_ID)).resolves.toMatchObject({ language: "ja" })
   })
 
   it("reports no subtitles when the list is empty, as it is for a signed-out viewer", async () => {

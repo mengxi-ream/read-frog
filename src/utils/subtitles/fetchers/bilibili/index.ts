@@ -1,11 +1,15 @@
 import type { SubtitlesTrack, SubtitlesTrackSource } from "../track"
+import type { Config } from "@/types/config/config"
 import type { SubtitlesFragment } from "@/utils/subtitles/types"
+import { isSameLanguage } from "@read-frog/definitions"
 import { z } from "zod"
+import { getLocalConfig } from "@/utils/config/storage"
 import {
   BILIBILI_POST_MESSAGE_TIMEOUT_MS,
   BILIBILI_SUBTITLES_REQUEST_TYPE,
   BILIBILI_SUBTITLES_RESPONSE_TYPE,
 } from "@/utils/constants/subtitles"
+import { resolveLanguageCodeFromLocale } from "@/utils/content/page-language"
 import { i18n } from "@/utils/i18n"
 import {
   NoSubtitlesError,
@@ -25,9 +29,18 @@ const bilibiliSubtitlesResponseSchema = z.object({
 
 export type BilibiliSubtitlesResponse = z.infer<typeof bilibiliSubtitlesResponseSchema>
 
-const subtitleEntrySchema = z.object({ lan: z.string(), subtitle_url: z.string().nonempty() })
+const subtitleEntrySchema = z.object({
+  lan: z.string(),
+  subtitle_url: z.string().nonempty(),
+  ai_type: z.number().optional(),
+})
 
 type SubtitleEntry = z.infer<typeof subtitleEntrySchema>
+type TargetLanguage = Config["language"]["targetCode"]
+
+const AI_LAN_PREFIX = /^ai-/
+// On an `ai-` entry: speech recognition in the spoken language; translations of it are 1.
+const AI_TYPE_TRANSCRIPT = 0
 
 const subtitleFileSchema = z.object({
   body: z.array(z.object({ from: z.number(), to: z.number(), content: z.string() })),
@@ -43,13 +56,43 @@ async function requestBilibiliSubtitles(partId: string): Promise<BilibiliSubtitl
   return parsed.success ? parsed.data : null
 }
 
+function entryLanguage(entry: SubtitleEntry): string {
+  return entry.lan.replace(AI_LAN_PREFIX, "")
+}
+
+// Without a transcript every AI track is a translation, and Bilibili lists Chinese first even for
+// a foreign video; the reader's own language is the one that cannot be the original.
+function pickTranslatedSubtitle(
+  entries: SubtitleEntry[],
+  targetLanguage: TargetLanguage | null,
+): SubtitleEntry | undefined {
+  const others =
+    targetLanguage === null
+      ? entries
+      : entries.filter((entry) => {
+          const language = resolveLanguageCodeFromLocale(entryLanguage(entry))
+          return !language || !isSameLanguage(language, targetLanguage)
+        })
+  const candidates = others.length > 0 ? others : entries
+  return candidates.find((entry) => entryLanguage(entry).split("-")[0] === "en") ?? candidates[0]
+}
+
 // Bilibili names its AI subtitles `ai-<lang>`; the uploader's own are the better source.
-function pickSubtitle(subtitles: unknown[]): SubtitleEntry | null {
+function pickSubtitle(
+  subtitles: unknown[],
+  targetLanguage: TargetLanguage | null,
+): SubtitleEntry | null {
   const entries = subtitles.flatMap((subtitle) => {
     const parsed = subtitleEntrySchema.safeParse(subtitle)
     return parsed.success ? [parsed.data] : []
   })
-  return entries.find((entry) => !entry.lan.startsWith("ai-")) ?? entries[0] ?? null
+  const aiEntries = entries.filter((entry) => AI_LAN_PREFIX.test(entry.lan))
+  return (
+    entries.find((entry) => !AI_LAN_PREFIX.test(entry.lan)) ??
+    aiEntries.find((entry) => entry.ai_type === AI_TYPE_TRANSCRIPT) ??
+    pickTranslatedSubtitle(aiEntries, targetLanguage) ??
+    null
+  )
 }
 
 async function downloadFragments(subtitle: SubtitleEntry): Promise<SubtitlesFragment[]> {
@@ -74,11 +117,12 @@ async function loadTrack(partId: string): Promise<SubtitlesTrack> {
   if (!response.subtitles) throw new TrackFileNotLoadedError()
 
   // Bilibili also sends an empty list to a signed-out viewer; signing in is theirs to do.
-  const subtitle = pickSubtitle(response.subtitles)
+  const config = await getLocalConfig()
+  const subtitle = pickSubtitle(response.subtitles, config?.language.targetCode ?? null)
   if (!subtitle) throw new NoSubtitlesError()
 
   return {
-    language: subtitle.lan.replace(/^ai-/, ""),
+    language: entryLanguage(subtitle),
     fragments: await downloadFragments(subtitle),
   }
 }
