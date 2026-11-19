@@ -13,43 +13,59 @@ const COUNT_MARK = "\uE000"
 
 /**
  * "N cards to review", tucked into the popover's bottom-right corner above the
- * footer: the due cards of the user's most recently used notebase, opening its
- * review page. Like the queue, it counts one card per note at a time.
+ * footer: today's cards across the user's awake notebases, the number the
+ * website's Start review shows, opening that combined review. Like the
+ * website, it adds up `srs.scheduleStatusStats` over the notebases
+ * `notebase.list` gives a null `srsSleepingAt`, so sleeping notebases are left
+ * out of both. Like the queue, it counts one card per note at a time.
  * Renders nothing for guests, on errors, or when nothing is due.
  */
 export function ReviewDueTab({ source }: { source: ReviewEntrySource }) {
   const { data: session, isPending: isSessionPending } = authClient.useSession()
   const userId = session?.user?.id
   const prefersReducedMotion = useReducedMotion() ?? false
-  const input = { timezone: new Intl.DateTimeFormat().resolvedOptions().timeZone }
-  const { data } = useQuery(
-    orpc.srs.recentNotebaseScheduleStatusStats.queryOptions({
-      input,
-      // Per user, so a sign-in or account switch never shows another account's
-      // count (suffixing keeps `orpc.srs.key()` invalidation prefix-matching).
-      queryKey: [
-        ...orpc.srs.recentNotebaseScheduleStatusStats.queryKey({ input }),
-        userId ?? "guest",
-      ],
-      enabled: !isSessionPending && userId !== undefined,
-      retry: false,
-      staleTime: 60_000,
-      meta: { suppressToast: true },
+  // Both queries are per user, so a sign-in or account switch never shows
+  // another account's count (suffixing keeps `.key()` invalidation
+  // prefix-matching).
+  const userKey = userId ?? "guest"
+  const queryRules = {
+    enabled: !isSessionPending && userId !== undefined,
+    retry: false,
+    staleTime: 60_000,
+    meta: { suppressToast: true },
+  }
+  const listInput = {}
+  const { data: notebases } = useQuery(
+    orpc.notebase.list.queryOptions({
+      input: listInput,
+      queryKey: [...orpc.notebase.list.queryKey({ input: listInput }), userKey],
+      ...queryRules,
+    }),
+  )
+  const statsInput = { timezone: new Intl.DateTimeFormat().resolvedOptions().timeZone }
+  const { data: statsByNotebaseId } = useQuery(
+    orpc.srs.scheduleStatusStats.queryOptions({
+      input: statsInput,
+      queryKey: [...orpc.srs.scheduleStatusStats.queryKey({ input: statsInput }), userKey],
+      ...queryRules,
     }),
   )
 
-  const count = data ? data.stats.new + data.stats.learning + data.stats.review : 0
-  if (!data || count === 0) {
+  let count = 0
+  for (const notebase of notebases ?? []) {
+    const stats = notebase.srsSleepingAt === null ? statsByNotebaseId?.[notebase.id] : undefined
+    if (stats) {
+      count += stats.new + stats.learning + stats.review
+    }
+  }
+  if (count === 0) {
     return null
   }
 
   const [before, after] = i18n
     .t(count === 1 ? "action.reviewDueOne" : "action.reviewDueOther", [COUNT_MARK])
     .split(COUNT_MARK)
-  const reviewUrl = new URL(
-    `/notebase/${encodeURIComponent(data.notebase.id)}/review`,
-    env.WXT_WEBSITE_URL,
-  )
+  const reviewUrl = new URL("/review", env.WXT_WEBSITE_URL)
   reviewUrl.searchParams.set("source", source)
 
   return (
@@ -58,7 +74,6 @@ export function ReviewDueTab({ source }: { source: ReviewEntrySource }) {
         type="button"
         initial="normal"
         whileHover={prefersReducedMotion ? undefined : "animate"}
-        title={data.notebase.name}
         className="flex shrink-0 cursor-pointer items-center gap-1 self-end rounded-tl-lg border-t border-l bg-popover py-1 pr-3 pl-2.5 text-xs text-muted-foreground transition-colors outline-none hover:bg-muted/60 hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 dark:hover:bg-muted/40"
         onClick={() => {
           void sendMessage("openPage", { url: reviewUrl.toString(), active: true })

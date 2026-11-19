@@ -151,9 +151,10 @@ export function useSaveToNotebase() {
 
   const handleSaveSuccess = (notebaseId: string, attempt: DirectNoteSaveAttempt) => {
     trackNoteSaveCompleted({ ...attempt, path: "direct" })
-    // The new note can change both which notebase is the recent one and its count.
+    // The new note's cards join the combined review's count unless its
+    // notebase is asleep.
     void queryClient.invalidateQueries({
-      queryKey: orpc.srs.recentNotebaseScheduleStatusStats.key(),
+      queryKey: orpc.srs.scheduleStatusStats.key(),
     })
     const notebaseUrl = getNotebaseDetailUrl(notebaseId)
     const guideTracking = savingGuideTrackingRef.current

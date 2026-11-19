@@ -179,9 +179,10 @@ export function SaveToNotebaseDialogHost() {
       // Reported before the config write: the notes are on the server now, and
       // a write that fails below reaches onError, which must not undo that.
       trackCreateAndSaveCompleted(createdPendingSave)
-      // The new notebase is now the most recently used one.
+      // The new notebase and its cards join the combined review's count.
+      void queryClient.invalidateQueries({ queryKey: orpc.notebase.list.key() })
       void queryClient.invalidateQueries({
-        queryKey: orpc.srs.recentNotebaseScheduleStatusStats.key(),
+        queryKey: orpc.srs.scheduleStatusStats.key(),
       })
       const nextConnection = buildNotebaseConnectionFromPending(
         createdPendingSave,
