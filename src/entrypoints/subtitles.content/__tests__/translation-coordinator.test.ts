@@ -1,4 +1,7 @@
 import { describe, expect, it, vi } from "vitest"
+import { storage } from "#imports"
+import { CONFIG_STORAGE_KEY, DEFAULT_CONFIG } from "@/utils/constants/config"
+import { DEFAULT_PROVIDER_CONFIG } from "@/utils/constants/providers"
 import { TranslationCoordinator } from "../translation-coordinator"
 
 describe("translation coordinator loading state", () => {
@@ -298,6 +301,57 @@ describe("translation coordinator loading state", () => {
 
     expect(sizes.length).toBeGreaterThan(0)
     expect(sizes.every((size) => size === 2)).toBe(true)
+  })
+
+  it("applies a batch limit change made while the video plays", async () => {
+    const translator = await import("@/utils/subtitles/processor/translator")
+    const spy = vi
+      .spyOn(translator, "translateSubtitles")
+      .mockImplementation((batch: any) => Promise.resolve(batch) as any)
+    const fragments = Array.from({ length: 60 }, (_, i) => ({
+      text: `line ${i}`,
+      start: i * 2000,
+      end: i * 2000 + 2000,
+    }))
+    const video = {
+      currentTime: 0,
+      addEventListener: vi.fn<(...args: any[]) => any>(),
+      removeEventListener: vi.fn<(...args: any[]) => any>(),
+    }
+    const coordinator = new TranslationCoordinator({
+      getFragments: () => fragments,
+      getVideoElement: () => video as unknown as HTMLVideoElement,
+      getCurrentState: () => "idle",
+      segmentationPipeline: null,
+      onTranslated: vi.fn<(...args: any[]) => any>(),
+      onStateChange: vi.fn<(...args: any[]) => any>(),
+      batchLimits: { maxItemsPerBatch: 2, maxCharactersPerBatch: 1000 },
+    })
+
+    coordinator.start()
+    await new Promise((resolve) => setTimeout(resolve, 0))
+
+    await storage.setItem(`local:${CONFIG_STORAGE_KEY}`, {
+      ...DEFAULT_CONFIG,
+      videoSubtitles: {
+        ...DEFAULT_CONFIG.videoSubtitles,
+        providerId: DEFAULT_PROVIDER_CONFIG.openai.id,
+        batchQueueConfig: { maxItemsPerBatch: 6, maxCharactersPerBatch: 1000 },
+      },
+    })
+    for (let seconds = 1; seconds <= 20; seconds += 1) {
+      video.currentTime = seconds
+      coordinator.requestTick()
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    }
+    coordinator.stop()
+
+    const sizes = spy.mock.calls.map((call) => (call[0] as unknown[]).length)
+    spy.mockRestore()
+    const firstNewSize = sizes.indexOf(6)
+    expect(sizes[0]).toBe(2)
+    expect(firstNewSize).toBeGreaterThan(0)
+    expect(sizes.slice(firstNewSize).every((size) => size === 6)).toBe(true)
   })
 
   it("does not publish stale batch cues on translation failure after a recut", async () => {
