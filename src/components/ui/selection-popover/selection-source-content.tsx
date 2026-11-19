@@ -20,21 +20,18 @@ export function SelectionSourceContent({
   emptyPlaceholder,
   separatorClassName,
 }: SelectionSourceContentProps) {
-  const [actionsExpanded, setActionsExpanded] = useState(defaultExpanded)
+  const [expanded, setExpanded] = useState(defaultExpanded)
   const displayText = text || emptyPlaceholder || ""
 
   return (
     <>
       <div className="space-y-2">
         <div className="flex items-start justify-between gap-2">
-          <ScrollArea
-            className="min-w-0 flex-1"
-            viewportClassName={cn(actionsExpanded && "max-h-18")}
-          >
+          <ScrollArea className="min-w-0 flex-1" viewportClassName={cn(expanded && "max-h-18")}>
             <p
               className={cn(
                 "text-sm [overflow-wrap:anywhere] break-words whitespace-pre-wrap text-zinc-600 dark:text-zinc-400",
-                !actionsExpanded && "line-clamp-3",
+                !expanded && "line-clamp-3",
               )}
             >
               {displayText}
@@ -44,26 +41,25 @@ export function SelectionSourceContent({
             variant="ghost-secondary"
             size="icon-xs"
             className="size-5.5 shrink-0"
-            onClick={() => setActionsExpanded((prev) => !prev)}
+            onClick={() => setExpanded((prev) => !prev)}
           >
-            <Activity mode={actionsExpanded ? "visible" : "hidden"}>
+            <Activity mode={expanded ? "visible" : "hidden"}>
               <IconChevronUp />
             </Activity>
-            <Activity mode={actionsExpanded ? "hidden" : "visible"}>
+            <Activity mode={expanded ? "hidden" : "visible"}>
               <IconChevronDown />
             </Activity>
           </Button>
         </div>
-        <Activity mode={actionsExpanded ? "visible" : "hidden"}>
+        {/* Always shown: the chevron only expands the text. */}
+        <Activity mode={text ? "visible" : "hidden"}>
           <div className="flex items-center gap-1">
             <CopyButton text={text ?? undefined} />
             <SpeakButton text={text ?? undefined} />
           </div>
         </Activity>
       </div>
-      <Separator
-        className={cn("opacity-60", actionsExpanded ? "mt-1.5" : "mt-3", separatorClassName)}
-      />
+      <Separator className={cn("opacity-60", text ? "mt-1.5" : "mt-3", separatorClassName)} />
     </>
   )
 }
