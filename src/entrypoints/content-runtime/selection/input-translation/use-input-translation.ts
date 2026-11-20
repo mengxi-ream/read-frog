@@ -8,7 +8,7 @@ import { classifyFailureReason } from "@/utils/analytics-failure-reason"
 import { classifyResolvedProvider, UNKNOWN_FEATURE_PROVIDER } from "@/utils/analytics-provider"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { INPUT_REPLACE_REQUEST_TYPE } from "@/utils/constants/input-injector"
-import { openGuestSignInPrompt } from "@/utils/content-runtime/guest-sign-in-prompt"
+import { openBuiltInAiPrompt } from "@/utils/content-runtime/built-in-ai-prompt"
 import { getDeepActiveElement } from "@/utils/dom/active-element"
 import { translateTextForInput } from "@/utils/host/translate/translate-variants"
 import { createLogger } from "@/utils/logging/logger"
@@ -255,7 +255,7 @@ export function useInputTranslation() {
         if (error instanceof HostedAiProviderUnavailableError) {
           if (error.reason === "authentication_required") {
             // A guest: log in, or switch to machine translation and type the spaces again.
-            openGuestSignInPrompt({ feature: "inputTranslation" })
+            openBuiltInAiPrompt({ kind: "logIn", feature: "inputTranslation" })
           } else {
             toastManager.add({
               type: "error",

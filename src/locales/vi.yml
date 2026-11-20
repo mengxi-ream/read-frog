@@ -1818,9 +1818,12 @@ hostedAi:
     removedNoAlternatives: "$1 không còn được cung cấp. Hãy chọn nhà cung cấp khác."
   actions:
     chooseModel: "Chọn mô hình"
-  guestPrompt:
-    title: "Đăng nhập để dùng AI tích hợp"
-    description: "AI tích hợp miễn phí khi bạn đăng nhập, khoảng 60.000 token mỗi tuần. Hoặc chuyển sang dịch máy, không cần tài khoản."
+  builtInAiPrompt:
+    logInTitle: "Đăng nhập để dùng AI tích hợp"
+    logInDescription: "AI tích hợp miễn phí khi bạn đăng nhập, khoảng 120.000 token mỗi tuần. Hoặc chuyển sang dịch máy."
+    upgradeTitle: "Bạn đã dùng hết AI tích hợp của tuần này"
+    upgradeDescription: "Pro dịch khoảng 1.500 trang web mỗi tháng, Ultra khoảng 5.000. Hoặc tạm chuyển sang dịch máy."
+    upgradeDescriptionPro: "Ultra dịch khoảng 5.000 trang web mỗi tháng. Hoặc tạm chuyển sang dịch máy."
     useMachineTranslation: "Dùng dịch máy"
     switched: "$1 giờ dùng $2."
     switchFailed: "Không thể chuyển sang dịch máy. Vui lòng thử lại."

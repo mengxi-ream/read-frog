@@ -18,32 +18,33 @@ import {
 } from "@/utils/constants/feature-providers"
 import { SELECTION_CONTENT_OVERLAY_LAYERS } from "@/utils/constants/selection-overlay-layers"
 import {
-  closeGuestSignInPrompt,
-  useGuestSignInPrompt,
-} from "@/utils/content-runtime/guest-sign-in-prompt"
-import { logInUrl } from "@/utils/error-action"
+  closeBuiltInAiPrompt,
+  useBuiltInAiPrompt,
+} from "@/utils/content-runtime/built-in-ai-prompt"
+import { logInUrl, pricingUrl } from "@/utils/error-action"
 import { i18n } from "@/utils/i18n"
 import { createLogger } from "@/utils/logging/logger"
 import { sendMessage } from "@/utils/message"
 import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-host"
 
-const log = createLogger("content-runtime/guest-sign-in-dialog")
+const log = createLogger("content-runtime/built-in-ai-prompt-dialog")
 
 /**
- * What a guest sees after running a translate feature on Built-in AI, which needs an
- * account: log in, or switch the feature to the machine translator this network reaches
- * (Google, else Microsoft) and run it again.
+ * What someone sees when Built-in AI refuses a translate feature they ran. A guest is
+ * asked to log in; an account whose pool is spent, to upgrade. Either can instead switch
+ * the feature to the machine translator this network reaches (Google, else Microsoft)
+ * and run it again.
  */
-export function GuestSignInDialog() {
-  const request = useGuestSignInPrompt()
+export function BuiltInAiPromptDialog() {
+  const request = useBuiltInAiPrompt()
   const shadowWrapper = use(ShadowWrapperContext)
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
   const setConfig = useSetAtom(writeConfigAtom)
   const [isSwitching, setIsSwitching] = useState(false)
 
-  const logIn = () => {
-    closeGuestSignInPrompt()
-    void sendMessage("openPage", { url: logInUrl(), active: true })
+  const openWebsite = (url: string) => {
+    closeBuiltInAiPrompt()
+    void sendMessage("openPage", { url, active: true })
   }
 
   const switchToMachineTranslation = async () => {
@@ -55,10 +56,10 @@ export function GuestSignInDialog() {
     try {
       const providerId = await sendMessage("getFreeTranslateProviderId")
       await setConfig(buildFeatureProviderPatch({ [request.feature]: providerId }))
-      closeGuestSignInPrompt()
+      closeBuiltInAiPrompt()
       toastManager.add({
         type: "success",
-        title: i18n.t("hostedAi.guestPrompt.switched", [
+        title: i18n.t("hostedAi.builtInAiPrompt.switched", [
           i18n.t(getFeatureLabelI18nKey(request.feature)),
           getProviderConfigById(providersConfig, providerId)?.name ?? providerId,
         ]),
@@ -66,18 +67,20 @@ export function GuestSignInDialog() {
       request.retry?.()
     } catch (error) {
       log.error("Failed to switch to machine translation", { error })
-      toastManager.add({ type: "error", title: i18n.t("hostedAi.guestPrompt.switchFailed") })
+      toastManager.add({ type: "error", title: i18n.t("hostedAi.builtInAiPrompt.switchFailed") })
     } finally {
       setIsSwitching(false)
     }
   }
+
+  const isUpgrade = request?.kind === "upgrade"
 
   return (
     <Dialog
       open={request !== null}
       onOpenChange={(open) => {
         if (!open) {
-          closeGuestSignInPrompt()
+          closeBuiltInAiPrompt()
         }
       }}
     >
@@ -88,8 +91,18 @@ export function GuestSignInDialog() {
         overlayClassName={`${SELECTION_CONTENT_OVERLAY_LAYERS.popoverOverlay} pointer-events-auto`}
       >
         <DialogHeader>
-          <DialogTitle>{i18n.t("hostedAi.guestPrompt.title")}</DialogTitle>
-          <DialogDescription>{i18n.t("hostedAi.guestPrompt.description")}</DialogDescription>
+          <DialogTitle>
+            {isUpgrade
+              ? i18n.t("hostedAi.builtInAiPrompt.upgradeTitle")
+              : i18n.t("hostedAi.builtInAiPrompt.logInTitle")}
+          </DialogTitle>
+          <DialogDescription>
+            {!isUpgrade
+              ? i18n.t("hostedAi.builtInAiPrompt.logInDescription")
+              : request.plan === "pro"
+                ? i18n.t("hostedAi.builtInAiPrompt.upgradeDescriptionPro")
+                : i18n.t("hostedAi.builtInAiPrompt.upgradeDescription")}
+          </DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <Button
@@ -98,10 +111,17 @@ export function GuestSignInDialog() {
             disabled={isSwitching}
             onClick={() => void switchToMachineTranslation()}
           >
-            {i18n.t("hostedAi.guestPrompt.useMachineTranslation")}
+            {i18n.t("hostedAi.builtInAiPrompt.useMachineTranslation")}
           </Button>
-          <Button type="button" variant="accent" disabled={isSwitching} onClick={logIn}>
-            {i18n.t("account.login")}
+          <Button
+            type="button"
+            variant="accent"
+            disabled={isSwitching}
+            onClick={() =>
+              openWebsite(isUpgrade ? pricingUrl("extension_quota_exhausted") : logInUrl())
+            }
+          >
+            {isUpgrade ? i18n.t("action.upgrade") : i18n.t("account.login")}
           </Button>
         </DialogFooter>
       </DialogContent>

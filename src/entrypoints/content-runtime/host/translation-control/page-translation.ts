@@ -1,6 +1,7 @@
 import type { LanguageTag } from "@read-frog/definitions"
 import type { FeatureUsageContext } from "@/types/analytics"
 import type { Config } from "@/types/config/config"
+import type { HostedAiUnavailableReason } from "@/utils/hosted-ai/types"
 import debounce from "debounce"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
@@ -20,7 +21,10 @@ import {
   GIANT_PARAGRAPH_SPLIT_VIEWPORT_MULTIPLIER,
   GIANT_SPLIT_STRANDED_TEXT_MAX_UNITS,
 } from "@/utils/constants/translate"
-import { openGuestSignInPrompt } from "@/utils/content-runtime/guest-sign-in-prompt"
+import {
+  getBuiltInAiUpgradePlan,
+  openBuiltInAiPrompt,
+} from "@/utils/content-runtime/built-in-ai-prompt"
 import {
   clearAppliedDocumentTitleTranslation,
   setAppliedDocumentTitleTranslation,
@@ -61,6 +65,7 @@ import { translateTextForPageTitle } from "@/utils/host/translate/translate-vari
 import {
   beginPageTranslationSession,
   endPageTranslationSession,
+  onPageTranslationRequestFailed,
   setPageTranslationSessionProviderRef,
 } from "@/utils/host/translate/translation-session"
 import { cleanupNodeSiteRuleCSSIfUnused } from "@/utils/host/translate/ui/node-site-rule-css"
@@ -90,6 +95,30 @@ type SimpleIntersectionOptions = Omit<IntersectionObserverInit, "threshold"> & {
 }
 
 type DebouncedRetry = (() => void) & { clear: () => void }
+
+/** Automatic translation starts on its own; any other start is someone asking for it. */
+function isUserStarted(
+  analyticsContext: FeatureUsageContext<"page_translation"> | undefined,
+): boolean {
+  return analyticsContext?.surface !== ANALYTICS_SURFACE.PAGE_AUTO
+}
+
+/**
+ * The prompt for a Built-in AI refusal someone can act on: a guest can log in, and an
+ * account whose pool is spent can upgrade. Anything else keeps to a toast.
+ */
+function getBuiltInAiPromptKind(
+  reason: HostedAiUnavailableReason | undefined,
+): "logIn" | "upgrade" | null {
+  switch (reason) {
+    case "authentication_required":
+      return "logIn"
+    case "quota_exhausted":
+      return "upgrade"
+    default:
+      return null
+  }
+}
 
 interface RetranslationBudget {
   windowStart: number
@@ -319,6 +348,8 @@ export class PageTranslationManager implements IPageTranslationManager {
   // The "translate tab title" switch: read when a session starts, then kept
   // current by setTitleTranslationEnabled.
   private titleTranslationEnabled = true
+  /** Stops this session listening for its pool running dry; see `listenForSpentPool`. */
+  private stopListeningForSpentPool: (() => void) | null = null
 
   constructor(
     intersectionOptions: SimpleIntersectionOptions = {},
@@ -448,20 +479,6 @@ export class PageTranslationManager implements IPageTranslationManager {
       return
     }
     if (!availability.available) {
-      // A guest who asked for a translation is asked to log in, or to switch to machine
-      // translation and go on. Automatic translation keeps to a toast rather than putting
-      // a dialog over every page it opens, and frames stay quiet: one click, one prompt.
-      const isGuestRequest =
-        availability.reason === "authentication_required" &&
-        analyticsContext?.surface !== ANALYTICS_SURFACE.PAGE_AUTO
-      if (!isGuestRequest) {
-        toastManager.add({ type: "error", title: availability.message })
-      } else if (window === window.top) {
-        openGuestSignInPrompt({
-          feature: "pageTranslation",
-          retry: () => void this.start(analyticsContext),
-        })
-      }
       if (trackedContext) {
         void trackFeatureUsed({
           ...trackedContext,
@@ -470,6 +487,33 @@ export class PageTranslationManager implements IPageTranslationManager {
           outcome: "failure",
           failure_reason: "precheck",
         })
+      }
+
+      // Someone who asked for a translation Built-in AI refused is asked to log in (a
+      // guest) or to upgrade (a spent pool), or to switch to machine translation and go
+      // on. Automatic translation keeps to a toast rather than putting a dialog over every
+      // page it opens, and frames stay quiet: one click, one prompt.
+      const promptKind = isUserStarted(analyticsContext)
+        ? getBuiltInAiPromptKind(availability.reason)
+        : null
+      if (!promptKind) {
+        toastManager.add({ type: "error", title: availability.message })
+        return
+      }
+      if (window !== window.top) {
+        return
+      }
+      const retry = () => void this.start(analyticsContext)
+      if (promptKind === "logIn") {
+        openBuiltInAiPrompt({ kind: "logIn", feature: "pageTranslation", retry })
+        return
+      }
+      const plan = await getBuiltInAiUpgradePlan()
+      if (plan === null) {
+        // Ultra has no plan above it.
+        toastManager.add({ type: "error", title: availability.message })
+      } else if (this.pendingStart === startToken) {
+        openBuiltInAiPrompt({ kind: "upgrade", plan, feature: "pageTranslation", retry })
       }
       return
     }
@@ -488,6 +532,9 @@ export class PageTranslationManager implements IPageTranslationManager {
 
       beginPageTranslationSession()
       setPageTranslationSessionProviderRef(availability.providerRef, reasoningChoice)
+      if (isUserStarted(analyticsContext) && window === window.top) {
+        this.listenForSpentPool(sessionVersion, analyticsContext)
+      }
 
       try {
         await sendMessage("setAndNotifyPageTranslationStateChangedByManager", {
@@ -603,6 +650,39 @@ export class PageTranslationManager implements IPageTranslationManager {
     this.stopInternal({ notify: true, userInitiated: options?.userInitiated })
   }
 
+  /**
+   * Asks to upgrade, once, when Built-in AI's pool runs dry partway down a page someone
+   * started translating. Each paragraph after that shows its own inline error, but a page
+   * of them doesn't say what to do. Switching to machine translation starts the page over:
+   * the session's provider is fixed when it starts.
+   */
+  private listenForSpentPool(
+    sessionVersion: number,
+    analyticsContext: FeatureUsageContext<"page_translation"> | undefined,
+  ): void {
+    this.stopListeningForSpentPool = onPageTranslationRequestFailed((error) => {
+      if (classifyFailureReason(error) !== "quota_exceeded") {
+        return
+      }
+      this.stopListeningForSpentPool?.()
+      this.stopListeningForSpentPool = null
+      void getBuiltInAiUpgradePlan().then((plan) => {
+        if (plan === null || this.translationSessionVersion !== sessionVersion) {
+          return
+        }
+        openBuiltInAiPrompt({
+          kind: "upgrade",
+          plan,
+          feature: "pageTranslation",
+          retry: () => {
+            this.stop()
+            void this.start(analyticsContext)
+          },
+        })
+      })
+    })
+  }
+
   setTitleTranslationEnabled(enabled: boolean): void {
     this.titleTranslationEnabled = enabled
     if (!this.isPageTranslating) {
@@ -666,6 +746,8 @@ export class PageTranslationManager implements IPageTranslationManager {
     // without this, a long page keeps burning network/CPU/quota for minutes
     // after the user cancels (#1881). Fire-and-forget: the synchronous DOM
     // cleanup below finishes long before any rejection lands.
+    this.stopListeningForSpentPool?.()
+    this.stopListeningForSpentPool = null
     const endedSessionId = endPageTranslationSession()
     if (endedSessionId) {
       void sendMessage("cancelPageTranslationRequests", { sessionId: endedSessionId }).catch(

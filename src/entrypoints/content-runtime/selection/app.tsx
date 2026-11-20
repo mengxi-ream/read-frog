@@ -9,7 +9,7 @@ import {
 import { useCornerToastSurface } from "@/utils/content-runtime/corner-toasts"
 import { AnnotationModePill } from "./annotation/mode-pill"
 import { AnnotationProvider } from "./annotation/provider"
-import { GuestSignInDialog } from "./guest-sign-in-dialog"
+import { BuiltInAiPromptDialog } from "./built-in-ai-prompt-dialog"
 import { useInputTranslation } from "./input-translation"
 import { SelectionToolbar } from "./selection-toolbar"
 import { SelectionCustomActionProvider } from "./selection-toolbar/custom-action-button/provider"
@@ -60,7 +60,7 @@ export default function App({
             <AnnotationProvider>
               <SelectionToolbar />
               <AnnotationModePill />
-              <GuestSignInDialog />
+              <BuiltInAiPromptDialog />
             </AnnotationProvider>
           </SelectionSpeechProvider>
         </SelectionCustomActionProvider>

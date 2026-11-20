@@ -1818,9 +1818,12 @@ hostedAi:
     removedNoAlternatives: "$1 artık sunulmuyor. Başka bir sağlayıcı seçin."
   actions:
     chooseModel: "Model seç"
-  guestPrompt:
-    title: "Yerleşik AI'ı kullanmak için giriş yapın"
-    description: "Giriş yaptığınızda yerleşik AI ücretsizdir: haftada yaklaşık 60.000 token. Ya da hesap gerektirmeyen makine çevirisine geçin."
+  builtInAiPrompt:
+    logInTitle: "Yerleşik AI'ı kullanmak için giriş yapın"
+    logInDescription: "Giriş yaptığınızda yerleşik AI ücretsizdir: haftada yaklaşık 120.000 token. Ya da makine çevirisine geçin."
+    upgradeTitle: "Bu haftaki yerleşik AI hakkınız bitti"
+    upgradeDescription: "Pro ayda yaklaşık 1.500, Ultra yaklaşık 5.000 web sayfası çevirir. Ya da şimdilik makine çevirisine geçin."
+    upgradeDescriptionPro: "Ultra ayda yaklaşık 5.000 web sayfası çevirir. Ya da şimdilik makine çevirisine geçin."
     useMachineTranslation: "Makine çevirisini kullan"
     switched: "$1 artık $2 kullanıyor."
     switchFailed: "Makine çevirisine geçilemedi. Lütfen tekrar deneyin."
