@@ -7,6 +7,7 @@ import { createFeatureUsageContext } from "@/utils/analytics"
 import { getLocalConfig } from "@/utils/config/storage"
 import { SUBTITLES_SOURCE } from "@/utils/constants/subtitles"
 import { i18n } from "@/utils/i18n"
+import { ensureAiSubtitlesAccess } from "@/utils/subtitles/ai/access-guard"
 import { showAiSubtitlesWallToast } from "@/utils/subtitles/toast"
 import { subtitlesSidebarOpenAtom, subtitlesStore } from "../atoms"
 
@@ -34,6 +35,8 @@ export class SubtitlesStartRequests {
   private readonly getScheduler: SubtitlesStartRequestsDeps["getScheduler"]
   private readonly subtitlesSwitch: SubtitlesStartRequestsDeps["subtitlesSwitch"]
   private firstPlayStartAbortController: AbortController | null = null
+  // AI requests still in their access and live checks, before the switch starts the load.
+  private pendingAiRequestChecks = 0
 
   constructor({ config, lifecycle, getScheduler, subtitlesSwitch }: SubtitlesStartRequestsDeps) {
     this.config = config
@@ -90,10 +93,20 @@ export class SubtitlesStartRequests {
     })
   }
 
+  isCheckingAiRequest(): boolean {
+    return this.pendingAiRequestChecks > 0
+  }
+
   requestAiSubtitles = async (): Promise<void> => {
-    if (await this.config.isLiveContent?.()) {
-      showAiSubtitlesWallToast(i18n.t("subtitles.errors.aiLiveReplayUnsupported"))
-      return
+    this.pendingAiRequestChecks++
+    try {
+      if (!(await ensureAiSubtitlesAccess())) return
+      if (await this.config.isLiveContent?.()) {
+        showAiSubtitlesWallToast(i18n.t("subtitles.errors.aiLiveReplayUnsupported"))
+        return
+      }
+    } finally {
+      this.pendingAiRequestChecks--
     }
     this.cancelFirstPlayStart()
     return this.subtitlesSwitch.switchSubtitlesFetcher(SUBTITLES_SOURCE.AI)

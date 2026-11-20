@@ -1,9 +1,33 @@
 import type { PlatformConfig } from "@/entrypoints/subtitles.content/platforms"
+import type { AiSubtitlesContext } from "@/utils/subtitles/ai/request-ai-subtitles"
+import { xcomMediaIdFromUrl } from "@read-frog/definitions"
 import {
   DEFAULT_CONTROLS_HEIGHT,
   XCOM_PLAYER_CONTAINER_SELECTOR,
 } from "@/utils/constants/subtitles"
-import { getCurrentXcomVideoId, getCurrentXcomVideoUrl } from "./dom"
+import { resolveAiSubtitlesContext } from "@/utils/subtitles/ai/ai-subtitles-context"
+import {
+  getCurrentXcomSubtitlesVideo,
+  getCurrentXcomVideoId,
+  getCurrentXcomVideoUrl,
+  getXcomVideoPostUrl,
+} from "./dom"
+
+function createXcomAiSubtitlesContext(): AiSubtitlesContext | null {
+  const video = getCurrentXcomSubtitlesVideo()
+  const url = video && getXcomVideoPostUrl(video)
+  return video && url
+    ? resolveAiSubtitlesContext({
+        url,
+        mediaId: xcomMediaIdFromUrl(video.poster) ?? undefined,
+        video,
+      })
+    : null
+}
+
+async function isXcomLiveContent(): Promise<boolean> {
+  return getCurrentXcomSubtitlesVideo()?.duration === Number.POSITIVE_INFINITY
+}
 
 export function getXcomConfig(): PlatformConfig {
   return {
@@ -24,5 +48,7 @@ export function getXcomConfig(): PlatformConfig {
     },
     getVideoId: getCurrentXcomVideoId,
     getVideoPageUrl: getCurrentXcomVideoUrl,
+    createAiSubtitlesContext: createXcomAiSubtitlesContext,
+    isLiveContent: isXcomLiveContent,
   }
 }
