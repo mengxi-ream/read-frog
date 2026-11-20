@@ -1792,6 +1792,12 @@ hostedAi:
     rateLimited: 요청이 너무 많습니다. 나중에 다시 시도해 주세요.
     guestRateLimited: 게스트 요청이 너무 많습니다. 나중에 다시 시도해 주세요.
     userRateLimited: 요청이 너무 많습니다. 나중에 다시 시도해 주세요.
+    modelUnavailable: "지금은 $1 모델을 사용할 수 없습니다. 대신 $2 모델을 사용해 보세요."
+    modelUnavailableNoAlternatives: "지금은 $1 모델을 사용할 수 없으며, 사용할 수 있는 다른 내장 AI 모델도 없습니다. 나중에 다시 시도해 주세요."
+    modelBusy: "지금은 $1 모델의 요청이 많습니다. 잠시 후 다시 시도하거나 $2 모델로 전환해 주세요."
+    modelBusyNoAlternatives: "지금은 $1 모델의 요청이 많습니다. 잠시 후 다시 시도해 주세요."
+  actions:
+    chooseModel: "모델 선택"
 hotkey:
   control: Ctrl
   alt: Option

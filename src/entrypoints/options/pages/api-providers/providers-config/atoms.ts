@@ -1,6 +1,6 @@
 import { atom } from "jotai"
 import { requestEditorNavigationAtom } from "@/components/form/autosave-navigation"
-import { BUILT_IN_AI_PROVIDER_ID } from "@/utils/providers/provider-registry"
+import { DEFAULT_BUILT_IN_AI_PROVIDER_ID } from "@/utils/providers/provider-registry"
 
 /**
  * The field a deep link asked Provider Config to draw attention to. Held as state rather than
@@ -20,7 +20,7 @@ const internalSelectedProviderIdAtom = atom<string | undefined>(undefined)
 
 /** Opens on the normal Built-in AI provider, which leads the list, until something else is picked. */
 export const selectedProviderIdAtom = atom(
-  (get) => get(internalSelectedProviderIdAtom) ?? BUILT_IN_AI_PROVIDER_ID,
+  (get) => get(internalSelectedProviderIdAtom) ?? DEFAULT_BUILT_IN_AI_PROVIDER_ID,
   (get, set, newValue: string | undefined) => {
     if (get(internalSelectedProviderIdAtom) === newValue) return Promise.resolve(true)
     return set(requestEditorNavigationAtom, () => {

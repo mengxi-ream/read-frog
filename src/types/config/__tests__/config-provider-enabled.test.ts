@@ -82,7 +82,7 @@ describe("config provider enabled validation", () => {
       ...DEFAULT_CONFIG,
       selectionToolbar: {
         ...DEFAULT_CONFIG.selectionToolbar,
-        customActions: [{ ...action, id: "custom-action", providerId: "read-frog-free-ai" }],
+        customActions: [{ ...action, id: "custom-action", providerId: "read-frog-ai:gpt-6-luna" }],
       },
     })
 
@@ -98,7 +98,7 @@ describe("config provider enabled validation", () => {
           ...DEFAULT_CONFIG.selectionToolbar.features,
           translate: {
             ...DEFAULT_CONFIG.selectionToolbar.features.translate,
-            providerId: "read-frog-free-ai",
+            providerId: "read-frog-ai:gpt-6-luna",
           },
         },
       },
@@ -152,7 +152,7 @@ describe("config provider enabled validation", () => {
       ...DEFAULT_CONFIG,
       pageTranslation: {
         ...DEFAULT_CONFIG.pageTranslation,
-        providerId: "read-frog-free-ai",
+        providerId: "read-frog-ai:gpt-6-luna",
       },
     })
 
@@ -162,7 +162,7 @@ describe("config provider enabled validation", () => {
   it("allows built-in AI for every feature that declares the capability", () => {
     // Subtitles and input translation gained hosted routes, so the built-in
     // providers now declare those capabilities and the schema must accept them.
-    for (const providerId of ["read-frog-free-ai", "read-frog-advance-ai"]) {
+    for (const providerId of ["read-frog-ai:gpt-6-luna", "read-frog-ai:gpt-6.2-sol"]) {
       expect(
         getIssuePaths({
           ...DEFAULT_CONFIG,

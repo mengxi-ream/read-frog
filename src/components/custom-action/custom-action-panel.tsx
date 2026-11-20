@@ -2,6 +2,7 @@ import type { NoteOriginInput } from "@read-frog/definitions"
 import type { ComponentProps } from "react"
 import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { useEffect, useMemo, useRef } from "react"
+import { useBuiltInAiModels } from "@/components/llm-providers/use-built-in-ai-models"
 import { useHostedAiProviderOptions } from "@/components/llm-providers/use-hosted-ai-provider-options"
 import { SelectionPopover } from "@/components/ui/selection-popover"
 import { ReviewDueTab } from "@/components/ui/selection-popover/review-due-tab"
@@ -66,14 +67,27 @@ export function CustomActionPanel({
     const found = actionId && findSelectionToolbarAction(selectionToolbarConfig, actionId)
     return found && found.enabled !== false ? found : null
   }, [actionId, selectionToolbarConfig])
+  const { models: builtInAiModels } = useBuiltInAiModels()
   const provider = useMemo(
     () =>
-      action && resolveProviderRefForCapability("customAction", providersConfig, action.providerId),
-    [action, providersConfig],
+      action &&
+      resolveProviderRefForCapability(
+        "customAction",
+        providersConfig,
+        action.providerId,
+        builtInAiModels,
+      ),
+    [action, providersConfig, builtInAiModels],
   )
   const providers = useMemo(
-    () => getSelectableProvidersForCapability("customAction", providersConfig),
-    [providersConfig],
+    () =>
+      getSelectableProvidersForCapability(
+        "customAction",
+        providersConfig,
+        builtInAiModels,
+        action ? [action.providerId] : [],
+      ),
+    [providersConfig, builtInAiModels, action],
   )
 
   const webPageContext = useCustomActionWebPageContext(open, request?.sessionKey ?? 0)

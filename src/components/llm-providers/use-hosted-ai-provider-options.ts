@@ -6,7 +6,6 @@ import {
   isDurablyUnusableTier,
 } from "@/utils/providers/provider-availability"
 import { isSystemProviderSelectorItem } from "@/utils/providers/provider-display"
-import { getHostedAiModelTier, isBuiltInAiProviderId } from "@/utils/providers/provider-registry"
 import { useHostedAiStatus } from "./use-hosted-ai-status"
 
 export function useHostedAiProviderOptions(
@@ -21,19 +20,21 @@ export function useHostedAiProviderOptions(
   }
 
   return providers.map((provider) => {
-    if (!isSystemProviderSelectorItem(provider) || !isBuiltInAiProviderId(provider.id)) {
+    // A model no list names has no tier to read: it is marked unavailable
+    // where it was listed, and the server answers for it at run time.
+    if (!isSystemProviderSelectorItem(provider) || provider.tier === undefined) {
       return provider
     }
 
     // Gray out only on durable account facts — sign-in and plan — which is what
     // `isDurablyUnusableTier` reads off `unavailableReason`. Transient service
-    // state (exhausted quota, open circuit, unconfigured model, a billing
+    // state (exhausted quota, open circuit, a model out of budget, a billing
     // lookup that threw) keeps the option selectable and surfaces at run time.
     //
     // The previous `!accessAllowed || !hasFunding` test inverted that for the
     // transient half: a billing failure drops the plan's pools just as genuine
     // unfundedness does, so one bad lookup hard-disabled every built-in row.
-    const tierStatus = getHostedAiTierStatus(status, feature, getHostedAiModelTier(provider.id))
+    const tierStatus = getHostedAiTierStatus(status, feature, provider.tier)
     return {
       ...provider,
       disabled: isDurablyUnusableTier(tierStatus),

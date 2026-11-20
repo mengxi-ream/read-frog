@@ -54,7 +54,7 @@ export function videoSummaryQueryKey(
     ? null
     : resolved.kind === "local"
       ? resolved.config
-      : { providerId: resolved.id, modelTier: resolved.modelTier }
+      : { providerId: resolved.id }
 
   return [...VIDEO_SUMMARY_QUERY_SCOPE, videoId, targetCode, providerIdentity] as const
 }
@@ -162,7 +162,7 @@ export async function requestVideoSummary(
       ? {
           providerKind: "system",
           providerId: providerRef.providerId,
-          modelTier: providerRef.modelTier,
+          builtInAiReasoning: providerRef.reasoning,
           requestId: getRandomUUID(),
           hostedFeature: "videoSubtitles" as const,
           instructions: systemPrompt,

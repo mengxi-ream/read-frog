@@ -198,12 +198,17 @@ vi.mock("@/utils/config/helpers", () => ({
   getProviderConfigById: () => ({ id: "provider-1", name: "OpenAI", provider: "openai" }),
 }))
 
+// Names a Built-in AI model; the ref above already carries the name.
+vi.mock("@/components/llm-providers/use-built-in-ai-models", () => ({
+  useBuiltInAiModels: () => ({ models: null, isLive: false }),
+}))
+
 vi.mock("@/utils/providers/provider-registry", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/utils/providers/provider-registry")>()),
   BUILT_IN_AI_PROVIDER_LOGO: "built-in-logo",
   resolveProviderRefForCapability: () =>
     providerRefState.kind === "system"
-      ? { kind: "system", id: "read-frog-free-ai", name: "Built-in AI", modelTier: "normal" }
+      ? { kind: "system", id: "read-frog-ai:gpt-6-luna", name: "GPT-6 Luna", model: "gpt-6-luna" }
       : providerRefState.kind === "google"
         ? {
             kind: "local",
@@ -295,7 +300,7 @@ describe("TranslationCard built-in translation", () => {
     streamBackgroundTextMock.mockResolvedValueOnce({ output: "Translated by built-in AI" })
     render(
       <TranslationCard
-        providerId="read-frog-free-ai"
+        providerId="read-frog-ai:gpt-6-luna"
         isExpanded
         onExpandedChange={vi.fn<(expanded: boolean) => void>()}
       />,
@@ -313,8 +318,7 @@ describe("TranslationCard built-in translation", () => {
     expect(streamBackgroundTextMock).toHaveBeenCalledWith(
       expect.objectContaining({
         providerKind: "system",
-        providerId: "read-frog-free-ai",
-        modelTier: "normal",
+        providerId: "read-frog-ai:gpt-6-luna",
         hostedFeature: "pageTranslation",
         requestId: expect.any(String),
         instructions: expect.any(String),
@@ -322,6 +326,9 @@ describe("TranslationCard built-in translation", () => {
       }),
       { signal: expect.any(AbortSignal) },
     )
+    // No cache keeps a Hub result, so the background asks for the level the
+    // user picked for the model when it sends the request.
+    expect(streamBackgroundTextMock.mock.calls[0]![0]).not.toHaveProperty("builtInAiReasoning")
   })
 
   it("uses the Hub prompt snapshot and a fresh hosted request ID each time", async () => {
@@ -329,7 +336,7 @@ describe("TranslationCard built-in translation", () => {
     streamBackgroundTextMock.mockResolvedValue({ output: " result " })
     render(
       <TranslationCard
-        providerId="read-frog-free-ai"
+        providerId="read-frog-ai:gpt-6-luna"
         isExpanded
         onExpandedChange={vi.fn<(expanded: boolean) => void>()}
       />,

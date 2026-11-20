@@ -1792,6 +1792,12 @@ hostedAi:
     rateLimited: Çok fazla istek, lütfen daha sonra tekrar deneyin.
     guestRateLimited: Çok fazla misafir isteği. Lütfen daha sonra tekrar deneyin.
     userRateLimited: Çok fazla istek. Lütfen daha sonra tekrar deneyin.
+    modelUnavailable: "$1 şu anda kullanılamıyor. Bunun yerine $2 modelini deneyin."
+    modelUnavailableNoAlternatives: "$1 şu anda kullanılamıyor ve kullanabileceğiniz başka bir yerleşik AI modeli yok. Lütfen daha sonra tekrar deneyin."
+    modelBusy: "$1 şu anda çok yoğun. Biraz sonra tekrar deneyin veya $2 modeline geçin."
+    modelBusyNoAlternatives: "$1 şu anda çok yoğun. Biraz sonra tekrar deneyin."
+  actions:
+    chooseModel: "Model seç"
 hotkey:
   control: Ctrl
   alt: Option

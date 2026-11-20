@@ -19,7 +19,7 @@ import { trackGlossaryUsed } from "@/utils/glossary/analytics"
 import { i18n } from "@/utils/i18n"
 import { createLogger } from "@/utils/logging/logger"
 import { getTranslatePrompt } from "@/utils/prompts/translate"
-import { serializeProviderRef } from "@/utils/providers/provider-ref"
+import { getProviderCacheIdentity, serializeProviderRef } from "@/utils/providers/provider-ref"
 import { resolveProviderRefForCapability } from "@/utils/providers/provider-registry"
 import { TranslationCancelledError } from "@/utils/request/cancellation"
 import { Sha256Hex } from "../../hash"
@@ -115,16 +115,9 @@ async function buildWebPageHashComponents(
   const preparedText = prepareTranslationText(text)
   const normalizedWebPageContext = normalizeWebPagePromptContext(webPageContext)
   const providerConfig = providerRef.kind === "local" ? providerRef.config : null
-  const providerHashIdentity =
-    providerRef.kind === "local"
-      ? providerRef.config
-      : {
-          providerId: providerRef.providerId,
-          modelRevision: providerRef.modelRevision,
-        }
   const hashComponents = [
     preparedText,
-    JSON.stringify(providerHashIdentity),
+    getProviderCacheIdentity(providerRef),
     partialLangConfig.sourceCode,
     partialLangConfig.targetCode,
   ]
@@ -191,11 +184,8 @@ function getSessionProviderRefFor(
     return null
   }
   const sessionRef = getPageTranslationSessionProviderRef()
-  if (
-    sessionRef?.kind !== "system" ||
-    sessionRef.providerId !== provider.id ||
-    sessionRef.modelTier !== provider.modelTier
-  ) {
+  // The provider id names the model, so a switch to another model misses.
+  if (sessionRef?.kind !== "system" || sessionRef.providerId !== provider.id) {
     return null
   }
   return sessionRef
@@ -240,9 +230,9 @@ export async function resolvePageProviderRef(
     return serializeProviderRef(provider, feature)
   }
 
-  // The feature is part of the key: two features on the same provider and tier
-  // gate on different tier statuses, so they must not share an in-flight fetch.
-  const key = `${provider.id}:${provider.modelTier}:${feature}`
+  // The feature is part of the key: two features on the same model gate on
+  // different tier statuses, so they must not share an in-flight fetch.
+  const key = `${provider.id}:${feature}`
   lastRequestedSystemKey = key
 
   // The session snapshot belongs to the page-translation run; other features

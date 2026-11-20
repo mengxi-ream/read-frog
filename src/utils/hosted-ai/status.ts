@@ -1,14 +1,16 @@
+import type { HostedAiModel } from "./models"
 import type {
   HostedAiCreditPoolStatus,
   HostedAiFeature,
   HostedAiFeatureStatus,
+  HostedAiModelTier,
   HostedAiRecurringCreditStatus,
   HostedAiStatus,
   HostedAiTierStatus,
   HostedAiUnavailableReason,
 } from "./types"
-import type { HostedAiModelTier } from "@/utils/constants/provider-ids"
 import { i18n } from "@/utils/i18n"
+import { findHostedAiModel, getHostedAiModelsFromStatus } from "./models"
 
 const REASON_I18N_KEYS = {
   authentication_required: "hostedAi.availability.authenticationRequired",
@@ -106,4 +108,76 @@ export function getHostedAiTierStatus(
   const features: Partial<Record<HostedAiFeature, HostedAiFeatureStatus>> | undefined =
     status?.features
   return features?.[feature]?.[tier]
+}
+
+/**
+ * Whether a tier's status walls this account off from a feature: it is not
+ * signed in, its plan does not reach the tier, or its credit is spent.
+ *
+ * `service_unavailable` is left out on purpose. On a tier it describes the
+ * tier's default model, the one a request that names no model runs; another
+ * model of the tier can run regardless, and each model says so itself.
+ */
+export function isHostedAiTierBlocked(tierStatus: HostedAiTierStatus | undefined): boolean {
+  return (
+    tierStatus !== undefined &&
+    !tierStatus.available &&
+    tierStatus.unavailableReason !== "service_unavailable"
+  )
+}
+
+/**
+ * Whether one model can run a feature for this account, as far as a status
+ * response tells:
+ * - `unknown`: the response lists no models (it could not be fetched, or the
+ *   server predates models). Fail open: the server decides when it is asked.
+ * - `blocked`: the account cannot run the model's tier for this feature.
+ * - `unavailable`: the model is not in the list, or the server says it cannot
+ *   run now. `alternatives` are the models this account can run instead, in
+ *   the server's order.
+ */
+export type HostedAiModelVerdict =
+  | { kind: "unknown" }
+  | { kind: "usable"; model: HostedAiModel; tierStatus: HostedAiTierStatus | undefined }
+  | { kind: "blocked"; model: HostedAiModel; tierStatus: HostedAiTierStatus }
+  | { kind: "unavailable"; model: HostedAiModel | undefined; alternatives: HostedAiModel[] }
+
+export function getHostedAiModelVerdict(
+  status: HostedAiStatus | undefined,
+  feature: HostedAiFeature,
+  modelId: string,
+): HostedAiModelVerdict {
+  const models = getHostedAiModelsFromStatus(status)
+  if (!models) {
+    return { kind: "unknown" }
+  }
+
+  const model = findHostedAiModel(models, modelId)
+  const tierStatus = model ? getHostedAiTierStatus(status, feature, model.tier) : undefined
+  if (model && tierStatus && isHostedAiTierBlocked(tierStatus)) {
+    return { kind: "blocked", model, tierStatus }
+  }
+  if (!model || !model.available) {
+    return {
+      kind: "unavailable",
+      model,
+      alternatives: getHostedAiModelAlternatives(status, feature, models, modelId),
+    }
+  }
+  return { kind: "usable", model, tierStatus }
+}
+
+/** The models this account can run for a feature right now, other than `exceptModelId`. */
+export function getHostedAiModelAlternatives(
+  status: HostedAiStatus | undefined,
+  feature: HostedAiFeature,
+  models: readonly HostedAiModel[],
+  exceptModelId: string,
+): HostedAiModel[] {
+  return models.filter(
+    (model) =>
+      model.id !== exceptModelId &&
+      model.available &&
+      !isHostedAiTierBlocked(getHostedAiTierStatus(status, feature, model.tier)),
+  )
 }

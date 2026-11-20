@@ -1790,6 +1790,12 @@ hostedAi:
     rateLimited: Həddindən artıq sorğu var, daha sonra yenidən cəhd edin.
     guestRateLimited: Qonaq sorğularının sayı həddindən artıq çoxdur. Daha sonra yenidən cəhd edin.
     userRateLimited: Həddindən artıq sorğu var. Daha sonra yenidən cəhd edin.
+    modelUnavailable: "$1 hazırda işləmir. Onun əvəzinə $2 modelini sınayın."
+    modelUnavailableNoAlternatives: "$1 hazırda işləmir və sizin üçün başqa daxili süni intellekt modeli yoxdur. Daha sonra yenidən cəhd edin."
+    modelBusy: "$1 hazırda çox yüklənib. Bir azdan yenidən cəhd edin və ya $2 modelinə keçin."
+    modelBusyNoAlternatives: "$1 hazırda çox yüklənib. Bir azdan yenidən cəhd edin."
+  actions:
+    chooseModel: "Model seçin"
 hotkey:
   control: Ctrl düyməsi
   alt: Option düyməsi

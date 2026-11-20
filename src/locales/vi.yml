@@ -1792,6 +1792,12 @@ hostedAi:
     rateLimited: Quá nhiều yêu cầu, vui lòng thử lại sau.
     guestRateLimited: Quá nhiều yêu cầu từ khách. Vui lòng thử lại sau.
     userRateLimited: Quá nhiều yêu cầu. Vui lòng thử lại sau.
+    modelUnavailable: "Hiện không thể dùng $1. Hãy thử $2."
+    modelUnavailableNoAlternatives: "Hiện không thể dùng $1 và bạn không có mô hình AI tích hợp nào khác. Vui lòng thử lại sau."
+    modelBusy: "$1 đang quá tải. Vui lòng thử lại sau giây lát hoặc chuyển sang $2."
+    modelBusyNoAlternatives: "$1 đang quá tải. Vui lòng thử lại sau giây lát."
+  actions:
+    chooseModel: "Chọn mô hình"
 hotkey:
   control: Ctrl
   alt: Option

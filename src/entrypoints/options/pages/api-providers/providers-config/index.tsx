@@ -1,3 +1,4 @@
+import type { Config } from "@/types/config/config"
 import type { APIProviderConfig } from "@/types/config/provider"
 import type { HostedAiFeature } from "@/utils/hosted-ai/types"
 import { Icon } from "@iconify/react"
@@ -5,6 +6,7 @@ import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { useEffect, useRef, useState } from "react"
 import { useLocation } from "react-router"
 import { SponsorBadge } from "@/components/badges/sponsor-badge"
+import { useBuiltInAiModels } from "@/components/llm-providers/use-built-in-ai-models"
 import { useHostedAiStatus } from "@/components/llm-providers/use-hosted-ai-status"
 import ProviderIcon from "@/components/provider-icon"
 import { useTheme } from "@/components/providers/theme-provider"
@@ -23,9 +25,10 @@ import {
   FEATURE_PROVIDER_DEFS,
   getFeatureLabelI18nKey,
 } from "@/utils/constants/feature-providers"
-import { BUILT_IN_AI_PROVIDER_IDS, type BuiltInAiProviderId } from "@/utils/constants/provider-ids"
+import { type BuiltInAiProviderId, getBuiltInAiModelId } from "@/utils/constants/provider-ids"
 import { API_PROVIDER_ITEMS } from "@/utils/constants/providers"
 import { getSelectionToolbarActions } from "@/utils/custom-actions"
+import { findHostedAiModel } from "@/utils/hosted-ai/models"
 import { getHostedAiTierStatus } from "@/utils/hosted-ai/status"
 import { i18n } from "@/utils/i18n"
 import {
@@ -37,8 +40,8 @@ import {
 import { isDurablyUnusableTier } from "@/utils/providers/provider-availability"
 import {
   BUILT_IN_AI_PROVIDER_LOGO,
-  BUILT_IN_AI_ADVANCE_PROVIDER_ID,
   getBuiltInAiProviderName,
+  getBuiltInAiSelectorItems,
   isBuiltInAiProviderId,
 } from "@/utils/providers/provider-registry"
 import { ConfigItem } from "../../../components/config-item"
@@ -145,8 +148,25 @@ export function ProvidersConfig() {
   )
 }
 
+/**
+ * Every Built-in AI provider id the config points at, so a model the server
+ * stopped listing still gets a card (marked unavailable) while something uses it.
+ */
+function getAssignedBuiltInAiProviderIds(config: Config): string[] {
+  return [
+    ...FEATURE_KEYS.map((key) => FEATURE_PROVIDER_DEFS[key].getProviderId(config)),
+    ...getSelectionToolbarActions(config.selectionToolbar).map((action) => action.providerId),
+    ...(config.languageDetection.mode === "llm" && config.languageDetection.providerId
+      ? [config.languageDetection.providerId]
+      : []),
+  ].filter(isBuiltInAiProviderId)
+}
+
 function ProviderCardList() {
   const [providersConfig, setProvidersConfig] = useAtom(configFieldsAtomMap.providersConfig)
+  const config = useAtomValue(configAtom)
+  const { models } = useBuiltInAiModels()
+  const builtInAiItems = getBuiltInAiSelectorItems(models, getAssignedBuiltInAiProviderIds(config))
   const apiProvidersConfig = getAPIProvidersConfig(providersConfig)
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
 
@@ -198,8 +218,8 @@ function ProviderCardList() {
       </Dialog>
       <ProviderListSection title={i18n.t("options.apiProviders.builtInProvider")}>
         <div className="flex flex-col gap-4 pt-2">
-          {BUILT_IN_AI_PROVIDER_IDS.map((providerId) => (
-            <BuiltInProviderCard key={providerId} providerId={providerId} />
+          {builtInAiItems.map((item) => (
+            <BuiltInProviderCard key={item.id} providerId={item.id as BuiltInAiProviderId} />
           ))}
         </div>
       </ProviderListSection>
@@ -337,7 +357,8 @@ function FeatureCountBadge({ count, children }: { count: number; children: React
 function BuiltInProviderCard({ providerId }: { providerId: BuiltInAiProviderId }) {
   const [selectedProviderId, setSelectedProviderId] = useAtom(selectedProviderIdAtom)
   const config = useAtomValue(configAtom)
-  const providerName = getBuiltInAiProviderName(providerId)
+  const { models } = useBuiltInAiModels()
+  const providerName = getBuiltInAiProviderName(providerId, models)
   const assignedFeatures = FEATURE_KEYS.filter(
     (key) => FEATURE_PROVIDER_DEFS[key].getProviderId(config) === providerId,
   )
@@ -395,9 +416,11 @@ const BUILT_IN_FEATURE_KEYS = [
 ] as const
 
 function BuiltInProviderPanel({ providerId }: { providerId: BuiltInAiProviderId }) {
-  const isAdvance = providerId === BUILT_IN_AI_ADVANCE_PROVIDER_ID
-  const modelTier = isAdvance ? ("advance" as const) : ("normal" as const)
   const { status } = useHostedAiStatus()
+  const { models } = useBuiltInAiModels()
+  const modelId = getBuiltInAiModelId(providerId)
+  const modelTier = modelId === null ? undefined : findHostedAiModel(models, modelId)?.tier
+  const isAdvance = modelTier === "advance"
 
   // Both cards list every hosted-capable feature. Same policy as the provider
   // dropdowns, and now literally the same predicate: the plan badge is the
@@ -406,7 +429,8 @@ function BuiltInProviderPanel({ providerId }: { providerId: BuiltInAiProviderId 
   // quota, open circuit, unconfigured model) — those surface at run time. Fail
   // open while status is unknown so one failed fetch never locks the UI.
   const getAssignmentStatus = (feature: HostedAiFeature) => {
-    const tierStatus = getHostedAiTierStatus(status, feature, modelTier)
+    const tierStatus =
+      modelTier === undefined ? undefined : getHostedAiTierStatus(status, feature, modelTier)
     return {
       disabled: isDurablyUnusableTier(tierStatus),
       upgradeTo: tierStatus?.upgradeTo ?? undefined,

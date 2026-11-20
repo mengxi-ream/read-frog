@@ -4,7 +4,7 @@ import { atom } from "jotai"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { filterEnabledProvidersConfig, getTranslateProvidersConfig } from "@/utils/config/helpers"
 import {
-  getProviderIdsForCapability,
+  doesProviderSupportsCapability,
   resolveProviderRefForCapability,
 } from "@/utils/providers/provider-registry"
 
@@ -49,8 +49,16 @@ export const detectedLangCodeAtom = atom(
 )
 
 // === Selected Provider IDs (null follows enabled local translation providers) ===
-export function getAvailableHubProviderIds(config: Pick<Config, "providersConfig">): string[] {
-  return getProviderIdsForCapability("pageTranslation", config.providersConfig, {
+/**
+ * Whether the hub can keep a selected provider: an enabled translate provider
+ * of the user's, or any Built-in AI model. A model the server no longer lists
+ * stays selected, so its card can say it cannot run instead of vanishing.
+ */
+export function isAvailableHubProviderId(
+  config: Pick<Config, "providersConfig">,
+  providerId: string,
+): boolean {
+  return doesProviderSupportsCapability("pageTranslation", config.providersConfig, providerId, {
     requireEnable: true,
   })
 }
@@ -64,8 +72,7 @@ export const selectedProviderIdsAtom = atom(
         (provider) => provider.id,
       )
     }
-    const available = new Set(getAvailableHubProviderIds({ providersConfig }))
-    return [...new Set(ids)].filter((id) => available.has(id))
+    return [...new Set(ids)].filter((id) => isAvailableHubProviderId({ providersConfig }, id))
   },
   (_get, set, ids: string[]) =>
     set(configFieldsAtomMap.translationHub, { selectedProviderIds: ids }),

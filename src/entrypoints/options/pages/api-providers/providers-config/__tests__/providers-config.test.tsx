@@ -5,10 +5,9 @@ import { fireEvent, render, screen, within } from "@testing-library/react"
 import { MemoryRouter } from "react-router"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { ProvidersConfig } from "@/entrypoints/options/pages/api-providers/providers-config"
-import {
-  BUILT_IN_AI_PROVIDER_ID,
-  BUILT_IN_AI_ADVANCE_PROVIDER_ID,
-} from "@/utils/providers/provider-registry"
+import { SOL_PROVIDER_ID, testHostedAiModels } from "@/utils/hosted-ai/__tests__/test-models"
+import { sanitizeHostedAiModels } from "@/utils/hosted-ai/models"
+import { DEFAULT_BUILT_IN_AI_PROVIDER_ID } from "@/utils/providers/provider-registry"
 
 const {
   anchoredToastAddMock,
@@ -164,6 +163,17 @@ vi.mock("@/components/llm-providers/use-hosted-ai-status", () => ({
   useHostedAiStatus: () => hostedAiState.value,
 }))
 
+// The model list the cards come from: the last one the extension saw, which
+// tests set per case (default: the full catalog).
+const { builtInAiModelsState } = vi.hoisted(() => {
+  const state: { models: unknown } = { models: null }
+  return { builtInAiModelsState: state }
+})
+
+vi.mock("@/components/llm-providers/use-built-in-ai-models", () => ({
+  useBuiltInAiModels: () => ({ models: builtInAiModelsState.models, isLive: true }),
+}))
+
 function makeUltraAccessStatus(accessAllowed: boolean) {
   // A denial carries its reason: the server answers the advance tier of a
   // non-Ultra account with `ultra_required`, never with a bare accessAllowed
@@ -257,6 +267,7 @@ describe("ProvidersConfig", () => {
     testState.selectedProviderId = providerConfig.id
     config.languageDetection = { mode: "basic", providerId: undefined }
     hostedAiState.value = { status: undefined, isPending: false, isError: true }
+    builtInAiModelsState.models = sanitizeHostedAiModels(testHostedAiModels())
   })
 
   it("anchors an in-use disable error to the corresponding provider switch", () => {
@@ -275,7 +286,7 @@ describe("ProvidersConfig", () => {
   })
 
   it("renders the built-in provider composition without CRUD actions or a sponsor CTA", () => {
-    testState.selectedProviderId = BUILT_IN_AI_PROVIDER_ID
+    testState.selectedProviderId = DEFAULT_BUILT_IN_AI_PROVIDER_ID
 
     renderProvidersConfig()
 
@@ -299,15 +310,18 @@ describe("ProvidersConfig", () => {
       card.getAttribute("data-provider-id"),
     )
     expect(cardIds).toEqual([
-      BUILT_IN_AI_PROVIDER_ID,
-      BUILT_IN_AI_ADVANCE_PROVIDER_ID,
+      "read-frog-ai:claude-haiku-5-5",
+      DEFAULT_BUILT_IN_AI_PROVIDER_ID,
+      "read-frog-ai:deepseek-v4.1-flash",
+      SOL_PROVIDER_ID,
+      "read-frog-ai:claude-sonnet-5-5",
       providerConfig.id,
     ])
 
     const inDocumentOrder = [
       screen.getByRole("button", { name: "options.apiProviders.addProvider" }),
       screen.getByRole("heading", { name: "options.apiProviders.builtInProvider" }),
-      container.querySelector(`[data-provider-id="${BUILT_IN_AI_ADVANCE_PROVIDER_ID}"]`),
+      container.querySelector(`[data-provider-id="${SOL_PROVIDER_ID}"]`),
       screen.getByRole("heading", { name: "options.apiProviders.yourProviders" }),
       container.querySelector(`[data-provider-id="${providerConfig.id}"]`),
     ]
@@ -320,17 +334,42 @@ describe("ProvidersConfig", () => {
     }
   })
 
-  it("lists both built-in provider cards", () => {
+  it("lists a card per Built-in AI model, named as the server names it", () => {
     renderProvidersConfig()
 
-    expect(screen.getByText("options.apiProviders.providers.name.builtInAi")).toBeInTheDocument()
-    expect(
-      screen.getByText("options.apiProviders.providers.name.builtInAiAdvance"),
-    ).toBeInTheDocument()
+    for (const name of [
+      "Claude Haiku 5.5",
+      "GPT-6 Luna",
+      "DeepSeek V4.1 Flash",
+      "GPT-6.2 Sol",
+      "Claude Sonnet 5.5",
+    ]) {
+      expect(screen.getByRole("switch", { name })).toBeInTheDocument()
+    }
+  })
+
+  it("keeps a card for a model the list dropped while something still uses it", () => {
+    config.languageDetection = { mode: "llm", providerId: "read-frog-ai:gpt-5-mini" }
+
+    const { container } = renderProvidersConfig()
+
+    expect(container.querySelector('[data-provider-id="read-frog-ai:gpt-5-mini"]')).not.toBeNull()
+    expect(screen.getByRole("switch", { name: "gpt-5-mini" })).toBeInTheDocument()
+  })
+
+  it("offers only the default model before any list has been seen", () => {
+    builtInAiModelsState.models = null
+
+    const { container } = renderProvidersConfig()
+
+    const builtInIds = [...container.querySelectorAll("[data-provider-id]")]
+      .map((card) => card.getAttribute("data-provider-id"))
+      .filter((id) => id?.startsWith("read-frog-ai:"))
+    expect(builtInIds).toEqual([DEFAULT_BUILT_IN_AI_PROVIDER_ID])
   })
 
   it("renders the Ultra editor with its own attribution and all three feature assignments", () => {
-    testState.selectedProviderId = BUILT_IN_AI_ADVANCE_PROVIDER_ID
+    testState.selectedProviderId = SOL_PROVIDER_ID
 
     renderProvidersConfig()
 
@@ -344,7 +383,7 @@ describe("ProvidersConfig", () => {
   })
 
   it("keeps Ultra assignment rows interactive while the plan status is unknown", () => {
-    testState.selectedProviderId = BUILT_IN_AI_ADVANCE_PROVIDER_ID
+    testState.selectedProviderId = SOL_PROVIDER_ID
     // Default hostedAiState: settled error → status undefined → no verdict.
 
     renderProvidersConfig()
@@ -358,7 +397,7 @@ describe("ProvidersConfig", () => {
   })
 
   it("locks Ultra assignment rows when the server denies ultra access", () => {
-    testState.selectedProviderId = BUILT_IN_AI_ADVANCE_PROVIDER_ID
+    testState.selectedProviderId = SOL_PROVIDER_ID
     hostedAiState.value = {
       status: makeUltraAccessStatus(false),
       isPending: false,
@@ -374,7 +413,7 @@ describe("ProvidersConfig", () => {
   })
 
   it("unlocks Ultra assignment rows for an ultra-entitled account", () => {
-    testState.selectedProviderId = BUILT_IN_AI_ADVANCE_PROVIDER_ID
+    testState.selectedProviderId = SOL_PROVIDER_ID
     hostedAiState.value = {
       status: makeUltraAccessStatus(true),
       isPending: false,
@@ -389,7 +428,7 @@ describe("ProvidersConfig", () => {
   })
 
   it("assigns language detection from a Built-in AI editor", () => {
-    testState.selectedProviderId = BUILT_IN_AI_PROVIDER_ID
+    testState.selectedProviderId = DEFAULT_BUILT_IN_AI_PROVIDER_ID
 
     renderProvidersConfig()
     fireEvent.click(
@@ -401,7 +440,7 @@ describe("ProvidersConfig", () => {
     expect(writeConfigMock).toHaveBeenCalledWith({
       languageDetection: {
         mode: "llm",
-        providerId: BUILT_IN_AI_PROVIDER_ID,
+        providerId: DEFAULT_BUILT_IN_AI_PROVIDER_ID,
       },
     })
   })
@@ -413,10 +452,10 @@ describe("ProvidersConfig", () => {
     // Ultra card has nothing assigned and shows no badge.
     const { container } = renderProvidersConfig()
 
-    const freeCard = container.querySelector(`[data-provider-id="${BUILT_IN_AI_PROVIDER_ID}"]`)
-    const ultraCard = container.querySelector(
-      `[data-provider-id="${BUILT_IN_AI_ADVANCE_PROVIDER_ID}"]`,
+    const freeCard = container.querySelector(
+      `[data-provider-id="${DEFAULT_BUILT_IN_AI_PROVIDER_ID}"]`,
     )
+    const ultraCard = container.querySelector(`[data-provider-id="${SOL_PROVIDER_ID}"]`)
     if (!(freeCard instanceof HTMLElement) || !(ultraCard instanceof HTMLElement)) {
       throw new Error("Built-in provider cards not rendered")
     }
@@ -432,11 +471,13 @@ describe("ProvidersConfig", () => {
   it("counts language detection on the assigned Built-in AI card badge", () => {
     config.languageDetection = {
       mode: "llm",
-      providerId: BUILT_IN_AI_PROVIDER_ID,
+      providerId: DEFAULT_BUILT_IN_AI_PROVIDER_ID,
     }
 
     const { container } = renderProvidersConfig()
-    const freeCard = container.querySelector(`[data-provider-id="${BUILT_IN_AI_PROVIDER_ID}"]`)
+    const freeCard = container.querySelector(
+      `[data-provider-id="${DEFAULT_BUILT_IN_AI_PROVIDER_ID}"]`,
+    )
     if (!(freeCard instanceof HTMLElement)) {
       throw new Error("Built-in provider card not rendered")
     }
@@ -447,7 +488,7 @@ describe("ProvidersConfig", () => {
   })
 
   it("opens the provider a ?provider= deep link names", () => {
-    testState.selectedProviderId = BUILT_IN_AI_PROVIDER_ID
+    testState.selectedProviderId = DEFAULT_BUILT_IN_AI_PROVIDER_ID
 
     renderProvidersConfig(`/api-providers?provider=${providerConfig.id}`)
 
@@ -455,10 +496,10 @@ describe("ProvidersConfig", () => {
   })
 
   it("keeps the current selection when the deep link names an unknown provider", () => {
-    testState.selectedProviderId = BUILT_IN_AI_PROVIDER_ID
+    testState.selectedProviderId = DEFAULT_BUILT_IN_AI_PROVIDER_ID
 
     renderProvidersConfig("/api-providers?provider=deleted-provider")
 
-    expect(testState.selectedProviderId).toBe(BUILT_IN_AI_PROVIDER_ID)
+    expect(testState.selectedProviderId).toBe(DEFAULT_BUILT_IN_AI_PROVIDER_ID)
   })
 })

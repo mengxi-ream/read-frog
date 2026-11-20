@@ -1,5 +1,6 @@
 import type { HostedAiStatus } from "@/utils/hosted-ai/types"
 import { storage } from "#imports"
+import { getHostedAiModelsFromStatus, storeHostedAiModels } from "@/utils/hosted-ai/models"
 import { createLogger } from "@/utils/logging/logger"
 import { onMessage } from "@/utils/message"
 import { backgroundOrpcClient } from "@/utils/orpc/background-client"
@@ -11,11 +12,11 @@ const log = createLogger("background/hosted-ai-status")
  * subtitle playback, short enough that a quota exhausted mid-session surfaces
  * within seconds.
  *
- * A stale `available: true` cannot cost credit: nothing derived from this
- * response rides the wire (the generation schema carries only modelTier,
- * requestId, instructions, prompt, temperature), and the server refuses an
- * over-quota request before it reaches the model, releasing the reservation at
- * zero. The verdict is also boolean, not a budget — a fresh response says
+ * A stale `available: true` cannot cost credit: the server refuses an
+ * over-quota request, or a model it cannot run, before it reaches the model,
+ * releasing the reservation at zero. What rides the wire from here is the
+ * model's tier and reasoning level, which the server checks against its own
+ * catalog. The verdict is also boolean, not a budget — a fresh response says
  * `available: true` at 5% remaining exactly as a cached one does. What a stale
  * entry does cost is a delayed error message, which is what bounds the TTL.
  */
@@ -77,6 +78,12 @@ function fetchAndCache(): Promise<HostedAiStatus | null> {
         await storage.setItem<CachedStatus>(CACHE_KEY, { status, cachedAt: Date.now() })
       } catch (error) {
         log.warn("Failed to write cache", { error })
+      }
+      // The model list outlives this entry: names, tiers and revisions are
+      // what a status outage would otherwise take with it.
+      const models = getHostedAiModelsFromStatus(status)
+      if (models) {
+        await storeHostedAiModels(models)
       }
       return status
     })

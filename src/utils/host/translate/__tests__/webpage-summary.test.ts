@@ -19,9 +19,11 @@ const localRef: PromptableProviderRef = {
 
 const hostedRef: PromptableProviderRef = {
   kind: "system",
-  providerId: "read-frog-advance-ai",
+  providerId: "read-frog-ai:gpt-6.2-sol",
+  model: "gpt-6.2-sol",
   modelTier: "advance",
   modelRevision: "advance-r1",
+  reasoning: null,
 }
 
 const webPageContext = {

@@ -1802,6 +1802,12 @@ hostedAi:
     rateLimited: 请求过于频繁，请稍后再试
     guestRateLimited: 游客请求过于频繁，请稍后再试
     userRateLimited: 请求过于频繁，请稍后再试
+    modelUnavailable: "$1 暂时无法使用，可改用 $2"
+    modelUnavailableNoAlternatives: "$1 暂时无法使用，目前也没有其他可用的内置 AI 模型，请稍后再试"
+    modelBusy: "$1 当前繁忙，请稍后再试，或改用 $2"
+    modelBusyNoAlternatives: "$1 当前繁忙，请稍后再试"
+  actions:
+    chooseModel: "选择模型"
 hotkey:
   control: Ctrl
   alt: Option

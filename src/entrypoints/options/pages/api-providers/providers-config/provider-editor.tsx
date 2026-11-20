@@ -9,6 +9,7 @@ import { useAtomValue, useSetAtom } from "jotai"
 import { createContext, use, useState } from "react"
 import { UpgradePlanBadge } from "@/components/badges/upgrade-plan-badge"
 import { useAutosave } from "@/components/form/use-autosave"
+import { useBuiltInAiModels } from "@/components/llm-providers/use-built-in-ai-models"
 import ProviderIcon from "@/components/provider-icon"
 import { useTheme } from "@/components/providers/theme-provider"
 import {
@@ -175,11 +176,12 @@ function BuiltInProvider({
   providerId: BuiltInAiProviderId
   children: React.ReactNode
 }) {
+  const { models } = useBuiltInAiModels()
   const value = useProviderEditorValue({
     identity: {
       id: providerId,
       logo: BUILT_IN_AI_PROVIDER_LOGO,
-      name: getBuiltInAiProviderName(providerId),
+      name: getBuiltInAiProviderName(providerId, models),
     },
   })
 

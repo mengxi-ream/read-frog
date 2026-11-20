@@ -9,7 +9,7 @@ import {
   normalizeFeatureProviderAnalytics,
   UNKNOWN_FEATURE_PROVIDER,
 } from "@/utils/analytics-provider"
-import { BUILT_IN_AI_PROVIDER_ID } from "@/utils/providers/provider-registry"
+import { DEFAULT_BUILT_IN_AI_PROVIDER_ID } from "@/utils/providers/provider-registry"
 
 const openAIProvider = {
   id: "openai-provider-id",
@@ -49,9 +49,9 @@ describe("feature provider analytics", () => {
     expect(
       classifyResolvedProvider({
         kind: "system",
-        id: BUILT_IN_AI_PROVIDER_ID,
-        name: "Built-in AI",
-        modelTier: "normal",
+        id: DEFAULT_BUILT_IN_AI_PROVIDER_ID,
+        name: "GPT-6 Luna",
+        model: "gpt-6-luna",
       }),
     ).toEqual(BUILT_IN_AI_FEATURE_PROVIDER)
     expect(BUILT_IN_AI_FEATURE_PROVIDER).toEqual({
@@ -64,9 +64,11 @@ describe("feature provider analytics", () => {
     expect(
       classifySerializedProvider({
         kind: "system",
-        providerId: BUILT_IN_AI_PROVIDER_ID,
+        providerId: DEFAULT_BUILT_IN_AI_PROVIDER_ID,
+        model: "gpt-6-luna",
         modelTier: "normal",
         modelRevision: "rev-1",
+        reasoning: null,
       }),
     ).toEqual(BUILT_IN_AI_FEATURE_PROVIDER)
     expect(classifySerializedProvider({ kind: "local", config: googleTranslateProvider })).toEqual({

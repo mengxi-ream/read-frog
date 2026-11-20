@@ -3,6 +3,8 @@ import type { HostedAiStatus, HostedAiTierStatus } from "@/utils/hosted-ai/types
 import { describe, expect, it } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { buildFeatureProviderPatch } from "@/utils/constants/feature-providers"
+import { LUNA_PROVIDER_ID, testHostedAiModels } from "@/utils/hosted-ai/__tests__/test-models"
+import { sanitizeHostedAiModels } from "@/utils/hosted-ai/models"
 import { isSystemProviderSelectorItem } from "@/utils/providers/provider-display"
 import {
   BUILT_IN_AI_PROVIDER_LOGO,
@@ -27,6 +29,7 @@ function statusWithAllTiers(tier: HostedAiTierStatus): HostedAiStatus {
   const entry = { normal: tier, advance: tier }
   return {
     pools: [],
+    models: testHostedAiModels(),
     features: {
       pageTranslation: entry,
       customAction: entry,
@@ -55,13 +58,13 @@ describe("feature providers", () => {
 
     it("builds patch for the note suggestion feature", () => {
       const patch = buildFeatureProviderPatch({
-        noteSuggestion: "read-frog-free-ai",
+        noteSuggestion: LUNA_PROVIDER_ID,
       })
 
       expect(patch).toEqual({
         selectionToolbar: {
           noteSuggestion: {
-            providerId: "read-frog-free-ai",
+            providerId: LUNA_PROVIDER_ID,
           },
         },
       })
@@ -90,20 +93,21 @@ describe("feature providers", () => {
 
   describe("getSelectableProvidersForCapability", () => {
     it("marks registry-backed system providers for selector grouping", () => {
-      const providers = getSelectableProvidersForCapability("customAction", [])
+      const providers = getSelectableProvidersForCapability(
+        "customAction",
+        [],
+        sanitizeHostedAiModels(testHostedAiModels()),
+      )
 
-      expect(providers).toEqual([
+      expect(providers).toHaveLength(5)
+      expect(providers).toContainEqual(
         expect.objectContaining({
           kind: "system",
-          id: "read-frog-free-ai",
+          id: LUNA_PROVIDER_ID,
+          name: "GPT-6 Luna",
           logo: expect.any(Function),
         }),
-        expect.objectContaining({
-          kind: "system",
-          id: "read-frog-advance-ai",
-          logo: expect.any(Function),
-        }),
-      ])
+      )
 
       const builtInAiProvider = providers[0]
       expect(builtInAiProvider && isSystemProviderSelectorItem(builtInAiProvider)).toBe(true)
@@ -199,7 +203,7 @@ describe("feature providers", () => {
         remainingProviders,
       )
 
-      expect(fallbacks.pageTranslation).toBe("read-frog-free-ai")
+      expect(fallbacks.pageTranslation).toBe(LUNA_PROVIDER_ID)
     })
 
     it("skips disabled local providers before using the system Normal tier", () => {
@@ -224,7 +228,7 @@ describe("feature providers", () => {
         remainingProviders,
       )
 
-      expect(fallbacks.pageTranslation).toBe("read-frog-free-ai")
+      expect(fallbacks.pageTranslation).toBe(LUNA_PROVIDER_ID)
     })
 
     it("falls back to the system Normal tier for selection toolbar translation when no local provider is available", () => {
@@ -241,7 +245,7 @@ describe("feature providers", () => {
 
       const fallbacks = computeProviderFallbacksAfterDeletion("deleted-provider", config, [])
 
-      expect(fallbacks).toEqual({ selectionTranslation: "read-frog-free-ai" })
+      expect(fallbacks).toEqual({ selectionTranslation: LUNA_PROVIDER_ID })
     })
 
     it("falls back to the system Normal tier for note suggestion when no local llm provider remains", () => {
@@ -260,7 +264,7 @@ describe("feature providers", () => {
         getProviderById("google-translate-default"),
       ])
 
-      expect(fallbacks).toEqual({ noteSuggestion: "read-frog-free-ai" })
+      expect(fallbacks).toEqual({ noteSuggestion: LUNA_PROVIDER_ID })
     })
   })
 
@@ -560,7 +564,7 @@ describe("feature providers", () => {
       expect(result?.customActions).toEqual([
         expect.objectContaining({
           id: "action-a",
-          providerId: "read-frog-free-ai",
+          providerId: LUNA_PROVIDER_ID,
         }),
       ])
     })
@@ -615,7 +619,7 @@ describe("feature providers", () => {
       // Switching to llm mode used to be impossible without a BYOK LLM. Built-in
       // AI is always capability-compatible, so the mode is now always reachable
       // and seeds itself with the hosted provider.
-      expect(result).toEqual({ mode: "llm", providerId: "read-frog-free-ai" })
+      expect(result).toEqual({ mode: "llm", providerId: LUNA_PROVIDER_ID })
     })
   })
 

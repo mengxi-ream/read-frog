@@ -1,6 +1,7 @@
 import type { Config as SeedConfig } from "@/types/config/config"
 import type { APIProviderConfig } from "@/types/config/provider"
 // @vitest-environment jsdom
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { createStore, Provider } from "jotai"
 import { describe, expect, it } from "vitest"
@@ -10,7 +11,7 @@ import { isAPIProviderConfig } from "@/types/config/provider"
 import { configAtom } from "@/utils/atoms/config"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { BUILT_IN_DICTIONARY_ACTION_ID } from "@/utils/constants/custom-action"
-import { BUILT_IN_AI_PROVIDER_ID } from "@/utils/constants/provider-ids"
+import { DEFAULT_BUILT_IN_AI_PROVIDER_ID } from "@/utils/constants/provider-ids"
 import { getBuiltInDictionaryAction } from "@/utils/custom-actions"
 import {
   BuiltInProviderEditor,
@@ -110,11 +111,14 @@ describe("editor compound component contexts", () => {
 
     expect(() =>
       render(
-        <Provider store={store}>
-          <BuiltInProviderEditor.Provider providerId={BUILT_IN_AI_PROVIDER_ID}>
-            <ProviderEditor.DuplicateButton />
-          </BuiltInProviderEditor.Provider>
-        </Provider>,
+        // The built-in editor names its model from the model list, which status serves.
+        <QueryClientProvider client={new QueryClient()}>
+          <Provider store={store}>
+            <BuiltInProviderEditor.Provider providerId={DEFAULT_BUILT_IN_AI_PROVIDER_ID}>
+              <ProviderEditor.DuplicateButton />
+            </BuiltInProviderEditor.Provider>
+          </Provider>
+        </QueryClientProvider>,
       ),
     ).toThrow("ProviderEditor.duplicate is unavailable in this composition")
   })

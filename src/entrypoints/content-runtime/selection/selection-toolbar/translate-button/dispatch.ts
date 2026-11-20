@@ -230,7 +230,6 @@ export async function translateWithHostedTextStream({
     {
       providerKind: "system",
       providerId: provider.id,
-      modelTier: provider.modelTier,
       requestId: getRandomUUID(),
       hostedFeature: "selectionTranslation",
       instructions: systemPrompt,

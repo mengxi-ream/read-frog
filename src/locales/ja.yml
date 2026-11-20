@@ -1792,6 +1792,12 @@ hostedAi:
     rateLimited: リクエストが多すぎます。後でもう一度お試しください。
     guestRateLimited: ゲストからのリクエストが多すぎます。後でもう一度お試しください。
     userRateLimited: リクエストが多すぎます。後でもう一度お試しください。
+    modelUnavailable: "$1 は現在利用できません。代わりに $2 をお試しください。"
+    modelUnavailableNoAlternatives: "$1 は現在利用できず、ほかに利用できる組み込み AI モデルもありません。しばらくしてからもう一度お試しください。"
+    modelBusy: "$1 は現在混み合っています。少し待ってからもう一度お試しいただくか、$2 に切り替えてください。"
+    modelBusyNoAlternatives: "$1 は現在混み合っています。少し待ってからもう一度お試しください。"
+  actions:
+    chooseModel: "モデルを選択"
 hotkey:
   control: Ctrl
   alt: Option

@@ -14,6 +14,7 @@ import { getSelectionToolbarActions, patchSelectionToolbarAction } from "@/utils
 import { isSystemProviderSelectorItem } from "@/utils/providers/provider-display"
 import { getSelectableProvidersForCapability } from "@/utils/providers/provider-registry"
 import { providerSupportsTranslationOnlyMode } from "@/utils/providers/translation-only-gate"
+import { useBuiltInAiModels } from "./use-built-in-ai-models"
 import { useHostedAiProviderOptions } from "./use-hosted-ai-provider-options"
 
 export interface FeatureProviderBinding {
@@ -37,8 +38,14 @@ export function useFeatureProvider(featureKey: FeatureKey): FeatureProviderBindi
   // the full list.
   const hideTranslationOnlyUnsupported =
     featureKey === "pageTranslation" && translationMode === "translationOnly"
+  const { models: builtInAiModels } = useBuiltInAiModels()
   const baseProviders = useMemo(() => {
-    const candidates = getSelectableProvidersForCapability(featureKey, providersConfig)
+    const candidates = getSelectableProvidersForCapability(
+      featureKey,
+      providersConfig,
+      builtInAiModels,
+      [providerId],
+    )
     if (!hideTranslationOnlyUnsupported) {
       return candidates
     }
@@ -47,7 +54,7 @@ export function useFeatureProvider(featureKey: FeatureKey): FeatureProviderBindi
         isSystemProviderSelectorItem(option) ||
         providerSupportsTranslationOnlyMode(option.provider),
     )
-  }, [featureKey, providersConfig, hideTranslationOnlyUnsupported])
+  }, [featureKey, providersConfig, builtInAiModels, providerId, hideTranslationOnlyUnsupported])
   const providers = useHostedAiProviderOptions(featureKey, baseProviders)
 
   const setProviderId = useCallback(
@@ -77,12 +84,7 @@ export function useCustomActionProviders(): CustomActionProvidersBinding {
   const setConfig = useSetAtom(writeConfigAtom)
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
 
-  const baseProviders = useMemo(
-    () => getSelectableProvidersForCapability("customAction", providersConfig),
-    [providersConfig],
-  )
-  const providers = useHostedAiProviderOptions("customAction", baseProviders)
-
+  const { models: builtInAiModels } = useBuiltInAiModels()
   const actions = useMemo(
     () =>
       getSelectionToolbarActions(config.selectionToolbar).filter(
@@ -90,6 +92,18 @@ export function useCustomActionProviders(): CustomActionProvidersBinding {
       ),
     [config.selectionToolbar],
   )
+
+  const baseProviders = useMemo(
+    () =>
+      getSelectableProvidersForCapability(
+        "customAction",
+        providersConfig,
+        builtInAiModels,
+        actions.map((action) => action.providerId),
+      ),
+    [providersConfig, builtInAiModels, actions],
+  )
+  const providers = useHostedAiProviderOptions("customAction", baseProviders)
 
   const setActionProviderId = useCallback(
     (actionId: string, providerId: string) =>

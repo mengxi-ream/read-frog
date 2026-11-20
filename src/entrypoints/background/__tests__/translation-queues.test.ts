@@ -198,9 +198,11 @@ describe("translation queue helpers", () => {
     expect(
       shouldUseBatchQueue({
         kind: "system",
-        providerId: "read-frog-free-ai",
+        providerId: "read-frog-ai:gpt-6-luna",
+        model: "gpt-6-luna",
         modelTier: "normal",
         modelRevision: "normal-r1",
+        reasoning: null,
       }),
     ).toBe(true)
   }, 15_000)
@@ -248,9 +250,11 @@ describe("translation queue helpers", () => {
             langConfig: DEFAULT_CONFIG.language,
             providerRef: {
               kind: "system",
-              providerId: "read-frog-free-ai",
+              providerId: "read-frog-ai:gpt-6-luna",
+              model: "gpt-6-luna",
               modelTier: "normal",
               modelRevision: "normal-r1",
+              reasoning: null,
             },
             scheduleAt: Date.now(),
             hash: "hosted-retry-hash",
@@ -264,8 +268,9 @@ describe("translation queue helpers", () => {
     const firstPayload = runStreamTextInBackgroundMock.mock.calls[0]![0]
     const secondPayload = runStreamTextInBackgroundMock.mock.calls[1]![0]
     expect(firstPayload).toMatchObject({
-      providerId: "read-frog-free-ai",
-      modelTier: "normal",
+      providerId: "read-frog-ai:gpt-6-luna",
+      // The level the ref resolved with its cache identity, so the entry holds what it asked for.
+      builtInAiReasoning: null,
       instructions: "Translate accurately",
       prompt: "Source text",
       requestId: expect.stringMatching(/^[0-9a-f-]{36}$/i),
@@ -307,9 +312,11 @@ describe("translation queue helpers", () => {
           langConfig: DEFAULT_CONFIG.language,
           providerRef: {
             kind: "system",
-            providerId: "read-frog-free-ai",
+            providerId: "read-frog-ai:gpt-6-luna",
+            model: "gpt-6-luna",
             modelTier: "normal",
             modelRevision: "normal-r1",
+            reasoning: null,
           },
           scheduleAt: Date.now(),
           hash,
@@ -1139,9 +1146,11 @@ describe("translation queue helpers", () => {
         langConfig: DEFAULT_CONFIG.language,
         providerRef: {
           kind: "system" as const,
-          providerId: "read-frog-advance-ai",
+          providerId: "read-frog-ai:gpt-6.2-sol",
+          model: "gpt-6.2-sol",
           modelTier: "advance",
           modelRevision: "advance-r1",
+          reasoning: null,
         },
         scheduleAt: Date.now(),
         hash: "subtitle-hosted-hash",
@@ -1167,9 +1176,11 @@ describe("translation queue helpers", () => {
         langConfig: DEFAULT_CONFIG.language,
         providerRef: {
           kind: "system" as const,
-          providerId: "read-frog-free-ai",
+          providerId: "read-frog-ai:gpt-6-luna",
+          model: "gpt-6-luna",
           modelTier: "normal",
           modelRevision: "normal-r1",
+          reasoning: null,
         },
         scheduleAt: Date.now(),
         hash: "hosted-input-route-hash",
@@ -1199,9 +1210,11 @@ describe("translation queue helpers", () => {
         webContent: "Body",
         providerRef: {
           kind: "system",
-          providerId: "read-frog-free-ai",
+          providerId: "read-frog-ai:gpt-6-luna",
+          model: "gpt-6-luna",
           modelTier: "normal",
           modelRevision: "r1",
+          reasoning: null,
         },
         hostedFeature,
       }
@@ -1232,9 +1245,11 @@ describe("translation queue helpers", () => {
       langConfig: DEFAULT_CONFIG.language,
       providerRef: {
         kind: "system" as const,
-        providerId: "read-frog-free-ai",
+        providerId: "read-frog-ai:gpt-6-luna",
+        model: "gpt-6-luna",
         modelTier: "normal",
         modelRevision: "normal-r1",
+        reasoning: null,
       },
       scheduleAt: Date.now(),
     }
@@ -1288,9 +1303,11 @@ describe("translation queue helpers", () => {
     )
     const hostedRef = {
       kind: "system" as const,
-      providerId: "read-frog-advance-ai",
+      providerId: "read-frog-ai:gpt-6.2-sol",
+      model: "gpt-6.2-sol",
       modelTier: "advance",
       modelRevision: "advance-r1",
+      reasoning: null,
     }
     const { setupPageTranslationHandlers } = await import("../page-translation")
     setupPageTranslationHandlers()

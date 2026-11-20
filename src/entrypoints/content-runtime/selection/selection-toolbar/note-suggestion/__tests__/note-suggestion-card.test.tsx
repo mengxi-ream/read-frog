@@ -45,7 +45,7 @@ function createAction(
     name: "Dictionary",
     enabled: true,
     icon: "tabler:book-2",
-    providerId: "read-frog-free-ai",
+    providerId: "read-frog-ai:gpt-6-luna",
     systemPrompt: "system",
     prompt: "prompt",
     outputSchema: [

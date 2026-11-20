@@ -3,6 +3,7 @@ import { LANGUAGE_ENGLISH_NAMES } from "@read-frog/definitions"
 import { useMutation } from "@tanstack/react-query"
 import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { useEffect, useEffectEvent, useRef } from "react"
+import { useBuiltInAiModels } from "@/components/llm-providers/use-built-in-ai-models"
 import ProviderIcon from "@/components/provider-icon"
 import { useTheme } from "@/components/providers/theme-provider"
 import { Button } from "@/components/ui/base-ui/button"
@@ -53,7 +54,13 @@ export function TranslationCard({
   const setExpandedById = useSetAtom(translationCardExpandedStateAtom)
   const { play, stop, isFetching, isPlaying } = useTextToSpeech(ANALYTICS_SURFACE.TRANSLATION_HUB)
 
-  const provider = resolveProviderRefForCapability("pageTranslation", providersConfig, providerId)
+  const { models: builtInAiModels } = useBuiltInAiModels()
+  const provider = resolveProviderRefForCapability(
+    "pageTranslation",
+    providersConfig,
+    providerId,
+    builtInAiModels,
+  )
   const providerLogo =
     provider?.kind === "system"
       ? BUILT_IN_AI_PROVIDER_LOGO
@@ -121,7 +128,6 @@ export function TranslationCard({
               {
                 providerKind: "system",
                 providerId: provider.id,
-                modelTier: provider.modelTier,
                 requestId: getRandomUUID(),
                 hostedFeature: "pageTranslation",
                 instructions: systemPrompt,

@@ -10,6 +10,11 @@ import { getBuiltInDictionaryAction } from "@/utils/custom-actions"
 import { i18n } from "@/utils/i18n"
 import { CustomActionCardList } from "../action-card-list"
 
+// The model list only picks a new action's model, which these cases never add.
+vi.mock("@/components/llm-providers/use-built-in-ai-models", () => ({
+  useBuiltInAiModels: () => ({ models: null, isLive: false }),
+}))
+
 beforeAll(() => {
   vi.stubGlobal(
     "ResizeObserver",

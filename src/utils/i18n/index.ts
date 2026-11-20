@@ -121,6 +121,11 @@ export function formatUiList(items: readonly string[]): string {
   return new Intl.ListFormat(getUiLocale(), { type: "conjunction", style: "narrow" }).format(items)
 }
 
+/** Names offered as a choice in the UI language: "A, B, or C" in English, "A、B或C" in Chinese. */
+export function formatUiAlternatives(items: readonly string[]): string {
+  return new Intl.ListFormat(getUiLocale(), { type: "disjunction" }).format(items)
+}
+
 /**
  * `i18n.t` in `locale` instead of the UI language, for text that follows another
  * language setting: a result card's words follow the target language, like the

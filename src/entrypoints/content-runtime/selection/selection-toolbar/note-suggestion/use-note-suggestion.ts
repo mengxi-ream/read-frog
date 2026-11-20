@@ -12,7 +12,7 @@ import { STREAM_PORT_DISCONNECTED_MESSAGE } from "@/utils/content-script/port-st
 import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { resolveNoteSuggestionAction } from "@/utils/custom-actions"
 import { getOrCreateWebPageContext } from "@/utils/host/translate/webpage-context"
-import { getHostedAiTierStatus } from "@/utils/hosted-ai/status"
+import { getHostedAiModelVerdict } from "@/utils/hosted-ai/status"
 import { createLogger } from "@/utils/logging/logger"
 import { noteSuggestionEnvelopeSchema } from "@/utils/note-suggestion/types"
 import { validateNoteSuggestion } from "@/utils/note-suggestion/validate"
@@ -136,24 +136,27 @@ export function useNoteSuggestion() {
       }
 
       if (provider.kind === "system") {
-        // A background auto-fire feature must not hammer a hosted tier the
-        // account cannot use: skip silently on any explicit unavailable
-        // verdict — durable facts (sign-in, Ultra plan) and reported runtime
-        // state (quota exhausted, service down) alike, since nobody is
-        // watching to act on the error and status is far cheaper than a
-        // doomed stream call. Fail open when status itself is unreachable —
-        // the run surfaces any real error, which `fetchHostedAiStatus` already
-        // does; going through it also shares the request with whatever else
-        // resolves a hosted ref at the same moment, since one status response
-        // covers every feature.
+        // A background auto-fire feature must not hammer a model the account
+        // cannot use: skip silently on any explicit verdict against it —
+        // durable facts (sign-in, plan) and reported runtime state (quota
+        // exhausted, the model unable to run) alike, since nobody is watching
+        // to act on the error and status is far cheaper than a doomed stream
+        // call. Fail open when status itself is unreachable — the run surfaces
+        // any real error, which `fetchHostedAiStatus` already does; going
+        // through it also shares the request with whatever else resolves a
+        // hosted ref at the same moment, since one status response covers
+        // every feature.
         const status = await fetchHostedAiStatus()
         if (signal.aborted) {
           return
         }
-        const tierStatus = getHostedAiTierStatus(status, "noteSuggestion", provider.modelTier)
-        if (tierStatus && !tierStatus.available) {
-          log.debug("Skipped: hosted tier unavailable", {
-            unavailableReason: tierStatus.unavailableReason,
+        const verdict = getHostedAiModelVerdict(status, "noteSuggestion", provider.model)
+        if (verdict.kind === "blocked" || verdict.kind === "unavailable") {
+          log.debug("Skipped: model unavailable", {
+            model: provider.model,
+            verdict: verdict.kind,
+            unavailableReason:
+              verdict.kind === "blocked" ? verdict.tierStatus.unavailableReason : null,
           })
           completedSessionKeysRef.current.add(input.sessionKey)
           return
@@ -182,7 +185,6 @@ export function useNoteSuggestion() {
         provider.kind === "system"
           ? {
               providerId: provider.id,
-              modelTier: provider.modelTier,
               requestId: getRandomUUID(),
               instructions: systemPrompt,
               prompt,

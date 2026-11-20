@@ -90,7 +90,7 @@ function createAction(): SelectionToolbarCustomAction {
     id: "vocabulary",
     name: "Vocabulary",
     icon: "tabler:book",
-    providerId: "read-frog-free-ai",
+    providerId: "read-frog-ai:gpt-6-luna",
     systemPrompt: "Explain the selected word.",
     prompt: "{{selection}}",
     outputSchema: ["term", "phonetic", "meaning"].map((name) => ({
