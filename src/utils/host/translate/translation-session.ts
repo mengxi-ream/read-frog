@@ -12,6 +12,7 @@
  * ids. The random component keeps ids unique across frames of the same tab
  * (the background scopes by tab id + session id only).
  */
+import type { HostedAiReasoning } from "@/utils/hosted-ai/types"
 import type { SerializableProviderRef } from "@/utils/providers/provider-ref"
 
 let currentPageTranslationSessionId: string | null = null
@@ -24,10 +25,19 @@ let sessionCounter = 0
  * the model revision used for cache identity must stay stable per session).
  */
 let currentSessionProviderRef: SerializableProviderRef | null = null
+/**
+ * The reasoning choice stored for the model when that ref was made. The
+ * reasoning level is a user setting, not status, so it must not stay frozen:
+ * a paragraph whose stored choice differs makes a new ref. The ref can't be
+ * compared directly, because its level already falls back to the model's
+ * default when the choice is unset or not one the model offers.
+ */
+let currentSessionReasoningChoice: HostedAiReasoning | undefined
 
 export function beginPageTranslationSession(): string {
   sessionCounter += 1
   currentSessionProviderRef = null
+  currentSessionReasoningChoice = undefined
   currentPageTranslationSessionId = `${Date.now().toString(36)}-${Math.random()
     .toString(36)
     .slice(2, 10)}-${sessionCounter}`
@@ -38,6 +48,7 @@ export function endPageTranslationSession(): string | null {
   const endedSessionId = currentPageTranslationSessionId
   currentPageTranslationSessionId = null
   currentSessionProviderRef = null
+  currentSessionReasoningChoice = undefined
   return endedSessionId
 }
 
@@ -45,10 +56,24 @@ export function getPageTranslationSessionId(): string | null {
   return currentPageTranslationSessionId
 }
 
-export function setPageTranslationSessionProviderRef(providerRef: SerializableProviderRef): void {
+/**
+ * `reasoningChoice` must be read before the ref was made, never after. Then a
+ * change made while the ref was being made is newer than the recorded choice,
+ * and the next paragraph makes a ref again instead of keeping the old level.
+ */
+export function setPageTranslationSessionProviderRef(
+  providerRef: SerializableProviderRef,
+  reasoningChoice: HostedAiReasoning | undefined,
+): void {
   currentSessionProviderRef = providerRef
+  currentSessionReasoningChoice = reasoningChoice
 }
 
-export function getPageTranslationSessionProviderRef(): SerializableProviderRef | null {
+export function getPageTranslationSessionProviderRef(): {
+  providerRef: SerializableProviderRef
+  reasoningChoice: HostedAiReasoning | undefined
+} | null {
   return currentSessionProviderRef
+    ? { providerRef: currentSessionProviderRef, reasoningChoice: currentSessionReasoningChoice }
+    : null
 }
