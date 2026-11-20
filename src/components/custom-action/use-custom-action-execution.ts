@@ -73,7 +73,8 @@ interface ResolvedWebPageContext {
 }
 
 interface CustomActionExecutionRequest {
-  analytics: FeatureProviderAnalytics & {
+  analytics: {
+    provider: FeatureProviderAnalytics
     actionId: string
     actionName: string
     surface: SurfaceByFeature["custom_ai_action"]
@@ -283,10 +284,10 @@ function buildCustomActionExecutionRequest({
 
   return {
     analytics: {
+      provider: classifyResolvedProvider(provider),
       actionId: action.id,
       actionName: action.name,
       surface: analyticsSurface,
-      ...classifyResolvedProvider(provider),
     },
     key: stringifyExecutionRequestKey({
       actionId: action.id,
@@ -394,13 +395,7 @@ export function useCustomActionExecution({
       action_id: request.analytics.actionId,
       action_name: request.analytics.actionName,
     }
-    const providerAnalytics: FeatureProviderAnalytics = {
-      provider: request.analytics.provider,
-      backend_kind: request.analytics.backend_kind,
-      ...(request.analytics.built_in_ai_llm !== undefined && {
-        built_in_ai_llm: request.analytics.built_in_ai_llm,
-      }),
-    }
+    const providerAnalytics = request.analytics.provider
 
     const run = async () => {
       setIsRunning(true)

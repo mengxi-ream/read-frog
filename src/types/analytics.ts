@@ -84,12 +84,8 @@ export type AnalyticsBackendKind = "llm" | "non_llm" | "unknown"
 export interface FeatureProviderAnalytics {
   provider: AnalyticsProvider
   backend_kind: AnalyticsBackendKind
-  /**
-   * The Built-in AI model that ran, by its catalog id. Only on Built-in AI.
-   * Not named `model`: the PostHog filter drops every key that says "model",
-   * to keep the names of users' own models out, and a catalog id is not one.
-   */
-  built_in_ai_llm?: string
+  /** The Built-in AI model that ran, by its catalog id. Only on Built-in AI. */
+  built_in_ai_model?: string
 }
 
 export interface SurfaceByFeature {

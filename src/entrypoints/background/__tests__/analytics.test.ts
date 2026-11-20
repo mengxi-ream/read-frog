@@ -167,7 +167,7 @@ describe("background analytics", () => {
       ...PAGE_EVENT_FIELDS,
       provider: "read-frog-built-in-ai",
       backend_kind: "llm",
-      built_in_ai_llm: "gpt-6.2-sol",
+      built_in_ai_model: "gpt-6.2-sol",
     })
 
     const expected = {
@@ -178,7 +178,7 @@ describe("background analytics", () => {
       ...PAGE_EVENT_FIELDS,
       provider: "read-frog-built-in-ai",
       backend_kind: "llm",
-      built_in_ai_llm: "gpt-6.2-sol",
+      built_in_ai_model: "gpt-6.2-sol",
     }
     expect(posthogCaptureMock).toHaveBeenCalledWith("feature_used", expected)
 
@@ -395,6 +395,25 @@ describe("background analytics", () => {
     ).resolves.toBeUndefined()
 
     expect(posthogCaptureMock).not.toHaveBeenCalled()
+  })
+
+  it("keeps only an event's own built_in_ai_model through the filter, and drops every other model key", () => {
+    const filtered = filterAnalyticsCaptureResult({
+      event: "feature_used",
+      properties: {
+        built_in_ai_model: "gpt-6-luna",
+        model: "private-model",
+        modelId: "private-model",
+        custom_model: "private-model",
+        nested: { built_in_ai_model: "private-model" },
+      },
+      $set: { built_in_ai_model: "private-model" },
+      timestamp: new Date("2026-03-16T19:02:43.960Z"),
+      uuid: "test-uuid",
+    } as unknown as CaptureResult) as CaptureResult & { $set?: Record<string, unknown> }
+
+    expect(filtered.properties).toEqual({ built_in_ai_model: "gpt-6-luna", nested: {} })
+    expect(filtered.$set).toEqual({})
   })
 
   it("keeps site_domain and char_count through the PostHog property filter", () => {

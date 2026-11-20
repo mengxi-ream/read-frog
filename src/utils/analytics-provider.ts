@@ -43,7 +43,7 @@ export function classifyProviderConfig(
 /** Built-in AI, with the model that ran, so usage and failures can be told apart by model. */
 function classifyBuiltInAiModel(model: string): FeatureProviderAnalytics {
   return isBuiltInAiModelId(model)
-    ? { ...BUILT_IN_AI_FEATURE_PROVIDER, built_in_ai_llm: model }
+    ? { ...BUILT_IN_AI_FEATURE_PROVIDER, built_in_ai_model: model }
     : BUILT_IN_AI_FEATURE_PROVIDER
 }
 
@@ -74,7 +74,7 @@ export function classifySerializedProvider(
 export function normalizeFeatureProviderAnalytics(
   provider: unknown,
   backendKind: unknown,
-  builtInAiLlm?: unknown,
+  builtInAiModel?: unknown,
 ): FeatureProviderAnalytics {
   if (
     typeof provider !== "string" ||
@@ -88,8 +88,8 @@ export function normalizeFeatureProviderAnalytics(
   }
   if (provider === ANALYTICS_PROVIDER.BUILT_IN_AI && backendKind === "llm") {
     // A content script from before models were picked sends none.
-    return typeof builtInAiLlm === "string"
-      ? classifyBuiltInAiModel(builtInAiLlm)
+    return typeof builtInAiModel === "string"
+      ? classifyBuiltInAiModel(builtInAiModel)
       : BUILT_IN_AI_FEATURE_PROVIDER
   }
   if (provider === ANALYTICS_PROVIDER.EDGE_TTS && backendKind === "non_llm") {

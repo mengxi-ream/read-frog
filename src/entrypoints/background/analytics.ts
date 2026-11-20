@@ -3,6 +3,7 @@ import type { CaptureResult } from "posthog-js/dist/module.no-external"
 import type {
   AnalyticsFailureReason,
   AnalyticsFeature,
+  FeatureProviderAnalytics,
   FeatureUsedEventProperties,
   SurfaceByFeature,
 } from "@/types/analytics"
@@ -245,10 +246,20 @@ function normalizeAnalyticsPropertyKey(key: string): string {
   return key.replaceAll(/[$_\-\s]/g, "").toLowerCase()
 }
 
+/**
+ * Kept although it says "model": its value is a Built-in AI catalog id, not a
+ * user's own model name. Only normalizeFeatureProviderAnalytics writes it, only
+ * on read-frog-built-in-ai events, and only after classifyBuiltInAiModel has
+ * checked it as a catalog id. Every other key with "model" in it still goes.
+ */
+const BUILT_IN_AI_MODEL_PROPERTY = "built_in_ai_model" satisfies keyof FeatureProviderAnalytics
+
 function isBlockedAnalyticsProperty(key: string, preserveRootToken: boolean): boolean {
   const normalizedKey = normalizeAnalyticsPropertyKey(key)
 
   if (preserveRootToken && key === "token") return false
+  // An event's own property only, like the token: never in $set or nested.
+  if (preserveRootToken && key === BUILT_IN_AI_MODEL_PROPERTY) return false
   if (BLOCKED_ANALYTICS_PROPERTY_KEYS.has(normalizedKey)) return true
   if (normalizedKey.startsWith("sdkdebug")) return true
   if (normalizedKey.startsWith("prevpageview") || normalizedKey.startsWith("previouspageview")) {
@@ -421,7 +432,7 @@ function normalizeFeatureUsedEvent(
     ...normalizeFeatureProviderAnalytics(
       properties.provider,
       properties.backend_kind,
-      properties.built_in_ai_llm,
+      properties.built_in_ai_model,
     ),
     ...(properties.outcome === "failure" && isFailureReason(properties.failure_reason)
       ? { failure_reason: properties.failure_reason }
