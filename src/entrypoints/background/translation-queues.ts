@@ -61,9 +61,19 @@ export function getLocalProviderConfig(provider: QueuedTranslationProvider): Pro
   return provider.kind === "local" ? provider.config : null
 }
 
-function getQueuedProviderId(provider: QueuedTranslationProvider): string {
+/**
+ * The provider part of a batch key. A batch goes out as one request, sent with
+ * its first item's provider, so two items share one only when that request is
+ * right for both: the same provider and, for a Built-in AI model, the same
+ * reasoning level, which each request carries on its own.
+ */
+function getQueuedProviderBatchKey(provider: QueuedTranslationProvider): string {
   const local = getLocalProviderConfig(provider)
-  return local?.id ?? (provider as Extract<SerializableProviderRef, { kind: "system" }>).providerId
+  if (local) {
+    return local.id
+  }
+  const system = provider as Extract<SerializableProviderRef, { kind: "system" }>
+  return `${system.providerId}:${system.reasoning ?? ""}`
 }
 
 async function executeQueuedTranslation<TContext>(
@@ -331,7 +341,7 @@ async function createTranslationQueues<TContext>(config: TranslationQueueSetupCo
     dispatchGate: { nextDispatchEtaMs: () => requestQueue.nextDispatchEtaMs() },
     getBatchKey: (data) => {
       return Sha256Hex(
-        `${data.langConfig.sourceCode}-${data.langConfig.targetCode}-${getQueuedProviderId(data.provider)}`,
+        `${data.langConfig.sourceCode}-${data.langConfig.targetCode}-${getQueuedProviderBatchKey(data.provider)}`,
         data.context ? JSON.stringify(data.context) : "",
         data.hostedFeature ?? "",
         // Not the terms — the REVISION. The terms differ per paragraph and

@@ -1281,6 +1281,72 @@ describe("translation queue helpers", () => {
     expect(billedFeatures).toEqual(["inputTranslation", "pageTranslation"])
   })
 
+  it("keeps a Built-in AI model's requests at different reasoning levels in separate batches", async () => {
+    ensureInitializedConfigMock.mockResolvedValue({
+      ...DEFAULT_CONFIG,
+      pageTranslation: {
+        ...DEFAULT_CONFIG.pageTranslation,
+        batchQueueConfig: { maxCharactersPerBatch: 1000, maxItemsPerBatch: 4 },
+      },
+    })
+    const { setupPageTranslationHandlers } = await import("../page-translation")
+    setupPageTranslationHandlers()
+
+    // Answer every segment, so a merged batch would succeed as one request
+    // rather than fail and fall back to one request per item.
+    getTranslatePromptMock.mockImplementation(async (_targetLangName: string, text: string) => ({
+      systemPrompt: "Translate accurately",
+      prompt: text,
+    }))
+    runStreamTextInBackgroundMock.mockImplementation(async ({ prompt }: { prompt: string }) => ({
+      output: prompt
+        .split(BATCH_SEPARATOR)
+        .map((_, index) => `translated ${index}`)
+        .join(`\n\n${BATCH_SEPARATOR}\n\n`),
+      thinking: { status: "complete", text: "" },
+    }))
+
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+    const providerRef = {
+      kind: "system" as const,
+      providerId: "read-frog-ai:gpt-6-luna",
+      model: "gpt-6-luna",
+      modelTier: "normal",
+      modelRevision: "normal-r1",
+    }
+    const base = {
+      langConfig: DEFAULT_CONFIG.language,
+      scheduleAt: Date.now(),
+      hostedFeature: "pageTranslation",
+    }
+    await Promise.all([
+      handler({
+        data: {
+          ...base,
+          providerRef: { ...providerRef, reasoning: "low" },
+          text: "first paragraph",
+          hash: "reasoning-batch-low-hash",
+        },
+      }),
+      handler({
+        data: {
+          ...base,
+          providerRef: { ...providerRef, reasoning: "high" },
+          text: "second paragraph",
+          hash: "reasoning-batch-high-hash",
+        },
+      }),
+    ])
+
+    // A batch is sent at its first item's level, and each item is cached
+    // under its own: one merged batch would cache "high" output made at "low".
+    expect(runStreamTextInBackgroundMock).toHaveBeenCalledTimes(2)
+    const levels = runStreamTextInBackgroundMock.mock.calls
+      .map((call) => (call[0] as { builtInAiReasoning?: string }).builtInAiReasoning)
+      .sort((a, b) => (a ?? "").localeCompare(b ?? ""))
+    expect(levels).toEqual(["high", "low"])
+  })
+
   it("bills the webpage summary against the sender's route and stamps an idempotency key", async () => {
     generateTextForProviderRefMock.mockResolvedValue("hosted summary")
     generateArticleSummaryMock.mockImplementation(
