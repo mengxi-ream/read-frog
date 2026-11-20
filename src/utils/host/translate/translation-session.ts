@@ -77,3 +77,22 @@ export function getPageTranslationSessionProviderRef(): {
     ? { providerRef: currentSessionProviderRef, reasoningChoice: currentSessionReasoningChoice }
     : null
 }
+
+const requestFailureListeners = new Set<(error: unknown) => void>()
+
+/**
+ * Called with each error a paragraph's translation shows in place of its text. The
+ * paragraph handles the error on its own; this lets the session respond to the page as a
+ * whole, such as asking once to upgrade when the pool runs dry, instead of leaving a page
+ * of identical inline errors. Returns the unsubscribe.
+ */
+export function onPageTranslationRequestFailed(listener: (error: unknown) => void): () => void {
+  requestFailureListeners.add(listener)
+  return () => {
+    requestFailureListeners.delete(listener)
+  }
+}
+
+export function reportPageTranslationRequestFailed(error: unknown): void {
+  requestFailureListeners.forEach((listener) => listener(error))
+}

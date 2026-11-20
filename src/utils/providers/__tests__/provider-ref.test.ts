@@ -337,6 +337,29 @@ describe("serializeProviderRef per model", () => {
       available: false,
       message: "hostedAi.availability.ultraRequired",
       action: undefined,
+      reason: "ultra_required",
+    })
+  })
+
+  it("asks a guest to log in", async () => {
+    const guestWall = tier({
+      accessAllowed: false,
+      available: false,
+      unavailableReason: "authentication_required",
+      upgradeTo: null,
+    })
+    hostedAiStatus.mockResolvedValue({
+      ...status(),
+      features: {
+        pageTranslation: { normal: guestWall, advance: guestWall },
+      } as unknown as HostedAiStatus["features"],
+    })
+
+    await expect(checkProviderAvailability(SYSTEM_PROVIDER, "pageTranslation")).resolves.toEqual({
+      available: false,
+      message: "hostedAi.availability.authenticationRequired",
+      action: { label: "account.login", url: expect.stringMatching(/\/log-in$/) },
+      reason: "authentication_required",
     })
   })
 })

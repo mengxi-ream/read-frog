@@ -3,6 +3,7 @@ import { StreamPortError } from "@/utils/content-script/port-streaming"
 import { isExtensionContextInvalidatedError } from "@/utils/error/extension-context"
 import { extractAISDKErrorMessage } from "@/utils/error/extract-message"
 import { i18n } from "@/utils/i18n"
+import { HostedAiProviderUnavailableError } from "@/utils/providers/provider-ref"
 
 export interface SelectionToolbarInlineError {
   title: string
@@ -71,6 +72,11 @@ export function createSelectionToolbarRuntimeError(
   return {
     title: getErrorTitle(kind),
     description: toErrorDescription(kind, error),
-    action: error instanceof StreamPortError ? error.action : undefined,
+    // A guest refused Built-in AI gets a log-in button from either side: the status
+    // check before the run, or the server during it.
+    action:
+      error instanceof StreamPortError || error instanceof HostedAiProviderUnavailableError
+        ? error.action
+        : undefined,
   }
 }

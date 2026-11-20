@@ -1816,6 +1816,15 @@ hostedAi:
     removedNoAlternatives: "$1 artıq təklif olunmur. Başqa provayder seçin."
   actions:
     chooseModel: "Model seçin"
+  builtInAiPrompt:
+    logInTitle: "Daxili süni intellektdən istifadə üçün daxil olun"
+    logInDescription: "Daxil olduqda daxili süni intellekt pulsuzdur: həftədə təxminən 120 000 token."
+    upgradeTitle: "Bu həftənin daxili süni intellekti bitdi"
+    upgradeDescription: "Pro ayda təxminən 3 000, Ultra isə 10 000 veb səhifə tərcümə edir."
+    upgradeDescriptionPro: "Ultra ayda təxminən 10 000 veb səhifə tərcümə edir."
+    useMachineTranslation: "Maşın tərcüməsindən istifadə et"
+    switched: "$1 indi $2 istifadə edir."
+    switchFailed: "Maşın tərcüməsinə keçmək alınmadı. Yenidən cəhd edin."
 hotkey:
   control: Ctrl düyməsi
   alt: Option düyməsi

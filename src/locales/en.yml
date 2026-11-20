@@ -1965,6 +1965,15 @@ hostedAi:
     removedNoAlternatives: "$1 is no longer offered. Choose another provider."
   actions:
     chooseModel: "Choose a model"
+  builtInAiPrompt:
+    logInTitle: "Log in to use Built-in AI"
+    logInDescription: "Built-in AI is free once you log in, with about 120,000 tokens a week."
+    upgradeTitle: "You've used this week's Built-in AI"
+    upgradeDescription: "Pro translates about 3,000 web pages a month, Ultra about 10,000."
+    upgradeDescriptionPro: "Ultra translates about 10,000 web pages a month."
+    useMachineTranslation: "Use machine translation"
+    switched: "$1 now uses $2."
+    switchFailed: "Couldn't switch to machine translation. Please try again."
 hotkey:
   control: Ctrl
   alt: Option

@@ -47,6 +47,10 @@ vi.mock("../selection/annotation/mode-pill", () => ({
   AnnotationModePill: () => null,
 }))
 
+vi.mock("../selection/built-in-ai-prompt-dialog", () => ({
+  BuiltInAiPromptDialog: () => null,
+}))
+
 vi.mock("../side/components/floating-button", () => ({
   default: () => null,
 }))

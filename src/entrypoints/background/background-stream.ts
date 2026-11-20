@@ -46,7 +46,7 @@ import { isLLMProviderConfig, llmProviderConfigItemSchema } from "@/types/config
 import { createStructuredObjectSchema } from "@/utils/ai/structured-object-schema"
 import { classifyFailureReason } from "@/utils/analytics-failure-reason"
 import { getBuiltInAiModelId } from "@/utils/constants/provider-ids"
-import { upgradeAction } from "@/utils/error-action"
+import { logInAction, upgradeAction } from "@/utils/error-action"
 import { extractAISDKErrorMessage } from "@/utils/error/extract-message"
 import {
   chooseHostedAiModelAction,
@@ -576,7 +576,7 @@ function normalizeHostedAiError(
         new BackgroundStreamError(
           "UNAUTHORIZED",
           i18n.t("hostedAi.availability.authenticationRequired"),
-          { cause: error },
+          { cause: error, action: logInAction() },
         ),
         { isRetryable: false, kind: "access-denied" },
       )

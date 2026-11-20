@@ -8,6 +8,7 @@ import { classifyFailureReason } from "@/utils/analytics-failure-reason"
 import { classifyResolvedProvider, UNKNOWN_FEATURE_PROVIDER } from "@/utils/analytics-provider"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { INPUT_REPLACE_REQUEST_TYPE } from "@/utils/constants/input-injector"
+import { openBuiltInAiPrompt } from "@/utils/content-runtime/built-in-ai-prompt"
 import { getDeepActiveElement } from "@/utils/dom/active-element"
 import { translateTextForInput } from "@/utils/host/translate/translate-variants"
 import { createLogger } from "@/utils/logging/logger"
@@ -252,11 +253,16 @@ export function useInputTranslation() {
         // defect: without this the spinner just appears and disappears and
         // the feature reads as broken.
         if (error instanceof HostedAiProviderUnavailableError) {
-          toastManager.add({
-            type: "error",
-            title: error.message,
-            id: HOSTED_UNAVAILABLE_TOAST_ID,
-          })
+          if (error.reason === "authentication_required") {
+            // A guest: log in, or switch to machine translation and type the spaces again.
+            openBuiltInAiPrompt({ kind: "logIn", feature: "inputTranslation" })
+          } else {
+            toastManager.add({
+              type: "error",
+              title: error.message,
+              id: HOSTED_UNAVAILABLE_TOAST_ID,
+            })
+          }
         }
         log.error("Input translation failed", { error })
       } finally {

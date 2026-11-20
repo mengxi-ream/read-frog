@@ -10,6 +10,7 @@ import { isTranslationCancelledError } from "@/utils/request/cancellation"
 import { SPINNER_CLASS, TRANSLATION_ERROR_CONTAINER_CLASS } from "../../../constants/dom-labels"
 import { getContainingShadowRoot, getOwnerDocument } from "../../dom/node"
 import { translateTextForPage } from "../translate-variants"
+import { reportPageTranslationRequestFailed } from "../translation-session"
 import { ensurePresetStyles } from "./style-injector"
 
 /**
@@ -142,6 +143,7 @@ export async function getTranslatedTextAndRemoveSpinner(
     if (isTranslationCancelledError(error)) return undefined
     if (!isCurrent()) return undefined
     diagnosis?.untranslated("error", { error })
+    reportPageTranslationRequestFailed(error)
 
     const errorComponent = React.createElement(TranslationError, {
       nodes,

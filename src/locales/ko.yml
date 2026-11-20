@@ -1818,6 +1818,15 @@ hostedAi:
     removedNoAlternatives: "$1 모델은 더 이상 제공되지 않습니다. 다른 제공업체를 선택해 주세요."
   actions:
     chooseModel: "모델 선택"
+  builtInAiPrompt:
+    logInTitle: "로그인하고 내장 AI 사용하기"
+    logInDescription: "로그인하면 내장 AI를 매주 약 12만 토큰까지 무료로 쓸 수 있습니다."
+    upgradeTitle: "이번 주 내장 AI를 모두 사용했습니다"
+    upgradeDescription: "Pro는 매달 웹페이지 약 3,000개, Ultra는 약 10,000개를 번역할 수 있습니다."
+    upgradeDescriptionPro: "Ultra는 매달 웹페이지 약 10,000개를 번역할 수 있습니다."
+    useMachineTranslation: "기계 번역 사용"
+    switched: "이제 $1에 $2을(를) 사용합니다."
+    switchFailed: "기계 번역으로 바꾸지 못했습니다. 다시 시도해 주세요."
 hotkey:
   control: Ctrl
   alt: Option

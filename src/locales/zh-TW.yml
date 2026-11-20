@@ -1828,6 +1828,15 @@ hostedAi:
     removedNoAlternatives: "$1 已不再提供，請改用其他提供者"
   actions:
     chooseModel: "選擇模型"
+  builtInAiPrompt:
+    logInTitle: "登入後使用內建 AI"
+    logInDescription: "登入後即可免費使用內建 AI，每週約 12 萬 token。"
+    upgradeTitle: "本週的內建 AI 額度用完了"
+    upgradeDescription: "Pro 每月約可翻譯 3,000 個網頁，Ultra 約 10,000 個。"
+    upgradeDescriptionPro: "Ultra 每月約可翻譯 10,000 個網頁。"
+    useMachineTranslation: "改用機器翻譯"
+    switched: "$1已改用 $2"
+    switchFailed: "無法切換到機器翻譯，請再試一次"
 hotkey:
   control: Ctrl
   alt: Option
