@@ -2,7 +2,6 @@ import type { ComponentProps } from "react"
 import type { Theme } from "@/types/config/theme"
 import type { ProviderSelectorOption } from "@/utils/providers/provider-display"
 import { UpgradePlanBadge } from "@/components/badges/upgrade-plan-badge"
-import ProviderIcon from "@/components/provider-icon"
 import {
   Select,
   SelectContent,
@@ -13,20 +12,26 @@ import {
   SelectValue,
 } from "@/components/ui/base-ui/select"
 import { isLLMProviderConfig, isPureTranslateProviderConfig } from "@/types/config/provider"
+import { getHostedAiModelUnavailableReason } from "@/utils/hosted-ai/model-errors"
 import { i18n } from "@/utils/i18n"
 import {
-  getProviderLogo,
+  getBuiltInAiAlternativeNames,
+  getBuiltInAiUnavailability,
   getProviderName,
   isProviderSelectorOptionDisabled,
   isSystemProviderSelectorItem,
 } from "@/utils/providers/provider-display"
+import { cn } from "@/utils/styles/utils"
 import { useTheme } from "../providers/theme-provider"
+import { ProviderOptionIcon } from "./model-icon"
+import { ModelUnavailableIcon } from "./model-unavailable-icon"
 
 type ProviderSelectorLabelKey =
   | "translateService.builtInModels"
   | "translateService.llmModels"
   | "translateService.normalTranslator"
 type ProviderSelectorTriggerSize = ComponentProps<typeof SelectTrigger>["size"]
+type TooltipContainer = ComponentProps<typeof UpgradePlanBadge>["tooltipContainer"]
 
 export interface ProviderSelectorGroup {
   labelKey: ProviderSelectorLabelKey
@@ -71,26 +76,100 @@ export function getProviderSelectorGroups(
   return groups.filter((group) => group.providers.length > 0)
 }
 
-function ProviderOptionContent({
+/**
+ * Why a Built-in AI option cannot run and what to pick instead, or undefined
+ * when it can. `providers` is the whole menu, which the alternatives come from.
+ */
+function getUnavailableReason(
+  provider: ProviderSelectorOption,
+  providers: readonly ProviderSelectorOption[],
+): string | undefined {
+  const unavailability = getBuiltInAiUnavailability(provider)
+  if (!unavailability) {
+    return undefined
+  }
+  return getHostedAiModelUnavailableReason(
+    getProviderName(provider),
+    unavailability,
+    getBuiltInAiAlternativeNames(provider, providers),
+  )
+}
+
+/** One option's row in a provider menu: its icon and name, then why it cannot run or which plan it needs. */
+export function ProviderOptionContent({
   provider,
+  providers,
   theme,
   tooltipContainer,
 }: {
   provider: ProviderSelectorOption
+  providers: readonly ProviderSelectorOption[]
   theme: Theme
-  tooltipContainer?: ComponentProps<typeof UpgradePlanBadge>["tooltipContainer"]
+  tooltipContainer?: TooltipContainer
 }) {
   const upgradeTo = isSystemProviderSelectorItem(provider) ? provider.upgradeTo : undefined
+  const unavailableReason = getUnavailableReason(provider, providers)
 
   return (
     <div className="flex min-w-0 flex-1 items-center justify-between gap-2">
-      <ProviderIcon
-        logo={getProviderLogo(provider, theme)}
-        name={getProviderName(provider)}
-        size="sm"
+      <ProviderOptionIcon
+        provider={provider}
+        theme={theme}
+        textClassName={cn(unavailableReason && "text-muted-foreground")}
       />
-      {upgradeTo && <UpgradePlanBadge plan={upgradeTo} tooltipContainer={tooltipContainer} />}
+      {(unavailableReason || upgradeTo) && (
+        <div className="flex shrink-0 items-center gap-1.5">
+          {/* Still selectable: picking it is the user's call, and it fails with this reason when it runs. */}
+          {unavailableReason && (
+            <ModelUnavailableIcon reason={unavailableReason} tooltipContainer={tooltipContainer} />
+          )}
+          {upgradeTo && <UpgradePlanBadge plan={upgradeTo} tooltipContainer={tooltipContainer} />}
+        </div>
+      )}
     </div>
+  )
+}
+
+function ProviderSelectValue({
+  providers,
+  placeholder,
+  theme,
+  triggerNameClassName,
+  tooltipContainer,
+}: {
+  providers: readonly ProviderSelectorOption[]
+  placeholder?: string
+  theme: Theme
+  triggerNameClassName?: string
+  tooltipContainer?: TooltipContainer
+}) {
+  return (
+    // The trigger clamps its value to one line with overflow hidden, which
+    // would clip a model icon's frog where it overhangs the circle. The name
+    // still truncates: it does so itself, given the room to shrink.
+    <SelectValue placeholder={placeholder} className="min-w-0 overflow-visible!">
+      {(provider: ProviderSelectorOption | null) => {
+        if (!provider) {
+          return placeholder
+        }
+        const unavailableReason = getUnavailableReason(provider, providers)
+        return (
+          <span className="flex min-w-0 items-center gap-1.5">
+            <ProviderOptionIcon
+              provider={provider}
+              theme={theme}
+              textClassName={triggerNameClassName}
+            />
+            {unavailableReason && (
+              <ModelUnavailableIcon
+                reason={unavailableReason}
+                tooltipContainer={tooltipContainer}
+              />
+            )}
+          </span>
+        )
+      }}
+    </SelectValue>
   )
 }
 
@@ -111,6 +190,7 @@ export default function ProviderSelector({
   if (providerGroups.length > 1) {
     return (
       <GroupedSelect
+        providers={providers}
         providerGroups={providerGroups}
         currentProvider={currentProvider}
         onChange={onChange}
@@ -140,6 +220,7 @@ export default function ProviderSelector({
 }
 
 function GroupedSelect({
+  providers,
   providerGroups,
   currentProvider,
   onChange,
@@ -150,6 +231,7 @@ function GroupedSelect({
   theme,
   selectContentProps,
 }: {
+  providers: ProviderSelectorOption[]
   providerGroups: ProviderSelectorGroup[]
   currentProvider: ProviderSelectorOption | undefined
   onChange: (id: string) => void
@@ -173,16 +255,13 @@ function GroupedSelect({
       itemToStringValue={(p) => p.id}
     >
       <SelectTrigger className={className} size={triggerSize}>
-        <SelectValue placeholder={placeholder}>
-          {(provider: ProviderSelectorOption) => (
-            <ProviderIcon
-              logo={getProviderLogo(provider, theme)}
-              name={getProviderName(provider)}
-              size="sm"
-              textClassName={triggerNameClassName}
-            />
-          )}
-        </SelectValue>
+        <ProviderSelectValue
+          providers={providers}
+          placeholder={placeholder}
+          theme={theme}
+          triggerNameClassName={triggerNameClassName}
+          tooltipContainer={selectContentProps?.container}
+        />
       </SelectTrigger>
       <SelectContent {...selectContentProps}>
         {providerGroups.map((group) => (
@@ -196,6 +275,7 @@ function GroupedSelect({
               >
                 <ProviderOptionContent
                   provider={provider}
+                  providers={providers}
                   theme={theme}
                   tooltipContainer={selectContentProps?.container}
                 />
@@ -243,16 +323,13 @@ function UngroupedSelect({
       disabled={providers.length === 0}
     >
       <SelectTrigger className={className} size={triggerSize}>
-        <SelectValue placeholder={placeholder}>
-          {(provider: ProviderSelectorOption) => (
-            <ProviderIcon
-              logo={getProviderLogo(provider, theme)}
-              name={getProviderName(provider)}
-              size="sm"
-              textClassName={triggerNameClassName}
-            />
-          )}
-        </SelectValue>
+        <ProviderSelectValue
+          providers={providers}
+          placeholder={placeholder}
+          theme={theme}
+          triggerNameClassName={triggerNameClassName}
+          tooltipContainer={selectContentProps?.container}
+        />
       </SelectTrigger>
       <SelectContent {...selectContentProps}>
         <SelectGroup>
@@ -264,6 +341,7 @@ function UngroupedSelect({
             >
               <ProviderOptionContent
                 provider={provider}
+                providers={providers}
                 theme={theme}
                 tooltipContainer={selectContentProps?.container}
               />

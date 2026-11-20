@@ -160,6 +160,21 @@ options:
     addProvider: Añadir proveedor
     builtInProvider: Proveedor integrado
     yourProviders: Tus proveedores
+    builtInModel:
+      reasoningDescription: "Cuánto piensa $1 antes de responder. Los niveles más altos manejan mejor los textos difíciles, pero responden más despacio y consumen más de tu cuota."
+      reasoningDefault: "Predeterminado"
+      reasoningLevels:
+        none: "Desactivado"
+        minimal: "Mínimo"
+        low: "Bajo"
+        medium: "Medio"
+        high: "Alto"
+        xhigh: "Muy alto"
+      unavailableTitle:
+        temporary: "$1 no está disponible temporalmente"
+        removed: "$1 ya no se ofrece"
+      unavailableDescription: "Las funciones que lo usan muestran un error mientras no pueda ejecutarse. Para continuar, cámbialas a $1."
+      unavailableDescriptionNoAlternatives: "Las funciones que lo usan muestran un error mientras no pueda ejecutarse. Para continuar, cámbialas a otro proveedor."
     builtInAiUsage:
       title: Cuota de IA integrada
       remaining: "$1% restante"
@@ -1801,6 +1816,11 @@ hostedAi:
     modelUnavailableNoAlternatives: "$1 no está disponible en este momento y no tienes ningún otro modelo de IA integrada disponible. Inténtalo de nuevo más tarde."
     modelBusy: "$1 está saturado en este momento. Inténtalo de nuevo en un momento o cambia a $2."
     modelBusyNoAlternatives: "$1 está saturado en este momento. Inténtalo de nuevo en un momento."
+  unavailable:
+    temporary: "$1 no está disponible temporalmente. Prueba con $2."
+    temporaryNoAlternatives: "$1 no está disponible temporalmente. Inténtalo de nuevo más tarde."
+    removed: "$1 ya no se ofrece. Prueba con $2."
+    removedNoAlternatives: "$1 ya no se ofrece. Elige otro proveedor."
   actions:
     chooseModel: "Elegir un modelo"
 hotkey:

@@ -418,7 +418,11 @@ function normalizeFeatureUsedEvent(
   const common = {
     outcome: properties.outcome,
     latency_ms: properties.latency_ms,
-    ...normalizeFeatureProviderAnalytics(properties.provider, properties.backend_kind),
+    ...normalizeFeatureProviderAnalytics(
+      properties.provider,
+      properties.backend_kind,
+      properties.model,
+    ),
     ...(properties.outcome === "failure" && isFailureReason(properties.failure_reason)
       ? { failure_reason: properties.failure_reason }
       : {}),

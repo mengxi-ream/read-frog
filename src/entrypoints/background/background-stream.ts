@@ -297,7 +297,10 @@ function createStreamPortHandler<TSerializablePayload, TResponse>(
           return
         }
 
-        log.error("Stream Function failed", { error: finalError })
+        log.error("Stream Function failed", {
+          error: finalError,
+          ...getLoggedBuiltInAiModel(startMessage.payload),
+        })
         safePost({
           type: "error",
           error: {
@@ -330,6 +333,13 @@ function createStreamSnapshot<TOutput>(
     output: output !== null && typeof output === "object" ? { ...output } : output,
     thinking: { ...thinking },
   }
+}
+
+/** The Built-in AI model a failed stream ran on, for the log; nothing for the user's own providers. */
+function getLoggedBuiltInAiModel(payload: unknown): { model?: string } {
+  const providerId = isRecord(payload) ? payload.providerId : undefined
+  const model = typeof providerId === "string" ? getBuiltInAiModelId(providerId) : null
+  return model === null ? {} : { model }
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

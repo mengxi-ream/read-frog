@@ -1,11 +1,16 @@
 // @vitest-environment jsdom
 
-import type { ReactNode } from "react"
-import { fireEvent, render, screen, within } from "@testing-library/react"
+import type { ReactElement, ReactNode } from "react"
+import { act, fireEvent, render, screen, within } from "@testing-library/react"
+import { cloneElement } from "react"
 import { MemoryRouter } from "react-router"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { ProvidersConfig } from "@/entrypoints/options/pages/api-providers/providers-config"
-import { SOL_PROVIDER_ID, testHostedAiModels } from "@/utils/hosted-ai/__tests__/test-models"
+import {
+  LUNA_PROVIDER_ID,
+  SOL_PROVIDER_ID,
+  testHostedAiModels,
+} from "@/utils/hosted-ai/__tests__/test-models"
 import { sanitizeHostedAiModels } from "@/utils/hosted-ai/models"
 import { DEFAULT_BUILT_IN_AI_PROVIDER_ID } from "@/utils/providers/provider-registry"
 
@@ -41,6 +46,7 @@ const providerConfig = {
 }
 
 const config = {
+  builtInAi: { models: {} as Record<string, { reasoning?: string }> },
   languageDetection: { mode: "basic", providerId: undefined as string | undefined },
   providersConfig: [providerConfig],
   selectionToolbar: { customActions: [] },
@@ -77,6 +83,7 @@ vi.mock("jotai", () => ({
 
 vi.mock("@/components/provider-icon", () => ({
   default: ({ name }: { name: string }) => <span>{name}</span>,
+  normalizeLogoUrl: (logo: string) => logo,
 }))
 
 vi.mock("@/components/providers/theme-provider", () => ({
@@ -109,7 +116,20 @@ vi.mock("@/components/ui/base-ui/tooltip", () => ({
   // Keep hover-only content out of the tree so editor-panel assertions do not
   // collide with the assignment names repeated inside card badges.
   TooltipContent: () => null,
-  TooltipTrigger: ({ children }: { children: ReactNode }) => <>{children}</>,
+  // Renders the element a trigger names, so a trigger's own role and name stay
+  // queryable, as with base-ui.
+  TooltipTrigger: ({
+    children,
+    render: element,
+  }: {
+    children?: ReactNode
+    render?: ReactElement
+  }) =>
+    element
+      ? children === undefined
+        ? element
+        : cloneElement(element, undefined, children)
+      : children,
 }))
 
 vi.mock("@/utils/atoms/config", () => ({
@@ -217,6 +237,7 @@ vi.mock("@/utils/i18n", () => ({
     t: (key: string, values?: Array<string | number>) =>
       values ? `${key}:${values.join("|")}` : key,
   },
+  formatUiAlternatives: (items: readonly string[]) => items.join(" or "),
 }))
 
 vi.mock("@/entrypoints/options/components/config-item", () => ({
@@ -259,6 +280,43 @@ function renderProvidersConfig(initialEntry = "/api-providers") {
   )
 }
 
+function getCard(container: HTMLElement, providerId: string): HTMLElement {
+  const card = container.querySelector(`[data-provider-id="${providerId}"]`)
+  if (!(card instanceof HTMLElement)) {
+    throw new Error(`No card for ${providerId}`)
+  }
+  return card
+}
+
+function getReasoningTrigger() {
+  return screen.getByRole("combobox", { name: "options.apiProviders.form.reasoning.title" })
+}
+
+/** Opens the reasoning select, picks `optionText`, and returns every option's text as listed. */
+async function pickReasoning(optionText: string): Promise<(string | null)[]> {
+  const trigger = getReasoningTrigger()
+  await act(async () => {
+    for (const type of ["pointerdown", "mousedown", "click"]) {
+      trigger.dispatchEvent(new MouseEvent(type, { bubbles: true, button: 0 }))
+    }
+  })
+  // The mousedown also schedules an open for the next animation frame. Let it
+  // run now, or it reopens the select after the pick closes it.
+  await act(() => new Promise<void>((resolve) => requestAnimationFrame(() => resolve())))
+  const options = await screen.findAllByRole("option")
+  const option = options.find((element) => element.textContent === optionText)
+  if (!option) {
+    throw new Error(`No option ${optionText}`)
+  }
+  const optionTexts = options.map((element) => element.textContent)
+  await act(async () => {
+    for (const type of ["pointerdown", "mousedown", "pointerup", "mouseup", "click"]) {
+      option.dispatchEvent(new MouseEvent(type, { bubbles: true, button: 0 }))
+    }
+  })
+  return optionTexts
+}
+
 describe("ProvidersConfig", () => {
   beforeEach(() => {
     anchoredToastAddMock.mockReset()
@@ -266,6 +324,7 @@ describe("ProvidersConfig", () => {
     writeConfigMock.mockReset()
     testState.selectedProviderId = providerConfig.id
     config.languageDetection = { mode: "basic", providerId: undefined }
+    config.builtInAi = { models: {} }
     hostedAiState.value = { status: undefined, isPending: false, isError: true }
     builtInAiModelsState.models = sanitizeHostedAiModels(testHostedAiModels())
   })
@@ -501,5 +560,161 @@ describe("ProvidersConfig", () => {
     renderProvidersConfig("/api-providers?provider=deleted-provider")
 
     expect(testState.selectedProviderId).toBe(DEFAULT_BUILT_IN_AI_PROVIDER_ID)
+  })
+
+  it("marks a model the server cannot run now with a warning icon that says why", () => {
+    builtInAiModelsState.models = sanitizeHostedAiModels(
+      testHostedAiModels({ "gpt-6.2-sol": { available: false } }),
+    )
+
+    const { container } = renderProvidersConfig()
+
+    // No "Unavailable" text: the icon's name carries the reason and the
+    // models to switch to, so a screen reader reads both with the card.
+    expect(
+      within(getCard(container, SOL_PROVIDER_ID)).getByRole("img", {
+        name: "hostedAi.unavailable.temporary:GPT-6.2 Sol|Claude Haiku 5.5 or GPT-6 Luna or DeepSeek V4.1 Flash",
+      }),
+    ).toBeInTheDocument()
+    expect(
+      within(getCard(container, LUNA_PROVIDER_ID)).queryByRole("img", {
+        name: /hostedAi\.unavailable/,
+      }),
+    ).not.toBeInTheDocument()
+  })
+
+  it("says a model the list dropped is no longer offered", () => {
+    config.languageDetection = { mode: "llm", providerId: "read-frog-ai:gpt-5-mini" }
+
+    const { container } = renderProvidersConfig()
+
+    expect(
+      within(getCard(container, "read-frog-ai:gpt-5-mini")).getByRole("img", {
+        name: "hostedAi.unavailable.removed:gpt-5-mini|Claude Haiku 5.5 or GPT-6 Luna or DeepSeek V4.1 Flash",
+      }),
+    ).toBeInTheDocument()
+  })
+
+  it("suggests only models the account can use instead of an unavailable one", () => {
+    builtInAiModelsState.models = sanitizeHostedAiModels(
+      testHostedAiModels({ "gpt-6-luna": { available: false } }),
+    )
+    hostedAiState.value = { status: makeUltraAccessStatus(false), isPending: false, isError: false }
+
+    const { container } = renderProvidersConfig()
+
+    expect(
+      within(getCard(container, LUNA_PROVIDER_ID)).getByRole("img", {
+        name: "hostedAi.unavailable.temporary:GPT-6 Luna|Claude Haiku 5.5 or DeepSeek V4.1 Flash",
+      }),
+    ).toBeInTheDocument()
+  })
+
+  it("does not call a model unavailable before any list has been seen", () => {
+    builtInAiModelsState.models = null
+    config.languageDetection = { mode: "llm", providerId: "read-frog-ai:gpt-5-mini" }
+
+    renderProvidersConfig()
+
+    expect(screen.queryByRole("img", { name: /hostedAi\.unavailable/ })).not.toBeInTheDocument()
+  })
+
+  it("says at the top of an unavailable model's panel what to switch to", () => {
+    builtInAiModelsState.models = sanitizeHostedAiModels(
+      testHostedAiModels({ "gpt-6.2-sol": { available: false } }),
+    )
+    testState.selectedProviderId = SOL_PROVIDER_ID
+
+    renderProvidersConfig()
+
+    expect(
+      screen.getByText("options.apiProviders.builtInModel.unavailableTitle.temporary:GPT-6.2 Sol"),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        "options.apiProviders.builtInModel.unavailableDescription:Claude Haiku 5.5 or GPT-6 Luna or DeepSeek V4.1 Flash",
+      ),
+    ).toBeInTheDocument()
+  })
+
+  it("says a dropped model's panel is no longer offered, with no reasoning to pick", () => {
+    config.languageDetection = { mode: "llm", providerId: "read-frog-ai:gpt-5-mini" }
+    testState.selectedProviderId = "read-frog-ai:gpt-5-mini"
+
+    renderProvidersConfig()
+
+    expect(
+      screen.getByText("options.apiProviders.builtInModel.unavailableTitle.removed:gpt-5-mini"),
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole("combobox", { name: "options.apiProviders.form.reasoning.title" }),
+    ).not.toBeInTheDocument()
+  })
+
+  it("shows no unavailable alert for a model that can run", () => {
+    testState.selectedProviderId = LUNA_PROVIDER_ID
+
+    renderProvidersConfig()
+
+    expect(
+      screen.queryByText(/options\.apiProviders\.builtInModel\.unavailableTitle/),
+    ).not.toBeInTheDocument()
+  })
+
+  it("shows the model's default reasoning level until the user picks one", () => {
+    testState.selectedProviderId = SOL_PROVIDER_ID
+
+    renderProvidersConfig()
+
+    expect(getReasoningTrigger()).toHaveTextContent(
+      "options.apiProviders.builtInModel.reasoningLevels.low",
+    )
+    expect(
+      screen.getByText("options.apiProviders.builtInModel.reasoningDescription:GPT-6.2 Sol"),
+    ).toBeInTheDocument()
+  })
+
+  it("shows the level the user picked for the model", () => {
+    config.builtInAi = { models: { "gpt-6.2-sol": { reasoning: "high" } } }
+    testState.selectedProviderId = SOL_PROVIDER_ID
+
+    renderProvidersConfig()
+
+    expect(getReasoningTrigger()).toHaveTextContent(
+      "options.apiProviders.builtInModel.reasoningLevels.high",
+    )
+  })
+
+  it("lists the model's levels with its default marked, and keeps the pick per model", async () => {
+    testState.selectedProviderId = SOL_PROVIDER_ID
+
+    renderProvidersConfig()
+    const options = await pickReasoning("options.apiProviders.builtInModel.reasoningLevels.xhigh")
+
+    expect(options).toEqual([
+      "options.apiProviders.builtInModel.reasoningLevels.low" +
+        "options.apiProviders.builtInModel.reasoningDefault",
+      "options.apiProviders.builtInModel.reasoningLevels.medium",
+      "options.apiProviders.builtInModel.reasoningLevels.high",
+      "options.apiProviders.builtInModel.reasoningLevels.xhigh",
+    ])
+    expect(writeConfigMock).toHaveBeenCalledWith({
+      builtInAi: { models: { "gpt-6.2-sol": { reasoning: "xhigh" } } },
+    })
+  })
+
+  it("hides the reasoning field for a model with a single level", () => {
+    builtInAiModelsState.models = sanitizeHostedAiModels(
+      testHostedAiModels({
+        "gpt-6-luna": { reasoning: { levels: ["none"], default: "none" } },
+      }),
+    )
+    testState.selectedProviderId = LUNA_PROVIDER_ID
+
+    renderProvidersConfig()
+
+    expect(
+      screen.queryByRole("combobox", { name: "options.apiProviders.form.reasoning.title" }),
+    ).not.toBeInTheDocument()
   })
 })

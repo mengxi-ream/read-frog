@@ -160,6 +160,21 @@ options:
     addProvider: Sağlayıcı ekle
     builtInProvider: Yerleşik sağlayıcı
     yourProviders: Sağlayıcılarınız
+    builtInModel:
+      reasoningDescription: "$1 modelinin yanıt vermeden önce ne kadar düşüneceği. Yüksek seviyeler zor metinlerde daha iyi sonuç verir, ancak daha yavaş yanıt verir ve kotanızdan daha fazlasını kullanır."
+      reasoningDefault: "Varsayılan"
+      reasoningLevels:
+        none: "Kapalı"
+        minimal: "Minimum"
+        low: "Düşük"
+        medium: "Orta"
+        high: "Yüksek"
+        xhigh: "Çok yüksek"
+      unavailableTitle:
+        temporary: "$1 geçici olarak kullanılamıyor"
+        removed: "$1 artık sunulmuyor"
+      unavailableDescription: "Çalışamadığı sürece onu kullanan özellikler hata verir. Devam etmek için bu özellikleri $1 modeline geçirin."
+      unavailableDescriptionNoAlternatives: "Çalışamadığı sürece onu kullanan özellikler hata verir. Devam etmek için bu özellikleri başka bir sağlayıcıya geçirin."
     builtInAiUsage:
       title: Yerleşik AI kotası
       remaining: "%$1 kaldı"
@@ -1796,6 +1811,11 @@ hostedAi:
     modelUnavailableNoAlternatives: "$1 şu anda kullanılamıyor ve kullanabileceğiniz başka bir yerleşik AI modeli yok. Lütfen daha sonra tekrar deneyin."
     modelBusy: "$1 şu anda çok yoğun. Biraz sonra tekrar deneyin veya $2 modeline geçin."
     modelBusyNoAlternatives: "$1 şu anda çok yoğun. Biraz sonra tekrar deneyin."
+  unavailable:
+    temporary: "$1 geçici olarak kullanılamıyor. Bunun yerine $2 modelini deneyin."
+    temporaryNoAlternatives: "$1 geçici olarak kullanılamıyor. Lütfen daha sonra tekrar deneyin."
+    removed: "$1 artık sunulmuyor. Bunun yerine $2 modelini deneyin."
+    removedNoAlternatives: "$1 artık sunulmuyor. Başka bir sağlayıcı seçin."
   actions:
     chooseModel: "Model seç"
 hotkey:

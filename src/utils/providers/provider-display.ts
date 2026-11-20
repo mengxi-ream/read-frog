@@ -49,3 +49,40 @@ export function getProviderName(provider: ProviderSelectorOption): string {
 export function isProviderSelectorOptionDisabled(provider: ProviderSelectorOption): boolean {
   return isSystemProviderSelectorItem(provider) && provider.disabled === true
 }
+
+/**
+ * Why a Built-in AI option cannot run, when it cannot: `temporary` when the
+ * server lists the model but says it cannot run now, `removed` when the list
+ * no longer names it. Null when it can run, or when there is no list to tell.
+ */
+export type BuiltInAiUnavailability = "temporary" | "removed"
+
+export function getBuiltInAiUnavailability(
+  provider: ProviderSelectorOption,
+): BuiltInAiUnavailability | null {
+  if (!isSystemProviderSelectorItem(provider) || provider.available !== false) {
+    return null
+  }
+  // Only a model the list names has a tier.
+  return provider.tier === undefined ? "removed" : "temporary"
+}
+
+/**
+ * The names of the Built-in AI options this menu can switch to instead of
+ * `provider`: listed, able to run, and not locked for this account, in the
+ * menu's order.
+ */
+export function getBuiltInAiAlternativeNames(
+  provider: ProviderSelectorOption,
+  providers: readonly ProviderSelectorOption[],
+): string[] {
+  return providers
+    .filter(
+      (other) =>
+        other.id !== provider.id &&
+        isSystemProviderSelectorItem(other) &&
+        other.available === true &&
+        other.disabled !== true,
+    )
+    .map(getProviderName)
+}

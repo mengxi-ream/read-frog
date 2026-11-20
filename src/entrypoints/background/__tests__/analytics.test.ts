@@ -155,6 +155,33 @@ describe("background analytics", () => {
     expect(storageSetItemMock).not.toHaveBeenCalled()
   })
 
+  it("records which Built-in AI model ran a feature", async () => {
+    storageGetItemMock.mockResolvedValueOnce(true).mockResolvedValueOnce("install-123")
+
+    const { captureFeatureUsedEventInBackground } = createAnalytics()
+    await captureFeatureUsedEventInBackground({
+      feature: "page_translation",
+      surface: "popup",
+      outcome: "success",
+      latency_ms: 900,
+      ...PAGE_EVENT_FIELDS,
+      provider: "read-frog-built-in-ai",
+      backend_kind: "llm",
+      model: "gpt-6.2-sol",
+    })
+
+    expect(posthogCaptureMock).toHaveBeenCalledWith("feature_used", {
+      feature: "page_translation",
+      surface: "popup",
+      outcome: "success",
+      latency_ms: 900,
+      ...PAGE_EVENT_FIELDS,
+      provider: "read-frog-built-in-ai",
+      backend_kind: "llm",
+      model: "gpt-6.2-sol",
+    })
+  })
+
   it("downgrades a legacy TTS message without provider fields to unknown/unknown", async () => {
     storageGetItemMock.mockResolvedValueOnce(true).mockResolvedValueOnce("install-123")
 

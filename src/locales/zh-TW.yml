@@ -160,6 +160,21 @@ options:
     addProvider: 新增提供者
     builtInProvider: 內建提供者
     yourProviders: 我的提供者
+    builtInModel:
+      reasoningDescription: "$1 回答前思考的程度。檔位越高，越能處理艱深的文字，但回答較慢，消耗的額度也較多。"
+      reasoningDefault: "預設"
+      reasoningLevels:
+        none: "關閉"
+        minimal: "極低"
+        low: "低"
+        medium: "中"
+        high: "高"
+        xhigh: "超高"
+      unavailableTitle:
+        temporary: "$1 暫時無法使用"
+        removed: "$1 已不再提供"
+      unavailableDescription: "在它無法執行期間，使用它的功能會出錯。如需繼續使用，請將這些功能改用 $1。"
+      unavailableDescriptionNoAlternatives: "在它無法執行期間，使用它的功能會出錯。如需繼續使用，請將這些功能改用其他提供者。"
     builtInAiUsage:
       title: 內建 AI 額度
       remaining: "剩餘 $1%"
@@ -1806,6 +1821,11 @@ hostedAi:
     modelUnavailableNoAlternatives: "$1 暫時無法使用，目前也沒有其他可用的內建 AI 模型，請稍後再試"
     modelBusy: "$1 目前忙碌中，請稍後再試，或改用 $2"
     modelBusyNoAlternatives: "$1 目前忙碌中，請稍後再試"
+  unavailable:
+    temporary: "$1 暫時無法使用，可改用 $2"
+    temporaryNoAlternatives: "$1 暫時無法使用，請稍後再試"
+    removed: "$1 已不再提供，可改用 $2"
+    removedNoAlternatives: "$1 已不再提供，請改用其他提供者"
   actions:
     chooseModel: "選擇模型"
 hotkey:

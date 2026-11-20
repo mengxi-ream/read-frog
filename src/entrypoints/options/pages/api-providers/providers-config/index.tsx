@@ -1,11 +1,18 @@
 import type { Config } from "@/types/config/config"
 import type { APIProviderConfig } from "@/types/config/provider"
-import type { HostedAiFeature } from "@/utils/hosted-ai/types"
+import type { HostedAiModel } from "@/utils/hosted-ai/models"
+import type { HostedAiFeature, HostedAiStatus } from "@/utils/hosted-ai/types"
+import type {
+  BuiltInAiUnavailability,
+  SystemProviderSelectorItem,
+} from "@/utils/providers/provider-display"
 import { Icon } from "@iconify/react"
 import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { useEffect, useRef, useState } from "react"
 import { useLocation } from "react-router"
 import { SponsorBadge } from "@/components/badges/sponsor-badge"
+import { ModelIcon } from "@/components/llm-providers/model-icon"
+import { ModelUnavailableIcon } from "@/components/llm-providers/model-unavailable-icon"
 import { useBuiltInAiModels } from "@/components/llm-providers/use-built-in-ai-models"
 import { useHostedAiStatus } from "@/components/llm-providers/use-hosted-ai-status"
 import ProviderIcon from "@/components/provider-icon"
@@ -28,6 +35,7 @@ import {
 import { type BuiltInAiProviderId, getBuiltInAiModelId } from "@/utils/constants/provider-ids"
 import { API_PROVIDER_ITEMS } from "@/utils/constants/providers"
 import { getSelectionToolbarActions } from "@/utils/custom-actions"
+import { getHostedAiModelUnavailableReason } from "@/utils/hosted-ai/model-errors"
 import { findHostedAiModel } from "@/utils/hosted-ai/models"
 import { getHostedAiTierStatus } from "@/utils/hosted-ai/status"
 import { i18n } from "@/utils/i18n"
@@ -38,8 +46,8 @@ import {
   shouldHighlightApiKey,
 } from "@/utils/navigation"
 import { isDurablyUnusableTier } from "@/utils/providers/provider-availability"
+import { getBuiltInAiUnavailability } from "@/utils/providers/provider-display"
 import {
-  BUILT_IN_AI_PROVIDER_LOGO,
   getBuiltInAiProviderName,
   getBuiltInAiSelectorItems,
   isBuiltInAiProviderId,
@@ -51,6 +59,7 @@ import { EntityListItem } from "../../../components/entity-list-item"
 import { EntityListRail } from "../../../components/entity-list-rail"
 import AddProviderDialog from "./add-provider-dialog"
 import { highlightedProviderFieldAtom, selectedProviderIdAtom } from "./atoms"
+import { BuiltInModelReasoningField, BuiltInModelUnavailableAlert } from "./built-in-model-fields"
 import { ProviderConfigForm } from "./provider-config-form"
 import { BuiltInProviderEditor, ProviderEditor } from "./provider-editor"
 import { addProvider } from "./utils"
@@ -162,11 +171,44 @@ function getAssignedBuiltInAiProviderIds(config: Config): string[] {
   ].filter(isBuiltInAiProviderId)
 }
 
+/**
+ * The models to suggest instead of one that cannot run, in the server's order:
+ * listed, able to run, and open to this account for at least one feature. A
+ * model that needs a plan the account lacks is no way to keep going.
+ */
+function getAlternativeModelNames(
+  models: readonly HostedAiModel[] | null,
+  status: HostedAiStatus | undefined,
+  exceptModelId: string,
+): string[] {
+  return (models ?? [])
+    .filter(
+      (model) =>
+        model.id !== exceptModelId &&
+        model.available &&
+        BUILT_IN_HOSTED_FEATURES.some(
+          (feature) => !isDurablyUnusableTier(getHostedAiTierStatus(status, feature, model.tier)),
+        ),
+    )
+    .map((model) => model.name)
+}
+
 function ProviderCardList() {
   const [providersConfig, setProvidersConfig] = useAtom(configFieldsAtomMap.providersConfig)
   const config = useAtomValue(configAtom)
+  const { status } = useHostedAiStatus()
   const { models } = useBuiltInAiModels()
   const builtInAiItems = getBuiltInAiSelectorItems(models, getAssignedBuiltInAiProviderIds(config))
+  const getUnavailableReason = (item: SystemProviderSelectorItem) => {
+    const unavailability = getBuiltInAiUnavailability(item)
+    return unavailability
+      ? getHostedAiModelUnavailableReason(
+          item.name,
+          unavailability,
+          getAlternativeModelNames(models, status, item.model),
+        )
+      : undefined
+  }
   const apiProvidersConfig = getAPIProvidersConfig(providersConfig)
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
 
@@ -219,7 +261,11 @@ function ProviderCardList() {
       <ProviderListSection title={i18n.t("options.apiProviders.builtInProvider")}>
         <div className="flex flex-col gap-4 pt-2">
           {builtInAiItems.map((item) => (
-            <BuiltInProviderCard key={item.id} providerId={item.id as BuiltInAiProviderId} />
+            <BuiltInProviderCard
+              key={item.id}
+              item={item}
+              unavailableReason={getUnavailableReason(item)}
+            />
           ))}
         </div>
       </ProviderListSection>
@@ -354,11 +400,18 @@ function FeatureCountBadge({ count, children }: { count: number; children: React
   )
 }
 
-function BuiltInProviderCard({ providerId }: { providerId: BuiltInAiProviderId }) {
+function BuiltInProviderCard({
+  item,
+  unavailableReason,
+}: {
+  item: SystemProviderSelectorItem
+  /** Why the model cannot run and what to pick instead; undefined when it can. */
+  unavailableReason: string | undefined
+}) {
+  const providerId = item.id
+  const { theme } = useTheme()
   const [selectedProviderId, setSelectedProviderId] = useAtom(selectedProviderIdAtom)
   const config = useAtomValue(configAtom)
-  const { models } = useBuiltInAiModels()
-  const providerName = getBuiltInAiProviderName(providerId, models)
   const assignedFeatures = FEATURE_KEYS.filter(
     (key) => FEATURE_PROVIDER_DEFS[key].getProviderId(config) === providerId,
   )
@@ -377,26 +430,36 @@ function BuiltInProviderCard({ providerId }: { providerId: BuiltInAiProviderId }
       onClick={() => setSelectedProviderId(providerId)}
     >
       <EntityListItem.Badges>
-        <FeatureCountBadge count={totalAssigned}>
-          {assignedFeatures.map((key) => (
-            <li key={key}>{i18n.t(getFeatureLabelI18nKey(key))}</li>
-          ))}
-          {isLanguageDetectionProvider && (
-            <li>{i18n.t("options.apiProviders.languageDetection.title")}</li>
+        <>
+          {/* On the border like the count badge; the card's own background hides the line behind it. */}
+          {unavailableReason && (
+            <ModelUnavailableIcon
+              reason={unavailableReason}
+              className="absolute -top-2 left-2 rounded-sm bg-card px-0.5"
+            />
           )}
-          {assignedCustomActions.map((action) => (
-            <li key={action.id}>{action.name}</li>
-          ))}
-        </FeatureCountBadge>
+          <FeatureCountBadge count={totalAssigned}>
+            {assignedFeatures.map((key) => (
+              <li key={key}>{i18n.t(getFeatureLabelI18nKey(key))}</li>
+            ))}
+            {isLanguageDetectionProvider && (
+              <li>{i18n.t("options.apiProviders.languageDetection.title")}</li>
+            )}
+            {assignedCustomActions.map((action) => (
+              <li key={action.id}>{action.name}</li>
+            ))}
+          </FeatureCountBadge>
+        </>
       </EntityListItem.Badges>
       <EntityListItem.Content>
-        <ProviderIcon
-          logo={BUILT_IN_AI_PROVIDER_LOGO}
-          name={providerName}
+        <ModelIcon
+          vendor={item.vendor}
+          name={item.name}
+          theme={theme}
           size="base"
           textClassName="text-sm"
         />
-        <EntityListItem.Toggle aria-label={providerName} checked disabled />
+        <EntityListItem.Toggle aria-label={item.name} checked disabled />
       </EntityListItem.Content>
     </EntityListItem.Root>
   )
@@ -415,12 +478,29 @@ const BUILT_IN_FEATURE_KEYS = [
   "noteSuggestion",
 ] as const
 
+/** Every feature the built-in editor can assign a model to. */
+const BUILT_IN_HOSTED_FEATURES = [
+  ...BUILT_IN_FEATURE_KEYS,
+  "languageDetection",
+  "customAction",
+] as const satisfies readonly HostedAiFeature[]
+
 function BuiltInProviderPanel({ providerId }: { providerId: BuiltInAiProviderId }) {
   const { status } = useHostedAiStatus()
   const { models } = useBuiltInAiModels()
   const modelId = getBuiltInAiModelId(providerId)
-  const modelTier = modelId === null ? undefined : findHostedAiModel(models, modelId)?.tier
+  const model = modelId === null ? undefined : findHostedAiModel(models, modelId)
+  const modelTier = model?.tier
   const isAdvance = modelTier === "advance"
+  // Only a known list can say a model is gone; without one, the server decides when asked.
+  const unavailability: BuiltInAiUnavailability | null =
+    models === null || modelId === null
+      ? null
+      : model === undefined
+        ? "removed"
+        : model.available
+          ? null
+          : "temporary"
 
   // Both cards list every hosted-capable feature. Same policy as the provider
   // dropdowns, and now literally the same predicate: the plan badge is the
@@ -450,7 +530,15 @@ function BuiltInProviderPanel({ providerId }: { providerId: BuiltInAiProviderId 
                   : "options.apiProviders.providers.attribution.builtInAi",
               )}
             </ProviderEditor.Attribution>
+            {unavailability && modelId !== null && (
+              <BuiltInModelUnavailableAlert
+                name={getBuiltInAiProviderName(providerId, models)}
+                unavailability={unavailability}
+                alternativeNames={getAlternativeModelNames(models, status, modelId)}
+              />
+            )}
           </div>
+          {model && <BuiltInModelReasoningField model={model} />}
           <ProviderEditor.Assignments defaultOpen>
             {BUILT_IN_FEATURE_KEYS.map((featureKey) => (
               <ProviderEditor.FeatureAssignment

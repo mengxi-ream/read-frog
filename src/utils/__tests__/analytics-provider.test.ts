@@ -45,7 +45,7 @@ describe("feature provider analytics", () => {
     })
   })
 
-  it("maps the persisted built-in provider ID to its analytics-only name", () => {
+  it("maps a Built-in AI model to the analytics-only name, recording the model", () => {
     expect(
       classifyResolvedProvider({
         kind: "system",
@@ -53,7 +53,7 @@ describe("feature provider analytics", () => {
         name: "GPT-6 Luna",
         model: "gpt-6-luna",
       }),
-    ).toEqual(BUILT_IN_AI_FEATURE_PROVIDER)
+    ).toEqual({ ...BUILT_IN_AI_FEATURE_PROVIDER, model: "gpt-6-luna" })
     expect(BUILT_IN_AI_FEATURE_PROVIDER).toEqual({
       provider: "read-frog-built-in-ai",
       backend_kind: "llm",
@@ -70,7 +70,7 @@ describe("feature provider analytics", () => {
         modelRevision: "rev-1",
         reasoning: null,
       }),
-    ).toEqual(BUILT_IN_AI_FEATURE_PROVIDER)
+    ).toEqual({ ...BUILT_IN_AI_FEATURE_PROVIDER, model: "gpt-6-luna" })
     expect(classifySerializedProvider({ kind: "local", config: googleTranslateProvider })).toEqual({
       provider: "google-translate",
       backend_kind: "non_llm",
@@ -92,5 +92,26 @@ describe("feature provider analytics", () => {
     expect(normalizeFeatureProviderAnalytics("not-a-provider", "llm")).toEqual(
       UNKNOWN_FEATURE_PROVIDER,
     )
+  })
+
+  it("keeps a Built-in AI event's model when it is a model id, and only then", () => {
+    expect(normalizeFeatureProviderAnalytics("read-frog-built-in-ai", "llm", "gpt-6-luna")).toEqual(
+      { ...BUILT_IN_AI_FEATURE_PROVIDER, model: "gpt-6-luna" },
+    )
+    // From a content script that predates models.
+    expect(normalizeFeatureProviderAnalytics("read-frog-built-in-ai", "llm")).toEqual(
+      BUILT_IN_AI_FEATURE_PROVIDER,
+    )
+    expect(
+      normalizeFeatureProviderAnalytics("read-frog-built-in-ai", "llm", "x".repeat(65)),
+    ).toEqual(BUILT_IN_AI_FEATURE_PROVIDER)
+    expect(normalizeFeatureProviderAnalytics("read-frog-built-in-ai", "llm", 42)).toEqual(
+      BUILT_IN_AI_FEATURE_PROVIDER,
+    )
+    // A model rides only on Built-in AI.
+    expect(normalizeFeatureProviderAnalytics("google-translate", "non_llm", "gpt-6-luna")).toEqual({
+      provider: "google-translate",
+      backend_kind: "non_llm",
+    })
   })
 })

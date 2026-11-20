@@ -10,9 +10,12 @@ import { buildProviderConfigRoute } from "@/utils/navigation"
  */
 const MAX_NAMED_ALTERNATIVES = 3
 
-function formatAlternatives(alternativeNames: readonly string[]): string {
+/** The first few names offered as a choice: "A, B, or C". */
+export function formatHostedAiModelAlternatives(alternativeNames: readonly string[]): string {
   return formatUiAlternatives(alternativeNames.slice(0, MAX_NAMED_ALTERNATIVES))
 }
+
+const formatAlternatives = formatHostedAiModelAlternatives
 
 /** "GPT-6.2 Sol can't run right now. Try Claude Haiku 5.5 or GPT-6 Luna instead." */
 export function getHostedAiModelUnavailableMessage(
@@ -22,6 +25,25 @@ export function getHostedAiModelUnavailableMessage(
   return alternativeNames.length > 0
     ? i18n.t("hostedAi.errors.modelUnavailable", [modelName, formatAlternatives(alternativeNames)])
     : i18n.t("hostedAi.errors.modelUnavailableNoAlternatives", [modelName])
+}
+
+/**
+ * Why a model picked in a menu or on the settings page cannot run, and what to
+ * pick instead: the text of its warning icon's tooltip and accessible name.
+ */
+export function getHostedAiModelUnavailableReason(
+  modelName: string,
+  unavailability: "temporary" | "removed",
+  alternativeNames: readonly string[],
+): string {
+  if (unavailability === "removed") {
+    return alternativeNames.length > 0
+      ? i18n.t("hostedAi.unavailable.removed", [modelName, formatAlternatives(alternativeNames)])
+      : i18n.t("hostedAi.unavailable.removedNoAlternatives", [modelName])
+  }
+  return alternativeNames.length > 0
+    ? i18n.t("hostedAi.unavailable.temporary", [modelName, formatAlternatives(alternativeNames)])
+    : i18n.t("hostedAi.unavailable.temporaryNoAlternatives", [modelName])
 }
 
 /** Every provider of the model is at its rate limit: waiting works, and so does another model. */

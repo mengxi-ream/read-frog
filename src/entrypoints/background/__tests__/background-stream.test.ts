@@ -1644,6 +1644,38 @@ describe("background-stream", () => {
       })
     })
 
+    it("logs which model a failed stream ran on", async () => {
+      await storeTestModels()
+      hostedStreamTextMock.mockRejectedValue(
+        Object.assign(new Error("unavailable"), {
+          code: "HOSTED_AI_MODEL_UNAVAILABLE",
+          status: 403,
+          data: { model: "gpt-6.2-sol", alternatives: ["gpt-6-luna"] },
+        }),
+      )
+      const { captureLogs, logRecord } = await import("@/utils/logging/testing")
+      const logs = captureLogs()
+
+      const { handleStreamTextPort } = await import("../background-stream")
+      const mockPort = createMockPort("stream-text")
+      handleStreamTextPort(mockPort.port as never)
+      await mockPort.emitMessage({
+        type: "start",
+        streamRequestId: "req-model-unavailable",
+        payload: {
+          providerKind: "system",
+          providerId: "read-frog-ai:gpt-6.2-sol",
+          hostedFeature: "pageTranslation",
+          instructions: "Translate text",
+          prompt: "Hello world",
+        },
+      })
+
+      expect(logs).toContainEqual(
+        logRecord("error", "Stream Function failed", { model: "gpt-6.2-sol" }),
+      )
+    })
+
     it("names the model when it is unavailable and nothing else is", async () => {
       hostedStreamTextMock.mockRejectedValue(
         Object.assign(new Error("unavailable"), {
