@@ -4,13 +4,20 @@ import type { Browser } from "#imports"
 import type { AnalyticsFailureReason } from "@/types/analytics"
 import type { AISDKReasoning, LLMProviderConfig } from "@/types/config/provider"
 import type { SelectionToolbarCustomActionOutputType } from "@/types/config/selection-toolbar"
-import type { BuiltInAiProviderId, HostedAiModelTier } from "@/utils/constants/provider-ids"
+import type { BuiltInAiProviderId, HostedAiReasoning } from "@/utils/constants/provider-ids"
 import type { ErrorAction } from "@/utils/error-action"
 import type { NoteSuggestionEnvelope } from "@/utils/note-suggestion/types"
 
 interface BaseBackgroundStreamSerializablePayload {
   providerId: string
-  modelTier?: HostedAiModelTier
+  /**
+   * Built-in AI only: the reasoning level a provider ref resolved together with
+   * the cache identity this request's output is filed under, so the entry holds
+   * what that level wrote. Null asks for none. Left out by a request no cache
+   * keeps, for which the background asks for the level the user picked for the
+   * model.
+   */
+  builtInAiReasoning?: HostedAiReasoning | null
   /** Hosted billing idempotency key. Ignored by local/BYOK providers. */
   requestId?: string
   instructions?: string

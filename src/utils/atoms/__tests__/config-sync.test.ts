@@ -133,7 +133,7 @@ describe("config persistence and invalidation", () => {
       id: "a",
       name: "A",
       icon: "tabler:sparkles",
-      providerId: "read-frog-free-ai",
+      providerId: "read-frog-ai:gpt-6-luna",
       systemPrompt: "",
       prompt: "x",
       outputSchema: [

@@ -160,6 +160,21 @@ options:
     addProvider: 제공업체 추가
     builtInProvider: 내장 제공업체
     yourProviders: 내 제공업체
+    builtInModel:
+      reasoningDescription: "$1 모델이 답하기 전에 얼마나 생각할지 정합니다. 수준이 높을수록 어려운 텍스트를 더 잘 다루지만, 응답이 느려지고 할당량을 더 많이 사용합니다."
+      reasoningDefault: "기본값"
+      reasoningLevels:
+        none: "끄기"
+        minimal: "최소"
+        low: "낮음"
+        medium: "중간"
+        high: "높음"
+        xhigh: "매우 높음"
+      unavailableTitle:
+        temporary: "$1 모델을 일시적으로 사용할 수 없음"
+        removed: "$1 모델은 더 이상 제공되지 않음"
+      unavailableDescription: "이 모델을 사용할 수 없는 동안 이 모델을 쓰는 기능은 오류가 납니다. 계속 사용하려면 해당 기능을 $1 모델로 바꾸세요."
+      unavailableDescriptionNoAlternatives: "이 모델을 사용할 수 없는 동안 이 모델을 쓰는 기능은 오류가 납니다. 계속 사용하려면 해당 기능을 다른 제공업체로 바꾸세요."
     builtInAiUsage:
       title: 내장 AI 할당량
       remaining: "$1% 남음"
@@ -1792,6 +1807,17 @@ hostedAi:
     rateLimited: 요청이 너무 많습니다. 나중에 다시 시도해 주세요.
     guestRateLimited: 게스트 요청이 너무 많습니다. 나중에 다시 시도해 주세요.
     userRateLimited: 요청이 너무 많습니다. 나중에 다시 시도해 주세요.
+    modelUnavailable: "지금은 $1 모델을 사용할 수 없습니다. 대신 $2 모델을 사용해 보세요."
+    modelUnavailableNoAlternatives: "지금은 $1 모델을 사용할 수 없으며, 사용할 수 있는 다른 내장 AI 모델도 없습니다. 나중에 다시 시도해 주세요."
+    modelBusy: "지금은 $1 모델의 요청이 많습니다. 잠시 후 다시 시도하거나 $2 모델로 전환해 주세요."
+    modelBusyNoAlternatives: "지금은 $1 모델의 요청이 많습니다. 잠시 후 다시 시도해 주세요."
+  unavailable:
+    temporary: "$1 모델을 일시적으로 사용할 수 없습니다. 대신 $2 모델을 사용해 보세요."
+    temporaryNoAlternatives: "$1 모델을 일시적으로 사용할 수 없습니다. 나중에 다시 시도해 주세요."
+    removed: "$1 모델은 더 이상 제공되지 않습니다. 대신 $2 모델을 사용해 보세요."
+    removedNoAlternatives: "$1 모델은 더 이상 제공되지 않습니다. 다른 제공업체를 선택해 주세요."
+  actions:
+    chooseModel: "모델 선택"
 hotkey:
   control: Ctrl
   alt: Option

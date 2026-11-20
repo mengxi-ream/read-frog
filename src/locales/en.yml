@@ -160,6 +160,21 @@ options:
     addProvider: Add provider
     builtInProvider: Built-in provider
     yourProviders: Your providers
+    builtInModel:
+      reasoningDescription: "How much $1 thinks before it answers. Higher levels handle hard text better, but answer more slowly and use more of your quota."
+      reasoningDefault: "Default"
+      reasoningLevels:
+        none: "Off"
+        minimal: "Minimal"
+        low: "Low"
+        medium: "Medium"
+        high: "High"
+        xhigh: "Extra high"
+      unavailableTitle:
+        temporary: "$1 is temporarily unavailable"
+        removed: "$1 is no longer offered"
+      unavailableDescription: "Features set to it show an error while it can't run. To keep going, switch them to $1."
+      unavailableDescriptionNoAlternatives: "Features set to it show an error while it can't run. To keep going, switch them to another provider."
     builtInAiUsage:
       title: Built-in AI quota
       remaining: "$1% left"
@@ -1939,6 +1954,17 @@ hostedAi:
     rateLimited: Too many requests, please try again later.
     guestRateLimited: Too many guest requests. Please try again later.
     userRateLimited: Too many requests. Please try again later.
+    modelUnavailable: "$1 can't run right now. Try $2 instead."
+    modelUnavailableNoAlternatives: "$1 can't run right now, and no other Built-in AI model is available to you. Try again later."
+    modelBusy: "$1 is busy right now. Try again in a moment, or switch to $2."
+    modelBusyNoAlternatives: "$1 is busy right now. Try again in a moment."
+  unavailable:
+    temporary: "$1 is temporarily unavailable. Try $2 instead."
+    temporaryNoAlternatives: "$1 is temporarily unavailable. Try again later."
+    removed: "$1 is no longer offered. Try $2 instead."
+    removedNoAlternatives: "$1 is no longer offered. Choose another provider."
+  actions:
+    chooseModel: "Choose a model"
 hotkey:
   control: Ctrl
   alt: Option

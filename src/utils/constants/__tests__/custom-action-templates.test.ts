@@ -206,7 +206,7 @@ describe("custom action template layouts", () => {
       const builtIn = createBuiltIn()
 
       expect(builtIn.id).toBe(actionId)
-      expect(builtIn.providerId).toBe("read-frog-free-ai")
+      expect(builtIn.providerId).toBe("read-frog-ai:gpt-6-luna")
       expect(builtIn.systemPrompt).toBe(preset.systemPrompt)
       expect(builtIn.outputSchema.map((field) => field.id)).toEqual(
         preset.outputSchema.map((field) => `default-${field.id}`),

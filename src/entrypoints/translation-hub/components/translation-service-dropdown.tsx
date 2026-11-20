@@ -1,7 +1,8 @@
 import { IconSettings } from "@tabler/icons-react"
 import { useAtom, useAtomValue } from "jotai"
 import { browser } from "#imports"
-import { UpgradePlanBadge } from "@/components/badges/upgrade-plan-badge"
+import { ProviderOptionContent } from "@/components/llm-providers/provider-selector"
+import { useBuiltInAiModels } from "@/components/llm-providers/use-built-in-ai-models"
 import { useHostedAiProviderOptions } from "@/components/llm-providers/use-hosted-ai-provider-options"
 import ProviderIcon from "@/components/provider-icon"
 import { useTheme } from "@/components/providers/theme-provider"
@@ -26,7 +27,7 @@ import {
 import { PROVIDER_ITEMS } from "@/utils/constants/providers"
 import { i18n } from "@/utils/i18n"
 import { createLogger } from "@/utils/logging/logger"
-import { getProviderLogo, isSystemProviderSelectorItem } from "@/utils/providers/provider-display"
+import { isSystemProviderSelectorItem } from "@/utils/providers/provider-display"
 import { getSelectableProvidersForCapability } from "@/utils/providers/provider-registry"
 import { selectedProviderIdsAtom } from "../atoms"
 
@@ -35,6 +36,7 @@ const log = createLogger("translation-hub/translation-service-dropdown")
 export function TranslationServiceDropdown() {
   const { theme } = useTheme()
   const [selectedIds, setSelectedIds] = useAtom(selectedProviderIdsAtom)
+  const { models: builtInAiModels } = useBuiltInAiModels()
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
   const translateProviders = getTranslateProvidersConfig(providersConfig)
   const filteredProvidersConfig = filterEnabledProvidersConfig(translateProviders)
@@ -55,6 +57,8 @@ export function TranslationServiceDropdown() {
   const selectableProviders = getSelectableProvidersForCapability(
     "pageTranslation",
     providersConfig,
+    builtInAiModels,
+    selectedIds,
   )
   const providerOptions = useHostedAiProviderOptions("pageTranslation", selectableProviders)
   const builtInProviders = providerOptions.filter(isSystemProviderSelectorItem)
@@ -109,14 +113,11 @@ export function TranslationServiceDropdown() {
               <SelectLabel>{i18n.t("translateService.builtInModels")}</SelectLabel>
               {builtInProviders.map((provider) => (
                 <SelectItem key={provider.id} value={provider.id} disabled={provider.disabled}>
-                  <div className="flex min-w-0 flex-1 items-center justify-between gap-2">
-                    <ProviderIcon
-                      logo={getProviderLogo(provider, theme)}
-                      name={provider.name}
-                      size="sm"
-                    />
-                    {provider.upgradeTo && <UpgradePlanBadge plan={provider.upgradeTo} />}
-                  </div>
+                  <ProviderOptionContent
+                    provider={provider}
+                    providers={builtInProviders}
+                    theme={theme}
+                  />
                 </SelectItem>
               ))}
             </SelectGroup>

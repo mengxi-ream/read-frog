@@ -9,6 +9,8 @@ import { useAtomValue, useSetAtom } from "jotai"
 import { createContext, use, useState } from "react"
 import { UpgradePlanBadge } from "@/components/badges/upgrade-plan-badge"
 import { useAutosave } from "@/components/form/use-autosave"
+import { ModelIcon } from "@/components/llm-providers/model-icon"
+import { useBuiltInAiModels } from "@/components/llm-providers/use-built-in-ai-models"
 import ProviderIcon from "@/components/provider-icon"
 import { useTheme } from "@/components/providers/theme-provider"
 import {
@@ -39,9 +41,11 @@ import {
 } from "@/utils/constants/feature-providers"
 import { API_PROVIDER_ITEMS } from "@/utils/constants/providers"
 import { getSelectionToolbarActions, patchSelectionToolbarAction } from "@/utils/custom-actions"
+import { findHostedAiModel } from "@/utils/hosted-ai/models"
 import { i18n } from "@/utils/i18n"
 import {
   BUILT_IN_AI_PROVIDER_LOGO,
+  getBuiltInAiModelId,
   getBuiltInAiProviderName,
 } from "@/utils/providers/provider-registry"
 import { providerSupportsTranslationOnlyMode } from "@/utils/providers/translation-only-gate"
@@ -62,6 +66,11 @@ interface ProviderIdentity {
   id: string
   logo: string
   name: string
+  /**
+   * Set for a Built-in AI model, which shows its vendor's logo with the frog
+   * on it; null when its vendor is unknown. Undefined for the user's own.
+   */
+  vendor?: string | null
 }
 
 interface ProviderEditorContextValue {
@@ -175,11 +184,14 @@ function BuiltInProvider({
   providerId: BuiltInAiProviderId
   children: React.ReactNode
 }) {
+  const { models } = useBuiltInAiModels()
+  const modelId = getBuiltInAiModelId(providerId)
   const value = useProviderEditorValue({
     identity: {
       id: providerId,
       logo: BUILT_IN_AI_PROVIDER_LOGO,
-      name: getBuiltInAiProviderName(providerId),
+      name: getBuiltInAiProviderName(providerId, models),
+      vendor: (modelId === null ? undefined : findHostedAiModel(models, modelId))?.vendor ?? null,
     },
   })
 
@@ -262,6 +274,18 @@ function Form({ children }: { children: React.ReactNode }) {
 
 function Identity() {
   const { identity } = useProviderEditor().state
+  const { theme } = useTheme()
+  if (identity.vendor !== undefined) {
+    return (
+      <ModelIcon
+        vendor={identity.vendor}
+        name={identity.name}
+        theme={theme}
+        size="base"
+        textClassName="font-medium"
+      />
+    )
+  }
   return (
     <ProviderIcon
       logo={identity.logo}

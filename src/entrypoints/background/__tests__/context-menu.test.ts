@@ -37,11 +37,11 @@ function createConfig(enabled: boolean): Config {
       builtInActions: {
         dictionary: {
           enabled: false,
-          providerId: "read-frog-free-ai",
+          providerId: "read-frog-ai:gpt-6-luna",
         },
         sentenceAnalysis: {
           enabled: false,
-          providerId: "read-frog-free-ai",
+          providerId: "read-frog-ai:gpt-6-luna",
         },
       },
       customActions: [],

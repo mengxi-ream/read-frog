@@ -3,6 +3,11 @@ import type { HostedAiStatus, HostedAiTierStatus } from "@/utils/hosted-ai/types
 import { describe, expect, it } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import {
+  LUNA_PROVIDER_ID,
+  SOL_PROVIDER_ID,
+  testHostedAiModels,
+} from "@/utils/hosted-ai/__tests__/test-models"
+import {
   getUsableProviderIdsForCapability,
   isDurablyUnusableTier,
   isProviderIdDurablyUnusable,
@@ -21,10 +26,15 @@ function tier(overrides: Partial<HostedAiTierStatus> = {}): HostedAiTierStatus {
 }
 
 /** Every feature at the same pair of tiers, which is all these cases need. */
-function statusWith(normal: HostedAiTierStatus, advance = normal): HostedAiStatus {
+function statusWith(
+  normal: HostedAiTierStatus,
+  advance = normal,
+  models: HostedAiStatus["models"] = testHostedAiModels(),
+): HostedAiStatus {
   const entry = { normal, advance }
   return {
     pools: [],
+    models,
     features: {
       pageTranslation: entry,
       customAction: entry,
@@ -79,13 +89,28 @@ describe("isProviderIdDurablyUnusable", () => {
   it("reports a built-in walled off by plan", () => {
     const status = statusWith(tier({ unavailableReason: "ultra_required" }))
 
-    expect(isProviderIdDurablyUnusable("read-frog-free-ai", "pageTranslation", status)).toBe(true)
+    expect(isProviderIdDurablyUnusable(LUNA_PROVIDER_ID, "pageTranslation", status)).toBe(true)
+  })
+
+  it("judges each model by its own tier", () => {
+    const status = statusWith(tier(), tier({ unavailableReason: "ultra_required" }))
+
+    expect(isProviderIdDurablyUnusable(LUNA_PROVIDER_ID, "pageTranslation", status)).toBe(false)
+    expect(isProviderIdDurablyUnusable(SOL_PROVIDER_ID, "pageTranslation", status)).toBe(true)
+  })
+
+  it("leaves a model the list does not name to the server", () => {
+    const status = statusWith(tier({ unavailableReason: "ultra_required" }))
+
+    expect(isProviderIdDurablyUnusable("read-frog-ai:gpt-5-mini", "pageTranslation", status)).toBe(
+      false,
+    )
   })
 
   it("keeps a built-in usable while its quota is merely exhausted", () => {
     const status = statusWith(tier({ available: false, unavailableReason: "quota_exhausted" }))
 
-    expect(isProviderIdDurablyUnusable("read-frog-free-ai", "pageTranslation", status)).toBe(false)
+    expect(isProviderIdDurablyUnusable(LUNA_PROVIDER_ID, "pageTranslation", status)).toBe(false)
   })
 })
 
@@ -108,10 +133,26 @@ describe("getUsableProviderIdsForCapability", () => {
     expect(getUsableProviderIdsForCapability("pageTranslation", [], walledOff)).toEqual([])
   })
 
-  it("counts the built-ins when there is no status to judge them by", () => {
+  it("counts the default model when there is no status to judge or list models by", () => {
     expect(getUsableProviderIdsForCapability("pageTranslation", [], undefined)).toEqual([
-      "read-frog-free-ai",
-      "read-frog-advance-ai",
+      LUNA_PROVIDER_ID,
+    ])
+  })
+
+  it("lists every model the plan reaches, the default model ahead of the rest", () => {
+    const advanceWalled = statusWith(tier(), tier({ unavailableReason: "ultra_required" }))
+
+    expect(
+      getUsableProviderIdsForCapability(
+        "pageTranslation",
+        [providerById("google-translate-default")],
+        advanceWalled,
+      ),
+    ).toEqual([
+      "google-translate-default",
+      LUNA_PROVIDER_ID,
+      "read-frog-ai:claude-haiku-5-5",
+      "read-frog-ai:deepseek-v4.1-flash",
     ])
   })
 })
@@ -127,9 +168,11 @@ describe("canProviderRefGenerateText", () => {
     expect(
       canProviderRefGenerateText({
         kind: "system",
-        providerId: "read-frog-free-ai",
+        providerId: LUNA_PROVIDER_ID,
+        model: "gpt-6-luna",
         modelTier: "normal",
         modelRevision: "r1",
+        reasoning: null,
       }),
     ).toBe(true)
   })

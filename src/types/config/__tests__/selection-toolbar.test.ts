@@ -9,7 +9,7 @@ const customAction = {
   name: "Custom Action",
   enabled: true,
   icon: "tabler:sparkles",
-  providerId: "read-frog-free-ai",
+  providerId: "read-frog-ai:gpt-6-luna",
   systemPrompt: "",
   prompt: "{{selection}}",
   outputSchema: [

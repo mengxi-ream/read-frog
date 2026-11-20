@@ -9,6 +9,7 @@ import {
   MIN_FONT_SCALE,
   MIN_FONT_WEIGHT,
 } from "@/utils/constants/subtitles"
+import { storedProviderIdSchema } from "./provider-id"
 import { shortcutSchema } from "./shortcut"
 import {
   batchQueueConfigSchema,
@@ -79,7 +80,7 @@ export const videoSubtitlesSchema = z.object({
   // instead, and still has to parse until the v126 migration turns them into this.
   platforms: subtitlesPlatformModesSchema.prefault({}),
   toggleShortcut: shortcutSchema,
-  providerId: z.string().nonempty(),
+  providerId: storedProviderIdSchema,
   style: subtitlesStyleSchema,
   aiSegmentation: z.boolean(),
   // `.default()` is load-bearing: it lets configs stored before this field existed still

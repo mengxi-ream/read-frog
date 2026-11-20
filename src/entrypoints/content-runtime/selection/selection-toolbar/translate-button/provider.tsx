@@ -16,6 +16,7 @@ import {
   useState,
 } from "react"
 import { isSaveToNotebaseDialogOpenAtom } from "@/components/custom-action/save-to-notebase-dialog-atom"
+import { useBuiltInAiModels } from "@/components/llm-providers/use-built-in-ai-models"
 import { useHostedAiProviderOptions } from "@/components/llm-providers/use-hosted-ai-provider-options"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { SelectionPopover } from "@/components/ui/selection-popover"
@@ -143,9 +144,20 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
     [activeSession],
   )
   const titleText = getSourceDocumentTitle() || null
+  // This provider mounts on every page and in every frame, so status is asked
+  // for only once the popover opens. Closed, the stored list is enough: it only
+  // names the models, and a model resolves without it.
+  const { models: builtInAiModels } = useBuiltInAiModels({ enabled: isOpen })
+  const selectedTranslateProviderId = selectionToolbar.features.translate.providerId
   const translateProviders = useMemo(
-    () => getSelectableProvidersForCapability("selectionTranslation", providersConfig),
-    [providersConfig],
+    () =>
+      getSelectableProvidersForCapability(
+        "selectionTranslation",
+        providersConfig,
+        builtInAiModels,
+        [selectedTranslateProviderId],
+      ),
+    [providersConfig, builtInAiModels, selectedTranslateProviderId],
   )
   const translateRequestKey = useMemo(() => JSON.stringify(translateRequest), [translateRequest])
   const isSaveToNotebaseDialogOpen = useAtomValue(isSaveToNotebaseDialogOpenAtom)

@@ -3,6 +3,8 @@ import { LANGUAGE_ENGLISH_NAMES } from "@read-frog/definitions"
 import { useMutation } from "@tanstack/react-query"
 import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { useEffect, useEffectEvent, useRef } from "react"
+import { ModelIcon } from "@/components/llm-providers/model-icon"
+import { useBuiltInAiModels } from "@/components/llm-providers/use-built-in-ai-models"
 import ProviderIcon from "@/components/provider-icon"
 import { useTheme } from "@/components/providers/theme-provider"
 import { Button } from "@/components/ui/base-ui/button"
@@ -19,12 +21,10 @@ import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { resolveGlossaryTerms } from "@/utils/glossary/active-matcher"
 import { executeTranslate } from "@/utils/host/translate/execute-translate"
 import { prepareTranslationText } from "@/utils/host/translate/text-preparation"
+import { findHostedAiModel } from "@/utils/hosted-ai/models"
 import { i18n } from "@/utils/i18n"
 import { getTranslatePromptFromConfig } from "@/utils/prompts/translate"
-import {
-  BUILT_IN_AI_PROVIDER_LOGO,
-  resolveProviderRefForCapability,
-} from "@/utils/providers/provider-registry"
+import { resolveProviderRefForCapability } from "@/utils/providers/provider-registry"
 import { cn } from "@/utils/styles/utils"
 import {
   selectedProviderIdsAtom,
@@ -53,13 +53,15 @@ export function TranslationCard({
   const setExpandedById = useSetAtom(translationCardExpandedStateAtom)
   const { play, stop, isFetching, isPlaying } = useTextToSpeech(ANALYTICS_SURFACE.TRANSLATION_HUB)
 
-  const provider = resolveProviderRefForCapability("pageTranslation", providersConfig, providerId)
+  const { models: builtInAiModels } = useBuiltInAiModels()
+  const provider = resolveProviderRefForCapability(
+    "pageTranslation",
+    providersConfig,
+    providerId,
+    builtInAiModels,
+  )
   const providerLogo =
-    provider?.kind === "system"
-      ? BUILT_IN_AI_PROVIDER_LOGO
-      : provider?.kind === "local"
-        ? PROVIDER_ITEMS[provider.config.provider].logo(theme)
-        : undefined
+    provider?.kind === "local" ? PROVIDER_ITEMS[provider.config.provider].logo(theme) : undefined
 
   // Track request IDs to ignore stale responses from slow providers
   const requestIdRef = useRef(0)
@@ -121,7 +123,6 @@ export function TranslationCard({
               {
                 providerKind: "system",
                 providerId: provider.id,
-                modelTier: provider.modelTier,
                 requestId: getRandomUUID(),
                 hostedFeature: "pageTranslation",
                 instructions: systemPrompt,
@@ -232,7 +233,13 @@ export function TranslationCard({
         )}
       >
         <div className="flex items-center space-x-2">
-          {providerLogo ? (
+          {provider?.kind === "system" ? (
+            <ModelIcon
+              vendor={findHostedAiModel(builtInAiModels, provider.model)?.vendor}
+              name={provider.name}
+              theme={theme}
+            />
+          ) : providerLogo ? (
             <ProviderIcon logo={providerLogo} name={provider.name} size="sm" />
           ) : (
             <div className="flex h-5 w-5 items-center justify-center rounded bg-muted text-xs text-muted-foreground">

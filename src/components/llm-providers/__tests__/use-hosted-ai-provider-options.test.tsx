@@ -5,10 +5,10 @@ import type { ProviderSelectorOption } from "@/utils/providers/provider-display"
 import { renderHook } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { useHostedAiProviderOptions } from "@/components/llm-providers/use-hosted-ai-provider-options"
-import {
-  BUILT_IN_AI_PROVIDER_ID,
-  BUILT_IN_AI_ADVANCE_PROVIDER_ID,
-} from "@/utils/constants/provider-ids"
+import { DEFAULT_BUILT_IN_AI_PROVIDER_ID } from "@/utils/constants/provider-ids"
+import { testHostedAiModels } from "@/utils/hosted-ai/__tests__/test-models"
+import { findHostedAiModel, sanitizeHostedAiModels } from "@/utils/hosted-ai/models"
+import { createBuiltInAiSelectorItem } from "@/utils/providers/provider-registry"
 
 const { hostedAiState } = vi.hoisted(() => {
   const state: { value: HostedAiStatusResult } = {
@@ -21,8 +21,13 @@ vi.mock("@/components/llm-providers/use-hosted-ai-status", () => ({
   useHostedAiStatus: () => hostedAiState.value,
 }))
 
-function systemOption(id: string): ProviderSelectorOption {
-  return { kind: "system", id, name: id, logo: () => "logo.png" }
+const MODELS = sanitizeHostedAiModels(testHostedAiModels())
+
+/** The menu option for a model in the test catalog. */
+function modelOption(modelId: string): ProviderSelectorOption {
+  const model = findHostedAiModel(MODELS, modelId)
+  if (!model) throw new Error(`Model "${modelId}" is not in the test catalog`)
+  return createBuiltInAiSelectorItem(model)
 }
 
 function tier(overrides: Partial<HostedAiTierStatus> = {}): HostedAiTierStatus {
@@ -89,10 +94,8 @@ function customActionDailyCredit(usedPercent = 0) {
   return dailyCredit(["customAction"], usedPercent)
 }
 
-const PROVIDERS: ProviderSelectorOption[] = [
-  systemOption(BUILT_IN_AI_PROVIDER_ID),
-  systemOption(BUILT_IN_AI_ADVANCE_PROVIDER_ID),
-]
+/** A normal-tier model, then an advance-tier one. */
+const PROVIDERS: ProviderSelectorOption[] = [modelOption("gpt-6-luna"), modelOption("gpt-6.2-sol")]
 
 function getDisabled(providers: ProviderSelectorOption[]): Array<boolean | undefined> {
   return providers.map((provider) => ("disabled" in provider ? provider.disabled : undefined))
@@ -110,6 +113,7 @@ describe("useHostedAiProviderOptions", () => {
       isError: false,
       status: {
         pools: [customActionDailyCredit()],
+        models: testHostedAiModels(),
         features: allFeatures({
           customAction: {
             normal: tier(),
@@ -135,6 +139,7 @@ describe("useHostedAiProviderOptions", () => {
       isError: false,
       status: {
         pools: [customActionDailyCredit()],
+        models: testHostedAiModels(),
         features: allFeatures({
           customAction: {
             normal: tier({ upgradeTo: "pro" }),
@@ -159,6 +164,7 @@ describe("useHostedAiProviderOptions", () => {
       isError: false,
       status: {
         pools: [customActionDailyCredit()],
+        models: testHostedAiModels(),
         features: allFeatures(),
       },
     }
@@ -180,6 +186,7 @@ describe("useHostedAiProviderOptions", () => {
       status: {
         // A free plan funds customAction only — pageTranslation has no pool.
         pools: [customActionDailyCredit()],
+        models: testHostedAiModels(),
         features: allFeatures({ pageTranslation: unfundedTiers() }),
       },
     }
@@ -196,6 +203,7 @@ describe("useHostedAiProviderOptions", () => {
       isError: false,
       status: {
         pools: [dailyCredit(["selectionTranslation"])],
+        models: testHostedAiModels(),
         features: allFeatures({
           selectionTranslation: {
             normal: tier(),
@@ -223,6 +231,7 @@ describe("useHostedAiProviderOptions", () => {
       isError: false,
       status: {
         pools: [customActionDailyCredit()],
+        models: testHostedAiModels(),
         features: allFeatures({ selectionTranslation: unfundedTiers() }),
       },
     }
@@ -241,6 +250,7 @@ describe("useHostedAiProviderOptions", () => {
       isError: false,
       status: {
         pools: [dailyCredit(["noteSuggestion"])],
+        models: testHostedAiModels(),
         features: allFeatures({
           noteSuggestion: {
             normal: tier(),
@@ -269,6 +279,7 @@ describe("useHostedAiProviderOptions", () => {
       isError: false,
       status: {
         pools: [customActionDailyCredit()],
+        models: testHostedAiModels(),
         features: allFeatures({ noteSuggestion: unfundedTiers() }),
       },
     }
@@ -285,6 +296,7 @@ describe("useHostedAiProviderOptions", () => {
       isError: false,
       status: {
         pools: [customActionDailyCredit(100)],
+        models: testHostedAiModels(),
         features: allFeatures({
           customAction: {
             normal: tier({ available: false, unavailableReason: "quota_exhausted" }),
@@ -318,10 +330,70 @@ describe("useHostedAiProviderOptions", () => {
 
       expect(result.current).not.toBe(PROVIDERS)
       expect(result.current[0]).toMatchObject({
-        id: BUILT_IN_AI_PROVIDER_ID,
+        id: DEFAULT_BUILT_IN_AI_PROVIDER_ID,
         disabled: expect.any(Boolean),
       })
     }
+  })
+
+  it("judges every model by its own tier", () => {
+    hostedAiState.value = {
+      isSignedIn: true,
+      isPending: false,
+      isError: false,
+      status: {
+        pools: [customActionDailyCredit()],
+        models: testHostedAiModels(),
+        features: allFeatures({
+          customAction: {
+            normal: tier({ upgradeTo: null }),
+            advance: tier({
+              accessAllowed: false,
+              available: false,
+              unavailableReason: "ultra_required",
+              upgradeTo: "ultra",
+            }),
+          },
+        }),
+      },
+    }
+    const options = MODELS!.map(createBuiltInAiSelectorItem)
+
+    const { result } = renderHook(() => useHostedAiProviderOptions("customAction", options))
+
+    expect(result.current.map((p) => [p.name, "upgradeTo" in p ? p.upgradeTo : null])).toEqual([
+      ["Claude Haiku 5.5", undefined],
+      ["GPT-6 Luna", undefined],
+      ["DeepSeek V4.1 Flash", undefined],
+      ["GPT-6.2 Sol", "ultra"],
+      ["Claude Sonnet 5.5", "ultra"],
+    ])
+    expect(getDisabled(result.current)).toEqual([false, false, false, true, true])
+  })
+
+  it("leaves a model no list names to the server, since it has no tier to judge", () => {
+    hostedAiState.value = {
+      isSignedIn: true,
+      isPending: false,
+      isError: false,
+      status: {
+        pools: [],
+        models: testHostedAiModels(),
+        features: allFeatures({ customAction: unfundedTiers() }),
+      },
+    }
+    const unlisted: ProviderSelectorOption = {
+      kind: "system",
+      id: "read-frog-ai:gpt-5-mini",
+      name: "gpt-5-mini",
+      logo: () => "logo.png",
+      model: "gpt-5-mini",
+      available: false,
+    }
+
+    const { result } = renderHook(() => useHostedAiProviderOptions("customAction", [unlisted]))
+
+    expect(result.current[0]).toBe(unlisted)
   })
 
   it("passes local provider configs through unchanged", () => {

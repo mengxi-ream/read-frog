@@ -17,11 +17,11 @@ describe("hosted request routing", () => {
   it("requires explicit routing in hosted stream, generation, message and queue types", () => {
     expectTypeOf<{
       providerKind: "system"
-      providerId: "read-frog-free-ai"
+      providerId: "read-frog-ai:gpt-6-luna"
     }>().not.toMatchTypeOf<BackgroundStreamTextSerializablePayload>()
     expectTypeOf<{
       providerKind: "system"
-      providerId: "read-frog-free-ai"
+      providerId: "read-frog-ai:gpt-6-luna"
       hostedFeature: "videoSubtitles"
     }>().toMatchTypeOf<BackgroundStreamTextSerializablePayload>()
     expectTypeOf<{ providerRef: SystemRef }>().not.toMatchTypeOf<ProviderRequestRouting>()

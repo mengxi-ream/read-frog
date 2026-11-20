@@ -50,6 +50,7 @@ describe("BuiltInAiUsageConfig", () => {
             features: ["pageTranslation", "customAction", "noteSuggestion"],
           },
         ],
+        models: [],
         features: {} as never,
       },
     }
@@ -94,6 +95,7 @@ describe("BuiltInAiUsageConfig", () => {
             features: ["customAction"],
           },
         ],
+        models: [],
         features: {} as never,
       },
     }
@@ -127,6 +129,7 @@ describe("BuiltInAiUsageConfig", () => {
       isError: false,
       status: {
         pools: [{ periodKind: "daily", usedPercent: 0, resetAt: null, features: ["customAction"] }],
+        models: [],
         features: {} as never,
       },
     }
@@ -141,7 +144,7 @@ describe("BuiltInAiUsageConfig", () => {
       isSignedIn: true,
       isPending: false,
       isError: false,
-      status: { pools: [], features: {} as never },
+      status: { pools: [], models: [], features: {} as never },
     }
 
     render(<BuiltInAiUsageConfig />)
@@ -159,6 +162,7 @@ describe("BuiltInAiUsageConfig", () => {
           { periodKind: "daily", usedPercent: 10, resetAt: null, features: ["customAction"] },
           { periodKind: "weekly", usedPercent: 5, resetAt: null, features: ["pageTranslation"] },
         ],
+        models: [],
         features: {} as never,
       },
     }
@@ -185,6 +189,7 @@ describe("BuiltInAiUsageConfig", () => {
             features: ["pageTranslation", "pdfTranslation"],
           },
         ],
+        models: [],
         features: {} as never,
       },
     }
@@ -211,6 +216,7 @@ describe("BuiltInAiUsageConfig", () => {
             features: ["pageTranslation", "customAction", "videoSubtitles"],
           },
         ],
+        models: [],
         features: {} as never,
       },
     }
@@ -247,6 +253,7 @@ describe("BuiltInAiUsageConfig", () => {
             features: ["customAction"],
           },
         ],
+        models: [],
         features: {} as never,
       },
     }
@@ -272,6 +279,7 @@ describe("BuiltInAiUsageConfig", () => {
             features: ["customAction"],
           },
         ],
+        models: [],
         features: {} as never,
       },
     }

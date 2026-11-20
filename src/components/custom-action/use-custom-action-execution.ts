@@ -10,7 +10,6 @@ import type {
 import type { Config } from "@/types/config/config"
 import type { AISDKReasoning } from "@/types/config/provider"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
-import type { HostedAiModelTier } from "@/utils/constants/provider-ids"
 import type { CachedWebPageContext } from "@/utils/host/translate/webpage-context"
 import type { CustomActionProviderRef } from "@/utils/providers/provider-registry"
 
@@ -74,7 +73,8 @@ interface ResolvedWebPageContext {
 }
 
 interface CustomActionExecutionRequest {
-  analytics: FeatureProviderAnalytics & {
+  analytics: {
+    provider: FeatureProviderAnalytics
     actionId: string
     actionName: string
     surface: SurfaceByFeature["custom_ai_action"]
@@ -90,7 +90,6 @@ interface CustomActionExecutionRequest {
     }>
     prompt: string
     providerId: string
-    modelTier?: HostedAiModelTier
     providerOptions?: Record<string, Record<string, JSONValue>>
     reasoning?: AISDKReasoning
     instructions: string
@@ -285,10 +284,10 @@ function buildCustomActionExecutionRequest({
 
   return {
     analytics: {
+      provider: classifyResolvedProvider(provider),
       actionId: action.id,
       actionName: action.name,
       surface: analyticsSurface,
-      ...classifyResolvedProvider(provider),
     },
     key: stringifyExecutionRequestKey({
       actionId: action.id,
@@ -314,7 +313,6 @@ function buildCustomActionExecutionRequest({
     selectionValues: getSelectionOutputValues(action.outputSchema, promptTokens.selection),
     payload: {
       providerId: provider.id,
-      modelTier: provider.kind === "system" ? provider.modelTier : undefined,
       instructions: systemPrompt,
       prompt,
       outputSchema,
@@ -397,10 +395,7 @@ export function useCustomActionExecution({
       action_id: request.analytics.actionId,
       action_name: request.analytics.actionName,
     }
-    const providerAnalytics: FeatureProviderAnalytics = {
-      provider: request.analytics.provider,
-      backend_kind: request.analytics.backend_kind,
-    }
+    const providerAnalytics = request.analytics.provider
 
     const run = async () => {
       setIsRunning(true)

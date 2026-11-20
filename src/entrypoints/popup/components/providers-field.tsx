@@ -1,11 +1,13 @@
 import type { Config } from "@/types/config/config"
 import type { ProvidersConfig } from "@/types/config/provider"
 import type { ProviderSelectorOption } from "@/utils/providers/provider-display"
-import type { ProviderCapability } from "@/utils/providers/provider-registry"
+import type { BuiltInAiModelList, ProviderCapability } from "@/utils/providers/provider-registry"
 import { useAtomValue } from "jotai"
 import { useMemo } from "react"
 import { HelpTooltip } from "@/components/help-tooltip"
 import { FeatureProviderSelectorList } from "@/components/llm-providers/feature-provider-selector-list"
+import { getModelVendorLogo } from "@/components/llm-providers/model-icon"
+import { useBuiltInAiModels } from "@/components/llm-providers/use-built-in-ai-models"
 import { useHostedAiStatus } from "@/components/llm-providers/use-hosted-ai-status"
 import { useTheme } from "@/components/providers/theme-provider"
 import { Avatar, AvatarGroup, AvatarGroupCount, AvatarImage } from "@/components/ui/base-ui/avatar"
@@ -16,7 +18,11 @@ import { FEATURE_KEYS, FEATURE_PROVIDER_DEFS } from "@/utils/constants/feature-p
 import { getSelectionToolbarActions } from "@/utils/custom-actions"
 import { i18n } from "@/utils/i18n"
 import { isProviderIdDurablyUnusable } from "@/utils/providers/provider-availability"
-import { getProviderLogo, getProviderName } from "@/utils/providers/provider-display"
+import {
+  getProviderLogo,
+  getProviderName,
+  isSystemProviderSelectorItem,
+} from "@/utils/providers/provider-display"
 import { getSelectableProvidersForCapability } from "@/utils/providers/provider-registry"
 
 const VISIBLE_PROVIDER_COUNT = 5
@@ -34,13 +40,17 @@ interface SelectedProviderSlot {
 function getSelectedProviderOptions(
   config: Config,
   providersConfig: ProvidersConfig,
+  builtInAiModels: BuiltInAiModelList,
 ): SelectedProviderSlot[] {
   const selectedProviders: SelectedProviderSlot[] = []
 
   const addProvider = (capability: ProviderCapability, providerId: string) => {
-    const selectedProvider = getSelectableProvidersForCapability(capability, providersConfig).find(
-      (providerOption) => providerOption.id === providerId,
-    )
+    const selectedProvider = getSelectableProvidersForCapability(
+      capability,
+      providersConfig,
+      builtInAiModels,
+      [providerId],
+    ).find((providerOption) => providerOption.id === providerId)
     if (!selectedProvider) {
       return
     }
@@ -81,6 +91,13 @@ function ProviderAvatarSummary({ slots }: { slots: SelectedProviderSlot[] }) {
         // merely out of quota. Otherwise these logos say "five features
         // configured" to an account that can run none of them.
         const unusable = isProviderIdDurablyUnusable(provider.id, capability, status)
+        // A Built-in AI model shows its vendor's logo, as in the menus, but
+        // without the frog badge: the next avatar would cover it. A model whose
+        // vendor is unknown keeps the frog.
+        const logo =
+          (isSystemProviderSelectorItem(provider)
+            ? getModelVendorLogo(provider.vendor, theme)
+            : null) ?? getProviderLogo(provider, theme)
 
         return (
           <Avatar
@@ -89,7 +106,7 @@ function ProviderAvatarSummary({ slots }: { slots: SelectedProviderSlot[] }) {
             className="items-center justify-center bg-white dark:bg-muted"
           >
             <AvatarImage
-              src={getProviderLogo(provider, theme)}
+              src={logo}
               alt={name}
               className={`size-3.5 rounded-none object-contain${unusable ? " opacity-40 grayscale" : ""}`}
             />
@@ -104,10 +121,11 @@ function ProviderAvatarSummary({ slots }: { slots: SelectedProviderSlot[] }) {
 export default function ProvidersField() {
   const config = useAtomValue(configAtom)
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
+  const { models: builtInAiModels } = useBuiltInAiModels()
 
   const selectedProviders = useMemo(
-    () => getSelectedProviderOptions(config, providersConfig),
-    [config, providersConfig],
+    () => getSelectedProviderOptions(config, providersConfig, builtInAiModels),
+    [config, providersConfig, builtInAiModels],
   )
 
   return (

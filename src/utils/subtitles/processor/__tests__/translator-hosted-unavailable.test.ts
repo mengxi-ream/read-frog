@@ -29,9 +29,9 @@ const { HostedAiProviderUnavailableError } = await import("@/utils/providers/pro
 
 const BUILT_IN_PROVIDER = {
   kind: "system" as const,
-  id: "read-frog-free-ai" as const,
-  name: "Built-in AI",
-  modelTier: "normal" as const,
+  id: "read-frog-ai:gpt-6-luna" as const,
+  name: "GPT-6 Luna",
+  model: "gpt-6-luna",
 }
 
 describe("subtitles provider ref resolution under a hosted denial", () => {
@@ -41,7 +41,7 @@ describe("subtitles provider ref resolution under a hosted denial", () => {
       ...DEFAULT_CONFIG,
       videoSubtitles: {
         ...DEFAULT_CONFIG.videoSubtitles,
-        providerId: "read-frog-free-ai",
+        providerId: "read-frog-ai:gpt-6-luna",
       },
     })
   })

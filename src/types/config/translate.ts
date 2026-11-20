@@ -21,6 +21,7 @@ import {
 } from "@/utils/constants/translate"
 import { TRANSLATION_NODE_STYLE } from "@/utils/constants/translation-node-style"
 import { storedLanguageTagSchema } from "./language-tag"
+import { storedProviderIdSchema } from "./provider-id"
 import { shortcutSchema } from "./shortcut"
 
 export const requestQueueConfigSchema = z.object({
@@ -189,7 +190,7 @@ export const pageCustomPromptsConfigSchema = createCustomPromptsConfigSchema(
 export const customPromptsConfigSchema = pageCustomPromptsConfigSchema
 
 export const translateConfigSchema = z.object({
-  providerId: z.string().nonempty(),
+  providerId: storedProviderIdSchema,
   mode: translationModeSchema,
   modeShortcut: shortcutSchema,
   node: z.object({

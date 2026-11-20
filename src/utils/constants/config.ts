@@ -11,7 +11,7 @@ import {
   buildImproveWritingActionLayout,
   buildSentenceAnalysisActionLayout,
 } from "@/utils/layout-host/slots"
-import { BUILT_IN_AI_PROVIDER_ID } from "@/utils/providers/provider-registry"
+import { DEFAULT_BUILT_IN_AI_PROVIDER_ID } from "@/utils/providers/provider-registry"
 import {
   BUILT_IN_ACTION_DEFAULT_SHORTCUTS,
   BUILT_IN_ACTION_IDS,
@@ -78,7 +78,7 @@ export const GOOGLE_DRIVE_TOKEN_STORAGE_KEY = "__googleDriveToken"
 
 export const THEME_STORAGE_KEY = "theme"
 export const DEFAULT_DETECTED_CODE = "en" as const
-export const CONFIG_SCHEMA_VERSION = 126
+export const CONFIG_SCHEMA_VERSION = 127
 
 export const DEFAULT_FLOATING_BUTTON_POSITION = 0.66
 export const DEFAULT_FLOATING_BUTTON_SIDE: FloatingButtonSide = "right"
@@ -109,7 +109,7 @@ const getBuiltInImproveWritingLayout = memoizeBuiltInLayout(buildImproveWritingA
  * (never persisted), so it always follows the current locale's field names.
  */
 export function createDefaultDictionaryAction(): SelectionToolbarCustomAction {
-  const action = createDictionaryDefinition(BUILT_IN_AI_PROVIDER_ID)
+  const action = createDictionaryDefinition(DEFAULT_BUILT_IN_AI_PROVIDER_ID)
   const outputSchema = action.outputSchema.map((field) => ({
     ...field,
     id: field.id.startsWith("dictionary-")
@@ -133,7 +133,7 @@ export function createDefaultDictionaryAction(): SelectionToolbarCustomAction {
  * enabled/provider/Notebase state persisted.
  */
 export function createDefaultSentenceAnalysisAction(): SelectionToolbarCustomAction {
-  const action = createSentenceAnalysisDefinition(BUILT_IN_AI_PROVIDER_ID)
+  const action = createSentenceAnalysisDefinition(DEFAULT_BUILT_IN_AI_PROVIDER_ID)
   const outputSchema = action.outputSchema.map((field) => ({
     ...field,
     id: `default-${field.id}`,
@@ -153,7 +153,7 @@ export function createDefaultSentenceAnalysisAction(): SelectionToolbarCustomAct
  * config without its state reads it as off, as the schema does.
  */
 export function createDefaultImproveWritingAction(): SelectionToolbarCustomAction {
-  const action = createImproveWritingDefinition(BUILT_IN_AI_PROVIDER_ID)
+  const action = createImproveWritingDefinition(DEFAULT_BUILT_IN_AI_PROVIDER_ID)
   const outputSchema = action.outputSchema.map((field) => ({
     ...field,
     id: `default-${field.id}`,
@@ -252,17 +252,17 @@ export const DEFAULT_CONFIG: Config = {
     builtInActions: {
       dictionary: {
         enabled: true,
-        providerId: BUILT_IN_AI_PROVIDER_ID,
+        providerId: DEFAULT_BUILT_IN_AI_PROVIDER_ID,
         shortcut: BUILT_IN_ACTION_DEFAULT_SHORTCUTS[BUILT_IN_DICTIONARY_ACTION_ID],
       },
       sentenceAnalysis: {
         enabled: true,
-        providerId: BUILT_IN_AI_PROVIDER_ID,
+        providerId: DEFAULT_BUILT_IN_AI_PROVIDER_ID,
         shortcut: BUILT_IN_ACTION_DEFAULT_SHORTCUTS[BUILT_IN_SENTENCE_ANALYSIS_ACTION_ID],
       },
       improveWriting: {
         enabled: true,
-        providerId: BUILT_IN_AI_PROVIDER_ID,
+        providerId: DEFAULT_BUILT_IN_AI_PROVIDER_ID,
         shortcut: BUILT_IN_ACTION_DEFAULT_SHORTCUTS[BUILT_IN_IMPROVE_WRITING_ACTION_ID],
       },
     },
@@ -359,6 +359,7 @@ export const DEFAULT_CONFIG: Config = {
     promptId: DEFAULT_TRANSLATE_PROMPTS_CONFIG.promptId,
   },
   glossary: { ...DEFAULT_GLOSSARY_CONFIG },
+  builtInAi: { models: {} },
 }
 
 /**
@@ -375,15 +376,15 @@ export function buildFreshDefaultConfig(): Config {
       builtInActions: {
         dictionary: {
           enabled: true,
-          providerId: BUILT_IN_AI_PROVIDER_ID,
+          providerId: DEFAULT_BUILT_IN_AI_PROVIDER_ID,
         },
         sentenceAnalysis: {
           enabled: true,
-          providerId: BUILT_IN_AI_PROVIDER_ID,
+          providerId: DEFAULT_BUILT_IN_AI_PROVIDER_ID,
         },
         improveWriting: {
           enabled: true,
-          providerId: BUILT_IN_AI_PROVIDER_ID,
+          providerId: DEFAULT_BUILT_IN_AI_PROVIDER_ID,
         },
       },
       customActions: [],

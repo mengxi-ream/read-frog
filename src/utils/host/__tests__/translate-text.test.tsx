@@ -548,7 +548,12 @@ describe("translate-text", () => {
       })
       mockGetOrGenerateWebPageSummary.mockRejectedValue(
         new HostedAiProviderUnavailableError(
-          { kind: "system", id: "read-frog-free-ai", name: "Built-in AI", modelTier: "normal" },
+          {
+            kind: "system",
+            id: "read-frog-ai:gpt-6-luna",
+            name: "GPT-6 Luna",
+            model: "gpt-6-luna",
+          },
           "Weekly credit used up",
         ),
       )

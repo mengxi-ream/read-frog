@@ -84,6 +84,8 @@ export type AnalyticsBackendKind = "llm" | "non_llm" | "unknown"
 export interface FeatureProviderAnalytics {
   provider: AnalyticsProvider
   backend_kind: AnalyticsBackendKind
+  /** The Built-in AI model that ran, by its catalog id. Only on Built-in AI. */
+  built_in_ai_model?: string
 }
 
 export interface SurfaceByFeature {

@@ -51,6 +51,11 @@ type PlanBadgeProps = useRender.ComponentProps<"span"> &
      * styles reach.
      */
     tooltipContainer?: ComponentProps<typeof TooltipContent>["container"]
+    /**
+     * Classes for the tooltip's positioner. Inside the selection popover, pass
+     * its overlay layer: the default z-50 paints under the popover and its menus.
+     */
+    tooltipPositionerClassName?: string
   }
 
 /**
@@ -68,6 +73,7 @@ export function PlanBadge({
   className,
   upgradeTooltip,
   tooltipContainer,
+  tooltipPositionerClassName,
   ...props
 }: PlanBadgeProps) {
   if (upgradeTooltip === undefined) {
@@ -122,7 +128,15 @@ export function PlanBadge({
           </Badge>
         }
       />
-      <TooltipContent container={tooltipContainer}>{upgradeTooltip}</TooltipContent>
+      <TooltipContent
+        container={tooltipContainer}
+        positionerClassName={tooltipPositionerClassName}
+        // The selection popover portals tooltips into a zero-width box, where
+        // the default fit-content width shrinks to the longest word.
+        className="w-max"
+      >
+        {upgradeTooltip}
+      </TooltipContent>
     </Tooltip>
   )
 }

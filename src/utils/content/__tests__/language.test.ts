@@ -35,9 +35,9 @@ const mockFranc = vi.mocked(franc)
 
 const BUILT_IN_PROVIDER = {
   kind: "system" as const,
-  id: "read-frog-free-ai" as const,
-  name: "Built-in AI",
-  modelTier: "normal" as const,
+  id: "read-frog-ai:gpt-6-luna" as const,
+  name: "GPT-6 Luna",
+  model: "gpt-6-luna",
 }
 
 describe("detectLanguageWithSource", () => {
@@ -107,7 +107,7 @@ describe("detectLanguageWithSource", () => {
       toastAddMock.mockReset()
       serializeProviderRefMock.mockReset()
       getLocalConfigMock.mockResolvedValue({
-        languageDetection: { mode: "llm", providerId: "read-frog-free-ai" },
+        languageDetection: { mode: "llm", providerId: "read-frog-ai:gpt-6-luna" },
         providersConfig: [],
       })
     })

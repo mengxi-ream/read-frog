@@ -160,6 +160,21 @@ options:
     addProvider: Provayder əlavə et
     builtInProvider: Daxili provayder
     yourProviders: Sizin provayderləriniz
+    builtInModel:
+      reasoningDescription: "$1 modelinin cavab verməzdən əvvəl nə qədər düşünəcəyi. Yüksək səviyyələr çətin mətnlərin öhdəsindən daha yaxşı gəlir, amma daha yavaş cavab verir və kvotanızdan daha çox istifadə edir."
+      reasoningDefault: "Defolt"
+      reasoningLevels:
+        none: "Söndürülüb"
+        minimal: "Minimal"
+        low: "Aşağı"
+        medium: "Orta"
+        high: "Yüksək"
+        xhigh: "Çox yüksək"
+      unavailableTitle:
+        temporary: "$1 müvəqqəti olaraq əlçatan deyil"
+        removed: "$1 artıq təklif olunmur"
+      unavailableDescription: "İşləyə bilmədiyi müddətdə ondan istifadə edən funksiyalar xəta verir. Davam etmək üçün onları $1 modelinə keçirin."
+      unavailableDescriptionNoAlternatives: "İşləyə bilmədiyi müddətdə ondan istifadə edən funksiyalar xəta verir. Davam etmək üçün onları başqa provayderə keçirin."
     builtInAiUsage:
       title: Daxili süni intellekt kvotası
       remaining: "$1% qalıb"
@@ -1790,6 +1805,17 @@ hostedAi:
     rateLimited: Həddindən artıq sorğu var, daha sonra yenidən cəhd edin.
     guestRateLimited: Qonaq sorğularının sayı həddindən artıq çoxdur. Daha sonra yenidən cəhd edin.
     userRateLimited: Həddindən artıq sorğu var. Daha sonra yenidən cəhd edin.
+    modelUnavailable: "$1 hazırda işləmir. Onun əvəzinə $2 modelini sınayın."
+    modelUnavailableNoAlternatives: "$1 hazırda işləmir və sizin üçün başqa daxili süni intellekt modeli yoxdur. Daha sonra yenidən cəhd edin."
+    modelBusy: "$1 hazırda çox yüklənib. Bir azdan yenidən cəhd edin və ya $2 modelinə keçin."
+    modelBusyNoAlternatives: "$1 hazırda çox yüklənib. Bir azdan yenidən cəhd edin."
+  unavailable:
+    temporary: "$1 müvəqqəti olaraq əlçatan deyil. Onun əvəzinə $2 modelini sınayın."
+    temporaryNoAlternatives: "$1 müvəqqəti olaraq əlçatan deyil. Daha sonra yenidən cəhd edin."
+    removed: "$1 artıq təklif olunmur. Onun əvəzinə $2 modelini sınayın."
+    removedNoAlternatives: "$1 artıq təklif olunmur. Başqa provayder seçin."
+  actions:
+    chooseModel: "Model seçin"
 hotkey:
   control: Ctrl düyməsi
   alt: Option düyməsi

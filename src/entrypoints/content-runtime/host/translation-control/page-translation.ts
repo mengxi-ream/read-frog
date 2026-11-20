@@ -64,6 +64,7 @@ import { cleanupNodeSiteRuleCSSIfUnused } from "@/utils/host/translate/ui/node-s
 import { cancelSpinnerAnimation } from "@/utils/host/translate/ui/spinner"
 import { ensureSiteRuleCSS, removeSiteRuleCSS } from "@/utils/host/translate/ui/style-injector"
 import { getOrCreateWebPageContext } from "@/utils/host/translate/webpage-context"
+import { readHostedAiReasoningChoice } from "@/utils/hosted-ai/models"
 import { createLogger } from "@/utils/logging/logger"
 import { sendMessage } from "@/utils/message"
 import {
@@ -416,6 +417,12 @@ export class PageTranslationManager implements IPageTranslationManager {
     // explicit guard for type-safety and for malformed storage snapshots.
     if (!requestedProviderConfig) return
 
+    // Read before the check below makes the session's ref; see
+    // setPageTranslationSessionProviderRef.
+    const reasoningChoice =
+      requestedProviderConfig.kind === "system"
+        ? await readHostedAiReasoningChoice(requestedProviderConfig.model)
+        : undefined
     const availability = await checkProviderAvailability(requestedProviderConfig, "pageTranslation")
     if (this.pendingStart !== startToken) {
       return
@@ -447,7 +454,7 @@ export class PageTranslationManager implements IPageTranslationManager {
       const sessionVersion = this.translationSessionVersion
 
       beginPageTranslationSession()
-      setPageTranslationSessionProviderRef(availability.providerRef)
+      setPageTranslationSessionProviderRef(availability.providerRef, reasoningChoice)
 
       try {
         await sendMessage("setAndNotifyPageTranslationStateChangedByManager", {

@@ -1,8 +1,9 @@
 import { HostedAiOutputFieldTypeSchema } from "@read-frog/api-contract"
 import { z } from "zod"
 import { isBuiltInActionId } from "@/utils/constants/custom-action"
-import { BUILT_IN_AI_PROVIDER_ID } from "@/utils/constants/provider-ids"
+import { DEFAULT_BUILT_IN_AI_PROVIDER_ID } from "@/utils/constants/provider-ids"
 import { storedLanguageTagSchema } from "./language-tag"
+import { storedProviderIdSchema } from "./provider-id"
 import { shortcutSchema } from "./shortcut"
 
 // Upper bound (UTF-16 code units) of a custom action's HTML layout. NEVER lower
@@ -71,7 +72,7 @@ export const selectionToolbarCustomActionNotebaseConnectionSchema = z.object({
 
 export const selectionToolbarBuiltInActionStateSchema = z.object({
   enabled: z.boolean(),
-  providerId: z.string().nonempty(),
+  providerId: storedProviderIdSchema,
   notebaseConnection: selectionToolbarCustomActionNotebaseConnectionSchema.optional(),
   // Missing means the action's default key (BUILT_IN_ACTION_DEFAULT_SHORTCUTS);
   // empty means the user cleared it.
@@ -85,14 +86,14 @@ export const selectionToolbarBuiltInActionsSchema = z.object({
   // falling back to DEFAULT_CONFIG and writing that over the user's settings.
   sentenceAnalysis: selectionToolbarBuiltInActionStateSchema.default(() => ({
     enabled: true,
-    providerId: BUILT_IN_AI_PROVIDER_ID,
+    providerId: DEFAULT_BUILT_IN_AI_PROVIDER_ID,
   })),
   // For the same reason as above. Off: a config stored before v105 has not
   // been through v106 either, which turns it on and unpins it, so it must not
   // land on the toolbar in the meantime.
   improveWriting: selectionToolbarBuiltInActionStateSchema.default(() => ({
     enabled: false,
-    providerId: BUILT_IN_AI_PROVIDER_ID,
+    providerId: DEFAULT_BUILT_IN_AI_PROVIDER_ID,
   })),
 })
 
@@ -102,7 +103,7 @@ export const selectionToolbarCustomActionSchema = z
     name: z.string().nonempty(),
     enabled: z.boolean().optional(),
     icon: z.string(),
-    providerId: z.string().nonempty(),
+    providerId: storedProviderIdSchema,
     systemPrompt: z.string(),
     prompt: z.string(),
     outputSchema: z.array(selectionToolbarCustomActionOutputFieldSchema).min(1),

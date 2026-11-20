@@ -160,6 +160,21 @@ options:
     addProvider: プロバイダーを追加
     builtInProvider: 組み込みプロバイダー
     yourProviders: マイプロバイダー
+    builtInModel:
+      reasoningDescription: "$1 が回答する前にどれだけ考えるかです。レベルが高いほど難しい文章をうまく扱えますが、回答が遅くなり、クォータの消費も増えます。"
+      reasoningDefault: "デフォルト"
+      reasoningLevels:
+        none: "オフ"
+        minimal: "最小"
+        low: "低"
+        medium: "中"
+        high: "高"
+        xhigh: "最高"
+      unavailableTitle:
+        temporary: "$1 は一時的に利用できません"
+        removed: "$1 は提供が終了しました"
+      unavailableDescription: "利用できない間、これを使う機能はエラーになります。引き続き使うには、それらの機能を $1 に切り替えてください。"
+      unavailableDescriptionNoAlternatives: "利用できない間、これを使う機能はエラーになります。引き続き使うには、それらの機能を別のプロバイダーに切り替えてください。"
     builtInAiUsage:
       title: 組み込み AI クォータ
       remaining: "残り $1%"
@@ -1792,6 +1807,17 @@ hostedAi:
     rateLimited: リクエストが多すぎます。後でもう一度お試しください。
     guestRateLimited: ゲストからのリクエストが多すぎます。後でもう一度お試しください。
     userRateLimited: リクエストが多すぎます。後でもう一度お試しください。
+    modelUnavailable: "$1 は現在利用できません。代わりに $2 をお試しください。"
+    modelUnavailableNoAlternatives: "$1 は現在利用できず、ほかに利用できる組み込み AI モデルもありません。しばらくしてからもう一度お試しください。"
+    modelBusy: "$1 は現在混み合っています。少し待ってからもう一度お試しいただくか、$2 に切り替えてください。"
+    modelBusyNoAlternatives: "$1 は現在混み合っています。少し待ってからもう一度お試しください。"
+  unavailable:
+    temporary: "$1 は一時的に利用できません。代わりに $2 をお試しください。"
+    temporaryNoAlternatives: "$1 は一時的に利用できません。しばらくしてからもう一度お試しください。"
+    removed: "$1 は提供が終了しました。代わりに $2 をお試しください。"
+    removedNoAlternatives: "$1 は提供が終了しました。別のプロバイダーを選んでください。"
+  actions:
+    chooseModel: "モデルを選択"
 hotkey:
   control: Ctrl
   alt: Option

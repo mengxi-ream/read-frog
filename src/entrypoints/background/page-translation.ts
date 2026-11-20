@@ -60,7 +60,12 @@ async function getValidatedCachedTranslation(
 /** Which service answered, for the log; never its config, which holds the key. */
 function describeProvider(providerRef: SerializableProviderRef): Record<string, string | null> {
   if (providerRef.kind === "system") {
-    return { provider: providerRef.providerId, modelTier: providerRef.modelTier }
+    return {
+      provider: providerRef.providerId,
+      model: providerRef.model,
+      modelTier: providerRef.modelTier,
+      reasoning: providerRef.reasoning,
+    }
   }
   const { config } = providerRef
   if (!isLLMProviderConfig(config)) return { provider: config.provider }

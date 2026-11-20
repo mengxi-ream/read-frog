@@ -6,8 +6,9 @@ import type { LLMProviderConfig, TranslateProviderConfig } from "@/types/config/
 import type { TranslationTextFormat } from "@/types/config/translate"
 import type { WebPagePromptContext } from "@/types/content"
 import type { MatchedTerm } from "@/utils/glossary/types"
+import type { HostedAiReasoning } from "@/utils/hosted-ai/types"
 import type { PromptableProviderRef, SerializableProviderRef } from "@/utils/providers/provider-ref"
-import type { ResolvedProviderRef } from "@/utils/providers/provider-registry"
+import type { ResolvedProviderRef, SystemProviderRef } from "@/utils/providers/provider-registry"
 import { isSameLanguage, LANGUAGE_ENGLISH_NAMES } from "@read-frog/definitions"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { isAPIProviderConfig, isLLMProviderConfig } from "@/types/config/provider"
@@ -16,10 +17,11 @@ import { isNoTranslationSentinel } from "@/utils/constants/prompt"
 import { detectLanguage } from "@/utils/content/language"
 import { resolveGlossaryTerms } from "@/utils/glossary/active-matcher"
 import { trackGlossaryUsed } from "@/utils/glossary/analytics"
+import { readHostedAiReasoningChoice } from "@/utils/hosted-ai/models"
 import { i18n } from "@/utils/i18n"
 import { createLogger } from "@/utils/logging/logger"
 import { getTranslatePrompt } from "@/utils/prompts/translate"
-import { serializeProviderRef } from "@/utils/providers/provider-ref"
+import { getProviderCacheIdentity, serializeProviderRef } from "@/utils/providers/provider-ref"
 import { resolveProviderRefForCapability } from "@/utils/providers/provider-registry"
 import { TranslationCancelledError } from "@/utils/request/cancellation"
 import { Sha256Hex } from "../../hash"
@@ -115,16 +117,9 @@ async function buildWebPageHashComponents(
   const preparedText = prepareTranslationText(text)
   const normalizedWebPageContext = normalizeWebPagePromptContext(webPageContext)
   const providerConfig = providerRef.kind === "local" ? providerRef.config : null
-  const providerHashIdentity =
-    providerRef.kind === "local"
-      ? providerRef.config
-      : {
-          providerId: providerRef.providerId,
-          modelRevision: providerRef.modelRevision,
-        }
   const hashComponents = [
     preparedText,
-    JSON.stringify(providerHashIdentity),
+    getProviderCacheIdentity(providerRef),
     partialLangConfig.sourceCode,
     partialLangConfig.targetCode,
   ]
@@ -185,20 +180,24 @@ async function buildWebPageHashComponents(
  * status blip cannot fail in-flight paragraphs.
  */
 function getSessionProviderRefFor(
-  provider: ResolvedProviderRef<TranslateProviderConfig>,
+  provider: SystemProviderRef,
+  reasoningChoice: HostedAiReasoning | undefined,
 ): SerializableProviderRef | null {
-  if (provider.kind !== "system") {
+  const session = getPageTranslationSessionProviderRef()
+  if (!session) {
     return null
   }
-  const sessionRef = getPageTranslationSessionProviderRef()
+  const { providerRef } = session
+  // The provider id names the model, so a switch to another model misses. So
+  // does another reasoning level: it is a user setting, not status.
   if (
-    sessionRef?.kind !== "system" ||
-    sessionRef.providerId !== provider.id ||
-    sessionRef.modelTier !== provider.modelTier
+    providerRef.kind !== "system" ||
+    providerRef.providerId !== provider.id ||
+    session.reasoningChoice !== reasoningChoice
   ) {
     return null
   }
-  return sessionRef
+  return providerRef
 }
 
 const pendingSystemSerializes = new Map<string, Promise<SerializableProviderRef>>()
@@ -213,10 +212,10 @@ let lastRequestedSystemKey: string | null = null
 
 /**
  * Resolve the transport ref for the requested provider. Snapshot misses do
- * happen off the happy path — a mid-session provider/tier switch, node
- * translation without an active session — and each translation unit resolves
- * independently, so without coalescing a dense batch would fan out one
- * hosted-status fetch per paragraph. Concurrent misses for the same system
+ * happen off the happy path — a mid-session switch of model or reasoning
+ * level, node translation without an active session — and each translation
+ * unit resolves independently, so without coalescing a dense batch would fan
+ * out one hosted-status fetch per paragraph. Concurrent misses for the same system
  * provider share one serialization (per-key, so interleaved keys cannot evict
  * each other's in-flight fetch), and an active session adopts the result so
  * later paragraphs skip the network entirely.
@@ -240,14 +239,23 @@ export async function resolvePageProviderRef(
     return serializeProviderRef(provider, feature)
   }
 
-  // The feature is part of the key: two features on the same provider and tier
-  // gate on different tier statuses, so they must not share an in-flight fetch.
-  const key = `${provider.id}:${provider.modelTier}:${feature}`
+  // Page translation compares the stored reasoning choice with the one its
+  // session snapshot was made from. Read here, before any ref is made below;
+  // see setPageTranslationSessionProviderRef.
+  const reasoningChoice =
+    feature === "pageTranslation" ? await readHostedAiReasoningChoice(provider.model) : undefined
+
+  // The feature is part of the key: two features on the same model gate on
+  // different tier statuses, so they must not share an in-flight fetch. The
+  // reasoning choice is too: a ref made for the old level must not be shared
+  // with, or adopted for, a paragraph that read the new one.
+  const key = `${provider.id}:${feature}:${reasoningChoice ?? ""}`
   lastRequestedSystemKey = key
 
   // The session snapshot belongs to the page-translation run; other features
   // must not adopt it, and must not overwrite it below.
-  const sessionRef = feature === "pageTranslation" ? getSessionProviderRefFor(provider) : null
+  const sessionRef =
+    feature === "pageTranslation" ? getSessionProviderRefFor(provider, reasoningChoice) : null
   if (sessionRef) {
     return sessionRef
   }
@@ -273,7 +281,7 @@ export async function resolvePageProviderRef(
     getPageTranslationSessionId() === sessionId &&
     key === lastRequestedSystemKey
   ) {
-    setPageTranslationSessionProviderRef(providerRef)
+    setPageTranslationSessionProviderRef(providerRef, reasoningChoice)
   }
   return providerRef
 }

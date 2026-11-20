@@ -724,6 +724,37 @@ describe("selection toolbar requests", () => {
     expect(screen.getByTestId("translation-language").textContent).toBe("ja")
   })
 
+  it("asks for the Built-in AI status only once the translation popover opens", async () => {
+    translateTextCoreMock.mockResolvedValue("translated once")
+    const { sendMessage } = await import("@/utils/message")
+    const statusRequests = () =>
+      vi
+        .mocked(sendMessage)
+        .mock.calls.filter(
+          ([name, data]) =>
+            name === "backgroundFetch" &&
+            String((data as { url?: unknown } | undefined)?.url).includes("hostedAi/status"),
+        )
+
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    setSelectionState(store, { text: "Selected text" })
+    renderWithProviders(<TranslateButton />, store)
+
+    // The selection app mounts on every page and in every frame: loading a
+    // page alone must not reach the server.
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 50))
+    })
+    expect(statusRequests()).toHaveLength(0)
+
+    fireEvent.click(screen.getByRole("button", { name: "action.translation" }))
+
+    await waitFor(() => {
+      expect(statusRequests().length).toBeGreaterThan(0)
+    })
+  })
+
   it("renders the translation tooltip as non-interactive and closes it on hover leave", async () => {
     translateTextCoreMock.mockResolvedValue("translated once")
     getOrCreateWebPageContextMock.mockResolvedValue(null)
@@ -1807,8 +1838,7 @@ describe("selection toolbar requests", () => {
       expect(streamBackgroundStructuredObjectMock).toHaveBeenCalledTimes(1)
     })
     expect(streamBackgroundStructuredObjectMock.mock.calls[0]?.[0]).toMatchObject({
-      providerId: "read-frog-free-ai",
-      modelTier: "normal",
+      providerId: "read-frog-ai:gpt-6-luna",
       requestId: expect.stringMatching(/^[0-9a-f-]{36}$/i),
     })
 

@@ -27,7 +27,7 @@ const {
     pageTranslation: null as Config["pageTranslation"] | null,
     pageTranslationProviderRef: null as
       | { kind: "local"; config: { provider: string } }
-      | { kind: "system"; id: string; name: string; modelTier: "normal" | "advance" }
+      | { kind: "system"; id: string; name: string; model: string }
       | null,
   },
   translateAtom: {},
@@ -164,9 +164,9 @@ describe("translation prompt selectors", () => {
   it("keeps prompt selection available for Built-in AI", () => {
     testState.pageTranslationProviderRef = {
       kind: "system",
-      id: "read-frog-free-ai",
-      name: "Built-in AI",
-      modelTier: "normal",
+      id: "read-frog-ai:gpt-6-luna",
+      name: "GPT-6 Luna",
+      model: "gpt-6-luna",
     }
     render(<TranslatePromptSelector />)
 
@@ -194,9 +194,9 @@ describe("translation prompt selectors", () => {
     testState.translationHub!.promptId = "precision-rewrite"
     testState.pageTranslationProviderRef = {
       kind: "system",
-      id: "read-frog-free-ai",
-      name: "Built-in AI",
-      modelTier: "normal",
+      id: "read-frog-ai:gpt-6-luna",
+      name: "GPT-6 Luna",
+      model: "gpt-6-luna",
     }
     render(<TranslationHubPromptSelector />)
 

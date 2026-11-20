@@ -1,6 +1,7 @@
 import { useAtom, useAtomValue } from "jotai"
 import { useMemo } from "react"
 import ProviderSelector from "@/components/llm-providers/provider-selector"
+import { useBuiltInAiModels } from "@/components/llm-providers/use-built-in-ai-models"
 import { useHostedAiProviderOptions } from "@/components/llm-providers/use-hosted-ai-provider-options"
 import { useHostedAiStatus } from "@/components/llm-providers/use-hosted-ai-status"
 import { Label } from "@/components/ui/base-ui/label"
@@ -21,9 +22,17 @@ export function LanguageDetectionConfig() {
   // Capability-based so Built-in AI appears: it is synthesized by the provider
   // registry rather than stored in providersConfig, so the old
   // getEnabledLLMProvidersConfig filter could never surface it.
+  const { models: builtInAiModels } = useBuiltInAiModels()
+  const selectedProviderId = languageDetection.providerId
   const selectableProviders = useMemo(
-    () => getSelectableProvidersForCapability("languageDetection", providersConfig),
-    [providersConfig],
+    () =>
+      getSelectableProvidersForCapability(
+        "languageDetection",
+        providersConfig,
+        builtInAiModels,
+        selectedProviderId ? [selectedProviderId] : [],
+      ),
+    [providersConfig, builtInAiModels, selectedProviderId],
   )
   // Adds the Ultra badge and grays out tiers this account cannot run, matching
   // every other provider dropdown.

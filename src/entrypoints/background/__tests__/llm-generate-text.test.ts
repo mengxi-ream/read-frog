@@ -53,9 +53,11 @@ describe("llm-generate-text", () => {
       ...localPayload,
       providerRef: {
         kind: "system" as const,
-        providerId: "read-frog-advance-ai" as const,
+        providerId: "read-frog-ai:gpt-6.2-sol" as const,
+        model: "gpt-6.2-sol",
         modelTier: "advance" as const,
         modelRevision: "advance-r1",
+        reasoning: null,
       },
       requestId: "123e4567-e89b-42d3-a456-426614174000",
     }
@@ -93,9 +95,11 @@ describe("llm-generate-text", () => {
             ...localPayload,
             providerRef: {
               kind: "system",
-              providerId: "read-frog-free-ai",
+              providerId: "read-frog-ai:gpt-6-luna",
+              model: "gpt-6-luna",
               modelTier: "normal",
               modelRevision: "r1",
+              reasoning: null,
             },
             hostedFeature,
           },
