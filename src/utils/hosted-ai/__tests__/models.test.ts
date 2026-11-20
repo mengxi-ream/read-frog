@@ -42,22 +42,30 @@ describe("sanitizeHostedAiModels", () => {
   })
 
   it("drops malformed entries one by one instead of the whole list", () => {
+    // Each dropped entry is well formed but for the one field it is named after.
+    const model = { vendor: "openai", tier: "normal", modelRevision: "r", available: true }
     const models = sanitizeHostedAiModels([
       null,
-      { id: "", name: "Empty", tier: "normal", modelRevision: "r", available: true },
-      { id: "x".repeat(65), name: "Long", tier: "normal", modelRevision: "r", available: true },
-      { id: "pro-model", name: "Pro", tier: "pro", modelRevision: "r", available: true },
-      { id: "no-revision", name: "No revision", tier: "normal", available: true },
-      { id: "gpt-6-luna", name: "GPT-6 Luna", tier: "normal", modelRevision: "r1" },
-      { id: "gpt-6-luna", name: "Duplicate", tier: "normal", modelRevision: "r2" },
+      { ...model, id: "", name: "Empty" },
+      { ...model, id: "x".repeat(65), name: "Long" },
+      { ...model, id: "pro-model", name: "Pro", tier: "pro" },
+      { ...model, id: "no-revision", name: "No revision", modelRevision: undefined },
+      { ...model, id: "no-vendor", name: "No vendor", vendor: undefined },
+      {
+        id: "gpt-6-luna",
+        name: "GPT-6 Luna",
+        vendor: "openai",
+        tier: "normal",
+        modelRevision: "r1",
+      },
+      { ...model, id: "gpt-6-luna", name: "Duplicate", modelRevision: "r2" },
     ])
 
     expect(models).toEqual([
       {
         id: "gpt-6-luna",
         name: "GPT-6 Luna",
-        // Named by no vendor, the model shows Read Frog's logo.
-        vendor: null,
+        vendor: "openai",
         tier: "normal",
         modelRevision: "r1",
         reasoning: { levels: [], default: null },
@@ -72,6 +80,7 @@ describe("sanitizeHostedAiModels", () => {
       {
         id: "future-model",
         name: "Future",
+        vendor: "openai",
         tier: "normal",
         modelRevision: "r1",
         reasoning: { levels: ["low", "max", "high"], default: "max" },
@@ -82,8 +91,8 @@ describe("sanitizeHostedAiModels", () => {
     expect(model!.reasoning).toEqual({ levels: ["low", "high"], default: null })
   })
 
-  it("takes the vendor only when it is a non-empty string", () => {
-    const vendors = sanitizeHostedAiModels(
+  it("keeps a model only when it names its vendor with a non-empty string", () => {
+    const models = sanitizeHostedAiModels(
       [" openai ", "", "   ", 42, null, { id: "openai" }, undefined].map((vendor, index) => ({
         id: `model-${index}`,
         name: "Model",
@@ -91,9 +100,12 @@ describe("sanitizeHostedAiModels", () => {
         tier: "normal",
         modelRevision: "r1",
       })),
-    )?.map((model) => model.vendor)
+    )
 
-    expect(vendors).toEqual(["openai", null, null, null, null, null, null])
+    // Trimmed, as the contract's schema has the server send it.
+    expect(models?.map(({ id, vendor }) => ({ id, vendor }))).toEqual([
+      { id: "model-0", vendor: "openai" },
+    ])
   })
 
   it("names a model by its id when the list does not have it", () => {

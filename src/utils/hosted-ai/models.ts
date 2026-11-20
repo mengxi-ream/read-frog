@@ -39,15 +39,7 @@ const HOSTED_AI_MODEL_TIERS = Object.keys(MODEL_TIER_SET) as HostedAiModelTier[]
  * contract's input schema would refuse it before the request leaves), so it is
  * not offered, and a default nobody here knows reads as null.
  */
-export interface HostedAiModel extends Omit<HostedAiModelStatus, "reasoning" | "vendor"> {
-  /**
-   * The company that makes the model, as the extension's provider id for it
-   * (`openai`, `anthropic`), for its logo. The contract does not type the
-   * field yet, so the list's value is used only when it is a non-empty string.
-   * Null otherwise, as from a server that does not send it or a list stored by
-   * an earlier build; the model then shows Read Frog's logo.
-   */
-  vendor: string | null
+export interface HostedAiModel extends Omit<HostedAiModelStatus, "reasoning"> {
   reasoning: {
     levels: HostedAiReasoning[]
     default: HostedAiReasoning | null
@@ -82,6 +74,11 @@ function sanitizeHostedAiModel(entry: unknown): HostedAiModel | null {
   if (typeof modelRevision !== "string" || modelRevision.trim() === "") {
     return null
   }
+  // The contract has every model name its maker, so one that does not is
+  // malformed like one without a revision.
+  if (typeof vendor !== "string" || vendor.trim() === "") {
+    return null
+  }
 
   const offeredLevels =
     isRecord(reasoning) && Array.isArray(reasoning.levels) ? reasoning.levels : []
@@ -91,7 +88,7 @@ function sanitizeHostedAiModel(entry: unknown): HostedAiModel | null {
   return {
     id,
     name: typeof name === "string" && name.trim() !== "" ? name.trim() : id,
-    vendor: typeof vendor === "string" && vendor.trim() !== "" ? vendor.trim() : null,
+    vendor: vendor.trim(),
     tier,
     modelRevision,
     reasoning: {

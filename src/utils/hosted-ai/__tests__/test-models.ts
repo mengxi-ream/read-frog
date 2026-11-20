@@ -1,14 +1,6 @@
 import type { HostedAiModelStatus } from "@/utils/hosted-ai/types"
 
 /**
- * One entry of `hostedAi.status.models` as the server's catalog sends it,
- * naming the model's maker in `vendor`. The contract this build compiles
- * against does not type `vendor` yet, which is why the extension reads it only
- * when it is a non-empty string.
- */
-export type TestHostedAiModelStatus = HostedAiModelStatus & { vendor: string }
-
-/**
  * `hostedAi.status.models` as the server's catalog first shipped it, in its
  * order. Tests use these instead of made-up models so names, tiers and
  * reasoning levels look like what users see.
@@ -59,14 +51,14 @@ export const TEST_HOSTED_AI_MODELS = [
     reasoning: { levels: ["low", "medium", "high"], default: "low" },
     available: true,
   },
-] as const satisfies readonly TestHostedAiModelStatus[]
+] as const satisfies readonly HostedAiModelStatus[]
 
 export type TestHostedAiModelId = (typeof TEST_HOSTED_AI_MODELS)[number]["id"]
 
 /** A fresh copy of the catalog, each model changed by `overrides` where named. */
 export function testHostedAiModels(
-  overrides: Partial<Record<TestHostedAiModelId, Partial<TestHostedAiModelStatus>>> = {},
-): TestHostedAiModelStatus[] {
+  overrides: Partial<Record<TestHostedAiModelId, Partial<HostedAiModelStatus>>> = {},
+): HostedAiModelStatus[] {
   return TEST_HOSTED_AI_MODELS.map((model) => ({
     ...structuredClone(model),
     reasoning: { levels: [...model.reasoning.levels], default: model.reasoning.default },
