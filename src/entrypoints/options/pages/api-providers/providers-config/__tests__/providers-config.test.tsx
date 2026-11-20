@@ -674,6 +674,24 @@ describe("ProvidersConfig", () => {
     ).toBeInTheDocument()
   })
 
+  it("puts the reasoning field below the model's feature providers", () => {
+    testState.selectedProviderId = SOL_PROVIDER_ID
+
+    renderProvidersConfig()
+
+    const reasoning = getReasoningTrigger()
+    const switches = screen.getAllByRole("switch")
+    expect(switches.length).toBeGreaterThan(0)
+    for (const above of [
+      screen.getByRole("button", { name: "options.apiProviders.featureProviders.title" }),
+      ...switches,
+    ]) {
+      expect(above.compareDocumentPosition(reasoning) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
+        Node.DOCUMENT_POSITION_FOLLOWING,
+      )
+    }
+  })
+
   it("shows the level the user picked for the model", () => {
     config.builtInAi = { models: { "gpt-6.2-sol": { reasoning: "high" } } }
     testState.selectedProviderId = SOL_PROVIDER_ID

@@ -538,7 +538,6 @@ function BuiltInProviderPanel({ providerId }: { providerId: BuiltInAiProviderId 
               />
             )}
           </div>
-          {model && <BuiltInModelReasoningField model={model} />}
           <ProviderEditor.Assignments defaultOpen>
             {BUILT_IN_FEATURE_KEYS.map((featureKey) => (
               <ProviderEditor.FeatureAssignment
@@ -552,6 +551,7 @@ function BuiltInProviderPanel({ providerId }: { providerId: BuiltInAiProviderId 
             />
             <ProviderEditor.CustomActionAssignments {...getAssignmentStatus("customAction")} />
           </ProviderEditor.Assignments>
+          {model && <BuiltInModelReasoningField model={model} />}
         </EntityEditor.Body>
       </EntityEditor.Root>
     </BuiltInProviderEditor.Provider>
