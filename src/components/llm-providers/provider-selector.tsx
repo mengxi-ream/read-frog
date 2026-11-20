@@ -31,7 +31,15 @@ type ProviderSelectorLabelKey =
   | "translateService.llmModels"
   | "translateService.normalTranslator"
 type ProviderSelectorTriggerSize = ComponentProps<typeof SelectTrigger>["size"]
-type TooltipContainer = ComponentProps<typeof UpgradePlanBadge>["tooltipContainer"]
+/**
+ * Where a row's tooltips portal to, and the classes for their positioner: the
+ * menu's own `container` and `positionerClassName`, so that inside the
+ * selection popover they paint on its overlay layer, not under it.
+ */
+interface TooltipLayer {
+  container?: ComponentProps<typeof UpgradePlanBadge>["tooltipContainer"]
+  positionerClassName?: string
+}
 
 export interface ProviderSelectorGroup {
   labelKey: ProviderSelectorLabelKey
@@ -100,12 +108,12 @@ export function ProviderOptionContent({
   provider,
   providers,
   theme,
-  tooltipContainer,
+  tooltipLayer,
 }: {
   provider: ProviderSelectorOption
   providers: readonly ProviderSelectorOption[]
   theme: Theme
-  tooltipContainer?: TooltipContainer
+  tooltipLayer?: TooltipLayer
 }) {
   const upgradeTo = isSystemProviderSelectorItem(provider) ? provider.upgradeTo : undefined
   const unavailableReason = getUnavailableReason(provider, providers)
@@ -121,9 +129,19 @@ export function ProviderOptionContent({
         <div className="flex shrink-0 items-center gap-1.5">
           {/* Still selectable: picking it is the user's call, and it fails with this reason when it runs. */}
           {unavailableReason && (
-            <ModelUnavailableIcon reason={unavailableReason} tooltipContainer={tooltipContainer} />
+            <ModelUnavailableIcon
+              reason={unavailableReason}
+              tooltipContainer={tooltipLayer?.container}
+              tooltipPositionerClassName={tooltipLayer?.positionerClassName}
+            />
           )}
-          {upgradeTo && <UpgradePlanBadge plan={upgradeTo} tooltipContainer={tooltipContainer} />}
+          {upgradeTo && (
+            <UpgradePlanBadge
+              plan={upgradeTo}
+              tooltipContainer={tooltipLayer?.container}
+              tooltipPositionerClassName={tooltipLayer?.positionerClassName}
+            />
+          )}
         </div>
       )}
     </div>
@@ -135,13 +153,13 @@ function ProviderSelectValue({
   placeholder,
   theme,
   triggerNameClassName,
-  tooltipContainer,
+  tooltipLayer,
 }: {
   providers: readonly ProviderSelectorOption[]
   placeholder?: string
   theme: Theme
   triggerNameClassName?: string
-  tooltipContainer?: TooltipContainer
+  tooltipLayer?: TooltipLayer
 }) {
   return (
     // The trigger clamps its value to one line with overflow hidden, which
@@ -163,7 +181,8 @@ function ProviderSelectValue({
             {unavailableReason && (
               <ModelUnavailableIcon
                 reason={unavailableReason}
-                tooltipContainer={tooltipContainer}
+                tooltipContainer={tooltipLayer?.container}
+                tooltipPositionerClassName={tooltipLayer?.positionerClassName}
               />
             )}
           </span>
@@ -260,7 +279,7 @@ function GroupedSelect({
           placeholder={placeholder}
           theme={theme}
           triggerNameClassName={triggerNameClassName}
-          tooltipContainer={selectContentProps?.container}
+          tooltipLayer={selectContentProps}
         />
       </SelectTrigger>
       <SelectContent {...selectContentProps}>
@@ -277,7 +296,7 @@ function GroupedSelect({
                   provider={provider}
                   providers={providers}
                   theme={theme}
-                  tooltipContainer={selectContentProps?.container}
+                  tooltipLayer={selectContentProps}
                 />
               </SelectItem>
             ))}
@@ -328,7 +347,7 @@ function UngroupedSelect({
           placeholder={placeholder}
           theme={theme}
           triggerNameClassName={triggerNameClassName}
-          tooltipContainer={selectContentProps?.container}
+          tooltipLayer={selectContentProps}
         />
       </SelectTrigger>
       <SelectContent {...selectContentProps}>
@@ -343,7 +362,7 @@ function UngroupedSelect({
                 provider={provider}
                 providers={providers}
                 theme={theme}
-                tooltipContainer={selectContentProps?.container}
+                tooltipLayer={selectContentProps}
               />
             </SelectItem>
           ))}

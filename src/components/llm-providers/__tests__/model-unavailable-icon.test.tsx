@@ -36,4 +36,26 @@ describe("ModelUnavailableIcon", () => {
       expect(document.querySelector("[data-slot='tooltip-content']")).toHaveTextContent(REASON)
     })
   })
+
+  it("puts the tooltip on the layer it is given, sized to its text", async () => {
+    render(
+      <TooltipProvider>
+        <ModelUnavailableIcon reason={REASON} tooltipPositionerClassName="z-2147483647" />
+      </TooltipProvider>,
+    )
+
+    const icon = screen.getByRole("img", { name: REASON })
+    fireEvent.mouseEnter(icon)
+    fireEvent.focus(icon)
+
+    // Inside the selection popover, the default z-50 paints under the popover
+    // and its menus, and the box tooltips portal into has no width.
+    const tooltip = await waitFor(() => {
+      const element = document.querySelector("[data-slot='tooltip-content']")
+      expect(element).toBeInTheDocument()
+      return element!
+    })
+    expect(tooltip.parentElement).toHaveClass("z-2147483647")
+    expect(tooltip).toHaveClass("w-max")
+  })
 })

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import type { ProviderConfig } from "@/types/config/provider"
 import type { ProviderSelectorOption } from "@/utils/providers/provider-display"
-import { act, render, screen, within } from "@testing-library/react"
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { TooltipProvider } from "@/components/ui/base-ui/tooltip"
 import {
@@ -50,7 +50,11 @@ function getProviders(): ProviderSelectorOption[] {
   return [...builtIn, OWN_OPENAI]
 }
 
-function renderSelector(value: string, onChange = vi.fn<(id: string) => void>()) {
+function renderSelector(
+  value: string,
+  onChange = vi.fn<(id: string) => void>(),
+  selectContentProps?: { positionerClassName: string },
+) {
   render(
     <TooltipProvider>
       <ProviderSelector
@@ -58,10 +62,23 @@ function renderSelector(value: string, onChange = vi.fn<(id: string) => void>())
         value={value}
         onChange={onChange}
         placeholder="Pick a provider"
+        selectContentProps={selectContentProps}
       />
     </TooltipProvider>,
   )
   return onChange
+}
+
+async function hoverForTooltip(element: HTMLElement, text: string) {
+  fireEvent.mouseEnter(element)
+  fireEvent.focus(element)
+  return waitFor(() => {
+    const tooltip = [
+      ...document.querySelectorAll<HTMLElement>("[data-slot='tooltip-content']"),
+    ].find((candidate) => candidate.textContent === text)
+    expect(tooltip).toBeDefined()
+    return tooltip!
+  })
 }
 
 async function openMenu() {
@@ -148,6 +165,25 @@ describe("ProviderSelector with Built-in AI models", () => {
     expect(
       within(trigger).queryByRole("img", { name: /hostedAi\.unavailable/ }),
     ).not.toBeInTheDocument()
+  })
+
+  it("puts a row's tooltips on the menu's layer", async () => {
+    // The selection popover passes its overlay layer: at the default z-50 the
+    // tooltips would paint under the popover and the menu itself.
+    renderSelector(LUNA_PROVIDER_ID, undefined, { positionerClassName: "overlay-layer" })
+
+    const sol = findOption(await openMenu(), "GPT-6.2 Sol")
+    const warning = await hoverForTooltip(
+      within(sol).getByRole("img", { name: SOL_UNAVAILABLE_REASON }),
+      SOL_UNAVAILABLE_REASON,
+    )
+    expect(warning.parentElement).toHaveClass("overlay-layer")
+
+    const upgrade = await hoverForTooltip(
+      within(sol).getByText("Ultra"),
+      "hostedAi.planBadge.ultra",
+    )
+    expect(upgrade.parentElement).toHaveClass("overlay-layer")
   })
 
   it("shows the placeholder when the value is not one of the options", () => {
