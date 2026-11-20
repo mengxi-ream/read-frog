@@ -3,7 +3,9 @@ import type { Config } from "@/types/config/config"
 import type { SubtitlesFragment } from "@/utils/subtitles/types"
 import { isSameLanguage } from "@read-frog/definitions"
 import { z } from "zod"
+import { storage } from "#imports"
 import { getLocalConfig } from "@/utils/config/storage"
+import { CONFIG_STORAGE_KEY } from "@/utils/constants/config"
 import {
   BILIBILI_POST_MESSAGE_TIMEOUT_MS,
   BILIBILI_SUBTITLES_REQUEST_TYPE,
@@ -55,6 +57,8 @@ const TRACK_KEY_SEPARATOR = "#"
 // Bilibili selects a track on its own, often its Chinese AI translation even for a foreign video,
 // so only a track the reader clicked in the menu counts as their pick.
 let playerPick: { partId: string; lan: string } | null = null
+// Bumped when the reader's source or target language changes, so the track is picked again.
+let languagesRevision = 0
 
 const subtitleFileSchema = z.object({
   body: z.array(z.object({ from: z.number(), to: z.number(), content: z.string() })),
@@ -83,12 +87,22 @@ function rememberPlayerPick(event: Event) {
 }
 
 /** Starts on page load, so a pick made before subtitles are turned on still counts. */
-export function listenForBilibiliPlayerPicks(): () => void {
+export function watchBilibiliTrackChoices(): () => void {
   // Capture, so the player cannot stop the click before it reaches us.
   document.addEventListener("click", rememberPlayerPick, true)
+  const unwatchConfig = storage.watch<Config>(`local:${CONFIG_STORAGE_KEY}`, (next, previous) => {
+    if (
+      next?.language.sourceCode !== previous?.language.sourceCode ||
+      next?.language.targetCode !== previous?.language.targetCode
+    ) {
+      languagesRevision += 1
+    }
+  })
   return () => {
     document.removeEventListener("click", rememberPlayerPick, true)
+    unwatchConfig()
     playerPick = null
+    languagesRevision = 0
   }
 }
 
@@ -165,11 +179,11 @@ async function downloadFragments(subtitle: SubtitleEntry): Promise<SubtitlesFrag
   }))
 }
 
-// The reader's pick is part of the key, so picking another track in the player loads ours again.
+// Everything the pick depends on is in the key, so a change to any of them loads our track again.
 function currentTrackKey(): string | null {
   const partId = getBilibiliPartId()
   if (partId === null) return null
-  return [partId, getPlayerPickedLan(partId) ?? ""].join(TRACK_KEY_SEPARATOR)
+  return [partId, getPlayerPickedLan(partId) ?? "", languagesRevision].join(TRACK_KEY_SEPARATOR)
 }
 
 async function loadTrack(trackKey: string): Promise<SubtitlesTrack> {

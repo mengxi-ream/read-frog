@@ -2,8 +2,10 @@
 
 import type { BilibiliSubtitlesResponse } from ".."
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import { storage } from "#imports"
+import { CONFIG_STORAGE_KEY } from "@/utils/constants/config"
 import { NoSubtitlesError } from "@/utils/subtitles/errors"
-import { bilibiliTrackSource, listenForBilibiliPlayerPicks } from ".."
+import { bilibiliTrackSource, watchBilibiliTrackChoices } from ".."
 
 vi.mock("@/utils/i18n", () => ({ i18n: { t: (key: string) => key } }))
 vi.mock("@/utils/sleep", () => ({ sleep: () => Promise.resolve() }))
@@ -44,7 +46,7 @@ let stopListening: () => void
 beforeEach(() => {
   readerLanguage.sourceCode = "auto"
   readerLanguage.targetCode = "zh-Hans"
-  stopListening = listenForBilibiliPlayerPicks()
+  stopListening = watchBilibiliTrackChoices()
   window.history.replaceState(null, "", "/video/BV1XZn26rE8x/?p=2")
   postMessageRequest.mockResolvedValue(response())
   fetchMock.mockResolvedValue(Response.json(FILE))
@@ -76,9 +78,18 @@ function pickInPlayer(lan: string) {
 
 describe("bilibiliTrackSource", () => {
   it("keys the track by the video part in the url and the reader's pick in the player", () => {
-    expect(bilibiliTrackSource.currentKey()).toBe("BV1XZn26rE8x:2#")
+    expect(bilibiliTrackSource.currentKey()).toBe("BV1XZn26rE8x:2##0")
     pickInPlayer("ai-en")
-    expect(bilibiliTrackSource.currentKey()).toBe("BV1XZn26rE8x:2#ai-en")
+    expect(bilibiliTrackSource.currentKey()).toBe("BV1XZn26rE8x:2#ai-en#0")
+  })
+
+  it("picks again once the reader's source or target language changes", async () => {
+    const before = bilibiliTrackSource.currentKey()
+    await storage.setItem(`local:${CONFIG_STORAGE_KEY}`, {
+      language: { sourceCode: "ja", targetCode: "zh-Hans" },
+    })
+
+    await vi.waitFor(() => expect(bilibiliTrackSource.currentKey()).not.toBe(before))
   })
 
   it("forgets the pick once subtitles are turned off in the player", () => {
@@ -86,7 +97,7 @@ describe("bilibiliTrackSource", () => {
     document
       .querySelector(".bpx-player-ctrl-subtitle-close-switch")!
       .dispatchEvent(new MouseEvent("click", { bubbles: true }))
-    expect(bilibiliTrackSource.currentKey()).toBe("BV1XZn26rE8x:2#")
+    expect(bilibiliTrackSource.currentKey()).toBe("BV1XZn26rE8x:2##0")
   })
 
   it("asks the page for the part and loads the uploader's subtitles, in milliseconds", async () => {

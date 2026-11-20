@@ -1,8 +1,8 @@
 import type { ContentScriptContext } from "#imports"
 import {
   bilibiliTrackSource,
-  listenForBilibiliPlayerPicks,
   TrackSubtitlesFetcher,
+  watchBilibiliTrackChoices,
 } from "@/utils/subtitles/fetchers"
 import { getBilibiliConfig } from "./platforms/bilibili/config"
 import { pollPlayerSubtitles } from "./poll-player-subtitles"
@@ -13,13 +13,13 @@ export function initBilibiliSubtitles(ctx: ContentScriptContext) {
     return
   }
 
-  ctx.onInvalidated(listenForBilibiliPlayerPicks())
+  ctx.onInvalidated(watchBilibiliTrackChoices())
   const config = getBilibiliConfig()
   const adapter = new UniversalVideoAdapter({
     config,
     fetchers: { native: () => new TrackSubtitlesFetcher(bilibiliTrackSource) },
   })
-  // The track key carries the reader's pick in the player, so a new pick loads ours again.
+  // The track key carries the player pick and the reader's languages, so a change loads ours again.
   pollPlayerSubtitles(ctx, {
     adapter,
     config,
