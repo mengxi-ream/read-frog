@@ -144,7 +144,10 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
     [activeSession],
   )
   const titleText = getSourceDocumentTitle() || null
-  const { models: builtInAiModels } = useBuiltInAiModels()
+  // This provider mounts on every page and in every frame, so status is asked
+  // for only once the popover opens. Closed, the stored list is enough: it only
+  // names the models, and a model resolves without it.
+  const { models: builtInAiModels } = useBuiltInAiModels({ enabled: isOpen })
   const selectedTranslateProviderId = selectionToolbar.features.translate.providerId
   const translateProviders = useMemo(
     () =>
