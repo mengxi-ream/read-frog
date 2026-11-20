@@ -1,5 +1,31 @@
 # @read-frog/extension
 
+## 1.61.0
+
+### Minor Changes
+
+- [#2547](https://github.com/mengxi-ream/read-frog/pull/2547) [`6060ad8`](https://github.com/mengxi-ream/read-frog/commit/6060ad8111dd14b196ecfbaf3c4a46eae1e80fc4) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(hosted-ai): when a Free or Pro account runs out of Built-in AI, a page translation it asked for offers to upgrade, with about how many web pages Pro and Ultra translate a month, or to switch to machine translation. This happens at the start, or once partway down the page. Ultra and automatic translation keep their messages
+
+- [#2547](https://github.com/mengxi-ream/read-frog/pull/2547) [`6060ad8`](https://github.com/mengxi-ream/read-frog/commit/6060ad8111dd14b196ecfbaf3c4a46eae1e80fc4) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(hosted-ai): new installs translate with Built-in AI (GPT-6 Luna). A guest who asks for a translation is asked to log in, or to switch to machine translation: Google Translate where it is reachable, otherwise Microsoft Translator. The website's guide translates with that machine translator before anyone logs in
+
+### Patch Changes
+
+- [#2535](https://github.com/mengxi-ream/read-frog/pull/2535) [`1864ae7`](https://github.com/mengxi-ream/read-frog/commit/1864ae7cdb1730a6b6672d839054c334560b0592) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(subtitles): pick the original Bilibili subtitles the way YouTube does
+
+- [#2543](https://github.com/mengxi-ream/read-frog/pull/2543) [`3373687`](https://github.com/mengxi-ream/read-frog/commit/33736878bdb1be9e9db0a94661a755d9f2c16a25) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(hosted-ai): pick which Built-in AI model each feature uses and how much it reasons. Provider menus list the models the server offers with their maker's logo, the popup's provider avatars show that logo too, and the API Providers page has a card per model with its reasoning level. A model that can't run shows a warning icon whose tooltip says why and what to switch to, and fails with that advice instead of switching by itself. Features already on Built-in AI move to GPT-6 Luna
+
+- [#2545](https://github.com/mengxi-ream/read-frog/pull/2545) [`4493881`](https://github.com/mengxi-ream/read-frog/commit/4493881e63940dd67a12552069daea2e762fd0e6) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(subtitles): stop showing "Video element not found" after the video leaves the page on X or Netflix
+
+- [#2542](https://github.com/mengxi-ream/read-frog/pull/2542) [`3e88634`](https://github.com/mengxi-ream/read-frog/commit/3e886348f1d1d1c814dc4d38f31a037330087ee8) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(floating-button): remove the feedback button below the frog
+
+- [#2540](https://github.com/mengxi-ream/read-frog/pull/2540) [`510b90a`](https://github.com/mengxi-ream/read-frog/commit/510b90a7fb90a7409218d99938e38f66c284605e) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(selection-toolbar): make the review-due tab count and open the combined review, so it shows the number the website's Start review shows and a sleeping notebase no longer appears in it
+
+- [#2529](https://github.com/mengxi-ream/read-frog/pull/2529) [`75303d0`](https://github.com/mengxi-ream/read-frog/commit/75303d043e6309bb9b0ee6029c39778b7070f14a) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(selection): always show copy and speak for the selected text instead of hiding them behind the expand toggle
+
+- [#2534](https://github.com/mengxi-ream/read-frog/pull/2534) [`37958e4`](https://github.com/mengxi-ream/read-frog/commit/37958e418d89f6989ec112df7bb195ba8782bb2b) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(subtitles): fill each AI translation request up to the batch limits while a video plays, instead of sending one subtitle line per request once the first 30 seconds were translated
+
+- [#2513](https://github.com/mengxi-ream/read-frog/pull/2513) [`fe2a78b`](https://github.com/mengxi-ream/read-frog/commit/fe2a78bebd8d8f3add7aea0b24151d1e266c29ba) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(subtitles): show the captions a publisher uploads to an X video. Their timestamps count from 01:00:00, so none of them ever lined up with the video and nothing appeared
+
 ## 1.60.1
 
 ### Patch Changes
