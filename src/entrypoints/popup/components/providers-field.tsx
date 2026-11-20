@@ -6,6 +6,7 @@ import { useAtomValue } from "jotai"
 import { useMemo } from "react"
 import { HelpTooltip } from "@/components/help-tooltip"
 import { FeatureProviderSelectorList } from "@/components/llm-providers/feature-provider-selector-list"
+import { getModelVendorLogo } from "@/components/llm-providers/model-icon"
 import { useBuiltInAiModels } from "@/components/llm-providers/use-built-in-ai-models"
 import { useHostedAiStatus } from "@/components/llm-providers/use-hosted-ai-status"
 import { useTheme } from "@/components/providers/theme-provider"
@@ -17,7 +18,11 @@ import { FEATURE_KEYS, FEATURE_PROVIDER_DEFS } from "@/utils/constants/feature-p
 import { getSelectionToolbarActions } from "@/utils/custom-actions"
 import { i18n } from "@/utils/i18n"
 import { isProviderIdDurablyUnusable } from "@/utils/providers/provider-availability"
-import { getProviderLogo, getProviderName } from "@/utils/providers/provider-display"
+import {
+  getProviderLogo,
+  getProviderName,
+  isSystemProviderSelectorItem,
+} from "@/utils/providers/provider-display"
 import { getSelectableProvidersForCapability } from "@/utils/providers/provider-registry"
 
 const VISIBLE_PROVIDER_COUNT = 5
@@ -86,6 +91,13 @@ function ProviderAvatarSummary({ slots }: { slots: SelectedProviderSlot[] }) {
         // merely out of quota. Otherwise these logos say "five features
         // configured" to an account that can run none of them.
         const unusable = isProviderIdDurablyUnusable(provider.id, capability, status)
+        // A Built-in AI model shows its vendor's logo, as in the menus, but
+        // without the frog badge: the next avatar would cover it. A model whose
+        // vendor is unknown keeps the frog.
+        const logo =
+          (isSystemProviderSelectorItem(provider)
+            ? getModelVendorLogo(provider.vendor, theme)
+            : null) ?? getProviderLogo(provider, theme)
 
         return (
           <Avatar
@@ -94,7 +106,7 @@ function ProviderAvatarSummary({ slots }: { slots: SelectedProviderSlot[] }) {
             className="items-center justify-center bg-white dark:bg-muted"
           >
             <AvatarImage
-              src={getProviderLogo(provider, theme)}
+              src={logo}
               alt={name}
               className={`size-3.5 rounded-none object-contain${unusable ? " opacity-40 grayscale" : ""}`}
             />
