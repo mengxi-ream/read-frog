@@ -3,7 +3,11 @@ import type { HostedAiStatus, HostedAiTierStatus } from "@/utils/hosted-ai/types
 import { describe, expect, it } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { buildFeatureProviderPatch } from "@/utils/constants/feature-providers"
-import { LUNA_PROVIDER_ID, testHostedAiModels } from "@/utils/hosted-ai/__tests__/test-models"
+import {
+  LUNA_PROVIDER_ID,
+  SOL_PROVIDER_ID,
+  testHostedAiModels,
+} from "@/utils/hosted-ai/__tests__/test-models"
 import { sanitizeHostedAiModels } from "@/utils/hosted-ai/models"
 import { isSystemProviderSelectorItem } from "@/utils/providers/provider-display"
 import {
@@ -620,6 +624,60 @@ describe("feature providers", () => {
       // AI is always capability-compatible, so the mode is now always reachable
       // and seeds itself with the hosted provider.
       expect(result).toEqual({ mode: "llm", providerId: LUNA_PROVIDER_ID })
+    })
+
+    describe("with a Built-in AI model stored", () => {
+      const allowedTier: HostedAiTierStatus = {
+        accessAllowed: true,
+        available: true,
+        unavailableReason: null,
+        upgradeTo: null,
+        modelRevision: "r1",
+      }
+      const walledOffTier: HostedAiTierStatus = {
+        accessAllowed: true,
+        available: false,
+        unavailableReason: "ultra_required",
+        upgradeTo: "ultra",
+        modelRevision: "r1",
+      }
+
+      it("keeps the model while status is loading or could not be fetched", () => {
+        // With no status the usable ids name the default model alone.
+        const result = resolveLanguageDetectionConfigForModeChange(
+          { mode: "basic", providerId: SOL_PROVIDER_ID },
+          "llm",
+          DEFAULT_CONFIG.providersConfig,
+          undefined,
+        )
+
+        expect(result).toEqual({ mode: "llm", providerId: SOL_PROVIDER_ID })
+      })
+
+      it("keeps a model the status list does not name", () => {
+        const result = resolveLanguageDetectionConfigForModeChange(
+          { mode: "basic", providerId: "read-frog-ai:retired-model" },
+          "llm",
+          DEFAULT_CONFIG.providersConfig,
+          statusWithAllTiers(allowedTier),
+        )
+
+        expect(result).toEqual({ mode: "llm", providerId: "read-frog-ai:retired-model" })
+      })
+
+      it("replaces a model whose tier the account cannot run", () => {
+        const status = statusWithAllTiers(allowedTier)
+        status.features.languageDetection = { normal: allowedTier, advance: walledOffTier }
+
+        const result = resolveLanguageDetectionConfigForModeChange(
+          { mode: "basic", providerId: SOL_PROVIDER_ID },
+          "llm",
+          DEFAULT_CONFIG.providersConfig,
+          status,
+        )
+
+        expect(result).toEqual({ mode: "llm", providerId: "openai-default" })
+      })
     })
   })
 
