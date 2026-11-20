@@ -53,7 +53,7 @@ describe("feature provider analytics", () => {
         name: "GPT-6 Luna",
         model: "gpt-6-luna",
       }),
-    ).toEqual({ ...BUILT_IN_AI_FEATURE_PROVIDER, model: "gpt-6-luna" })
+    ).toEqual({ ...BUILT_IN_AI_FEATURE_PROVIDER, built_in_ai_llm: "gpt-6-luna" })
     expect(BUILT_IN_AI_FEATURE_PROVIDER).toEqual({
       provider: "read-frog-built-in-ai",
       backend_kind: "llm",
@@ -70,7 +70,7 @@ describe("feature provider analytics", () => {
         modelRevision: "rev-1",
         reasoning: null,
       }),
-    ).toEqual({ ...BUILT_IN_AI_FEATURE_PROVIDER, model: "gpt-6-luna" })
+    ).toEqual({ ...BUILT_IN_AI_FEATURE_PROVIDER, built_in_ai_llm: "gpt-6-luna" })
     expect(classifySerializedProvider({ kind: "local", config: googleTranslateProvider })).toEqual({
       provider: "google-translate",
       backend_kind: "non_llm",
@@ -96,7 +96,7 @@ describe("feature provider analytics", () => {
 
   it("keeps a Built-in AI event's model when it is a model id, and only then", () => {
     expect(normalizeFeatureProviderAnalytics("read-frog-built-in-ai", "llm", "gpt-6-luna")).toEqual(
-      { ...BUILT_IN_AI_FEATURE_PROVIDER, model: "gpt-6-luna" },
+      { ...BUILT_IN_AI_FEATURE_PROVIDER, built_in_ai_llm: "gpt-6-luna" },
     )
     // From a content script that predates models.
     expect(normalizeFeatureProviderAnalytics("read-frog-built-in-ai", "llm")).toEqual(

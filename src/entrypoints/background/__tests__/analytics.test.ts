@@ -155,7 +155,7 @@ describe("background analytics", () => {
     expect(storageSetItemMock).not.toHaveBeenCalled()
   })
 
-  it("records which Built-in AI model ran a feature", async () => {
+  it("records which Built-in AI model ran a feature, through the PostHog property filter", async () => {
     storageGetItemMock.mockResolvedValueOnce(true).mockResolvedValueOnce("install-123")
 
     const { captureFeatureUsedEventInBackground } = createAnalytics()
@@ -167,10 +167,10 @@ describe("background analytics", () => {
       ...PAGE_EVENT_FIELDS,
       provider: "read-frog-built-in-ai",
       backend_kind: "llm",
-      model: "gpt-6.2-sol",
+      built_in_ai_llm: "gpt-6.2-sol",
     })
 
-    expect(posthogCaptureMock).toHaveBeenCalledWith("feature_used", {
+    const expected = {
       feature: "page_translation",
       surface: "popup",
       outcome: "success",
@@ -178,8 +178,21 @@ describe("background analytics", () => {
       ...PAGE_EVENT_FIELDS,
       provider: "read-frog-built-in-ai",
       backend_kind: "llm",
-      model: "gpt-6.2-sol",
-    })
+      built_in_ai_llm: "gpt-6.2-sol",
+    }
+    expect(posthogCaptureMock).toHaveBeenCalledWith("feature_used", expected)
+
+    // The client runs before_send after capture is called: the model has to
+    // get past the filter there to reach PostHog.
+    const [event, properties] = posthogCaptureMock.mock.calls.at(-1) as [string, object]
+    const filtered = filterAnalyticsCaptureResult({
+      event,
+      properties,
+      timestamp: new Date("2026-03-16T19:02:43.960Z"),
+      uuid: "test-uuid",
+    } as unknown as CaptureResult)?.properties
+
+    expect(filtered).toEqual(expected)
   })
 
   it("downgrades a legacy TTS message without provider fields to unknown/unknown", async () => {

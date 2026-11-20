@@ -397,7 +397,9 @@ export function useCustomActionExecution({
     const providerAnalytics: FeatureProviderAnalytics = {
       provider: request.analytics.provider,
       backend_kind: request.analytics.backend_kind,
-      ...(request.analytics.model !== undefined && { model: request.analytics.model }),
+      ...(request.analytics.built_in_ai_llm !== undefined && {
+        built_in_ai_llm: request.analytics.built_in_ai_llm,
+      }),
     }
 
     const run = async () => {

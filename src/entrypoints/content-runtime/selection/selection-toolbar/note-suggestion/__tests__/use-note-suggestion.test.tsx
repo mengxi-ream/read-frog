@@ -215,7 +215,7 @@ describe("useNoteSuggestion", () => {
     expect(result.current.suggestion?.analyticsProvider).toEqual({
       provider: "read-frog-built-in-ai",
       backend_kind: "llm",
-      model: "gpt-6-luna",
+      built_in_ai_llm: "gpt-6-luna",
     })
   })
 

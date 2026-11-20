@@ -421,7 +421,7 @@ function normalizeFeatureUsedEvent(
     ...normalizeFeatureProviderAnalytics(
       properties.provider,
       properties.backend_kind,
-      properties.model,
+      properties.built_in_ai_llm,
     ),
     ...(properties.outcome === "failure" && isFailureReason(properties.failure_reason)
       ? { failure_reason: properties.failure_reason }
