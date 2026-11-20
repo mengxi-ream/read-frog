@@ -1818,6 +1818,12 @@ hostedAi:
     removedNoAlternatives: "$1 artık sunulmuyor. Başka bir sağlayıcı seçin."
   actions:
     chooseModel: "Model seç"
+  guestPrompt:
+    title: "Yerleşik AI'ı kullanmak için giriş yapın"
+    description: "Giriş yaptığınızda yerleşik AI ücretsizdir: haftada yaklaşık 60.000 token. Ya da hesap gerektirmeyen makine çevirisine geçin."
+    useMachineTranslation: "Makine çevirisini kullan"
+    switched: "$1 artık $2 kullanıyor."
+    switchFailed: "Makine çevirisine geçilemedi. Lütfen tekrar deneyin."
 hotkey:
   control: Ctrl
   alt: Option

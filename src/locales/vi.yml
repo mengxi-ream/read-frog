@@ -1818,6 +1818,12 @@ hostedAi:
     removedNoAlternatives: "$1 không còn được cung cấp. Hãy chọn nhà cung cấp khác."
   actions:
     chooseModel: "Chọn mô hình"
+  guestPrompt:
+    title: "Đăng nhập để dùng AI tích hợp"
+    description: "AI tích hợp miễn phí khi bạn đăng nhập, khoảng 60.000 token mỗi tuần. Hoặc chuyển sang dịch máy, không cần tài khoản."
+    useMachineTranslation: "Dùng dịch máy"
+    switched: "$1 giờ dùng $2."
+    switchFailed: "Không thể chuyển sang dịch máy. Vui lòng thử lại."
 hotkey:
   control: Ctrl
   alt: Option

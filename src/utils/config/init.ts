@@ -19,7 +19,7 @@ export interface InitializeConfigResult {
   /**
    * The config was created from defaults in this run — either no stored value existed, or the
    * stored value failed validation and was rebuilt. Callers use it to run one-time setup that
-   * only makes sense on untouched defaults (see `selectFreshTranslateProviders`).
+   * only makes sense on untouched defaults (see the background's `onInstalled`).
    */
   isFreshInstall: boolean
 }

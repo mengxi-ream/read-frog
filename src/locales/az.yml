@@ -1816,6 +1816,12 @@ hostedAi:
     removedNoAlternatives: "$1 artıq təklif olunmur. Başqa provayder seçin."
   actions:
     chooseModel: "Model seçin"
+  guestPrompt:
+    title: "Daxili süni intellektdən istifadə üçün daxil olun"
+    description: "Daxil olduqda daxili süni intellekt pulsuzdur: həftədə təxminən 60 000 token. Və ya hesab tələb etməyən maşın tərcüməsinə keçin."
+    useMachineTranslation: "Maşın tərcüməsindən istifadə et"
+    switched: "$1 indi $2 istifadə edir."
+    switchFailed: "Maşın tərcüməsinə keçmək alınmadı. Yenidən cəhd edin."
 hotkey:
   control: Ctrl düyməsi
   alt: Option düyməsi

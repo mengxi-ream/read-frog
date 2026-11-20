@@ -47,6 +47,10 @@ vi.mock("../selection/annotation/mode-pill", () => ({
   AnnotationModePill: () => null,
 }))
 
+vi.mock("../selection/guest-sign-in-dialog", () => ({
+  GuestSignInDialog: () => null,
+}))
+
 vi.mock("../side/components/floating-button", () => ({
   default: () => null,
 }))

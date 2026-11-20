@@ -3,6 +3,7 @@ import type { HostedAiTextStreamRoute } from "@/types/background-stream"
 import type { Config } from "@/types/config/config"
 import type { BatchQueueConfig } from "@/types/config/translate"
 import type { SubtitlePromptContext } from "@/types/content"
+import type { ErrorAction } from "@/utils/error-action"
 import type { MatchedTerm } from "@/utils/glossary/types"
 import type { PromptableProviderRef, SerializableProviderRef } from "@/utils/providers/provider-ref"
 import { LANGUAGE_ENGLISH_NAMES } from "@read-frog/definitions"
@@ -233,7 +234,7 @@ export type SubtitlesProviderResolution<
   Ref extends SerializableProviderRef = SerializableProviderRef,
 > =
   | { status: "ok"; ref: Ref }
-  | { status: "hostedUnavailable"; message: string }
+  | { status: "hostedUnavailable"; message: string; action?: ErrorAction }
   | { status: "notPromptable" }
   | { status: "none" }
 
@@ -277,7 +278,7 @@ export async function resolveSubtitlesProvider(
     return { status: "ok", ref: await serializeProviderRef(resolved, SUBTITLES_TASK_ROUTE[task]) }
   } catch (error) {
     if (error instanceof HostedAiProviderUnavailableError) {
-      return { status: "hostedUnavailable", message: error.message }
+      return { status: "hostedUnavailable", message: error.message, action: error.action }
     }
     // Nothing else is expected to throw here (serializeProviderRef already
     // fails open on an unreachable status endpoint). Keep degrading rather
@@ -308,10 +309,21 @@ export async function resolveSubtitlesProviderRef(
   const resolution = await resolveSubtitlesProvider(config, task)
   if (resolution.status === "hostedUnavailable") {
     // Silence here is indistinguishable from "these lines have no translation".
+    const { action } = resolution
     toastManager.add({
       type: "error",
       title: resolution.message,
       id: SUBTITLES_HOSTED_UNAVAILABLE_TOAST_ID,
+      // A guest's refusal carries a log-in button.
+      ...(action && {
+        actionProps: {
+          children: action.label,
+          onClick: () => {
+            toastManager.close(SUBTITLES_HOSTED_UNAVAILABLE_TOAST_ID)
+            void sendMessage("openPage", { url: action.url, active: true })
+          },
+        },
+      }),
     })
     return null
   }

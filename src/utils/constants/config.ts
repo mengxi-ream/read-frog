@@ -363,16 +363,37 @@ export const DEFAULT_CONFIG: Config = {
 }
 
 /**
- * Translate features start on Microsoft Translate, which is reachable everywhere; a fresh
- * install is moved onto Google Translate afterwards where that endpoint answers — see
- * `selectFreshTranslateProviders`.
+ * A fresh install translates pages, selections, inputs and video subtitles with Built-in AI,
+ * on its default model. A guest cannot run it there: the first try asks them to log in, or
+ * to switch to a machine translator that needs no account. Note suggestions and language
+ * detection keep their defaults. Existing configs never read this: they keep the providers
+ * they have.
  */
 export function buildFreshDefaultConfig(): Config {
   return {
     ...DEFAULT_CONFIG,
     providersConfig: buildDefaultProviderConfigList(),
+    pageTranslation: {
+      ...DEFAULT_CONFIG.pageTranslation,
+      providerId: DEFAULT_BUILT_IN_AI_PROVIDER_ID,
+    },
+    inputTranslation: {
+      ...DEFAULT_CONFIG.inputTranslation,
+      providerId: DEFAULT_BUILT_IN_AI_PROVIDER_ID,
+    },
+    videoSubtitles: {
+      ...DEFAULT_CONFIG.videoSubtitles,
+      providerId: DEFAULT_BUILT_IN_AI_PROVIDER_ID,
+    },
     selectionToolbar: {
       ...DEFAULT_CONFIG.selectionToolbar,
+      features: {
+        ...DEFAULT_CONFIG.selectionToolbar.features,
+        translate: {
+          ...DEFAULT_CONFIG.selectionToolbar.features.translate,
+          providerId: DEFAULT_BUILT_IN_AI_PROVIDER_ID,
+        },
+      },
       builtInActions: {
         dictionary: {
           enabled: true,

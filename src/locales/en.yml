@@ -1965,6 +1965,12 @@ hostedAi:
     removedNoAlternatives: "$1 is no longer offered. Choose another provider."
   actions:
     chooseModel: "Choose a model"
+  guestPrompt:
+    title: "Log in to use Built-in AI"
+    description: "Built-in AI is free once you log in, with about 60,000 tokens a week. Or switch to machine translation, which needs no account."
+    useMachineTranslation: "Use machine translation"
+    switched: "$1 now uses $2."
+    switchFailed: "Couldn't switch to machine translation. Please try again."
 hotkey:
   control: Ctrl
   alt: Option

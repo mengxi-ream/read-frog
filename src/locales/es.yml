@@ -1823,6 +1823,12 @@ hostedAi:
     removedNoAlternatives: "$1 ya no se ofrece. Elige otro proveedor."
   actions:
     chooseModel: "Elegir un modelo"
+  guestPrompt:
+    title: "Inicia sesión para usar la IA integrada"
+    description: "La IA integrada es gratis al iniciar sesión, con unos 60.000 tokens por semana. O cambia a la traducción automática, que no necesita cuenta."
+    useMachineTranslation: "Usar traducción automática"
+    switched: "$1 ahora usa $2."
+    switchFailed: "No se pudo cambiar a la traducción automática. Inténtalo de nuevo."
 hotkey:
   control: Ctrl
   alt: Opción

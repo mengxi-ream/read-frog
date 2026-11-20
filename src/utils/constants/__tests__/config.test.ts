@@ -161,6 +161,16 @@ describe("dEFAULT_CONFIG", () => {
       providerId: "read-frog-ai:gpt-6-luna",
     })
     expect(config.selectionToolbar.customActions).toEqual([])
+    // Translation runs on Built-in AI; note suggestions keep their own default.
+    expect([
+      config.pageTranslation.providerId,
+      config.selectionToolbar.features.translate.providerId,
+      config.inputTranslation.providerId,
+      config.videoSubtitles.providerId,
+    ]).toEqual(Array.from({ length: 4 }, () => "read-frog-ai:gpt-6-luna"))
+    expect(config.selectionToolbar.noteSuggestion.providerId).toBe(
+      DEFAULT_CONFIG.selectionToolbar.noteSuggestion.providerId,
+    )
     expect(createDefaultDictionaryAction()).toEqual(
       expect.objectContaining({
         id: "default-dictionary",

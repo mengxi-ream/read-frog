@@ -13,17 +13,20 @@ import {
   REACT_SHADOW_HOST_CLASS,
   SPINNER_CLASS,
 } from "@/utils/constants/dom-labels"
+import { MICROSOFT_TRANSLATE_PROVIDER_ID } from "@/utils/constants/providers"
 import {
   GIANT_PARAGRAPH_MAX_SPLIT_DEPTH,
   GIANT_PARAGRAPH_SPLIT_MIN_VIEWPORT_PX,
   GIANT_PARAGRAPH_SPLIT_VIEWPORT_MULTIPLIER,
   GIANT_SPLIT_STRANDED_TEXT_MAX_UNITS,
 } from "@/utils/constants/translate"
+import { openGuestSignInPrompt } from "@/utils/content-runtime/guest-sign-in-prompt"
 import {
   clearAppliedDocumentTitleTranslation,
   setAppliedDocumentTitleTranslation,
 } from "@/utils/content/document-title"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
+import { isGuideStepUrl } from "@/utils/guide/guide-url"
 import {
   hasNoWalkAncestor,
   isHTMLElement,
@@ -70,8 +73,10 @@ import { sendMessage } from "@/utils/message"
 import {
   canResolvedProviderRefGenerateText,
   checkProviderAvailability,
+  getPageTranslationProviderId,
   resolvePageTranslationProvider,
   resolvePageTranslationProviderOrNull,
+  setPageTranslationProviderIdOverride,
 } from "@/utils/providers/provider-ref"
 import { removeReactShadowHost } from "@/utils/react-shadow-host/create-shadow-host"
 import { isTranslationCancelledError } from "@/utils/request/cancellation"
@@ -378,6 +383,18 @@ export class PageTranslationManager implements IPageTranslationManager {
     }
     this.titleTranslationEnabled = config.pageTranslation.page.translateTitle
 
+    // The website's guide is read before anyone has logged in, while a fresh install
+    // translates pages with Built-in AI, which needs an account. There, page translation
+    // runs on the machine translator this network reaches instead, without touching the
+    // config.
+    const guideProviderId = isGuideStepUrl(window.location.href)
+      ? await sendMessage("getFreeTranslateProviderId").catch(() => MICROSOFT_TRANSLATE_PROVIDER_ID)
+      : null
+    if (this.pendingStart !== startToken) {
+      return
+    }
+    setPageTranslationProviderIdOverride(guideProviderId)
+
     const requestedProviderConfig = resolvePageTranslationProviderOrNull(config)
     const providerAnalytics = classifyResolvedProvider(requestedProviderConfig)
     const startedUrl = window.location.href
@@ -397,7 +414,10 @@ export class PageTranslationManager implements IPageTranslationManager {
     if (
       !validateTranslationConfigAndToast({
         providersConfig: config.providersConfig,
-        pageTranslation: config.pageTranslation,
+        pageTranslation: {
+          ...config.pageTranslation,
+          providerId: getPageTranslationProviderId(config),
+        },
         language: config.language,
       })
     ) {
@@ -428,7 +448,20 @@ export class PageTranslationManager implements IPageTranslationManager {
       return
     }
     if (!availability.available) {
-      toastManager.add({ type: "error", title: availability.message })
+      // A guest who asked for a translation is asked to log in, or to switch to machine
+      // translation and go on. Automatic translation keeps to a toast rather than putting
+      // a dialog over every page it opens, and frames stay quiet: one click, one prompt.
+      const isGuestRequest =
+        availability.reason === "authentication_required" &&
+        analyticsContext?.surface !== ANALYTICS_SURFACE.PAGE_AUTO
+      if (!isGuestRequest) {
+        toastManager.add({ type: "error", title: availability.message })
+      } else if (window === window.top) {
+        openGuestSignInPrompt({
+          feature: "pageTranslation",
+          retry: () => void this.start(analyticsContext),
+        })
+      }
       if (trackedContext) {
         void trackFeatureUsed({
           ...trackedContext,

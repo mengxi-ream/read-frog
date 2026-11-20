@@ -19,6 +19,7 @@ import type {
   TTSPlaybackStartResponse,
   TTSPlaybackStopRequest,
 } from "@/types/tts-playback"
+import type { FreeTranslateProviderId } from "@/utils/config/free-translate-provider"
 import type { DiagnosticsReport } from "@/utils/diagnostics/report"
 import type { GlossarySnapshot } from "@/utils/glossary/active-matcher"
 import type { MatchedTerm } from "@/utils/glossary/types"
@@ -46,6 +47,9 @@ interface ProtocolMap {
   >
   // config
   getInitialConfig: () => Config | null
+  // The machine translator a guest can use instead of Built-in AI: Google where this
+  // network reaches it, Microsoft otherwise. Probed in the background, once a session.
+  getFreeTranslateProviderId: () => FreeTranslateProviderId
   // glossary — the terms live in IndexedDB, which a content script cannot open,
   // so it asks the background once per page and compiles a matcher locally.
   // `url` says which page is asking; glossaries scoped to other sites are left

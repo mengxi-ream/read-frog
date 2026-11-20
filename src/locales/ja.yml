@@ -1818,6 +1818,12 @@ hostedAi:
     removedNoAlternatives: "$1 は提供が終了しました。別のプロバイダーを選んでください。"
   actions:
     chooseModel: "モデルを選択"
+  guestPrompt:
+    title: "ログインして組み込み AI を使う"
+    description: "ログインすると、組み込み AI を週に約 6 万トークンまで無料で使えます。アカウント不要の機械翻訳に切り替えることもできます。"
+    useMachineTranslation: "機械翻訳を使う"
+    switched: "$1は $2 を使うようになりました。"
+    switchFailed: "機械翻訳に切り替えられませんでした。もう一度お試しください。"
 hotkey:
   control: Ctrl
   alt: Option

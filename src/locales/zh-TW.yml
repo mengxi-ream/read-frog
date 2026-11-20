@@ -1828,6 +1828,12 @@ hostedAi:
     removedNoAlternatives: "$1 已不再提供，請改用其他提供者"
   actions:
     chooseModel: "選擇模型"
+  guestPrompt:
+    title: "登入後使用內建 AI"
+    description: "登入後即可免費使用內建 AI，每週約 6 萬 token。也可以改用機器翻譯，不需要帳號。"
+    useMachineTranslation: "改用機器翻譯"
+    switched: "$1已改用 $2"
+    switchFailed: "無法切換到機器翻譯，請再試一次"
 hotkey:
   control: Ctrl
   alt: Option

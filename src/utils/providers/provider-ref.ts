@@ -10,8 +10,10 @@ import type {
   HostedAiModelTier,
   HostedAiReasoning,
   HostedAiStatus,
+  HostedAiUnavailableReason,
 } from "@/utils/hosted-ai/types"
 import { isLLMProviderConfig } from "@/types/config/provider"
+import { logInAction } from "@/utils/error-action"
 import {
   chooseHostedAiModelAction,
   getHostedAiModelUnavailableMessage,
@@ -79,22 +81,40 @@ export class HostedAiProviderUnavailableError extends Error {
     message: string,
     /** What the user can do about it, such as choosing another model. */
     readonly action?: ErrorAction,
+    /** Why the server refused, when its status said so. */
+    readonly reason?: HostedAiUnavailableReason,
   ) {
     super(message)
     this.name = "HostedAiProviderUnavailableError"
   }
 }
 
+/**
+ * The provider page translation runs on in this document instead of the configured one, or
+ * null to follow the config. Set for each page-translation run; see `PageTranslationManager`.
+ */
+let pageTranslationProviderIdOverride: string | null = null
+
+export function setPageTranslationProviderIdOverride(providerId: string | null): void {
+  pageTranslationProviderIdOverride = providerId
+}
+
+/** The provider page translation runs on: the override, or the configured one. */
+export function getPageTranslationProviderId(config: Config): string {
+  return pageTranslationProviderIdOverride ?? config.pageTranslation.providerId
+}
+
 export function resolvePageTranslationProvider(
   config: Config,
 ): ResolvedProviderRef<TranslateProviderConfig> {
+  const providerId = getPageTranslationProviderId(config)
   const resolved = resolveProviderRefForCapability(
     "pageTranslation",
     config.providersConfig,
-    config.pageTranslation.providerId,
+    providerId,
   )
   if (!resolved) {
-    throw new Error(`No page translation provider for id "${config.pageTranslation.providerId}"`)
+    throw new Error(`No page translation provider for id "${providerId}"`)
   }
   return resolved
 }
@@ -282,11 +302,14 @@ export async function serializeProviderRef(
   const verdict = getHostedAiModelVerdict(status, feature, provider.model)
 
   if (verdict.kind === "blocked") {
+    const reason = verdict.tierStatus.unavailableReason ?? undefined
     throw new HostedAiProviderUnavailableError(
       provider,
       getHostedAiTierDescription(verdict.tierStatus, {
         credit: getHostedAiCreditForFeature(status, feature),
       }) ?? i18n.t("hostedAi.availability.serviceUnavailable"),
+      reason === "authentication_required" ? logInAction() : undefined,
+      reason,
     )
   }
   if (verdict.kind === "unavailable") {
@@ -311,7 +334,12 @@ export async function serializeProviderRef(
 
 export type ProviderAvailability<Ref extends SerializableProviderRef = SerializableProviderRef> =
   | { available: true; providerRef: Ref }
-  | { available: false; message: string; action?: ErrorAction }
+  | {
+      available: false
+      message: string
+      action?: ErrorAction
+      reason?: HostedAiUnavailableReason
+    }
 
 export async function checkProviderAvailability(
   provider: ResolvedProviderRef<LLMProviderConfig>,
@@ -329,7 +357,12 @@ export async function checkProviderAvailability(
     return { available: true, providerRef: await serializeProviderRef(provider, route) }
   } catch (error) {
     if (error instanceof HostedAiProviderUnavailableError) {
-      return { available: false, message: error.message, action: error.action }
+      return {
+        available: false,
+        message: error.message,
+        action: error.action,
+        reason: error.reason,
+      }
     }
     throw error
   }
