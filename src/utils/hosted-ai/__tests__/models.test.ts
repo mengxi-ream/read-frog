@@ -82,6 +82,20 @@ describe("sanitizeHostedAiModels", () => {
     expect(model!.reasoning).toEqual({ levels: ["low", "high"], default: null })
   })
 
+  it("takes the vendor only when it is a non-empty string", () => {
+    const vendors = sanitizeHostedAiModels(
+      [" openai ", "", "   ", 42, null, { id: "openai" }, undefined].map((vendor, index) => ({
+        id: `model-${index}`,
+        name: "Model",
+        vendor,
+        tier: "normal",
+        modelRevision: "r1",
+      })),
+    )?.map((model) => model.vendor)
+
+    expect(vendors).toEqual(["openai", null, null, null, null, null, null])
+  })
+
   it("names a model by its id when the list does not have it", () => {
     expect(getHostedAiModelName([luna!], "gpt-6-luna")).toBe("GPT-6 Luna")
     expect(getHostedAiModelName([luna!], "gpt-5-mini")).toBe("gpt-5-mini")

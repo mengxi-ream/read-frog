@@ -42,8 +42,10 @@ const HOSTED_AI_MODEL_TIERS = Object.keys(MODEL_TIER_SET) as HostedAiModelTier[]
 export interface HostedAiModel extends Omit<HostedAiModelStatus, "reasoning" | "vendor"> {
   /**
    * The company that makes the model, as the extension's provider id for it
-   * (`openai`, `anthropic`), for its logo. Null when the list did not say, as
-   * one stored by an earlier build does not; the model then shows Read Frog's.
+   * (`openai`, `anthropic`), for its logo. The contract does not type the
+   * field yet, so the list's value is used only when it is a non-empty string.
+   * Null otherwise, as from a server that does not send it or a list stored by
+   * an earlier build; the model then shows Read Frog's logo.
    */
   vendor: string | null
   reasoning: {
