@@ -5,6 +5,7 @@ import {
   YOUTUBE_NAVIGATE_FINISH_EVENT,
   YOUTUBE_NAVIGATE_START_EVENT,
 } from "@/utils/constants/subtitles"
+import { resolveAiSubtitlesContext } from "@/utils/subtitles/ai/ai-subtitles-context"
 import { requestPlayerData } from "@/utils/subtitles/fetchers/youtube"
 import { getYoutubeVideoId } from "@/utils/subtitles/video-id"
 
@@ -24,21 +25,11 @@ const WATCH_PLAYER = "#movie_player.html5-video-player"
 const ABOVE_PLAYER_CHROME_BELOW_PLAYER_MENUS = 60
 
 function createYoutubeAiSubtitlesContext() {
-  const videoId = getYoutubeVideoId()
-  if (!videoId) {
-    return null
-  }
-  // The player's own duration, sent as `durationSec` with the create request.
-  // An untrusted admission hint only — the server measures the real duration
-  // in its worker before billing — so the ad-playback edge (where `duration`
-  // briefly reports the ad's length) is harmless. NaN until metadata loads,
-  // which cannot happen behind an open settings panel.
-  const video = document.querySelector<HTMLVideoElement>("video.html5-main-video")
-  const duration = video?.duration
-  if (!duration || !Number.isFinite(duration) || duration <= 0) {
-    return null
-  }
-  return { videoId, url: location.href, durationSec: Math.ceil(duration) }
+  // YouTube's claim is never checked against the transcript, so an ad's length here is harmless.
+  return resolveAiSubtitlesContext({
+    url: location.href,
+    video: document.querySelector<HTMLVideoElement>("video.html5-main-video"),
+  })
 }
 
 async function isYoutubeLiveContent(): Promise<boolean> {

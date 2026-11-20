@@ -19,7 +19,7 @@ type SubtitlesSwitchDeps = Pick<AdapterContext, "lifecycle" | "getScheduler"> & 
   nativeCaptions: Pick<NativeCaptions, "showNativeSubtitles" | "hideNativeSubtitles">
   sourceCache: Pick<
     SourceSubtitlesCache,
-    "getOrLoadSourceSubtitles" | "clearSourceCache" | "sourceProcessedSubtitles"
+    "getOrLoadSourceSubtitles" | "clearSourceCache" | "sourceSubtitles" | "sourceProcessedSubtitles"
   >
   session: Pick<
     SubtitlesSession,
@@ -69,6 +69,15 @@ export class SubtitlesSwitch {
     this.hasPendingNavigationReset = hasPendingNavigationReset
     this.startTranslation = startTranslation
     this.fetcher = fetchers.native()
+  }
+
+  // From the switch until its subtitles arrive; a refusal or turning subtitles off ends it.
+  isAwaitingAiSubtitles(): boolean {
+    return (
+      this.source === SUBTITLES_SOURCE.AI &&
+      this.sourceCache.sourceSubtitles.length === 0 &&
+      !!this.getScheduler()?.isActive()
+    )
   }
 
   async handleSourceTrackChanged(): Promise<void> {

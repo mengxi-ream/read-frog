@@ -14,6 +14,10 @@ vi.mock("@/utils/i18n", () => ({
   },
 }))
 
+vi.mock("@/utils/subtitles/ai/access-guard", () => ({
+  ensureAiSubtitlesAccess: async () => true,
+}))
+
 function createFetcher(): SubtitlesFetcher {
   return {
     fetch: vi.fn<SubtitlesFetcher["fetch"]>().mockResolvedValue([]),

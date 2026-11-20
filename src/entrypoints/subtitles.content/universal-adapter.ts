@@ -272,4 +272,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
   }
 
   requestAiSubtitles = () => this.startRequests.requestAiSubtitles()
+
+  isAwaitingAiSubtitles = () =>
+    this.startRequests.isCheckingAiRequest() || this.subtitlesSwitch.isAwaitingAiSubtitles()
 }
