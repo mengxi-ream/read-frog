@@ -1820,10 +1820,10 @@ hostedAi:
     chooseModel: "Chọn mô hình"
   builtInAiPrompt:
     logInTitle: "Đăng nhập để dùng AI tích hợp"
-    logInDescription: "AI tích hợp miễn phí khi bạn đăng nhập, khoảng 120.000 token mỗi tuần. Hoặc chuyển sang dịch máy."
+    logInDescription: "AI tích hợp miễn phí khi bạn đăng nhập, khoảng 120.000 token mỗi tuần."
     upgradeTitle: "Bạn đã dùng hết AI tích hợp của tuần này"
-    upgradeDescription: "Pro dịch khoảng 1.500 trang web mỗi tháng, Ultra khoảng 5.000. Hoặc tạm chuyển sang dịch máy."
-    upgradeDescriptionPro: "Ultra dịch khoảng 5.000 trang web mỗi tháng. Hoặc tạm chuyển sang dịch máy."
+    upgradeDescription: "Pro dịch khoảng 3.000 trang web mỗi tháng, Ultra khoảng 10.000."
+    upgradeDescriptionPro: "Ultra dịch khoảng 10.000 trang web mỗi tháng."
     useMachineTranslation: "Dùng dịch máy"
     switched: "$1 giờ dùng $2."
     switchFailed: "Không thể chuyển sang dịch máy. Vui lòng thử lại."

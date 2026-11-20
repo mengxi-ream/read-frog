@@ -1820,10 +1820,10 @@ hostedAi:
     chooseModel: "モデルを選択"
   builtInAiPrompt:
     logInTitle: "ログインして組み込み AI を使う"
-    logInDescription: "ログインすると、組み込み AI を週に約 12 万トークンまで無料で使えます。機械翻訳に切り替えることもできます。"
+    logInDescription: "ログインすると、組み込み AI を週に約 12 万トークンまで無料で使えます。"
     upgradeTitle: "今週の組み込み AI を使い切りました"
-    upgradeDescription: "Pro なら毎月約 1,500 件、Ultra なら約 5,000 件のウェブページを翻訳できます。機械翻訳に切り替えることもできます。"
-    upgradeDescriptionPro: "Ultra なら毎月約 5,000 件のウェブページを翻訳できます。機械翻訳に切り替えることもできます。"
+    upgradeDescription: "Pro なら毎月約 3,000 件、Ultra なら約 10,000 件のウェブページを翻訳できます。"
+    upgradeDescriptionPro: "Ultra なら毎月約 10,000 件のウェブページを翻訳できます。"
     useMachineTranslation: "機械翻訳を使う"
     switched: "$1は $2 を使うようになりました。"
     switchFailed: "機械翻訳に切り替えられませんでした。もう一度お試しください。"

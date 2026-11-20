@@ -1830,10 +1830,10 @@ hostedAi:
     chooseModel: "选择模型"
   builtInAiPrompt:
     logInTitle: "登录后使用内置 AI"
-    logInDescription: "登录后即可免费使用内置 AI，每周约 12 万 token。也可以改用机器翻译。"
+    logInDescription: "登录后即可免费使用内置 AI，每周约 12 万 token。"
     upgradeTitle: "本周的内置 AI 额度用完了"
-    upgradeDescription: "Pro 每月约可翻译 1,500 个网页，Ultra 约 5,000 个。也可以先改用机器翻译。"
-    upgradeDescriptionPro: "Ultra 每月约可翻译 5,000 个网页。也可以先改用机器翻译。"
+    upgradeDescription: "Pro 每月约可翻译 3,000 个网页，Ultra 约 10,000 个。"
+    upgradeDescriptionPro: "Ultra 每月约可翻译 10,000 个网页。"
     useMachineTranslation: "改用机器翻译"
     switched: "$1已改用 $2"
     switchFailed: "没能切换到机器翻译，请重试"

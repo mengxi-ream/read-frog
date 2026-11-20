@@ -1967,10 +1967,10 @@ hostedAi:
     chooseModel: "Choose a model"
   builtInAiPrompt:
     logInTitle: "Log in to use Built-in AI"
-    logInDescription: "Built-in AI is free once you log in, with about 120,000 tokens a week. Or switch to machine translation."
+    logInDescription: "Built-in AI is free once you log in, with about 120,000 tokens a week."
     upgradeTitle: "You've used this week's Built-in AI"
-    upgradeDescription: "Pro translates about 1,500 web pages a month, Ultra about 5,000. Or switch to machine translation for now."
-    upgradeDescriptionPro: "Ultra translates about 5,000 web pages a month. Or switch to machine translation for now."
+    upgradeDescription: "Pro translates about 3,000 web pages a month, Ultra about 10,000."
+    upgradeDescriptionPro: "Ultra translates about 10,000 web pages a month."
     useMachineTranslation: "Use machine translation"
     switched: "$1 now uses $2."
     switchFailed: "Couldn't switch to machine translation. Please try again."

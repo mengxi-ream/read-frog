@@ -1825,10 +1825,10 @@ hostedAi:
     chooseModel: "Elegir un modelo"
   builtInAiPrompt:
     logInTitle: "Inicia sesión para usar la IA integrada"
-    logInDescription: "La IA integrada es gratis al iniciar sesión, con unos 120.000 tokens por semana. O cambia a la traducción automática."
+    logInDescription: "La IA integrada es gratis al iniciar sesión, con unos 120.000 tokens por semana."
     upgradeTitle: "Has usado la IA integrada de esta semana"
-    upgradeDescription: "Pro traduce unas 1500 páginas web al mes, y Ultra unas 5000. O cambia a la traducción automática por ahora."
-    upgradeDescriptionPro: "Ultra traduce unas 5000 páginas web al mes. O cambia a la traducción automática por ahora."
+    upgradeDescription: "Pro traduce unas 3000 páginas web al mes, y Ultra unas 10.000."
+    upgradeDescriptionPro: "Ultra traduce unas 10.000 páginas web al mes."
     useMachineTranslation: "Usar traducción automática"
     switched: "$1 ahora usa $2."
     switchFailed: "No se pudo cambiar a la traducción automática. Inténtalo de nuevo."

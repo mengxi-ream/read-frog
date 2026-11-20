@@ -1818,10 +1818,10 @@ hostedAi:
     chooseModel: "Model seçin"
   builtInAiPrompt:
     logInTitle: "Daxili süni intellektdən istifadə üçün daxil olun"
-    logInDescription: "Daxil olduqda daxili süni intellekt pulsuzdur: həftədə təxminən 120 000 token. Və ya maşın tərcüməsinə keçin."
+    logInDescription: "Daxil olduqda daxili süni intellekt pulsuzdur: həftədə təxminən 120 000 token."
     upgradeTitle: "Bu həftənin daxili süni intellekti bitdi"
-    upgradeDescription: "Pro ayda təxminən 1 500, Ultra isə 5 000 veb səhifə tərcümə edir. Və ya hələlik maşın tərcüməsinə keçin."
-    upgradeDescriptionPro: "Ultra ayda təxminən 5 000 veb səhifə tərcümə edir. Və ya hələlik maşın tərcüməsinə keçin."
+    upgradeDescription: "Pro ayda təxminən 3 000, Ultra isə 10 000 veb səhifə tərcümə edir."
+    upgradeDescriptionPro: "Ultra ayda təxminən 10 000 veb səhifə tərcümə edir."
     useMachineTranslation: "Maşın tərcüməsindən istifadə et"
     switched: "$1 indi $2 istifadə edir."
     switchFailed: "Maşın tərcüməsinə keçmək alınmadı. Yenidən cəhd edin."
