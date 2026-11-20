@@ -1,6 +1,6 @@
 export * from "./types"
 export { AiSubtitlesFetcher } from "./ai"
-export { bilibiliTrackSource } from "./bilibili"
+export { bilibiliTrackSource, watchBilibiliTrackChoices } from "./bilibili"
 export { edxTrackSource } from "./edx"
 export { NetflixSubtitlesFetcher } from "./netflix"
 export { TextTrackFetcher } from "./text-track"
