@@ -62,6 +62,17 @@ function createAdapterWithPendingStart() {
   }
 }
 
+/** Holds the next access check open; settle it with whether access is granted. */
+function holdAccessCheck(): (granted: boolean) => void {
+  let settle: (granted: boolean) => void = () => {}
+  mocks.ensureAiSubtitlesAccess.mockReturnValueOnce(
+    new Promise<boolean>((resolve) => {
+      settle = resolve
+    }),
+  )
+  return (granted) => settle(granted)
+}
+
 describe("universalVideoAdapter awaiting AI subtitles", () => {
   it("waits on AI subtitles from the request until they arrive", async () => {
     const { adapter, loadStarted } = createAdapterWithPendingStart()
@@ -76,12 +87,7 @@ describe("universalVideoAdapter awaiting AI subtitles", () => {
   })
 
   it("waits on AI subtitles while the request checks access", async () => {
-    let settleAccess: (granted: boolean) => void = () => {}
-    mocks.ensureAiSubtitlesAccess.mockReturnValueOnce(
-      new Promise<boolean>((resolve) => {
-        settleAccess = resolve
-      }),
-    )
+    const settleAccess = holdAccessCheck()
     const { adapter } = createAdapterWithPendingStart()
 
     const request = adapter.requestAiSubtitles()
@@ -90,6 +96,37 @@ describe("universalVideoAdapter awaiting AI subtitles", () => {
     await request
 
     expect(adapter.isAwaitingAiSubtitles()).toBe(false)
+  })
+
+  it.each([
+    ["turns subtitles off", "toggleSubtitlesManually"],
+    ["turns subtitles off by shortcut", "toggleSubtitlesByShortcut"],
+  ] as const)("starts no AI subtitles once the reader %s during the checks", async (_, toggle) => {
+    const settleAccess = holdAccessCheck()
+    const { adapter } = createAdapterWithPendingStart()
+    const switchFetcher = vi
+      .spyOn((adapter as any).subtitlesSwitch, "switchSubtitlesFetcher")
+      .mockResolvedValue(undefined)
+
+    const request = adapter.requestAiSubtitles()
+    adapter[toggle](false)
+    settleAccess(true)
+    await request
+
+    expect(switchFetcher).not.toHaveBeenCalled()
+    expect(adapter.isAwaitingAiSubtitles()).toBe(false)
+  })
+
+  it("keeps the AI request when subtitles are turned on during the checks", async () => {
+    const settleAccess = holdAccessCheck()
+    const { adapter } = createAdapterWithPendingStart()
+    const switchFetcher = vi.spyOn((adapter as any).subtitlesSwitch, "switchSubtitlesFetcher")
+
+    void adapter.requestAiSubtitles()
+    adapter.toggleSubtitlesManually(true)
+    settleAccess(true)
+
+    await vi.waitFor(() => expect(switchFetcher).toHaveBeenLastCalledWith("ai"))
   })
 
   it("stops waiting once the request is refused", async () => {
