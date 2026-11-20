@@ -33,6 +33,7 @@ import {
   buildSubtitlesSummaryContextHash,
   resolveSubtitlesProviderRef,
   fetchSubtitlesSummary,
+  getSubtitlesPassLimits,
 } from "@/utils/subtitles/processor/translator"
 import { downloadSubtitlesAsSrt } from "@/utils/subtitles/srt"
 import { showAiSubtitlesWallToast, showSubtitlesErrorToast } from "@/utils/subtitles/toast"
@@ -1220,6 +1221,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
       segmentationPipeline: this.segmentationPipeline,
       onTranslated: (fragments) => scheduler.supplementSubtitles(fragments),
       onStateChange: (state, data) => scheduler.setState(state, data),
+      batchLimits: config ? getSubtitlesPassLimits(config) : undefined,
     })
     this.translationCoordinator.start(videoContext)
     // The hash and the summary must share one ref — the promptable one — or

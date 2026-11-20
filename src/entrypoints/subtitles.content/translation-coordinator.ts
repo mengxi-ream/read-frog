@@ -1,10 +1,16 @@
 import type { SegmentationPipeline } from "./segmentation-pipeline"
+import type { Config } from "@/types/config/config"
+import type { BatchQueueConfig } from "@/types/config/translate"
 import type { SubtitlesVideoContext } from "@/utils/subtitles/processor/translator"
 import type { SubtitlesFragment, SubtitlesState } from "@/utils/subtitles/types"
+import { storage } from "#imports"
+import { configSchema } from "@/types/config/config"
 import { getLocalConfig } from "@/utils/config/storage"
-import { TRANSLATE_LOOK_AHEAD_MS, TRANSLATION_BATCH_SIZE } from "@/utils/constants/subtitles"
+import { CONFIG_STORAGE_KEY } from "@/utils/constants/config"
+import { TRANSLATE_LOOK_AHEAD_MS } from "@/utils/constants/subtitles"
+import { DEFAULT_BATCH_CONFIG } from "@/utils/constants/translate"
 import { effectiveLookAheadMs } from "@/utils/subtitles/lookahead"
-import { translateSubtitles } from "@/utils/subtitles/processor/translator"
+import { getSubtitlesPassLimits, translateSubtitles } from "@/utils/subtitles/processor/translator"
 import { adPlayingAtom, subtitlesStore } from "./atoms"
 
 export interface TranslationCoordinatorOptions {
@@ -14,10 +20,25 @@ export interface TranslationCoordinatorOptions {
   segmentationPipeline: SegmentationPipeline | null
   onTranslated: (fragments: SubtitlesFragment[]) => void
   onStateChange: (state: SubtitlesState, data?: Record<string, string>) => void
+  /** Limits for one pass (see `getSubtitlesPassLimits`); kept current from config while running. */
+  batchLimits?: BatchQueueConfig
 }
 
 function fragmentIdentity(fragment: Pick<SubtitlesFragment, "end" | "text">): string {
   return `${fragment.end}\0${fragment.text}`
+}
+
+/** Leading cues that fit the limits; always at least one, so an oversized cue still goes. */
+function takeBatch(pending: SubtitlesFragment[], limits: BatchQueueConfig): SubtitlesFragment[] {
+  const batch: SubtitlesFragment[] = []
+  let characters = 0
+  for (const fragment of pending) {
+    if (batch.length >= limits.maxItemsPerBatch) break
+    if (batch.length > 0 && characters + fragment.text.length > limits.maxCharactersPerBatch) break
+    batch.push(fragment)
+    characters += fragment.text.length
+  }
+  return batch
 }
 
 export class TranslationCoordinator {
@@ -41,8 +62,11 @@ export class TranslationCoordinator {
   private segmentationPipeline: SegmentationPipeline | null
   private onTranslated: (fragments: SubtitlesFragment[]) => void
   private onStateChange: (state: SubtitlesState, data?: Record<string, string>) => void
+  private batchLimits: BatchQueueConfig
+  private unwatchConfig: (() => void) | null = null
 
   constructor(options: TranslationCoordinatorOptions) {
+    this.batchLimits = options.batchLimits ?? DEFAULT_BATCH_CONFIG
     this.getFragments = options.getFragments
     this.getVideoElement = options.getVideoElement
     this.getCurrentState = options.getCurrentState
@@ -61,6 +85,7 @@ export class TranslationCoordinator {
 
     this.active = true
     this.attachVideoListeners(video)
+    this.watchPassLimits()
 
     if (this.segmentationPipeline) {
       this.segmentationPipeline.start()
@@ -77,6 +102,7 @@ export class TranslationCoordinator {
     this.isTranslating = false
     this.translatingStarts.clear()
     this.detachVideoListeners()
+    this.unwatchPassLimits()
     this.segmentationPipeline?.stop()
   }
 
@@ -90,6 +116,7 @@ export class TranslationCoordinator {
     this.active = false
     this.runId += 1
     this.detachVideoListeners()
+    this.unwatchPassLimits()
     this.translatingStarts.clear()
     this.translatedStarts.clear()
     this.failedStarts.clear()
@@ -97,6 +124,20 @@ export class TranslationCoordinator {
     this.isTranslating = false
     this.lastEmittedState = "idle"
     this.videoContext = { videoTitle: "", subtitlesTextContent: "" }
+  }
+
+  /** Settings apply mid-video, as they already do for the background queue. */
+  private watchPassLimits() {
+    if (this.unwatchConfig) return
+    this.unwatchConfig = storage.watch<Config>(`local:${CONFIG_STORAGE_KEY}`, (next) => {
+      const parsed = configSchema.safeParse(next)
+      if (parsed.success) this.batchLimits = getSubtitlesPassLimits(parsed.data)
+    })
+  }
+
+  private unwatchPassLimits() {
+    this.unwatchConfig?.()
+    this.unwatchConfig = null
   }
 
   private attachVideoListeners(video: HTMLVideoElement) {
@@ -198,20 +239,20 @@ export class TranslationCoordinator {
       this.getVideoElement()?.playbackRate,
     )
 
-    const batch = fragments
-      .filter(
-        (f) =>
-          !this.translatedStarts.has(f.start) &&
-          !this.translatingStarts.has(f.start) &&
-          !this.failedStarts.has(f.start) &&
-          f.start >= currentTimeMs - 5000 &&
-          f.start <= currentTimeMs + lookAheadMs,
-      )
-      .slice(0, TRANSLATION_BATCH_SIZE)
+    const pending = fragments.filter(
+      (f) =>
+        !this.translatedStarts.has(f.start) &&
+        !this.translatingStarts.has(f.start) &&
+        !this.failedStarts.has(f.start) &&
+        f.start >= currentTimeMs - 5000,
+    )
 
-    if (batch.length === 0) {
+    // The window decides when to request, not how much: topping up only the cues
+    // that just scrolled into it sent one line per request during playback.
+    if (!pending.some((f) => f.start <= currentTimeMs + lookAheadMs)) {
       return
     }
+    const batch = takeBatch(pending, this.batchLimits)
 
     const runId = this.runId
     this.isTranslating = true

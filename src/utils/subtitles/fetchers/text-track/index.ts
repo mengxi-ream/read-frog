@@ -215,12 +215,17 @@ export class TextTrackFetcher implements SubtitlesFetcher {
     return cues
   }
 
-  // Cues can land before the video's metadata, and the fragments are cached once aligned.
+  // Cues can land before the video's length is known (NaN before metadata, Infinity until a
+  // streamed source sets it), and the fragments are cached once aligned. A live video never gets
+  // a length, so it waits out the timeout and keeps its times.
   private async waitForDuration(video: HTMLVideoElement): Promise<number> {
-    const duration = await pollUntil(() => (Number.isNaN(video.duration) ? null : video.duration), {
-      timeoutMs: TEXT_TRACK_CUE_WAIT_TIMEOUT_MS,
-      intervalMs: TEXT_TRACK_CUE_POLL_INTERVAL_MS,
-    })
+    const duration = await pollUntil(
+      () => (Number.isFinite(video.duration) ? video.duration : null),
+      {
+        timeoutMs: TEXT_TRACK_CUE_WAIT_TIMEOUT_MS,
+        intervalMs: TEXT_TRACK_CUE_POLL_INTERVAL_MS,
+      },
+    )
     return duration ?? Number.NaN
   }
 }
