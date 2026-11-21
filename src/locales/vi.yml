@@ -677,6 +677,12 @@ options:
         providerDescription: Nhà cung cấp AI tạo ra gợi ý
     display:
       title: Hiển thị
+      placement:
+        title: Vị trí
+        description: Chọn thanh công cụ hiện ở phía nào của văn bản đã chọn. Nếu phía đã chọn không đủ chỗ, thanh sẽ hiện ở phía còn lại
+        followDirection: Theo hướng chọn
+        above: Luôn ở trên
+        below: Luôn ở dưới
       opacity:
         title: Độ mờ
         description: Điều chỉnh độ mờ của thanh công cụ chọn văn bản và cửa sổ mở rộng mở từ đó

@@ -27,6 +27,7 @@ import { storedProviderIdListSchema, storedProviderIdSchema } from "./provider-i
 import {
   selectionToolbarBuiltInActionsSchema,
   selectionToolbarCustomActionsSchema,
+  selectionToolbarPlacementSchema,
 } from "./selection-toolbar"
 import { shortcutSchema } from "./shortcut"
 import { siteRulesConfigSchema } from "./site-rules"
@@ -80,6 +81,9 @@ const selectionToolbarSchema = z
     enabled: z.boolean(),
     disabledSelectionToolbarPatterns: z.array(z.string()),
     opacity: z.number().min(MIN_SELECTION_OVERLAY_OPACITY).max(MAX_SELECTION_OVERLAY_OPACITY),
+    // `.default()` lets a config stored before v128 parse in UI contexts that
+    // load ahead of the background migration.
+    placement: selectionToolbarPlacementSchema.default("followDirection"),
     features: z.object({
       translate: selectionToolbarFeatureSchema,
       speak: selectionToolbarSpeakFeatureSchema,

@@ -17,6 +17,14 @@ export const MAX_CUSTOM_ACTION_LAYOUT_LENGTH = 32768
 // data. NEVER lower it, for the reason given above.
 export const MAX_CUSTOM_ACTION_SAMPLE_TEXT_LENGTH = 32768
 
+// Which side of the selection the toolbar opens on. "followDirection" is the
+// side the drag ended on: below for a drag downward or along one line, above
+// for one upward. "above" and "below" pin it to that side of the selection,
+// and move it to the other side only when the chosen one has no room.
+export const selectionToolbarPlacements = ["followDirection", "above", "below"] as const
+export type SelectionToolbarPlacement = (typeof selectionToolbarPlacements)[number]
+export const selectionToolbarPlacementSchema = z.enum(selectionToolbarPlacements)
+
 // The contract's field-type enum is the source of truth: these values ride the
 // wire to hostedAi.customAction unchanged. Only the enum is shared — length
 // caps and strictness stay hosted-only so BYOK actions are not constrained.

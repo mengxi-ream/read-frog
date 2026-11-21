@@ -678,6 +678,12 @@ options:
         providerDescription: Təklifi yaradan süni intellekt provayderi
     display:
       title: Görünüş
+      placement:
+        title: Mövqe
+        description: Alətlər panelinin seçilmiş mətnin hansı tərəfində görünəcəyini seçin. Seçilmiş tərəfdə yer yoxdursa, digər tərəfdə görünür
+        followDirection: Seçim istiqamətini izlə
+        above: Həmişə yuxarıda
+        below: Həmişə aşağıda
       opacity:
         title: Qeyri-şəffaflıq
         description: Seçim alətlər panelinin və ondan açılan geniş pəncərənin qeyri-şəffaflığını tənzimləyin
