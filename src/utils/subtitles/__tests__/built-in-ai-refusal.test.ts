@@ -3,12 +3,17 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { promptForSubtitlesRefusal, resetPromptedSubtitlesVideos } from "../built-in-ai-refusal"
 
-const { mockPromptForBuiltInAiRefusal } = vi.hoisted(() => ({
+const { mockPromptForBuiltInAiRefusal, mockToastAdd } = vi.hoisted(() => ({
   mockPromptForBuiltInAiRefusal: vi.fn<(...args: any[]) => Promise<boolean>>(),
+  mockToastAdd: vi.fn<(...args: any[]) => any>(),
 }))
 
 vi.mock("@/utils/content-runtime/built-in-ai-prompt", () => ({
   promptForBuiltInAiRefusal: mockPromptForBuiltInAiRefusal,
+}))
+
+vi.mock("@/components/ui/base-ui/toast", () => ({
+  toastManager: { add: mockToastAdd },
 }))
 
 /** A cue batch the server refused, relayed from the background. */
@@ -42,8 +47,28 @@ describe("promptForSubtitlesRefusal", () => {
       analyticsFeature: "video_subtitles",
       trigger: "user",
       retry: first.retry,
-      beforeDialog: expect.any(Function),
+      beforePrompt: expect.any(Function),
     })
+  })
+
+  it("gives Ultra, which the prompt passes over, its plain message once a video", async () => {
+    mockPromptForBuiltInAiRefusal.mockResolvedValue(false)
+
+    promptForSubtitlesRefusal(spentPoolError(), options("video-A"))
+    promptForSubtitlesRefusal(spentPoolError(), options("video-A"))
+
+    await vi.waitFor(() => expect(mockToastAdd).toHaveBeenCalledOnce())
+    expect(mockToastAdd).toHaveBeenCalledWith(
+      expect.objectContaining({ type: "error", title: "Built-in AI quota used up" }),
+    )
+  })
+
+  it("adds no toast of its own when the prompt showed one", async () => {
+    promptForSubtitlesRefusal(spentPoolError(), options("video-A"))
+
+    await vi.waitFor(() => expect(mockPromptForBuiltInAiRefusal).toHaveBeenCalledOnce())
+    await Promise.resolve()
+    expect(mockToastAdd).not.toHaveBeenCalled()
   })
 
   it("asks again for the next video", () => {
@@ -63,7 +88,7 @@ describe("promptForSubtitlesRefusal", () => {
     expect(mockPromptForBuiltInAiRefusal).toHaveBeenCalledOnce()
   })
 
-  it("leaves fullscreen before the dialog opens, which a fullscreen player would cover", async () => {
+  it("leaves fullscreen before the prompt shows, which a fullscreen player would cover", async () => {
     const exitFullscreen = vi.fn<() => Promise<void>>().mockResolvedValue(undefined)
     Object.defineProperty(document, "exitFullscreen", { configurable: true, value: exitFullscreen })
     // jsdom has no Fullscreen API.
@@ -74,11 +99,11 @@ describe("promptForSubtitlesRefusal", () => {
     })
 
     promptForSubtitlesRefusal(spentPoolError(), options("video-A"))
-    await mockPromptForBuiltInAiRefusal.mock.calls[0]![1].beforeDialog()
+    await mockPromptForBuiltInAiRefusal.mock.calls[0]![1].beforePrompt()
     expect(exitFullscreen).toHaveBeenCalledOnce()
 
     fullscreenElement = null
-    await mockPromptForBuiltInAiRefusal.mock.calls[0]![1].beforeDialog()
+    await mockPromptForBuiltInAiRefusal.mock.calls[0]![1].beforePrompt()
     expect(exitFullscreen).toHaveBeenCalledOnce()
   })
 })

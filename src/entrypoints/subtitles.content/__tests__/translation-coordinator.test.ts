@@ -1,3 +1,4 @@
+import type { SubtitlesState } from "@/utils/subtitles/types"
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { storage } from "#imports"
 import { CONFIG_STORAGE_KEY, DEFAULT_CONFIG } from "@/utils/constants/config"
@@ -415,6 +416,7 @@ describe("translation coordinator when Built-in AI refuses", () => {
   afterEach(() => {
     restoreSetup?.()
     restoreSetup = null
+    vi.unstubAllGlobals()
   })
   /** The server's refusal, relayed from the background inside translateSubtitles' error. */
   function spentPoolError() {
@@ -435,7 +437,8 @@ describe("translation coordinator when Built-in AI refuses", () => {
     await new Promise((resolve) => setTimeout(resolve, 0))
   }
 
-  async function setup() {
+  /** `trackState` keeps the player's state as the scheduler does, error badge and all. */
+  async function setup({ trackState = false } = {}) {
     const fragments = Array.from({ length: 20 }, (_, i) => ({
       text: `line ${i}`,
       start: i * 2000,
@@ -449,11 +452,16 @@ describe("translation coordinator when Built-in AI refuses", () => {
     const configSpy = vi.spyOn(configModule, "getLocalConfig").mockResolvedValue(DEFAULT_CONFIG)
     const video = createVideo()
     const onBuiltInAiRefused = vi.fn<(error: unknown) => void>()
-    const onStateChange = vi.fn<(...args: any[]) => any>()
+    let state: SubtitlesState = "idle"
+    const onStateChange = vi.fn<(next: SubtitlesState) => void>((next) => {
+      if (trackState) {
+        state = next
+      }
+    })
     const coordinator = new TranslationCoordinator({
       getFragments: () => fragments,
       getVideoElement: () => video as unknown as HTMLVideoElement,
-      getCurrentState: () => "idle",
+      getCurrentState: () => state,
       segmentationPipeline: null,
       onTranslated: vi.fn<(...args: any[]) => any>(),
       onStateChange,
@@ -465,7 +473,14 @@ describe("translation coordinator when Built-in AI refuses", () => {
       translateSpy.mockRestore()
       configSpy.mockRestore()
     }
-    return { coordinator, video, translateSpy, onBuiltInAiRefused, onStateChange }
+    return {
+      coordinator,
+      video,
+      translateSpy,
+      onBuiltInAiRefused,
+      onStateChange,
+      getState: () => state,
+    }
   }
 
   it("holds translation after a refusal instead of sending batch after batch", async () => {
@@ -498,6 +513,53 @@ describe("translation coordinator when Built-in AI refuses", () => {
 
     await vi.waitFor(() => expect(translateSpy.mock.calls.length).toBeGreaterThanOrEqual(2))
     expect(translateSpy.mock.calls[1]![0]).toEqual(refusedBatch)
+  })
+
+  it("retries at once when the reader switches while the refusal's error still shows", async () => {
+    const { coordinator, translateSpy, onBuiltInAiRefused, getState } = await setup({
+      trackState: true,
+    })
+
+    coordinator.start()
+    await vi.waitFor(() => expect(onBuiltInAiRefused).toHaveBeenCalledOnce())
+    await vi.waitFor(() => expect(getState()).toBe("error"))
+
+    // The video is paused: no timeupdate comes along to pick the retry up later.
+    translateSpy.mockImplementation((batch: any) => Promise.resolve(batch))
+    coordinator.retryFailed()
+
+    await vi.waitFor(() => expect(translateSpy.mock.calls.length).toBeGreaterThanOrEqual(2))
+    expect(getState()).not.toBe("error")
+  })
+
+  it("tries the held cues again when the reader comes back to the tab", async () => {
+    const page = Object.assign(new EventTarget(), { visibilityState: "visible" })
+    vi.stubGlobal("document", page)
+    const { coordinator, translateSpy, onBuiltInAiRefused } = await setup()
+
+    coordinator.start()
+    await vi.waitFor(() => expect(onBuiltInAiRefused).toHaveBeenCalledOnce())
+    const refusedBatch = translateSpy.mock.calls[0]![0]
+
+    // Off to the website to log in or upgrade: nothing has changed yet.
+    page.visibilityState = "hidden"
+    page.dispatchEvent(new Event("visibilitychange"))
+    await flush()
+    expect(translateSpy).toHaveBeenCalledOnce()
+
+    translateSpy.mockImplementation((batch: any) => Promise.resolve(batch))
+    page.visibilityState = "visible"
+    page.dispatchEvent(new Event("visibilitychange"))
+
+    await vi.waitFor(() => expect(translateSpy.mock.calls.length).toBeGreaterThanOrEqual(2))
+    expect(translateSpy.mock.calls[1]![0]).toEqual(refusedBatch)
+
+    // Stopped, it no longer listens.
+    coordinator.stop()
+    const calls = translateSpy.mock.calls.length
+    page.dispatchEvent(new Event("visibilitychange"))
+    await flush()
+    expect(translateSpy).toHaveBeenCalledTimes(calls)
   })
 
   it("translates the refused cues again when the subtitles provider changes", async () => {

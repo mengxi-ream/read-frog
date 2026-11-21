@@ -278,22 +278,39 @@ describe("promptForBuiltInAiRefusal", () => {
     expect(host.result.current).toBeNull()
   })
 
-  it("runs beforeDialog before opening the dialog", async () => {
+  it("runs beforePrompt before opening the dialog", async () => {
     const host = renderDialogHost()
     const order: string[] = []
     let current: unknown = "unset"
 
     await promptForBuiltInAiRefusal(spentPoolError(), {
       ...OPTIONS,
-      beforeDialog: () => {
-        order.push("beforeDialog")
+      beforePrompt: () => {
+        order.push("beforePrompt")
         current = host.result.current
       },
     })
 
-    expect(order).toEqual(["beforeDialog"])
+    expect(order).toEqual(["beforePrompt"])
     expect(current).toBeNull()
     await vi.waitFor(() => expect(host.result.current).toMatchObject({ kind: "upgrade" }))
+  })
+
+  it("runs beforePrompt before the toast too, in a frame with no dialog", async () => {
+    const order: string[] = []
+    mockToastAdd.mockImplementation(({ id }: { id: string }) => {
+      order.push("toast")
+      return id
+    })
+
+    await promptForBuiltInAiRefusal(spentPoolError(), {
+      ...OPTIONS,
+      beforePrompt: () => {
+        order.push("beforePrompt")
+      },
+    })
+
+    expect(order).toEqual(["beforePrompt", "toast"])
   })
 
   it("drops the prompt when its run stopped while the plan loaded", async () => {

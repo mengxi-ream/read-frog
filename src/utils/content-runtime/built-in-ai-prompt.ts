@@ -113,8 +113,11 @@ export interface BuiltInAiRefusalPromptOptions {
    * a browser session.
    */
   mayOpenDialog?: (kind: BuiltInAiRefusalKind) => boolean | Promise<boolean>
-  /** Runs just before the dialog opens, such as to leave fullscreen, which would hide it. */
-  beforeDialog?: () => void | Promise<void>
+  /**
+   * Runs just before the dialog or the toast shows, such as to leave fullscreen, which
+   * would hide either one.
+   */
+  beforePrompt?: () => void | Promise<void>
   /** Checked after each wait: false drops the prompt, as when its run was stopped. */
   isCurrent?: () => boolean
 }
@@ -223,11 +226,12 @@ export async function promptForBuiltInAiRefusal(
     }
   }
 
+  await options.beforePrompt?.()
+  if (!isCurrent()) {
+    return true
+  }
+
   if (presentation === "dialog") {
-    await options.beforeDialog?.()
-    if (!isCurrent()) {
-      return true
-    }
     const base = { feature, analyticsFeature, trigger, retry }
     openBuiltInAiPrompt(
       kind === "upgrade" && plan !== null

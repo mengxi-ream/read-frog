@@ -1,4 +1,5 @@
 import type { BuiltInAiPromptTrigger } from "@/types/analytics"
+import { toastManager } from "@/components/ui/base-ui/toast"
 import { ANALYTICS_FEATURE } from "@/types/analytics"
 import { promptForBuiltInAiRefusal } from "@/utils/content-runtime/built-in-ai-prompt"
 import { getBuiltInAiRefusalKind } from "@/utils/hosted-ai/refusal"
@@ -9,9 +10,12 @@ const log = createLogger("subtitles/built-in-ai-refusal")
 /** The videos already asked about in this document, by `getVideoId` or the page's URL. */
 const promptedVideos = new Set<string>()
 
+const ULTRA_REFUSAL_TOAST_ID = "subtitles-built-in-ai-refusal"
+
 /**
- * The dialog is drawn on the page, which a fullscreen player covers: leave fullscreen
- * first, or the reader is asked a question they can't see.
+ * The dialog, or in a frame without one the toast, is drawn on the page, which a
+ * fullscreen player covers: leave fullscreen first, or the reader is asked a question
+ * they can't see.
  */
 async function leaveFullscreen(): Promise<void> {
   if (!document.fullscreenElement) {
@@ -28,7 +32,8 @@ async function leaveFullscreen(): Promise<void> {
  * Asks someone whose subtitle lines Built-in AI refused to log in or upgrade, or to switch
  * subtitles to machine translation, at most once a video: every cue batch after the first
  * would ask again. Only line translation asks; a refused summary or AI segmentation keeps
- * quiet, as the lines still come. Returns whether the error was such a refusal.
+ * quiet, as the lines still come. Ultra, with no plan to upgrade to, gets its plain
+ * message instead, once a video too. Returns whether the error was such a refusal.
  */
 export function promptForSubtitlesRefusal(
   error: unknown,
@@ -46,7 +51,16 @@ export function promptForSubtitlesRefusal(
     analyticsFeature: ANALYTICS_FEATURE.VIDEO_SUBTITLES,
     trigger: options.trigger,
     retry: options.retry,
-    beforeDialog: leaveFullscreen,
+    beforePrompt: leaveFullscreen,
+  }).then((prompted) => {
+    // Translation holds either way: without this, Ultra would see nothing say why.
+    if (!prompted) {
+      toastManager.add({
+        id: ULTRA_REFUSAL_TOAST_ID,
+        type: "error",
+        title: error instanceof Error ? error.message : String(error),
+      })
+    }
   })
   return true
 }

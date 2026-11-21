@@ -25,7 +25,8 @@ export interface TranslationCoordinatorOptions {
   batchLimits?: BatchQueueConfig
   /**
    * Built-in AI refused a cue batch: a guest, or a spent pool. Every batch after it would
-   * be refused the same way, so translation holds until `retryFailed` or a provider change.
+   * be refused the same way, so translation holds until `retryFailed`, a provider change,
+   * or the reader coming back to the tab.
    */
   onBuiltInAiRefused?: (error: unknown) => void
 }
@@ -166,6 +167,7 @@ export class TranslationCoordinator {
     if (this.segmentationPipeline) {
       video.addEventListener("seeked", this.handleSeek)
     }
+    globalThis.document?.addEventListener("visibilitychange", this.handleVisibilityChange)
     this.listenersAttached = true
   }
 
@@ -177,7 +179,19 @@ export class TranslationCoordinator {
       video.removeEventListener("seeked", this.handleTranslationTick)
       video.removeEventListener("seeked", this.handleSeek)
     }
+    globalThis.document?.removeEventListener("visibilitychange", this.handleVisibilityChange)
     this.listenersAttached = false
+  }
+
+  /**
+   * Log in and Upgrade open the website in another tab, and nothing tells this one when
+   * the reader has done either there: coming back is the cue to try the held cues again.
+   * Still refused, they hold again, and the video isn't asked about twice.
+   */
+  private handleVisibilityChange = () => {
+    if (this.heldByRefusal && document.visibilityState === "visible") {
+      this.retryFailed()
+    }
   }
 
   clearFailed() {
@@ -188,6 +202,13 @@ export class TranslationCoordinator {
   /** Translates the failed cues again, as after a switch away from a provider that refused. */
   retryFailed() {
     this.clearFailed()
+    // The failure's error badge stops every tick until it hides, 5 s on: a switch made
+    // straight from the prompt would otherwise wait that out, or on a paused video, until
+    // the reader plays or seeks.
+    if (this.active && this.getCurrentState() === "error") {
+      this.lastEmittedState = "idle"
+      this.onStateChange("idle")
+    }
     this.requestTick()
   }
 
