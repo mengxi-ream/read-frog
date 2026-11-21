@@ -1,5 +1,5 @@
+import type { SubtitlesProvidersAdapter } from "@/entrypoints/subtitles.content/adapter/subtitles-providers-adapter"
 import type { ControlsConfig } from "@/entrypoints/subtitles.content/platforms"
-import type { SubtitlesProvidersAdapter } from "@/entrypoints/subtitles.content/universal-adapter"
 import type { Config } from "@/types/config/config"
 import type { SubtitlesPlatform } from "@/types/config/subtitles"
 import { QueryClientProvider } from "@tanstack/react-query"

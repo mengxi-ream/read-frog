@@ -57,10 +57,10 @@ async function setUpPausedEmbeddedVideo({ translationStarts = true, isLive = fal
   })
   const video = document.createElement("video")
   const scheduler = createSchedulerStub(video)
-  ;(adapter as any).subtitlesScheduler = scheduler
-  vi.spyOn(adapter as any, "startTranslation").mockResolvedValue(translationStarts)
-  const switchSpy = vi.spyOn(adapter as any, "switchSubtitlesFetcher")
-  await (adapter as any).tryAutoStartSubtitles()
+  ;(adapter as any).player.subtitlesScheduler = scheduler
+  vi.spyOn((adapter as any).starter, "startTranslation").mockResolvedValue(translationStarts)
+  const switchSpy = vi.spyOn((adapter as any).subtitlesSwitch, "switchSubtitlesFetcher")
+  await (adapter as any).startRequests.tryAutoStartSubtitles()
 
   return {
     adapter,
@@ -156,12 +156,12 @@ describe("universalVideoAdapter before the first play of an embedded video", () 
   it("leaves nothing on the old video when an attach finishes during a navigation's wait", async () => {
     const { adapter, scheduler, play, switchedSources } = await setUpPausedEmbeddedVideo()
     vi.useFakeTimers()
-    vi.spyOn(adapter as any, "attachPlayer").mockResolvedValue(undefined)
+    vi.spyOn((adapter as any).player, "attachPlayer").mockResolvedValue(undefined)
 
     adapter.notifyNavigation()
     // The navigation dropped the scheduler; the attach that finishes now brings one back.
-    ;(adapter as any).subtitlesScheduler = scheduler
-    await (adapter as any).tryAutoStartSubtitles()
+    ;(adapter as any).player.subtitlesScheduler = scheduler
+    await (adapter as any).startRequests.tryAutoStartSubtitles()
     await vi.advanceTimersByTimeAsync(NAVIGATION_HANDLER_DELAY)
     play()
 

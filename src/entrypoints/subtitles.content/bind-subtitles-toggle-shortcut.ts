@@ -1,5 +1,5 @@
 import type { HotkeyChord } from "@tanstack/hotkeys"
-import type { SubtitlesProvidersAdapter } from "./universal-adapter"
+import type { SubtitlesProvidersAdapter } from "./adapter/subtitles-providers-adapter"
 import { HotkeyManager } from "@tanstack/hotkeys"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { getLocalConfig } from "@/utils/config/storage"

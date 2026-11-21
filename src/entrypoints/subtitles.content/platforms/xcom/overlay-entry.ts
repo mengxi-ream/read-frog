@@ -1,4 +1,4 @@
-import type { SubtitlesProvidersAdapter } from "../../universal-adapter"
+import type { SubtitlesProvidersAdapter } from "../../adapter/subtitles-providers-adapter"
 import {
   XCOM_CONTROLS_CONTAINER_ATTRIBUTE,
   XCOM_CONTROLS_CONTAINER_SELECTOR,
