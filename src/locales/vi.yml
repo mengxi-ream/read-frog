@@ -1752,7 +1752,7 @@ subtitles:
   requestAiSubtitles: Yêu cầu phụ đề AI
   usingAiSubtitles: Đang dùng phụ đề AI
   settings: Cài đặt phụ đề
-  autoStartOnPlatform: "Tự động bật khi mở video $1"
+  autoStartOnPlatform: "Tự động bật trên $1"
   toggle:
     enabled: Đã bật dịch phụ đề
     disabled: Đã tắt dịch phụ đề

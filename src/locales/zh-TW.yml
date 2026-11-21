@@ -1762,7 +1762,7 @@ subtitles:
   requestAiSubtitles: 請求 AI 字幕
   usingAiSubtitles: 正在使用 AI 字幕
   settings: 字幕設定
-  autoStartOnPlatform: "打開 $1 影片時自動開啟"
+  autoStartOnPlatform: "在 $1 上自動開啟"
   toggle:
     enabled: 字幕翻譯已開啟
     disabled: 字幕翻譯已關閉

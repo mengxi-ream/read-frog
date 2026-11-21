@@ -1752,7 +1752,7 @@ subtitles:
   requestAiSubtitles: Yapay zeka altyazısı iste
   usingAiSubtitles: Yapay zeka altyazısı kullanılıyor
   settings: Altyazı ayarları
-  autoStartOnPlatform: "$1 videolarında otomatik başlat"
+  autoStartOnPlatform: "$1 üzerinde otomatik başlat"
   toggle:
     enabled: Altyazı çevirisi açık
     disabled: Altyazı çevirisi kapalı

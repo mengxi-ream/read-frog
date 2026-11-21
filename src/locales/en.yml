@@ -1899,7 +1899,7 @@ subtitles:
   requestAiSubtitles: Request AI subtitles
   usingAiSubtitles: Using AI subtitles
   settings: Subtitle settings
-  autoStartOnPlatform: "Start automatically on $1 videos"
+  autoStartOnPlatform: "Auto-start on $1"
   toggle:
     enabled: Subtitle translation on
     disabled: Subtitle translation off
