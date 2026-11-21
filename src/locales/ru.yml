@@ -159,7 +159,7 @@ options:
     configTitle: Настройка провайдеров
     addProvider: Добавить провайдера
     builtInProvider: Встроенный провайдер
-    yourProviders: Ваши провайдеры
+    thirdPartyProviders: Сторонние провайдеры
     builtInModel:
       reasoningDescription: "Сколько модель $1 размышляет перед ответом. Более высокие уровни лучше справляются со сложным текстом, но отвечают медленнее и расходуют больше квоты."
       reasoningDefault: "По умолчанию"

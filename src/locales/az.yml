@@ -159,7 +159,7 @@ options:
     configTitle: Provayder konfiqurasiyası
     addProvider: Provayder əlavə et
     builtInProvider: Daxili provayder
-    yourProviders: Sizin provayderləriniz
+    thirdPartyProviders: Üçüncü tərəf provayderləri
     builtInModel:
       reasoningDescription: "$1 modelinin cavab verməzdən əvvəl nə qədər düşünəcəyi. Yüksək səviyyələr çətin mətnlərin öhdəsindən daha yaxşı gəlir, amma daha yavaş cavab verir və kvotanızdan daha çox istifadə edir."
       reasoningDefault: "Defolt"

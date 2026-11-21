@@ -159,7 +159,7 @@ options:
     configTitle: 提供者設定
     addProvider: 新增提供者
     builtInProvider: 內建提供者
-    yourProviders: 我的提供者
+    thirdPartyProviders: 第三方提供者
     builtInModel:
       reasoningDescription: "$1 回答前思考的程度。檔位越高，越能處理艱深的文字，但回答較慢，消耗的額度也較多。"
       reasoningDefault: "預設"

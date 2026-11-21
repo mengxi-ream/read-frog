@@ -159,7 +159,7 @@ options:
     configTitle: プロバイダー設定
     addProvider: プロバイダーを追加
     builtInProvider: 組み込みプロバイダー
-    yourProviders: マイプロバイダー
+    thirdPartyProviders: サードパーティのプロバイダー
     builtInModel:
       reasoningDescription: "$1 が回答する前にどれだけ考えるかです。レベルが高いほど難しい文章をうまく扱えますが、回答が遅くなり、クォータの消費も増えます。"
       reasoningDefault: "デフォルト"

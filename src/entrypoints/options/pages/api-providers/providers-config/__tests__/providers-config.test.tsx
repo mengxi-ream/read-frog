@@ -381,7 +381,7 @@ describe("ProvidersConfig", () => {
       screen.getByRole("button", { name: "options.apiProviders.addProvider" }),
       screen.getByRole("heading", { name: "options.apiProviders.builtInProvider" }),
       container.querySelector(`[data-provider-id="${SOL_PROVIDER_ID}"]`),
-      screen.getByRole("heading", { name: "options.apiProviders.yourProviders" }),
+      screen.getByRole("heading", { name: "options.apiProviders.thirdPartyProviders" }),
       container.querySelector(`[data-provider-id="${providerConfig.id}"]`),
     ]
     for (let i = 1; i < inDocumentOrder.length; i++) {

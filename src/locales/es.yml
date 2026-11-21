@@ -159,7 +159,7 @@ options:
     configTitle: Configuración de proveedores
     addProvider: Añadir proveedor
     builtInProvider: Proveedor integrado
-    yourProviders: Tus proveedores
+    thirdPartyProviders: Proveedores de terceros
     builtInModel:
       reasoningDescription: "Cuánto piensa $1 antes de responder. Los niveles más altos manejan mejor los textos difíciles, pero responden más despacio y consumen más de tu cuota."
       reasoningDefault: "Predeterminado"

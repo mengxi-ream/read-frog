@@ -159,7 +159,7 @@ options:
     configTitle: Sağlayıcı yapılandırması
     addProvider: Sağlayıcı ekle
     builtInProvider: Yerleşik sağlayıcı
-    yourProviders: Sağlayıcılarınız
+    thirdPartyProviders: Üçüncü taraf sağlayıcılar
     builtInModel:
       reasoningDescription: "$1 modelinin yanıt vermeden önce ne kadar düşüneceği. Yüksek seviyeler zor metinlerde daha iyi sonuç verir, ancak daha yavaş yanıt verir ve kotanızdan daha fazlasını kullanır."
       reasoningDefault: "Varsayılan"
