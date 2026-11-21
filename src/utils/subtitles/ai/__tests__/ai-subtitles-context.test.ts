@@ -1,8 +1,10 @@
+import { xcomPostVideoKey } from "@read-frog/definitions"
 import { describe, expect, it } from "vitest"
 import { resolveAiSubtitlesContext } from "../ai-subtitles-context"
 
 const YOUTUBE_URL = "https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=42"
-const X_POST_URL = "https://x.com/NASA/status/2119833829389041896"
+const X_STATUS_ID = "2119833829389041896"
+const X_POST_URL = `https://x.com/NASA/status/${X_STATUS_ID}`
 const MEDIA_ID = "2119833138889158657"
 const video = { duration: 341.043 }
 
@@ -28,8 +30,16 @@ describe("resolveAiSubtitlesContext", () => {
     })
   })
 
+  it("keys an X post without a media id by the post", () => {
+    expect(resolveAiSubtitlesContext({ url: X_POST_URL, video })).toEqual({
+      videoId: xcomPostVideoKey(X_STATUS_ID),
+      url: X_POST_URL,
+      durationSec: 342,
+    })
+  })
+
   it.each([
-    { url: X_POST_URL },
+    { url: X_POST_URL, mediaId: "0123" },
     { url: "https://vimeo.com/76979871", mediaId: MEDIA_ID },
     { url: "not-a-url" },
   ])("has no context for $url with media id $mediaId", (request) => {

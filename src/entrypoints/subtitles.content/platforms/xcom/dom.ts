@@ -12,6 +12,10 @@ const XCOM_VIDEO_CONTAINER_SELECTORS = [
   "[data-testid='videoPlayerContainer']",
 ]
 
+// X hides a card's media from screen readers, yet plays a broadcast replay there.
+const XCOM_HIDDEN_ANCESTOR_SELECTOR =
+  "[aria-hidden='true']:not([data-testid='card.layoutLarge.media'])"
+
 function hasRenderedSize(element: HTMLElement): boolean {
   const rect = element.getBoundingClientRect()
   return rect.width > 0 && rect.height > 0
@@ -20,7 +24,7 @@ function hasRenderedSize(element: HTMLElement): boolean {
 function isCandidateStatusVideo(video: HTMLVideoElement): boolean {
   return (
     video.isConnected &&
-    !video.closest("[aria-hidden='true']") &&
+    !video.closest(XCOM_HIDDEN_ANCESTOR_SELECTOR) &&
     !!getXcomStatusVideoContainer(video) &&
     !!video.closest("article")
   )
@@ -96,7 +100,7 @@ export function getCurrentPrimaryXcomStatusVideo(): HTMLVideoElement | null {
 }
 
 // A quoted post's card links to no post of its own, so its video resolves to the post quoting
-// it; the server finds the video by its media id in either post.
+// it; the server finds the video by its media id, or as the only one, across both posts.
 function getXcomVideoStatusId(video: HTMLVideoElement): string | null {
   const article = video.closest("article")
   if (!article) {
