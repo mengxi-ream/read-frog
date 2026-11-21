@@ -13,6 +13,11 @@
  *   successors are image models, so they go to the default text model.
  * - Moonshot AI: the Moonshot V1 series and the deprecated Kimi K2 models.
  *   kimi-k2.6 is still served and is kept.
+ * - DeepSeek: deepseek-v4-flash. V4 Flash is retired and the name only
+ *   temporarily routes to V4.1 Flash, which deepseek-flash serves. Unlike the
+ *   others it is still listed in v129, because it was the default and a UI
+ *   context can read a not-yet-migrated config, so it is moved before DeepSeek
+ *   stops routing it rather than after it is dropped.
  * - Groq: every chat model except gpt-oss-20b/120b and qwen3.8-27b.
  * - Cerebras: every model except gpt-oss-120b.
  * - Mistral: zai-glm-5-2, the Magistral and Mistral Medium snapshots,
@@ -70,6 +75,9 @@ const REPLACEMENTS: Record<string, Readonly<Record<string, string>>> = {
     "kimi-k2-thinking": "kimi-k3",
     "kimi-k2-thinking-turbo": "kimi-k3",
     "kimi-k2-turbo": "kimi-k3",
+  },
+  deepseek: {
+    "deepseek-v4-flash": "deepseek-flash",
   },
   groq: {
     "gemma2-9b-it": "openai/gpt-oss-20b",

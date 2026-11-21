@@ -5,10 +5,11 @@ import type { TestSeriesObject } from "./types"
  * spreads the previous version is not a snapshot, because editing v128 would
  * silently change what v129 asserts.
  *
- * Delta from v128: none. v129 moves providers off models that were dropped
- * from the built-in lists, and every provider in these series (including the
- * Google ones on `gemini-2.5-pro`, which is still listed) is on a model that
- * stays. The removed models and the custom-model case are covered in
+ * Delta from v128: the DeepSeek provider in "complex-config-from-v020" moves
+ * from `deepseek-v4-flash`, a retired model, to `deepseek-flash`. Every other
+ * provider in these series (including the Google ones on `gemini-2.5-pro`,
+ * which is still listed) is on a model that stays. The other removed models
+ * and the custom-model case are covered in
  * `migration-scripts/v128-to-v129.test.ts`.
  */
 
@@ -88,7 +89,7 @@ export const testSeries: TestSeriesObject = {
           apiKey: "ds-custom",
           baseURL: "https://api.custom.com/v1",
           model: {
-            model: "deepseek-v4-flash",
+            model: "deepseek-flash",
             isCustomModel: false,
             customModel: "",
           },

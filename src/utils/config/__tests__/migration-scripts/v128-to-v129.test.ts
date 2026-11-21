@@ -42,6 +42,7 @@ const MOVES: Array<[provider: string, removed: string, replacement: string]> = [
   ["moonshotai", "kimi-k2-thinking", "kimi-k3"],
   ["moonshotai", "kimi-k2-thinking-turbo", "kimi-k3"],
   ["moonshotai", "kimi-k2-turbo", "kimi-k3"],
+  ["deepseek", "deepseek-v4-flash", "deepseek-flash"],
   ["groq", "gemma2-9b-it", "openai/gpt-oss-20b"],
   ["groq", "llama-3.1-8b-instant", "openai/gpt-oss-20b"],
   ["groq", "llama3-8b-8192", "openai/gpt-oss-20b"],
@@ -148,6 +149,7 @@ describe("v128-to-v129 migration", () => {
       provider("google", "gemini-2.5-pro"),
       provider("google", "gemini-2.5-flash-lite-preview-06-17"),
       provider("moonshotai", "kimi-k2.6"),
+      provider("deepseek", "deepseek-v4-pro"),
       provider("groq", "qwen/qwen3.8-27b"),
       provider("cerebras", "gpt-oss-120b"),
       provider("mistral", "mistral-medium-3.5"),
@@ -167,10 +169,13 @@ describe("v128-to-v129 migration", () => {
 
   it("only looks at the provider's own removed list", () => {
     // A removed id is only removed for the provider it was dropped from: Alibaba
-    // still hosts kimi-k2.5, and a custom endpoint may still serve the others.
+    // still hosts kimi-k2.5, AtlasCloud still serves V4 Flash, and a custom
+    // endpoint may still serve the others.
     const config = {
       providersConfig: [
         provider("alibaba", "kimi-k2.5"),
+        provider("alibaba", "deepseek-v4-flash"),
+        provider("atlascloud", "deepseek-ai/deepseek-v4-flash"),
         provider("deepinfra", "meta-llama/Llama-3.3-70B-Instruct"),
         provider("togetherai", "openai/gpt-oss-20b"),
         provider("openai-compatible", "gpt-5-chat-latest"),

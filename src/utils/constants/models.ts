@@ -66,8 +66,13 @@ export const LLM_PROVIDER_MODELS = {
     "grok-code-fast-1",
   ],
   // deepseek-chat and deepseek-reasoner were retired on 2026-07-24; v119-to-v120 moves them off.
-  // deepseek-flash is DeepSeek's alias for whichever V4.x Flash release is current.
-  deepseek: ["deepseek-v4-flash", "deepseek-flash", "deepseek-v4-pro"],
+  // deepseek-flash is DeepSeek's alias for whichever V4.x Flash release is current (V4.1 Flash
+  // 1017 as of 2026-11-21). V4 Flash is retired and the deepseek-v4-flash name only temporarily
+  // routes to V4.1 Flash, so v128-to-v129 moves configs to deepseek-flash. deepseek-v4-flash
+  // stays listed for now because it was the default: a UI context that reads storage before the
+  // background runs v128-to-v129 must still parse those configs. Drop it in a later update.
+  // https://api-docs.deepseek.com/updates (reviewed 2026-11-21)
+  deepseek: ["deepseek-flash", "deepseek-v4-flash", "deepseek-v4-pro"],
   // Shut down by Google and moved off in v128-to-v129: gemini-3-pro-preview,
   // gemini-3.1-flash-lite-preview, gemini-2.0-flash and the two image previews.
   // https://ai.google.dev/gemini-api/docs/deprecations
@@ -116,6 +121,8 @@ export const LLM_PROVIDER_MODELS = {
   tensdaq: ["Qwen3-30B-A3B-Instruct-2507", "deepseek-v3.1"],
   atlascloud: [
     "deepseek-ai/deepseek-v4-flash",
+    "deepseek-ai/deepseek-v4.1-flash",
+    "deepseek-ai/deepseek-v4.1-flash-1017",
     "deepseek-ai/deepseek-v4-pro",
     "moonshotai/Kimi-K2-Instruct",
     "moonshotai/Kimi-K2-Instruct-0905",
@@ -269,6 +276,8 @@ export const LLM_PROVIDER_MODELS = {
   deepinfra: [
     "Qwen/Qwen3.5-9B",
     "Qwen/Qwen3.8-27B",
+    "deepseek-ai/DeepSeek-V4.1-Flash",
+    "deepseek-ai/DeepSeek-V4.1-Flash-1017",
     "deepseek-ai/DeepSeek-V4-Flash",
     "deepseek-ai/DeepSeek-V4-Pro",
     "moonshotai/Kimi-K2.6",
@@ -380,6 +389,8 @@ export const LLM_PROVIDER_MODELS = {
     "google/gemma-4-31b-it:free",
     "openai/gpt-5.6-luna",
     "google/gemini-3.5-flash-lite",
+    "deepseek/deepseek-v4.1-flash",
+    "deepseek/deepseek-v4.1-flash-1017",
     "deepseek/deepseek-v4-flash",
     "x-ai/grok-4-fast:free",
     "openai/gpt-4.1-mini",
@@ -407,6 +418,8 @@ export const LLM_PROVIDER_MODELS = {
     "qwen3.8-max",
     "qwen3.7-flash",
     "qwen3.7-plus",
+    "deepseek-v4.1-flash",
+    "deepseek-v4.1-flash-1017",
     "deepseek-v4-flash",
     "deepseek-v4-pro",
     "kimi-k2.6",
@@ -435,6 +448,8 @@ export const LLM_PROVIDER_MODELS = {
   huggingface: [
     "Qwen/Qwen3.5-9B",
     "Qwen/Qwen3.8-27B",
+    "deepseek-ai/DeepSeek-V4.1-Flash",
+    "deepseek-ai/DeepSeek-V4.1-Flash-1017",
     "deepseek-ai/DeepSeek-V4-Flash",
     "deepseek-ai/DeepSeek-V4-Pro",
     "moonshotai/Kimi-K2.6",
@@ -625,9 +640,11 @@ export const LLM_MODEL_OPTIONS: Array<{
   },
 
   // DeepSeek reasoning models - disable thinking by default.
-  // `deepseek-flash` is the alias for the current V4.x Flash release.
+  // `deepseek-flash` is the alias for the current V4.x Flash release. Hosts serving the open
+  // weights use the point release and an optional MMDD snapshot suffix (V4.1-Flash-1017,
+  // V4-Flash-0731, V4-Pro-0813).
   {
-    pattern: /(?:^|\/)deepseek-(?:reasoner|flash|v4-(?:flash|pro))$/i,
+    pattern: /(?:^|\/)deepseek-(?:reasoner|flash|v4(?:\.\d+)?-(?:flash|pro)(?:-\d{4})?)$/i,
     options: { thinking: { type: "disabled" } },
   },
 

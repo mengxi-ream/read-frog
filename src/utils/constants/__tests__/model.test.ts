@@ -533,6 +533,61 @@ describe("getProviderOptions", () => {
       ])
     })
 
+    it("should disable thinking for DeepSeek point releases and dated snapshots", () => {
+      const hosted: Array<[model: string, provider: string]> = [
+        ["deepseek-ai/deepseek-v4.1-flash", "atlascloud"],
+        ["deepseek-ai/deepseek-v4.1-flash-1017", "atlascloud"],
+        ["deepseek-ai/DeepSeek-V4.1-Flash", "deepinfra"],
+        ["deepseek-ai/DeepSeek-V4.1-Flash-1017", "huggingface"],
+        ["deepseek/deepseek-v4.1-flash", "openrouter"],
+        ["deepseek/deepseek-v4.1-flash-1017", "openrouter"],
+        ["deepseek-v4.1-flash", "alibaba"],
+        ["deepseek-v4.1-flash-1017", "alibaba"],
+        ["DeepSeek-V4.1-Flash-1017", "jalapenocloud"],
+        ["DeepSeek-V4-Flash-0731", "jalapenocloud"],
+        ["deepseek-ai/DeepSeek-V4-Pro-0813", "deepinfra"],
+      ]
+      for (const [model, provider] of hosted) {
+        expect(getProviderOptions(model, provider)).toEqual({
+          [provider]: { thinking: { type: "disabled" } },
+        })
+      }
+      // Other DeepSeek-named models keep falling through to their own rules (or none).
+      expect(getProviderOptions("deepseek-v4-flash-vision-exp", "deepseek")).toEqual({})
+      expect(getProviderOptions("deepseek-v4.1-flash-preview", "deepseek")).toEqual({})
+    })
+
+    it("should list DeepSeek V4.1 Flash on the hosts that serve it", () => {
+      // deepseek-v4-flash stays listed until v128-to-v129 has moved configs off it.
+      expect(LLM_PROVIDER_MODELS.deepseek).toEqual([
+        "deepseek-flash",
+        "deepseek-v4-flash",
+        "deepseek-v4-pro",
+      ])
+      expect(LLM_PROVIDER_MODELS.atlascloud.slice(0, 3)).toEqual([
+        "deepseek-ai/deepseek-v4-flash",
+        "deepseek-ai/deepseek-v4.1-flash",
+        "deepseek-ai/deepseek-v4.1-flash-1017",
+      ])
+      for (const provider of ["deepinfra", "huggingface"] as const) {
+        expect(LLM_PROVIDER_MODELS[provider]).toEqual(
+          expect.arrayContaining([
+            "deepseek-ai/DeepSeek-V4.1-Flash",
+            "deepseek-ai/DeepSeek-V4.1-Flash-1017",
+          ]),
+        )
+      }
+      expect(LLM_PROVIDER_MODELS.openrouter).toEqual(
+        expect.arrayContaining([
+          "deepseek/deepseek-v4.1-flash",
+          "deepseek/deepseek-v4.1-flash-1017",
+        ]),
+      )
+      expect(LLM_PROVIDER_MODELS.alibaba).toEqual(
+        expect.arrayContaining(["deepseek-v4.1-flash", "deepseek-v4.1-flash-1017"]),
+      )
+    })
+
     it("should only list the models GroqCloud, Cerebras and Kimi still serve", () => {
       expect(LLM_PROVIDER_MODELS.groq).toEqual([
         "openai/gpt-oss-20b",

@@ -112,7 +112,7 @@ describe("dEFAULT_CONFIG", () => {
     ).toEqual(
       expect.objectContaining({
         model: {
-          model: "deepseek-v4-flash",
+          model: "deepseek-flash",
           isCustomModel: false,
           customModel: null,
         },
