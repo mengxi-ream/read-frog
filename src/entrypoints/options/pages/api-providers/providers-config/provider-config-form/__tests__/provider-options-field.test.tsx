@@ -193,7 +193,7 @@ describe("providerOptionsField", () => {
           ...baseProviderConfig,
           provider: "groq",
           model: {
-            model: "qwen/qwen3-32b",
+            model: "qwen/qwen3.8-27b",
             isCustomModel: false,
             customModel: null,
           },
