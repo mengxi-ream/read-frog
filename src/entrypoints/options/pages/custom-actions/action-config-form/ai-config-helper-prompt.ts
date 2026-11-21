@@ -121,10 +121,6 @@ function quoteList(values: readonly string[]) {
   return values.map((value) => `\`${value}\``).join(", ")
 }
 
-// Custom action layouts mount no media renderer (see findMediaFilterDiagnostics),
-// so the engine's `media` filter would only print an empty placeholder.
-const LAYOUT_FILTERS = LAYOUT_FILTER_NAMES.filter((name) => name !== "media")
-
 const FORM = "options.selectionToolbar.customActions.form"
 const TEMPLATES = "options.selectionToolbar.customActions.templates"
 
@@ -345,7 +341,7 @@ A layout is HTML with Liquid (the liquidjs flavor of Shopify's template language
 
 ### Liquid
 - Tags: ${quoteList(LAYOUT_ALLOWED_TAGS.filter((tag) => tag !== "#"))} and \`{% # comment %}\`. Nothing else: no \`include\`, \`render\`, \`capture\`, \`echo\` or \`cycle\`.
-- Filters: ${quoteList(LAYOUT_FILTERS)}.
+- Filters: ${quoteList(LAYOUT_FILTER_NAMES)}.
 - Every output is HTML-escaped (\`raw\` and \`escape\` change nothing), so a value can never inject markup. Always quote attributes that contain output: \`title="{{ … }}"\`.
 - Filters written in a \`for\` or \`when\` tag are ignored: assign the filtered value first, then loop over the local.
 - \`parse_json\`: JSON text → data (nil when it isn't JSON; text over ${LAYOUT_PARSE_JSON_MAX_LENGTH.toLocaleString("en")} characters gives nil). For a JSON array cut off mid-stream it returns the items completed so far, so a list grows item by item while the answer streams.

@@ -830,7 +830,6 @@ options:
             newlineToBrNotLast: newline_to_br는 출력의 마지막 필터일 때만 동작합니다.
             mathFilterNotLast: $1 필터는 출력의 마지막 필터일 때만 동작합니다.
             mathFilterInAttribute: 속성 값 안에서는 $1 필터를 쓰지 마세요. 그려진 수식에 들어 있는 따옴표가 속성을 끝내 버립니다.
-            mediaFilterUnsupported: 이 레이아웃은 미디어를 표시할 수 없어서 media 필터는 여기서 아무것도 출력하지 않습니다.
             tooLong: 이 레이아웃은 $1자를 넘어 저장할 수 없습니다.
             fieldNotShown: "'$1'은(는) 이 레이아웃에 표시되지 않습니다."
             reservedFieldName: 필드 이름 '$1'은(는) 레이아웃 예약어입니다. 필드 이름을 바꾸세요.

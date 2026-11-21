@@ -93,15 +93,6 @@ describe("buildAiConfigHelperPrompt", () => {
     targetCode: "zh-Hans",
   } as const
 
-  it("lists the layout filters except media, which custom action layouts can't show", () => {
-    const prompt = buildAiConfigHelperPrompt({ ...input, action: createAction() })
-    const filtersLine = prompt.split("\n").find((line) => line.startsWith("- Filters: "))
-
-    expect(filtersLine).toContain("`math`")
-    expect(filtersLine).toContain("`newline_to_br`")
-    expect(filtersLine).not.toContain("`media`")
-  })
-
   it("asks the assistant to find out the user's intent before designing anything", () => {
     const prompt = buildAiConfigHelperPrompt({ ...input, action: createAction() })
 

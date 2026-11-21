@@ -17,7 +17,7 @@ import type { LiquidEditorField } from "../liquid-code-editor-extensions"
 import { css } from "@codemirror/lang-css"
 import { json, jsonParseLinter } from "@codemirror/lang-json"
 import { closePercentBrace, liquid } from "@codemirror/lang-liquid"
-import { forceLinting, forEachDiagnostic, linter, lintGutter } from "@codemirror/lint"
+import { linter, lintGutter } from "@codemirror/lint"
 import { EditorState } from "@codemirror/state"
 import { EditorView } from "@codemirror/view"
 import { refreshFieldPills } from "@read-frog/layout-engine/codemirror"
@@ -27,12 +27,11 @@ import {
   getDefaultExtensions,
   EditorState as ReactCodeMirrorEditorState,
 } from "@uiw/react-codemirror"
-import { afterEach, describe, expect, it, vi } from "vitest"
+import { afterEach, describe, expect, it } from "vitest"
 import { cssLinter } from "@/utils/css/lint-css"
 import { i18n } from "@/utils/i18n"
 import { CUSTOM_ACTION_LAYOUT_HOST } from "@/utils/layout-host/host"
 import {
-  findMediaFilterDiagnostics,
   layoutLengthLimit,
   liquidLayoutFieldPills,
   liquidLayoutLanguage,
@@ -200,53 +199,5 @@ describe("liquid layout field pills", () => {
     fields = fields.slice(0, 1)
     refreshFieldPills(view)
     expect(pillLabels()).toEqual(["the term"])
-  })
-})
-
-describe("liquid layout media filter", () => {
-  const unsupported = i18n.t(
-    "options.selectionToolbar.customActions.form.layout.lint.mediaFilterUnsupported",
-  )
-  const fields: LiquidEditorField[] = [{ id: "f1", name: "Word", type: "string", description: "" }]
-
-  let view: EditorView | null = null
-
-  afterEach(() => {
-    view?.destroy()
-    view = null
-  })
-
-  // Custom action layouts mount no media renderer, so a field written through
-  // `media` would go blank without a word: warn wherever the filter appears.
-  it("marks every media filter, even the last one outside an attribute", () => {
-    const doc = '<p>{{ Word | media }}</p><img alt="{{ Word | media }}">{{ Word | upcase }}'
-    const diagnostics = findMediaFilterDiagnostics(doc)
-
-    expect(diagnostics.map((d) => doc.slice(d.from, d.to))).toEqual(["media", "media"])
-    expect(diagnostics.every((d) => d.severity === "warning" && d.message === unsupported)).toBe(
-      true,
-    )
-    expect(findMediaFilterDiagnostics("<p>{{ Word | upcase }}</p>")).toEqual([])
-    expect(findMediaFilterDiagnostics("<p>{{ Word | media </p>")).toEqual([])
-  })
-
-  it("shows one warning per media filter in the editor, not the engine's placement warnings too", async () => {
-    // Not last, and inside an attribute: the engine flags both on its own.
-    const doc = '<p title="{{ Word | media | upcase }}">{{ Word }}</p>'
-    view = new EditorView({
-      parent: document.body,
-      state: EditorState.create({
-        doc,
-        extensions: [liquidLayoutLinter({ getFields: () => fields, maxLength: 32768 })],
-      }),
-    })
-    forceLinting(view)
-
-    const messages = () => {
-      const found: string[] = []
-      forEachDiagnostic(view!.state, (d) => found.push(d.message))
-      return found
-    }
-    await vi.waitFor(() => expect(messages()).toEqual([unsupported]))
   })
 })
