@@ -1360,7 +1360,10 @@ describe("selection toolbar requests", () => {
     expect(screen.getByTestId("translation-selection").textContent).toBe("punched")
   })
 
-  it("does not translate this frame's own selection for a context menu opened in an ebook section", async () => {
+  it("translates the menu's text, not this frame's own selection, for a context menu opened in an ebook section", async () => {
+    translateTextCoreMock.mockResolvedValue("Ebook result")
+    getOrCreateWebPageContextMock.mockResolvedValue(null)
+
     const paragraph = document.createElement("p")
     paragraph.textContent = "Reader page header."
     document.body.appendChild(paragraph)
@@ -1371,17 +1374,19 @@ describe("selection toolbar requests", () => {
     setSelectionState(store, { text: "Reader page header.", range: createRangeFor(paragraph) })
     renderWithProviders(<TranslateButton />, store)
 
-    act(() => {
+    await act(async () => {
       getRegisteredMessageHandler("openSelectionTranslationFromContextMenu")({
         data: { selectionText: "punched", fromEbookSection: true },
       })
+      await Promise.resolve()
     })
 
-    expect(toastAddMock).toHaveBeenCalledWith({
-      type: "error",
-      title: "options.selectionToolbar.errors.missingSelection",
+    await waitFor(() => {
+      expect(translateTextCoreMock).toHaveBeenCalledTimes(1)
     })
-    expect(translateTextCoreMock).not.toHaveBeenCalled()
+
+    expect(screen.getByTestId("translation-selection").textContent).toBe("punched")
+    expect(toastAddMock).not.toHaveBeenCalled()
   })
 
   it("shows a toast when the context menu request cannot recover a selection snapshot", async () => {
@@ -2103,6 +2108,36 @@ describe("selection toolbar requests", () => {
     expect(content).toHaveAttribute("data-anchor-x", "240")
     expect(content).toHaveAttribute("data-anchor-y", "138")
     expect(screen.getByTestId("footer-paragraphs").textContent).toContain("My mom punched me.")
+    expect(toastAddMock).not.toHaveBeenCalled()
+  })
+
+  it("runs a context-menu action opened in an ebook section on the menu's text when the relay is stale", async () => {
+    streamBackgroundStructuredObjectMock.mockResolvedValue(
+      createStructuredObjectSnapshot({ summary: "Ebook result" }),
+    )
+
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    setRelayedEbookSelection(store)
+    renderWithProviders(<SelectionToolbarPinnedItems />, store)
+
+    // Extended past "punched" with the keyboard, which the reader does not relay.
+    await act(async () => {
+      getRegisteredMessageHandler("openSelectionCustomActionFromContextMenu")({
+        data: {
+          actionId: DEFAULT_DICTIONARY_ACTION.id,
+          selectionText: "punched me in the face",
+          fromEbookSection: true,
+        },
+      })
+      await Promise.resolve()
+    })
+
+    await waitFor(() => {
+      expect(streamBackgroundStructuredObjectMock).toHaveBeenCalledTimes(1)
+    })
+
+    expect(screen.getByTestId("footer-paragraphs").textContent).toBe("punched me in the face")
     expect(toastAddMock).not.toHaveBeenCalled()
   })
 

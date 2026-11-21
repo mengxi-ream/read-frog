@@ -1,5 +1,6 @@
 import type { ComponentProps, ReactNode } from "react"
 import type { NoteSuggestionProviderRef, SelectionSession } from "../atoms"
+import type { ContextMenuSelection } from "../use-selection-open-request"
 import type { SelectionPopoverActions } from "@/components/ui/selection-popover"
 import type { SelectionToolbarInlineError } from "@/components/ui/selection-popover/inline-error"
 import type { ThinkingSnapshot } from "@/types/background-stream"
@@ -461,8 +462,8 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
   }, [commitOpenRequest, selectionSession])
 
   const resolveContextMenuRequest = useCallback(
-    (fromEbookSection?: boolean): SelectionTranslatePendingOpenRequest | null => {
-      const request = resolveContextMenuOpenRequest({ fromEbookSection })
+    (menu: ContextMenuSelection): SelectionTranslatePendingOpenRequest | null => {
+      const request = resolveContextMenuOpenRequest(menu)
       if (!request) {
         return null
       }
@@ -528,8 +529,8 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
   )
 
   const openFromContextMenu = useCallback(
-    (fromEbookSection?: boolean) => {
-      openSelectionTranslationRequest(resolveContextMenuRequest(fromEbookSection), {
+    (menu: ContextMenuSelection) => {
+      openSelectionTranslationRequest(resolveContextMenuRequest(menu), {
         showMissingSelectionToast: true,
       })
     },
@@ -556,7 +557,7 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
 
   useEffect(() => {
     return onMessage("openSelectionTranslationFromContextMenu", (message) => {
-      openFromContextMenu(message.data.fromEbookSection)
+      openFromContextMenu(message.data)
     })
   }, [openFromContextMenu])
 
