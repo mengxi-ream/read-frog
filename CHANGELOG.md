@@ -1,5 +1,21 @@
 # @read-frog/extension
 
+## 1.61.1
+
+### Patch Changes
+
+- [#2555](https://github.com/mengxi-ream/read-frog/pull/2555) [`80b4047`](https://github.com/mengxi-ream/read-frog/commit/80b4047cb870dc271d8cc639b746a8a48294cf75) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(subtitles): show the "Loading AI subtitles" message again while AI subtitles load
+
+- [#2554](https://github.com/mengxi-ream/read-frog/pull/2554) [`e5512d4`](https://github.com/mengxi-ream/read-frog/commit/e5512d44c71cd6c2db972f740ca68d232e330e5d) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(hosted-ai): offer the upgrade wherever Built-in AI runs out, including hover translation, annotation, input translation, video subtitles and the Translation Hub, and ask automatic page translation only once per browser session
+
+- [#2552](https://github.com/mengxi-ream/read-frog/pull/2552) [`05e534d`](https://github.com/mengxi-ream/read-frog/commit/05e534dd0ad2c5f58bbe8443714aa6b104801c98) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(providers): list Built-in Models first and machine translators second in provider menus
+
+- [#2556](https://github.com/mengxi-ream/read-frog/pull/2556) [`bb31d0a`](https://github.com/mengxi-ream/read-frog/commit/bb31d0a4a26d7e289f68e9e70581a13303e69e70) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(selection-toolbar): add a Position setting that keeps the selection toolbar above or below the selection, so it no longer lands on top of other text-selection popups such as PopClip
+
+- [#2557](https://github.com/mengxi-ream/read-frog/pull/2557) [`a2bd6b2`](https://github.com/mengxi-ream/read-frog/commit/a2bd6b2fa1557ceabd93b62db9dd1c99b77574ad) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(subtitles): shorten the auto-start label in the subtitle settings menu so it fits on one line
+
+- [#2552](https://github.com/mengxi-ream/read-frog/pull/2552) [`05e534d`](https://github.com/mengxi-ream/read-frog/commit/05e534dd0ad2c5f58bbe8443714aa6b104801c98) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(options): title the user's own provider list "Third-party providers" on the API Providers page
+
 ## 1.61.0
 
 ### Minor Changes
