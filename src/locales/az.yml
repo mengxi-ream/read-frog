@@ -831,8 +831,7 @@ options:
             newlineToBrNotLast: newline_to_br yalnız çıxışın son filtri olduqda işləyir.
             mathFilterNotLast: $1 yalnız çıxışın son filtri olduqda işləyir.
             mathFilterInAttribute: $1 filtrini atribut dəyərinin içində istifadə etməyin. Onun çəkdiyi düsturlardakı dırnaqlar atributu bağlayır.
-            mediaFilterNotLast: media yalnız çıxışın son filtri olduqda işləyir.
-            mediaFilterInAttribute: media filtrini atribut dəyərinin içində istifadə etməyin. Onun yazdığı işarələmədəki dırnaqlar atributu bağlayır.
+            mediaFilterUnsupported: Bu tərtibat media göstərə bilmir, ona görə media filtri burada heç nə yazmır.
             tooLong: Bu tərtibat $1 simvoldan uzundur və yadda saxlanıla bilməz.
             fieldNotShown: '"$1" bu tərtibatda göstərilmir.'
             reservedFieldName: '"$1" sahə adı tərtibatlarda ehtiyatda saxlanılır. Sahənin adını dəyişin.'

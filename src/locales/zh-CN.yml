@@ -836,8 +836,7 @@ options:
             newlineToBrNotLast: newline_to_br 只有作为输出的最后一个过滤器才有效。
             mathFilterNotLast: $1 只有作为输出的最后一个过滤器才有效。
             mathFilterInAttribute: 不要在属性值里使用 $1，它画出的公式含有引号，会提前结束属性。
-            mediaFilterNotLast: media 只有作为输出的最后一个过滤器才有效。
-            mediaFilterInAttribute: 不要在属性值里使用 media，它输出的标记含有引号，会提前结束属性。
+            mediaFilterUnsupported: 这个版式显示不了媒体，media 过滤器在这里什么也不输出。
             tooLong: 版式超过 $1 个字符，无法保存。
             fieldNotShown: 「$1」未在此版式中显示。
             reservedFieldName: 字段名「$1」是版式保留名，请重命名该字段。

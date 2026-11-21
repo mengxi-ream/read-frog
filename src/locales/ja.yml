@@ -830,8 +830,7 @@ options:
             newlineToBrNotLast: newline_to_br は出力の最後のフィルターとしてのみ機能します。
             mathFilterNotLast: $1 は出力の最後のフィルターとしてのみ機能します。
             mathFilterInAttribute: 属性値の中では $1 を使わないでください。描画した数式に含まれる引用符で属性が終わってしまいます。
-            mediaFilterNotLast: media は出力の最後のフィルターとしてのみ機能します。
-            mediaFilterInAttribute: 属性値の中では media を使わないでください。出力されるマークアップに含まれる引用符で属性が終わってしまいます。
+            mediaFilterUnsupported: このレイアウトではメディアを表示できないため、media フィルターはここでは何も出力しません。
             tooLong: このレイアウトは $1 文字を超えているため保存できません。
             fieldNotShown: 「$1」はこのレイアウトに表示されません。
             reservedFieldName: フィールド名「$1」はレイアウトの予約名です。フィールドの名前を変更してください。
