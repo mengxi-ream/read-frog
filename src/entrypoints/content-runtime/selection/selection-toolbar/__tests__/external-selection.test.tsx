@@ -135,6 +135,8 @@ describe("selectionToolbar - external selection source", () => {
     const session = store.get(selectionSessionAtom)
     expect(session?.selectionSnapshot.text).toBe(EXTERNAL_PAYLOAD.text)
     expect(session?.selectionSnapshot.ranges).toEqual([])
+    // With no ranges to measure, a context-menu popover opens here.
+    expect(session?.selectionSnapshot.anchor).toEqual(EXTERNAL_PAYLOAD.anchor)
     expect(session?.contextSnapshot.paragraphs).toEqual(EXTERNAL_PAYLOAD.contextParagraphs)
     expect(session?.contextSnapshot.text).toBe(EXTERNAL_PAYLOAD.contextParagraphs.join("\n\n"))
   })

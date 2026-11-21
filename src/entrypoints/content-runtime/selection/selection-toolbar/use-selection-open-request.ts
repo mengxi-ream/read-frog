@@ -50,7 +50,7 @@ function getSelectionAnchor(session: SelectionSession | null) {
     }
   }
 
-  return null
+  return session.selectionSnapshot.anchor ?? null
 }
 
 function getViewportCenterAnchor(): SelectionAnchor {

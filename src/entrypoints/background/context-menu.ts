@@ -1,6 +1,7 @@
 import type { Browser } from "#imports"
 import type { Config } from "@/types/config/config"
 import { browser, storage } from "#imports"
+import { env } from "@/env"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext } from "@/utils/analytics"
 import { CONFIG_STORAGE_KEY } from "@/utils/constants/config"
@@ -194,6 +195,40 @@ function warnMenuActionNotDelivered(error: unknown) {
 }
 
 /**
+ * Whether the menu was opened in a book section of the readfrog.app ebook
+ * reader: a blob: frame the site made (see isReadFrogEbookSection). Only its
+ * URL is known here.
+ */
+function isReadFrogEbookSectionFrame(frameUrl: string | undefined) {
+  if (!frameUrl?.startsWith("blob:")) {
+    return false
+  }
+
+  try {
+    return env.WXT_OFFICIAL_SITE_ORIGINS.includes(new URL(frameUrl).origin)
+  } catch {
+    return false
+  }
+}
+
+/**
+ * A selection action goes to the frame the menu was opened in, whose toolbar
+ * holds the selection. A book section has no toolbar: the reader relays its
+ * selections to the top frame's, so the action goes there.
+ */
+function getSelectionActionTarget(info: Browser.contextMenus.OnClickData, tabId: number) {
+  if (typeof info.frameId !== "number") {
+    return tabId
+  }
+
+  if (isReadFrogEbookSectionFrame(info.frameUrl)) {
+    return { tabId, frameId: 0 }
+  }
+
+  return { tabId, frameId: info.frameId }
+}
+
+/**
  * Handle translate menu click - toggle page translation
  */
 async function handleTranslateClick(tabId: number, tabUrl?: string) {
@@ -235,7 +270,7 @@ async function handleSelectionTranslateClick(
     return
   }
 
-  const target = typeof info.frameId === "number" ? { tabId, frameId: info.frameId } : tabId
+  const target = getSelectionActionTarget(info, tabId)
 
   void sendMessage(
     "openSelectionTranslationFromContextMenu",
@@ -255,7 +290,7 @@ async function handleSelectionReadAloudClick(
     return
   }
 
-  const target = typeof info.frameId === "number" ? { tabId, frameId: info.frameId } : tabId
+  const target = getSelectionActionTarget(info, tabId)
 
   void sendMessage("readAloudSelectionFromContextMenu", { selectionText }, target).catch(
     warnMenuActionNotDelivered,
@@ -272,7 +307,7 @@ async function handleSelectionCustomActionClick(
     return
   }
 
-  const target = typeof info.frameId === "number" ? { tabId, frameId: info.frameId } : tabId
+  const target = getSelectionActionTarget(info, tabId)
 
   void sendMessage(
     "openSelectionCustomActionFromContextMenu",

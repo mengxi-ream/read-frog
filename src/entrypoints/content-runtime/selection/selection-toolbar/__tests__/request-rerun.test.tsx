@@ -1281,6 +1281,40 @@ describe("selection toolbar requests", () => {
     expect(toastAddMock).not.toHaveBeenCalled()
   })
 
+  it("opens a context-menu translation of a selection relayed from the ebook reader at its end", async () => {
+    translateTextCoreMock.mockResolvedValue("Ebook result")
+    getOrCreateWebPageContextMock.mockResolvedValue(null)
+
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    // As the toolbar records an ebook bridge selection: no ranges in this frame.
+    store.set(setSelectionStateAtom, {
+      selection: { text: "punched", ranges: [], anchor: { x: 240, y: 138 } },
+      context: { text: "My mom punched me.", paragraphs: ["My mom punched me."] },
+      noteOrigin: null,
+    })
+    renderWithProviders(<TranslateButton />, store)
+
+    // The right-click happened inside the book's iframe, so this frame saw no
+    // contextmenu event to take the anchor from.
+    const handler = getRegisteredMessageHandler("openSelectionTranslationFromContextMenu")
+
+    await act(async () => {
+      handler({ data: { selectionText: "punched" } })
+      await Promise.resolve()
+    })
+
+    await waitFor(() => {
+      expect(translateTextCoreMock).toHaveBeenCalledTimes(1)
+    })
+
+    const content = screen.getByTestId("selection-popover-content")
+    expect(content).toHaveAttribute("data-anchor-x", "240")
+    expect(content).toHaveAttribute("data-anchor-y", "138")
+    expect(screen.getByTestId("translation-selection").textContent).toBe("punched")
+    expect(toastAddMock).not.toHaveBeenCalled()
+  })
+
   it("shows a toast when the context menu request cannot recover a selection snapshot", async () => {
     const store = createStore()
     store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
