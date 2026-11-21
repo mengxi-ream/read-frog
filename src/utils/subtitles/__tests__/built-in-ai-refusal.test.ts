@@ -71,6 +71,22 @@ describe("promptForSubtitlesRefusal", () => {
     expect(mockToastAdd).not.toHaveBeenCalled()
   })
 
+  it("asks a guest who logs in on the same video to upgrade once the pool is spent", () => {
+    const guestRefusal = new Error("Log in to use Built-in AI", {
+      cause: Object.assign(new Error("x"), { code: "UNAUTHORIZED" }),
+    })
+
+    promptForSubtitlesRefusal(guestRefusal, options("video-A"))
+    promptForSubtitlesRefusal(spentPoolError(), options("video-A"))
+    promptForSubtitlesRefusal(spentPoolError(), options("video-A"))
+
+    expect(mockPromptForBuiltInAiRefusal).toHaveBeenCalledTimes(2)
+    expect(mockPromptForBuiltInAiRefusal.mock.calls.map(([error]) => error.message)).toEqual([
+      "Log in to use Built-in AI",
+      "Built-in AI quota used up",
+    ])
+  })
+
   it("asks again for the next video", () => {
     promptForSubtitlesRefusal(spentPoolError(), options("video-A"))
     promptForSubtitlesRefusal(spentPoolError(), { ...options("video-B"), trigger: "auto" })

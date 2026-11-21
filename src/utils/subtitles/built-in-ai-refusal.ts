@@ -7,7 +7,11 @@ import { createLogger } from "@/utils/logging/logger"
 
 const log = createLogger("subtitles/built-in-ai-refusal")
 
-/** The videos already asked about in this document, by `getVideoId` or the page's URL. */
+/**
+ * The refusals already asked about in this document, one per video (by `getVideoId` or
+ * the page's URL) and kind: a guest who logs in from the prompt can be refused again
+ * on the same video, now for a spent pool, and is then asked to upgrade.
+ */
 const promptedVideos = new Set<string>()
 
 const ULTRA_REFUSAL_TOAST_ID = "subtitles-built-in-ai-refusal"
@@ -30,8 +34,9 @@ async function leaveFullscreen(): Promise<void> {
 
 /**
  * Asks someone whose subtitle lines Built-in AI refused to log in or upgrade, or to switch
- * subtitles to machine translation, at most once a video: every cue batch after the first
- * would ask again. Only line translation asks; a refused summary or AI segmentation keeps
+ * subtitles to machine translation, once a video for each: every cue batch after the
+ * first would ask again, but a guest who logs in and finds the pool spent is still asked
+ * to upgrade. Only line translation asks; a refused summary or AI segmentation keeps
  * quiet, as the lines still come. Ultra, with no plan to upgrade to, gets its plain
  * message instead, once a video too. Returns whether the error was such a refusal.
  */
@@ -39,13 +44,15 @@ export function promptForSubtitlesRefusal(
   error: unknown,
   options: { videoKey: string; trigger: BuiltInAiPromptTrigger; retry: () => void },
 ): boolean {
-  if (!getBuiltInAiRefusalKind(error)) {
+  const kind = getBuiltInAiRefusalKind(error)
+  if (!kind) {
     return false
   }
-  if (promptedVideos.has(options.videoKey)) {
+  const promptKey = `${options.videoKey}\0${kind}`
+  if (promptedVideos.has(promptKey)) {
     return true
   }
-  promptedVideos.add(options.videoKey)
+  promptedVideos.add(promptKey)
   void promptForBuiltInAiRefusal(error, {
     feature: "videoSubtitles",
     analyticsFeature: ANALYTICS_FEATURE.VIDEO_SUBTITLES,
