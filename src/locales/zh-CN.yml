@@ -678,6 +678,12 @@ options:
         providerDescription: 用于生成「猜你想存」的 AI 提供商
     display:
       title: 显示
+      placement:
+        title: 位置
+        description: 工具栏出现在选中文本的哪一侧。选定的一侧没有空间时，会改到另一侧显示
+        followDirection: 跟随划选方向
+        above: 始终在上方
+        below: 始终在下方
       opacity:
         title: 透明度
         description: 调整选择工具栏及其展开内容窗的透明度

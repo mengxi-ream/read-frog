@@ -677,6 +677,12 @@ options:
         providerDescription: 저장 제안을 만드는 AI 제공업체
     display:
       title: 표시
+      placement:
+        title: 위치
+        description: 선택한 텍스트의 어느 쪽에 툴바를 표시할지 선택합니다. 선택한 쪽에 공간이 없으면 반대쪽에 표시합니다
+        followDirection: 선택 방향 따르기
+        above: 항상 위
+        below: 항상 아래
       opacity:
         title: 투명도
         description: 선택 툴바와 여기서 열리는 확장 창의 투명도를 조절합니다

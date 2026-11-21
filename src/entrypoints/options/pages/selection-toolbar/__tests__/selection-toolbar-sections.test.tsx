@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import type { Config } from "@/types/config/config"
-import { fireEvent, render, screen } from "@testing-library/react"
+import { act, fireEvent, render, screen } from "@testing-library/react"
 import { MemoryRouter } from "react-router"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
@@ -48,6 +48,25 @@ vi.mock("@/components/llm-providers/use-feature-providers", () => ({
 vi.mock("@/components/llm-providers/provider-selector", () => ({
   default: () => <div>ProviderSelector</div>,
 }))
+
+// Base UI's select, driven as in video-subtitles-sections.test.tsx: the mousedown also schedules
+// an open for the next frame, which has to run before an option is picked.
+async function pick(trigger: HTMLElement, optionText: string) {
+  await act(async () => {
+    for (const type of ["pointerdown", "mousedown", "click"]) {
+      trigger.dispatchEvent(new MouseEvent(type, { bubbles: true, button: 0 }))
+    }
+  })
+  await act(() => new Promise<void>((resolve) => requestAnimationFrame(() => resolve())))
+  const option = (await screen.findAllByRole("option")).find(
+    (element) => element.textContent === optionText,
+  )!
+  await act(async () => {
+    for (const type of ["pointerdown", "mousedown", "pointerup", "mouseup", "click"]) {
+      option.dispatchEvent(new MouseEvent(type, { bubbles: true, button: 0 }))
+    }
+  })
+}
 
 describe("selection toolbar page sections", () => {
   beforeEach(() => {
@@ -108,6 +127,19 @@ describe("selection toolbar page sections", () => {
     })
     // The provider row is the translate feature's own setting, shown here too.
     expect(screen.getByText("ProviderSelector")).toBeInTheDocument()
+  })
+
+  it("pins the toolbar to one side of the selection, writing only the placement", async () => {
+    render(<DisplaySection />)
+
+    const placement = (key: string) => `options.selectionToolbar.display.placement.${key}`
+    const trigger = screen.getByRole("combobox", { name: placement("title") })
+    // Existing users keep the toolbar where it has always opened.
+    expect(trigger).toHaveTextContent(placement("followDirection"))
+
+    await pick(trigger, placement("above"))
+
+    expect(setSelectionToolbarMock).toHaveBeenCalledWith({ placement: "above" })
   })
 
   it("adds a disabled site without dropping the rest of the toolbar config", () => {

@@ -678,6 +678,12 @@ options:
         providerDescription: El proveedor de IA que genera la sugerencia
     display:
       title: Visualización
+      placement:
+        title: Posición
+        description: Elige en qué lado del texto seleccionado aparece la barra de selección. Si el lado elegido no tiene espacio, aparece en el otro
+        followDirection: Seguir la dirección de la selección
+        above: Siempre encima
+        below: Siempre debajo
       opacity:
         title: Opacidad
         description: Ajusta la opacidad de la barra de selección y de la ventana expandida que se abre desde ella

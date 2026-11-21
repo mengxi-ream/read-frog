@@ -677,6 +677,12 @@ options:
         providerDescription: 保存候補を生成する AI プロバイダー
     display:
       title: 表示
+      placement:
+        title: 位置
+        description: 選択したテキストのどちら側にツールバーを表示するかを選びます。選んだ側に空きがない場合は反対側に表示します
+        followDirection: 選択方向に合わせる
+        above: 常に上
+        below: 常に下
       opacity:
         title: 透明度
         description: 選択ツールバーとそこから開く展開ウィンドウの透明度を調整します

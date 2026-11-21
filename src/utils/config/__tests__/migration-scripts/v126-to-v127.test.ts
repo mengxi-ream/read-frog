@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { configSchema } from "@/types/config/config"
-import { migrateConfig } from "../../migration"
+import { migrateConfig, runMigration } from "../../migration"
 import { migrate } from "../../migration-scripts/v126-to-v127"
 import { testSeries as v126TestSeries } from "../example/v126"
 import { testSeries as v127TestSeries } from "../example/v127"
@@ -127,9 +127,11 @@ describe("v126-to-v127 migration", () => {
 
   it("produces the v127 fixtures, and a valid current config, from every v126 series", async () => {
     for (const [seriesId, series] of Object.entries(v126TestSeries)) {
+      expect(await runMigration(127, structuredClone(series.config))).toEqual(
+        v127TestSeries[seriesId]!.config,
+      )
       const migrated = await migrateConfig(structuredClone(series.config), 126)
       expect(configSchema.safeParse(migrated).success).toBe(true)
-      expect(migrated).toEqual(v127TestSeries[seriesId]!.config)
     }
   })
 })
