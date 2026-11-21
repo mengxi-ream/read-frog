@@ -5,7 +5,11 @@ import {
   getBuiltInAiProviderId,
   isBuiltInAiProviderId,
 } from "@/utils/constants/provider-ids"
-import { LUNA_PROVIDER_ID, testHostedAiModels } from "@/utils/hosted-ai/__tests__/test-models"
+import {
+  HAIKU_PROVIDER_ID,
+  LUNA_PROVIDER_ID,
+  testHostedAiModels,
+} from "@/utils/hosted-ai/__tests__/test-models"
 import { sanitizeHostedAiModels } from "@/utils/hosted-ai/models"
 import {
   doesProviderSupportsCapability,
@@ -78,7 +82,7 @@ describe("getBuiltInAiSelectorItems", () => {
     const items = getBuiltInAiSelectorItems(null, ["read-frog-ai:gpt-6.2-sol"])
 
     expect(items.map((item) => [item.id, item.available])).toEqual([
-      [LUNA_PROVIDER_ID, undefined],
+      [HAIKU_PROVIDER_ID, undefined],
       ["read-frog-ai:gpt-6.2-sol", undefined],
     ])
   })

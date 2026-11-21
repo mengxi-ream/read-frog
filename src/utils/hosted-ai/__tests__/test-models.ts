@@ -66,5 +66,6 @@ export function testHostedAiModels(
   }))
 }
 
+export const HAIKU_PROVIDER_ID = "read-frog-ai:claude-haiku-5-5"
 export const LUNA_PROVIDER_ID = "read-frog-ai:gpt-6-luna"
 export const SOL_PROVIDER_ID = "read-frog-ai:gpt-6.2-sol"

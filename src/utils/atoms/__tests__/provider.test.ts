@@ -85,7 +85,7 @@ describe("feature provider refs", () => {
     expect(store.get(featureProviderRefAtom("pageTranslation"))).toMatchObject({
       kind: "system",
       id: DEFAULT_BUILT_IN_AI_PROVIDER_ID,
-      model: "gpt-6-luna",
+      model: "claude-haiku-5-5",
     })
   })
 

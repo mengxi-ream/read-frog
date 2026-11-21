@@ -7,16 +7,24 @@
 export const BUILT_IN_AI_PROVIDER_ID_PREFIX = "read-frog-ai:"
 
 /**
- * The model a fresh install runs on, and the one the v127 migration moves both
- * old Built-in AI tiers to: it is what both tiers ran on before models could be
- * chosen. A default choice, not the catalog: when the server stops offering it,
- * it shows as unavailable like any other model.
+ * The model a fresh install runs on. A default choice, not the catalog: when
+ * the server stops offering it, it shows as unavailable like any other model.
+ * Changing it moves only new installs: a stored config keeps the model it
+ * names, so existing users stay where they are unless a migration moves them.
  */
-export const DEFAULT_BUILT_IN_AI_MODEL_ID = "gpt-6-luna"
+export const DEFAULT_BUILT_IN_AI_MODEL_ID = "claude-haiku-5-5"
 
 export type BuiltInAiProviderId = `${typeof BUILT_IN_AI_PROVIDER_ID_PREFIX}${string}`
 
 export const DEFAULT_BUILT_IN_AI_PROVIDER_ID: BuiltInAiProviderId = `${BUILT_IN_AI_PROVIDER_ID_PREFIX}${DEFAULT_BUILT_IN_AI_MODEL_ID}`
+
+/**
+ * The model both old Built-in AI tiers ran on before models could be chosen,
+ * and so the one the v127 migration moves them to. Fixed, unlike the default
+ * model: configs from before that migration are existing users, who keep the
+ * model they were on.
+ */
+export const LEGACY_BUILT_IN_AI_PROVIDER_ID: BuiltInAiProviderId = `${BUILT_IN_AI_PROVIDER_ID_PREFIX}gpt-6-luna`
 
 /**
  * Built-in AI's ids from before each model was a provider of its own, one per
@@ -25,8 +33,8 @@ export const DEFAULT_BUILT_IN_AI_PROVIDER_ID: BuiltInAiProviderId = `${BUILT_IN_
  * schema reads them through this (see `storedProviderIdSchema`).
  */
 const LEGACY_BUILT_IN_AI_PROVIDER_IDS: Readonly<Record<string, BuiltInAiProviderId>> = {
-  "read-frog-free-ai": DEFAULT_BUILT_IN_AI_PROVIDER_ID,
-  "read-frog-advance-ai": DEFAULT_BUILT_IN_AI_PROVIDER_ID,
+  "read-frog-free-ai": LEGACY_BUILT_IN_AI_PROVIDER_ID,
+  "read-frog-advance-ai": LEGACY_BUILT_IN_AI_PROVIDER_ID,
 }
 
 /** The provider a stored id names now: a legacy tier id as its model, any other id as is. */

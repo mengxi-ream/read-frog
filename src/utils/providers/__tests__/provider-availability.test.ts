@@ -2,6 +2,7 @@ import type { ProviderConfig } from "@/types/config/provider"
 import type { HostedAiStatus, HostedAiTierStatus } from "@/utils/hosted-ai/types"
 import { describe, expect, it } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import { DEFAULT_BUILT_IN_AI_PROVIDER_ID } from "@/utils/constants/provider-ids"
 import {
   LUNA_PROVIDER_ID,
   SOL_PROVIDER_ID,
@@ -135,12 +136,17 @@ describe("getUsableProviderIdsForCapability", () => {
 
   it("counts the default model when there is no status to judge or list models by", () => {
     expect(getUsableProviderIdsForCapability("pageTranslation", [], undefined)).toEqual([
-      LUNA_PROVIDER_ID,
+      DEFAULT_BUILT_IN_AI_PROVIDER_ID,
     ])
   })
 
   it("lists every model the plan reaches, the default model ahead of the rest", () => {
-    const advanceWalled = statusWith(tier(), tier({ unavailableReason: "ultra_required" }))
+    // The server lists the default model last here, so it has to be moved up.
+    const advanceWalled = statusWith(
+      tier(),
+      tier({ unavailableReason: "ultra_required" }),
+      testHostedAiModels().reverse(),
+    )
 
     expect(
       getUsableProviderIdsForCapability(
@@ -150,9 +156,9 @@ describe("getUsableProviderIdsForCapability", () => {
       ),
     ).toEqual([
       "google-translate-default",
-      LUNA_PROVIDER_ID,
-      "read-frog-ai:claude-haiku-5-5",
+      DEFAULT_BUILT_IN_AI_PROVIDER_ID,
       "read-frog-ai:deepseek-v4.1-flash",
+      LUNA_PROVIDER_ID,
     ])
   })
 })

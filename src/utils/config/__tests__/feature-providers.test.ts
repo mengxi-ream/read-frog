@@ -3,6 +3,7 @@ import type { HostedAiStatus, HostedAiTierStatus } from "@/utils/hosted-ai/types
 import { describe, expect, it } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { buildFeatureProviderPatch } from "@/utils/constants/feature-providers"
+import { DEFAULT_BUILT_IN_AI_PROVIDER_ID } from "@/utils/constants/provider-ids"
 import {
   LUNA_PROVIDER_ID,
   SOL_PROVIDER_ID,
@@ -207,7 +208,7 @@ describe("feature providers", () => {
         remainingProviders,
       )
 
-      expect(fallbacks.pageTranslation).toBe(LUNA_PROVIDER_ID)
+      expect(fallbacks.pageTranslation).toBe(DEFAULT_BUILT_IN_AI_PROVIDER_ID)
     })
 
     it("skips disabled local providers before using the system Normal tier", () => {
@@ -232,7 +233,7 @@ describe("feature providers", () => {
         remainingProviders,
       )
 
-      expect(fallbacks.pageTranslation).toBe(LUNA_PROVIDER_ID)
+      expect(fallbacks.pageTranslation).toBe(DEFAULT_BUILT_IN_AI_PROVIDER_ID)
     })
 
     it("falls back to the system Normal tier for selection toolbar translation when no local provider is available", () => {
@@ -249,7 +250,7 @@ describe("feature providers", () => {
 
       const fallbacks = computeProviderFallbacksAfterDeletion("deleted-provider", config, [])
 
-      expect(fallbacks).toEqual({ selectionTranslation: LUNA_PROVIDER_ID })
+      expect(fallbacks).toEqual({ selectionTranslation: DEFAULT_BUILT_IN_AI_PROVIDER_ID })
     })
 
     it("falls back to the system Normal tier for note suggestion when no local llm provider remains", () => {
@@ -268,7 +269,7 @@ describe("feature providers", () => {
         getProviderById("google-translate-default"),
       ])
 
-      expect(fallbacks).toEqual({ noteSuggestion: LUNA_PROVIDER_ID })
+      expect(fallbacks).toEqual({ noteSuggestion: DEFAULT_BUILT_IN_AI_PROVIDER_ID })
     })
   })
 
@@ -568,7 +569,7 @@ describe("feature providers", () => {
       expect(result?.customActions).toEqual([
         expect.objectContaining({
           id: "action-a",
-          providerId: LUNA_PROVIDER_ID,
+          providerId: DEFAULT_BUILT_IN_AI_PROVIDER_ID,
         }),
       ])
     })
@@ -623,7 +624,7 @@ describe("feature providers", () => {
       // Switching to llm mode used to be impossible without a BYOK LLM. Built-in
       // AI is always capability-compatible, so the mode is now always reachable
       // and seeds itself with the hosted provider.
-      expect(result).toEqual({ mode: "llm", providerId: LUNA_PROVIDER_ID })
+      expect(result).toEqual({ mode: "llm", providerId: DEFAULT_BUILT_IN_AI_PROVIDER_ID })
     })
 
     describe("with a Built-in AI model stored", () => {

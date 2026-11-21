@@ -5,8 +5,7 @@ import type { ProviderSelectorOption } from "@/utils/providers/provider-display"
 import { renderHook } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { useHostedAiProviderOptions } from "@/components/llm-providers/use-hosted-ai-provider-options"
-import { DEFAULT_BUILT_IN_AI_PROVIDER_ID } from "@/utils/constants/provider-ids"
-import { testHostedAiModels } from "@/utils/hosted-ai/__tests__/test-models"
+import { LUNA_PROVIDER_ID, testHostedAiModels } from "@/utils/hosted-ai/__tests__/test-models"
 import { findHostedAiModel, sanitizeHostedAiModels } from "@/utils/hosted-ai/models"
 import { createBuiltInAiSelectorItem } from "@/utils/providers/provider-registry"
 
@@ -330,7 +329,7 @@ describe("useHostedAiProviderOptions", () => {
 
       expect(result.current).not.toBe(PROVIDERS)
       expect(result.current[0]).toMatchObject({
-        id: DEFAULT_BUILT_IN_AI_PROVIDER_ID,
+        id: LUNA_PROVIDER_ID,
         disabled: expect.any(Boolean),
       })
     }
