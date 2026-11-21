@@ -28,6 +28,13 @@ vi.mock("../config", () => ({
   ensureInitializedConfig: ensureInitializedConfigMock,
 }))
 
+vi.mock("@/env", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/env")>()
+  return {
+    env: { ...actual.env, WXT_OFFICIAL_SITE_ORIGINS: ["https://readfrog.app"] },
+  }
+})
+
 function createConfig(enabled: boolean): Config {
   return {
     contextMenu: {
@@ -293,6 +300,69 @@ describe("background context menu", () => {
     expect(sendMessageMock).toHaveBeenCalledWith(
       "openSelectionCustomActionFromContextMenu",
       { actionId: "dictionary", selectionText: "Selected text" },
+      { tabId: 5, frameId: 7 },
+    )
+  })
+
+  it.each([
+    [MENU_ID_SELECTION_TRANSLATE, "openSelectionTranslationFromContextMenu"],
+    [MENU_ID_SELECTION_READ_ALOUD, "readAloudSelectionFromContextMenu"],
+    [
+      `${MENU_ID_SELECTION_CUSTOM_ACTION_PREFIX}dictionary`,
+      "openSelectionCustomActionFromContextMenu",
+    ],
+  ])(
+    "routes %s clicks in an ebook reader book section to the top frame",
+    async (menuItemId, messageType) => {
+      registerContextMenuListeners(async () => {})
+
+      const clickHandler = contextMenuClickListeners[0]
+      if (!clickHandler) {
+        throw new Error("Context menu click listener was not registered")
+      }
+
+      // The reader relays the section's selections to the top frame's toolbar,
+      // and the top frame is told so: it never saw this right-click.
+      await clickHandler(
+        {
+          menuItemId,
+          selectionText: "punched",
+          frameId: 7,
+          frameUrl: "blob:https://readfrog.app/0f8e0c55-3c3c-4a6c-9a51-7d5a3b0b6c11",
+          pageUrl: "https://readfrog.app/ebooks/book-1",
+        },
+        { id: 5 },
+      )
+
+      expect(sendMessageMock).toHaveBeenCalledWith(
+        messageType,
+        expect.objectContaining({ selectionText: "punched", fromEbookSection: true }),
+        { tabId: 5, frameId: 0 },
+      )
+    },
+  )
+
+  it("keeps selection menu clicks in another site's blob: frame in that frame", async () => {
+    registerContextMenuListeners(async () => {})
+
+    const clickHandler = contextMenuClickListeners[0]
+    if (!clickHandler) {
+      throw new Error("Context menu click listener was not registered")
+    }
+
+    await clickHandler(
+      {
+        menuItemId: MENU_ID_SELECTION_TRANSLATE,
+        selectionText: "Selected text",
+        frameId: 7,
+        frameUrl: "blob:https://example.com/0f8e0c55-3c3c-4a6c-9a51-7d5a3b0b6c11",
+      },
+      { id: 5 },
+    )
+
+    expect(sendMessageMock).toHaveBeenCalledWith(
+      "openSelectionTranslationFromContextMenu",
+      { selectionText: "Selected text" },
       { tabId: 5, frameId: 7 },
     )
   })

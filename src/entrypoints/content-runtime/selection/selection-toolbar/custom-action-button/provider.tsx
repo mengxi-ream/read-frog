@@ -1,5 +1,6 @@
 import type { ReactNode } from "react"
 import type { SelectionSession } from "../atoms"
+import type { ContextMenuSelection } from "../use-selection-open-request"
 import type { SelectionPopoverActions } from "@/components/ui/selection-popover"
 import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { createContext, use, useCallback, useEffect, useMemo, useRef, useState } from "react"
@@ -178,7 +179,7 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
   )
 
   const openContextMenuCustomAction = useCallback(
-    (actionId: string) => {
+    (actionId: string, menu: ContextMenuSelection) => {
       const action = findSelectionToolbarAction(selectionToolbarConfig, actionId)
       if (!action || action.enabled === false) {
         const nextError = createSelectionToolbarPrecheckError("customAction", "actionUnavailable")
@@ -196,7 +197,7 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
         return
       }
 
-      const request = resolveContextMenuOpenRequest()
+      const request = resolveContextMenuOpenRequest(menu)
       if (!request) {
         const nextError = createSelectionToolbarPrecheckError("customAction", "missingSelection")
         void trackFeatureUsed({
@@ -253,7 +254,7 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
 
   useEffect(() => {
     return onMessage("openSelectionCustomActionFromContextMenu", (message) => {
-      openContextMenuCustomAction(message.data.actionId)
+      openContextMenuCustomAction(message.data.actionId, message.data)
     })
   }, [openContextMenuCustomAction])
 

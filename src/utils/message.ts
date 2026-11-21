@@ -101,12 +101,21 @@ interface ProtocolMap {
     enabled: boolean
     analyticsContext?: FeatureUsageContext<"page_translation">
   }) => void
-  openSelectionTranslationFromContextMenu: (data: { selectionText: string }) => void
+  // `fromEbookSection`: the menu was opened in a book section of the ebook
+  // reader, which relays its selection to the receiving top frame.
+  openSelectionTranslationFromContextMenu: (data: {
+    selectionText: string
+    fromEbookSection?: boolean
+  }) => void
   openSelectionCustomActionFromContextMenu: (data: {
     actionId: string
     selectionText: string
+    fromEbookSection?: boolean
   }) => void
-  readAloudSelectionFromContextMenu: (data: { selectionText: string }) => void
+  readAloudSelectionFromContextMenu: (data: {
+    selectionText: string
+    fromEbookSection?: boolean
+  }) => void
   // The selection toolbar's "Until I reload this page", kept for the whole tab
   hideSelectionToolbarUntilReload: () => void
   isSelectionToolbarHiddenUntilReload: () => boolean

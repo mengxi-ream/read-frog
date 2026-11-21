@@ -623,7 +623,7 @@ export function SelectionToolbar() {
 
       preserveSelectionStateRef.current = false
       setSelectionState({
-        selection: { text: detail.text, ranges: [] },
+        selection: { text: detail.text, ranges: [], anchor: detail.anchor },
         context: {
           text: paragraphs.join("\n\n"),
           paragraphs,
