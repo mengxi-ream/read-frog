@@ -49,7 +49,7 @@ Use a fresh profile or the Puppeteer harness when persistent browser state could
 
 ## Puppeteer workflow
 
-Drive headed Chrome from a Node script to install the extension, force known config, toggle translation via its message bus, and assert live DOM. The details below encode failures observed during issue #1846 and #2011 verification.
+Drive headed Chrome from a Node script to install the extension, force known config, toggle translation via its message bus, and assert live DOM. Each "NOT this" below fails silently.
 
 ## Quick reference
 
@@ -69,14 +69,14 @@ Drive headed Chrome from a Node script to install the extension, force known con
 2. Copy `references/harness-template.js` into the session scratchpad, point `EXT_PATH` at `.output/chrome-mv3`, adjust the fixture/assertions.
 3. Serve fixtures over `http://localhost` (content scripts don't run on `file://`). For framework-safety checks, use a React fixture with a focus-triggered re-render (simulates React Query `refetchOnWindowFocus` — the trigger behind logged-in-only bugs like #1846) and a counter button to prove listeners survived.
 4. Run headed; capture `page.on('console')` + `pageerror` for `Minified React error|NotFoundError` — a clean screenshot can hide a broken fiber tree.
-5. Provider: `microsoft-translate-default` needs no API key but real network. Slow the queues (`requestQueueConfig.rate/capacity = 1`) when you need to observe spinners.
+5. Provider: `microsoft-translate-default` needs no API key but real network. Slow the page-translation queue (`pageTranslation.requestQueueConfig.rate/capacity = 1`) when you need to observe spinners.
 
 For loading screenshots, first record `.read-frog-spinner` count and relevant computed/inline styles, capture the raw frame, then continue waiting for translated Chinese text to prove that the run completed. A visible screenshot without matching DOM/runtime evidence is insufficient.
 
 ## Interpreting extension DOM state
 
 - Bilingual mode: original text stays; wrapper `.read-frog-translated-content-wrapper` inserted next to it.
-- translationOnly, in-place swap (preferred since #1846): **no wrapper remains**; the run's parent carries `data-read-frog-translation-only` and the site's own text nodes hold Chinese.
+- translationOnly, in-place swap (the usual path): **no wrapper remains**; the run's parent carries `data-read-frog-translation-only` and the site's own text nodes hold Chinese.
 - translationOnly, fallback: wrapper holds the translation, originals detached but retained for restore.
 - After "show original": zero wrappers AND zero `[data-read-frog-translation-only]` anchors; walk labels remain — that's normal, not a leak.
 

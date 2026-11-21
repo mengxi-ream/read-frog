@@ -103,4 +103,4 @@ Format: `type(scope): description`
 ## References
 
 - PR Template: `.github/PULL_REQUEST_TEMPLATE.md`
-- Project Guidelines: `CLAUDE.md`
+- Project Guidelines: `AGENTS.md`

@@ -1,6 +1,6 @@
 Update AI SDK provider models by scraping the latest data from Vercel AI SDK docs and syncing with `LLM_PROVIDER_MODELS`.
 
-You MUST follow every step below in order. Do not skip steps or auto-approve decisions — ask the user when instructed.
+Work through the steps below in order. Where a step says to ask the user, stop and wait for their answer rather than deciding yourself.
 
 ---
 
@@ -23,7 +23,7 @@ Read `src/utils/constants/models.ts` and extract all keys from `LLM_PROVIDER_MOD
 For each key in `LLM_PROVIDER_MODELS`, find a matching provider in the scraped data's `providers` array (each has a `slug` field):
 
 1. **Exact match**: codebase key === scraped slug
-2. **Fuzzy match**: scraped slug contains the codebase key, or codebase key contains the scraped slug (e.g., codebase `xai` matches scraped slug `xai`)
+2. **Fuzzy match**: scraped slug contains the codebase key, or codebase key contains the scraped slug (e.g., codebase `google` matches scraped slug `google-generative-ai`)
 3. **No match**: skip this provider (preserve its models as-is)
 
 Present the full mapping table to the user for confirmation before proceeding:
@@ -52,7 +52,7 @@ For **new models**: prepend them to the array (newer models first).
 
 For **missing models**: present them to the user and ask whether to remove each one. Some models may be intentionally kept even if not on the AI SDK docs page.
 
-Edit `src/utils/constants/models.ts` to update `LLM_PROVIDER_MODELS` with the changes. Preserve the `as const` assertion and existing formatting style (single quotes, trailing commas).
+Edit `src/utils/constants/models.ts` to update `LLM_PROVIDER_MODELS` with the changes. Preserve the `as const` assertion and existing formatting style (double quotes, trailing commas, one model per line).
 
 ## Step 5: Check `LLM_MODEL_OPTIONS`
 
@@ -97,22 +97,26 @@ Create a new file at `src/utils/config/migration-scripts/vXXX-to-vYYY.ts` follow
 Template:
 
 ```typescript
-import type { MigrationFunction } from './types'
+/**
+ * Migration script from vXXX to vYYY
+ * - Moves providers whose model was removed from LLM_PROVIDER_MODELS to that
+ *   provider's default model at the time of this update.
+ *
+ * IMPORTANT: Model names are hardcoded inline. Migration scripts are frozen
+ * snapshots - never import constants, helpers, or shared types.
+ */
 
-// Models removed in this update and their replacement defaults.
-// These are intentionally hardcoded — migrations must not depend on
-// runtime constants that change across versions.
-const REMOVED_MODELS: Record<string, { removed: string[], default: string }> = {
-  openai: { removed: ['gpt-4-turbo'], default: 'gpt-5-mini' },
+const REMOVED_MODELS: Record<string, { removed: string[]; default: string }> = {
+  openai: { removed: ["gpt-4-turbo"], default: "gpt-5-mini" },
   // ... one entry per provider that had removals
 }
 
-export const migrate: MigrationFunction = (oldConfig: any) => {
-  const providersConfig = oldConfig.providersConfig
+export function migrate(oldConfig: any): any {
+  const providersConfig = oldConfig?.providersConfig
   if (!Array.isArray(providersConfig)) return oldConfig
 
   const newProvidersConfig = providersConfig.map((provider: any) => {
-    const entry = REMOVED_MODELS[provider.provider]
+    const entry = REMOVED_MODELS[provider?.provider]
     if (!entry) return provider
 
     const currentModel = provider.model?.model
@@ -132,9 +136,9 @@ export const migrate: MigrationFunction = (oldConfig: any) => {
 }
 ```
 
-### 7c. Register the migration
+### 7c. Registration
 
-Read `src/utils/config/migration.ts` and add the new migration import and entry to the `migrationScripts` record.
+Nothing to register: `src/utils/config/migration.ts` picks up every `migration-scripts/v*-to-v*.ts` file automatically and checks that the version chain is continuous, so the file name must match the bumped `CONFIG_SCHEMA_VERSION`.
 
 ### 7d. Add test data
 
