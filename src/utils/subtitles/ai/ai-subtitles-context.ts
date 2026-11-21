@@ -2,7 +2,7 @@ import type { AiSubtitlesContext } from "./request-ai-subtitles"
 import { resolveTranscriptVideo } from "@read-frog/definitions"
 
 /** Keys the playing video as the server does and claims the player's length; null before its
- * metadata loads, for a live stream, or for an X post without a media id. */
+ * metadata loads, for a live stream, or for a malformed media id. */
 export function resolveAiSubtitlesContext({
   url,
   mediaId,

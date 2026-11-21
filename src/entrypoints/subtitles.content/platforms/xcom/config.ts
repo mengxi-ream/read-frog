@@ -13,10 +13,24 @@ import {
   getXcomVideoPostUrl,
 } from "./dom"
 
+// X plays a GIF as a silent looping video, with its poster under this path.
+const XCOM_GIF_POSTER_PATTERN = /^https:\/\/pbs\.twimg\.com\/tweet_video_thumb\//
+// X's player gives a broadcast still live a finite duration that grows, so its poster marks it.
+const XCOM_LIVE_POSTER_PATTERN =
+  /^https:\/\/[^/]+\.video\.pscp\.tv\/Transcoding\/v1\/live_thumbnail\//
+
+function isXcomLiveVideo(video: Pick<HTMLVideoElement, "duration" | "poster">): boolean {
+  return video.duration === Number.POSITIVE_INFINITY || XCOM_LIVE_POSTER_PATTERN.test(video.poster)
+}
+
+// A poster without a media id, as a custom cover's or a replay's, keys the post's only video.
 function createXcomAiSubtitlesContext(): AiSubtitlesContext | null {
   const video = getCurrentXcomSubtitlesVideo()
-  const url = video && getXcomVideoPostUrl(video)
-  return video && url
+  if (!video || XCOM_GIF_POSTER_PATTERN.test(video.poster) || isXcomLiveVideo(video)) {
+    return null
+  }
+  const url = getXcomVideoPostUrl(video)
+  return url
     ? resolveAiSubtitlesContext({
         url,
         mediaId: xcomMediaIdFromUrl(video.poster) ?? undefined,
@@ -26,7 +40,8 @@ function createXcomAiSubtitlesContext(): AiSubtitlesContext | null {
 }
 
 async function isXcomLiveContent(): Promise<boolean> {
-  return getCurrentXcomSubtitlesVideo()?.duration === Number.POSITIVE_INFINITY
+  const video = getCurrentXcomSubtitlesVideo()
+  return !!video && isXcomLiveVideo(video)
 }
 
 export function getXcomConfig(): PlatformConfig {
