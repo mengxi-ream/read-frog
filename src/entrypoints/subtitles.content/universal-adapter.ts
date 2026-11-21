@@ -3,6 +3,7 @@ import type { FeatureUsageContext, SurfaceByFeature } from "@/types/analytics"
 import type { Config } from "@/types/config/config"
 import type { SubtitlesPlatform } from "@/types/config/subtitles"
 import type { SubtitlesSource } from "@/utils/constants/subtitles"
+import type { I18nKey } from "@/utils/i18n"
 import type { SubtitlesFetcher } from "@/utils/subtitles/fetchers/types"
 import type { SubtitlesVideoContext } from "@/utils/subtitles/processor/translator"
 import type { SubtitlesFragment } from "@/utils/subtitles/types"
@@ -88,9 +89,15 @@ type SubtitlesFetcherFactories = {
   ai?: () => SubtitlesFetcher
 }
 
-const LOADING_MESSAGE: Record<SubtitlesSource, string | undefined> = {
+const LOADING_MESSAGE_KEY = {
   [SUBTITLES_SOURCE.NATIVE]: undefined,
-  [SUBTITLES_SOURCE.AI]: i18n.t("subtitles.loadingAiSubtitles"),
+  [SUBTITLES_SOURCE.AI]: "subtitles.loadingAiSubtitles",
+} as const satisfies Record<SubtitlesSource, I18nKey | undefined>
+
+/** Translated when shown: this module loads before the content script runs `initI18n`. */
+function getLoadingMessage(source: SubtitlesSource): string | undefined {
+  const key = LOADING_MESSAGE_KEY[source]
+  return key && i18n.t(key)
 }
 
 export interface SubtitlesProvidersAdapter {
@@ -838,7 +845,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
     this.subtitlesScheduler?.show()
     this.hideNativeSubtitles()
 
-    const message = LOADING_MESSAGE[next]
+    const message = getLoadingMessage(next)
     if (message) {
       this.subtitlesScheduler?.setState("loading", { message })
     }
@@ -1010,7 +1017,7 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
 
       // A quiet start stays invisible until there is something to show.
       if (!quiet) {
-        this.subtitlesScheduler?.setState("loading", { message: LOADING_MESSAGE[this.source] })
+        this.subtitlesScheduler?.setState("loading", { message: getLoadingMessage(this.source) })
       }
 
       loadingSource = true
