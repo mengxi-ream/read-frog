@@ -102,18 +102,18 @@ function findOption(options: HTMLElement[], name: string) {
 }
 
 describe("ProviderSelector with Built-in AI models", () => {
-  it("lists the models flat, in the server's order, after the user's own providers", async () => {
+  it("lists the models flat, in the server's order, before the user's own providers", async () => {
     renderSelector(LUNA_PROVIDER_ID)
 
     const options = await openMenu()
 
     expect(options.map((option) => option.textContent)).toEqual([
-      "OpenAI",
       "Claude Haiku 5.5",
       "GPT-6 Luna",
       "DeepSeek V4.1 Flash",
       "GPT-6.2 SolUltra",
       "Claude Sonnet 5.5Ultra",
+      "OpenAI",
     ])
   })
 

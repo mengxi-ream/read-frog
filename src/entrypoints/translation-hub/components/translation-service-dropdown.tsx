@@ -83,12 +83,16 @@ export function TranslationServiceDropdown() {
           </SelectValue>
         </SelectTrigger>
         <SelectContent>
-          {llmProviders.length > 0 && (
+          {builtInProviders.length > 0 && (
             <SelectGroup>
-              <SelectLabel>{i18n.t("translateService.llmModels")}</SelectLabel>
-              {llmProviders.map(({ id, name, provider }) => (
-                <SelectItem key={id} value={id}>
-                  <ProviderIcon logo={PROVIDER_ITEMS[provider].logo(theme)} name={name} size="sm" />
+              <SelectLabel>{i18n.t("translateService.builtInModels")}</SelectLabel>
+              {builtInProviders.map((provider) => (
+                <SelectItem key={provider.id} value={provider.id} disabled={provider.disabled}>
+                  <ProviderOptionContent
+                    provider={provider}
+                    providers={builtInProviders}
+                    theme={theme}
+                  />
                 </SelectItem>
               ))}
             </SelectGroup>
@@ -108,16 +112,12 @@ export function TranslationServiceDropdown() {
               ))}
             </SelectGroup>
           )}
-          {builtInProviders.length > 0 && (
+          {llmProviders.length > 0 && (
             <SelectGroup>
-              <SelectLabel>{i18n.t("translateService.builtInModels")}</SelectLabel>
-              {builtInProviders.map((provider) => (
-                <SelectItem key={provider.id} value={provider.id} disabled={provider.disabled}>
-                  <ProviderOptionContent
-                    provider={provider}
-                    providers={builtInProviders}
-                    theme={theme}
-                  />
+              <SelectLabel>{i18n.t("translateService.llmModels")}</SelectLabel>
+              {llmProviders.map(({ id, name, provider }) => (
+                <SelectItem key={id} value={id}>
+                  <ProviderIcon logo={PROVIDER_ITEMS[provider].logo(theme)} name={name} size="sm" />
                 </SelectItem>
               ))}
             </SelectGroup>
