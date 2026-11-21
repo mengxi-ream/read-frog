@@ -1,5 +1,6 @@
 import type { ComponentProps, ReactNode } from "react"
 import type { NoteSuggestionProviderRef, SelectionSession } from "../atoms"
+import type { ContextMenuSelection } from "../use-selection-open-request"
 import type { SelectionPopoverActions } from "@/components/ui/selection-popover"
 import type { SelectionToolbarInlineError } from "@/components/ui/selection-popover/inline-error"
 import type { ThinkingSnapshot } from "@/types/background-stream"
@@ -460,18 +461,21 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
     })
   }, [commitOpenRequest, selectionSession])
 
-  const resolveContextMenuRequest = useCallback((): SelectionTranslatePendingOpenRequest | null => {
-    const request = resolveContextMenuOpenRequest()
-    if (!request) {
-      return null
-    }
+  const resolveContextMenuRequest = useCallback(
+    (menu: ContextMenuSelection): SelectionTranslatePendingOpenRequest | null => {
+      const request = resolveContextMenuOpenRequest(menu)
+      if (!request) {
+        return null
+      }
 
-    return {
-      anchor: request.anchor,
-      session: request.session,
-      surface: ANALYTICS_SURFACE.CONTEXT_MENU,
-    }
-  }, [resolveContextMenuOpenRequest])
+      return {
+        anchor: request.anchor,
+        session: request.session,
+        surface: ANALYTICS_SURFACE.CONTEXT_MENU,
+      }
+    },
+    [resolveContextMenuOpenRequest],
+  )
 
   const resolveShortcutRequest = useCallback(
     (session: SelectionSession | null): SelectionTranslatePendingOpenRequest | null => {
@@ -524,11 +528,14 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
     [openSelectionTranslationRequest, selectionSession],
   )
 
-  const openFromContextMenu = useCallback(() => {
-    openSelectionTranslationRequest(resolveContextMenuRequest(), {
-      showMissingSelectionToast: true,
-    })
-  }, [openSelectionTranslationRequest, resolveContextMenuRequest])
+  const openFromContextMenu = useCallback(
+    (menu: ContextMenuSelection) => {
+      openSelectionTranslationRequest(resolveContextMenuRequest(menu), {
+        showMissingSelectionToast: true,
+      })
+    },
+    [openSelectionTranslationRequest, resolveContextMenuRequest],
+  )
 
   // Turned off, the button and its key go together, as Speak's and the actions' do. Hiding the
   // whole toolbar does not stop the key.
@@ -549,8 +556,8 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
   )
 
   useEffect(() => {
-    return onMessage("openSelectionTranslationFromContextMenu", () => {
-      openFromContextMenu()
+    return onMessage("openSelectionTranslationFromContextMenu", (message) => {
+      openFromContextMenu(message.data)
     })
   }, [openFromContextMenu])
 

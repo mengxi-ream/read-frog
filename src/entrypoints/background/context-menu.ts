@@ -1,6 +1,7 @@
 import type { Browser } from "#imports"
 import type { Config } from "@/types/config/config"
 import { browser, storage } from "#imports"
+import { env } from "@/env"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext } from "@/utils/analytics"
 import { CONFIG_STORAGE_KEY } from "@/utils/constants/config"
@@ -194,6 +195,46 @@ function warnMenuActionNotDelivered(error: unknown) {
 }
 
 /**
+ * Whether the menu was opened in a book section of the readfrog.app ebook
+ * reader: a blob: frame the site made (see isReadFrogEbookSection). Only its
+ * URL is known here.
+ */
+function isReadFrogEbookSectionFrame(frameUrl: string | undefined) {
+  if (!frameUrl?.startsWith("blob:")) {
+    return false
+  }
+
+  try {
+    return env.WXT_OFFICIAL_SITE_ORIGINS.includes(new URL(frameUrl).origin)
+  } catch {
+    return false
+  }
+}
+
+/**
+ * A selection action goes to the frame the menu was opened in, whose toolbar
+ * holds the selection. A book section has no toolbar: the reader relays its
+ * selections to the top frame's, so the action goes there, marked as coming
+ * from the book. The top frame never saw that right-click, so it acts on the
+ * relayed selection, not on its own.
+ */
+function getSelectionActionDelivery(
+  info: Browser.contextMenus.OnClickData,
+  tabId: number,
+  selectionText: string,
+) {
+  if (typeof info.frameId !== "number") {
+    return { target: tabId, data: { selectionText } }
+  }
+
+  if (isReadFrogEbookSectionFrame(info.frameUrl)) {
+    return { target: { tabId, frameId: 0 }, data: { selectionText, fromEbookSection: true } }
+  }
+
+  return { target: { tabId, frameId: info.frameId }, data: { selectionText } }
+}
+
+/**
  * Handle translate menu click - toggle page translation
  */
 async function handleTranslateClick(tabId: number, tabUrl?: string) {
@@ -235,15 +276,11 @@ async function handleSelectionTranslateClick(
     return
   }
 
-  const target = typeof info.frameId === "number" ? { tabId, frameId: info.frameId } : tabId
+  const { target, data } = getSelectionActionDelivery(info, tabId, selectionText)
 
-  void sendMessage(
-    "openSelectionTranslationFromContextMenu",
-    {
-      selectionText,
-    },
-    target,
-  ).catch(warnMenuActionNotDelivered)
+  void sendMessage("openSelectionTranslationFromContextMenu", data, target).catch(
+    warnMenuActionNotDelivered,
+  )
 }
 
 async function handleSelectionReadAloudClick(
@@ -255,9 +292,9 @@ async function handleSelectionReadAloudClick(
     return
   }
 
-  const target = typeof info.frameId === "number" ? { tabId, frameId: info.frameId } : tabId
+  const { target, data } = getSelectionActionDelivery(info, tabId, selectionText)
 
-  void sendMessage("readAloudSelectionFromContextMenu", { selectionText }, target).catch(
+  void sendMessage("readAloudSelectionFromContextMenu", data, target).catch(
     warnMenuActionNotDelivered,
   )
 }
@@ -272,14 +309,9 @@ async function handleSelectionCustomActionClick(
     return
   }
 
-  const target = typeof info.frameId === "number" ? { tabId, frameId: info.frameId } : tabId
+  const { target, data } = getSelectionActionDelivery(info, tabId, selectionText)
 
-  void sendMessage(
-    "openSelectionCustomActionFromContextMenu",
-    {
-      actionId,
-      selectionText,
-    },
-    target,
-  ).catch(warnMenuActionNotDelivered)
+  void sendMessage("openSelectionCustomActionFromContextMenu", { actionId, ...data }, target).catch(
+    warnMenuActionNotDelivered,
+  )
 }

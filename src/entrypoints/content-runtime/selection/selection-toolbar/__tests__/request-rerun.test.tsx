@@ -451,6 +451,16 @@ function setSelectionState(
   })
 }
 
+// As the toolbar records a selection the ebook reader relays from a book
+// section: no ranges in this frame, only where it ended.
+function setRelayedEbookSelection(store: TestStore) {
+  store.set(setSelectionStateAtom, {
+    selection: { text: "punched", ranges: [], anchor: { x: 240, y: 138 } },
+    context: { text: "My mom punched me.", paragraphs: ["My mom punched me."] },
+    noteOrigin: null,
+  })
+}
+
 function createDeferredPromise<T>() {
   let resolve!: (value: T) => void
   let reject!: (reason?: unknown) => void
@@ -1281,6 +1291,104 @@ describe("selection toolbar requests", () => {
     expect(toastAddMock).not.toHaveBeenCalled()
   })
 
+  it("opens a context-menu translation of a selection relayed from the ebook reader at its end", async () => {
+    translateTextCoreMock.mockResolvedValue("Ebook result")
+    getOrCreateWebPageContextMock.mockResolvedValue(null)
+
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    setRelayedEbookSelection(store)
+    renderWithProviders(<TranslateButton />, store)
+
+    // The right-click happened inside the book's iframe, so this frame saw no
+    // contextmenu event to take the anchor from.
+    const handler = getRegisteredMessageHandler("openSelectionTranslationFromContextMenu")
+
+    await act(async () => {
+      handler({ data: { selectionText: "punched", fromEbookSection: true } })
+      await Promise.resolve()
+    })
+
+    await waitFor(() => {
+      expect(translateTextCoreMock).toHaveBeenCalledTimes(1)
+    })
+
+    const content = screen.getByTestId("selection-popover-content")
+    expect(content).toHaveAttribute("data-anchor-x", "240")
+    expect(content).toHaveAttribute("data-anchor-y", "138")
+    expect(screen.getByTestId("translation-selection").textContent).toBe("punched")
+    expect(toastAddMock).not.toHaveBeenCalled()
+  })
+
+  it("ignores a right-click this frame recorded for a context menu opened in an ebook section", async () => {
+    translateTextCoreMock.mockResolvedValue("Ebook result")
+    getOrCreateWebPageContextMock.mockResolvedValue(null)
+
+    const paragraph = document.createElement("p")
+    paragraph.textContent = "Reader page header."
+    document.body.appendChild(paragraph)
+
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    setSelectionState(store, { text: "Reader page header.", range: createRangeFor(paragraph) })
+    renderWithProviders(<TranslateButton />, store)
+
+    // A right-click on this frame's own text, a moment before the book selection.
+    act(() => {
+      paragraph.dispatchEvent(
+        new MouseEvent("contextmenu", { bubbles: true, button: 2, clientX: 40, clientY: 20 }),
+      )
+    })
+    act(() => {
+      setRelayedEbookSelection(store)
+    })
+
+    await act(async () => {
+      getRegisteredMessageHandler("openSelectionTranslationFromContextMenu")({
+        data: { selectionText: "punched", fromEbookSection: true },
+      })
+      await Promise.resolve()
+    })
+
+    await waitFor(() => {
+      expect(translateTextCoreMock).toHaveBeenCalledTimes(1)
+    })
+
+    const content = screen.getByTestId("selection-popover-content")
+    expect(content).toHaveAttribute("data-anchor-x", "240")
+    expect(content).toHaveAttribute("data-anchor-y", "138")
+    expect(screen.getByTestId("translation-selection").textContent).toBe("punched")
+  })
+
+  it("translates the menu's text, not this frame's own selection, for a context menu opened in an ebook section", async () => {
+    translateTextCoreMock.mockResolvedValue("Ebook result")
+    getOrCreateWebPageContextMock.mockResolvedValue(null)
+
+    const paragraph = document.createElement("p")
+    paragraph.textContent = "Reader page header."
+    document.body.appendChild(paragraph)
+
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    // The reader cleared its relayed selection; this frame still has its own.
+    setSelectionState(store, { text: "Reader page header.", range: createRangeFor(paragraph) })
+    renderWithProviders(<TranslateButton />, store)
+
+    await act(async () => {
+      getRegisteredMessageHandler("openSelectionTranslationFromContextMenu")({
+        data: { selectionText: "punched", fromEbookSection: true },
+      })
+      await Promise.resolve()
+    })
+
+    await waitFor(() => {
+      expect(translateTextCoreMock).toHaveBeenCalledTimes(1)
+    })
+
+    expect(screen.getByTestId("translation-selection").textContent).toBe("punched")
+    expect(toastAddMock).not.toHaveBeenCalled()
+  })
+
   it("shows a toast when the context menu request cannot recover a selection snapshot", async () => {
     const store = createStore()
     store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
@@ -1956,6 +2064,81 @@ describe("selection toolbar requests", () => {
         action_name: action.name,
       }),
     )
+  })
+
+  it("runs a context-menu action opened in an ebook section on the relayed selection", async () => {
+    streamBackgroundStructuredObjectMock.mockResolvedValue(
+      createStructuredObjectSnapshot({ summary: "Ebook result" }),
+    )
+    const paragraph = document.createElement("p")
+    paragraph.textContent = "Reader page header."
+    document.body.appendChild(paragraph)
+
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    setSelectionState(store, { text: "Reader page header.", range: createRangeFor(paragraph) })
+    renderWithProviders(<SelectionToolbarPinnedItems />, store)
+
+    // A right-click on this frame's own text, a moment before the book selection.
+    act(() => {
+      paragraph.dispatchEvent(
+        new MouseEvent("contextmenu", { bubbles: true, button: 2, clientX: 40, clientY: 20 }),
+      )
+    })
+    act(() => {
+      setRelayedEbookSelection(store)
+    })
+
+    await act(async () => {
+      getRegisteredMessageHandler("openSelectionCustomActionFromContextMenu")({
+        data: {
+          actionId: DEFAULT_DICTIONARY_ACTION.id,
+          selectionText: "punched",
+          fromEbookSection: true,
+        },
+      })
+      await Promise.resolve()
+    })
+
+    await waitFor(() => {
+      expect(streamBackgroundStructuredObjectMock).toHaveBeenCalledTimes(1)
+    })
+
+    const content = screen.getByTestId("selection-popover-content")
+    expect(content).toHaveAttribute("data-anchor-x", "240")
+    expect(content).toHaveAttribute("data-anchor-y", "138")
+    expect(screen.getByTestId("footer-paragraphs").textContent).toContain("My mom punched me.")
+    expect(toastAddMock).not.toHaveBeenCalled()
+  })
+
+  it("runs a context-menu action opened in an ebook section on the menu's text when the relay is stale", async () => {
+    streamBackgroundStructuredObjectMock.mockResolvedValue(
+      createStructuredObjectSnapshot({ summary: "Ebook result" }),
+    )
+
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    setRelayedEbookSelection(store)
+    renderWithProviders(<SelectionToolbarPinnedItems />, store)
+
+    // Extended past "punched" with the keyboard, which the reader does not relay.
+    await act(async () => {
+      getRegisteredMessageHandler("openSelectionCustomActionFromContextMenu")({
+        data: {
+          actionId: DEFAULT_DICTIONARY_ACTION.id,
+          selectionText: "punched me in the face",
+          fromEbookSection: true,
+        },
+      })
+      await Promise.resolve()
+    })
+
+    await waitFor(() => {
+      expect(streamBackgroundStructuredObjectMock).toHaveBeenCalledTimes(1)
+    })
+
+    expect(screen.getByTestId("footer-paragraphs").textContent).toBe("punched me in the face")
+    expect(toastAddMock).not.toHaveBeenCalled()
   })
 
   it("carries the note origin recorded with the selection into the custom action request", async () => {
