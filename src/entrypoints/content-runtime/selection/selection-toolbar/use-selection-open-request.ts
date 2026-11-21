@@ -84,24 +84,41 @@ export function useSelectionOpenRequestResolver(selectionSession: SelectionSessi
   }, [selectionSession])
 
   // The context menu opens where it was right-clicked, on the selection it was opened for.
-  const resolveContextMenuOpenRequest = useCallback((): SelectionOpenRequest | null => {
-    const cachedRequest = recentCapturedOpenRequestRef.current
-    if (cachedRequest && Date.now() - cachedRequest.capturedAt <= RECENT_OPEN_REQUEST_TTL_MS) {
-      return {
-        anchor: cachedRequest.anchor,
-        session: cachedRequest.session,
+  // A menu opened in a book section of the ebook reader was right-clicked there, not
+  // here: it is for the selection the reader relays, so neither a right-click this
+  // frame recorded nor a selection made in this frame stands in for it.
+  const resolveContextMenuOpenRequest = useCallback(
+    (options?: { fromEbookSection?: boolean }): SelectionOpenRequest | null => {
+      if (options?.fromEbookSection) {
+        if (!selectionSession?.selectionSnapshot.anchor) {
+          return null
+        }
+
+        return {
+          anchor: getSelectionAnchor(selectionSession) ?? getViewportCenterAnchor(),
+          session: selectionSession,
+        }
       }
-    }
 
-    if (!selectionSession) {
-      return null
-    }
+      const cachedRequest = recentCapturedOpenRequestRef.current
+      if (cachedRequest && Date.now() - cachedRequest.capturedAt <= RECENT_OPEN_REQUEST_TTL_MS) {
+        return {
+          anchor: cachedRequest.anchor,
+          session: cachedRequest.session,
+        }
+      }
 
-    return {
-      anchor: getSelectionAnchor(selectionSession) ?? getViewportCenterAnchor(),
-      session: selectionSession,
-    }
-  }, [selectionSession])
+      if (!selectionSession) {
+        return null
+      }
+
+      return {
+        anchor: getSelectionAnchor(selectionSession) ?? getViewportCenterAnchor(),
+        session: selectionSession,
+      }
+    },
+    [selectionSession],
+  )
 
   // A shortcut acts on the selection it was pressed on (see useSelectionShortcuts), not the
   // one recorded at the last mouseup.

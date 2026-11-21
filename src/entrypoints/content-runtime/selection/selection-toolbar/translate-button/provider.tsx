@@ -460,18 +460,21 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
     })
   }, [commitOpenRequest, selectionSession])
 
-  const resolveContextMenuRequest = useCallback((): SelectionTranslatePendingOpenRequest | null => {
-    const request = resolveContextMenuOpenRequest()
-    if (!request) {
-      return null
-    }
+  const resolveContextMenuRequest = useCallback(
+    (fromEbookSection?: boolean): SelectionTranslatePendingOpenRequest | null => {
+      const request = resolveContextMenuOpenRequest({ fromEbookSection })
+      if (!request) {
+        return null
+      }
 
-    return {
-      anchor: request.anchor,
-      session: request.session,
-      surface: ANALYTICS_SURFACE.CONTEXT_MENU,
-    }
-  }, [resolveContextMenuOpenRequest])
+      return {
+        anchor: request.anchor,
+        session: request.session,
+        surface: ANALYTICS_SURFACE.CONTEXT_MENU,
+      }
+    },
+    [resolveContextMenuOpenRequest],
+  )
 
   const resolveShortcutRequest = useCallback(
     (session: SelectionSession | null): SelectionTranslatePendingOpenRequest | null => {
@@ -524,11 +527,14 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
     [openSelectionTranslationRequest, selectionSession],
   )
 
-  const openFromContextMenu = useCallback(() => {
-    openSelectionTranslationRequest(resolveContextMenuRequest(), {
-      showMissingSelectionToast: true,
-    })
-  }, [openSelectionTranslationRequest, resolveContextMenuRequest])
+  const openFromContextMenu = useCallback(
+    (fromEbookSection?: boolean) => {
+      openSelectionTranslationRequest(resolveContextMenuRequest(fromEbookSection), {
+        showMissingSelectionToast: true,
+      })
+    },
+    [openSelectionTranslationRequest, resolveContextMenuRequest],
+  )
 
   // Turned off, the button and its key go together, as Speak's and the actions' do. Hiding the
   // whole toolbar does not stop the key.
@@ -549,8 +555,8 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
   )
 
   useEffect(() => {
-    return onMessage("openSelectionTranslationFromContextMenu", () => {
-      openFromContextMenu()
+    return onMessage("openSelectionTranslationFromContextMenu", (message) => {
+      openFromContextMenu(message.data.fromEbookSection)
     })
   }, [openFromContextMenu])
 

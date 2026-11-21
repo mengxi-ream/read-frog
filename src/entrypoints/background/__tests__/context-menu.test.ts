@@ -321,7 +321,8 @@ describe("background context menu", () => {
         throw new Error("Context menu click listener was not registered")
       }
 
-      // The reader relays the section's selections to the top frame's toolbar.
+      // The reader relays the section's selections to the top frame's toolbar,
+      // and the top frame is told so: it never saw this right-click.
       await clickHandler(
         {
           menuItemId,
@@ -333,10 +334,11 @@ describe("background context menu", () => {
         { id: 5 },
       )
 
-      expect(sendMessageMock).toHaveBeenCalledWith(messageType, expect.anything(), {
-        tabId: 5,
-        frameId: 0,
-      })
+      expect(sendMessageMock).toHaveBeenCalledWith(
+        messageType,
+        expect.objectContaining({ selectionText: "punched", fromEbookSection: true }),
+        { tabId: 5, frameId: 0 },
+      )
     },
   )
 

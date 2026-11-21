@@ -178,7 +178,7 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
   )
 
   const openContextMenuCustomAction = useCallback(
-    (actionId: string) => {
+    (actionId: string, fromEbookSection?: boolean) => {
       const action = findSelectionToolbarAction(selectionToolbarConfig, actionId)
       if (!action || action.enabled === false) {
         const nextError = createSelectionToolbarPrecheckError("customAction", "actionUnavailable")
@@ -196,7 +196,7 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
         return
       }
 
-      const request = resolveContextMenuOpenRequest()
+      const request = resolveContextMenuOpenRequest({ fromEbookSection })
       if (!request) {
         const nextError = createSelectionToolbarPrecheckError("customAction", "missingSelection")
         void trackFeatureUsed({
@@ -253,7 +253,7 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
 
   useEffect(() => {
     return onMessage("openSelectionCustomActionFromContextMenu", (message) => {
-      openContextMenuCustomAction(message.data.actionId)
+      openContextMenuCustomAction(message.data.actionId, message.data.fromEbookSection)
     })
   }, [openContextMenuCustomAction])
 

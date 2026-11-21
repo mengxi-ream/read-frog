@@ -214,18 +214,24 @@ function isReadFrogEbookSectionFrame(frameUrl: string | undefined) {
 /**
  * A selection action goes to the frame the menu was opened in, whose toolbar
  * holds the selection. A book section has no toolbar: the reader relays its
- * selections to the top frame's, so the action goes there.
+ * selections to the top frame's, so the action goes there, marked as coming
+ * from the book. The top frame never saw that right-click, so it acts on the
+ * relayed selection, not on its own.
  */
-function getSelectionActionTarget(info: Browser.contextMenus.OnClickData, tabId: number) {
+function getSelectionActionDelivery(
+  info: Browser.contextMenus.OnClickData,
+  tabId: number,
+  selectionText: string,
+) {
   if (typeof info.frameId !== "number") {
-    return tabId
+    return { target: tabId, data: { selectionText } }
   }
 
   if (isReadFrogEbookSectionFrame(info.frameUrl)) {
-    return { tabId, frameId: 0 }
+    return { target: { tabId, frameId: 0 }, data: { selectionText, fromEbookSection: true } }
   }
 
-  return { tabId, frameId: info.frameId }
+  return { target: { tabId, frameId: info.frameId }, data: { selectionText } }
 }
 
 /**
@@ -270,15 +276,11 @@ async function handleSelectionTranslateClick(
     return
   }
 
-  const target = getSelectionActionTarget(info, tabId)
+  const { target, data } = getSelectionActionDelivery(info, tabId, selectionText)
 
-  void sendMessage(
-    "openSelectionTranslationFromContextMenu",
-    {
-      selectionText,
-    },
-    target,
-  ).catch(warnMenuActionNotDelivered)
+  void sendMessage("openSelectionTranslationFromContextMenu", data, target).catch(
+    warnMenuActionNotDelivered,
+  )
 }
 
 async function handleSelectionReadAloudClick(
@@ -290,9 +292,9 @@ async function handleSelectionReadAloudClick(
     return
   }
 
-  const target = getSelectionActionTarget(info, tabId)
+  const { target, data } = getSelectionActionDelivery(info, tabId, selectionText)
 
-  void sendMessage("readAloudSelectionFromContextMenu", { selectionText }, target).catch(
+  void sendMessage("readAloudSelectionFromContextMenu", data, target).catch(
     warnMenuActionNotDelivered,
   )
 }
@@ -307,14 +309,9 @@ async function handleSelectionCustomActionClick(
     return
   }
 
-  const target = getSelectionActionTarget(info, tabId)
+  const { target, data } = getSelectionActionDelivery(info, tabId, selectionText)
 
-  void sendMessage(
-    "openSelectionCustomActionFromContextMenu",
-    {
-      actionId,
-      selectionText,
-    },
-    target,
-  ).catch(warnMenuActionNotDelivered)
+  void sendMessage("openSelectionCustomActionFromContextMenu", { actionId, ...data }, target).catch(
+    warnMenuActionNotDelivered,
+  )
 }
