@@ -246,6 +246,7 @@ describe("page translation when Built-in AI refuses at the start", () => {
         kind: "logIn",
         feature: "pageTranslation",
         analyticsFeature: "page_translation",
+        trigger: "user",
         retry: expect.any(Function),
       }),
     )
@@ -332,6 +333,7 @@ describe("page translation when Built-in AI refuses at the start", () => {
           plan,
           feature: "pageTranslation",
           analyticsFeature: "page_translation",
+          trigger: "user",
           retry: expect.any(Function),
         }),
       )
@@ -485,6 +487,7 @@ describe("page translation when Built-in AI's pool runs dry partway down a page"
       plan: "free",
       feature: "pageTranslation",
       analyticsFeature: "page_translation",
+      trigger: "user",
       retry: expect.any(Function),
     })
     expect(mockToastAdd).not.toHaveBeenCalled()

@@ -831,18 +831,22 @@ describe("background analytics", () => {
     } as const
     await captureBuiltInAiPromptEventInBackground(shown)
     await captureBuiltInAiPromptEventInBackground(shown)
-    await captureBuiltInAiPromptEventInBackground({
+    const action = {
       event: "built_in_ai_prompt_action",
-      properties: { feature: "video_subtitles", kind: "upgrade", action: "machine_translation" },
-    })
+      properties: {
+        feature: "video_subtitles",
+        kind: "upgrade",
+        presentation: "dialog",
+        trigger: "auto",
+        action: "machine_translation",
+      },
+    } as const
+    await captureBuiltInAiPromptEventInBackground(action)
 
     expect(posthogCaptureMock.mock.calls).toEqual([
       ["built_in_ai_prompt_shown", shown.properties],
       ["built_in_ai_prompt_shown", shown.properties],
-      [
-        "built_in_ai_prompt_action",
-        { feature: "video_subtitles", kind: "upgrade", action: "machine_translation" },
-      ],
+      ["built_in_ai_prompt_action", action.properties],
     ])
     expect(cache.getLastReportedDay).not.toHaveBeenCalled()
   })
@@ -862,15 +866,34 @@ describe("background analytics", () => {
     } as never)
     await captureBuiltInAiPromptEventInBackground({
       event: "built_in_ai_prompt_action",
-      properties: { feature: "page_translation", kind: "upgrade", action: "upgrade", url: "x" },
+      properties: {
+        feature: "page_translation",
+        kind: "upgrade",
+        presentation: "toast",
+        trigger: "auto",
+        action: "upgrade",
+        url: "x",
+      },
+    } as never)
+    // An action from a content script that predates presentation and trigger.
+    await captureBuiltInAiPromptEventInBackground({
+      event: "built_in_ai_prompt_action",
+      properties: { feature: "page_translation", kind: "upgrade", action: "dismissed" },
     } as never)
 
     expect(posthogCaptureMock.mock.calls).toEqual([
       [
         "built_in_ai_prompt_action",
-        { feature: "page_translation", kind: "upgrade", action: "upgrade" },
+        {
+          feature: "page_translation",
+          kind: "upgrade",
+          presentation: "toast",
+          trigger: "auto",
+          action: "upgrade",
+        },
       ],
     ])
+    expect(loggerWarnMock).toHaveBeenCalledTimes(2)
     expect(loggerWarnMock).toHaveBeenCalledWith("Dropped an incomplete Built-in AI prompt event")
   })
 
@@ -880,7 +903,13 @@ describe("background analytics", () => {
     const { captureBuiltInAiPromptEventInBackground } = createAnalytics()
     await captureBuiltInAiPromptEventInBackground({
       event: "built_in_ai_prompt_action",
-      properties: { feature: "page_translation", kind: "upgrade", action: "dismissed" },
+      properties: {
+        feature: "page_translation",
+        kind: "upgrade",
+        presentation: "dialog",
+        trigger: "user",
+        action: "dismissed",
+      },
     })
 
     expect(posthogInitMock).not.toHaveBeenCalled()

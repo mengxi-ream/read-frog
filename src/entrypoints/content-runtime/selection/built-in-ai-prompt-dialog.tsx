@@ -52,6 +52,8 @@ export function BuiltInAiPromptDialog() {
     void trackBuiltInAiPromptAction({
       feature: request.analyticsFeature,
       kind: toAnalyticsPromptKind(request.kind),
+      presentation: "dialog",
+      trigger: request.trigger,
       action,
     })
   }

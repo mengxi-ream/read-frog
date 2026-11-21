@@ -112,6 +112,7 @@ describe("promptForBuiltInAiRefusal", () => {
         kind: "logIn",
         feature: "inputTranslation",
         analyticsFeature: "input_translation",
+        trigger: "user",
         retry,
       }),
     )
@@ -218,7 +219,13 @@ describe("promptForBuiltInAiRefusal", () => {
     expect(url.searchParams.get("feature")).toBe("video_subtitles")
     expect(trackedEvents()).toContainEqual({
       event: "built_in_ai_prompt_action",
-      properties: { feature: "video_subtitles", kind: "upgrade", action: "upgrade" },
+      properties: {
+        feature: "video_subtitles",
+        kind: "upgrade",
+        presentation: "toast",
+        trigger: "auto",
+        action: "upgrade",
+      },
     })
   })
 
@@ -232,7 +239,13 @@ describe("promptForBuiltInAiRefusal", () => {
     expect(new URL(opened![1].url).pathname).toBe("/log-in")
     expect(trackedEvents()).toContainEqual({
       event: "built_in_ai_prompt_action",
-      properties: { feature: "input_translation", kind: "log_in", action: "log_in" },
+      properties: {
+        feature: "input_translation",
+        kind: "log_in",
+        presentation: "toast",
+        trigger: "user",
+        action: "log_in",
+      },
     })
   })
 

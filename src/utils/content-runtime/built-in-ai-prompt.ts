@@ -34,6 +34,8 @@ interface BuiltInAiPromptBase {
   feature: BuiltInAiPromptFeature
   /** The feature that hit the wall, as analytics and the upgrade link name it. */
   analyticsFeature: AnalyticsFeature
+  /** Whether someone ran the feature or it ran on its own; analytics only. */
+  trigger: BuiltInAiPromptTrigger
   /** Runs the feature again after it has switched to the machine translator. */
   retry?: () => void
 }
@@ -141,6 +143,7 @@ function showRefusalToast(
   title: string,
   kind: BuiltInAiRefusalKind,
   analyticsFeature: AnalyticsFeature,
+  trigger: BuiltInAiPromptTrigger,
 ): void {
   const action =
     kind === "upgrade"
@@ -157,6 +160,8 @@ function showRefusalToast(
         void trackBuiltInAiPromptAction({
           feature: analyticsFeature,
           kind: toAnalyticsPromptKind(kind),
+          presentation: "toast",
+          trigger,
           action: kind === "upgrade" ? "upgrade" : "log_in",
         })
         // Content scripts cannot use chrome.tabs: route through the background.
@@ -223,14 +228,14 @@ export async function promptForBuiltInAiRefusal(
     if (!isCurrent()) {
       return true
     }
-    const base = { feature, analyticsFeature, retry }
+    const base = { feature, analyticsFeature, trigger, retry }
     openBuiltInAiPrompt(
       kind === "upgrade" && plan !== null
         ? { ...base, kind: "upgrade", plan }
         : { ...base, kind: "logIn" },
     )
   } else {
-    showRefusalToast(getRefusalMessage(error, kind), kind, analyticsFeature)
+    showRefusalToast(getRefusalMessage(error, kind), kind, analyticsFeature, trigger)
   }
 
   void trackBuiltInAiPromptShown({

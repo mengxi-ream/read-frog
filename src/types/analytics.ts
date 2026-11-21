@@ -199,9 +199,8 @@ export interface BuiltInAiPromptShownEventProperties {
   trigger: BuiltInAiPromptTrigger
 }
 
-export interface BuiltInAiPromptActionEventProperties {
-  feature: AnalyticsFeature
-  kind: BuiltInAiPromptKind
+/** The prompt's own `presentation` and `trigger` come along, so actions split the same way. */
+export interface BuiltInAiPromptActionEventProperties extends BuiltInAiPromptShownEventProperties {
   action: BuiltInAiPromptAction
 }
 

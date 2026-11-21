@@ -290,6 +290,7 @@ describe("input translation when Built-in AI refuses", () => {
         plan: "free",
         feature: "inputTranslation",
         analyticsFeature: "input_translation",
+        trigger: "user",
         retry: undefined,
       }),
     )

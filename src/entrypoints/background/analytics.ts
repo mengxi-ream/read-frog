@@ -615,25 +615,27 @@ function isOneOf<const T extends string>(values: readonly T[], value: unknown): 
 export function normalizeBuiltInAiPromptEvent(
   input: BuiltInAiPromptEvent,
 ): BuiltInAiPromptEvent | null {
-  const { feature, kind } = input.properties
-  if (!isOneOf(ANALYTICS_FEATURES, feature) || !isOneOf(BUILT_IN_AI_PROMPT_KINDS, kind)) {
+  const { feature, kind, presentation, trigger } = input.properties
+  if (
+    !isOneOf(ANALYTICS_FEATURES, feature) ||
+    !isOneOf(BUILT_IN_AI_PROMPT_KINDS, kind) ||
+    !isOneOf(BUILT_IN_AI_PROMPT_PRESENTATIONS, presentation) ||
+    !isOneOf(BUILT_IN_AI_PROMPT_TRIGGERS, trigger)
+  ) {
     return null
   }
 
   return match(input)
-    .with({ event: "built_in_ai_prompt_shown" }, ({ event, properties }) => {
-      const { presentation, trigger } = properties
-      if (
-        !isOneOf(BUILT_IN_AI_PROMPT_PRESENTATIONS, presentation) ||
-        !isOneOf(BUILT_IN_AI_PROMPT_TRIGGERS, trigger)
-      ) {
-        return null
-      }
-      return { event, properties: { feature, kind, presentation, trigger } }
-    })
+    .with({ event: "built_in_ai_prompt_shown" }, ({ event }) => ({
+      event,
+      properties: { feature, kind, presentation, trigger },
+    }))
     .with({ event: "built_in_ai_prompt_action" }, ({ event, properties }) => {
       if (!isOneOf(BUILT_IN_AI_PROMPT_ACTIONS, properties.action)) return null
-      return { event, properties: { feature, kind, action: properties.action } }
+      return {
+        event,
+        properties: { feature, kind, presentation, trigger, action: properties.action },
+      }
     })
     .otherwise(() => null)
 }
