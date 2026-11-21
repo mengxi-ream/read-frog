@@ -16,7 +16,8 @@ export interface AiSubtitlesContext {
   /** The player's length claim; billing never uses it. On X, where one URL can name several
    * videos, a transcript of another length is refused as another video. */
   durationSec: number
-  /** Names the played video where the URL names a post that can hold several. */
+  /** Names the played video where the URL names a post that can hold several; without it, the
+   * server takes the post's only video. */
   mediaId?: string
 }
 

@@ -13,9 +13,13 @@ import {
   getXcomVideoPostUrl,
 } from "./dom"
 
+// X plays a GIF as a silent looping video, with its poster under this path.
+const XCOM_GIF_POSTER_PATTERN = /^https:\/\/pbs\.twimg\.com\/tweet_video_thumb\//
+
+// A poster without a media id, as a custom cover's or a replay's, keys the post's only video.
 function createXcomAiSubtitlesContext(): AiSubtitlesContext | null {
   const video = getCurrentXcomSubtitlesVideo()
-  const url = video && getXcomVideoPostUrl(video)
+  const url = video && !XCOM_GIF_POSTER_PATTERN.test(video.poster) && getXcomVideoPostUrl(video)
   return video && url
     ? resolveAiSubtitlesContext({
         url,
