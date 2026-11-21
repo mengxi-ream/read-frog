@@ -1750,7 +1750,7 @@ subtitles:
   requestAiSubtitles: Süni intellekt subtitrləri istə
   usingAiSubtitles: Süni intellekt subtitrlərindən istifadə olunur
   settings: Subtitr ayarları
-  autoStartOnPlatform: "$1 videolarında avtomatik başlat"
+  autoStartOnPlatform: "$1 üzərində avtomatik başlat"
   toggle:
     enabled: Subtitr tərcüməsi aktivdir
     disabled: Subtitr tərcüməsi deaktivdir

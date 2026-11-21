@@ -1752,7 +1752,7 @@ subtitles:
   requestAiSubtitles: AI字幕をリクエスト
   usingAiSubtitles: AI字幕を使用中
   settings: 字幕設定
-  autoStartOnPlatform: "$1 の動画を開いたら自動で開始"
+  autoStartOnPlatform: "$1 で自動開始"
   toggle:
     enabled: 字幕翻訳をオンにしました
     disabled: 字幕翻訳をオフにしました

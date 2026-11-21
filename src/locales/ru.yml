@@ -1752,7 +1752,7 @@ subtitles:
   requestAiSubtitles: Запросить ИИ-субтитры
   usingAiSubtitles: Используются ИИ-субтитры
   settings: Настройки субтитров
-  autoStartOnPlatform: "Запускать автоматически на $1"
+  autoStartOnPlatform: "Автозапуск на $1"
   toggle:
     enabled: Перевод субтитров включён
     disabled: Перевод субтитров выключен
