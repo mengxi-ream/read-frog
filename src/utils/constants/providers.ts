@@ -303,7 +303,7 @@ export const PROVIDER_ITEMS: Record<
     website: "https://aistudio.google.com",
   },
   anthropic: {
-    logo: getLobeIconsCDNUrlFn("anthropic"),
+    logo: getLobeIconsCDNUrlFn("claude-color"),
     name: "Anthropic",
     website: "https://console.anthropic.com",
   },
