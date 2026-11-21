@@ -22,6 +22,13 @@ vi.mock("@/utils/message", () => ({
   sendMessage: (...args: unknown[]) => hostedAiStatus(...args),
 }))
 
+// The plan decides whether a spent pool offers an upgrade; it is read from billing.
+const getBuiltInAiUpgradePlan = vi.fn<() => Promise<"free" | "pro" | null>>()
+
+vi.mock("@/utils/hosted-ai/upgrade-plan", () => ({
+  getBuiltInAiUpgradePlan: () => getBuiltInAiUpgradePlan(),
+}))
+
 const {
   canProviderRefGenerateText,
   canResolvedProviderRefGenerateText,
@@ -338,6 +345,7 @@ describe("serializeProviderRef per model", () => {
       message: "hostedAi.availability.ultraRequired",
       action: undefined,
       reason: "ultra_required",
+      error: expect.any(HostedAiProviderUnavailableError),
     })
   })
 
@@ -360,7 +368,45 @@ describe("serializeProviderRef per model", () => {
       message: "hostedAi.availability.authenticationRequired",
       action: { label: "account.login", url: expect.stringMatching(/\/log-in$/) },
       reason: "authentication_required",
+      error: expect.any(HostedAiProviderUnavailableError),
     })
+  })
+
+  function spendPool(feature: "pageTranslation" | "videoSubtitles") {
+    const spent = tier({ available: false, unavailableReason: "quota_exhausted" })
+    hostedAiStatus.mockResolvedValue({
+      ...status(),
+      features: {
+        [feature]: { normal: spent, advance: spent },
+      } as unknown as HostedAiStatus["features"],
+    })
+  }
+
+  it("offers a spent pool below Ultra the upgrade, named after the feature that ran dry", async () => {
+    getBuiltInAiUpgradePlan.mockResolvedValue("free")
+    spendPool("videoSubtitles")
+
+    const availability = await checkProviderAvailability(
+      SYSTEM_PROVIDER,
+      "videoSubtitlesSegmentation",
+    )
+
+    expect(availability).toMatchObject({ available: false, reason: "quota_exhausted" })
+    const action = availability.available ? undefined : availability.action
+    expect(action?.label).toBe("action.upgrade")
+    const url = new URL(action!.url)
+    expect(url.pathname).toBe("/pricing")
+    expect(url.searchParams.get("entry")).toBe("extension_quota_exhausted")
+    expect(url.searchParams.get("feature")).toBe("video_subtitles")
+  })
+
+  it("offers Ultra's spent pool nothing: no plan sits above it", async () => {
+    getBuiltInAiUpgradePlan.mockResolvedValue(null)
+    spendPool("pageTranslation")
+
+    await expect(checkProviderAvailability(SYSTEM_PROVIDER, "pageTranslation")).resolves.toEqual(
+      expect.objectContaining({ available: false, reason: "quota_exhausted", action: undefined }),
+    )
   })
 })
 

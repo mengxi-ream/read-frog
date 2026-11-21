@@ -34,7 +34,7 @@ vi.mock("@/utils/subtitles/toast", () => ({
 
 vi.mock("@/utils/subtitles/processor/translator", () => ({
   buildSubtitlesSummaryContextHash: vi.fn<(...args: any[]) => any>(() => null),
-  resolveSubtitlesProviderRef: vi.fn<(...args: any[]) => any>(),
+  resolveSubtitlesProvider: vi.fn<(...args: any[]) => any>(),
   fetchSubtitlesSummary: vi.fn<(...args: any[]) => any>(),
   translateSubtitles: vi.fn<(...args: any[]) => any>(),
 }))

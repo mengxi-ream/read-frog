@@ -48,6 +48,7 @@ import { classifyFailureReason } from "@/utils/analytics-failure-reason"
 import { getBuiltInAiModelId } from "@/utils/constants/provider-ids"
 import { logInAction, upgradeAction } from "@/utils/error-action"
 import { extractAISDKErrorMessage } from "@/utils/error/extract-message"
+import { getAnalyticsFeatureForHostedFeature } from "@/utils/hosted-ai/analytics-feature"
 import {
   chooseHostedAiModelAction,
   getHostedAiModelBusyMessage,
@@ -506,13 +507,19 @@ function createHostedAiModelUnavailableError(
  * subscriber there, so the message stands alone. A payload that fails to parse
  * still offers it — nearly everyone who hits a wall is below Ultra.
  */
-function getHostedAiQuotaExhaustedAction(error: unknown): ErrorAction | undefined {
+function getHostedAiQuotaExhaustedAction(
+  error: unknown,
+  context: HostedAiErrorContext,
+): ErrorAction | undefined {
   const parsed = HostedAiQuotaExhaustedDataSchema.safeParse(
     isRecord(error) ? error.data : undefined,
   )
   return parsed.success && parsed.data.policyId === "ultra-weekly-v1"
     ? undefined
-    : upgradeAction("extension_quota_exhausted")
+    : upgradeAction(
+        "extension_quota_exhausted",
+        context.feature && getAnalyticsFeatureForHostedFeature(context.feature),
+      )
 }
 
 /**
@@ -533,6 +540,8 @@ function getHostedAiTierRestrictedMessage(error: unknown): string {
 interface HostedAiErrorContext {
   model?: string
   models: HostedAiModelCatalog
+  /** The feature the request bills against; an upgrade link names it. */
+  feature?: HostedAiFeature
 }
 
 const NO_HOSTED_AI_ERROR_CONTEXT: HostedAiErrorContext = { models: null }
@@ -567,7 +576,7 @@ function normalizeHostedAiError(
         new BackgroundStreamError(
           "HOSTED_AI_QUOTA_EXHAUSTED",
           i18n.t("hostedAi.availability.quotaExhausted"),
-          { cause: error, action: getHostedAiQuotaExhaustedAction(error) },
+          { cause: error, action: getHostedAiQuotaExhaustedAction(error, context) },
         ),
         { isRetryable: false, kind: "access-denied" },
       )
@@ -660,7 +669,7 @@ async function resolveHostedModelRequest(
       modelTier: model?.tier ?? "normal",
       ...(reasoning !== undefined && { reasoning }),
     },
-    errorContext: { model: modelId, models },
+    errorContext: { model: modelId, models, feature },
   }
 }
 

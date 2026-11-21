@@ -2,7 +2,7 @@ import type { ReactNode } from "react"
 import type { SelectionSession } from "../selection-toolbar/atoms"
 import type { AnalyticsSurface } from "@/types/analytics"
 import type { AnnotateFailure, AnnotationController } from "@/utils/annotate"
-import { useAtom, useAtomValue, useSetAtom } from "jotai"
+import { useAtom, useAtomValue, useSetAtom, useStore } from "jotai"
 import {
   createContext,
   use,
@@ -25,6 +25,7 @@ import {
   getAnnotationShortcut,
   MAX_ANNOTATION_TEXT_LENGTH,
 } from "@/utils/constants/selection"
+import { promptForBuiltInAiRefusal } from "@/utils/content-runtime/built-in-ai-prompt"
 import { prepareTranslationText } from "@/utils/host/translate/text-preparation"
 import { i18n } from "@/utils/i18n"
 import { toSelectionPromptContext } from "@/utils/prompts/selection-context"
@@ -87,8 +88,11 @@ const EMPTY: never[] = []
 // toolbar's pen, its key, or annotation mode. The meaning comes from the same
 // translation the translate button would show, on the same provider.
 function useAnnotationController(): AnnotationContextValue {
+  const store = useStore()
   const selectionToolbar = useAtomValue(configFieldsAtomMap.selectionToolbar)
-  const translateRequest = useAtomValue(selectionToolbarTranslateRequestAtom)
+  // Subscribed for the re-render; `annotate` reads the store itself, so a retry right
+  // after a provider switch runs on the new provider.
+  useAtomValue(selectionToolbarTranslateRequestAtom)
   const [mode, setModeState] = useAtom(annotationModeAtom)
   const setIsSelectionToolbarOpen = useSetAtom(isSelectionToolbarOpenAtom)
   const enabled = selectionToolbar.enabled && selectionToolbar.annotation.enabled
@@ -168,7 +172,11 @@ function useAnnotationController(): AnnotationContextValue {
   )
 
   const annotate = useCallback(
-    (session: SelectionSession | null, surface: AnnotateSurface): boolean => {
+    function annotateSelection(
+      session: SelectionSession | null,
+      surface: AnnotateSurface,
+    ): boolean {
+      const translateRequest = store.get(selectionToolbarTranslateRequestAtom)
       const snapshot = session?.selectionSnapshot
       if (!snapshot || snapshot.text === "") {
         warn("annotation.noTextSelected")
@@ -271,11 +279,24 @@ function useAnnotationController(): AnnotationContextValue {
           inFlight.current.delete(record.id)
           if (isAbortError(error)) return
           controller.remove(record.id)
-          const message = error instanceof Error && error.message ? error.message : ""
-          toastManager.add({
-            type: "error",
-            title: i18n.t("annotation.failed"),
-            ...(message ? { description: message } : {}),
+          // A guest is asked to log in and a spent pool to upgrade; either can switch
+          // selection translation, whose provider annotation runs on, to machine
+          // translation, and the word is annotated again.
+          void promptForBuiltInAiRefusal(error, {
+            feature: "selectionTranslation",
+            analyticsFeature: ANALYTICS_FEATURE.WORD_ANNOTATION,
+            trigger: "user",
+            retry: () => {
+              annotateSelection(session, surface)
+            },
+          }).then((prompted) => {
+            if (prompted) return
+            const message = error instanceof Error && error.message ? error.message : ""
+            toastManager.add({
+              type: "error",
+              title: i18n.t("annotation.failed"),
+              ...(message ? { description: message } : {}),
+            })
           })
           void trackFeatureUsed({
             ...analyticsContext,
@@ -287,7 +308,7 @@ function useAnnotationController(): AnnotationContextValue {
         })
       return true
     },
-    [getController, translateRequest],
+    [getController, store],
   )
 
   // The key annotates like the pen; with nothing selected it lets the page

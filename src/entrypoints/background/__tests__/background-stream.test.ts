@@ -479,12 +479,50 @@ describe("background-stream", () => {
         message: "hostedAi.availability.quotaExhausted",
         action: {
           label: "action.upgrade",
-          url: new URL("/pricing?entry=extension_quota_exhausted", env.WXT_WEBSITE_URL).toString(),
+          // Named after the feature that ran dry, for the website's attribution.
+          url: new URL(
+            "/pricing?entry=extension_quota_exhausted&feature=custom_ai_action",
+            env.WXT_WEBSITE_URL,
+          ).toString(),
         },
         // Classified in the background, where the hosted-AI error code still exists.
         reason: "quota_exceeded",
       },
     })
+  })
+
+  it("names the feature a hosted text request bills against in its upgrade link", async () => {
+    const quotaExhausted = () =>
+      Object.assign(new Error("Built-in AI credit exhausted"), {
+        code: "HOSTED_AI_QUOTA_EXHAUSTED",
+        status: 429,
+        data: { modelTier: "normal", policyId: "pro-weekly-v2", usedPercent: 100, resetAt: null },
+      })
+    const { runStreamTextInBackground } = await import("../background-stream")
+    const upgradeUrlFor = async (hostedFeature: "pageTranslation" | "selectionTranslation") => {
+      try {
+        await runStreamTextInBackground({
+          providerKind: "system",
+          hostedFeature,
+          providerId: "read-frog-ai:gpt-6-luna",
+          requestId: "123e4567-e89b-42d3-a456-426614174031",
+          instructions: "Translate text",
+          prompt: "Hello world",
+        })
+      } catch (error) {
+        return new URL((error as { action: { url: string } }).action.url)
+      }
+      throw new Error("expected the request to be refused")
+    }
+
+    hostedStreamTextMock.mockRejectedValueOnce(quotaExhausted())
+    const pageUrl = await upgradeUrlFor("pageTranslation")
+    hostedSelectionStreamTextMock.mockRejectedValueOnce(quotaExhausted())
+    const selectionUrl = await upgradeUrlFor("selectionTranslation")
+
+    expect(pageUrl.searchParams.get("entry")).toBe("extension_quota_exhausted")
+    expect(pageUrl.searchParams.get("feature")).toBe("page_translation")
+    expect(selectionUrl.searchParams.get("feature")).toBe("selection_translation")
   })
 
   it("offers no upgrade when the Ultra pool itself runs dry", async () => {

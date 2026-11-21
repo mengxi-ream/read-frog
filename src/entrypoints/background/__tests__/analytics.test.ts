@@ -813,6 +813,80 @@ describe("background analytics", () => {
     expect(posthogCaptureMock).not.toHaveBeenCalled()
   })
 
+  it("records every Built-in AI prompt and what was done about it, without the daily cache", async () => {
+    mockEnabledAnalyticsStorage()
+    const { cache } = createMemoryFeatureUsageCache()
+    const { captureBuiltInAiPromptEventInBackground } = createAnalytics({
+      featureUsageCache: cache,
+    })
+
+    const shown = {
+      event: "built_in_ai_prompt_shown",
+      properties: {
+        feature: "video_subtitles",
+        kind: "upgrade",
+        presentation: "dialog",
+        trigger: "auto",
+      },
+    } as const
+    await captureBuiltInAiPromptEventInBackground(shown)
+    await captureBuiltInAiPromptEventInBackground(shown)
+    await captureBuiltInAiPromptEventInBackground({
+      event: "built_in_ai_prompt_action",
+      properties: { feature: "video_subtitles", kind: "upgrade", action: "machine_translation" },
+    })
+
+    expect(posthogCaptureMock.mock.calls).toEqual([
+      ["built_in_ai_prompt_shown", shown.properties],
+      ["built_in_ai_prompt_shown", shown.properties],
+      [
+        "built_in_ai_prompt_action",
+        { feature: "video_subtitles", kind: "upgrade", action: "machine_translation" },
+      ],
+    ])
+    expect(cache.getLastReportedDay).not.toHaveBeenCalled()
+  })
+
+  it("drops a malformed Built-in AI prompt event and any property it does not define", async () => {
+    mockEnabledAnalyticsStorage()
+    const { captureBuiltInAiPromptEventInBackground } = createAnalytics()
+
+    await captureBuiltInAiPromptEventInBackground({
+      event: "built_in_ai_prompt_shown",
+      properties: {
+        feature: "page_translation",
+        kind: "log_in",
+        presentation: "banner",
+        trigger: "user",
+      },
+    } as never)
+    await captureBuiltInAiPromptEventInBackground({
+      event: "built_in_ai_prompt_action",
+      properties: { feature: "page_translation", kind: "upgrade", action: "upgrade", url: "x" },
+    } as never)
+
+    expect(posthogCaptureMock.mock.calls).toEqual([
+      [
+        "built_in_ai_prompt_action",
+        { feature: "page_translation", kind: "upgrade", action: "upgrade" },
+      ],
+    ])
+    expect(loggerWarnMock).toHaveBeenCalledWith("Dropped an incomplete Built-in AI prompt event")
+  })
+
+  it("does not record Built-in AI prompts when analytics is disabled", async () => {
+    storageGetItemMock.mockResolvedValue(false)
+
+    const { captureBuiltInAiPromptEventInBackground } = createAnalytics()
+    await captureBuiltInAiPromptEventInBackground({
+      event: "built_in_ai_prompt_action",
+      properties: { feature: "page_translation", kind: "upgrade", action: "dismissed" },
+    })
+
+    expect(posthogInitMock).not.toHaveBeenCalled()
+    expect(posthogCaptureMock).not.toHaveBeenCalled()
+  })
+
   it("does not write feature cache state when analytics is disabled", async () => {
     storageGetItemMock.mockResolvedValueOnce(false)
     const { cache } = createMemoryFeatureUsageCache()

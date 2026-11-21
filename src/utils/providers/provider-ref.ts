@@ -13,7 +13,8 @@ import type {
   HostedAiUnavailableReason,
 } from "@/utils/hosted-ai/types"
 import { isLLMProviderConfig } from "@/types/config/provider"
-import { logInAction } from "@/utils/error-action"
+import { logInAction, upgradeAction } from "@/utils/error-action"
+import { getAnalyticsFeatureForHostedFeature } from "@/utils/hosted-ai/analytics-feature"
 import {
   chooseHostedAiModelAction,
   getHostedAiModelUnavailableMessage,
@@ -29,6 +30,7 @@ import {
   getHostedAiModelVerdict,
   getHostedAiTierDescription,
 } from "@/utils/hosted-ai/status"
+import { getBuiltInAiUpgradePlan } from "@/utils/hosted-ai/upgrade-plan"
 import { i18n } from "@/utils/i18n"
 import { sendMessage } from "@/utils/message"
 import { resolveProviderRefForCapability } from "./provider-registry"
@@ -259,6 +261,27 @@ function createModelUnavailableError(
 }
 
 /**
+ * What someone refused by the server's status can do about it: a guest can log in, and an
+ * account whose pool is spent can upgrade, unless it is on Ultra, which has nothing above
+ * it. The upgrade link names the feature that ran dry.
+ */
+async function getHostedAiRefusalAction(
+  reason: HostedAiUnavailableReason | undefined,
+  feature: HostedAiFeature,
+): Promise<ErrorAction | undefined> {
+  switch (reason) {
+    case "authentication_required":
+      return logInAction()
+    case "quota_exhausted":
+      return (await getBuiltInAiUpgradePlan()) === null
+        ? undefined
+        : upgradeAction("extension_quota_exhausted", getAnalyticsFeatureForHostedFeature(feature))
+    default:
+      return undefined
+  }
+}
+
+/**
  * The model as the extension last knew it, when status could not say: the
  * stored list keeps cache identities stable through a status outage.
  */
@@ -308,7 +331,7 @@ export async function serializeProviderRef(
       getHostedAiTierDescription(verdict.tierStatus, {
         credit: getHostedAiCreditForFeature(status, feature),
       }) ?? i18n.t("hostedAi.availability.serviceUnavailable"),
-      reason === "authentication_required" ? logInAction() : undefined,
+      await getHostedAiRefusalAction(reason, feature),
       reason,
     )
   }
@@ -339,6 +362,8 @@ export type ProviderAvailability<Ref extends SerializableProviderRef = Serializa
       message: string
       action?: ErrorAction
       reason?: HostedAiUnavailableReason
+      /** The refusal itself, for a caller that hands it on, as to the Built-in AI prompt. */
+      error: HostedAiProviderUnavailableError
     }
 
 export async function checkProviderAvailability(
@@ -362,6 +387,7 @@ export async function checkProviderAvailability(
         message: error.message,
         action: error.action,
         reason: error.reason,
+        error,
       }
     }
     throw error

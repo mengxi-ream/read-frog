@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/base-ui/button"
 import { Progress, ProgressLabel } from "@/components/ui/base-ui/progress"
 import { Skeleton } from "@/components/ui/base-ui/skeleton"
 import { openLogIn } from "@/components/user-account-menu/shared"
+import { ANALYTICS_FEATURE } from "@/types/analytics"
 import { authClient } from "@/utils/auth/auth-client"
 import { pricingUrl } from "@/utils/error-action"
 import { i18n } from "@/utils/i18n"
@@ -143,7 +144,12 @@ function QuotaUpgradeGuide() {
       <Button
         variant="outline"
         size="sm"
-        onClick={() => window.open(pricingUrl("extension_video_quota"), "_blank")}
+        onClick={() =>
+          window.open(
+            pricingUrl("extension_video_quota", ANALYTICS_FEATURE.VIDEO_SUBTITLES),
+            "_blank",
+          )
+        }
       >
         {i18n.t("action.upgrade")}
       </Button>

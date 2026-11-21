@@ -96,3 +96,21 @@ export function onPageTranslationRequestFailed(listener: (error: unknown) => voi
 export function reportPageTranslationRequestFailed(error: unknown): void {
   requestFailureListeners.forEach((listener) => listener(error))
 }
+
+/** Failures a page-translation session has answered for; see `claimPageTranslationRequestFailure`. */
+const claimedRequestFailures = new WeakSet<object>()
+
+/**
+ * Marks a reported failure as one the page-translation session answers for, as with the
+ * one upgrade prompt it shows when Built-in AI's pool runs dry. Hover translation shares
+ * the session's reports and stays quiet about a failure the session claimed.
+ */
+export function claimPageTranslationRequestFailure(error: unknown): void {
+  if (typeof error === "object" && error !== null) {
+    claimedRequestFailures.add(error)
+  }
+}
+
+export function isPageTranslationRequestFailureClaimed(error: unknown): boolean {
+  return typeof error === "object" && error !== null && claimedRequestFailures.has(error)
+}

@@ -28,7 +28,7 @@ const mocks = vi.hoisted(() => ({
   buildSubtitlesSummaryContextHash: vi.fn<(...args: any[]) => any>(() => null),
   fetchSubtitlesSummary: vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined),
   translateSubtitles: vi.fn<(...args: any[]) => any>(),
-  resolveSubtitlesProviderRef: vi.fn<(...args: any[]) => any>(),
+  resolveSubtitlesProvider: vi.fn<(...args: any[]) => any>(),
   showSubtitlesErrorToast: vi.fn<(...args: any[]) => any>(),
   showAiSubtitlesWallToast: vi.fn<(...args: any[]) => any>(),
   waitForElement: vi.fn<(...args: any[]) => any>(),
@@ -57,7 +57,7 @@ vi.mock("@/utils/config/storage", async (importOriginal) => {
 
 vi.mock("@/utils/subtitles/processor/translator", () => ({
   buildSubtitlesSummaryContextHash: mocks.buildSubtitlesSummaryContextHash,
-  resolveSubtitlesProviderRef: mocks.resolveSubtitlesProviderRef,
+  resolveSubtitlesProvider: mocks.resolveSubtitlesProvider,
   fetchSubtitlesSummary: mocks.fetchSubtitlesSummary,
   getSubtitlesPassLimits: () => ({ maxItemsPerBatch: 5, maxCharactersPerBatch: Infinity }),
   translateSubtitles: mocks.translateSubtitles,
@@ -634,7 +634,7 @@ describe("universalVideoAdapter", () => {
       .spyOn(TranslationCoordinator.prototype, "start")
       .mockImplementation(() => undefined)
     const provider = Promise.withResolvers<null>()
-    mocks.resolveSubtitlesProviderRef.mockReturnValueOnce(provider.promise)
+    mocks.resolveSubtitlesProvider.mockReturnValueOnce(provider.promise)
 
     const processing = (adapter as any).processTranslatedSubtitles({
       videoSubtitles: { aiSegmentation: false },
@@ -691,12 +691,12 @@ describe("universalVideoAdapter", () => {
       .spyOn(TranslationCoordinator.prototype, "start")
       .mockImplementation(() => undefined)
     const firstProvider = Promise.withResolvers<null>()
-    mocks.resolveSubtitlesProviderRef
+    mocks.resolveSubtitlesProvider
       .mockReturnValueOnce(firstProvider.promise)
       .mockResolvedValueOnce(null)
 
     const first = (adapter as any).switchSubtitlesFetcher(SUBTITLES_SOURCE.NATIVE)
-    await vi.waitFor(() => expect(mocks.resolveSubtitlesProviderRef).toHaveBeenCalledOnce())
+    await vi.waitFor(() => expect(mocks.resolveSubtitlesProvider).toHaveBeenCalledOnce())
     await (adapter as any).switchSubtitlesFetcher(SUBTITLES_SOURCE.NATIVE)
     firstProvider.resolve(null)
     await first
@@ -1147,7 +1147,7 @@ describe("universalVideoAdapter", () => {
     // Once, not permanently: clearAllMocks between tests drops calls but keeps
     // implementations, so a never-settling mockReturnValue would hang the next
     // test instead of this one.
-    mocks.resolveSubtitlesProviderRef.mockReturnValueOnce(new Promise(() => {}))
+    mocks.resolveSubtitlesProvider.mockReturnValueOnce(new Promise(() => {}))
 
     void (adapter as any).processTranslatedSubtitles()
     await Promise.resolve()

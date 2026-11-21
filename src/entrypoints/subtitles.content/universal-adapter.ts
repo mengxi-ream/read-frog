@@ -1,5 +1,9 @@
 import type { ControlsConfig, PlatformConfig } from "@/entrypoints/subtitles.content/platforms"
-import type { FeatureUsageContext, SurfaceByFeature } from "@/types/analytics"
+import type {
+  BuiltInAiPromptTrigger,
+  FeatureUsageContext,
+  SurfaceByFeature,
+} from "@/types/analytics"
 import type { Config } from "@/types/config/config"
 import type { SubtitlesPlatform } from "@/types/config/subtitles"
 import type { SubtitlesSource } from "@/utils/constants/subtitles"
@@ -27,11 +31,12 @@ import { i18n } from "@/utils/i18n"
 import { canProviderRefGenerateText } from "@/utils/providers/provider-ref"
 import { resolveProviderRefForCapability } from "@/utils/providers/provider-registry"
 import { removeReactShadowHost } from "@/utils/react-shadow-host/create-shadow-host"
+import { promptForSubtitlesRefusal } from "@/utils/subtitles/built-in-ai-refusal"
 import { NoSubtitlesError, ToastSubtitlesError, VideoNotFoundError } from "@/utils/subtitles/errors"
 import { optimizeSubtitles } from "@/utils/subtitles/processor/optimizer"
 import {
   buildSubtitlesSummaryContextHash,
-  resolveSubtitlesProviderRef,
+  resolveSubtitlesProvider,
   fetchSubtitlesSummary,
   getSubtitlesPassLimits,
 } from "@/utils/subtitles/processor/translator"
@@ -156,6 +161,8 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
   private destroyed = false
   // Bumped by a leave and a navigation reset, so an init still waiting on the old player stops.
   private playerGeneration = 0
+  // Whether the running translation was asked for or started on its own; analytics only.
+  private translationTrigger: BuiltInAiPromptTrigger = "user"
 
   get embedded() {
     return this.config.embedded
@@ -953,6 +960,10 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
     let providerAnalytics = UNKNOWN_FEATURE_PROVIDER
     let targetLanguage: Config["language"]["targetCode"] | undefined
     const operationId = this.switchOperationId
+    if (analyticsContext) {
+      this.translationTrigger =
+        analyticsContext.surface === ANALYTICS_SURFACE.VIDEO_SUBTITLES_AUTO ? "auto" : "user"
+    }
     this.adOverlappedLoad = subtitlesStore.get(adPlayingAtom)
     // Only the caption load is what an ad can break; a failure after it is the translation's own.
     let loadingSource = false
@@ -1173,8 +1184,10 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
     // and the summary are generations, so a translate-only provider keeps the
     // rule-based recut and skips the summary without a doomed prompt attempt
     // per look-ahead window.
+    // Quiet: why lines can't be translated is the coordinator's to say, once a cue asks.
     const operationId = this.switchOperationId
-    const providerRef = config ? await resolveSubtitlesProviderRef(config, "lineTranslation") : null
+    const resolution = config ? await resolveSubtitlesProvider(config, "lineTranslation") : null
+    const providerRef = resolution?.status === "ok" ? resolution.ref : null
     // Superseded: the session stays unclaimed, or a newer start would resume it untranslated.
     if (this.isSuperseded(operationId)) return
     this.sessionProcessedFragments = sessionFragments
@@ -1222,6 +1235,13 @@ export class UniversalVideoAdapter implements SubtitlesProvidersAdapter {
       onTranslated: (fragments) => scheduler.supplementSubtitles(fragments),
       onStateChange: (state, data) => scheduler.setState(state, data),
       batchLimits: config ? getSubtitlesPassLimits(config) : undefined,
+      onBuiltInAiRefused: (error) => {
+        promptForSubtitlesRefusal(error, {
+          videoKey: this.config.getVideoId?.() ?? window.location.href,
+          trigger: this.translationTrigger,
+          retry: () => this.translationCoordinator?.retryFailed(),
+        })
+      },
     })
     this.translationCoordinator.start(videoContext)
     // The hash and the summary must share one ref — the promptable one — or

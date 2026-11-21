@@ -1,11 +1,18 @@
 import type {
   AnalyticsFeature,
+  BuiltInAiPromptActionEventProperties,
+  BuiltInAiPromptEvent,
+  BuiltInAiPromptShownEventProperties,
   FeatureUsageContext,
   FeatureUsedEventProperties,
   SurfaceByFeature,
 } from "@/types/analytics"
 import { classifyFailureReason } from "@/utils/analytics-failure-reason"
-import { ANALYTICS_FEATURE_USED_EVENT } from "@/utils/constants/analytics"
+import {
+  ANALYTICS_BUILT_IN_AI_PROMPT_ACTION_EVENT,
+  ANALYTICS_BUILT_IN_AI_PROMPT_SHOWN_EVENT,
+  ANALYTICS_FEATURE_USED_EVENT,
+} from "@/utils/constants/analytics"
 import { createLogger } from "@/utils/logging/logger"
 import { sendMessage } from "@/utils/message"
 
@@ -74,4 +81,26 @@ export async function trackFeatureAttempt<T>(
     })
     throw error
   }
+}
+
+async function trackBuiltInAiPromptEvent(event: BuiltInAiPromptEvent): Promise<void> {
+  try {
+    await sendMessage("trackBuiltInAiPromptEvent", event)
+  } catch (error) {
+    log.warn(`Failed to track ${event.event}`, { error })
+  }
+}
+
+/** Once per prompt: how many people hit the wall, by feature, and how it was put to them. */
+export function trackBuiltInAiPromptShown(
+  properties: BuiltInAiPromptShownEventProperties,
+): Promise<void> {
+  return trackBuiltInAiPromptEvent({ event: ANALYTICS_BUILT_IN_AI_PROMPT_SHOWN_EVENT, properties })
+}
+
+/** What they did about it: upgrade, log in, switch to machine translation, or close it. */
+export function trackBuiltInAiPromptAction(
+  properties: BuiltInAiPromptActionEventProperties,
+): Promise<void> {
+  return trackBuiltInAiPromptEvent({ event: ANALYTICS_BUILT_IN_AI_PROMPT_ACTION_EVENT, properties })
 }

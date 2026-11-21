@@ -19,6 +19,7 @@ import { trackGlossaryUsed } from "@/utils/glossary/analytics"
 import { Sha256Hex } from "@/utils/hash"
 import { prepareTranslationText } from "@/utils/host/translate/text-preparation"
 import { normalizePromptContextValue } from "@/utils/host/translate/translate-text"
+import { getBuiltInAiRefusalKind } from "@/utils/hosted-ai/refusal"
 import { i18n } from "@/utils/i18n"
 import { createLogger } from "@/utils/logging/logger"
 import { sendMessage } from "@/utils/message"
@@ -234,7 +235,12 @@ export type SubtitlesProviderResolution<
   Ref extends SerializableProviderRef = SerializableProviderRef,
 > =
   | { status: "ok"; ref: Ref }
-  | { status: "hostedUnavailable"; message: string; action?: ErrorAction }
+  | {
+      status: "hostedUnavailable"
+      message: string
+      action?: ErrorAction
+      error: HostedAiProviderUnavailableError
+    }
   | { status: "notPromptable" }
   | { status: "none" }
 
@@ -278,7 +284,12 @@ export async function resolveSubtitlesProvider(
     return { status: "ok", ref: await serializeProviderRef(resolved, SUBTITLES_TASK_ROUTE[task]) }
   } catch (error) {
     if (error instanceof HostedAiProviderUnavailableError) {
-      return { status: "hostedUnavailable", message: error.message, action: error.action }
+      return {
+        status: "hostedUnavailable",
+        message: error.message,
+        action: error.action,
+        error,
+      }
     }
     // Nothing else is expected to throw here (serializeProviderRef already
     // fails open on an unreachable status endpoint). Keep degrading rather
@@ -306,7 +317,13 @@ export async function resolveSubtitlesProviderRef(
   config: Config,
   task: SubtitlesTask,
 ): Promise<SerializableProviderRef | null> {
-  const resolution = await resolveSubtitlesProvider(config, task)
+  return announceSubtitlesProviderResolution(await resolveSubtitlesProvider(config, task))
+}
+
+/** The ref a resolution gave, or null after saying why there is none where that matters. */
+function announceSubtitlesProviderResolution(
+  resolution: SubtitlesProviderResolution,
+): SerializableProviderRef | null {
   if (resolution.status === "hostedUnavailable") {
     // Silence here is indistinguishable from "these lines have no translation".
     const { action } = resolution
@@ -314,7 +331,7 @@ export async function resolveSubtitlesProviderRef(
       type: "error",
       title: resolution.message,
       id: SUBTITLES_HOSTED_UNAVAILABLE_TOAST_ID,
-      // A guest's refusal carries a log-in button.
+      // A guest's refusal carries a log-in button, and a spent pool below Ultra an upgrade.
       ...(action && {
         actionProps: {
           children: action.label,
@@ -398,7 +415,13 @@ export async function translateSubtitles(
     return fragments.map((f) => ({ ...f, translation: "" }))
   }
 
-  const providerRef = await resolveSubtitlesProviderRef(config, "lineTranslation")
+  // A guest or a spent pool is thrown rather than blanked: the cues stay untranslated
+  // instead of passing as translated, and the caller asks to log in or upgrade.
+  const resolution = await resolveSubtitlesProvider(config, "lineTranslation")
+  if (resolution.status === "hostedUnavailable" && getBuiltInAiRefusalKind(resolution.error)) {
+    throw resolution.error
+  }
+  const providerRef = announceSubtitlesProviderResolution(resolution)
   if (!providerRef) {
     return fragments.map((f) => ({ ...f, translation: "" }))
   }
@@ -419,10 +442,14 @@ export async function translateSubtitles(
 
   const results = await Promise.allSettled(translationPromises)
 
-  // If all translations failed, throw with friendly error message
-  const allRejected = results.every((r): r is PromiseRejectedResult => r.status === "rejected")
-  if (allRejected && results.length) {
-    throw new Error(toFriendlyErrorMessage(results[0]!.reason))
+  // If all translations failed, throw with friendly error message. So does a batch any
+  // cue of which Built-in AI refused, so it is tried again rather than kept as blank.
+  // The cause keeps the error's code for whoever classifies it.
+  const rejections = results.filter((r): r is PromiseRejectedResult => r.status === "rejected")
+  const refusal = rejections.find((r) => getBuiltInAiRefusalKind(r.reason))
+  if (refusal || (rejections.length === results.length && results.length)) {
+    const reason = (refusal ?? rejections[0]!).reason
+    throw new Error(toFriendlyErrorMessage(reason), { cause: reason })
   }
 
   return fragments.map((fragment, index) => {

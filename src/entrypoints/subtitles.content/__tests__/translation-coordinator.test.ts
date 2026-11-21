@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest"
+import { afterEach, describe, expect, it, vi } from "vitest"
 import { storage } from "#imports"
 import { CONFIG_STORAGE_KEY, DEFAULT_CONFIG } from "@/utils/constants/config"
 import { DEFAULT_PROVIDER_CONFIG } from "@/utils/constants/providers"
@@ -406,5 +406,140 @@ describe("translation coordinator loading state", () => {
 
     spy.mockRestore()
     configSpy.mockRestore()
+  })
+})
+
+describe("translation coordinator when Built-in AI refuses", () => {
+  let restoreSetup: (() => void) | null = null
+
+  afterEach(() => {
+    restoreSetup?.()
+    restoreSetup = null
+  })
+  /** The server's refusal, relayed from the background inside translateSubtitles' error. */
+  function spentPoolError() {
+    return new Error("Built-in AI quota used up", {
+      cause: Object.assign(new Error("x"), { code: "HOSTED_AI_QUOTA_EXHAUSTED" }),
+    })
+  }
+
+  function createVideo() {
+    return {
+      currentTime: 0,
+      addEventListener: vi.fn<(...args: any[]) => any>(),
+      removeEventListener: vi.fn<(...args: any[]) => any>(),
+    }
+  }
+
+  async function flush() {
+    await new Promise((resolve) => setTimeout(resolve, 0))
+  }
+
+  async function setup() {
+    const fragments = Array.from({ length: 20 }, (_, i) => ({
+      text: `line ${i}`,
+      start: i * 2000,
+      end: i * 2000 + 2000,
+    }))
+    const translator = await import("@/utils/subtitles/processor/translator")
+    const translateSpy = vi
+      .spyOn(translator, "translateSubtitles")
+      .mockRejectedValue(spentPoolError())
+    const configModule = await import("@/utils/config/storage")
+    const configSpy = vi.spyOn(configModule, "getLocalConfig").mockResolvedValue(DEFAULT_CONFIG)
+    const video = createVideo()
+    const onBuiltInAiRefused = vi.fn<(error: unknown) => void>()
+    const onStateChange = vi.fn<(...args: any[]) => any>()
+    const coordinator = new TranslationCoordinator({
+      getFragments: () => fragments,
+      getVideoElement: () => video as unknown as HTMLVideoElement,
+      getCurrentState: () => "idle",
+      segmentationPipeline: null,
+      onTranslated: vi.fn<(...args: any[]) => any>(),
+      onStateChange,
+      onBuiltInAiRefused,
+      batchLimits: { maxItemsPerBatch: 2, maxCharactersPerBatch: 1000 },
+    })
+    restoreSetup = () => {
+      coordinator.stop()
+      translateSpy.mockRestore()
+      configSpy.mockRestore()
+    }
+    return { coordinator, video, translateSpy, onBuiltInAiRefused, onStateChange }
+  }
+
+  it("holds translation after a refusal instead of sending batch after batch", async () => {
+    const { coordinator, video, translateSpy, onBuiltInAiRefused, onStateChange } = await setup()
+
+    coordinator.start()
+    await vi.waitFor(() => expect(onBuiltInAiRefused).toHaveBeenCalledOnce())
+    for (let seconds = 1; seconds <= 10; seconds += 1) {
+      video.currentTime = seconds
+      coordinator.requestTick()
+      await flush()
+    }
+
+    expect(translateSpy).toHaveBeenCalledOnce()
+    expect(onBuiltInAiRefused).toHaveBeenCalledOnce()
+    // Held, no cue is on its way: the player shows no endless spinner.
+    const states = onStateChange.mock.calls.map(([state]) => state)
+    expect(states.slice(states.indexOf("error"))).not.toContain("loading")
+  })
+
+  it("translates the refused cues again on retry, as after switching to machine translation", async () => {
+    const { coordinator, translateSpy, onBuiltInAiRefused } = await setup()
+
+    coordinator.start()
+    await vi.waitFor(() => expect(onBuiltInAiRefused).toHaveBeenCalledOnce())
+    const refusedBatch = translateSpy.mock.calls[0]![0]
+
+    translateSpy.mockImplementation((batch: any) => Promise.resolve(batch))
+    coordinator.retryFailed()
+
+    await vi.waitFor(() => expect(translateSpy.mock.calls.length).toBeGreaterThanOrEqual(2))
+    expect(translateSpy.mock.calls[1]![0]).toEqual(refusedBatch)
+  })
+
+  it("translates the refused cues again when the subtitles provider changes", async () => {
+    await storage.setItem(`local:${CONFIG_STORAGE_KEY}`, DEFAULT_CONFIG)
+    const { coordinator, translateSpy, onBuiltInAiRefused } = await setup()
+
+    coordinator.start()
+    await vi.waitFor(() => expect(onBuiltInAiRefused).toHaveBeenCalledOnce())
+
+    // Another setting changes: still held.
+    await storage.setItem(`local:${CONFIG_STORAGE_KEY}`, {
+      ...DEFAULT_CONFIG,
+      videoSubtitles: {
+        ...DEFAULT_CONFIG.videoSubtitles,
+        batchQueueConfig: { maxItemsPerBatch: 3, maxCharactersPerBatch: 1000 },
+      },
+    })
+    await flush()
+    expect(translateSpy).toHaveBeenCalledOnce()
+
+    translateSpy.mockImplementation((batch: any) => Promise.resolve(batch))
+    await storage.setItem(`local:${CONFIG_STORAGE_KEY}`, {
+      ...DEFAULT_CONFIG,
+      videoSubtitles: {
+        ...DEFAULT_CONFIG.videoSubtitles,
+        providerId: DEFAULT_PROVIDER_CONFIG.openai.id,
+      },
+    })
+
+    await vi.waitFor(() => expect(translateSpy.mock.calls.length).toBeGreaterThanOrEqual(2))
+  })
+
+  it("keeps going after a failure that is not a refusal", async () => {
+    const { coordinator, video, translateSpy, onBuiltInAiRefused } = await setup()
+    translateSpy.mockRejectedValue(new Error("Failed to fetch"))
+
+    coordinator.start()
+    await vi.waitFor(() => expect(translateSpy).toHaveBeenCalled())
+    video.currentTime = 5
+    coordinator.requestTick()
+    await vi.waitFor(() => expect(translateSpy.mock.calls.length).toBeGreaterThan(1))
+
+    expect(onBuiltInAiRefused).not.toHaveBeenCalled()
   })
 })

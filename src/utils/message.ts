@@ -1,6 +1,10 @@
 import type { LanguageTag } from "@read-frog/definitions"
 import type { GuideDictionaryNotebaseCompletionInput } from "./guide/dictionary-notebase"
-import type { FeatureUsageContext, FeatureUsedEventProperties } from "@/types/analytics"
+import type {
+  BuiltInAiPromptEvent,
+  FeatureUsageContext,
+  FeatureUsedEventProperties,
+} from "@/types/analytics"
 import type {
   BackgroundGenerateTextPayload,
   BackgroundGenerateTextResponse,
@@ -50,6 +54,9 @@ interface ProtocolMap {
   // The machine translator a guest can use instead of Built-in AI: Google where this
   // network reaches it, Microsoft otherwise. Probed in the background, once a session.
   getFreeTranslateProviderId: () => FreeTranslateProviderId
+  // Automatic page translation may ask to upgrade in a dialog once a browser session; the
+  // first ask gets true. Kept in the background: content scripts can't read session storage.
+  claimBuiltInAiAutoPrompt: () => boolean
   // glossary — the terms live in IndexedDB, which a content script cannot open,
   // so it asks the background once per page and compiles a matcher locally.
   // `url` says which page is asking; glossaries scoped to other sites are left
@@ -108,6 +115,7 @@ interface ProtocolMap {
   togglePageTranslationDiagnostics: () => void
   // analytics
   trackFeatureUsedEvent: (data: FeatureUsedEventProperties) => void
+  trackBuiltInAiPromptEvent: (data: BuiltInAiPromptEvent) => void
   // user guide
   pinStateChanged: (data: { isPinned: boolean }) => void
   getPinState: () => boolean

@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 
 import type { FeatureUsageContext } from "@/types/analytics"
+import { renderHook } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext } from "@/utils/analytics"
@@ -8,26 +9,32 @@ import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { DEFAULT_BUILT_IN_AI_PROVIDER_ID } from "@/utils/constants/provider-ids"
 import { GOOGLE_TRANSLATE_PROVIDER_ID } from "@/utils/constants/providers"
 import {
+  closeBuiltInAiPrompt,
+  useBuiltInAiPrompt,
+} from "@/utils/content-runtime/built-in-ai-prompt"
+import {
   getPageTranslationSessionId,
+  isPageTranslationRequestFailureClaimed,
   reportPageTranslationRequestFailed,
 } from "@/utils/host/translate/translation-session"
+import { HostedAiProviderUnavailableError } from "@/utils/providers/provider-ref"
 import { PageTranslationManager } from "../page-translation"
 
 const {
   mockCheckProviderAvailability,
+  mockClaimAutoPrompt,
   mockGetBuiltInAiUpgradePlan,
   mockGetLocalConfig,
   mockIsGuideStepUrl,
-  mockOpenBuiltInAiPrompt,
   mockSendMessage,
   mockToastAdd,
   mockValidateTranslationConfigAndToast,
 } = vi.hoisted(() => ({
   mockCheckProviderAvailability: vi.fn<(...args: any[]) => any>(),
+  mockClaimAutoPrompt: vi.fn<() => Promise<boolean>>(),
   mockGetBuiltInAiUpgradePlan: vi.fn<() => Promise<"free" | "pro" | null>>(),
   mockGetLocalConfig: vi.fn<(...args: any[]) => any>(),
   mockIsGuideStepUrl: vi.fn<(url: string) => boolean>(),
-  mockOpenBuiltInAiPrompt: vi.fn<(...args: any[]) => any>(),
   mockSendMessage: vi.fn<(...args: any[]) => any>(),
   mockToastAdd: vi.fn<(...args: any[]) => any>(),
   mockValidateTranslationConfigAndToast: vi.fn<(...args: any[]) => any>(),
@@ -50,9 +57,8 @@ vi.mock("@/utils/config/storage", () => ({
   getLocalConfig: mockGetLocalConfig,
 }))
 
-vi.mock("@/utils/content-runtime/built-in-ai-prompt", () => ({
+vi.mock("@/utils/hosted-ai/upgrade-plan", () => ({
   getBuiltInAiUpgradePlan: mockGetBuiltInAiUpgradePlan,
-  openBuiltInAiPrompt: mockOpenBuiltInAiPrompt,
 }))
 
 vi.mock("@/utils/guide/guide-url", () => ({
@@ -103,17 +109,29 @@ const GOOGLE_CONFIG = {
   },
 }
 
-const GUEST_REFUSAL = {
-  available: false,
-  message: "hostedAi.availability.authenticationRequired",
-  reason: "authentication_required",
+function availabilityRefusal(
+  message: string,
+  reason: "authentication_required" | "quota_exhausted" | "service_unavailable",
+) {
+  return {
+    available: false,
+    message,
+    reason,
+    error: new HostedAiProviderUnavailableError({} as never, message, undefined, reason),
+  }
 }
 
-const SPENT_POOL_REFUSAL = {
-  available: false,
-  message: "hostedAi.availability.quotaExhausted",
-  reason: "quota_exhausted",
-}
+const GUEST_REFUSAL = availabilityRefusal(
+  "hostedAi.availability.authenticationRequired",
+  "authentication_required",
+)
+
+const SPENT_POOL_REFUSAL = availabilityRefusal(
+  "hostedAi.availability.quotaExhausted",
+  "quota_exhausted",
+)
+
+const OUTAGE_REFUSAL = availabilityRefusal("Built-in AI is down", "service_unavailable")
 
 /** What a paragraph's request rejects with once Built-in AI's pool is spent. */
 function spentPoolError() {
@@ -145,6 +163,25 @@ function inFrame() {
   vi.spyOn(window, "top", "get").mockReturnValue({} as Window)
 }
 
+/** The prompt the selection UI's dialog shows; this frame draws the dialog. */
+let dialog: { readonly current: ReturnType<typeof useBuiltInAiPrompt> }
+
+function shownEvents() {
+  return mockSendMessage.mock.calls
+    .filter(
+      ([type, event]) =>
+        type === "trackBuiltInAiPromptEvent" && event.event === "built_in_ai_prompt_shown",
+    )
+    .map(([, event]) => event.properties)
+}
+
+/** The refusal toast with the dialog's button, as opposed to a plain error toast. */
+function refusalToasts() {
+  return mockToastAdd.mock.calls
+    .map(([toast]) => toast)
+    .filter((toast) => toast.id === "built-in-ai-refusal-page_translation")
+}
+
 let managers: PageTranslationManager[] = []
 
 function createManager() {
@@ -162,20 +199,31 @@ beforeEach(() => {
   mockIsGuideStepUrl.mockReturnValue(false)
   mockValidateTranslationConfigAndToast.mockReturnValue(true)
   mockGetBuiltInAiUpgradePlan.mockResolvedValue("free")
-  mockSendMessage.mockImplementation(async (type: string) =>
-    type === "getFreeTranslateProviderId" ? GOOGLE_TRANSLATE_PROVIDER_ID : undefined,
-  )
+  mockClaimAutoPrompt.mockResolvedValue(true)
+  mockToastAdd.mockImplementation((toast: { id?: string }) => toast.id ?? "toast")
+  mockSendMessage.mockImplementation(async (type: string) => {
+    switch (type) {
+      case "getFreeTranslateProviderId":
+        return GOOGLE_TRANSLATE_PROVIDER_ID
+      case "claimBuiltInAiAutoPrompt":
+        return mockClaimAutoPrompt()
+      default:
+        return undefined
+    }
+  })
+  dialog = renderHook(() => useBuiltInAiPrompt()).result
 })
 
 afterEach(() => {
   // A session left running would keep listening for failures reported by the next test.
   managers.forEach((manager) => manager.stop())
   managers = []
+  closeBuiltInAiPrompt()
   vi.restoreAllMocks()
 })
 
 describe("page translation when Built-in AI refuses at the start", () => {
-  let refusal: typeof GUEST_REFUSAL
+  let refusal: ReturnType<typeof availabilityRefusal>
 
   beforeEach(() => {
     refusal = GUEST_REFUSAL
@@ -193,27 +241,52 @@ describe("page translation when Built-in AI refuses at the start", () => {
     expect(manager.isActive).toBe(false)
     expect(mockToastAdd).not.toHaveBeenCalled()
     expect(mockGetBuiltInAiUpgradePlan).not.toHaveBeenCalled()
-    expect(mockOpenBuiltInAiPrompt).toHaveBeenCalledWith({
-      kind: "logIn",
-      feature: "pageTranslation",
-      retry: expect.any(Function),
-    })
+    await vi.waitFor(() =>
+      expect(dialog.current).toEqual({
+        kind: "logIn",
+        feature: "pageTranslation",
+        analyticsFeature: "page_translation",
+        retry: expect.any(Function),
+      }),
+    )
+    expect(shownEvents()).toEqual([
+      { feature: "page_translation", kind: "log_in", presentation: "dialog", trigger: "user" },
+    ])
 
     // The dialog switched the config to the machine translator, then retries.
     mockGetLocalConfig.mockResolvedValue(GOOGLE_CONFIG)
-    mockOpenBuiltInAiPrompt.mock.calls[0]![0].retry()
+    dialog.current!.retry!()
     await vi.waitFor(() => expect(manager.isActive).toBe(true))
   })
 
-  it("keeps automatic translation to a toast", async () => {
+  it("keeps a guest's automatic translation to a toast with the log-in button", async () => {
     const manager = createManager()
     await manager.start(automaticStart())
 
-    expect(mockOpenBuiltInAiPrompt).not.toHaveBeenCalled()
-    expect(mockToastAdd).toHaveBeenCalledWith({
-      type: "error",
-      title: "hostedAi.availability.authenticationRequired",
-    })
+    expect(dialog.current).toBeNull()
+    // The once-a-session dialog is kept for a spent pool.
+    expect(mockClaimAutoPrompt).not.toHaveBeenCalled()
+    expect(refusalToasts()).toEqual([
+      expect.objectContaining({
+        type: "error",
+        title: "hostedAi.availability.authenticationRequired",
+        actionProps: expect.objectContaining({ children: "account.login" }),
+      }),
+    ])
+    expect(shownEvents()).toEqual([
+      { feature: "page_translation", kind: "log_in", presentation: "toast", trigger: "auto" },
+    ])
+  })
+
+  it("keeps any other refusal to a plain toast", async () => {
+    refusal = OUTAGE_REFUSAL
+
+    const manager = createManager()
+    await manager.start(popupClick())
+
+    expect(dialog.current).toBeNull()
+    expect(mockToastAdd).toHaveBeenCalledWith({ type: "error", title: "Built-in AI is down" })
+    expect(shownEvents()).toEqual([])
   })
 
   it("translates the website's guide with the free provider and leaves the config alone", async () => {
@@ -223,7 +296,7 @@ describe("page translation when Built-in AI refuses at the start", () => {
     await manager.start(popupClick())
 
     expect(manager.isActive).toBe(true)
-    expect(mockOpenBuiltInAiPrompt).not.toHaveBeenCalled()
+    expect(dialog.current).toBeNull()
     expect(mockCheckProviderAvailability).toHaveBeenCalledWith(
       expect.objectContaining({ id: GOOGLE_TRANSLATE_PROVIDER_ID }),
       "pageTranslation",
@@ -239,7 +312,7 @@ describe("page translation when Built-in AI refuses at the start", () => {
     // Off the guide, the next run follows the config again.
     mockIsGuideStepUrl.mockReturnValue(false)
     await manager.start(popupClick())
-    expect(mockOpenBuiltInAiPrompt).toHaveBeenCalledTimes(1)
+    await vi.waitFor(() => expect(dialog.current).toMatchObject({ kind: "logIn" }))
   })
 
   it.each(["free", "pro"] as const)(
@@ -253,53 +326,71 @@ describe("page translation when Built-in AI refuses at the start", () => {
 
       expect(manager.isActive).toBe(false)
       expect(mockToastAdd).not.toHaveBeenCalled()
-      expect(mockOpenBuiltInAiPrompt).toHaveBeenCalledOnce()
-      expect(mockOpenBuiltInAiPrompt).toHaveBeenCalledWith({
-        kind: "upgrade",
-        plan,
-        feature: "pageTranslation",
-        retry: expect.any(Function),
-      })
+      await vi.waitFor(() =>
+        expect(dialog.current).toEqual({
+          kind: "upgrade",
+          plan,
+          feature: "pageTranslation",
+          analyticsFeature: "page_translation",
+          retry: expect.any(Function),
+        }),
+      )
 
       // "Use machine translation" switched the config, then retries.
       mockGetLocalConfig.mockResolvedValue(GOOGLE_CONFIG)
-      mockOpenBuiltInAiPrompt.mock.calls[0]![0].retry()
+      dialog.current!.retry!()
       await vi.waitFor(() => expect(manager.isActive).toBe(true))
     },
   )
 
-  it("keeps Ultra to a toast: no plan sits above it", async () => {
+  it("keeps Ultra to a plain toast: no plan sits above it", async () => {
     refusal = SPENT_POOL_REFUSAL
     mockGetBuiltInAiUpgradePlan.mockResolvedValue(null)
 
     const manager = createManager()
     await manager.start(popupClick())
 
-    expect(mockOpenBuiltInAiPrompt).not.toHaveBeenCalled()
+    expect(dialog.current).toBeNull()
     expect(mockToastAdd).toHaveBeenCalledWith({
       type: "error",
       title: "hostedAi.availability.quotaExhausted",
     })
+    expect(shownEvents()).toEqual([])
   })
 
-  it("keeps automatic translation with a spent pool to a toast, without reading the plan", async () => {
+  it("gives automatic translation the dialog once a browser session, then the toast", async () => {
     refusal = SPENT_POOL_REFUSAL
 
-    const manager = createManager()
-    await manager.start(automaticStart())
+    const firstPage = createManager()
+    await firstPage.start(automaticStart())
 
-    expect(mockGetBuiltInAiUpgradePlan).not.toHaveBeenCalled()
-    expect(mockOpenBuiltInAiPrompt).not.toHaveBeenCalled()
-    expect(mockToastAdd).toHaveBeenCalledWith({
-      type: "error",
-      title: "hostedAi.availability.quotaExhausted",
-    })
+    await vi.waitFor(() => expect(dialog.current).toMatchObject({ kind: "upgrade", plan: "free" }))
+    expect(mockClaimAutoPrompt).toHaveBeenCalledOnce()
+    expect(refusalToasts()).toEqual([])
+
+    // The background has handed out this session's dialog.
+    closeBuiltInAiPrompt()
+    mockClaimAutoPrompt.mockResolvedValue(false)
+    const secondPage = createManager()
+    await secondPage.start(automaticStart())
+
+    expect(dialog.current).toBeNull()
+    expect(refusalToasts()).toEqual([
+      expect.objectContaining({
+        title: "hostedAi.availability.quotaExhausted",
+        actionProps: expect.objectContaining({ children: "action.upgrade" }),
+      }),
+    ])
+    expect(shownEvents()).toEqual([
+      { feature: "page_translation", kind: "upgrade", presentation: "dialog", trigger: "auto" },
+      { feature: "page_translation", kind: "upgrade", presentation: "toast", trigger: "auto" },
+    ])
   })
 
   it.each([
     ["a guest", GUEST_REFUSAL],
     ["a spent pool", SPENT_POOL_REFUSAL],
-  ])("stays quiet in a frame for %s", async (_, frameRefusal) => {
+  ])("leaves a click in a frame to the top frame for %s", async (_, frameRefusal) => {
     refusal = frameRefusal
     inFrame()
 
@@ -308,8 +399,23 @@ describe("page translation when Built-in AI refuses at the start", () => {
 
     expect(manager.isActive).toBe(false)
     expect(mockGetBuiltInAiUpgradePlan).not.toHaveBeenCalled()
-    expect(mockOpenBuiltInAiPrompt).not.toHaveBeenCalled()
+    expect(dialog.current).toBeNull()
     expect(mockToastAdd).not.toHaveBeenCalled()
+  })
+
+  it("keeps automatic translation in a frame to a plain toast", async () => {
+    refusal = SPENT_POOL_REFUSAL
+    inFrame()
+
+    const manager = createManager()
+    await manager.start(automaticStart())
+
+    expect(mockClaimAutoPrompt).not.toHaveBeenCalled()
+    expect(dialog.current).toBeNull()
+    expect(mockToastAdd).toHaveBeenCalledWith({
+      type: "error",
+      title: "hostedAi.availability.quotaExhausted",
+    })
   })
 
   it("drops the upgrade prompt when the start is cancelled while the plan loads", async () => {
@@ -325,7 +431,7 @@ describe("page translation when Built-in AI refuses at the start", () => {
     plan.resolve("free")
     await starting
 
-    expect(mockOpenBuiltInAiPrompt).not.toHaveBeenCalled()
+    expect(dialog.current).toBeNull()
     expect(mockToastAdd).not.toHaveBeenCalled()
   })
 })
@@ -348,35 +454,43 @@ describe("page translation when Built-in AI's pool runs dry partway down a page"
   it("ignores a paragraph that failed for another reason", async () => {
     await startSession()
 
-    reportPageTranslationRequestFailed(new Error("Failed"))
-    reportPageTranslationRequestFailed(
+    const failures = [
+      new Error("Failed"),
       Object.assign(new Error("x"), { code: "HOSTED_AI_MODEL_UNAVAILABLE" }),
-    )
-    reportPageTranslationRequestFailed(Object.assign(new Error("x"), { code: "UNAUTHORIZED" }))
+      // A guest reaches here only if the status check let them through; their
+      // paragraphs keep the inline error rather than a dialog per page.
+      Object.assign(new Error("x"), { code: "UNAUTHORIZED" }),
+    ]
+    failures.forEach(reportPageTranslationRequestFailed)
     await flushAsync()
 
     expect(mockGetBuiltInAiUpgradePlan).not.toHaveBeenCalled()
-    expect(mockOpenBuiltInAiPrompt).not.toHaveBeenCalled()
+    expect(dialog.current).toBeNull()
+    expect(failures.some(isPageTranslationRequestFailureClaimed)).toBe(false)
   })
 
-  it("asks to upgrade once, however many paragraphs run dry", async () => {
+  it("asks to upgrade once, however many paragraphs run dry, and answers for all of them", async () => {
     await startSession()
 
-    reportPageTranslationRequestFailed(spentPoolError())
-    reportPageTranslationRequestFailed(spentPoolError())
-    await vi.waitFor(() => expect(mockOpenBuiltInAiPrompt).toHaveBeenCalled())
-    reportPageTranslationRequestFailed(spentPoolError())
+    const failures = [spentPoolError(), spentPoolError(), spentPoolError()]
+    reportPageTranslationRequestFailed(failures[0])
+    reportPageTranslationRequestFailed(failures[1])
+    await vi.waitFor(() => expect(dialog.current).not.toBeNull())
+    reportPageTranslationRequestFailed(failures[2])
     await flushAsync()
 
     expect(mockGetBuiltInAiUpgradePlan).toHaveBeenCalledOnce()
-    expect(mockOpenBuiltInAiPrompt).toHaveBeenCalledOnce()
-    expect(mockOpenBuiltInAiPrompt).toHaveBeenCalledWith({
+    expect(dialog.current).toEqual({
       kind: "upgrade",
       plan: "free",
       feature: "pageTranslation",
+      analyticsFeature: "page_translation",
       retry: expect.any(Function),
     })
     expect(mockToastAdd).not.toHaveBeenCalled()
+    expect(shownEvents()).toHaveLength(1)
+    // Hover translation stays quiet about the failures the session answered for.
+    expect(failures.every(isPageTranslationRequestFailureClaimed)).toBe(true)
   })
 
   it("starts the page over when someone switches to machine translation", async () => {
@@ -384,13 +498,13 @@ describe("page translation when Built-in AI's pool runs dry partway down a page"
     const firstSessionId = getPageTranslationSessionId()
 
     reportPageTranslationRequestFailed(spentPoolError())
-    await vi.waitFor(() => expect(mockOpenBuiltInAiPrompt).toHaveBeenCalled())
+    await vi.waitFor(() => expect(dialog.current).not.toBeNull())
 
     // The dialog switched the config to the machine translator, then retries.
     mockGetLocalConfig.mockResolvedValue(GOOGLE_CONFIG)
     mockSendMessage.mockClear()
     mockCheckProviderAvailability.mockClear()
-    mockOpenBuiltInAiPrompt.mock.calls[0]![0].retry()
+    dialog.current!.retry!()
 
     // The old session stops first: its provider was fixed when it started.
     expect(manager.isActive).toBe(false)
@@ -414,25 +528,45 @@ describe("page translation when Built-in AI's pool runs dry partway down a page"
     expect(getPageTranslationSessionId()).not.toBe(firstSessionId)
   })
 
-  it("leaves automatic translation to its inline errors", async () => {
+  it("gives automatic translation the session's dialog if it is still unclaimed", async () => {
     await startSession(automaticStart())
 
     reportPageTranslationRequestFailed(spentPoolError())
+
+    await vi.waitFor(() => expect(dialog.current).toMatchObject({ kind: "upgrade" }))
+    expect(mockClaimAutoPrompt).toHaveBeenCalledOnce()
+    expect(shownEvents()).toEqual([
+      { feature: "page_translation", kind: "upgrade", presentation: "dialog", trigger: "auto" },
+    ])
+  })
+
+  it("gives automatic translation the toast once the session's dialog is used", async () => {
+    mockClaimAutoPrompt.mockResolvedValue(false)
+    await startSession(automaticStart())
+
+    reportPageTranslationRequestFailed(spentPoolError())
+    reportPageTranslationRequestFailed(spentPoolError())
+    await vi.waitFor(() => expect(refusalToasts()).toHaveLength(1))
     await flushAsync()
 
-    expect(mockGetBuiltInAiUpgradePlan).not.toHaveBeenCalled()
-    expect(mockOpenBuiltInAiPrompt).not.toHaveBeenCalled()
+    expect(dialog.current).toBeNull()
+    expect(refusalToasts()).toHaveLength(1)
+    expect(shownEvents()).toEqual([
+      { feature: "page_translation", kind: "upgrade", presentation: "toast", trigger: "auto" },
+    ])
   })
 
   it("leaves a frame to its inline errors", async () => {
     inFrame()
     await startSession()
 
-    reportPageTranslationRequestFailed(spentPoolError())
+    const failure = spentPoolError()
+    reportPageTranslationRequestFailed(failure)
     await flushAsync()
 
     expect(mockGetBuiltInAiUpgradePlan).not.toHaveBeenCalled()
-    expect(mockOpenBuiltInAiPrompt).not.toHaveBeenCalled()
+    expect(dialog.current).toBeNull()
+    expect(isPageTranslationRequestFailureClaimed(failure)).toBe(false)
   })
 
   it("leaves Ultra to its inline errors, and reads the plan only once", async () => {
@@ -445,7 +579,7 @@ describe("page translation when Built-in AI's pool runs dry partway down a page"
     await flushAsync()
 
     expect(mockGetBuiltInAiUpgradePlan).toHaveBeenCalledOnce()
-    expect(mockOpenBuiltInAiPrompt).not.toHaveBeenCalled()
+    expect(dialog.current).toBeNull()
     expect(mockToastAdd).not.toHaveBeenCalled()
   })
 
@@ -457,7 +591,7 @@ describe("page translation when Built-in AI's pool runs dry partway down a page"
     await flushAsync()
 
     expect(mockGetBuiltInAiUpgradePlan).not.toHaveBeenCalled()
-    expect(mockOpenBuiltInAiPrompt).not.toHaveBeenCalled()
+    expect(dialog.current).toBeNull()
   })
 
   it("drops the prompt when the session stops while the plan loads", async () => {
@@ -472,6 +606,6 @@ describe("page translation when Built-in AI's pool runs dry partway down a page"
     plan.resolve("free")
     await flushAsync()
 
-    expect(mockOpenBuiltInAiPrompt).not.toHaveBeenCalled()
+    expect(dialog.current).toBeNull()
   })
 })
