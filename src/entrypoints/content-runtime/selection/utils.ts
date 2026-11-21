@@ -26,6 +26,11 @@ export interface SelectionSnapshot {
    * them around the control element), so context is built from this instead.
    */
   textControl?: TextControlSelectionSnapshot
+  /**
+   * Set for a selection relayed from another frame (the ebook reader), which
+   * has no ranges in this one: where it ended, in this frame's viewport.
+   */
+  anchor?: { x: number; y: number }
 }
 
 export interface ContextSnapshot {
