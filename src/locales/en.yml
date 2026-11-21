@@ -678,6 +678,12 @@ options:
         providerDescription: The AI provider that generates the suggestion
     display:
       title: Display
+      placement:
+        title: Position
+        description: Which side of the selected text the toolbar appears on. If the chosen side has no room, it appears on the other side.
+        followDirection: Follow selection direction
+        above: Always above
+        below: Always below
       opacity:
         title: Opacity
         description: Adjust the opacity of the selection toolbar and the expanded window opened from it

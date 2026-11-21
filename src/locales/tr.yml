@@ -677,6 +677,12 @@ options:
         providerDescription: Öneriyi üreten yapay zekâ sağlayıcısı
     display:
       title: Görünüm
+      placement:
+        title: Konum
+        description: Araç çubuğunun seçili metnin hangi tarafında görüneceğini seçin. Seçilen tarafta yer yoksa diğer tarafta görünür
+        followDirection: Seçim yönünü takip et
+        above: Her zaman üstte
+        below: Her zaman altta
       opacity:
         title: Opaklık
         description: Seçim araç çubuğunun ve buradan açılan genişletilmiş pencerenin opaklığını ayarlayın

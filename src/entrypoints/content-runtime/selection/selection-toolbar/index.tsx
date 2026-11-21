@@ -3,6 +3,7 @@ import type {
   EbookBridgeSelectionPayload,
 } from "@read-frog/definitions"
 import type { ModalDialogHostController } from "./modal-dialog-host"
+import type { SelectionVerticalBounds } from "./positioning"
 import type { DeferredSelectionOpenDetail } from "@/utils/constants/selection"
 import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { useCallback, useEffect, useEffectEvent, useLayoutEffect, useRef, useState } from "react"
@@ -234,6 +235,10 @@ export function SelectionToolbar() {
   const selectionStartRef = useRef<{ x: number; y: number } | null>(null) // store selection start position
   const selectionDirectionRef = useRef<SelectionDirection>(SelectionDirection.BOTTOM_RIGHT) // store selection direction
   const selectionAnchorTrackerRef = useRef<ReturnType<typeof createSelectionAnchorTracker>>(null)
+  // How far the selection reaches up and down, which a toolbar pinned above or
+  // below it clears. Remeasured with the anchor; kept while the selection has
+  // no geometry, like the anchor.
+  const selectionBoundsRef = useRef<SelectionVerticalBounds | null>(null)
   const selectionScrollTargetsRef = useRef<Array<Element | ShadowRoot>>([])
   const modalDialogHostControllerRef = useRef<ModalDialogHostController>(null)
   const isPointerDownInsideOverlayRef = useRef(false)
@@ -242,6 +247,7 @@ export function SelectionToolbar() {
   const setSelectionState = useSetAtom(setSelectionStateAtom)
   const clearSelectionState = useSetAtom(clearSelectionStateAtom)
   const selectionToolbar = useAtomValue(configFieldsAtomMap.selectionToolbar)
+  const placement = selectionToolbar.placement
   const isHiddenUntilReload = useAtomValue(isSelectionToolbarHiddenUntilReloadAtom)
   const isHiddenOnPage =
     isHiddenUntilReload ||
@@ -315,6 +321,7 @@ export function SelectionToolbar() {
 
         if (measurement.status === "invalid") {
           selectionAnchorTrackerRef.current = null
+          selectionBoundsRef.current = null
           selectionScrollTargetsRef.current = []
           selectionPositionRef.current = null
           clearSelectionState()
@@ -324,6 +331,9 @@ export function SelectionToolbar() {
 
         selectionAnchorTrackerRef.current = measurement.tracker
         selectionPositionRef.current = measurement.anchor
+        if (measurement.bounds) {
+          selectionBoundsRef.current = measurement.bounds
+        }
       }
 
       const nextSelectionPosition = selectionPositionRef.current
@@ -341,13 +351,15 @@ export function SelectionToolbar() {
         },
         viewport,
         MARGIN,
+        placement,
+        selectionBoundsRef.current,
       )
       const hostPosition = viewportPointToHostPoint(viewportPosition, viewportHost)
 
       tooltip.style.top = `${hostPosition.y}px`
       tooltip.style.left = `${hostPosition.x}px`
     },
-    [clearSelectionState, isSelectionToolbarVisible, setIsSelectionToolbarOpen],
+    [clearSelectionState, isSelectionToolbarVisible, placement, setIsSelectionToolbarOpen],
   )
 
   useLayoutEffect(() => {
@@ -483,6 +495,7 @@ export function SelectionToolbar() {
             selectionSnapshot.ranges,
             selectionPosition,
           )
+          selectionBoundsRef.current = null
           selectionScrollTargetsRef.current = collectSelectionScrollTargets(
             selectionSnapshot.ranges,
           )
@@ -514,6 +527,7 @@ export function SelectionToolbar() {
       selectionStartRef.current = { x: e.clientX, y: e.clientY }
       selectionPositionRef.current = null
       selectionAnchorTrackerRef.current = null
+      selectionBoundsRef.current = null
       selectionScrollTargetsRef.current = []
 
       clearSelectionState()
@@ -549,6 +563,7 @@ export function SelectionToolbar() {
         clearSelectionState()
         selectionPositionRef.current = null
         selectionAnchorTrackerRef.current = null
+        selectionBoundsRef.current = null
         selectionScrollTargetsRef.current = []
         // Don't hide toolbar when dropdown is open to prevent unwanted dismissal
         // (Firefox clears selection when dropdown gains focus)
@@ -619,6 +634,11 @@ export function SelectionToolbar() {
       selectionDirectionRef.current = EXTERNAL_SELECTION_DIRECTION_MAP[detail.direction]
       selectionPositionRef.current = detail.anchor
       selectionAnchorTrackerRef.current = null
+      // The reader sends the selection's box in this frame's viewport.
+      selectionBoundsRef.current = {
+        top: detail.rect.top,
+        bottom: detail.rect.top + detail.rect.height,
+      }
       selectionScrollTargetsRef.current = []
       setIsSelectionToolbarOpen(true)
       // Force a reposition: the toolbar may already be open, in which case the
@@ -636,6 +656,7 @@ export function SelectionToolbar() {
       clearSelectionState()
       selectionPositionRef.current = null
       selectionAnchorTrackerRef.current = null
+      selectionBoundsRef.current = null
       selectionScrollTargetsRef.current = []
       // Don't hide toolbar when dropdown is open to prevent unwanted dismissal
       if (!dropdownOpenRef.current) setIsSelectionToolbarOpen(false)

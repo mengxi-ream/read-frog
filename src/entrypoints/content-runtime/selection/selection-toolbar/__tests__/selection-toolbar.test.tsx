@@ -3,7 +3,10 @@ import { act, cleanup, render, screen, waitFor } from "@testing-library/react"
 import { atom, getDefaultStore, useAtomValue } from "jotai"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { DEFERRED_SELECTION_OPEN_EVENT } from "@/utils/constants/selection"
+import {
+  DEFERRED_SELECTION_OPEN_EVENT,
+  EXTERNAL_SELECTION_OPEN_EVENT,
+} from "@/utils/constants/selection"
 import { SELECTION_CONTENT_OVERLAY_ROOT_ATTRIBUTE } from "@/utils/constants/selection-overlay-layers"
 import { createShadowSelection } from "../../__tests__/composed-selection"
 import { isSelectionToolbarHiddenUntilReloadAtom, selectionSessionAtom } from "../atoms"
@@ -1062,7 +1065,12 @@ describe("selectionToolbar - positioning logic", () => {
       toJSON: () => ({}),
     }) as DOMRect
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    await store.set(
+      configFieldsAtomMap.selectionToolbar,
+      structuredClone(DEFAULT_SELECTION_TOOLBAR_CONFIG),
+    )
+
     // Mock requestAnimationFrame to execute callbacks synchronously
     rafCallbacks = []
     originalRequestAnimationFrame = window.requestAnimationFrame
@@ -1352,6 +1360,106 @@ describe("selectionToolbar - positioning logic", () => {
 
       expect(topValue - 200).toBeGreaterThanOrEqual(20)
     })
+  })
+
+  it("opens above a selection dragged downward when pinned above", async () => {
+    await store.set(configFieldsAtomMap.selectionToolbar, {
+      ...DEFAULT_SELECTION_TOOLBAR_CONFIG,
+      placement: "above",
+    })
+    render(
+      <div>
+        <SelectionToolbar />
+        <div data-testid="test-element">Test content</div>
+      </div>,
+    )
+
+    const toolbar = getToolbarElement()
+    mockToolbarDimensions(toolbar, 200, 50)
+
+    // The selection spans 100–200; the drag ends at its bottom.
+    await triggerMouseDownAndUp(screen.getByTestId("test-element"), 100, 100, 200, 200)
+
+    // Clear of the selection's top edge, where following the drag would put it below.
+    expect(toolbar.style.left).toBe("200px")
+    expect(toolbar.style.top).toBe("42px")
+  })
+
+  it("opens below a selection dragged upward when pinned below", async () => {
+    await store.set(configFieldsAtomMap.selectionToolbar, {
+      ...DEFAULT_SELECTION_TOOLBAR_CONFIG,
+      placement: "below",
+    })
+    render(
+      <div>
+        <SelectionToolbar />
+        <div data-testid="test-element">Test content</div>
+      </div>,
+    )
+
+    const toolbar = getToolbarElement()
+    mockToolbarDimensions(toolbar, 200, 50)
+
+    await triggerMouseDownAndUp(screen.getByTestId("test-element"), 300, 200, 200, 100)
+
+    expect(toolbar.style.left).toBe("25px")
+    expect(toolbar.style.top).toBe("208px")
+  })
+
+  it("moves a toolbar pinned above below the selection once it scrolls to the top", async () => {
+    await store.set(configFieldsAtomMap.selectionToolbar, {
+      ...DEFAULT_SELECTION_TOOLBAR_CONFIG,
+      placement: "above",
+    })
+    render(
+      <div>
+        <SelectionToolbar />
+        <div data-testid="test-element">Test content</div>
+      </div>,
+    )
+
+    const toolbar = getToolbarElement()
+    mockToolbarDimensions(toolbar, 200, 50)
+    await triggerMouseDownAndUp(screen.getByTestId("test-element"), 100, 100, 200, 200)
+    expect(toolbar.style.top).toBe("42px")
+
+    selectionRects = [createRect({ left: 100, top: 10, width: 100, height: 100 })]
+    await act(async () => {
+      window.dispatchEvent(new Event("scroll"))
+      const callbacks = [...rafCallbacks]
+      rafCallbacks = []
+      callbacks.forEach((cb) => cb(0))
+    })
+
+    expect(toolbar.style.top).toBe("130px")
+  })
+
+  it("pins an ebook selection by the box the reader sends", async () => {
+    await store.set(configFieldsAtomMap.selectionToolbar, {
+      ...DEFAULT_SELECTION_TOOLBAR_CONFIG,
+      placement: "above",
+    })
+    render(<SelectionToolbar />)
+    const toolbar = getToolbarElement()
+    mockToolbarDimensions(toolbar, 200, 50)
+
+    await act(async () => {
+      window.dispatchEvent(
+        new CustomEvent(EXTERNAL_SELECTION_OPEN_EVENT, {
+          detail: {
+            requestId: "req-1",
+            text: "Selected ebook text",
+            contextParagraphs: [],
+            rect: { top: 300, left: 40, width: 400, height: 60 },
+            anchor: { x: 240, y: 350 },
+            direction: "bottom-right",
+          },
+        }),
+      )
+    })
+
+    expect(toolbar.style.left).toBe("240px")
+    expect(toolbar.style.top).toBe("242px")
   })
 
   it("should position toolbar at bottom-left when selecting from top-right to bottom-left", async () => {

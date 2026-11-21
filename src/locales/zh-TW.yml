@@ -678,6 +678,12 @@ options:
         providerDescription: 用於產生「猜你想存」的 AI 提供者
     display:
       title: 顯示
+      placement:
+        title: 位置
+        description: 工具列出現在選取文字的哪一側。選定的一側沒有空間時，會改到另一側顯示
+        followDirection: 跟隨選取方向
+        above: 一律在上方
+        below: 一律在下方
       opacity:
         title: 透明度
         description: 調整選取工具列及其展開內容視窗的透明度
