@@ -836,6 +836,8 @@ options:
             newlineToBrNotLast: newline_to_br only works as the last filter of an output.
             mathFilterNotLast: $1 only works as the last filter of an output.
             mathFilterInAttribute: Leave $1 out of an attribute value. The formulas it draws contain quotes, which end the attribute.
+            mediaFilterNotLast: media only works as the last filter of an output.
+            mediaFilterInAttribute: Leave media out of an attribute value. The markup it writes contains quotes, which end the attribute.
             tooLong: This layout is longer than $1 characters and can't be saved.
             fieldNotShown: “$1” isn't shown in this layout.
             reservedFieldName: The field name “$1” is reserved in layouts. Rename the field.

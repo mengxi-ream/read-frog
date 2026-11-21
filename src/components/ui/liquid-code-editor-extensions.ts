@@ -69,6 +69,8 @@ const LINT_MESSAGES: Record<LayoutLintCode, (params: string[]) => string> = {
   newlineToBrNotLast: () => i18n.t(`${LINT_KEY}.newlineToBrNotLast`),
   mathFilterNotLast: ([filter = ""]) => i18n.t(`${LINT_KEY}.mathFilterNotLast`, [filter]),
   mathFilterInAttribute: ([filter = ""]) => i18n.t(`${LINT_KEY}.mathFilterInAttribute`, [filter]),
+  mediaFilterNotLast: () => i18n.t(`${LINT_KEY}.mediaFilterNotLast`),
+  mediaFilterInAttribute: () => i18n.t(`${LINT_KEY}.mediaFilterInAttribute`),
   tooLong: ([maxLength = ""]) => i18n.t(`${LINT_KEY}.tooLong`, [maxLength]),
   fieldNotShown: ([name = ""]) => i18n.t(`${LINT_KEY}.fieldNotShown`, [name]),
   reservedFieldName: ([name = ""]) => i18n.t(`${LINT_KEY}.reservedFieldName`, [name]),
