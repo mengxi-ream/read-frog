@@ -159,7 +159,7 @@ options:
     configTitle: Provider config
     addProvider: Add provider
     builtInProvider: Built-in provider
-    yourProviders: Your providers
+    thirdPartyProviders: Third-party providers
     builtInModel:
       reasoningDescription: "How much $1 thinks before it answers. Higher levels handle hard text better, but answer more slowly and use more of your quota."
       reasoningDefault: "Default"

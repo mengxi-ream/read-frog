@@ -270,7 +270,7 @@ function ProviderCardList() {
         </div>
       </ProviderListSection>
       {apiProvidersConfig.length > 0 && (
-        <ProviderListSection title={i18n.t("options.apiProviders.yourProviders")}>
+        <ProviderListSection title={i18n.t("options.apiProviders.thirdPartyProviders")}>
           <EntityListRail>
             <SortableList
               list={apiProvidersConfig}

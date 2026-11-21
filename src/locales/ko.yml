@@ -159,7 +159,7 @@ options:
     configTitle: 제공업체 구성
     addProvider: 제공업체 추가
     builtInProvider: 내장 제공업체
-    yourProviders: 내 제공업체
+    thirdPartyProviders: 타사 제공업체
     builtInModel:
       reasoningDescription: "$1 모델이 답하기 전에 얼마나 생각할지 정합니다. 수준이 높을수록 어려운 텍스트를 더 잘 다루지만, 응답이 느려지고 할당량을 더 많이 사용합니다."
       reasoningDefault: "기본값"

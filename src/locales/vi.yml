@@ -159,7 +159,7 @@ options:
     configTitle: Cấu hình nhà cung cấp
     addProvider: Thêm nhà cung cấp
     builtInProvider: Nhà cung cấp tích hợp
-    yourProviders: Nhà cung cấp của bạn
+    thirdPartyProviders: Nhà cung cấp bên thứ ba
     builtInModel:
       reasoningDescription: "Mức độ $1 suy nghĩ trước khi trả lời. Mức càng cao càng xử lý tốt văn bản khó, nhưng trả lời chậm hơn và dùng nhiều hạn mức hơn."
       reasoningDefault: "Mặc định"

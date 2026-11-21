@@ -73,12 +73,11 @@ export function getProviderSelectorGroups(
       !isSystemProviderSelectorItem(provider) && isPureTranslateProviderConfig(provider),
   )
 
-  // Built-in models sit last: the user's own configured providers are the
-  // primary choice, the hosted fallback the closing offer.
+  // Built-in models lead, then machine translators, then the user's own LLM providers.
   const groups: ProviderSelectorGroup[] = [
-    { labelKey: "translateService.llmModels", providers: llmProviders },
-    { labelKey: "translateService.normalTranslator", providers: pureTranslateProviders },
     { labelKey: "translateService.builtInModels", providers: builtInProviders },
+    { labelKey: "translateService.normalTranslator", providers: pureTranslateProviders },
+    { labelKey: "translateService.llmModels", providers: llmProviders },
   ]
 
   return groups.filter((group) => group.providers.length > 0)
