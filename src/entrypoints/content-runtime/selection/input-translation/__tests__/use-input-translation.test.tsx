@@ -2,9 +2,22 @@
 
 import { act, cleanup, fireEvent, renderHook } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import {
+  closeBuiltInAiPrompt,
+  useBuiltInAiPrompt,
+} from "@/utils/content-runtime/built-in-ai-prompt"
 import { useInputTranslation } from "../use-input-translation"
 
-const { translate, trackFeatureUsedMock, config, inputAtom, providerAtom } = vi.hoisted(() => ({
+const {
+  translate,
+  trackFeatureUsedMock,
+  config,
+  inputAtom,
+  providerAtom,
+  toastAddMock,
+  sendMessageMock,
+  getUpgradePlanMock,
+} = vi.hoisted(() => ({
   translate:
     vi.fn<
       (
@@ -25,6 +38,9 @@ const { translate, trackFeatureUsedMock, config, inputAtom, providerAtom } = vi.
   },
   inputAtom: {},
   providerAtom: {},
+  toastAddMock: vi.fn<(...args: any[]) => any>(),
+  sendMessageMock: vi.fn<(...args: any[]) => any>(),
+  getUpgradePlanMock: vi.fn<() => Promise<"free" | "pro" | null>>(),
 }))
 
 vi.mock("jotai", () => ({ useAtomValue: (atom: object) => (atom === inputAtom ? config : []) }))
@@ -32,11 +48,18 @@ vi.mock("@/utils/atoms/config", () => ({
   configFieldsAtomMap: { inputTranslation: inputAtom, providersConfig: providerAtom },
 }))
 vi.mock("@/utils/host/translate/translate-variants", () => ({ translateTextForInput: translate }))
-vi.mock("@/components/ui/base-ui/toast", () => ({ toastManager: { add: vi.fn<() => void>() } }))
+vi.mock("@/components/ui/base-ui/toast", () => ({
+  toastManager: { add: toastAddMock, close: vi.fn<() => void>() },
+}))
 vi.mock("@/utils/analytics", () => ({
   createFeatureUsageContext: () => ({}),
   trackFeatureUsed: trackFeatureUsedMock,
+  trackBuiltInAiPromptShown: (properties: unknown) =>
+    sendMessageMock("trackBuiltInAiPromptEvent", { event: "built_in_ai_prompt_shown", properties }),
+  trackBuiltInAiPromptAction: vi.fn<() => void>(),
 }))
+vi.mock("@/utils/message", () => ({ sendMessage: sendMessageMock }))
+vi.mock("@/utils/hosted-ai/upgrade-plan", () => ({ getBuiltInAiUpgradePlan: getUpgradePlanMock }))
 vi.mock("@/utils/analytics-provider", () => ({
   UNKNOWN_FEATURE_PROVIDER: { provider: "unknown", backend_kind: "unknown" },
   classifyResolvedProvider: () => ({ provider: "openai", backend_kind: "llm" }),
@@ -212,5 +235,102 @@ describe("input translation across editors", () => {
     await act(async () => pending.resolve("First reply"))
     expect(post).not.toHaveBeenCalled()
     expect(document.activeElement).toBe(second)
+  })
+})
+
+describe("input translation when Built-in AI refuses", () => {
+  beforeEach(() => {
+    translate.mockReset()
+    toastAddMock.mockReset()
+    sendMessageMock.mockReset().mockResolvedValue(undefined)
+    getUpgradePlanMock.mockReset().mockResolvedValue("free")
+    config.enableCycle = false
+    sessionStorage.clear()
+    Object.defineProperty(document, "execCommand", {
+      configurable: true,
+      value: vi.fn<() => boolean>(() => true),
+    })
+    Object.defineProperty(HTMLElement.prototype, "animate", {
+      configurable: true,
+      value: vi.fn<() => void>(),
+    })
+  })
+
+  afterEach(() => {
+    cleanup()
+    closeBuiltInAiPrompt()
+    document.body.replaceChildren()
+    vi.restoreAllMocks()
+  })
+
+  async function translateWithSpaces() {
+    const element = textarea()
+    // The selection UI draws the dialog in this frame.
+    const dialog = renderHook(() => useBuiltInAiPrompt()).result
+    renderHook(useInputTranslation)
+    await act(async () => {
+      space(element)
+      space(element)
+      space(element)
+    })
+    return dialog
+  }
+
+  it("asks to upgrade when the server refuses mid-run, instead of saying nothing", async () => {
+    // The server's refusal, relayed from the background with its code still on it.
+    translate.mockRejectedValue(
+      Object.assign(new Error("Built-in AI quota used up"), { code: "HOSTED_AI_QUOTA_EXHAUSTED" }),
+    )
+
+    const dialog = await translateWithSpaces()
+
+    await vi.waitFor(() =>
+      expect(dialog.current).toEqual({
+        kind: "upgrade",
+        plan: "free",
+        feature: "inputTranslation",
+        analyticsFeature: "input_translation",
+        trigger: "user",
+        retry: undefined,
+      }),
+    )
+    expect(toastAddMock).not.toHaveBeenCalled()
+    expect(sendMessageMock).toHaveBeenCalledWith("trackBuiltInAiPromptEvent", {
+      event: "built_in_ai_prompt_shown",
+      properties: {
+        feature: "input_translation",
+        kind: "upgrade",
+        presentation: "dialog",
+        trigger: "user",
+      },
+    })
+  })
+
+  it("tells Ultra its pool is spent in a toast", async () => {
+    getUpgradePlanMock.mockResolvedValue(null)
+    translate.mockRejectedValue(
+      Object.assign(new Error("Built-in AI quota used up"), { code: "HOSTED_AI_QUOTA_EXHAUSTED" }),
+    )
+
+    const dialog = await translateWithSpaces()
+
+    await vi.waitFor(() =>
+      expect(toastAddMock).toHaveBeenCalledWith({
+        type: "error",
+        title: "Built-in AI quota used up",
+        id: "input-translation-hosted-unavailable",
+      }),
+    )
+    expect(dialog.current).toBeNull()
+  })
+
+  it("keeps quiet about a failure that is not Built-in AI's", async () => {
+    translate.mockRejectedValue(new Error("Failed to fetch"))
+
+    const dialog = await translateWithSpaces()
+    await new Promise((resolve) => setTimeout(resolve, 0))
+
+    expect(dialog.current).toBeNull()
+    expect(toastAddMock).not.toHaveBeenCalled()
   })
 })

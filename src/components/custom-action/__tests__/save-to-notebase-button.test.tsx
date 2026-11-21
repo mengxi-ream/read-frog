@@ -456,7 +456,10 @@ describe("saveToNotebaseButton notebase availability", () => {
 
     expect(toastManagerMock.close).toHaveBeenCalledWith("toast-id")
     expect(sendMessage).toHaveBeenCalledWith("openPage", {
-      url: new URL("/pricing?entry=extension_notebase_limit", env.WXT_WEBSITE_URL).toString(),
+      url: new URL(
+        "/pricing?entry=extension_notebase_limit&feature=note_save",
+        env.WXT_WEBSITE_URL,
+      ).toString(),
       active: true,
     })
   })
@@ -1172,7 +1175,10 @@ describe("saveToNotebaseButton notebase availability", () => {
 
     expect(toastManagerMock.close).toHaveBeenCalledWith("toast-id")
     expect(sendMessage).toHaveBeenCalledWith("openPage", {
-      url: new URL("/pricing?entry=extension_notebase_limit", env.WXT_WEBSITE_URL).toString(),
+      url: new URL(
+        "/pricing?entry=extension_notebase_limit&feature=note_save",
+        env.WXT_WEBSITE_URL,
+      ).toString(),
       active: true,
     })
   })

@@ -9,6 +9,7 @@ import { getLocalConfig } from "@/utils/config/storage"
 import { CONFIG_STORAGE_KEY } from "@/utils/constants/config"
 import { TRANSLATE_LOOK_AHEAD_MS } from "@/utils/constants/subtitles"
 import { DEFAULT_BATCH_CONFIG } from "@/utils/constants/translate"
+import { getBuiltInAiRefusalKind } from "@/utils/hosted-ai/refusal"
 import { effectiveLookAheadMs } from "@/utils/subtitles/lookahead"
 import { getSubtitlesPassLimits, translateSubtitles } from "@/utils/subtitles/processor/translator"
 import { adPlayingAtom, subtitlesStore } from "./atoms"
@@ -22,6 +23,12 @@ export interface TranslationCoordinatorOptions {
   onStateChange: (state: SubtitlesState, data?: Record<string, string>) => void
   /** Limits for one pass (see `getSubtitlesPassLimits`); kept current from config while running. */
   batchLimits?: BatchQueueConfig
+  /**
+   * Built-in AI refused a cue batch: a guest, or a spent pool. Every batch after it would
+   * be refused the same way, so translation holds until `retryFailed`, a provider change,
+   * or the reader coming back to the tab.
+   */
+  onBuiltInAiRefused?: (error: unknown) => void
 }
 
 function fragmentIdentity(fragment: Pick<SubtitlesFragment, "end" | "text">): string {
@@ -62,8 +69,11 @@ export class TranslationCoordinator {
   private segmentationPipeline: SegmentationPipeline | null
   private onTranslated: (fragments: SubtitlesFragment[]) => void
   private onStateChange: (state: SubtitlesState, data?: Record<string, string>) => void
+  private onBuiltInAiRefused: ((error: unknown) => void) | undefined
   private batchLimits: BatchQueueConfig
   private unwatchConfig: (() => void) | null = null
+  /** Set when Built-in AI refuses a batch; see `onBuiltInAiRefused`. */
+  private heldByRefusal = false
 
   constructor(options: TranslationCoordinatorOptions) {
     this.batchLimits = options.batchLimits ?? DEFAULT_BATCH_CONFIG
@@ -73,6 +83,7 @@ export class TranslationCoordinator {
     this.segmentationPipeline = options.segmentationPipeline
     this.onTranslated = options.onTranslated
     this.onStateChange = options.onStateChange
+    this.onBuiltInAiRefused = options.onBuiltInAiRefused
   }
 
   start(videoContext?: SubtitlesVideoContext) {
@@ -121,17 +132,26 @@ export class TranslationCoordinator {
     this.translatedStarts.clear()
     this.failedStarts.clear()
     this.knownIdentities.clear()
+    this.heldByRefusal = false
     this.isTranslating = false
     this.lastEmittedState = "idle"
     this.videoContext = { videoTitle: "", subtitlesTextContent: "" }
   }
 
-  /** Settings apply mid-video, as they already do for the background queue. */
+  /**
+   * Settings apply mid-video, as they already do for the background queue. A new provider
+   * also gets another go at the cues the old one failed, such as every cue Built-in AI
+   * refused: the reader may have switched just for them.
+   */
   private watchPassLimits() {
     if (this.unwatchConfig) return
-    this.unwatchConfig = storage.watch<Config>(`local:${CONFIG_STORAGE_KEY}`, (next) => {
+    this.unwatchConfig = storage.watch<Config>(`local:${CONFIG_STORAGE_KEY}`, (next, previous) => {
       const parsed = configSchema.safeParse(next)
-      if (parsed.success) this.batchLimits = getSubtitlesPassLimits(parsed.data)
+      if (!parsed.success) return
+      this.batchLimits = getSubtitlesPassLimits(parsed.data)
+      if (parsed.data.videoSubtitles.providerId !== previous?.videoSubtitles?.providerId) {
+        this.retryFailed()
+      }
     })
   }
 
@@ -147,6 +167,7 @@ export class TranslationCoordinator {
     if (this.segmentationPipeline) {
       video.addEventListener("seeked", this.handleSeek)
     }
+    globalThis.document?.addEventListener("visibilitychange", this.handleVisibilityChange)
     this.listenersAttached = true
   }
 
@@ -158,11 +179,37 @@ export class TranslationCoordinator {
       video.removeEventListener("seeked", this.handleTranslationTick)
       video.removeEventListener("seeked", this.handleSeek)
     }
+    globalThis.document?.removeEventListener("visibilitychange", this.handleVisibilityChange)
     this.listenersAttached = false
+  }
+
+  /**
+   * Log in and Upgrade open the website in another tab, and nothing tells this one when
+   * the reader has done either there: coming back is the cue to try the held cues again.
+   * Still refused, they hold again, and the video isn't asked about twice.
+   */
+  private handleVisibilityChange = () => {
+    if (this.heldByRefusal && document.visibilityState === "visible") {
+      this.retryFailed()
+    }
   }
 
   clearFailed() {
     this.failedStarts.clear()
+    this.heldByRefusal = false
+  }
+
+  /** Translates the failed cues again, as after a switch away from a provider that refused. */
+  retryFailed() {
+    this.clearFailed()
+    // The failure's error badge stops every tick until it hides, 5 s on: a switch made
+    // straight from the prompt would otherwise wait that out, or on a paused video, until
+    // the reader plays or seeks.
+    if (this.active && this.getCurrentState() === "error") {
+      this.lastEmittedState = "idle"
+      this.onStateChange("idle")
+    }
+    this.requestTick()
   }
 
   /**
@@ -230,7 +277,7 @@ export class TranslationCoordinator {
   }
 
   private async translateNearby(currentTimeMs: number) {
-    if (!this.active) return
+    if (!this.active || this.heldByRefusal) return
 
     const fragments = this.getFragments()
 
@@ -303,6 +350,11 @@ export class TranslationCoordinator {
         this.rememberIdentity(f)
       })
 
+      if (getBuiltInAiRefusalKind(error)) {
+        this.heldByRefusal = true
+        this.onBuiltInAiRefused?.(error)
+      }
+
       const config = await getLocalConfig()
       if (!this.active || runId !== this.runId) {
         return
@@ -355,7 +407,10 @@ export class TranslationCoordinator {
   }
 
   private isCueResolved(startMs: number): boolean {
-    return this.translatedStarts.has(startMs) || this.failedStarts.has(startMs)
+    // While held, no cue is on its way: none of them is loading.
+    return (
+      this.heldByRefusal || this.translatedStarts.has(startMs) || this.failedStarts.has(startMs)
+    )
   }
 
   private updateLoadingStateAt(timeMs: number, fragments: SubtitlesFragment[]) {

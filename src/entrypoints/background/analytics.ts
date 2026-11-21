@@ -3,6 +3,7 @@ import type { CaptureResult } from "posthog-js/dist/module.no-external"
 import type {
   AnalyticsFailureReason,
   AnalyticsFeature,
+  BuiltInAiPromptEvent,
   FeatureProviderAnalytics,
   FeatureUsedEventProperties,
   SurfaceByFeature,
@@ -12,7 +13,16 @@ import { posthog } from "posthog-js/dist/module.no-external"
 import { match } from "ts-pattern"
 import { storage } from "#imports"
 import { env } from "@/env"
-import { ANALYTICS_FAILURE_REASONS, ANALYTICS_FEATURE, NOTE_SAVE_PATHS } from "@/types/analytics"
+import {
+  ANALYTICS_FAILURE_REASONS,
+  ANALYTICS_FEATURE,
+  ANALYTICS_FEATURES,
+  BUILT_IN_AI_PROMPT_ACTIONS,
+  BUILT_IN_AI_PROMPT_KINDS,
+  BUILT_IN_AI_PROMPT_PRESENTATIONS,
+  BUILT_IN_AI_PROMPT_TRIGGERS,
+  NOTE_SAVE_PATHS,
+} from "@/types/analytics"
 import { translationModeSchema } from "@/types/config/translate"
 import { normalizeFeatureProviderAnalytics } from "@/utils/analytics-provider"
 import {
@@ -594,6 +604,42 @@ function normalizeFeatureUsedEvent(
     .exhaustive(() => null)
 }
 
+function isOneOf<const T extends string>(values: readonly T[], value: unknown): value is T {
+  return typeof value === "string" && (values as readonly string[]).includes(value)
+}
+
+/**
+ * Picks only the documented fields of a Built-in AI prompt event, and drops one with a
+ * value this version doesn't know, such as from a newer content script.
+ */
+export function normalizeBuiltInAiPromptEvent(
+  input: BuiltInAiPromptEvent,
+): BuiltInAiPromptEvent | null {
+  const { feature, kind, presentation, trigger } = input.properties
+  if (
+    !isOneOf(ANALYTICS_FEATURES, feature) ||
+    !isOneOf(BUILT_IN_AI_PROMPT_KINDS, kind) ||
+    !isOneOf(BUILT_IN_AI_PROMPT_PRESENTATIONS, presentation) ||
+    !isOneOf(BUILT_IN_AI_PROMPT_TRIGGERS, trigger)
+  ) {
+    return null
+  }
+
+  return match(input)
+    .with({ event: "built_in_ai_prompt_shown" }, ({ event }) => ({
+      event,
+      properties: { feature, kind, presentation, trigger },
+    }))
+    .with({ event: "built_in_ai_prompt_action" }, ({ event, properties }) => {
+      if (!isOneOf(BUILT_IN_AI_PROMPT_ACTIONS, properties.action)) return null
+      return {
+        event,
+        properties: { feature, kind, presentation, trigger, action: properties.action },
+      }
+    })
+    .otherwise(() => null)
+}
+
 export function createBackgroundAnalytics(
   runtime: BackgroundAnalyticsRuntime = createDefaultRuntime(),
 ) {
@@ -770,11 +816,39 @@ export function createBackgroundAnalytics(
     await captureFeatureUsedEventWithCache(normalizedProperties, runtime.featureUsageCache)
   }
 
+  /**
+   * The Built-in AI prompt's two events. Each prompt is one wall someone hit, so unlike
+   * `feature_used` there is no daily throttle: the count is the point. Off with the
+   * rest of analytics.
+   */
+  async function captureBuiltInAiPromptEventInBackground(
+    input: BuiltInAiPromptEvent,
+  ): Promise<void> {
+    if (!(await isAnalyticsEnabled())) {
+      return
+    }
+
+    const normalized = normalizeBuiltInAiPromptEvent(input)
+    if (!normalized) {
+      runtime.warn("Dropped an incomplete Built-in AI prompt event")
+      return
+    }
+
+    try {
+      const client = await getPostHogClient()
+      client?.capture(normalized.event, normalized.properties)
+    } catch (error) {
+      runtime.warn(`Failed to capture ${normalized.event} in background`, { error })
+    }
+  }
+
   return {
     captureFeatureUsedEventInBackground,
+    captureBuiltInAiPromptEventInBackground,
   }
 }
 
 const backgroundAnalytics = createBackgroundAnalytics()
 
-export const { captureFeatureUsedEventInBackground } = backgroundAnalytics
+export const { captureFeatureUsedEventInBackground, captureBuiltInAiPromptEventInBackground } =
+  backgroundAnalytics

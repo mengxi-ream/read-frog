@@ -163,3 +163,48 @@ export type FeatureUsedEventPropertiesFor<F extends AnalyticsFeature> = FeatureU
 export type FeatureUsedEventProperties = {
   [F in AnalyticsFeature]: FeatureUsedEventPropertiesFor<F>
 }[AnalyticsFeature]
+
+/**
+ * The prompt someone gets when Built-in AI refuses a feature they ran: `log_in` for a
+ * guest, `upgrade` for a spent pool. Ultra has no plan above it and gets no prompt.
+ */
+export const BUILT_IN_AI_PROMPT_KINDS = ["upgrade", "log_in"] as const
+
+export type BuiltInAiPromptKind = (typeof BUILT_IN_AI_PROMPT_KINDS)[number]
+
+/** A dialog where there is room for one, else a toast carrying the same button. */
+export const BUILT_IN_AI_PROMPT_PRESENTATIONS = ["dialog", "toast"] as const
+
+export type BuiltInAiPromptPresentation = (typeof BUILT_IN_AI_PROMPT_PRESENTATIONS)[number]
+
+/** Whether someone ran the feature, or it ran on its own (automatic page translation). */
+export const BUILT_IN_AI_PROMPT_TRIGGERS = ["user", "auto"] as const
+
+export type BuiltInAiPromptTrigger = (typeof BUILT_IN_AI_PROMPT_TRIGGERS)[number]
+
+/** What someone did with the prompt. `dismissed` is the dialog's only: a toast just times out. */
+export const BUILT_IN_AI_PROMPT_ACTIONS = [
+  "upgrade",
+  "log_in",
+  "machine_translation",
+  "dismissed",
+] as const
+
+export type BuiltInAiPromptAction = (typeof BUILT_IN_AI_PROMPT_ACTIONS)[number]
+
+export interface BuiltInAiPromptShownEventProperties {
+  feature: AnalyticsFeature
+  kind: BuiltInAiPromptKind
+  presentation: BuiltInAiPromptPresentation
+  trigger: BuiltInAiPromptTrigger
+}
+
+/** The prompt's own `presentation` and `trigger` come along, so actions split the same way. */
+export interface BuiltInAiPromptActionEventProperties extends BuiltInAiPromptShownEventProperties {
+  action: BuiltInAiPromptAction
+}
+
+/** A Built-in AI prompt event on its way to the background, which owns the capture. */
+export type BuiltInAiPromptEvent =
+  | { event: "built_in_ai_prompt_shown"; properties: BuiltInAiPromptShownEventProperties }
+  | { event: "built_in_ai_prompt_action"; properties: BuiltInAiPromptActionEventProperties }

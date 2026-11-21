@@ -485,3 +485,59 @@ describe("TranslationCard error display", () => {
     expect(errorParagraph.className).toContain("whitespace-pre-wrap")
   })
 })
+
+describe("TranslationCard when Built-in AI refuses", () => {
+  function renderWithError(error: Error) {
+    useMutationMock.current = {
+      data: undefined,
+      isError: true,
+      isPending: false,
+      mutate: vi.fn<(request: unknown) => void>(),
+      error,
+    }
+    render(
+      <TranslationCard
+        providerId="provider-1"
+        isExpanded
+        onExpandedChange={vi.fn<(expanded: boolean) => void>()}
+      />,
+    )
+  }
+
+  it("offers the upgrade in the card, with the feature on the link", () => {
+    const open = vi.spyOn(window, "open").mockReturnValue(null)
+    // The background's refusal for a spent pool below Ultra carries its action.
+    renderWithError(
+      Object.assign(new Error("Built-in AI quota used up"), {
+        code: "HOSTED_AI_QUOTA_EXHAUSTED",
+        action: {
+          label: "Upgrade",
+          url: "https://readfrog.app/pricing?entry=extension_quota_exhausted",
+        },
+      }),
+    )
+
+    fireEvent.click(screen.getByRole("button", { name: "action.upgrade" }))
+
+    const url = new URL(open.mock.calls[0]![0] as string)
+    expect(url.pathname).toBe("/pricing")
+    expect(url.searchParams.get("entry")).toBe("extension_quota_exhausted")
+    expect(url.searchParams.get("feature")).toBe("translation_hub")
+    open.mockRestore()
+  })
+
+  it("offers a guest the log-in", () => {
+    renderWithError(Object.assign(new Error("Log in to use Built-in AI"), { code: "UNAUTHORIZED" }))
+
+    expect(screen.getByRole("button", { name: "account.login" })).toBeInTheDocument()
+  })
+
+  it("offers Ultra no upgrade: its refusal carries no action", () => {
+    renderWithError(
+      Object.assign(new Error("Built-in AI quota used up"), { code: "HOSTED_AI_QUOTA_EXHAUSTED" }),
+    )
+
+    expect(screen.getByText("Built-in AI quota used up")).toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: "action.upgrade" })).not.toBeInTheDocument()
+  })
+})

@@ -16,6 +16,7 @@ import { ensureRemoteSiteRulesLoaded } from "@/utils/site-rules/active"
 import { runAiSegmentSubtitles } from "./ai-segmentation"
 import { dispatchBackgroundStreamPort } from "./background-stream"
 import { initializeActionIcons, registerActionIconListeners } from "./browser-action-icon"
+import { claimBuiltInAiAutoPrompt } from "./built-in-ai-auto-prompt"
 import { ensureInitializedConfig, isFreshInstalledConfig } from "./config"
 import { setUpConfigBackup } from "./config-backup"
 import { initializeContextMenu, registerContextMenuListeners } from "./context-menu"
@@ -90,6 +91,7 @@ export default defineBackground({
     })
 
     onMessage("getFreeTranslateProviderId", () => getFreeTranslateProviderId())
+    onMessage("claimBuiltInAiAutoPrompt", () => claimBuiltInAiAutoPrompt())
 
     onMessage("openPage", async (message) => {
       const { url, active } = message.data

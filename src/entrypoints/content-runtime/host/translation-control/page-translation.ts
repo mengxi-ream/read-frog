@@ -1,7 +1,7 @@
 import type { LanguageTag } from "@read-frog/definitions"
 import type { FeatureUsageContext } from "@/types/analytics"
 import type { Config } from "@/types/config/config"
-import type { HostedAiUnavailableReason } from "@/utils/hosted-ai/types"
+import type { BuiltInAiRefusalPromptOptions } from "@/utils/content-runtime/built-in-ai-prompt"
 import debounce from "debounce"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
@@ -21,10 +21,7 @@ import {
   GIANT_PARAGRAPH_SPLIT_VIEWPORT_MULTIPLIER,
   GIANT_SPLIT_STRANDED_TEXT_MAX_UNITS,
 } from "@/utils/constants/translate"
-import {
-  getBuiltInAiUpgradePlan,
-  openBuiltInAiPrompt,
-} from "@/utils/content-runtime/built-in-ai-prompt"
+import { promptForBuiltInAiRefusal } from "@/utils/content-runtime/built-in-ai-prompt"
 import {
   clearAppliedDocumentTitleTranslation,
   setAppliedDocumentTitleTranslation,
@@ -64,6 +61,7 @@ import { validateTranslationConfigAndToast } from "@/utils/host/translate/transl
 import { translateTextForPageTitle } from "@/utils/host/translate/translate-variants"
 import {
   beginPageTranslationSession,
+  claimPageTranslationRequestFailure,
   endPageTranslationSession,
   onPageTranslationRequestFailed,
   setPageTranslationSessionProviderRef,
@@ -73,6 +71,7 @@ import { cancelSpinnerAnimation } from "@/utils/host/translate/ui/spinner"
 import { ensureSiteRuleCSS, removeSiteRuleCSS } from "@/utils/host/translate/ui/style-injector"
 import { getOrCreateWebPageContext } from "@/utils/host/translate/webpage-context"
 import { readHostedAiReasoningChoice } from "@/utils/hosted-ai/models"
+import { getBuiltInAiRefusalKind } from "@/utils/hosted-ai/refusal"
 import { createLogger } from "@/utils/logging/logger"
 import { sendMessage } from "@/utils/message"
 import {
@@ -104,19 +103,27 @@ function isUserStarted(
 }
 
 /**
- * The prompt for a Built-in AI refusal someone can act on: a guest can log in, and an
- * account whose pool is spent can upgrade. Anything else keeps to a toast.
+ * How page translation asks someone Built-in AI refused to log in or upgrade. A start
+ * someone made gets the dialog. Automatic translation runs on every page someone opens,
+ * so it gets the dialog only for the first spent pool of a browser session, which the
+ * background keeps track of, and a toast with the same button after that; a guest's
+ * automatic translation keeps to the toast with its log-in button.
  */
-function getBuiltInAiPromptKind(
-  reason: HostedAiUnavailableReason | undefined,
-): "logIn" | "upgrade" | null {
-  switch (reason) {
-    case "authentication_required":
-      return "logIn"
-    case "quota_exhausted":
-      return "upgrade"
-    default:
-      return null
+function getPagePromptOptions(
+  analyticsContext: FeatureUsageContext<"page_translation"> | undefined,
+): Pick<
+  BuiltInAiRefusalPromptOptions,
+  "feature" | "analyticsFeature" | "trigger" | "mayOpenDialog"
+> {
+  const userStarted = isUserStarted(analyticsContext)
+  return {
+    feature: "pageTranslation",
+    analyticsFeature: ANALYTICS_FEATURE.PAGE_TRANSLATION,
+    trigger: userStarted ? "user" : "auto",
+    ...(!userStarted && {
+      mayOpenDialog: async (kind) =>
+        kind === "upgrade" && (await sendMessage("claimBuiltInAiAutoPrompt")),
+    }),
   }
 }
 
@@ -489,31 +496,23 @@ export class PageTranslationManager implements IPageTranslationManager {
         })
       }
 
-      // Someone who asked for a translation Built-in AI refused is asked to log in (a
-      // guest) or to upgrade (a spent pool), or to switch to machine translation and go
-      // on. Automatic translation keeps to a toast rather than putting a dialog over every
-      // page it opens, and frames stay quiet: one click, one prompt.
-      const promptKind = isUserStarted(analyticsContext)
-        ? getBuiltInAiPromptKind(availability.reason)
-        : null
-      if (!promptKind) {
-        toastManager.add({ type: "error", title: availability.message })
-        return
-      }
+      // Someone Built-in AI refused is asked to log in (a guest) or to upgrade (a spent
+      // pool), or to switch to machine translation and go on; see getPagePromptOptions.
+      // Frames leave that to the top frame: one page, one prompt. Anything else, and
+      // Ultra, which has no plan above it, keeps to a toast.
       if (window !== window.top) {
+        if (!isUserStarted(analyticsContext) || !getBuiltInAiRefusalKind(availability.error)) {
+          toastManager.add({ type: "error", title: availability.message })
+        }
         return
       }
-      const retry = () => void this.start(analyticsContext)
-      if (promptKind === "logIn") {
-        openBuiltInAiPrompt({ kind: "logIn", feature: "pageTranslation", retry })
-        return
-      }
-      const plan = await getBuiltInAiUpgradePlan()
-      if (plan === null) {
-        // Ultra has no plan above it.
+      const prompted = await promptForBuiltInAiRefusal(availability.error, {
+        ...getPagePromptOptions(analyticsContext),
+        retry: () => void this.start(analyticsContext),
+        isCurrent: () => this.pendingStart === startToken,
+      })
+      if (!prompted) {
         toastManager.add({ type: "error", title: availability.message })
-      } else if (this.pendingStart === startToken) {
-        openBuiltInAiPrompt({ kind: "upgrade", plan, feature: "pageTranslation", retry })
       }
       return
     }
@@ -532,7 +531,7 @@ export class PageTranslationManager implements IPageTranslationManager {
 
       beginPageTranslationSession()
       setPageTranslationSessionProviderRef(availability.providerRef, reasoningChoice)
-      if (isUserStarted(analyticsContext) && window === window.top) {
+      if (window === window.top) {
         this.listenForSpentPool(sessionVersion, analyticsContext)
       }
 
@@ -651,34 +650,35 @@ export class PageTranslationManager implements IPageTranslationManager {
   }
 
   /**
-   * Asks to upgrade, once, when Built-in AI's pool runs dry partway down a page someone
-   * started translating. Each paragraph after that shows its own inline error, but a page
-   * of them doesn't say what to do. Switching to machine translation starts the page over:
-   * the session's provider is fixed when it starts.
+   * Asks to upgrade, once a session, when Built-in AI's pool runs dry partway down a page;
+   * see getPagePromptOptions for how an automatic session asks. Each paragraph after that
+   * shows its own inline error, but a page of them doesn't say what to do. The session
+   * answers for every spent-pool failure in its frame, hover translation's included, so
+   * nothing else asks again. Switching to machine translation starts the page over: the
+   * session's provider is fixed when it starts. Ultra keeps to the inline errors.
    */
   private listenForSpentPool(
     sessionVersion: number,
     analyticsContext: FeatureUsageContext<"page_translation"> | undefined,
   ): void {
+    let asked = false
     this.stopListeningForSpentPool = onPageTranslationRequestFailed((error) => {
-      if (classifyFailureReason(error) !== "quota_exceeded") {
+      if (getBuiltInAiRefusalKind(error) !== "upgrade") {
         return
       }
-      this.stopListeningForSpentPool?.()
-      this.stopListeningForSpentPool = null
-      void getBuiltInAiUpgradePlan().then((plan) => {
-        if (plan === null || this.translationSessionVersion !== sessionVersion) {
-          return
-        }
-        openBuiltInAiPrompt({
-          kind: "upgrade",
-          plan,
-          feature: "pageTranslation",
-          retry: () => {
-            this.stop()
-            void this.start(analyticsContext)
-          },
-        })
+      claimPageTranslationRequestFailure(error)
+      if (asked) {
+        return
+      }
+      asked = true
+      void promptForBuiltInAiRefusal(error, {
+        ...getPagePromptOptions(analyticsContext),
+        kinds: ["upgrade"],
+        retry: () => {
+          this.stop()
+          void this.start(analyticsContext)
+        },
+        isCurrent: () => this.translationSessionVersion === sessionVersion,
       })
     })
   }

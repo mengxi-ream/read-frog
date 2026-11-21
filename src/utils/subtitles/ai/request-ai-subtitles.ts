@@ -2,6 +2,7 @@ import type { VideoTranscriptStatus } from "@read-frog/api-contract"
 import type { SubtitlesError } from "@/utils/subtitles/errors"
 import type { SubtitlesFragment } from "@/utils/subtitles/types"
 import { safe } from "@orpc/client"
+import { ANALYTICS_FEATURE } from "@/types/analytics"
 import { billingAction, upgradeAction } from "@/utils/error-action"
 import { i18n } from "@/utils/i18n"
 import { isORPCPublicAppError } from "@/utils/notebase/errors"
@@ -52,7 +53,7 @@ function mapTranscriptError(error: unknown): SubtitlesError {
   if (isORPCPublicAppError(error, "VIDEO_TRANSCRIPTION_SUBSCRIPTION_REQUIRED")) {
     return new ToastSubtitlesError(
       i18n.t("subtitles.errors.aiSubscriptionRequired"),
-      upgradeAction("extension_video_quota"),
+      upgradeAction("extension_video_quota", ANALYTICS_FEATURE.VIDEO_SUBTITLES),
     )
   }
   if (isORPCPublicAppError(error, "VIDEO_TRANSCRIPTION_PAYMENT_REQUIRED")) {
@@ -63,7 +64,7 @@ function mapTranscriptError(error: unknown): SubtitlesError {
     // time the server refuses, only it knows the remainder and we do not.
     return new ToastSubtitlesError(
       i18n.t("subtitles.errors.aiQuotaExceeded"),
-      upgradeAction("extension_video_quota"),
+      upgradeAction("extension_video_quota", ANALYTICS_FEATURE.VIDEO_SUBTITLES),
     )
   }
   if (isORPCPublicAppError(error, "VIDEO_TRANSCRIPTION_UNSUPPORTED_LENGTH")) {

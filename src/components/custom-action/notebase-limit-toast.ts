@@ -1,4 +1,5 @@
 import { toastManager } from "@/components/ui/base-ui/toast"
+import { ANALYTICS_FEATURE } from "@/types/analytics"
 import { pricingUrl } from "@/utils/error-action"
 import { i18n } from "@/utils/i18n"
 import { sendMessage } from "@/utils/message"
@@ -12,7 +13,7 @@ export function showNotebaseLimitExceededToast() {
       onClick: () => {
         toastManager.close(toastId)
         void sendMessage("openPage", {
-          url: pricingUrl("extension_notebase_limit"),
+          url: pricingUrl("extension_notebase_limit", ANALYTICS_FEATURE.NOTE_SAVE),
           active: true,
         })
       },

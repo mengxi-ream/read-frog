@@ -8,9 +8,10 @@ import { classifyFailureReason } from "@/utils/analytics-failure-reason"
 import { classifyResolvedProvider, UNKNOWN_FEATURE_PROVIDER } from "@/utils/analytics-provider"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { INPUT_REPLACE_REQUEST_TYPE } from "@/utils/constants/input-injector"
-import { openBuiltInAiPrompt } from "@/utils/content-runtime/built-in-ai-prompt"
+import { promptForBuiltInAiRefusal } from "@/utils/content-runtime/built-in-ai-prompt"
 import { getDeepActiveElement } from "@/utils/dom/active-element"
 import { translateTextForInput } from "@/utils/host/translate/translate-variants"
+import { getBuiltInAiRefusalKind } from "@/utils/hosted-ai/refusal"
 import { createLogger } from "@/utils/logging/logger"
 import { HostedAiProviderUnavailableError } from "@/utils/providers/provider-ref"
 import { resolveProviderRefForCapability } from "@/utils/providers/provider-registry"
@@ -132,6 +133,31 @@ function setTextWithUndo(
   }
 }
 
+/**
+ * A Built-in AI refusal is a state the user can act on, not a defect: without a word the
+ * spinner just appears and disappears and the feature reads as broken. A guest is asked to
+ * log in and a spent pool to upgrade, whether the status check refused before the request
+ * or the server during it; either can instead switch to machine translation and type the
+ * spaces again. Any other hosted denial, and Ultra's spent pool, says so in a toast.
+ */
+async function reportInputTranslationFailure(error: unknown): Promise<void> {
+  const prompted = await promptForBuiltInAiRefusal(error, {
+    feature: "inputTranslation",
+    analyticsFeature: ANALYTICS_FEATURE.INPUT_TRANSLATION,
+    trigger: "user",
+  })
+  if (prompted) {
+    return
+  }
+  if (error instanceof HostedAiProviderUnavailableError || getBuiltInAiRefusalKind(error)) {
+    toastManager.add({
+      type: "error",
+      title: error instanceof Error ? error.message : String(error),
+      id: HOSTED_UNAVAILABLE_TOAST_ID,
+    })
+  }
+}
+
 export function useInputTranslation() {
   const inputTranslationConfig = useAtomValue(configFieldsAtomMap.inputTranslation)
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
@@ -249,21 +275,7 @@ export function useInputTranslation() {
             failure_reason: classifyFailureReason(error),
           })
         }
-        // A hosted plan/quota denial is a state the user can act on, not a
-        // defect: without this the spinner just appears and disappears and
-        // the feature reads as broken.
-        if (error instanceof HostedAiProviderUnavailableError) {
-          if (error.reason === "authentication_required") {
-            // A guest: log in, or switch to machine translation and type the spaces again.
-            openBuiltInAiPrompt({ kind: "logIn", feature: "inputTranslation" })
-          } else {
-            toastManager.add({
-              type: "error",
-              title: error.message,
-              id: HOSTED_UNAVAILABLE_TOAST_ID,
-            })
-          }
-        }
+        void reportInputTranslationFailure(error)
         log.error("Input translation failed", { error })
       } finally {
         hideSpinner()

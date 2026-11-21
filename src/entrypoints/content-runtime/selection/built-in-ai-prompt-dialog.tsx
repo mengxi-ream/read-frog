@@ -1,3 +1,4 @@
+import type { BuiltInAiPromptAction } from "@/types/analytics"
 import { useAtomValue, useSetAtom } from "jotai"
 import { use, useState } from "react"
 import { Button } from "@/components/ui/base-ui/button"
@@ -10,6 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/base-ui/dialog"
 import { toastManager } from "@/components/ui/base-ui/toast"
+import { trackBuiltInAiPromptAction } from "@/utils/analytics"
 import { configFieldsAtomMap, writeConfigAtom } from "@/utils/atoms/config"
 import { getProviderConfigById } from "@/utils/config/helpers"
 import {
@@ -19,6 +21,7 @@ import {
 import { SELECTION_CONTENT_OVERLAY_LAYERS } from "@/utils/constants/selection-overlay-layers"
 import {
   closeBuiltInAiPrompt,
+  toAnalyticsPromptKind,
   useBuiltInAiPrompt,
 } from "@/utils/content-runtime/built-in-ai-prompt"
 import { logInUrl, pricingUrl } from "@/utils/error-action"
@@ -42,9 +45,32 @@ export function BuiltInAiPromptDialog() {
   const setConfig = useSetAtom(writeConfigAtom)
   const [isSwitching, setIsSwitching] = useState(false)
 
-  const openWebsite = (url: string) => {
+  const trackAction = (action: BuiltInAiPromptAction) => {
+    if (!request) {
+      return
+    }
+    void trackBuiltInAiPromptAction({
+      feature: request.analyticsFeature,
+      kind: toAnalyticsPromptKind(request.kind),
+      presentation: "dialog",
+      trigger: request.trigger,
+      action,
+    })
+  }
+
+  const openWebsite = () => {
+    if (!request) {
+      return
+    }
+    trackAction(request.kind === "upgrade" ? "upgrade" : "log_in")
     closeBuiltInAiPrompt()
-    void sendMessage("openPage", { url, active: true })
+    void sendMessage("openPage", {
+      url:
+        request.kind === "upgrade"
+          ? pricingUrl("extension_quota_exhausted", request.analyticsFeature)
+          : logInUrl(),
+      active: true,
+    })
   }
 
   const switchToMachineTranslation = async () => {
@@ -52,6 +78,7 @@ export function BuiltInAiPromptDialog() {
       return
     }
 
+    trackAction("machine_translation")
     setIsSwitching(true)
     try {
       const providerId = await sendMessage("getFreeTranslateProviderId")
@@ -79,7 +106,9 @@ export function BuiltInAiPromptDialog() {
     <Dialog
       open={request !== null}
       onOpenChange={(open) => {
+        // Only a close the reader made lands here: the buttons close the dialog themselves.
         if (!open) {
+          trackAction("dismissed")
           closeBuiltInAiPrompt()
         }
       }}
@@ -113,14 +142,7 @@ export function BuiltInAiPromptDialog() {
           >
             {i18n.t("hostedAi.builtInAiPrompt.useMachineTranslation")}
           </Button>
-          <Button
-            type="button"
-            variant="accent"
-            disabled={isSwitching}
-            onClick={() =>
-              openWebsite(isUpgrade ? pricingUrl("extension_quota_exhausted") : logInUrl())
-            }
-          >
+          <Button type="button" variant="accent" disabled={isSwitching} onClick={openWebsite}>
             {isUpgrade ? i18n.t("action.upgrade") : i18n.t("account.login")}
           </Button>
         </DialogFooter>
