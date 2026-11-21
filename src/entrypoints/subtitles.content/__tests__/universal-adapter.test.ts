@@ -47,6 +47,10 @@ vi.mock("@/utils/subtitles/toast", () => ({
   showAiSubtitlesWallToast: mocks.showAiSubtitlesWallToast,
 }))
 
+vi.mock("@/utils/subtitles/ai/access-guard", () => ({
+  ensureAiSubtitlesAccess: async () => true,
+}))
+
 vi.mock("@/utils/config/storage", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/utils/config/storage")>()
   return {

@@ -7,7 +7,6 @@ import { SUBTITLES_SOURCE } from "@/utils/constants/subtitles"
 import { i18n } from "@/utils/i18n"
 import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-host"
 import { cn } from "@/utils/styles/utils"
-import { ensureAiSubtitlesAccess } from "@/utils/subtitles/ai/access-guard"
 import { setAiSubtitlesToastAnchor } from "@/utils/subtitles/toast"
 import { subtitlesSourceAtom, subtitlesStore, subtitlesVisibleAtom } from "../../../atoms"
 import { useSubtitlesUI } from "../../subtitles-ui-context"
@@ -38,9 +37,6 @@ export function RequestAiSubtitlesItem() {
     setPending(true)
 
     try {
-      if (!(await ensureAiSubtitlesAccess())) {
-        return
-      }
       await requestAiSubtitles()
     } finally {
       setPending(false)

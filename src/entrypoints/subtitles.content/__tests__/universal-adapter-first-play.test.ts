@@ -5,6 +5,7 @@ import { UniversalVideoAdapter } from "../universal-adapter"
 
 const mocks = vi.hoisted(() => ({
   getLocalConfig: vi.fn<(...args: any[]) => any>(),
+  ensureAiSubtitlesAccess: vi.fn<() => Promise<boolean>>(async () => true),
 }))
 
 vi.mock("@/utils/config/storage", async (importOriginal) => {
@@ -14,6 +15,10 @@ vi.mock("@/utils/config/storage", async (importOriginal) => {
     getLocalConfig: mocks.getLocalConfig,
   }
 })
+
+vi.mock("@/utils/subtitles/ai/access-guard", () => ({
+  ensureAiSubtitlesAccess: mocks.ensureAiSubtitlesAccess,
+}))
 
 vi.mock("@/utils/subtitles/toast", () => ({
   showSubtitlesErrorToast: vi.fn<(...args: any[]) => any>(),
@@ -111,6 +116,16 @@ describe("universalVideoAdapter before the first play of an embedded video", () 
 
   it("keeps the first-play start after an AI request refused as live", async () => {
     const { adapter, play, switchedSources } = await setUpPausedEmbeddedVideo({ isLive: true })
+
+    await adapter.requestAiSubtitles()
+    play()
+
+    expect(switchedSources()).toEqual([SUBTITLES_SOURCE.NATIVE])
+  })
+
+  it("keeps the first-play start after an AI request stopped by the sign-in, plan or quota wall", async () => {
+    const { adapter, play, switchedSources } = await setUpPausedEmbeddedVideo()
+    mocks.ensureAiSubtitlesAccess.mockResolvedValueOnce(false)
 
     await adapter.requestAiSubtitles()
     play()
