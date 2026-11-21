@@ -1,5 +1,13 @@
 # @read-frog/extension
 
+## 1.61.2
+
+### Patch Changes
+
+- [#2561](https://github.com/mengxi-ream/read-frog/pull/2561) [`7f51190`](https://github.com/mengxi-ream/read-frog/commit/7f5119082a54ed199f987fac0d575cc48129557c) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - style(providers): show the colored Claude logo for the Anthropic provider and Claude models
+
+- [#2536](https://github.com/mengxi-ream/read-frog/pull/2536) [`38ed1d0`](https://github.com/mengxi-ream/read-frog/commit/38ed1d0498ab7e0159b6841df51dfe051aa73599) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(subtitles): keep the subtitles a reader picks before an embedded video first plays. With subtitles set to start automatically, the first play of an X or embedded YouTube video replaced AI subtitles asked for beforehand with the video's own captions and turned back on subtitles the reader had switched off
+
 ## 1.61.1
 
 ### Patch Changes
