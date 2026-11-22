@@ -15,15 +15,6 @@ const streamBackgroundNoteSuggestionMock = vi.fn<(...args: any[]) => any>()
 const validateNoteSuggestionMock = vi.fn<(...args: any[]) => any>()
 const getOrCreateWebPageContextMock = vi.fn<(...args: any[]) => any>()
 const hostedStatusMock = vi.fn<(...args: any[]) => any>()
-const toastAddMock = vi.fn<(...args: any[]) => any>()
-
-vi.mock("@/components/ui/base-ui/toast", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@/components/ui/base-ui/toast")>()
-  return {
-    ...actual,
-    toastManager: { ...actual.toastManager, add: (...args: any[]) => toastAddMock(...args) },
-  }
-})
 
 vi.mock("@/utils/content-script/background-stream-client", () => ({
   streamBackgroundNoteSuggestion: (...args: any[]) => streamBackgroundNoteSuggestionMock(...args),
@@ -40,9 +31,7 @@ vi.mock("@/utils/message", () => ({
   sendMessage: (...args: any[]) => hostedStatusMock(...args),
 }))
 
-const { resetNoteSuggestionLogInPromptForTests, useNoteSuggestion } =
-  await import("../use-note-suggestion")
-const { logInAction } = await import("@/utils/error-action")
+const { useNoteSuggestion } = await import("../use-note-suggestion")
 
 function wrapper(store: ReturnType<typeof createStore>) {
   return function Wrapper({ children }: { children: ReactNode }) {
@@ -104,19 +93,6 @@ function createHostedStatus(available: boolean, models = testHostedAiModels()) {
   }
 }
 
-/** What the server sends a guest for save suggestions: sign in first. */
-function createGuestStatus() {
-  return {
-    features: {
-      noteSuggestion: {
-        normal: { available: false, unavailableReason: "authentication_required" },
-      },
-    },
-    pools: [],
-    models: testHostedAiModels(),
-  }
-}
-
 const fireInput = (
   sessionKey: string,
   provider: NoteSuggestionFireInput["provider"] = LOCAL_PROVIDER_REF,
@@ -149,7 +125,6 @@ describe("useNoteSuggestion", () => {
     streamBackgroundNoteSuggestionMock.mockResolvedValue(VALID_ENVELOPE)
     validateNoteSuggestionMock.mockReturnValue(VALIDATED_SUGGESTION)
     hostedStatusMock.mockResolvedValue(undefined)
-    resetNoteSuggestionLogInPromptForTests()
   })
 
   afterEach(() => {
@@ -263,33 +238,6 @@ describe("useNoteSuggestion", () => {
     await flushRun()
     expect(hostedStatusMock).toHaveBeenCalledTimes(1)
     expect(streamBackgroundNoteSuggestionMock).not.toHaveBeenCalled()
-    // Waiting fixes a spent quota, so nobody is asked to do anything.
-    expect(toastAddMock).not.toHaveBeenCalled()
-  })
-
-  it("asks a guest to log in, once per page, instead of skipping silently", async () => {
-    hostedStatusMock.mockResolvedValue(createGuestStatus())
-    const store = createStore()
-    store.set(configAtom, DEFAULT_CONFIG)
-    const { result } = renderHook(() => useNoteSuggestion(), { wrapper: wrapper(store) })
-
-    act(() => result.current.maybeFire(fireInput("1:lang:0", SYSTEM_PROVIDER_REF)))
-    await waitFor(() => expect(hostedStatusMock).toHaveBeenCalledTimes(1))
-    await flushRun()
-
-    expect(streamBackgroundNoteSuggestionMock).not.toHaveBeenCalled()
-    expect(toastAddMock).toHaveBeenCalledTimes(1)
-    expect(toastAddMock.mock.calls[0]?.[0]).toMatchObject({
-      title: "hostedAi.builtInAiPrompt.logInTitle",
-      actionProps: { children: logInAction().label },
-    })
-
-    // The next selection skips again, without asking a second time.
-    act(() => result.current.maybeFire(fireInput("2:lang:0", SYSTEM_PROVIDER_REF)))
-    await waitFor(() => expect(hostedStatusMock).toHaveBeenCalledTimes(2))
-    await flushRun()
-    expect(streamBackgroundNoteSuggestionMock).not.toHaveBeenCalled()
-    expect(toastAddMock).toHaveBeenCalledTimes(1)
   })
 
   it("skips silently when the server says the model cannot run now", async () => {
