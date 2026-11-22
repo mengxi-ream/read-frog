@@ -1594,7 +1594,7 @@ translateService:
   title: Servicio de traducción
   description: Solo para traducir la página web
   builtInModels: Built-in Models
-  llmModels: LLM Models
+  llmModels: Modelos de terceros
   normalTranslator: Traductor normal
   selectServices: Seleccionar servicios
   translationProviders: Proveedores de traducción

@@ -1599,7 +1599,7 @@ translateService:
   title: 翻譯服務
   description: 僅用於翻譯網頁內容
   builtInModels: 內建模型
-  llmModels: 大語言模型
+  llmModels: 第三方模型
   normalTranslator: 一般翻譯
   selectServices: 選擇服務
   translationProviders: 翻譯服務

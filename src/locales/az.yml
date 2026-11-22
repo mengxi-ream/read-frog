@@ -1594,7 +1594,7 @@ translateService:
   title: Tərcümə xidməti
   description: Yalnız veb səhifənin tərcüməsi üçün
   builtInModels: Daxili modellər
-  llmModels: LLM modelləri
+  llmModels: Üçüncü tərəf modelləri
   normalTranslator: Adi tərcüməçilər
   selectServices: Xidmətləri seçin
   translationProviders: Tərcümə provayderləri
