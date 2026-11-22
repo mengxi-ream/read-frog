@@ -148,6 +148,8 @@ export const BILIBILI_PLAYER_INFO_URL_PATTERN =
   /^(?:https:)?\/\/api\.bilibili\.com\/x\/player\/wbi\/v2\?/
 export const BILIBILI_SUBTITLES_REQUEST_TYPE = "READ_FROG_BILIBILI_SUBTITLES"
 export const BILIBILI_SUBTITLES_RESPONSE_TYPE = "READ_FROG_BILIBILI_SUBTITLES_DONE"
+export const BILIBILI_PLAYING_PART_REQUEST_TYPE = "READ_FROG_BILIBILI_PLAYING_PART"
+export const BILIBILI_PLAYING_PART_RESPONSE_TYPE = "READ_FROG_BILIBILI_PLAYING_PART_DONE"
 // The page script waits this long for the player to reach the part and report its subtitle list.
 export const BILIBILI_PAGE_WAIT_TIMEOUT_MS = 5000
 // A page script injected after the player asked repeats the player's request once, within this.

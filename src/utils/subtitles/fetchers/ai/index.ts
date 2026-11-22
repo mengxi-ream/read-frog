@@ -12,10 +12,10 @@ export class AiSubtitlesFetcher implements SubtitlesFetcher {
   private abortController: AbortController | null = null
   private inFlight: { videoId: string; promise: Promise<SubtitlesFragment[]> } | null = null
 
-  constructor(private createAiSubtitlesContext: () => AiSubtitlesContext | null) {}
+  constructor(private createAiSubtitlesContext: () => Promise<AiSubtitlesContext | null>) {}
 
   async fetch(): Promise<SubtitlesFragment[]> {
-    const ctx = this.createAiSubtitlesContext()
+    const ctx = await this.createAiSubtitlesContext()
     if (!ctx) {
       throw new OverlaySubtitlesError(i18n.t("subtitles.errors.noSubtitlesFound"))
     }
@@ -42,7 +42,7 @@ export class AiSubtitlesFetcher implements SubtitlesFetcher {
     try {
       const { segments, detectedLanguage } = await requestAiSubtitles(ctx, { signal })
 
-      if (this.createAiSubtitlesContext()?.videoId !== ctx.videoId) {
+      if ((await this.createAiSubtitlesContext())?.videoId !== ctx.videoId) {
         throw new DOMException("Aborted", "AbortError")
       }
 
@@ -67,14 +67,17 @@ export class AiSubtitlesFetcher implements SubtitlesFetcher {
   }
 
   async hasAvailableSubtitles(): Promise<boolean> {
-    return this.createAiSubtitlesContext() !== null
+    return (await this.createAiSubtitlesContext()) !== null
   }
 
+  // A context missing for a moment, as while the player switches quality, is no other video: a part
+  // change resets the session through navigation instead.
   async shouldUseSameTrack(): Promise<boolean> {
     if (this.subtitles.length === 0 || this.cachedVideoId === null) {
       return false
     }
-    return this.createAiSubtitlesContext()?.videoId === this.cachedVideoId
+    const ctx = await this.createAiSubtitlesContext()
+    return ctx === null || ctx.videoId === this.cachedVideoId
   }
 
   cleanup(): void {

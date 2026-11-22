@@ -237,7 +237,12 @@ export class SubtitlesSwitch {
     scheduler.reset()
     scheduler.setState("loading")
 
-    await this.startTranslation()
+    const succeeded = await this.startTranslation()
+    // As after a switch: an AI track that fails to reload ends the AI session, or the next track
+    // check would request it again, as Bilibili's every second.
+    if (!succeeded && this.source !== SUBTITLES_SOURCE.NATIVE && !isOvertaken()) {
+      this.revertToNativeSource()
+    }
   }
 
   dropPendingStart() {

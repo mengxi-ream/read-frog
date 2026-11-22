@@ -36,8 +36,8 @@ describe("x AI subtitles", () => {
     mocks.video = { duration: 341.043, poster: POSTER }
   })
 
-  it("names the played video by its poster's media id, under its post link", () => {
-    expect(createAiSubtitlesContext?.()).toEqual({
+  it("names the played video by its poster's media id, under its post link", async () => {
+    await expect(createAiSubtitlesContext?.()).resolves.toEqual({
       videoId: MEDIA_ID,
       url: POST_URL,
       durationSec: 342,
@@ -47,9 +47,9 @@ describe("x AI subtitles", () => {
 
   it.each([CUSTOM_COVER_POSTER, REPLAY_POSTER, ""])(
     "names the only video of the post holding it when the poster %j holds no media id",
-    (poster) => {
+    async (poster) => {
       mocks.video = { duration: 341.043, poster }
-      expect(createAiSubtitlesContext?.()).toEqual({
+      await expect(createAiSubtitlesContext?.()).resolves.toEqual({
         videoId: xcomPostVideoKey(STATUS_ID),
         url: POST_URL,
         durationSec: 342,
@@ -57,18 +57,18 @@ describe("x AI subtitles", () => {
     },
   )
 
-  it("has no context for a GIF, which X plays as a silent video", () => {
+  it("has no context for a GIF, which X plays as a silent video", async () => {
     mocks.video = { duration: 341.043, poster: GIF_POSTER }
-    expect(createAiSubtitlesContext?.()).toBeNull()
+    await expect(createAiSubtitlesContext?.()).resolves.toBeNull()
   })
 
-  it("has no context without a post link, even on a post's page, or without a video", () => {
+  it("has no context without a post link, even on a post's page, or without a video", async () => {
     mocks.postUrl = null
-    expect(createAiSubtitlesContext?.()).toBeNull()
+    await expect(createAiSubtitlesContext?.()).resolves.toBeNull()
 
     mocks.postUrl = POST_URL
     mocks.video = null
-    expect(createAiSubtitlesContext?.()).toBeNull()
+    await expect(createAiSubtitlesContext?.()).resolves.toBeNull()
   })
 
   it.each([
@@ -78,7 +78,7 @@ describe("x AI subtitles", () => {
   ])("treats a video $live as live, with no context", async ({ video }) => {
     mocks.video = video
     await expect(isLiveContent?.()).resolves.toBe(true)
-    expect(createAiSubtitlesContext?.()).toBeNull()
+    await expect(createAiSubtitlesContext?.()).resolves.toBeNull()
   })
 
   it("tells a reader refused while a broadcast is live that its replay will work", () => {

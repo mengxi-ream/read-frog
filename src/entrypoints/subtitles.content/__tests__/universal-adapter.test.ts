@@ -415,6 +415,25 @@ describe("universalVideoAdapter", () => {
     expect(startTranslationSpy).toHaveBeenCalledTimes(1)
   })
 
+  it("returns to native subtitles when an AI track fails to reload on a track check", async () => {
+    const { adapter, subtitlesFetcher } = createAdapter([])
+    ;(adapter as any).subtitlesSwitch.source = SUBTITLES_SOURCE.AI
+    subtitlesFetcher.fetch.mockRejectedValue(
+      new ToastSubtitlesError("subtitles.errors.aiSubscriptionRequired"),
+    )
+    attachScheduler(adapter, true)
+    const showNativeSubtitles = vi
+      .spyOn((adapter as any).nativeCaptions, "showNativeSubtitles")
+      .mockImplementation(() => {})
+
+    await adapter.handleSourceTrackChanged()
+
+    expect(mocks.showAiSubtitlesWallToast).toHaveBeenCalledOnce()
+    expect((adapter as any).subtitlesSwitch.source).toBe(SUBTITLES_SOURCE.NATIVE)
+    expect(subtitlesStore.get(subtitlesSourceAtom)).toBe(SUBTITLES_SOURCE.NATIVE)
+    expect(showNativeSubtitles).toHaveBeenCalled()
+  })
+
   it("ignores source track changes when translation is disabled", async () => {
     const { adapter, subtitlesFetcher } = createAdapter([{ text: "hello", start: 0, end: 500 }])
 
