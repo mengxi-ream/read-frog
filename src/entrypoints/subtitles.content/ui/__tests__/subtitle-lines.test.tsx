@@ -4,7 +4,12 @@ import { act, render, screen } from "@testing-library/react"
 import { createStore, Provider } from "jotai"
 import { describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
-import { currentSubtitleAtom, currentTimeMsAtom, sourceTrackAtom } from "../../atoms"
+import {
+  currentSubtitleAtom,
+  currentTimeMsAtom,
+  sourceTrackAtom,
+  subtitlesStateAtom,
+} from "../../atoms"
 import { MainSubtitle, TranslationSubtitle } from "../subtitle-lines"
 
 const mockedAtoms = vi.hoisted(() => ({
@@ -101,6 +106,23 @@ describe("subtitle lines", () => {
 
     expect(container.querySelector("[data-pending='true']")).not.toBeNull()
     expect(screen.getByText("Translating")).toBeTruthy()
+  })
+
+  it("shows no pending indicator while an error holds translation", () => {
+    const store = createStoreWithLanguage("en")
+    store.set(currentTimeMsAtom, 500)
+    store.set(currentSubtitleAtom, null)
+    store.set(sourceTrackAtom, [{ text: "Hello", start: 0, end: 1000 }])
+    store.set(subtitlesStateAtom, { state: "error", message: "Insufficient Balance" })
+
+    const { container } = render(
+      <Provider store={store}>
+        <TranslationSubtitle />
+      </Provider>,
+    )
+
+    expect(container.querySelector("[data-pending='true']")).toBeNull()
+    expect(screen.queryByText("Translating")).toBeNull()
   })
 
   it("fades translation in when the pending cue resolves", () => {

@@ -25,6 +25,11 @@ export const TRANSLATION_BATCH_SIZE = 5
 export const TRANSLATE_LOOK_AHEAD_MS = 30_000
 export const PROCESS_LOOK_AHEAD_MS = 60_000
 export const MAX_LOOKAHEAD_RATE = 4
+// A line this close to showing (scaled with playback rate) without its translation gets a
+// machine one meanwhile; a few hundred milliseconds of Microsoft land before it shows.
+export const MACHINE_PLACEHOLDER_LEAD_MS = 1_500
+// Failed batches in a row before translation holds instead of covering up with machine ones.
+export const MAX_CONSECUTIVE_FAILED_BATCHES = 3
 
 // DOM IDs
 export const READ_FROG_SUBTITLES_UI_HOST_ID = "read-frog-subtitles-ui-host"

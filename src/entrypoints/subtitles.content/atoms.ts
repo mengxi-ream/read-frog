@@ -136,12 +136,12 @@ export const subtitlesShowStateAtom = atom((get): Exclude<SubtitlesState, "idle"
 export const subtitlesShowContentAtom = atom((get): boolean => {
   if (get(adPlayingAtom)) return false
 
-  const { subtitle, stateData, isVisible } = get(subtitlesDisplayAtom)
+  const { subtitle, isVisible } = get(subtitlesDisplayAtom)
   const { style } = get(configFieldsAtomMap.videoSubtitles)
 
   if (!isVisible) return false
 
-  if (stateData?.state === "error") return false
-
+  // Not even an error hides them: one that holds translation stays up, and the
+  // original and the lines already translated still play under it.
   return hasRenderableSubtitleByMode(subtitle, style.displayMode)
 })

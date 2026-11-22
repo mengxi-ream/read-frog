@@ -60,6 +60,7 @@ vi.mock("@/utils/subtitles/processor/translator", () => ({
   resolveSubtitlesProvider: mocks.resolveSubtitlesProvider,
   fetchSubtitlesSummary: mocks.fetchSubtitlesSummary,
   getSubtitlesPassLimits: () => ({ maxItemsPerBatch: 5, maxCharactersPerBatch: Infinity }),
+  isSubtitlesProviderAi: () => false,
   translateSubtitles: mocks.translateSubtitles,
 }))
 

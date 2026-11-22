@@ -61,6 +61,7 @@ interface RetryAwareError {
   retryAfterMs?: unknown
   kind?: unknown
   message?: unknown
+  responseBody?: unknown
 }
 
 const RATE_LIMIT_ERROR_RE = /\b429\b|too many requests|rate[ -]?limit/i
@@ -80,6 +81,12 @@ export function attachRequestErrorMeta<T extends Error>(error: T, meta: RequestE
 
 export function getRequestErrorMeta(error: unknown): RequestErrorMeta {
   const source = isObject(error) ? (error as RetryAwareError) : undefined
+  // OpenAI answers an empty balance with a 429 as well, but no pause refills
+  // it: fail at once and drain the backlog, like a hosted quota denial. No
+  // statusCode, so nothing can read it as a rate limit.
+  if (isInsufficientQuotaError(source)) {
+    return { kind: "access-denied", isRetryable: false }
+  }
   const attachedMeta = source?.[REQUEST_ERROR_META] ?? source?.requestErrorMeta
   const response = isObject(source?.response) ? (source.response as RetryAwareError) : undefined
 
@@ -309,6 +316,11 @@ function normalizeHeaders(headers: unknown): RequestErrorMeta["responseHeaders"]
   }
 
   return undefined
+}
+
+function isInsufficientQuotaError(source: RetryAwareError | undefined): boolean {
+  const body = source?.responseBody
+  return typeof body === "string" && body.includes('"insufficient_quota"')
 }
 
 function inferRequestErrorKind({

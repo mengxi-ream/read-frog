@@ -189,6 +189,13 @@ interface ProtocolMap {
     glossaryTerms?: MatchedTerm[]
     glossaryRevision?: number
   }) => Promise<string>
+  // A machine translation of one line, shown until the AI one arrives; its own
+  // queue, so a pause on the AI provider's does not hold it.
+  translateSubtitleWithMachine: (data: {
+    text: string
+    langConfig: Config["language"]
+    hash: string
+  }) => Promise<string>
   getSubtitlesSummary: (data: {
     videoTitle: string
     subtitlesContext: string

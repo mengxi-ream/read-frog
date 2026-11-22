@@ -85,6 +85,43 @@ describe("request retry policy", () => {
     expect(isRateLimitRequestError(error)).toBe(false)
   })
 
+  describe("OpenAI insufficient_quota", () => {
+    // What the AI SDK's APICallError carries for an empty OpenAI balance.
+    function openAiError(code: string, message: string) {
+      return Object.assign(new Error(message), {
+        statusCode: 429,
+        responseBody: JSON.stringify({ error: { message, type: code, param: null, code } }),
+      })
+    }
+
+    it("drains the queue at once instead of pausing as a rate limit", () => {
+      const error = openAiError("insufficient_quota", "You exceeded your current quota.")
+
+      expect(getRequestErrorMeta(error)).toEqual({ kind: "access-denied", isRetryable: false })
+      expect(isRateLimitRequestError(error)).toBe(false)
+      expect(defaultRequestRetryPolicy.decide(error, retryContext)).toEqual({
+        action: "fail",
+        failQueue: true,
+      })
+    })
+
+    it("stays a denial after the provider call attaches its metadata", () => {
+      const error = openAiError("insufficient_quota", "You exceeded your current quota.")
+      attachRequestErrorMeta(error, getRequestErrorMeta(error))
+
+      expect(defaultRequestRetryPolicy.decide(error, retryContext)).toEqual({
+        action: "fail",
+        failQueue: true,
+      })
+    })
+
+    it("still pauses on an ordinary OpenAI rate limit", () => {
+      const error = openAiError("rate_limit_exceeded", "Rate limit reached for gpt-4o.")
+
+      expect(defaultRequestRetryPolicy.decide(error, retryContext).action).toBe("pause-and-retry")
+    })
+  })
+
   it("preserves explicit bad-request metadata precedence", () => {
     const error = attachRequestErrorMeta(errorWithStatus(409), { kind: "bad-request" })
 

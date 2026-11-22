@@ -12,6 +12,7 @@ import { toastManager } from "@/components/ui/base-ui/toast"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { classifySerializedProvider } from "@/utils/analytics-provider"
 import { getLocalConfig } from "@/utils/config/storage"
+import { DEFAULT_PROVIDER_CONFIG } from "@/utils/constants/providers"
 import { TRANSLATION_BATCH_SIZE } from "@/utils/constants/subtitles"
 import { cleanText } from "@/utils/content/utils"
 import { resolveGlossaryTerms } from "@/utils/glossary/active-matcher"
@@ -349,6 +350,16 @@ function announceSubtitlesProviderResolution(
   return resolution.status === "ok" ? resolution.ref : null
 }
 
+/** Whether the subtitles provider is an AI (an LLM or Built-in AI) rather than a translation service. */
+export function isSubtitlesProviderAi(config: Config): boolean {
+  const resolved = resolveProviderRefForCapability(
+    "videoSubtitles",
+    config.providersConfig,
+    config.videoSubtitles.providerId,
+  )
+  return !!resolved && canResolvedProviderRefGenerateText(resolved)
+}
+
 /**
  * How many cues one translation pass may take. Only a provider on the batch
  * queue (the same rule as the background's `shouldUseBatchQueue`) packs them
@@ -356,18 +367,44 @@ function announceSubtitlesProviderResolution(
  * provider sends one request per cue and keeps the fixed group size.
  */
 export function getSubtitlesPassLimits(config: Config): BatchQueueConfig {
-  const resolved = resolveProviderRefForCapability(
-    "videoSubtitles",
-    config.providersConfig,
-    config.videoSubtitles.providerId,
-  )
-  if (resolved && canResolvedProviderRefGenerateText(resolved)) {
+  if (isSubtitlesProviderAi(config)) {
     return config.videoSubtitles.batchQueueConfig
   }
   return {
     maxItemsPerBatch: TRANSLATION_BATCH_SIZE,
     maxCharactersPerBatch: Number.POSITIVE_INFINITY,
   }
+}
+
+const MACHINE_PLACEHOLDER_PROVIDER_REF: SerializableProviderRef = {
+  kind: "local",
+  config: DEFAULT_PROVIDER_CONFIG["microsoft-translate"],
+}
+
+/**
+ * A Microsoft translation of one line, shown while the AI's is on its way. It
+ * takes no prompt, so it is cached under the key a Microsoft subtitles provider
+ * would use, apart from the AI's: the key holds the provider.
+ */
+export async function translateSubtitleWithMachine(text: string): Promise<string> {
+  const config = await getLocalConfig()
+  if (!config) {
+    return ""
+  }
+  const langConfig = config.language
+  const hashComponents = await buildSubtitleHashComponents(
+    text,
+    MACHINE_PLACEHOLDER_PROVIDER_REF,
+    { sourceCode: langConfig.sourceCode, targetCode: langConfig.targetCode },
+    false,
+    "",
+    [],
+  )
+  return await sendMessage("translateSubtitleWithMachine", {
+    text,
+    langConfig,
+    hash: Sha256Hex(...hashComponents),
+  })
 }
 
 export async function fetchSubtitlesSummary(

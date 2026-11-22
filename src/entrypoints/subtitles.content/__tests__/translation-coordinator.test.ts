@@ -1,4 +1,4 @@
-import type { SubtitlesState } from "@/utils/subtitles/types"
+import type { SubtitlesFragment, SubtitlesState } from "@/utils/subtitles/types"
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { storage } from "#imports"
 import { CONFIG_STORAGE_KEY, DEFAULT_CONFIG } from "@/utils/constants/config"
@@ -102,7 +102,8 @@ describe("translation coordinator loading state", () => {
 
     coordinator.start()
     await Promise.resolve()
-    expect(spy).toHaveBeenCalledTimes(1)
+    // The whole look-ahead window at once, in full batches.
+    expect(spy.mock.calls.map(([batch]) => batch.length)).toEqual([4, 2])
 
     coordinator.stop()
     const firstCall = spy.mock.calls[0]!
@@ -111,8 +112,8 @@ describe("translation coordinator loading state", () => {
     await Promise.resolve()
     await Promise.resolve()
 
-    // In-flight call may finish, but stop must not chain another nearby batch.
-    expect(spy).toHaveBeenCalledTimes(1)
+    // In-flight calls may finish, but stop must not chain another nearby batch.
+    expect(spy).toHaveBeenCalledTimes(2)
     expect(onTranslated).not.toHaveBeenCalled()
 
     spy.mockRestore()
@@ -396,105 +397,130 @@ describe("translation coordinator loading state", () => {
       { text: "next", start: 2000, end: 3000 },
     ]
     await vi.waitFor(() => {
-      expect(onStateChange).toHaveBeenCalledWith("error", { message: "translate failed" })
+      expect(onTranslated).toHaveBeenCalledWith([
+        expect.objectContaining({ text: "next", translation: "", placeholder: "failed" }),
+      ])
     })
+    await new Promise((resolve) => setTimeout(resolve, 0))
 
     // Stale full-batch fallback would re-introduce the pre-recut cue as a zombie.
     const published = onTranslated.mock.calls.flatMap((call) => call[0] as any[])
     expect(published.every((f) => f.text !== "hello world")).toBe(true)
     // Empty translation fallbacks for still-valid cues are fine; identity-mismatched are not.
     expect(published.some((f) => f.start === 0 && f.end === 2000)).toBe(false)
+    // A batch failing alone says nothing; the cues get machine translations instead.
+    expect(onStateChange).not.toHaveBeenCalledWith("error", expect.anything())
 
     spy.mockRestore()
     configSpy.mockRestore()
   })
 })
 
-describe("translation coordinator when Built-in AI refuses", () => {
-  let restoreSetup: (() => void) | null = null
+let restoreSetup: (() => void) | null = null
 
-  afterEach(() => {
-    restoreSetup?.()
-    restoreSetup = null
-    vi.unstubAllGlobals()
+afterEach(() => {
+  restoreSetup?.()
+  restoreSetup = null
+  vi.unstubAllGlobals()
+})
+
+/** The server's refusal, relayed from the background inside translateSubtitles' error. */
+function spentPoolError() {
+  return new Error("Built-in AI quota used up", {
+    cause: Object.assign(new Error("x"), { code: "HOSTED_AI_QUOTA_EXHAUSTED" }),
   })
-  /** The server's refusal, relayed from the background inside translateSubtitles' error. */
-  function spentPoolError() {
-    return new Error("Built-in AI quota used up", {
-      cause: Object.assign(new Error("x"), { code: "HOSTED_AI_QUOTA_EXHAUSTED" }),
-    })
-  }
+}
 
-  function createVideo() {
-    return {
-      currentTime: 0,
-      addEventListener: vi.fn<(...args: any[]) => any>(),
-      removeEventListener: vi.fn<(...args: any[]) => any>(),
+function createVideo() {
+  return {
+    currentTime: 0,
+    addEventListener: vi.fn<(...args: any[]) => any>(),
+    removeEventListener: vi.fn<(...args: any[]) => any>(),
+  }
+}
+
+async function flush() {
+  await new Promise((resolve) => setTimeout(resolve, 0))
+}
+
+/** `trackState` keeps the player's state as the scheduler does, error badge and all. */
+async function setup({ trackState = false, machinePlaceholder = false } = {}) {
+  const fragments = Array.from({ length: 20 }, (_, i) => ({
+    text: `line ${i}`,
+    start: i * 2000,
+    end: i * 2000 + 2000,
+  }))
+  const translator = await import("@/utils/subtitles/processor/translator")
+  const translateSpy = vi
+    .spyOn(translator, "translateSubtitles")
+    .mockRejectedValue(spentPoolError())
+  const machineSpy = vi
+    .spyOn(translator, "translateSubtitleWithMachine")
+    .mockImplementation(async (text) => `mt:${text}`)
+  const configModule = await import("@/utils/config/storage")
+  const configSpy = vi.spyOn(configModule, "getLocalConfig").mockResolvedValue(DEFAULT_CONFIG)
+  const video = createVideo()
+  const onBuiltInAiRefused = vi.fn<(error: unknown) => void>()
+  const onTranslated = vi.fn<(fragments: SubtitlesFragment[]) => void>()
+  const onMachineTranslationsDropped = vi.fn<() => void>()
+  let state: SubtitlesState = "idle"
+  const onStateChange = vi.fn<(next: SubtitlesState) => void>((next) => {
+    if (trackState) {
+      state = next
     }
+  })
+  const coordinator = new TranslationCoordinator({
+    getFragments: () => fragments,
+    getVideoElement: () => video as unknown as HTMLVideoElement,
+    getCurrentState: () => state,
+    segmentationPipeline: null,
+    onTranslated,
+    onStateChange,
+    onBuiltInAiRefused,
+    onMachineTranslationsDropped,
+    machinePlaceholder,
+    batchLimits: { maxItemsPerBatch: 2, maxCharactersPerBatch: 1000 },
+  })
+  restoreSetup = () => {
+    coordinator.stop()
+    translateSpy.mockRestore()
+    machineSpy.mockRestore()
+    configSpy.mockRestore()
   }
-
-  async function flush() {
-    await new Promise((resolve) => setTimeout(resolve, 0))
+  return {
+    coordinator,
+    video,
+    translateSpy,
+    machineSpy,
+    onBuiltInAiRefused,
+    onTranslated,
+    onMachineTranslationsDropped,
+    onStateChange,
+    getState: () => state,
   }
+}
 
-  /** `trackState` keeps the player's state as the scheduler does, error badge and all. */
-  async function setup({ trackState = false } = {}) {
-    const fragments = Array.from({ length: 20 }, (_, i) => ({
-      text: `line ${i}`,
-      start: i * 2000,
-      end: i * 2000 + 2000,
-    }))
-    const translator = await import("@/utils/subtitles/processor/translator")
-    const translateSpy = vi
-      .spyOn(translator, "translateSubtitles")
-      .mockRejectedValue(spentPoolError())
-    const configModule = await import("@/utils/config/storage")
-    const configSpy = vi.spyOn(configModule, "getLocalConfig").mockResolvedValue(DEFAULT_CONFIG)
-    const video = createVideo()
-    const onBuiltInAiRefused = vi.fn<(error: unknown) => void>()
-    let state: SubtitlesState = "idle"
-    const onStateChange = vi.fn<(next: SubtitlesState) => void>((next) => {
-      if (trackState) {
-        state = next
-      }
-    })
-    const coordinator = new TranslationCoordinator({
-      getFragments: () => fragments,
-      getVideoElement: () => video as unknown as HTMLVideoElement,
-      getCurrentState: () => state,
-      segmentationPipeline: null,
-      onTranslated: vi.fn<(...args: any[]) => any>(),
-      onStateChange,
-      onBuiltInAiRefused,
-      batchLimits: { maxItemsPerBatch: 2, maxCharactersPerBatch: 1000 },
-    })
-    restoreSetup = () => {
-      coordinator.stop()
-      translateSpy.mockRestore()
-      configSpy.mockRestore()
-    }
-    return {
-      coordinator,
-      video,
-      translateSpy,
-      onBuiltInAiRefused,
-      onStateChange,
-      getState: () => state,
-    }
-  }
+/** Every batch sent so far, in order. */
+function sentBatches(translateSpy: { mock: { calls: unknown[][] } }) {
+  return translateSpy.mock.calls.map(([batch]) => batch as SubtitlesFragment[])
+}
 
+describe("translation coordinator when batches fail", () => {
   it("holds translation after a refusal instead of sending batch after batch", async () => {
     const { coordinator, video, translateSpy, onBuiltInAiRefused, onStateChange } = await setup()
 
     coordinator.start()
     await vi.waitFor(() => expect(onBuiltInAiRefused).toHaveBeenCalledOnce())
+    await flush()
+    const sent = translateSpy.mock.calls.length
     for (let seconds = 1; seconds <= 10; seconds += 1) {
       video.currentTime = seconds
       coordinator.requestTick()
       await flush()
     }
 
-    expect(translateSpy).toHaveBeenCalledOnce()
+    expect(translateSpy).toHaveBeenCalledTimes(sent)
+    // Every batch of the window was refused, and the reader is asked once.
     expect(onBuiltInAiRefused).toHaveBeenCalledOnce()
     // Held, no cue is on its way: the player shows no endless spinner.
     const states = onStateChange.mock.calls.map(([state]) => state)
@@ -506,13 +532,14 @@ describe("translation coordinator when Built-in AI refuses", () => {
 
     coordinator.start()
     await vi.waitFor(() => expect(onBuiltInAiRefused).toHaveBeenCalledOnce())
-    const refusedBatch = translateSpy.mock.calls[0]![0]
+    await flush()
+    const refused = sentBatches(translateSpy)
 
     translateSpy.mockImplementation((batch: any) => Promise.resolve(batch))
     coordinator.retryFailed()
 
-    await vi.waitFor(() => expect(translateSpy.mock.calls.length).toBeGreaterThanOrEqual(2))
-    expect(translateSpy.mock.calls[1]![0]).toEqual(refusedBatch)
+    await vi.waitFor(() => expect(translateSpy.mock.calls.length).toBeGreaterThan(refused.length))
+    expect(sentBatches(translateSpy).slice(refused.length)).toEqual(refused)
   })
 
   it("retries at once when the reader switches while the refusal's error still shows", async () => {
@@ -539,20 +566,21 @@ describe("translation coordinator when Built-in AI refuses", () => {
 
     coordinator.start()
     await vi.waitFor(() => expect(onBuiltInAiRefused).toHaveBeenCalledOnce())
-    const refusedBatch = translateSpy.mock.calls[0]![0]
+    await flush()
+    const refused = sentBatches(translateSpy)
 
     // Off to the website to log in or upgrade: nothing has changed yet.
     page.visibilityState = "hidden"
     page.dispatchEvent(new Event("visibilitychange"))
     await flush()
-    expect(translateSpy).toHaveBeenCalledOnce()
+    expect(translateSpy).toHaveBeenCalledTimes(refused.length)
 
     translateSpy.mockImplementation((batch: any) => Promise.resolve(batch))
     page.visibilityState = "visible"
     page.dispatchEvent(new Event("visibilitychange"))
 
-    await vi.waitFor(() => expect(translateSpy.mock.calls.length).toBeGreaterThanOrEqual(2))
-    expect(translateSpy.mock.calls[1]![0]).toEqual(refusedBatch)
+    await vi.waitFor(() => expect(translateSpy.mock.calls.length).toBeGreaterThan(refused.length))
+    expect(sentBatches(translateSpy)[refused.length]).toEqual(refused[0])
 
     // Stopped, it no longer listens.
     coordinator.stop()
@@ -568,6 +596,8 @@ describe("translation coordinator when Built-in AI refuses", () => {
 
     coordinator.start()
     await vi.waitFor(() => expect(onBuiltInAiRefused).toHaveBeenCalledOnce())
+    await flush()
+    const sent = translateSpy.mock.calls.length
 
     // Another setting changes: still held.
     await storage.setItem(`local:${CONFIG_STORAGE_KEY}`, {
@@ -578,7 +608,7 @@ describe("translation coordinator when Built-in AI refuses", () => {
       },
     })
     await flush()
-    expect(translateSpy).toHaveBeenCalledOnce()
+    expect(translateSpy).toHaveBeenCalledTimes(sent)
 
     translateSpy.mockImplementation((batch: any) => Promise.resolve(batch))
     await storage.setItem(`local:${CONFIG_STORAGE_KEY}`, {
@@ -589,19 +619,200 @@ describe("translation coordinator when Built-in AI refuses", () => {
       },
     })
 
-    await vi.waitFor(() => expect(translateSpy.mock.calls.length).toBeGreaterThanOrEqual(2))
+    await vi.waitFor(() => expect(translateSpy.mock.calls.length).toBeGreaterThan(sent))
   })
 
-  it("keeps going after a failure that is not a refusal", async () => {
-    const { coordinator, video, translateSpy, onBuiltInAiRefused } = await setup()
-    translateSpy.mockRejectedValue(new Error("Failed to fetch"))
+  it("leaves a batch that fails alone to machine translation: no retry, no error", async () => {
+    const { coordinator, video, translateSpy, onTranslated, onStateChange } = await setup()
+    translateSpy.mockImplementation((batch: any) =>
+      batch[0].start === 4000 ? Promise.reject(new Error("timed out")) : Promise.resolve(batch),
+    )
 
     coordinator.start()
-    await vi.waitFor(() => expect(translateSpy).toHaveBeenCalled())
-    video.currentTime = 5
-    coordinator.requestTick()
-    await vi.waitFor(() => expect(translateSpy.mock.calls.length).toBeGreaterThan(1))
+    await flush()
+    for (let seconds = 1; seconds <= 10; seconds += 1) {
+      video.currentTime = seconds
+      coordinator.requestTick()
+      await flush()
+    }
 
+    expect(sentBatches(translateSpy).filter((batch) => batch[0]!.start === 4000)).toHaveLength(1)
+    expect(onTranslated).toHaveBeenCalledWith([
+      expect.objectContaining({ start: 4000, translation: "", placeholder: "failed" }),
+      expect.objectContaining({ start: 6000, translation: "", placeholder: "failed" }),
+    ])
+    expect(onStateChange).not.toHaveBeenCalledWith("error", expect.anything())
+  })
+
+  it("holds after three batches fail in a row, keeping the error up", async () => {
+    const { coordinator, video, translateSpy, onBuiltInAiRefused, onStateChange } = await setup()
+    translateSpy.mockRejectedValue(new Error("Insufficient Balance"))
+
+    coordinator.start()
+    await vi.waitFor(() =>
+      expect(onStateChange).toHaveBeenCalledWith("error", {
+        message: "Insufficient Balance",
+        persistent: true,
+      }),
+    )
+    await flush()
+    const sent = translateSpy.mock.calls.length
+    video.currentTime = 20
+    coordinator.requestTick()
+    await flush()
+
+    expect(translateSpy).toHaveBeenCalledTimes(sent)
     expect(onBuiltInAiRefused).not.toHaveBeenCalled()
+    expect(onStateChange.mock.calls.filter(([state]) => state === "error")).toHaveLength(1)
+  })
+
+  it("counts failures in a row only: one batch coming back starts over", async () => {
+    const { coordinator, translateSpy, onStateChange } = await setup()
+    // Batches of the window, in the order they come back: fail, fail, ok, fail, fail, ok…
+    const failing = new Set([0, 4000, 12_000, 16_000])
+    translateSpy.mockImplementation((batch: any) =>
+      failing.has(batch[0].start) ? Promise.reject(new Error("timed out")) : Promise.resolve(batch),
+    )
+
+    coordinator.start()
+    await flush()
+
+    expect(translateSpy.mock.calls.length).toBeGreaterThanOrEqual(6)
+    expect(onStateChange).not.toHaveBeenCalledWith("error", expect.anything())
+  })
+})
+
+describe("translation coordinator sending", () => {
+  /** Each batch as the indexes of its cues, which start every 2 s. */
+  function batchIndexes(batches: SubtitlesFragment[][]) {
+    return batches.map((batch) => batch.map((fragment) => fragment.start / 2000))
+  }
+
+  it("sends the whole look-ahead window at once, then the new place right after a seek", async () => {
+    const { coordinator, video, translateSpy } = await setup()
+    // The AI never answers: nothing waits on it.
+    translateSpy.mockImplementation(() => new Promise(() => {}))
+
+    coordinator.start()
+    expect(batchIndexes(sentBatches(translateSpy))).toEqual([
+      [0, 1],
+      [2, 3],
+      [4, 5],
+      [6, 7],
+      [8, 9],
+      [10, 11],
+      [12, 13],
+      [14, 15],
+    ])
+
+    video.currentTime = 34
+    coordinator.requestTick()
+    expect(batchIndexes(sentBatches(translateSpy).slice(8))).toEqual([
+      [16, 17],
+      [18, 19],
+    ])
+  })
+})
+
+describe("translation coordinator machine translations", () => {
+  it("puts one on a cue about to show while its AI translation is on the way", async () => {
+    const { coordinator, video, translateSpy, machineSpy, onTranslated } = await setup({
+      machinePlaceholder: true,
+    })
+    translateSpy.mockImplementation(() => new Promise(() => {}))
+
+    coordinator.start()
+    // The cue on screen; the next one, 2 s away, is not near enough yet.
+    expect(machineSpy.mock.calls).toEqual([["line 0"]])
+    await vi.waitFor(() =>
+      expect(onTranslated).toHaveBeenCalledWith([
+        { text: "line 0", start: 0, end: 2000, translation: "mt:line 0", placeholder: "machine" },
+      ]),
+    )
+
+    video.currentTime = 0.6
+    coordinator.requestTick()
+    video.currentTime = 0.8
+    coordinator.requestTick()
+    // 1.5 s ahead, and once a cue.
+    expect(machineSpy.mock.calls).toEqual([["line 0"], ["line 1"]])
+  })
+
+  it("looks further ahead at a higher playback rate", async () => {
+    const { coordinator, video, translateSpy, machineSpy } = await setup({
+      machinePlaceholder: true,
+    })
+    translateSpy.mockImplementation(() => new Promise(() => {}))
+    Object.assign(video, { playbackRate: 2 })
+
+    coordinator.start()
+
+    expect(machineSpy.mock.calls).toEqual([["line 0"], ["line 1"]])
+  })
+
+  it("asks for none once the AI translation is in", async () => {
+    const { coordinator, video, translateSpy, machineSpy } = await setup({
+      machinePlaceholder: true,
+    })
+    translateSpy.mockImplementation((batch: any) => Promise.resolve(batch))
+
+    coordinator.start()
+    await flush()
+    machineSpy.mockClear()
+    for (let seconds = 1; seconds <= 20; seconds += 1) {
+      video.currentTime = seconds
+      coordinator.requestTick()
+      await flush()
+    }
+
+    expect(machineSpy).not.toHaveBeenCalled()
+  })
+
+  it("asks for none for a translation service, which is fast on its own", async () => {
+    const { coordinator, translateSpy, machineSpy } = await setup()
+    translateSpy.mockImplementation(() => new Promise(() => {}))
+
+    coordinator.start()
+    await flush()
+
+    expect(machineSpy).not.toHaveBeenCalled()
+  })
+
+  it("takes them down when translation holds, and drops one that comes back after", async () => {
+    const {
+      coordinator,
+      video,
+      translateSpy,
+      machineSpy,
+      onTranslated,
+      onMachineTranslationsDropped,
+    } = await setup({ machinePlaceholder: true })
+    let answerMachine!: (translation: string) => void
+    machineSpy.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          answerMachine = resolve
+        }),
+    )
+
+    // Every batch is refused.
+    coordinator.start()
+    await vi.waitFor(() => expect(onMachineTranslationsDropped).toHaveBeenCalledOnce())
+    answerMachine("mt:line 0")
+    await flush()
+
+    const published = onTranslated.mock.calls.flatMap(([fragments]) => fragments)
+    expect(published.some((fragment) => fragment.placeholder === "machine")).toBe(false)
+
+    // Held: none asked for as playback goes on.
+    machineSpy.mockClear()
+    video.currentTime = 1
+    coordinator.requestTick()
+    expect(machineSpy).not.toHaveBeenCalled()
+
+    // Retried: the cue on screen gets one again while the AI's is on the way.
+    translateSpy.mockImplementation(() => new Promise(() => {}))
+    coordinator.retryFailed()
+    expect(machineSpy).toHaveBeenCalledWith("line 0")
   })
 })

@@ -5,6 +5,7 @@ import {
   currentTimeMsAtom,
   subtitlesStateAtom,
   subtitlesStore,
+  translatedTrackAtom,
   videoLoadingAtom,
 } from "../atoms"
 import { SubtitlesScheduler } from "../subtitles-scheduler"
@@ -207,5 +208,116 @@ describe("subtitles scheduler", () => {
     ;(scheduler as any).updateSubtitles(1.2)
     // Recut line must not keep the old translation under a changed identity.
     expect(subtitlesStore.get(currentSubtitleAtom)).toBeNull()
+  })
+
+  it("keeps the better translation: the provider's over a machine one over a failed cue's", () => {
+    const scheduler = new SubtitlesScheduler({ videoElement: createVideo(5) })
+    scheduler.start()
+    const cue = { text: "hello", start: 0, end: 1000 }
+
+    scheduler.supplementSubtitles([{ ...cue, translation: "", placeholder: "failed" }])
+    scheduler.supplementSubtitles([{ ...cue, translation: "机翻", placeholder: "machine" }])
+    scheduler.supplementSubtitles([{ ...cue, translation: "", placeholder: "failed" }])
+    expect(subtitlesStore.get(translatedTrackAtom)).toEqual([
+      { ...cue, translation: "机翻", placeholder: "machine" },
+    ])
+
+    scheduler.supplementSubtitles([{ ...cue, translation: "你好" }])
+    scheduler.supplementSubtitles([{ ...cue, translation: "机翻", placeholder: "machine" }])
+    expect(subtitlesStore.get(translatedTrackAtom)).toEqual([{ ...cue, translation: "你好" }])
+  })
+
+  it("plays a cue out with its machine translation when the AI's lands while it shows", () => {
+    const video = createVideo(2.5)
+    const scheduler = new SubtitlesScheduler({ videoElement: video })
+    scheduler.start()
+    const cue = { text: "hello", start: 2000, end: 3000 }
+
+    scheduler.supplementSubtitles([{ ...cue, translation: "机翻", placeholder: "machine" }])
+    // An earlier cue lands with it, moving the shown one along the list.
+    scheduler.supplementSubtitles([
+      { text: "before", start: 0, end: 1000, translation: "之前" },
+      { ...cue, translation: "你好" },
+    ])
+
+    expect(subtitlesStore.get(currentSubtitleAtom)?.translation).toBe("机翻")
+    // The transcript has the AI's at once.
+    expect(
+      subtitlesStore.get(translatedTrackAtom).find((fragment) => fragment.start === 2000),
+    ).toEqual({ ...cue, translation: "你好" })
+
+    // Shown again, it shows the AI's.
+    ;(scheduler as any).updateSubtitles(4)
+    ;(scheduler as any).updateSubtitles(2.5)
+    expect(subtitlesStore.get(currentSubtitleAtom)?.translation).toBe("你好")
+  })
+
+  it("switches a recut cue on screen at once", () => {
+    const scheduler = new SubtitlesScheduler({ videoElement: createVideo(0.5) })
+    scheduler.start()
+
+    scheduler.supplementSubtitles([
+      { text: "hello world", start: 0, end: 2000, translation: "机翻", placeholder: "machine" },
+    ])
+    scheduler.reconcileTranslatedCuesAfterRecut(0, 2000, [
+      { text: "hello", start: 0, end: 1000 },
+      { text: "world", start: 1000, end: 2000 },
+    ])
+    scheduler.supplementSubtitles([{ text: "hello", start: 0, end: 1000, translation: "你好" }])
+
+    expect(subtitlesStore.get(currentSubtitleAtom)).toEqual({
+      text: "hello",
+      start: 0,
+      end: 1000,
+      translation: "你好",
+    })
+  })
+
+  it("keeps a machine translation marked as one through a recut that keeps its cue", () => {
+    const scheduler = new SubtitlesScheduler({ videoElement: createVideo(5) })
+    scheduler.start()
+    const cue = { text: "keep me", start: 0, end: 1000 }
+
+    scheduler.supplementSubtitles([{ ...cue, translation: "机翻", placeholder: "machine" }])
+    scheduler.reconcileTranslatedCuesAfterRecut(0, 2000, [
+      cue,
+      { text: "new cut", start: 1000, end: 2000 },
+    ])
+
+    expect(subtitlesStore.get(translatedTrackAtom)).toEqual([
+      { ...cue, translation: "机翻", placeholder: "machine" },
+    ])
+  })
+
+  it("takes every machine translation down, the one on screen included", () => {
+    const scheduler = new SubtitlesScheduler({ videoElement: createVideo(0.5) })
+    scheduler.start()
+    scheduler.supplementSubtitles([
+      { text: "a", start: 0, end: 1000, translation: "机翻 a", placeholder: "machine" },
+      { text: "b", start: 1000, end: 2000, translation: "乙" },
+      { text: "c", start: 2000, end: 3000, translation: "机翻 c", placeholder: "machine" },
+    ])
+    expect(subtitlesStore.get(currentSubtitleAtom)?.translation).toBe("机翻 a")
+
+    scheduler.removeMachineTranslations()
+
+    expect(subtitlesStore.get(translatedTrackAtom)).toEqual([
+      { text: "b", start: 1000, end: 2000, translation: "乙" },
+    ])
+    expect(subtitlesStore.get(currentSubtitleAtom)).toBeNull()
+  })
+
+  it("keeps an error that holds translation up", () => {
+    vi.useFakeTimers()
+
+    const scheduler = new SubtitlesScheduler({ videoElement: createVideo() })
+    scheduler.setState("error", { message: "Insufficient Balance", persistent: true })
+    vi.advanceTimersByTime(60_000)
+
+    expect(subtitlesStore.get(subtitlesStateAtom)).toEqual({
+      state: "error",
+      message: "Insufficient Balance",
+      persistent: true,
+    })
   })
 })
