@@ -202,7 +202,7 @@ ReadFrog 採用 GPLv3 與商業授權雙重授權。
 貢獻者授權條款請參閱 [CONTRIBUTING.md](../CONTRIBUTING.md)。
 
 <a href="https://github.com/mengxi-ream/read-frog/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=mengxi-ream/read-frog" />
+  <img src="https://contrib.rocks/image?repo=mengxi-ream/read-frog" alt="Read Frog contributors" />
 </a>
 
 Made with [contrib.rocks](https://contrib.rocks).

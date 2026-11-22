@@ -196,7 +196,7 @@ ReadFrog được cấp phép kép theo GPLv3 và giấy phép thương mại.
 Điều khoản cấp phép cho người đóng góp nằm trong [CONTRIBUTING.md](../CONTRIBUTING.md).
 
 <a href="https://github.com/mengxi-ream/read-frog/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=mengxi-ream/read-frog" />
+  <img src="https://contrib.rocks/image?repo=mengxi-ream/read-frog" alt="Read Frog contributors" />
 </a>
 
 Made with [contrib.rocks](https://contrib.rocks).

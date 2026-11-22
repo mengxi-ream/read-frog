@@ -196,7 +196,7 @@ ReadFrog, GPLv3 ve ticari lisans ile çift lisanslıdır.
 Katkıda bulunan lisans şartları için [CONTRIBUTING.md](../CONTRIBUTING.md) dosyasına bakın.
 
 <a href="https://github.com/mengxi-ream/read-frog/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=mengxi-ream/read-frog" />
+  <img src="https://contrib.rocks/image?repo=mengxi-ream/read-frog" alt="Read Frog contributors" />
 </a>
 
 Made with [contrib.rocks](https://contrib.rocks).
