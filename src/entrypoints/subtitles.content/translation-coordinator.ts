@@ -203,6 +203,9 @@ export class TranslationCoordinator {
   private attachVideoListeners(video: HTMLVideoElement) {
     if (this.listenersAttached) return
     video.addEventListener("timeupdate", this.handleTranslationTick)
+    // As a seek starts, not only once it ends: the new place is asked for while the
+    // player buffers it, instead of after.
+    video.addEventListener("seeking", this.handleTranslationTick)
     video.addEventListener("seeked", this.handleTranslationTick)
     if (this.segmentationPipeline) {
       video.addEventListener("seeked", this.handleSeek)
@@ -216,6 +219,7 @@ export class TranslationCoordinator {
     const video = this.getVideoElement()
     if (video) {
       video.removeEventListener("timeupdate", this.handleTranslationTick)
+      video.removeEventListener("seeking", this.handleTranslationTick)
       video.removeEventListener("seeked", this.handleTranslationTick)
       video.removeEventListener("seeked", this.handleSeek)
     }

@@ -712,6 +712,22 @@ describe("translation coordinator sending", () => {
       [18, 19],
     ])
   })
+
+  it("sends for the new place as a seek starts, while the player still buffers it", async () => {
+    const { coordinator, video, translateSpy } = await setup()
+    translateSpy.mockImplementation(() => new Promise(() => {}))
+
+    coordinator.start()
+    const onSeeking = video.addEventListener.mock.calls.find(([type]) => type === "seeking")?.[1]
+    expect(onSeeking).toBeTypeOf("function")
+
+    video.currentTime = 34
+    onSeeking()
+    expect(batchIndexes(sentBatches(translateSpy).slice(8))).toEqual([
+      [16, 17],
+      [18, 19],
+    ])
+  })
 })
 
 describe("translation coordinator machine translations", () => {
