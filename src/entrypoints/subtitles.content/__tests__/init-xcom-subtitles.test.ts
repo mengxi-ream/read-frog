@@ -43,6 +43,10 @@ vi.mock("../bind-subtitles-toggle-shortcut", () => ({
   bindSubtitlesToggleShortcut: vi.fn<() => Promise<() => void>>(async () => () => {}),
 }))
 
+function play(video: HTMLVideoElement) {
+  Object.defineProperty(video, "paused", { value: false })
+}
+
 function addPlayer(statusId: string): { container: HTMLElement; video: HTMLVideoElement } {
   const container = document.createElement("div")
   const video = document.createElement("video")
@@ -90,6 +94,35 @@ describe("initXcomSubtitles", () => {
 
     expect(mocks.ensureEntryPoint).toHaveBeenLastCalledWith(second.container)
     await vi.waitFor(() => expect(mocks.adapter.notifyNavigation).toHaveBeenCalledOnce())
+  })
+
+  it("lets go of that player when the reader plays another video", async () => {
+    const first = addPlayer("1")
+    const second = addPlayer("2")
+    await startOn(first.video)
+
+    mocks.adapter.isAwaitingAiSubtitles.mockReturnValue(true)
+    play(second.video)
+    mocks.primaryVideo = second.video
+    mocks.onPlayerChanged()
+
+    expect(mocks.ensureEntryPoint).toHaveBeenLastCalledWith(second.container)
+    await vi.waitFor(() => expect(mocks.adapter.notifyNavigation).toHaveBeenCalledOnce())
+  })
+
+  it("keeps that player while it plays on, even when another video plays", async () => {
+    const first = addPlayer("1")
+    const second = addPlayer("2")
+    await startOn(first.video)
+
+    mocks.adapter.isAwaitingAiSubtitles.mockReturnValue(true)
+    play(first.video)
+    play(second.video)
+    mocks.primaryVideo = second.video
+    mocks.onPlayerChanged()
+
+    expect(mocks.ensureEntryPoint).toHaveBeenLastCalledWith(first.container)
+    expect(mocks.adapter.notifyNavigation).not.toHaveBeenCalled()
   })
 
   it("lets go of that player once it leaves the page", async () => {

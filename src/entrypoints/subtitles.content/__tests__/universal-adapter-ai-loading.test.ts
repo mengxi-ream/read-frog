@@ -74,15 +74,20 @@ function holdAccessCheck(): (granted: boolean) => void {
 }
 
 describe("universalVideoAdapter awaiting AI subtitles", () => {
-  it("waits on AI subtitles from the request until they arrive", async () => {
-    const { adapter, loadStarted } = createAdapterWithPendingStart()
+  it("waits on AI subtitles from the request until their start settles", async () => {
+    const { adapter, loadStarted, settleStart } = createAdapterWithPendingStart()
     expect(adapter.isAwaitingAiSubtitles()).toBe(false)
 
-    void adapter.requestAiSubtitles()
+    const request = adapter.requestAiSubtitles()
     await loadStarted()
     expect(adapter.isAwaitingAiSubtitles()).toBe(true)
 
+    // The transcript has arrived, but its translation is still on the way.
     ;(adapter as any).sourceCache.sourceSubtitles = [{ text: "Hello", start: 0, end: 1000 }]
+    expect(adapter.isAwaitingAiSubtitles()).toBe(true)
+
+    settleStart(true)
+    await request
     expect(adapter.isAwaitingAiSubtitles()).toBe(false)
   })
 

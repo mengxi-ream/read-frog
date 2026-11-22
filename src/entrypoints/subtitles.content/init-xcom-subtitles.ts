@@ -32,6 +32,10 @@ function getCurrentVideoContainer(): HTMLElement | null {
   return video ? getXcomStatusVideoContainer(video) : null
 }
 
+function isPlayingIn(container: HTMLElement | null): boolean {
+  return container?.querySelector("video")?.paused === false
+}
+
 export function initXcomSubtitles(ctx: ContentScriptContext) {
   if (!isXcomHost()) {
     return
@@ -43,11 +47,15 @@ export function initXcomSubtitles(ctx: ContentScriptContext) {
   let lastVideoId: string | null = null
   let lastVideoContainer: HTMLElement | null = null
 
-  // Passing over another video must not drop the AI subtitles a reader is waiting for.
-  const getActiveVideoContainer = () =>
-    adapter?.isAwaitingAiSubtitles() && lastVideoContainer?.isConnected
-      ? lastVideoContainer
-      : getCurrentVideoContainer()
+  // Passing over another video keeps the AI subtitles a reader waits for; playing it instead lets go.
+  const getActiveVideoContainer = () => {
+    const current = getCurrentVideoContainer()
+    const keepsPinned =
+      adapter?.isAwaitingAiSubtitles() &&
+      lastVideoContainer?.isConnected &&
+      (isPlayingIn(lastVideoContainer) || !isPlayingIn(current))
+    return keepsPinned ? lastVideoContainer : current
+  }
 
   const remount = async (activeAdapter: NonNullable<typeof adapter>) => {
     lastVideoContainer = getActiveVideoContainer()
