@@ -196,16 +196,10 @@ ReadFrog는 GPLv3와 상업 라이선스의 듀얼 라이선스를 사용합니�
 기여자 라이선스 조건은 [CONTRIBUTING.md](../CONTRIBUTING.md)를 참조하세요.
 
 <a href="https://github.com/mengxi-ream/read-frog/graphs/contributors">
-  <table>
-    <tr>
-      <th colspan="2">
-        <br>
-        <img src="https://contrib.rocks/image?repo=mengxi-ream/read-frog" alt="Read Frog contributors"><br>
-        <br>
-      </th>
-    </tr>
-  </table>
+  <img src="https://contrib.rocks/image?repo=mengxi-ream/read-frog" />
 </a>
+
+Made with [contrib.rocks](https://contrib.rocks).
 
 ## 📜 상업 라이선스 부여
 
