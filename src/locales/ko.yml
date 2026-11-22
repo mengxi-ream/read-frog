@@ -1589,7 +1589,7 @@ translateService:
   title: 번역 서비스
   description: 웹페이지 번역 전용
   builtInModels: Built-in Models
-  llmModels: LLM Models
+  llmModels: 서드파티 모델
   normalTranslator: 일반 번역기
   selectServices: 서비스 선택
   translationProviders: 번역 서비스

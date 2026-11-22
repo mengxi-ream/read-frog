@@ -1589,7 +1589,7 @@ translateService:
   title: Сервис перевода
   description: Только для перевода веб-страницы
   builtInModels: Built-in Models
-  llmModels: LLM Models
+  llmModels: Сторонние модели
   normalTranslator: Обычный переводчик
   selectServices: Выберите сервисы
   translationProviders: Сервисы перевода
