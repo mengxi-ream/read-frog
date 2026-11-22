@@ -196,16 +196,10 @@ ReadFrog tiene doble licencia: GPLv3 y licencia comercial.
 Consulta [CONTRIBUTING.md](../CONTRIBUTING.md) para los términos de licencia de contribuyentes.
 
 <a href="https://github.com/mengxi-ream/read-frog/graphs/contributors">
-  <table>
-    <tr>
-      <th colspan="2">
-        <br>
-        <img src="https://contrib.rocks/image?repo=mengxi-ream/read-frog" alt="Read Frog contributors"><br>
-        <br>
-      </th>
-    </tr>
-  </table>
+  <img src="https://contrib.rocks/image?repo=mengxi-ream/read-frog" alt="Read Frog contributors" />
 </a>
+
+Made with [contrib.rocks](https://contrib.rocks).
 
 ## 📜 Licencia comercial
 

@@ -196,16 +196,10 @@ ReadFrog распространяется по двойной лицензии: 
 Условия лицензирования вкладов см. в [CONTRIBUTING.md](../CONTRIBUTING.md).
 
 <a href="https://github.com/mengxi-ream/read-frog/graphs/contributors">
-  <table>
-    <tr>
-      <th colspan="2">
-        <br>
-        <img src="https://contrib.rocks/image?repo=mengxi-ream/read-frog" alt="Read Frog contributors"><br>
-        <br>
-      </th>
-    </tr>
-  </table>
+  <img src="https://contrib.rocks/image?repo=mengxi-ream/read-frog" alt="Read Frog contributors" />
 </a>
+
+Made with [contrib.rocks](https://contrib.rocks).
 
 ## 📜 Коммерческая лицензия
 

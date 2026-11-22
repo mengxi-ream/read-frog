@@ -263,30 +263,10 @@ ReadFrog 采用 GPLv3 和商业许可双重授权。
 贡献者许可条款请参阅 [CONTRIBUTING.md](../CONTRIBUTING.md)。
 
 <a href="https://github.com/mengxi-ream/read-frog/graphs/contributors">
-  <table>
-    <tr>
-      <th colspan="2">
-        <br>
-        <img src="https://contrib.rocks/image?repo=mengxi-ream/read-frog" alt="Contributors"><br>
-        <br>
-      </th>
-    </tr>
-    <!-- <tr>
-      <td>
-        <picture>
-          <source media="(prefers-color-scheme: dark)" srcset="https://next.ossinsight.io/widgets/official/compose-recent-top-contributors/thumbnail.png?repo_id=967738751&image_size=auto&color_scheme=dark" width="373" height="auto">
-          <img alt="Top Contributors of mengxi-ream/read-frog - Last 28 days" src="https://next.ossinsight.io/widgets/official/compose-recent-top-contributors/thumbnail.png?repo_id=967738751&image_size=auto&color_scheme=light" width="373" height="auto">
-        </picture>
-      </td>
-      <td rowspan="2">
-        <picture>
-          <source media="(prefers-color-scheme: dark)" srcset="https://next.ossinsight.io/widgets/official/compose-last-28-days-stats/thumbnail.png?repo_id=967738751&image_size=4x7&color_scheme=dark" width="655" height="auto">
-          <img alt="Performance Stats of mengxi-ream/read-frog - Last 28 days" src="https://next.ossinsight.io/widgets/official/compose-last-28-days-stats/thumbnail.png?repo_id=967738751&image_size=auto&color_scheme=light" width="655" height="auto">
-        </picture>
-      </td>
-    </tr> -->
-  </table>
+  <img src="https://contrib.rocks/image?repo=mengxi-ream/read-frog" alt="Contributors" />
 </a>
+
+Made with [contrib.rocks](https://contrib.rocks).
 
 <div align="right">
 
