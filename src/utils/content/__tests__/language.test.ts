@@ -7,14 +7,24 @@ vi.mock("franc", () => ({
   franc: vi.fn<(...args: any[]) => any>(),
 }))
 
-const { getLocalConfigMock, serializeProviderRefMock, toastAddMock } = vi.hoisted(() => ({
-  toastAddMock: vi.fn<(...args: any[]) => any>(),
-  getLocalConfigMock: vi.fn<(...args: any[]) => any>(),
-  serializeProviderRefMock: vi.fn<(...args: any[]) => any>(),
-}))
+const { getLocalConfigMock, sendMessageMock, serializeProviderRefMock, toastAddMock } = vi.hoisted(
+  () => ({
+    toastAddMock: vi.fn<(...args: any[]) => any>(),
+    getLocalConfigMock: vi.fn<(...args: any[]) => any>(),
+    sendMessageMock: vi.fn<(...args: any[]) => any>(),
+    serializeProviderRefMock: vi.fn<(...args: any[]) => any>(),
+  }),
+)
 
 vi.mock("@/components/ui/base-ui/toast", () => ({
-  toastManager: { add: (...args: unknown[]) => toastAddMock(...args) },
+  toastManager: {
+    add: (...args: unknown[]) => toastAddMock(...args),
+    close: vi.fn<(...args: unknown[]) => void>(),
+  },
+}))
+
+vi.mock("@/utils/message", () => ({
+  sendMessage: (...args: unknown[]) => sendMessageMock(...args),
 }))
 
 vi.mock("@/utils/config/storage", () => ({
@@ -29,6 +39,7 @@ vi.mock("@/utils/providers/provider-ref", async () => {
 })
 
 const { HostedAiProviderUnavailableError } = await import("@/utils/providers/provider-ref")
+const { logInAction, logInUrl } = await import("@/utils/error-action")
 const { detectLanguageWithSource } = await import("../language")
 
 const mockFranc = vi.mocked(franc)
@@ -105,6 +116,7 @@ describe("detectLanguageWithSource", () => {
   describe("when LLM detection is enabled but the account cannot run it", () => {
     beforeEach(() => {
       toastAddMock.mockReset()
+      sendMessageMock.mockReset()
       serializeProviderRefMock.mockReset()
       getLocalConfigMock.mockResolvedValue({
         languageDetection: { mode: "llm", providerId: "read-frog-ai:gpt-6-luna" },
@@ -150,6 +162,73 @@ describe("detectLanguageWithSource", () => {
           description: "speak.languageDetectionSettingsHint",
         }),
       )
+    })
+
+    describe("for a guest on a Built-in model", () => {
+      // What the status pre-flight throws for a guest: the reason says sign in.
+      const guestRefusal = () =>
+        new HostedAiProviderUnavailableError(
+          BUILT_IN_PROVIDER,
+          "Log in to use this provider",
+          logInAction(),
+          "authentication_required",
+        )
+
+      it("offers to log in with the fallback warning", async () => {
+        serializeProviderRefMock.mockRejectedValue(guestRefusal())
+        mockFranc.mockReturnValue("eng")
+
+        await expect(
+          detectLanguageWithSource("This is enough text to detect language.", { enableLLM: true }),
+        ).resolves.toEqual({ code: "en", source: "franc" })
+
+        const toast = toastAddMock.mock.calls[0]?.[0]
+        expect(toast).toMatchObject({
+          type: "warning",
+          title: "Log in to use this provider",
+          actionProps: { children: logInAction().label },
+        })
+
+        // The button opens the log-in page through the background; it never navigates by itself.
+        expect(sendMessageMock).not.toHaveBeenCalled()
+        toast.actionProps.onClick()
+        expect(sendMessageMock).toHaveBeenCalledWith("openPage", { url: logInUrl(), active: true })
+      })
+
+      it("asks a guest who is speaking to log in rather than to pick another LLM", async () => {
+        serializeProviderRefMock.mockRejectedValue(guestRefusal())
+        mockFranc.mockReturnValue("eng")
+
+        await detectLanguageWithSource("This is enough text to detect language.", {
+          enableLLM: true,
+          llmFallbackToastContext: "speak",
+        })
+
+        // Settings already lists the model as available, so its hint would not help.
+        expect(toastAddMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            title: "speak.languageDetectionFallback",
+            description: "hostedAi.builtInAiPrompt.logInTitle",
+            actionProps: expect.objectContaining({ children: logInAction().label }),
+          }),
+        )
+      })
+    })
+
+    it("offers no button for a refusal logging in would not fix", async () => {
+      serializeProviderRefMock.mockRejectedValue(
+        new HostedAiProviderUnavailableError(
+          BUILT_IN_PROVIDER,
+          "Ultra plan required",
+          undefined,
+          "ultra_required",
+        ),
+      )
+      mockFranc.mockReturnValue("eng")
+
+      await detectLanguageWithSource("This is enough text to detect language.", { enableLLM: true })
+
+      expect(toastAddMock.mock.calls[0]?.[0]).not.toHaveProperty("actionProps")
     })
 
     it("stays silent when no provider is configured at all", async () => {

@@ -4,6 +4,7 @@ import type { SelectionToolbarCustomAction } from "@/types/config/selection-tool
 import type { ValidatedNoteSuggestion } from "@/utils/note-suggestion/types"
 import { useAtomValue } from "jotai"
 import { useCallback, useRef, useState } from "react"
+import { toastManager } from "@/components/ui/base-ui/toast"
 import { isAbortError } from "@/components/ui/selection-popover/inline-error"
 import { classifyResolvedProvider } from "@/utils/analytics-provider"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
@@ -11,8 +12,11 @@ import { streamBackgroundNoteSuggestion } from "@/utils/content-script/backgroun
 import { STREAM_PORT_DISCONNECTED_MESSAGE } from "@/utils/content-script/port-streaming"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { resolveNoteSuggestionAction } from "@/utils/custom-actions"
+import { logInAction } from "@/utils/error-action"
+import { getErrorActionToastProps } from "@/utils/error-action-toast"
 import { getOrCreateWebPageContext } from "@/utils/host/translate/webpage-context"
 import { getHostedAiModelVerdict } from "@/utils/hosted-ai/status"
+import { i18n } from "@/utils/i18n"
 import { createLogger } from "@/utils/logging/logger"
 import { noteSuggestionEnvelopeSchema } from "@/utils/note-suggestion/types"
 import { validateNoteSuggestion } from "@/utils/note-suggestion/validate"
@@ -25,6 +29,34 @@ import { buildNoteSuggestionPrompts } from "./prompt"
 const log = createLogger(
   "content-runtime/selection/selection-toolbar/note-suggestion/use-note-suggestion",
 )
+
+const LOG_IN_TOAST_ID = "note-suggestion-log-in"
+
+/**
+ * Whether this page has already asked a guest to log in for save suggestions.
+ * The suggestion fires on every selection translation, so asking once per page
+ * is enough: the guest picked a Built-in model in a menu that offers it, and
+ * hearing about it on every selection would be noise.
+ */
+let hasAskedToLogIn = false
+
+function askToLogInOnce() {
+  if (hasAskedToLogIn) {
+    return
+  }
+  hasAskedToLogIn = true
+  toastManager.add({
+    id: LOG_IN_TOAST_ID,
+    type: "info",
+    title: i18n.t("hostedAi.builtInAiPrompt.logInTitle"),
+    description: i18n.t("hostedAi.builtInAiPrompt.logInDescription"),
+    actionProps: getErrorActionToastProps(logInAction(), LOG_IN_TOAST_ID),
+  })
+}
+
+export function resetNoteSuggestionLogInPromptForTests(): void {
+  hasAskedToLogIn = false
+}
 
 export interface NoteSuggestionSessionResult {
   /** Composite key: popoverSessionKey:translateRequestKey:rerunNonce. */
@@ -68,7 +100,8 @@ export interface NoteSuggestionFireInput {
  * near-free): failures are silent, at most once per popover session. The one
  * pre-request gate is hosted status: a Built-in provider whose tier is
  * explicitly unavailable (not signed in, needs Ultra, quota exhausted,
- * service down) skips without issuing the doomed stream call. A valid
+ * service down) skips without issuing the doomed stream call. Only a guest is
+ * told, once per page, that logging in turns the suggestion on. A valid
  * response with zero notes is a success (nothing worth saving) that renders
  * no card.
  */
@@ -137,11 +170,12 @@ export function useNoteSuggestion() {
 
       if (provider.kind === "system") {
         // A background auto-fire feature must not hammer a model the account
-        // cannot use: skip silently on any explicit verdict against it —
-        // durable facts (sign-in, plan) and reported runtime state (quota
-        // exhausted, the model unable to run) alike, since nobody is watching
-        // to act on the error and status is far cheaper than a doomed stream
-        // call. Fail open when status itself is unreachable — the run surfaces
+        // cannot use: skip on any explicit verdict against it — sign-in, plan
+        // and reported runtime state (quota exhausted, the model unable to
+        // run) alike, since status is far cheaper than a doomed stream call.
+        // The skip is silent except for a guest: the menus let a guest pick a
+        // Built-in model, so logging in is the one fix worth asking for, once
+        // per page. Fail open when status itself is unreachable — the run surfaces
         // any real error, which `fetchHostedAiStatus` already does; going
         // through it also shares the request with whatever else resolves a
         // hosted ref at the same moment, since one status response covers
@@ -159,6 +193,12 @@ export function useNoteSuggestion() {
               verdict.kind === "blocked" ? verdict.tierStatus.unavailableReason : null,
           })
           completedSessionKeysRef.current.add(input.sessionKey)
+          if (
+            verdict.kind === "blocked" &&
+            verdict.tierStatus.unavailableReason === "authentication_required"
+          ) {
+            askToLogInOnce()
+          }
           return
         }
       }
