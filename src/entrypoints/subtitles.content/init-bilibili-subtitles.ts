@@ -4,7 +4,7 @@ import {
   TrackSubtitlesFetcher,
   watchBilibiliTrackChoices,
 } from "@/utils/subtitles/fetchers"
-import { aiFetcherFactory } from "./platforms/ai-fetcher"
+import { aiFetcherFactories } from "./platforms/ai-fetcher"
 import { getBilibiliConfig } from "./platforms/bilibili/config"
 import { pollPlayerSubtitles } from "./poll-player-subtitles"
 import { UniversalVideoAdapter } from "./universal-adapter"
@@ -20,7 +20,7 @@ export function initBilibiliSubtitles(ctx: ContentScriptContext) {
     config,
     fetchers: {
       native: () => new TrackSubtitlesFetcher(bilibiliTrackSource),
-      ...aiFetcherFactory(config.createAiSubtitlesContext),
+      ...aiFetcherFactories(config),
     },
   })
   // The track key carries the player pick and the reader's languages, so a change loads ours again.

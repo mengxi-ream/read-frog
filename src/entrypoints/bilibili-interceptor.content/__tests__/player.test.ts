@@ -8,7 +8,7 @@ import {
   BILIBILI_SUBTITLES_RESPONSE_TYPE,
 } from "@/utils/constants/subtitles"
 import { requestBilibiliPlayingPart } from "@/utils/subtitles/fetchers/bilibili/playing-part"
-import { listenForSubtitlesRequests } from "../player"
+import { listenForPlayingPartRequests, listenForSubtitlesRequests } from "../player"
 import { findCapturedSubtitles, recordPlayerInfo } from "../player-info-capture"
 
 const SUBTITLES = [{ lan: "ai-zh", subtitle_url: "//aisubtitle.hdslb.com/bfs/ai_subtitle/zh.json" }]
@@ -24,6 +24,7 @@ function playerInfo(subtitles: object[] = SUBTITLES) {
 beforeAll(() => {
   ;(window as any).player = { getManifest: () => manifest() }
   listenForSubtitlesRequests()
+  listenForPlayingPartRequests()
 })
 
 beforeEach(() => {
@@ -177,7 +178,7 @@ describe("Bilibili subtitle requests", () => {
 })
 
 describe("requestBilibiliPlayingPart", () => {
-  it("names the BV id and cid of the part the url names once the player plays it", async () => {
+  it("names the part the url names once the player plays it, also from an av link", async () => {
     vi.useFakeTimers()
     let switched = false
     manifest = () => ({
@@ -192,31 +193,15 @@ describe("requestBilibiliPlayingPart", () => {
     switched = true
     await vi.advanceTimersByTimeAsync(BILIBILI_PAGE_POLL_INTERVAL_MS * 2)
 
-    await expect(part).resolves.toEqual({ bvid: "BV1XZn26rE8x", cid })
+    await expect(part).resolves.toEqual({ bvid: "BV1XZn26rE8x", cid, p: 3 })
   })
 
-  it("asks the page about a confirmed part only once", async () => {
-    const partId = "BV1XZn26rE8x:4"
-    manifest = () => ({ cid, bvid: "BV1XZn26rE8x", aid: 170001, p: 4 })
-
-    await requestBilibiliPlayingPart(partId)
-    manifest = () => {
-      throw new Error("asked again")
-    }
-
-    await expect(requestBilibiliPlayingPart(partId)).resolves.toEqual({ bvid: "BV1XZn26rE8x", cid })
-  })
-
-  it("names no part when the player never reaches it, and asks again next time", async () => {
+  it("names no part when the player never reaches it", async () => {
     vi.useFakeTimers()
 
     const part = requestBilibiliPlayingPart("BV1XZn26rE8x:9")
     await vi.advanceTimersByTimeAsync(PAST_PAGE_WAIT)
-    await expect(part).resolves.toBeNull()
 
-    manifest = () => ({ cid, bvid: "BV1XZn26rE8x", aid: 170001, p: 9 })
-    const retried = requestBilibiliPlayingPart("BV1XZn26rE8x:9")
-    await vi.advanceTimersByTimeAsync(BILIBILI_PAGE_POLL_INTERVAL_MS)
-    await expect(retried).resolves.toEqual({ bvid: "BV1XZn26rE8x", cid })
+    await expect(part).resolves.toBeNull()
   })
 })

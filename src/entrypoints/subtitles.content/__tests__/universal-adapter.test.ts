@@ -415,19 +415,29 @@ describe("universalVideoAdapter", () => {
     expect(startTranslationSpy).toHaveBeenCalledTimes(1)
   })
 
-  it("returns to native subtitles when an AI track fails to reload on a track check", async () => {
+  it("returns to the site's subtitles when an AI track fails to reload, and checks no more", async () => {
     const { adapter, subtitlesFetcher } = createAdapter([])
     ;(adapter as any).subtitlesSwitch.source = SUBTITLES_SOURCE.AI
     subtitlesFetcher.fetch.mockRejectedValue(
       new ToastSubtitlesError("subtitles.errors.aiSubscriptionRequired"),
     )
-    attachScheduler(adapter, true)
+    let active = true
+    const scheduler = Object.assign(attachScheduler(adapter, true), {
+      hide: vi.fn<() => void>(() => {
+        active = false
+      }),
+    })
+    scheduler.isActive.mockImplementation(() => active)
     const showNativeSubtitles = vi
       .spyOn((adapter as any).nativeCaptions, "showNativeSubtitles")
       .mockImplementation(() => {})
 
+    // Bilibili checks the track every second.
+    await adapter.handleSourceTrackChanged()
     await adapter.handleSourceTrackChanged()
 
+    expect(subtitlesFetcher.fetch).toHaveBeenCalledOnce()
+    expect(scheduler.hide).toHaveBeenCalled()
     expect(mocks.showAiSubtitlesWallToast).toHaveBeenCalledOnce()
     expect((adapter as any).subtitlesSwitch.source).toBe(SUBTITLES_SOURCE.NATIVE)
     expect(subtitlesStore.get(subtitlesSourceAtom)).toBe(SUBTITLES_SOURCE.NATIVE)

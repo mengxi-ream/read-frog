@@ -184,8 +184,10 @@ export class SubtitlesSwitch {
   }
 
   private revertToNativeSource() {
-    // A track check that waited on the failed start would lay a session over the native captions.
+    // A track check that waited on the failed start would lay a session over the native captions,
+    // and an active scheduler would have the next one start that session.
     this.lifecycle.switchGeneration.next()
+    this.getScheduler()?.hide()
     this.fetcher.cleanup()
     this.source = SUBTITLES_SOURCE.NATIVE
     this.fetcher = this.fetchers.native()

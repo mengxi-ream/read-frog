@@ -5,7 +5,7 @@ import {
 } from "@/utils/constants/subtitles"
 import { TextTrackFetcher } from "@/utils/subtitles/fetchers"
 import { UniversalVideoAdapter } from "../../universal-adapter"
-import { aiFetcherFactory } from "../ai-fetcher"
+import { aiFetcherFactories } from "../ai-fetcher"
 import { getCurrentXcomSubtitlesVideo, getCurrentXcomVideoId } from "./dom"
 
 // In-band captions, as a broadcast replay's, arrive just ahead of playback: one read would keep
@@ -25,7 +25,7 @@ export function createXcomSubtitlesAdapter(config: PlatformConfig) {
           isSourceTrack: isXcomSourceTrack,
           isBroadcastTimed: (track) => !track.label.includes(XCOM_AUTO_GENERATED_TRACK_MARK),
         }),
-      ...aiFetcherFactory(config.createAiSubtitlesContext),
+      ...aiFetcherFactories(config),
     },
   })
 }

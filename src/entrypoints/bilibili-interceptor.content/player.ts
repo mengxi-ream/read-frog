@@ -16,30 +16,44 @@ import {
 import { pollUntil } from "@/utils/poll"
 import { findCapturedSubtitles, recordPlayerInfo } from "./player-info-capture"
 
+interface PartRequest {
+  requestId: string
+  partId: string
+}
+
 function emptyResponse(requestId: string): BilibiliSubtitlesResponse {
   return { type: BILIBILI_SUBTITLES_RESPONSE_TYPE, requestId, cid: null, subtitles: null }
 }
 
-function playingPartResponse(
-  requestId: string,
-  part: BilibiliPlayingPart | null = null,
-): BilibiliPlayingPartResponse {
+function playingPartResponse({
+  requestId,
+  part,
+}: {
+  requestId: string
+  part: BilibiliPlayingPart | null
+}): BilibiliPlayingPartResponse {
   return { type: BILIBILI_PLAYING_PART_RESPONSE_TYPE, requestId, part }
+}
+
+/** The player's own account of what it plays; nothing while it is still starting. */
+function readManifest(): Record<string, unknown> {
+  try {
+    return (window as any).player.getManifest() ?? {}
+  } catch {
+    return {}
+  }
 }
 
 // The url can name the next part before the player has switched to it, so wait for both to agree.
 function findPlayingPart(partId: string): BilibiliPlayingPart | null {
-  try {
-    const manifest = (window as any).player.getManifest()
-    const playing = [`${manifest.bvid}:${manifest.p}`, `av${manifest.aid}:${manifest.p}`]
-    return typeof manifest.cid === "number" &&
-      typeof manifest.bvid === "string" &&
-      playing.includes(partId)
-      ? { bvid: manifest.bvid, cid: manifest.cid }
-      : null
-  } catch {
-    return null
-  }
+  const { bvid, aid, cid, p } = readManifest()
+  return typeof bvid === "string" &&
+    typeof aid === "number" &&
+    typeof cid === "number" &&
+    typeof p === "number" &&
+    [`${bvid}:${p}`, `av${aid}:${p}`].includes(partId)
+    ? { bvid, cid, p }
+    : null
 }
 
 // For a page script injected after the player asked, as on a Firefox update or a dev reload: the
@@ -71,12 +85,16 @@ function untilDeadline(deadline: number) {
   return { timeoutMs: deadline - Date.now(), intervalMs: BILIBILI_PAGE_POLL_INTERVAL_MS }
 }
 
-async function handleSubtitlesRequest(
-  requestId: string,
-  partId: string,
-): Promise<BilibiliSubtitlesResponse> {
+function waitForPlayingPart({ partId, deadline }: { partId: string; deadline: number }) {
+  return pollUntil(() => findPlayingPart(partId), untilDeadline(deadline))
+}
+
+async function answerSubtitles({
+  requestId,
+  partId,
+}: PartRequest): Promise<BilibiliSubtitlesResponse> {
   const deadline = Date.now() + BILIBILI_PAGE_WAIT_TIMEOUT_MS
-  const part = await pollUntil(() => findPlayingPart(partId), untilDeadline(deadline))
+  const part = await waitForPlayingPart({ partId, deadline })
   if (part === null) return emptyResponse(requestId)
 
   const { cid } = part
@@ -86,24 +104,21 @@ async function handleSubtitlesRequest(
   return { type: BILIBILI_SUBTITLES_RESPONSE_TYPE, requestId, cid, subtitles }
 }
 
-async function handlePlayingPartRequest(
-  requestId: string,
-  partId: string,
-): Promise<BilibiliPlayingPartResponse> {
+async function answerPlayingPart({
+  requestId,
+  partId,
+}: PartRequest): Promise<BilibiliPlayingPartResponse> {
   const deadline = Date.now() + BILIBILI_PAGE_WAIT_TIMEOUT_MS
-  return playingPartResponse(
-    requestId,
-    await pollUntil(() => findPlayingPart(partId), untilDeadline(deadline)),
-  )
+  return playingPartResponse({ requestId, part: await waitForPlayingPart({ partId, deadline }) })
 }
 
 function answerRequests<T>({
   requestType,
-  handle,
+  answer,
   fallback,
 }: {
   requestType: string
-  handle: (requestId: string, partId: string) => Promise<T>
+  answer: (request: PartRequest) => Promise<T>
   fallback: (requestId: string) => T
 }): void {
   window.addEventListener("message", (event: MessageEvent) => {
@@ -112,7 +127,7 @@ function answerRequests<T>({
     }
     const { requestId, partId } = event.data
     // Answers even when something unexpected throws, so the content script never waits in vain.
-    void handle(requestId, partId)
+    void answer({ requestId, partId })
       .catch(() => fallback(requestId))
       .then((response) => window.postMessage(response, window.location.origin))
   })
@@ -121,12 +136,15 @@ function answerRequests<T>({
 export function listenForSubtitlesRequests(): void {
   answerRequests({
     requestType: BILIBILI_SUBTITLES_REQUEST_TYPE,
-    handle: handleSubtitlesRequest,
+    answer: answerSubtitles,
     fallback: emptyResponse,
   })
+}
+
+export function listenForPlayingPartRequests(): void {
   answerRequests({
     requestType: BILIBILI_PLAYING_PART_REQUEST_TYPE,
-    handle: handlePlayingPartRequest,
-    fallback: playingPartResponse,
+    answer: answerPlayingPart,
+    fallback: (requestId) => playingPartResponse({ requestId, part: null }),
   })
 }

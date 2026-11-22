@@ -111,6 +111,34 @@ describe("aiSubtitlesFetcher", () => {
     expect(capturedSignal?.aborted).toBe(true)
   })
 
+  it("starts no request when cleaned up while its context resolves", async () => {
+    let resolveContext: (ctx: AiSubtitlesContext) => void = () => {}
+    const fetcher = new AiSubtitlesFetcher(
+      () =>
+        new Promise((resolve) => {
+          resolveContext = resolve
+        }),
+    )
+
+    const fetching = fetcher.fetch()
+    fetcher.cleanup()
+    resolveContext(contextFor("abc"))
+
+    await expect(fetching).rejects.toMatchObject({ name: "AbortError" })
+    expect(requestAiSubtitles).not.toHaveBeenCalled()
+  })
+
+  it("keeps a transcript that lands while the context is missing for a moment", async () => {
+    let ctx: AiSubtitlesContext | null = contextFor("abc")
+    requestAiSubtitles.mockImplementation(async () => {
+      ctx = null
+      return { segments: [{ text: "hi", start: 0, end: 100 }], detectedLanguage: "en" }
+    })
+    const fetcher = new AiSubtitlesFetcher(async () => ctx)
+
+    await expect(fetcher.fetch()).resolves.toEqual([{ text: "hi", start: 0, end: 100 }])
+  })
+
   it("keeps a loaded track while the context is missing for a moment, and drops it for another video", async () => {
     requestAiSubtitles.mockResolvedValue({
       segments: [{ text: "hi", start: 0, end: 100 }],

@@ -1,5 +1,5 @@
 import { defineContentScript } from "#imports"
-import { listenForSubtitlesRequests } from "./player"
+import { listenForPlayingPartRequests, listenForSubtitlesRequests } from "./player"
 import { setupPlayerInfoCapture } from "./player-info-capture"
 
 export default defineContentScript({
@@ -14,5 +14,6 @@ export default defineContentScript({
 
     setupPlayerInfoCapture()
     listenForSubtitlesRequests()
+    listenForPlayingPartRequests()
   },
 })

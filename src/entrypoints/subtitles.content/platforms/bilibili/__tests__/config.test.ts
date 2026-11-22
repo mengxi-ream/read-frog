@@ -6,7 +6,7 @@ const CID = 43764813122
 
 const mocks = vi.hoisted(() => ({
   partId: null as string | null,
-  part: null as { bvid: string; cid: number } | null,
+  part: null as { bvid: string; cid: number; p: number } | null,
   video: null as { duration: number } | null,
 }))
 
@@ -20,7 +20,7 @@ describe("bilibili AI subtitles", () => {
 
   beforeEach(() => {
     mocks.partId = `${BVID}:4`
-    mocks.part = { bvid: BVID, cid: CID }
+    mocks.part = { bvid: BVID, cid: CID, p: 4 }
     mocks.video = { duration: 659.968 }
     vi.stubGlobal("document", { querySelector: () => mocks.video })
   })
@@ -46,7 +46,7 @@ describe("bilibili AI subtitles", () => {
     mocks.part = null
     await expect(createAiSubtitlesContext?.()).resolves.toBeNull()
 
-    mocks.part = { bvid: BVID, cid: CID }
+    mocks.part = { bvid: BVID, cid: CID, p: 4 }
     mocks.partId = null
     await expect(createAiSubtitlesContext?.()).resolves.toBeNull()
 
