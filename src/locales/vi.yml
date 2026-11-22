@@ -1589,7 +1589,7 @@ translateService:
   title: Dịch vụ dịch thuật
   description: Chỉ để dịch trang web
   builtInModels: Built-in Models
-  llmModels: LLM Models
+  llmModels: Mô hình bên thứ ba
   normalTranslator: Trình dịch thông thường
   selectServices: Chọn dịch vụ
   translationProviders: Dịch vụ dịch thuật

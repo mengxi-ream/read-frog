@@ -1589,7 +1589,7 @@ translateService:
   title: 翻訳サービス
   description: ウェブページの翻訳にのみ使用
   builtInModels: Built-in Models
-  llmModels: LLM Models
+  llmModels: サードパーティモデル
   normalTranslator: 通常翻訳
   selectServices: サービスを選択
   translationProviders: 翻訳サービス

@@ -1736,7 +1736,7 @@ translateService:
   title: Translation Service
   description: For translate the webpage only
   builtInModels: Built-in Models
-  llmModels: LLM Models
+  llmModels: Third-party Models
   normalTranslator: Normal Translators
   selectServices: Select services
   translationProviders: Translation Providers

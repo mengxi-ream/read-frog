@@ -7,7 +7,7 @@ import { buttonVariants } from "@/components/ui/base-ui/button"
 import { configAtom, configFieldsAtomMap } from "@/utils/atoms/config"
 import { FEATURE_PROVIDER_DEFS, getFeatureLabelI18nKey } from "@/utils/constants/feature-providers"
 import { i18n } from "@/utils/i18n"
-import { isProviderIdDurablyUnusable } from "@/utils/providers/provider-availability"
+import { isProviderIdPlanWalled } from "@/utils/providers/provider-availability"
 import { canResolvedProviderRefGenerateText } from "@/utils/providers/provider-ref"
 import { resolveProviderRefForCapability } from "@/utils/providers/provider-registry"
 import { cn } from "@/utils/styles/utils"
@@ -52,7 +52,7 @@ export function LlmFeatureStatusList({
         const featureName = i18n.t(getFeatureLabelI18nKey(featureKey))
         const hasLLMProvider = providerRef
           ? canResolvedProviderRefGenerateText(providerRef) &&
-            !isProviderIdDurablyUnusable(providerId, featureKey, status)
+            !isProviderIdPlanWalled(providerId, featureKey, status)
           : false
 
         return {

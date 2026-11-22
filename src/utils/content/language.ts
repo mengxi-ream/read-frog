@@ -5,6 +5,9 @@ import { franc } from "franc"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { getLocalConfig } from "@/utils/config/storage"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
+import { logInAction } from "@/utils/error-action"
+import { getErrorActionToastProps } from "@/utils/error-action-toast"
+import { getBuiltInAiRefusalKind } from "@/utils/hosted-ai/refusal"
 import { i18n } from "@/utils/i18n"
 import { createLogger } from "@/utils/logging/logger"
 import { sendMessage } from "@/utils/message"
@@ -75,6 +78,10 @@ export async function detectLanguageWithSource(
     } catch (error) {
       log.warn("LLM detection failed, falling back to franc", { error })
       const isSpeaking = options.llmFallbackToastContext === "speak"
+      // A guest may pick a Built-in model for detection, and the run then asks
+      // them to log in, as every other feature does. Settings lists that model
+      // as available, so pointing there would not help.
+      const logIn = getBuiltInAiRefusalKind(error) === "logIn" ? logInAction() : undefined
       toastManager.add({
         type: "warning",
         title: isSpeaking
@@ -82,8 +89,15 @@ export async function detectLanguageWithSource(
           : error instanceof HostedAiProviderUnavailableError
             ? error.message
             : i18n.t("languageDetection.llmFailed"),
-        description: isSpeaking ? i18n.t("speak.languageDetectionSettingsHint") : undefined,
+        description: isSpeaking
+          ? i18n.t(
+              logIn ? "hostedAi.builtInAiPrompt.logInTitle" : "speak.languageDetectionSettingsHint",
+            )
+          : undefined,
         id: LLM_DETECTION_FALLBACK_TOAST_ID,
+        ...(logIn && {
+          actionProps: getErrorActionToastProps(logIn, LLM_DETECTION_FALLBACK_TOAST_ID),
+        }),
       })
     }
   }
