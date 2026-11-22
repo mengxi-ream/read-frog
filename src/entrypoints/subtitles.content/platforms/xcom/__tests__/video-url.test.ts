@@ -55,4 +55,16 @@ describe("getXcomVideoPostUrl", () => {
     expect(getCurrentXcomVideoUrl()).toBe(`https://x.com/i/status/${PAGE_STATUS_ID}`)
     expect(getXcomVideoPostUrl(ad)).toBeNull()
   })
+
+  it("links a video in the media view, which no post holds, to the post its URL names", () => {
+    page.statusId = PAGE_STATUS_ID
+    const mediaView = document.createElement("div")
+    mediaView.setAttribute("role", "dialog")
+    mediaView.setAttribute("aria-modal", "true")
+    const video = document.createElement("video")
+    mediaView.append(video)
+    document.body.append(mediaView)
+
+    expect(getXcomVideoPostUrl(video)).toBe(`https://x.com/i/status/${PAGE_STATUS_ID}`)
+  })
 })

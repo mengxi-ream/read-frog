@@ -37,6 +37,16 @@ function addVideoPost(statusId: string): { post: HTMLElement; video: HTMLVideoEl
   return { post, video: post.querySelector("video")! }
 }
 
+function openMediaView(statusId: string): { mediaView: HTMLElement; video: HTMLVideoElement } {
+  window.history.pushState({}, "", `/someone/status/${statusId}/photo/1`)
+  const mediaView = document.createElement("div")
+  mediaView.setAttribute("role", "dialog")
+  mediaView.setAttribute("aria-modal", "true")
+  mediaView.innerHTML = `<ul role="list"><li role="listitem"><div data-testid="videoComponent"><video></video></div></li></ul>`
+  document.body.append(mediaView)
+  return { mediaView, video: mediaView.querySelector("video")! }
+}
+
 async function startOn(video: HTMLVideoElement): Promise<UniversalVideoAdapter> {
   const initialize = vi.spyOn(UniversalVideoAdapter.prototype, "initialize")
   initXcomSubtitles({
@@ -62,6 +72,7 @@ describe("x.com timeline leaving the video it followed", () => {
   afterEach(() => {
     for (const stop of invalidations.splice(0)) stop()
     document.body.replaceChildren()
+    window.history.pushState({}, "", "/home")
     vi.restoreAllMocks()
     vi.useRealTimers()
   })
@@ -93,6 +104,24 @@ describe("x.com timeline leaving the video it followed", () => {
     await vi.advanceTimersByTimeAsync(XCOM_STATUS_POLL_INTERVAL_MS + NAVIGATION_HANDLER_DELAY)
 
     expect(adapter.getVideoElement()).toBe(next.video)
+    expect(toastManager.add).not.toHaveBeenCalled()
+  })
+
+  it("follows the video into X's media view, which hides the timeline, and back out", async () => {
+    const timeline = addVideoPost("1001")
+    const adapter = await startOn(timeline.video)
+
+    timeline.post.setAttribute("aria-hidden", "true")
+    const { mediaView, video } = openMediaView("1001")
+    await vi.advanceTimersByTimeAsync(XCOM_STATUS_POLL_INTERVAL_MS + NAVIGATION_HANDLER_DELAY)
+    expect(adapter.getVideoElement()).toBe(video)
+
+    mediaView.remove()
+    timeline.post.removeAttribute("aria-hidden")
+    window.history.pushState({}, "", "/home")
+    await vi.advanceTimersByTimeAsync(XCOM_STATUS_POLL_INTERVAL_MS + NAVIGATION_HANDLER_DELAY)
+
+    expect(adapter.getVideoElement()).toBe(timeline.video)
     expect(toastManager.add).not.toHaveBeenCalled()
   })
 })

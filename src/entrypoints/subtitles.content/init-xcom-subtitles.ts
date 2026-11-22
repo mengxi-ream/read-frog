@@ -7,6 +7,7 @@ import {
   getCurrentPrimaryXcomStatusVideo,
   getCurrentXcomVideoId,
   getXcomStatusVideoContainer,
+  isXcomCandidatePlayer,
 } from "./platforms/xcom/dom"
 import {
   clearXcomOverlayEntryPoints,
@@ -48,11 +49,12 @@ export function initXcomSubtitles(ctx: ContentScriptContext) {
   let lastVideoContainer: HTMLElement | null = null
 
   // Passing over another video keeps the AI subtitles a reader waits for; playing it instead lets go.
+  // So does a player the media view hides or slides away, whose video no longer resolves.
   const getActiveVideoContainer = () => {
     const current = getCurrentVideoContainer()
     const keepsPinned =
       adapter?.isAwaitingAiSubtitles() &&
-      lastVideoContainer?.isConnected &&
+      isXcomCandidatePlayer(lastVideoContainer) &&
       (isPlayingIn(lastVideoContainer) || !isPlayingIn(current))
     return keepsPinned ? lastVideoContainer : current
   }

@@ -1,8 +1,14 @@
 // @vitest-environment jsdom
+// @vitest-environment-options { "url": "https://x.com/home" }
 import { afterEach, describe, expect, it } from "vitest"
 import { getCurrentXcomSubtitlesVideo } from "../dom"
 
 const CARD_MEDIA_TESTID = "card.layoutLarge.media"
+// Moving between posts in the media view rewrites the URL to `/photo/1`, even on a video.
+const MEDIA_VIEW_PATH = "/NASA/status/2123820070803542306/photo/1"
+const MEDIA_VIEW_SLIDE = `<li role="listitem"><div data-testid="videoComponent"><video></video></div></li>`
+// As read on x.com, the slide before the one shown sat at x = -1357.
+const OFF_SCREEN_SLIDE_RECT = { left: -1357, width: 1357, height: 763 } as DOMRect
 
 function addPostWithVideo() {
   const article = document.createElement("article")
@@ -27,8 +33,19 @@ function hideFromScreenReaders({ element, testid }: { element: HTMLElement; test
   hidden.append(element)
 }
 
+function openMediaView({ slides }: { slides: number }): HTMLVideoElement[] {
+  window.history.pushState({}, "", MEDIA_VIEW_PATH)
+  const dialog = document.createElement("div")
+  dialog.setAttribute("role", "dialog")
+  dialog.setAttribute("aria-modal", "true")
+  dialog.innerHTML = `<ul role="list">${MEDIA_VIEW_SLIDE.repeat(slides)}</ul>`
+  document.body.append(dialog)
+  return Array.from(dialog.querySelectorAll("video"))
+}
+
 afterEach(() => {
   document.body.replaceChildren()
+  window.history.pushState({}, "", "/home")
 })
 
 describe("getCurrentXcomSubtitlesVideo", () => {
@@ -50,6 +67,30 @@ describe("getCurrentXcomSubtitlesVideo", () => {
     const { article, player } = addPostWithVideo()
     hideFromScreenReaders({ element: player, testid: CARD_MEDIA_TESTID })
     hideFromScreenReaders({ element: article })
+
+    expect(getCurrentXcomSubtitlesVideo()).toBeNull()
+  })
+})
+
+describe("getCurrentXcomSubtitlesVideo in X's media view", () => {
+  it("finds the video the media view shows, which has no post around it", () => {
+    const { article } = addPostWithVideo()
+    hideFromScreenReaders({ element: article })
+    const [shown] = openMediaView({ slides: 1 })
+
+    expect(getCurrentXcomSubtitlesVideo()).toBe(shown)
+  })
+
+  it("skips the slides the media view keeps mounted off screen", () => {
+    const [previous, shown] = openMediaView({ slides: 2 })
+    previous!.getBoundingClientRect = () => OFF_SCREEN_SLIDE_RECT
+
+    expect(getCurrentXcomSubtitlesVideo()).toBe(shown)
+  })
+
+  it("skips a video in a dialog whose URL names no post, as a draft's", () => {
+    openMediaView({ slides: 1 })
+    window.history.pushState({}, "", "/compose/post")
 
     expect(getCurrentXcomSubtitlesVideo()).toBeNull()
   })
