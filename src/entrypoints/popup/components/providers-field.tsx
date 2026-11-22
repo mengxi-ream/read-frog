@@ -17,7 +17,7 @@ import { configAtom, configFieldsAtomMap } from "@/utils/atoms/config"
 import { FEATURE_KEYS, FEATURE_PROVIDER_DEFS } from "@/utils/constants/feature-providers"
 import { getSelectionToolbarActions } from "@/utils/custom-actions"
 import { i18n } from "@/utils/i18n"
-import { isProviderIdDurablyUnusable } from "@/utils/providers/provider-availability"
+import { isProviderIdPlanWalled } from "@/utils/providers/provider-availability"
 import {
   getProviderLogo,
   getProviderName,
@@ -86,11 +86,11 @@ function ProviderAvatarSummary({ slots }: { slots: SelectedProviderSlot[] }) {
         const providerKeyCount = providerKeyCounts.get(provider.id) ?? 0
         providerKeyCounts.set(provider.id, providerKeyCount + 1)
         // Same treatment and the same predicate as the dropdowns this button
-        // opens: dimmed on durable account facts only, so a row the user could
-        // fix by signing in or upgrading reads differently from one that is
-        // merely out of quota. Otherwise these logos say "five features
-        // configured" to an account that can run none of them.
-        const unusable = isProviderIdDurablyUnusable(provider.id, capability, status)
+        // opens: dimmed only behind a plan the account lacks, so a row the user
+        // has to upgrade for reads differently from one that is merely out of
+        // quota or waiting for a guest to sign in. Otherwise these logos say
+        // "five features configured" to an account that can run none of them.
+        const unusable = isProviderIdPlanWalled(provider.id, capability, status)
         // A Built-in AI model shows its vendor's logo, as in the menus, but
         // without the frog badge: the next avatar would cover it. A model whose
         // vendor is unknown keeps the frog.
