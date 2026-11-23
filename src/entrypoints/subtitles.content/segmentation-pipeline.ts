@@ -1,7 +1,7 @@
 import type { PromptableProviderRef } from "@/utils/providers/provider-ref"
 import type { SubtitlesFragment } from "@/utils/subtitles/types"
 import { PROCESS_LOOK_AHEAD_MS } from "@/utils/constants/subtitles"
-import { effectiveLookAheadMs } from "@/utils/subtitles/lookahead"
+import { configuredLookAheadMs, effectiveLookAheadMs } from "@/utils/subtitles/lookahead"
 import { aiSegmentBlock } from "@/utils/subtitles/processor/ai-segmentation"
 import { optimizeSubtitles } from "@/utils/subtitles/processor/optimizer"
 
@@ -19,6 +19,8 @@ export class SegmentationPipeline {
   private aiSegmentFailedRawStarts = new Set<number>()
   private running = false
   private stopped = false
+  private prefetchMinutes = 0
+  private restartAfterRun = false
 
   private getVideoElement: () => HTMLVideoElement | null
   private getSourceLanguage: () => string
@@ -61,6 +63,17 @@ export class SegmentationPipeline {
     return this.rawFragments.some((f) => !this.segmentedRawStarts.has(f.start))
   }
 
+  setPrefetchMinutes(minutes: number) {
+    if (this.prefetchMinutes === minutes) return
+    this.prefetchMinutes = minutes
+    // If the old horizon made an active loop exit, restart after its last iteration.
+    if (this.running) {
+      this.restartAfterRun = true
+    } else if (!this.stopped) {
+      this.restart()
+    }
+  }
+
   start() {
     this.stopped = false
     void this.runLoop()
@@ -68,6 +81,7 @@ export class SegmentationPipeline {
 
   stop() {
     this.stopped = true
+    this.restartAfterRun = false
   }
 
   restart() {
@@ -98,6 +112,10 @@ export class SegmentationPipeline {
       }
     } finally {
       this.running = false
+      if (this.restartAfterRun && !this.stopped) {
+        this.restartAfterRun = false
+        void this.runLoop()
+      }
     }
   }
 
@@ -174,13 +192,19 @@ export class SegmentationPipeline {
     // eagerly sends the entire remaining video to the AI segmentation model.
     // Chunks further ahead are picked up later, once playback advances and the
     // translation coordinator restarts the pipeline.
-    const lookAheadMs = effectiveLookAheadMs(
+    const playbackRate = this.getVideoElement()?.playbackRate
+    const lookAheadMs = configuredLookAheadMs(
       PROCESS_LOOK_AHEAD_MS,
-      this.getVideoElement()?.playbackRate,
+      playbackRate,
+      this.prefetchMinutes,
     )
     if (firstUnprocessed.start > currentTimeMs + lookAheadMs) return []
 
-    const windowEnd = firstUnprocessed.start + lookAheadMs
+    // Chunk size stays bounded, even when the reader pretranslates the entire video.
+    const windowEnd = firstUnprocessed.start + effectiveLookAheadMs(
+      PROCESS_LOOK_AHEAD_MS,
+      playbackRate,
+    )
     return this.rawFragments.filter(
       (f) =>
         f.start >= firstUnprocessed.start &&

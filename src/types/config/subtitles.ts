@@ -83,6 +83,8 @@ export const videoSubtitlesSchema = z.object({
   providerId: storedProviderIdSchema,
   style: subtitlesStyleSchema,
   aiSegmentation: z.boolean(),
+  // 0 = regular adaptive look-ahead; -1 = entire available subtitle track.
+  prefetchMinutes: z.number().int().min(-1).max(60).default(0),
   // `.default()` is load-bearing: it lets configs stored before this field existed still
   // parse during the upgrade window, before the v115 migration runs.
   wordLookupActionId: z.string().nonempty().default(BUILT_IN_DICTIONARY_ACTION_ID),

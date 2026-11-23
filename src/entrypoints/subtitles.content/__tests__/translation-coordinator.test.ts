@@ -203,6 +203,42 @@ describe("translation coordinator loading state", () => {
     spy.mockRestore()
   })
 
+  it("pretranslates a distant ASR cue while playback is paused", async () => {
+    const config = await import("@/utils/config/storage")
+    const configSpy = vi.spyOn(config, "getLocalConfig").mockResolvedValue({
+      ...DEFAULT_CONFIG,
+      videoSubtitles: { ...DEFAULT_CONFIG.videoSubtitles, prefetchMinutes: -1 },
+    })
+    const translator = await import("@/utils/subtitles/processor/translator")
+    const spy = vi.spyOn(translator, "translateSubtitles")
+      .mockImplementation((batch: any) =>
+        Promise.resolve(batch.map((cue: any) => ({ ...cue, translation: `t:${cue.text}` }))) as any,
+      )
+    const coordinator = new TranslationCoordinator({
+      getFragments: () => [{ text: "ASR caption", start: 600_000, end: 601_000 }],
+      getVideoElement: () => ({
+        currentTime: 0,
+        paused: true,
+        playbackRate: 1,
+        addEventListener: vi.fn<(...args: any[]) => any>(),
+        removeEventListener: vi.fn<(...args: any[]) => any>(),
+      }) as unknown as HTMLVideoElement,
+      getCurrentState: () => "idle",
+      segmentationPipeline: null,
+      onTranslated: vi.fn<(...args: any[]) => any>(),
+      onStateChange: vi.fn<(...args: any[]) => any>(),
+    })
+    try {
+      coordinator.start()
+      await vi.waitFor(() => expect(spy).toHaveBeenCalledTimes(1))
+      expect((spy.mock.calls[0]![0] as Array<{ start: number }>)[0]!.start).toBe(600_000)
+    } finally {
+      coordinator.stop()
+      spy.mockRestore()
+      configSpy.mockRestore()
+    }
+  })
+
   it("widens the translation look-ahead window with playback rate", async () => {
     const translator = await import("@/utils/subtitles/processor/translator")
 

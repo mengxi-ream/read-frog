@@ -10,7 +10,7 @@ import { CONFIG_STORAGE_KEY } from "@/utils/constants/config"
 import { TRANSLATE_LOOK_AHEAD_MS } from "@/utils/constants/subtitles"
 import { DEFAULT_BATCH_CONFIG } from "@/utils/constants/translate"
 import { getBuiltInAiRefusalKind } from "@/utils/hosted-ai/refusal"
-import { effectiveLookAheadMs } from "@/utils/subtitles/lookahead"
+import { configuredLookAheadMs } from "@/utils/subtitles/lookahead"
 import { getSubtitlesPassLimits, translateSubtitles } from "@/utils/subtitles/processor/translator"
 import { adPlayingAtom, subtitlesStore } from "./atoms"
 
@@ -71,6 +71,7 @@ export class TranslationCoordinator {
   private onStateChange: (state: SubtitlesState, data?: Record<string, string>) => void
   private onBuiltInAiRefused: ((error: unknown) => void) | undefined
   private batchLimits: BatchQueueConfig
+  private prefetchMinutes = 0
   private unwatchConfig: (() => void) | null = null
   /** Set when Built-in AI refuses a batch; see `onBuiltInAiRefused`. */
   private heldByRefusal = false
@@ -143,12 +144,28 @@ export class TranslationCoordinator {
    * also gets another go at the cues the old one failed, such as every cue Built-in AI
    * refused: the reader may have switched just for them.
    */
+  private applyPrefetchMinutes(minutes: number) {
+    if (this.prefetchMinutes === minutes) return
+    this.prefetchMinutes = minutes
+    this.segmentationPipeline?.setPrefetchMinutes(minutes)
+    this.requestTick()
+  }
+
   private watchPassLimits() {
     if (this.unwatchConfig) return
+    // Storage watch observes later edits; load the saved preference on video start too.
+    const runId = this.runId
+    void getLocalConfig().then((config) => {
+      if (!config || !this.active || runId !== this.runId) return
+      this.applyPrefetchMinutes(config.videoSubtitles.prefetchMinutes)
+    }).catch(() => {
+      // Keep regular 30-second look-ahead when storage is unavailable.
+    })
     this.unwatchConfig = storage.watch<Config>(`local:${CONFIG_STORAGE_KEY}`, (next, previous) => {
       const parsed = configSchema.safeParse(next)
       if (!parsed.success) return
       this.batchLimits = getSubtitlesPassLimits(parsed.data)
+      this.applyPrefetchMinutes(parsed.data.videoSubtitles.prefetchMinutes)
       if (parsed.data.videoSubtitles.providerId !== previous?.videoSubtitles?.providerId) {
         this.retryFailed()
       }
@@ -281,9 +298,10 @@ export class TranslationCoordinator {
 
     const fragments = this.getFragments()
 
-    const lookAheadMs = effectiveLookAheadMs(
+    const lookAheadMs = configuredLookAheadMs(
       TRANSLATE_LOOK_AHEAD_MS,
       this.getVideoElement()?.playbackRate,
+      this.prefetchMinutes,
     )
 
     const pending = fragments.filter(

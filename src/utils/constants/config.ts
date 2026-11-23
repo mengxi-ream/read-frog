@@ -328,6 +328,7 @@ export const DEFAULT_CONFIG: Config = {
       customCSS: null,
     },
     aiSegmentation: false,
+    prefetchMinutes: 0,
     wordLookupActionId: BUILT_IN_DICTIONARY_ACTION_ID,
     pauseOnHover: false,
     requestQueueConfig: {

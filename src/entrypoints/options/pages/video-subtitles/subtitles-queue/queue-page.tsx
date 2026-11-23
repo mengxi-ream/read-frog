@@ -2,6 +2,7 @@ import { i18n } from "@/utils/i18n"
 import { ConfigDetailSection } from "../../../components/config-detail-section"
 import { PageLayout } from "../../../components/page-layout"
 import { BatchTranslationItems } from "./batch-items"
+import { SubtitlePrefetchItem } from "./prefetch-item"
 import { RequestRateItems, RequestTimeoutItem } from "./request-rate-items"
 
 /**
@@ -20,6 +21,7 @@ export function SubtitlesQueuePage() {
           <span id="subtitles-queue">{i18n.t("options.videoSubtitles.subtitlesQueue.title")}</span>
         }
       >
+        <SubtitlePrefetchItem />
         <RequestRateItems />
         <BatchTranslationItems />
         <RequestTimeoutItem />

@@ -1553,6 +1553,15 @@ options:
       title: 字幕佇列
       description: 字幕請求發出的速度、每個請求承載的字幕行數，以及每個請求最多等多久
       manageQueue: 管理佇列
+      prefetch:
+        title: 字幕預先翻譯
+        description: 播放或暫停時提前翻譯已取得的字幕，包含 YouTube 自動產生的 ASR。整片翻譯可能消耗大量模型 Token。
+        choice:
+          m0: 預設（1 倍速提前 30 秒）
+          m2: 提前 2 分鐘
+          m5: 提前 5 分鐘
+          m10: 提前 10 分鐘
+          all: 整片預先翻譯
       requestQueueConfig:
         title: 翻譯速率
         capacity:

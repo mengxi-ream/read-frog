@@ -1690,6 +1690,15 @@ options:
       title: Subtitle queue
       description: How fast subtitle requests go out, how many lines each carries, and how long each may take
       manageQueue: Manage queue
+      prefetch:
+        title: Subtitle pretranslation
+        description: Pretranslate available captions (including YouTube auto-generated ASR) while paused or playing. Whole-video translation may consume many AI tokens.
+        choice:
+          m0: Default (30 seconds at 1x)
+          m2: 2 minutes
+          m5: 5 minutes
+          m10: 10 minutes
+          all: Entire video
       requestQueueConfig:
         title: Translation rate
         capacity:

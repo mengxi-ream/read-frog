@@ -60,6 +60,25 @@ describe("segmentation pipeline", () => {
     expect(pipeline.hasUnprocessedChunks()).toBe(true)
   })
 
+  it("segments all available ASR cues in full-video mode while paused", async () => {
+    const rawFragments = Array.from({ length: 600 }, (_, i) => ({
+      text: `w${i}`,
+      start: i * 1000,
+      end: (i + 1) * 1000,
+    }))
+    const pipeline = new SegmentationPipeline({
+      rawFragments,
+      getVideoElement: () => ({ currentTime: 0, paused: true }) as HTMLVideoElement,
+      getSourceLanguage: () => "en",
+      providerRef: null,
+      preSegmented: true,
+    })
+    pipeline.setPrefetchMinutes(-1)
+    await vi.waitFor(() => {
+      expect((pipeline as any).segmentedRawStarts.size).toBe(600)
+    })
+  })
+
   it("widens the segmentation look-ahead window with playback rate", async () => {
     // 10 minutes of word-level fragments, one per second.
     const rawFragments = Array.from({ length: 600 }, (_, i) => ({
