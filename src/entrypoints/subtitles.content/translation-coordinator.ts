@@ -5,7 +5,6 @@ import type { SubtitlesVideoContext } from "@/utils/subtitles/processor/translat
 import type { StateData, SubtitlesFragment, SubtitlesState } from "@/utils/subtitles/types"
 import { storage } from "#imports"
 import { configSchema } from "@/types/config/config"
-import { getLocalConfig } from "@/utils/config/storage"
 import { CONFIG_STORAGE_KEY } from "@/utils/constants/config"
 import {
   MACHINE_PLACEHOLDER_LEAD_MS,
@@ -15,6 +14,7 @@ import {
 import { DEFAULT_BATCH_CONFIG } from "@/utils/constants/translate"
 import { getBuiltInAiRefusalKind } from "@/utils/hosted-ai/refusal"
 import { createLogger } from "@/utils/logging/logger"
+import { isAccessDeniedRequestError } from "@/utils/request/retry-policy"
 import { effectiveLookAheadMs } from "@/utils/subtitles/lookahead"
 import {
   getSubtitlesPassLimits,
@@ -65,18 +65,20 @@ function takeBatch(pending: SubtitlesFragment[], limits: BatchQueueConfig): Subt
 }
 
 /**
- * What a cue the provider failed shows until a machine translation takes its place: the
- * original as the translation, where the original is otherwise hidden, or nothing.
+ * What a cue the provider failed shows until a machine translation takes its place: no
+ * translation, in every display mode. It is not on its way either (`isCueResolved`).
  */
-function failedPlaceholder(
-  fragment: SubtitlesFragment,
-  translationOnly: boolean,
-): SubtitlesFragment {
-  return {
-    ...fragment,
-    translation: translationOnly ? fragment.text : "",
-    placeholder: "failed",
-  }
+function failedPlaceholder(fragment: SubtitlesFragment): SubtitlesFragment {
+  return { ...fragment, translation: "", placeholder: "failed" }
+}
+
+/**
+ * The account cannot use the provider: Built-in AI refused, or the retry policy calls the
+ * error an access denial, such as an OpenAI account with no balance. Every batch after
+ * would fail the same way.
+ */
+function isAccessDenied(error: unknown): boolean {
+  return getBuiltInAiRefusalKind(error) !== null || isAccessDeniedRequestError(error)
 }
 
 export class TranslationCoordinator {
@@ -359,7 +361,7 @@ export class TranslationCoordinator {
       this.onTranslated(stillValid)
     } catch (error) {
       if (!this.isCurrentRun(runId)) return
-      await this.handleFailedBatch(batch, error, runId)
+      this.handleFailedBatch(batch, error)
     } finally {
       // Only the current generation may touch the bookkeeping or chain another tick.
       if (this.isCurrentRun(runId)) {
@@ -372,10 +374,10 @@ export class TranslationCoordinator {
 
   /**
    * A failed batch is not tried again, and says nothing: its cues get machine translations
-   * as they come up, and meanwhile show what `failedPlaceholder` leaves. Built-in AI
-   * refusing, or batches failing in a row, holds translation instead (`hold`).
+   * as they come up, and meanwhile show nothing (`failedPlaceholder`). An access denial
+   * holds translation at once instead, and so do batches failing in a row (`hold`).
    */
-  private async handleFailedBatch(batch: SubtitlesFragment[], error: unknown, runId: number) {
+  private handleFailedBatch(batch: SubtitlesFragment[], error: unknown) {
     // Same identity gate as the success path: never bookkeep or publish recut/stale cues.
     const failed = this.filterIdentityValid(batch)
     failed.forEach((f) => this.failedStarts.add(f.start))
@@ -383,26 +385,20 @@ export class TranslationCoordinator {
     this.consecutiveFailures += 1
     if (
       !this.held &&
-      (getBuiltInAiRefusalKind(error) || this.consecutiveFailures >= MAX_CONSECUTIVE_FAILED_BATCHES)
+      (isAccessDenied(error) || this.consecutiveFailures >= MAX_CONSECUTIVE_FAILED_BATCHES)
     ) {
       this.hold(error)
     }
 
-    const config = await getLocalConfig()
-    if (!this.isCurrentRun(runId)) return
-
-    // Re-check after the await: AI recut may have landed while config was loading.
-    const stillValid = this.filterIdentityValid(failed)
-    if (stillValid.length > 0) {
-      const translationOnly = config?.videoSubtitles?.style.displayMode === "translationOnly"
-      this.onTranslated(stillValid.map((f) => failedPlaceholder(f, translationOnly)))
+    if (failed.length > 0) {
+      this.onTranslated(failed.map(failedPlaceholder))
     }
   }
 
   /**
-   * Built-in AI refused, or batches keep failing: a spent balance, a wrong key, a provider
-   * that is down. Every batch after would fail the same way, and machine translations
-   * would cover that up for as long as the video plays. So nothing is sent until the reader
+   * Access denied, or batches keep failing: a spent balance, a wrong key, a provider that
+   * is down. Every batch after would fail the same way, and machine translations would
+   * cover that up for as long as the video plays. So nothing is sent until the reader
    * retries — back to the tab, or another provider — the machine translations go at once,
    * and the error stays up; the AI's lines stay too.
    */

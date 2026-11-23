@@ -3,6 +3,7 @@ import {
   attachRequestErrorMeta,
   defaultRequestRetryPolicy,
   getRequestErrorMeta,
+  isAccessDeniedRequestError,
   isRateLimitRequestError,
   MAX_CONSECUTIVE_RATE_LIMIT_PAUSES,
   MAX_RATE_LIMIT_RETRIES_PER_TASK,
@@ -119,6 +120,34 @@ describe("request retry policy", () => {
       const error = openAiError("rate_limit_exceeded", "Rate limit reached for gpt-4o.")
 
       expect(defaultRequestRetryPolicy.decide(error, retryContext).action).toBe("pause-and-retry")
+    })
+  })
+
+  describe("isAccessDeniedRequestError", () => {
+    /** How the content script sees an error the background relayed: the cause of its own. */
+    function relayed(cause: object) {
+      return new Error("Translation failed", { cause: Object.assign(new Error("x"), cause) })
+    }
+
+    it("finds a denial down the cause chain, where the content script sees it", () => {
+      expect(
+        isAccessDeniedRequestError(
+          relayed({
+            statusCode: 429,
+            responseBody: JSON.stringify({ error: { code: "insufficient_quota" } }),
+          }),
+        ),
+      ).toBe(true)
+      // A hosted denial keeps its kind as a plain field: messaging drops the symbol.
+      expect(isAccessDeniedRequestError(relayed({ kind: "access-denied" }))).toBe(true)
+    })
+
+    it("leaves out a rate limit, a wrong key and anything else", () => {
+      expect(isAccessDeniedRequestError(relayed({ statusCode: 429 }))).toBe(false)
+      expect(isAccessDeniedRequestError(relayed({ statusCode: 401 }))).toBe(false)
+      expect(isAccessDeniedRequestError(relayed({ statusCode: 403 }))).toBe(false)
+      expect(isAccessDeniedRequestError(new Error("timed out"))).toBe(false)
+      expect(isAccessDeniedRequestError("access-denied")).toBe(false)
     })
   })
 

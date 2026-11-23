@@ -170,6 +170,24 @@ export function isRateLimitRequestError(error: unknown): boolean {
   return meta.kind === "rate-limit" || meta.statusCode === 429
 }
 
+const MAX_CAUSE_DEPTH = 5
+
+/**
+ * An access denial (`kind: "access-denied"`) anywhere down the cause chain. A request the
+ * background ran fails in the content script as the cause of a friendlier error, and
+ * messaging drops the symbol its meta rode on, but keeps the fields the meta is read from.
+ */
+export function isAccessDeniedRequestError(error: unknown): boolean {
+  let current = error
+  for (let depth = 0; depth < MAX_CAUSE_DEPTH && isObject(current); depth++) {
+    if (getRequestErrorMeta(current).kind === "access-denied") {
+      return true
+    }
+    current = (current as { cause?: unknown }).cause
+  }
+  return false
+}
+
 export const defaultRequestRetryPolicy: RequestRetryPolicy = {
   decide(error, context) {
     const meta = getRequestErrorMeta(error)

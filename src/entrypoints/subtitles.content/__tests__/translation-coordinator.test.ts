@@ -365,14 +365,13 @@ describe("translation coordinator loading state", () => {
     const onStateChange = vi.fn<(...args: any[]) => any>()
 
     const translator = await import("@/utils/subtitles/processor/translator")
-    const spy = vi
-      .spyOn(translator, "translateSubtitles")
-      .mockRejectedValue(new Error("translate failed"))
-
-    const config = await import("@/utils/config/storage")
-    const configSpy = vi.spyOn(config, "getLocalConfig").mockResolvedValue({
-      videoSubtitles: { style: { displayMode: "bilingual" } },
-    } as any)
+    const failRequests: Array<(error: Error) => void> = []
+    const spy = vi.spyOn(translator, "translateSubtitles").mockImplementation(
+      () =>
+        new Promise((_resolve, reject) => {
+          failRequests.push(reject)
+        }),
+    )
 
     const coordinator = new TranslationCoordinator({
       getFragments: () => fragments,
@@ -389,13 +388,13 @@ describe("translation coordinator loading state", () => {
     })
 
     coordinator.start()
-    await Promise.resolve()
     // Recut mid-request: original cue is gone; only identity-valid fallbacks may publish.
     fragments = [
       { text: "hello", start: 0, end: 1000 },
       { text: "world", start: 1000, end: 2000 },
       { text: "next", start: 2000, end: 3000 },
     ]
+    failRequests.splice(0).forEach((fail) => fail(new Error("translate failed")))
     await vi.waitFor(() => {
       expect(onTranslated).toHaveBeenCalledWith([
         expect.objectContaining({ text: "next", translation: "", placeholder: "failed" }),
@@ -411,8 +410,8 @@ describe("translation coordinator loading state", () => {
     // A batch failing alone says nothing; the cues get machine translations instead.
     expect(onStateChange).not.toHaveBeenCalledWith("error", expect.anything())
 
+    coordinator.stop()
     spy.mockRestore()
-    configSpy.mockRestore()
   })
 })
 
@@ -428,6 +427,30 @@ afterEach(() => {
 function spentPoolError() {
   return new Error("Built-in AI quota used up", {
     cause: Object.assign(new Error("x"), { code: "HOSTED_AI_QUOTA_EXHAUSTED" }),
+  })
+}
+
+/** OpenAI's answer for an account with no balance, relayed from the background. */
+function noBalanceError() {
+  return new Error("You exceeded your current quota", {
+    cause: Object.assign(new Error("You exceeded your current quota"), {
+      name: "AI_APICallError",
+      statusCode: 429,
+      responseBody: JSON.stringify({
+        error: { type: "insufficient_quota", code: "insufficient_quota" },
+      }),
+    }),
+  })
+}
+
+/** Built-in AI's server refusing a plan the model is not on, kind and all, as relayed. */
+function planDeniedError() {
+  return new Error("Ultra required", {
+    cause: Object.assign(new Error("Ultra required"), {
+      code: "HOSTED_AI_TIER_RESTRICTED",
+      kind: "access-denied",
+      isRetryable: false,
+    }),
   })
 }
 
@@ -457,8 +480,6 @@ async function setup({ trackState = false, machinePlaceholder = false } = {}) {
   const machineSpy = vi
     .spyOn(translator, "translateSubtitleWithMachine")
     .mockImplementation(async (text) => `mt:${text}`)
-  const configModule = await import("@/utils/config/storage")
-  const configSpy = vi.spyOn(configModule, "getLocalConfig").mockResolvedValue(DEFAULT_CONFIG)
   const video = createVideo()
   const onBuiltInAiRefused = vi.fn<(error: unknown) => void>()
   const onTranslated = vi.fn<(fragments: SubtitlesFragment[]) => void>()
@@ -485,7 +506,6 @@ async function setup({ trackState = false, machinePlaceholder = false } = {}) {
     coordinator.stop()
     translateSpy.mockRestore()
     machineSpy.mockRestore()
-    configSpy.mockRestore()
   }
   return {
     coordinator,
@@ -664,6 +684,67 @@ describe("translation coordinator when batches fail", () => {
     expect(translateSpy).toHaveBeenCalledTimes(sent)
     expect(onBuiltInAiRefused).not.toHaveBeenCalled()
     expect(onStateChange.mock.calls.filter(([state]) => state === "error")).toHaveLength(1)
+  })
+
+  it.each([
+    ["an OpenAI account with no balance", noBalanceError(), "You exceeded your current quota"],
+    ["Built-in AI refusing the plan", planDeniedError(), "Ultra required"],
+  ])("holds at the first access denial: %s", async (_case, denial, message) => {
+    const { coordinator, translateSpy, onBuiltInAiRefused, onStateChange } = await setup()
+    // The first batch is denied while the others are still on their way.
+    translateSpy.mockImplementation((batch: any) =>
+      batch[0].start === 0 ? Promise.reject(denial) : new Promise(() => {}),
+    )
+
+    coordinator.start()
+
+    await vi.waitFor(() =>
+      expect(onStateChange).toHaveBeenCalledWith("error", { message, persistent: true }),
+    )
+    // Neither asks the reader to log in or upgrade.
+    expect(onBuiltInAiRefused).not.toHaveBeenCalled()
+  })
+
+  it("waits for three failures in a row on any other error, a wrong key included", async () => {
+    const { coordinator, translateSpy, onTranslated, onStateChange } = await setup()
+    const wrongKey = new Error("Incorrect API key provided", {
+      cause: Object.assign(new Error("Incorrect API key provided"), {
+        name: "AI_APICallError",
+        statusCode: 401,
+      }),
+    })
+    translateSpy.mockImplementation((batch: any) =>
+      batch[0].start === 0 ? Promise.reject(wrongKey) : new Promise(() => {}),
+    )
+
+    coordinator.start()
+    await vi.waitFor(() =>
+      expect(onTranslated).toHaveBeenCalledWith([
+        expect.objectContaining({ start: 0, placeholder: "failed" }),
+        expect.objectContaining({ start: 2000, placeholder: "failed" }),
+      ]),
+    )
+
+    expect(onStateChange).not.toHaveBeenCalledWith("error", expect.anything())
+  })
+
+  it("does not show a failed cue as on its way", async () => {
+    const { coordinator, translateSpy, getState } = await setup({ trackState: true })
+    let fail!: (error: Error) => void
+    translateSpy.mockImplementation((batch: any) =>
+      batch[0].start === 0
+        ? new Promise((_resolve, reject) => {
+            fail = reject
+          })
+        : new Promise(() => {}),
+    )
+
+    coordinator.start()
+    expect(getState()).toBe("loading")
+
+    // It waits for a machine translation, and shows nothing meanwhile: no "Translating…".
+    fail(new Error("timed out"))
+    await vi.waitFor(() => expect(getState()).toBe("idle"))
   })
 
   it("counts failures in a row only: one batch coming back starts over", async () => {

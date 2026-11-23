@@ -115,6 +115,34 @@ describe("displaySubtitleAtom", () => {
     expect(subtitlesStore.get(subtitlesShowStateAtom)).toBe("loading")
   })
 
+  it("shows a failed line as nothing in translation-only mode: no caption, no 'Translating…'", () => {
+    subtitlesStore.set(configAtom, {
+      ...DEFAULT_CONFIG,
+      videoSubtitles: {
+        ...DEFAULT_CONFIG.videoSubtitles,
+        style: {
+          ...DEFAULT_CONFIG.videoSubtitles.style,
+          displayMode: "translationOnly",
+        },
+      },
+    })
+    subtitlesStore.set(currentTimeMsAtom, 500)
+    subtitlesStore.set(subtitlesVisibleAtom, true)
+    subtitlesStore.set(sourceTrackAtom, [{ text: "hello", start: 0, end: 1000 }])
+    // Not the original: the line waits for a machine translation, and nothing is on its
+    // way, so the coordinator reports no loading.
+    subtitlesStore.set(currentSubtitleAtom, {
+      text: "hello",
+      start: 0,
+      end: 1000,
+      translation: "",
+      placeholder: "failed",
+    })
+
+    expect(subtitlesStore.get(subtitlesShowContentAtom)).toBe(false)
+    expect(subtitlesStore.get(subtitlesShowStateAtom)).toBeUndefined()
+  })
+
   it("hides main-video captions while an ad is playing", () => {
     subtitlesStore.set(currentTimeMsAtom, 500)
     subtitlesStore.set(subtitlesVisibleAtom, true)
