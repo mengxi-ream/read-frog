@@ -56,7 +56,7 @@ popup:
   blog:
     notification: 陪讀蛙更新動態
   aiSmartContext: AI 智慧上下文
-  aiSmartContextDescription: 結合網頁前後文提升翻譯品質。需要設定 LLM 翻譯服務提供者。
+  aiSmartContextDescription: 結合網頁前後文提升翻譯品質。需要使用 LLM 提供者。
   storeReview:
     title: 用得還順手嗎？
     description: 到商店留個評價，能幫助更多人發現陪讀蛙。
@@ -154,11 +154,11 @@ options:
       qrCodeAlt: 微信 QR code
   apiProviders:
     title: API 提供者
-    pageDescription: 接入 Read Frog 呼叫的 AI 服務，並為每項功能指定使用哪一個。
-    description: 新增 Read Frog 可以呼叫的提供者。內建 20 多個，也可以新增相容 Chat Completions 的自訂 API 和 Open Responses 自訂 API。
+    pageDescription: 使用 Read Frog 內建模型或接入第三方 AI 服務，並為每項功能指定使用哪一個。
+    description: 使用 Read Frog 內建模型，或新增第三方提供者。已預設 20 多個常見提供者，也可以新增相容 Chat Completions 的自訂 API 和 Open Responses 自訂 API。
     configTitle: 提供者設定
     addProvider: 新增提供者
-    builtInProvider: 內建提供者
+    builtInProvider: 內建模型
     thirdPartyProviders: 第三方提供者
     builtInModel:
       reasoningDescription: "$1 回答前思考的程度。檔位越高，越能處理艱深的文字，但回答較慢，消耗的額度也較多。"
@@ -207,8 +207,8 @@ options:
       title: 新增提供者
       groups:
         builtInProviders:
-          title: 內建 LLM 提供者
-          description: 內建的大型語言模型提供者，大多數設定不需要填寫，例如 Base URL
+          title: 預設 LLM 提供者
+          description: 已預設的大型語言模型提供者，無需填寫 Base URL 等大部分設定
         compatibleProviders:
           title: 相容 API 提供者
           description: 相容 Chat Completions 的 API 使用自訂 Chat Complete，Open Responses API 使用自訂 Responses。
@@ -277,15 +277,13 @@ options:
       invalidJson: JSON 格式無效
     providers:
       name:
-        builtInAi: 內建 AI
-        builtInAiAdvance: 高級內建 AI
         customChatComplete: 自訂 Chat Complete
         customResponses: 自訂 Responses
       attribution:
-        builtInAi: 由 Read Frog 託管的普通模型。Pro 和 Ultra 使用者可在全部功能上使用，消耗每週額度；免費使用者僅支援在自訂 AI 指令使用。
-        builtInAiAdvance: 由 Read Frog 託管的進階模型，Ultra 會員專屬。網頁翻譯、自訂 AI 指令等全部內建 AI 功能均可使用，共享每週額度，額度消耗比標準模型更快。
+        builtInAi: 由 Read Frog 託管的標準模型，登入後即可免費使用，消耗每週額度。
+        builtInAiAdvance: 由 Read Frog 託管的進階模型，Ultra 會員專屬，額度消耗比標準模型更快。
       description:
-        openai: 提供 GPT-4o 等模型
+        openai: OpenAI 官方 API，提供 GPT 系列模型
         azure: 透過 Azure 部署使用 OpenAI 模型
         deepseek: 建議在中國使用
         openrouter: 多個 LLM 提供者的統一介面，按使用量付費
@@ -1613,7 +1611,7 @@ languageLevels:
   intermediate: 中級
   advanced: 進階
 noAPIKeyConfig:
-  warning: 如果想要使用 AI 模型，請先在選項頁面設定 API 金鑰
+  warning: 請先在選項頁面為此提供者設定 API 金鑰
   warningWithLink:
     youMust: 必須先
     setTheAPIKey: 設定 API 金鑰

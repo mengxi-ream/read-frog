@@ -56,7 +56,7 @@ popup:
   blog:
     notification: Novedades de Read Frog
   aiSmartContext: Contexto inteligente de IA
-  aiSmartContextDescription: Usa el contexto de la página web para mejorar la calidad de la traducción. Requiere un proveedor de traducción LLM.
+  aiSmartContextDescription: Usa el contexto de la página web para mejorar la calidad de la traducción. Requiere un proveedor LLM.
   storeReview:
     title: ¿Te gusta Read Frog?
     description: Una reseña en la tienda ayuda a que otros lectores lo descubran.
@@ -154,11 +154,11 @@ options:
       qrCodeAlt: Código QR de WeChat
   apiProviders:
     title: Proveedores de API
-    pageDescription: Conecta los servicios de IA que usa Read Frog y elige cuál se encarga de cada función.
-    description: Añade los proveedores que Read Frog puede llamar. Más de 20 vienen integrados y puedes añadir API personalizadas compatibles con Chat Completions u Open Responses.
+    pageDescription: Usa los modelos integrados de Read Frog o conecta servicios de IA de terceros y elige cuál se encarga de cada función.
+    description: Usa los modelos integrados de Read Frog o añade proveedores de terceros. Más de 20 proveedores vienen preconfigurados, y puedes añadir API personalizadas compatibles con Chat Completions u Open Responses.
     configTitle: Configuración de proveedores
     addProvider: Añadir proveedor
-    builtInProvider: Proveedor integrado
+    builtInProvider: Modelos integrados
     thirdPartyProviders: Proveedores de terceros
     builtInModel:
       reasoningDescription: "Cuánto piensa $1 antes de responder. Los niveles más altos manejan mejor los textos difíciles, pero responden más despacio y consumen más de tu cuota."
@@ -207,8 +207,8 @@ options:
       title: Añadir nuevo proveedor
       groups:
         builtInProviders:
-          title: Proveedores LLM integrados
-          description: Proveedores integrados de modelos de lenguaje grandes; no hace falta completar la mayoría de configuraciones, como Base URL
+          title: Proveedores LLM preconfigurados
+          description: Proveedores de modelos de lenguaje preconfigurados; no hace falta completar la mayoría de ajustes, como Base URL
         compatibleProviders:
           title: Proveedores de API compatibles
           description: Usa Personalizado Chat Complete para API compatibles con Chat Completions o Personalizado Responses para API Open Responses.
@@ -277,15 +277,13 @@ options:
       invalidJson: Formato JSON no válido
     providers:
       name:
-        builtInAi: IA integrada
-        builtInAiAdvance: IA integrada avanzada
         customChatComplete: Personalizado Chat Complete
         customResponses: Personalizado Responses
       attribution:
-        builtInAi: Modelo estándar alojado por Read Frog. Los usuarios Pro y Ultra pueden usarlo en todas las funciones con una cuota semanal; en el plan gratuito solo funciona en las acciones de IA personalizadas.
-        builtInAiAdvance: Modelo avanzado alojado por Read Frog, exclusivo para miembros Ultra. Funciona en todas las funciones de IA integrada — traducción de página, acciones de IA personalizadas y más — con una cuota semanal compartida. Consume la cuota más rápido que el modelo estándar.
+        builtInAi: Modelo estándar alojado por Read Frog. Gratis al iniciar sesión, con cuota semanal.
+        builtInAiAdvance: Modelo avanzado alojado por Read Frog, exclusivo para miembros Ultra. Consume la cuota más rápido que los modelos estándar.
       description:
-        openai: Proporciona modelos como GPT-4o
+        openai: API oficial de OpenAI para los modelos GPT
         azure: Modelos OpenAI hospedados en Azure mediante tus implementaciones
         deepseek: Recomendado para usar en China
         openrouter: Interfaz unificada para varios proveedores LLM con precios de pago por uso
@@ -1593,7 +1591,7 @@ side:
 translateService:
   title: Servicio de traducción
   description: Solo para traducir la página web
-  builtInModels: Built-in Models
+  builtInModels: Modelos integrados
   llmModels: Modelos de terceros
   normalTranslator: Traductor normal
   selectServices: Seleccionar servicios
@@ -1608,7 +1606,7 @@ languageLevels:
   intermediate: Intermedio
   advanced: Avanzado
 noAPIKeyConfig:
-  warning: Si quieres usar modelos AI, primero configura la clave API en la página de opciones
+  warning: Primero configura la clave API de este proveedor en la página de opciones
   warningWithLink:
     youMust: Debes
     setTheAPIKey: configurar la clave API

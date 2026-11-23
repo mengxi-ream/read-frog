@@ -56,7 +56,7 @@ popup:
   blog:
     notification: Có gì mới trong Read Frog
   aiSmartContext: Ngữ cảnh thông minh AI
-  aiSmartContextDescription: Sử dụng ngữ cảnh trang web để cải thiện chất lượng dịch. Yêu cầu nhà cung cấp dịch LLM.
+  aiSmartContextDescription: Sử dụng ngữ cảnh trang web để cải thiện chất lượng dịch. Yêu cầu nhà cung cấp LLM.
   storeReview:
     title: Bạn thấy Read Frog thế nào?
     description: Một đánh giá trên cửa hàng sẽ giúp nhiều người đọc khác tìm thấy nó.
@@ -154,11 +154,11 @@ options:
       qrCodeAlt: Mã QR WeChat
   apiProviders:
     title: Nhà cung cấp API
-    pageDescription: Kết nối các dịch vụ AI mà Read Frog sử dụng và chọn dịch vụ cho từng tính năng.
-    description: Thêm các nhà cung cấp mà Read Frog có thể gọi. Hơn 20 nhà cung cấp được tích hợp sẵn; bạn cũng có thể thêm API tùy chỉnh tương thích Chat Completions và API Open Responses.
+    pageDescription: Dùng các mô hình tích hợp của Read Frog hoặc kết nối dịch vụ AI bên thứ ba, rồi chọn dịch vụ cho từng tính năng.
+    description: Dùng các mô hình tích hợp của Read Frog hoặc thêm nhà cung cấp bên thứ ba. Hơn 20 nhà cung cấp đã được cấu hình sẵn; bạn cũng có thể thêm API tùy chỉnh tương thích Chat Completions và API Open Responses.
     configTitle: Cấu hình nhà cung cấp
     addProvider: Thêm nhà cung cấp
-    builtInProvider: Nhà cung cấp tích hợp
+    builtInProvider: Mô hình tích hợp
     thirdPartyProviders: Nhà cung cấp bên thứ ba
     builtInModel:
       reasoningDescription: "Mức độ $1 suy nghĩ trước khi trả lời. Mức càng cao càng xử lý tốt văn bản khó, nhưng trả lời chậm hơn và dùng nhiều hạn mức hơn."
@@ -207,8 +207,8 @@ options:
       title: Thêm nhà cung cấp mới
       groups:
         builtInProviders:
-          title: Nhà cung cấp LLM tích hợp sẵn
-          description: Các nhà cung cấp mô hình ngôn ngữ lớn tích hợp sẵn, không cần điền hầu hết các cấu hình như Base URL
+          title: Nhà cung cấp LLM cấu hình sẵn
+          description: Các nhà cung cấp mô hình ngôn ngữ lớn đã cấu hình sẵn — không cần điền hầu hết thiết lập như Base URL
         compatibleProviders:
           title: Nhà cung cấp API tương thích
           description: Dùng Tùy chỉnh Chat Complete cho API tương thích Chat Completions hoặc Tùy chỉnh Responses cho API Open Responses.
@@ -276,15 +276,13 @@ options:
       invalidJson: Định dạng JSON không hợp lệ
     providers:
       name:
-        builtInAi: AI tích hợp
-        builtInAiAdvance: AI tích hợp nâng cao
         customChatComplete: Tùy chỉnh Chat Complete
         customResponses: Tùy chỉnh Responses
       attribution:
-        builtInAi: Mô hình tiêu chuẩn do Read Frog lưu trữ. Người dùng Pro và Ultra dùng được ở mọi tính năng trong hạn mức tuần; ở gói miễn phí chỉ dùng được trong hành động AI tùy chỉnh.
-        builtInAiAdvance: Mô hình nâng cao do Read Frog lưu trữ, dành riêng cho thành viên Ultra. Dùng được ở mọi tính năng AI tích hợp — dịch trang, hành động AI tùy chỉnh và hơn nữa — với hạn mức tuần dùng chung. Tiêu hao hạn mức nhanh hơn mô hình tiêu chuẩn.
+        builtInAi: Mô hình tiêu chuẩn do Read Frog lưu trữ. Miễn phí sau khi đăng nhập, theo hạn mức tuần.
+        builtInAiAdvance: Mô hình nâng cao do Read Frog lưu trữ, dành riêng cho thành viên Ultra. Tiêu hao hạn mức nhanh hơn các mô hình tiêu chuẩn.
       description:
-        openai: Cung cấp các mô hình như GPT-4o
+        openai: API chính thức của OpenAI cho các mô hình GPT
         azure: Mô hình OpenAI lưu trữ trên Azure qua các bản triển khai của bạn
         deepseek: Khuyến nghị sử dụng ở Trung Quốc
         openrouter: Giao diện thống nhất cho nhiều nhà cung cấp LLM với giá trả theo lần sử dụng
@@ -1588,7 +1586,7 @@ side:
 translateService:
   title: Dịch vụ dịch thuật
   description: Chỉ để dịch trang web
-  builtInModels: Built-in Models
+  builtInModels: Mô hình tích hợp
   llmModels: Mô hình bên thứ ba
   normalTranslator: Trình dịch thông thường
   selectServices: Chọn dịch vụ
@@ -1603,7 +1601,7 @@ languageLevels:
   intermediate: Trung cấp
   advanced: Nâng cao
 noAPIKeyConfig:
-  warning: Nếu bạn muốn sử dụng mô hình AI, vui lòng đặt API key trên trang tùy chọn trước
+  warning: Vui lòng đặt API key cho nhà cung cấp này trên trang tùy chọn trước
   warningWithLink:
     youMust: Bạn phải
     setTheAPIKey: đặt API key
