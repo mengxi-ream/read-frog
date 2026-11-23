@@ -172,6 +172,8 @@ describe("subtitles when Built-in AI refuses a guest or a spent pool", () => {
 
     expect(error).toBeInstanceOf(Error)
     expect(getBuiltInAiRefusalKind(error)).toBe("upgrade")
+    // Built-in AI is Read Frog's own: its message is not put under a provider's name.
+    expect((error as Error).message).toBe("Built-in AI quota used up")
   })
 
   it("keeps a refused summary to the toast: only line translation asks", async () => {

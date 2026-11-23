@@ -29,7 +29,8 @@ export const MAX_LOOKAHEAD_RATE = 4
 // machine one meanwhile; a few hundred milliseconds of Microsoft land before it shows.
 export const MACHINE_PLACEHOLDER_LEAD_MS = 1_500
 // Failed batches in a row before translation holds instead of covering up with machine ones.
-// An access denial, such as a spent balance, holds at the first.
+// An error every later batch would repeat, such as a wrong key or a spent balance, holds at
+// the first.
 export const MAX_CONSECUTIVE_FAILED_BATCHES = 3
 
 // DOM IDs

@@ -3,7 +3,7 @@ import {
   attachRequestErrorMeta,
   defaultRequestRetryPolicy,
   getRequestErrorMeta,
-  isAccessDeniedRequestError,
+  isPermanentRequestError,
   isRateLimitRequestError,
   MAX_CONSECUTIVE_RATE_LIMIT_PAUSES,
   MAX_RATE_LIMIT_RETRIES_PER_TASK,
@@ -123,15 +123,15 @@ describe("request retry policy", () => {
     })
   })
 
-  describe("isAccessDeniedRequestError", () => {
+  describe("isPermanentRequestError", () => {
     /** How the content script sees an error the background relayed: the cause of its own. */
     function relayed(cause: object) {
       return new Error("Translation failed", { cause: Object.assign(new Error("x"), cause) })
     }
 
-    it("finds a denial down the cause chain, where the content script sees it", () => {
+    it("finds an error every later request repeats down the cause chain", () => {
       expect(
-        isAccessDeniedRequestError(
+        isPermanentRequestError(
           relayed({
             statusCode: 429,
             responseBody: JSON.stringify({ error: { code: "insufficient_quota" } }),
@@ -139,15 +139,19 @@ describe("request retry policy", () => {
         ),
       ).toBe(true)
       // A hosted denial keeps its kind as a plain field: messaging drops the symbol.
-      expect(isAccessDeniedRequestError(relayed({ kind: "access-denied" }))).toBe(true)
+      expect(isPermanentRequestError(relayed({ kind: "access-denied" }))).toBe(true)
+      // A wrong key, an empty balance, no permission, a wrong model or endpoint.
+      for (const statusCode of [401, 402, 403, 404]) {
+        expect(isPermanentRequestError(relayed({ statusCode }))).toBe(true)
+      }
     })
 
-    it("leaves out a rate limit, a wrong key and anything else", () => {
-      expect(isAccessDeniedRequestError(relayed({ statusCode: 429 }))).toBe(false)
-      expect(isAccessDeniedRequestError(relayed({ statusCode: 401 }))).toBe(false)
-      expect(isAccessDeniedRequestError(relayed({ statusCode: 403 }))).toBe(false)
-      expect(isAccessDeniedRequestError(new Error("timed out"))).toBe(false)
-      expect(isAccessDeniedRequestError("access-denied")).toBe(false)
+    it("leaves out errors a later request may get past", () => {
+      for (const statusCode of [400, 408, 429, 500, 503]) {
+        expect(isPermanentRequestError(relayed({ statusCode }))).toBe(false)
+      }
+      expect(isPermanentRequestError(new Error("timed out"))).toBe(false)
+      expect(isPermanentRequestError("access-denied")).toBe(false)
     })
   })
 

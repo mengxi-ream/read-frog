@@ -189,6 +189,37 @@ describe("subtitles translator", () => {
     expect(edited).not.toBe(original)
   })
 
+  it("names the provider a batch failed with, as the user named it", async () => {
+    // As the background relays OpenAI's answer: a plain Error with the API error's fields.
+    const quota = Object.assign(
+      new Error("You exceeded your current quota, please check your plan and billing details."),
+      { name: "AI_APICallError", statusCode: 429 },
+    )
+    sendMessageMock.mockImplementation(async (type: string) => {
+      if (type === "enqueueSubtitlesTranslateRequest") throw quota
+      return undefined
+    })
+    const { translateSubtitles } = await import("../translator")
+    const fragments = [{ text: "hello", start: 0, end: 1_000 }]
+    const videoContext = { videoTitle: "V", subtitlesTextContent: "hello" }
+
+    const error = await translateSubtitles(fragments, videoContext).catch((caught) => caught)
+
+    expect(error).toBeInstanceOf(Error)
+    expect(error.message).toBe(
+      "OpenAI: You exceeded your current quota, please check your plan and billing details.",
+    )
+    expect(error.cause).toBe(quota)
+
+    // A message of our own for the error gets the name too.
+    sendMessageMock.mockImplementation(async (type: string) => {
+      if (type === "enqueueSubtitlesTranslateRequest") throw new Error("No Response from model")
+      return undefined
+    })
+    const noResponse = await translateSubtitles(fragments, videoContext).catch((caught) => caught)
+    expect(noResponse.message).toBe("OpenAI: subtitles.errors.aiNoResponse")
+  })
+
   it("requests subtitle summary through a dedicated background message", async () => {
     sendMessageMock.mockResolvedValue("Generated summary")
 

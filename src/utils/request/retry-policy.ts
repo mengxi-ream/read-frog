@@ -173,14 +173,25 @@ export function isRateLimitRequestError(error: unknown): boolean {
 const MAX_CAUSE_DEPTH = 5
 
 /**
- * An access denial (`kind: "access-denied"`) anywhere down the cause chain. A request the
+ * Statuses every later request fails with as well: a wrong key (401), an empty balance
+ * (402), no permission (403), a wrong model or endpoint (404).
+ */
+const PERMANENT_FAILURE_STATUS_CODES = new Set([401, 402, 403, 404])
+
+/**
+ * An error every later request would fail with too, anywhere down the cause chain: an
+ * access denial (`kind: "access-denied"`) or one of the statuses above. A request the
  * background ran fails in the content script as the cause of a friendlier error, and
  * messaging drops the symbol its meta rode on, but keeps the fields the meta is read from.
  */
-export function isAccessDeniedRequestError(error: unknown): boolean {
+export function isPermanentRequestError(error: unknown): boolean {
   let current = error
   for (let depth = 0; depth < MAX_CAUSE_DEPTH && isObject(current); depth++) {
-    if (getRequestErrorMeta(current).kind === "access-denied") {
+    const { kind, statusCode } = getRequestErrorMeta(current)
+    if (
+      kind === "access-denied" ||
+      (statusCode !== undefined && PERMANENT_FAILURE_STATUS_CODES.has(statusCode))
+    ) {
       return true
     }
     current = (current as { cause?: unknown }).cause

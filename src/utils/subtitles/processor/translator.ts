@@ -87,6 +87,15 @@ function toFriendlyErrorMessage(error: unknown): string {
   return message
 }
 
+/**
+ * Names the provider an error came from, as the user named it in settings: "OpenAI: You
+ * exceeded your current quota…" is OpenAI's balance, not Read Frog's. Built-in AI is Read
+ * Frog's own, and its errors already say so.
+ */
+function withProviderName(message: string, providerRef: SerializableProviderRef): string {
+  return providerRef.kind === "local" ? `${providerRef.config.name}: ${message}` : message
+}
+
 export interface SubtitlesVideoContext {
   videoTitle: string
   videoDescription?: string | null
@@ -486,7 +495,9 @@ export async function translateSubtitles(
   const refusal = rejections.find((r) => getBuiltInAiRefusalKind(r.reason))
   if (refusal || (rejections.length === results.length && results.length)) {
     const reason = (refusal ?? rejections[0]!).reason
-    throw new Error(toFriendlyErrorMessage(reason), { cause: reason })
+    throw new Error(withProviderName(toFriendlyErrorMessage(reason), providerRef), {
+      cause: reason,
+    })
   }
 
   return fragments.map((fragment, index) => {

@@ -454,6 +454,13 @@ function planDeniedError() {
   })
 }
 
+/** A provider's answer with this status, relayed from the background. */
+function relayedStatusError(statusCode: number, message: string) {
+  return new Error(message, {
+    cause: Object.assign(new Error(message), { name: "AI_APICallError", statusCode }),
+  })
+}
+
 function createVideo() {
   return {
     currentTime: 0,
@@ -642,6 +649,43 @@ describe("translation coordinator when batches fail", () => {
     await vi.waitFor(() => expect(translateSpy.mock.calls.length).toBeGreaterThan(sent))
   })
 
+  it("translates the held cues again when the reader picks another Built-in AI model", async () => {
+    const luna = { ...DEFAULT_CONFIG.videoSubtitles, providerId: "read-frog-ai:gpt-6-luna" }
+    await storage.setItem(`local:${CONFIG_STORAGE_KEY}`, {
+      ...DEFAULT_CONFIG,
+      videoSubtitles: luna,
+    })
+    const { coordinator, translateSpy, onStateChange } = await setup()
+    // The model the server cannot run right now, as the background relays it.
+    translateSpy.mockRejectedValue(
+      new Error("GPT-6 Luna can't run right now. Try Claude Haiku instead.", {
+        cause: Object.assign(new Error("x"), {
+          code: "HOSTED_AI_MODEL_UNAVAILABLE",
+          kind: "access-denied",
+        }),
+      }),
+    )
+
+    coordinator.start()
+    await vi.waitFor(() =>
+      expect(onStateChange).toHaveBeenCalledWith(
+        "error",
+        expect.objectContaining({ persistent: true }),
+      ),
+    )
+    await flush()
+    const sent = translateSpy.mock.calls.length
+
+    // The model is part of the provider id, so another model is another provider.
+    translateSpy.mockImplementation((batch: any) => Promise.resolve(batch))
+    await storage.setItem(`local:${CONFIG_STORAGE_KEY}`, {
+      ...DEFAULT_CONFIG,
+      videoSubtitles: { ...luna, providerId: "read-frog-ai:claude-haiku-5-5" },
+    })
+
+    await vi.waitFor(() => expect(translateSpy.mock.calls.length).toBeGreaterThan(sent))
+  })
+
   it("leaves a batch that fails alone to machine translation: no retry, no error", async () => {
     const { coordinator, video, translateSpy, onTranslated, onStateChange } = await setup()
     translateSpy.mockImplementation((batch: any) =>
@@ -689,44 +733,65 @@ describe("translation coordinator when batches fail", () => {
   it.each([
     ["an OpenAI account with no balance", noBalanceError(), "You exceeded your current quota"],
     ["Built-in AI refusing the plan", planDeniedError(), "Ultra required"],
-  ])("holds at the first access denial: %s", async (_case, denial, message) => {
-    const { coordinator, translateSpy, onBuiltInAiRefused, onStateChange } = await setup()
-    // The first batch is denied while the others are still on their way.
-    translateSpy.mockImplementation((batch: any) =>
-      batch[0].start === 0 ? Promise.reject(denial) : new Promise(() => {}),
-    )
+    [
+      "a wrong key",
+      relayedStatusError(401, "Incorrect API key provided"),
+      "Incorrect API key provided",
+    ],
+    [
+      "an empty DeepSeek balance",
+      relayedStatusError(402, "Insufficient Balance"),
+      "Insufficient Balance",
+    ],
+    ["no permission", relayedStatusError(403, "Forbidden"), "Forbidden"],
+    [
+      "a wrong model",
+      relayedStatusError(404, "The model does not exist"),
+      "The model does not exist",
+    ],
+  ])(
+    "holds at the first failure every later batch would repeat: %s",
+    async (_case, error, message) => {
+      const { coordinator, translateSpy, onBuiltInAiRefused, onStateChange } = await setup()
+      // The first batch fails while the others are still on their way.
+      translateSpy.mockImplementation((batch: any) =>
+        batch[0].start === 0 ? Promise.reject(error) : new Promise(() => {}),
+      )
 
-    coordinator.start()
+      coordinator.start()
 
-    await vi.waitFor(() =>
-      expect(onStateChange).toHaveBeenCalledWith("error", { message, persistent: true }),
-    )
-    // Neither asks the reader to log in or upgrade.
-    expect(onBuiltInAiRefused).not.toHaveBeenCalled()
-  })
+      await vi.waitFor(() =>
+        expect(onStateChange).toHaveBeenCalledWith("error", { message, persistent: true }),
+      )
+      // None of them asks the reader to log in or upgrade.
+      expect(onBuiltInAiRefused).not.toHaveBeenCalled()
+    },
+  )
 
-  it("waits for three failures in a row on any other error, a wrong key included", async () => {
-    const { coordinator, translateSpy, onTranslated, onStateChange } = await setup()
-    const wrongKey = new Error("Incorrect API key provided", {
-      cause: Object.assign(new Error("Incorrect API key provided"), {
-        name: "AI_APICallError",
-        statusCode: 401,
-      }),
-    })
-    translateSpy.mockImplementation((batch: any) =>
-      batch[0].start === 0 ? Promise.reject(wrongKey) : new Promise(() => {}),
-    )
+  it.each([
+    ["a bad request", relayedStatusError(400, "Bad request")],
+    ["a rate limit", relayedStatusError(429, "Rate limit reached")],
+    ["a server error", relayedStatusError(500, "Internal server error")],
+    ["a timeout", new Error("timed out")],
+  ])(
+    "waits for three failures in a row on an error a later batch may get past: %s",
+    async (_case, error) => {
+      const { coordinator, translateSpy, onTranslated, onStateChange } = await setup()
+      translateSpy.mockImplementation((batch: any) =>
+        batch[0].start === 0 ? Promise.reject(error) : new Promise(() => {}),
+      )
 
-    coordinator.start()
-    await vi.waitFor(() =>
-      expect(onTranslated).toHaveBeenCalledWith([
-        expect.objectContaining({ start: 0, placeholder: "failed" }),
-        expect.objectContaining({ start: 2000, placeholder: "failed" }),
-      ]),
-    )
+      coordinator.start()
+      await vi.waitFor(() =>
+        expect(onTranslated).toHaveBeenCalledWith([
+          expect.objectContaining({ start: 0, placeholder: "failed" }),
+          expect.objectContaining({ start: 2000, placeholder: "failed" }),
+        ]),
+      )
 
-    expect(onStateChange).not.toHaveBeenCalledWith("error", expect.anything())
-  })
+      expect(onStateChange).not.toHaveBeenCalledWith("error", expect.anything())
+    },
+  )
 
   it("does not show a failed cue as on its way", async () => {
     const { coordinator, translateSpy, getState } = await setup({ trackState: true })
