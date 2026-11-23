@@ -5,7 +5,8 @@ export interface StateData {
   message?: string
   /**
    * An error that stays until the next state instead of hiding after a few
-   * seconds: translation is held, and the reason must not disappear while it is.
+   * seconds: translation is held, or the line on screen failed, and the reason
+   * must not disappear while it is. The coordinator takes it down itself.
    */
   persistent?: boolean
 }
@@ -17,8 +18,8 @@ export interface SubtitlesFragment {
   translation?: string
   /**
    * Set when `translation` stands in for the subtitles provider's own: a
-   * machine translation shown until the AI one arrives, or what is left when
-   * the provider failed the line. Unset, it is the provider's own.
+   * machine translation shown until the AI one arrives. Unset, it is the
+   * provider's own.
    */
-  placeholder?: "machine" | "failed"
+  placeholder?: "machine"
 }

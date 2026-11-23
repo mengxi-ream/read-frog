@@ -210,14 +210,12 @@ describe("subtitles scheduler", () => {
     expect(subtitlesStore.get(currentSubtitleAtom)).toBeNull()
   })
 
-  it("keeps the better translation: the provider's over a machine one over a failed cue's", () => {
+  it("keeps the better translation: the provider's over a machine one", () => {
     const scheduler = new SubtitlesScheduler({ videoElement: createVideo(5) })
     scheduler.start()
     const cue = { text: "hello", start: 0, end: 1000 }
 
-    scheduler.supplementSubtitles([{ ...cue, translation: "", placeholder: "failed" }])
     scheduler.supplementSubtitles([{ ...cue, translation: "机翻", placeholder: "machine" }])
-    scheduler.supplementSubtitles([{ ...cue, translation: "", placeholder: "failed" }])
     expect(subtitlesStore.get(translatedTrackAtom)).toEqual([
       { ...cue, translation: "机翻", placeholder: "machine" },
     ])

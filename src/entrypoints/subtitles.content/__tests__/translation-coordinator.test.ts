@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest"
 import { storage } from "#imports"
 import { CONFIG_STORAGE_KEY, DEFAULT_CONFIG } from "@/utils/constants/config"
 import { DEFAULT_PROVIDER_CONFIG } from "@/utils/constants/providers"
+import { FAILED_BATCH_RETRY_MS } from "@/utils/constants/subtitles"
 import { TranslationCoordinator } from "../translation-coordinator"
 
 describe("translation coordinator loading state", () => {
@@ -44,6 +45,45 @@ describe("translation coordinator loading state", () => {
     ])
 
     expect(onStateChange).toHaveBeenCalledWith("idle")
+  })
+
+  it("keeps a failed cue's error up through the gap before the next, and shows that one's own", () => {
+    const onStateChange = vi.fn<(...args: any[]) => any>()
+    const fragments = [
+      { text: "hello", start: 0, end: 1000 },
+      { text: "world", start: 2000, end: 3000 },
+      { text: "again", start: 4000, end: 5000 },
+    ]
+    const coordinator = new TranslationCoordinator({
+      getFragments: () => fragments,
+      getVideoElement: () => ({ currentTime: 0.5 }) as HTMLVideoElement,
+      getCurrentState: () => "idle",
+      segmentationPipeline: null,
+      onTranslated: vi.fn<(...args: any[]) => any>(),
+      onStateChange,
+    })
+    const offline = { error: new Error("Failed to fetch"), at: 0 }
+    ;(coordinator as any).failedCues = new Map([
+      [0, offline],
+      [2000, offline],
+      [4000, { error: new Error("Internal server error"), at: 0 }],
+    ])
+
+    ;(coordinator as any).updateLoadingStateAt(500, fragments)
+    ;(coordinator as any).updateLoadingStateAt(1500, fragments)
+    ;(coordinator as any).updateLoadingStateAt(2500, fragments)
+    ;(coordinator as any).updateLoadingStateAt(4500, fragments)
+
+    // Not taken down in the gap, and not shown twice; the third cue failed on its own.
+    expect(onStateChange.mock.calls).toEqual([
+      ["error", { message: "Failed to fetch", persistent: true }],
+      ["error", { message: "Internal server error", persistent: true }],
+    ])
+
+    // A batch came back: in a gap, the error goes.
+    ;(coordinator as any).failedCues.clear()
+    ;(coordinator as any).updateLoadingStateAt(3500, fragments)
+    expect(onStateChange).toHaveBeenLastCalledWith("idle")
   })
 
   it("clears adapter loading during a music intro with no active cue", () => {
@@ -356,7 +396,7 @@ describe("translation coordinator loading state", () => {
     expect(sizes.slice(firstNewSize).every((size) => size === 6)).toBe(true)
   })
 
-  it("does not publish stale batch cues on translation failure after a recut", async () => {
+  it("sends the recut cues, not the stale one, after a batch fails across a recut", async () => {
     let fragments = [
       { text: "hello world", start: 0, end: 2000 },
       { text: "next", start: 2000, end: 3000 },
@@ -388,26 +428,21 @@ describe("translation coordinator loading state", () => {
     })
 
     coordinator.start()
-    // Recut mid-request: original cue is gone; only identity-valid fallbacks may publish.
+    // Recut mid-request: the original cue is gone.
     fragments = [
       { text: "hello", start: 0, end: 1000 },
       { text: "world", start: 1000, end: 2000 },
       { text: "next", start: 2000, end: 3000 },
     ]
     failRequests.splice(0).forEach((fail) => fail(new Error("translate failed")))
-    await vi.waitFor(() => {
-      expect(onTranslated).toHaveBeenCalledWith([
-        expect.objectContaining({ text: "next", translation: "", placeholder: "failed" }),
-      ])
-    })
-    await new Promise((resolve) => setTimeout(resolve, 0))
+    await vi.waitFor(() => expect(spy.mock.calls.length).toBeGreaterThan(1))
 
-    // Stale full-batch fallback would re-introduce the pre-recut cue as a zombie.
-    const published = onTranslated.mock.calls.flatMap((call) => call[0] as any[])
-    expect(published.every((f) => f.text !== "hello world")).toBe(true)
-    // Empty translation fallbacks for still-valid cues are fine; identity-mismatched are not.
-    expect(published.some((f) => f.start === 0 && f.end === 2000)).toBe(false)
-    // A batch failing alone says nothing; the cues get machine translations instead.
+    // The recut cues are new ones, with nothing failed: they go out at once, never the stale
+    // one. The cue that failed as it was waits out its 10 s.
+    const resent = spy.mock.calls.slice(1).flatMap(([batch]) => batch)
+    expect(resent.map((f) => f.text)).toEqual(["hello", "world"])
+    // A failed batch publishes nothing, stale or not; the cue on screen is a new one.
+    expect(onTranslated).not.toHaveBeenCalled()
     expect(onStateChange).not.toHaveBeenCalledWith("error", expect.anything())
 
     coordinator.stop()
@@ -421,6 +456,7 @@ afterEach(() => {
   restoreSetup?.()
   restoreSetup = null
   vi.unstubAllGlobals()
+  vi.useRealTimers()
 })
 
 /** The server's refusal, relayed from the background inside translateSubtitles' error. */
@@ -686,29 +722,29 @@ describe("translation coordinator when batches fail", () => {
     await vi.waitFor(() => expect(translateSpy.mock.calls.length).toBeGreaterThan(sent))
   })
 
-  it("leaves a batch that fails alone to machine translation: no retry, no error", async () => {
-    const { coordinator, video, translateSpy, onTranslated, onStateChange } = await setup()
-    translateSpy.mockImplementation((batch: any) =>
-      batch[0].start === 4000 ? Promise.reject(new Error("timed out")) : Promise.resolve(batch),
-    )
+  it("sends a batch that fails alone again as another comes back, saying nothing off screen", async () => {
+    const { coordinator, translateSpy, onTranslated, onStateChange } = await setup()
+    let failed = false
+    translateSpy.mockImplementation((batch: any) => {
+      if (batch[0].start === 4000 && !failed) {
+        failed = true
+        return Promise.reject(new Error("timed out"))
+      }
+      return Promise.resolve(batch.map((f: any) => ({ ...f, translation: `t:${f.text}` })))
+    })
 
     coordinator.start()
     await flush()
-    for (let seconds = 1; seconds <= 10; seconds += 1) {
-      video.currentTime = seconds
-      coordinator.requestTick()
-      await flush()
-    }
 
-    expect(sentBatches(translateSpy).filter((batch) => batch[0]!.start === 4000)).toHaveLength(1)
+    expect(sentBatches(translateSpy).filter((batch) => batch[0]!.start === 4000)).toHaveLength(2)
     expect(onTranslated).toHaveBeenCalledWith([
-      expect.objectContaining({ start: 4000, translation: "", placeholder: "failed" }),
-      expect.objectContaining({ start: 6000, translation: "", placeholder: "failed" }),
+      expect.objectContaining({ start: 4000, translation: "t:line 2" }),
+      expect.objectContaining({ start: 6000, translation: "t:line 3" }),
     ])
     expect(onStateChange).not.toHaveBeenCalledWith("error", expect.anything())
   })
 
-  it("holds after three batches fail in a row, keeping the error up", async () => {
+  it("shows the error while the cue on screen has failed, and goes on as playback moves", async () => {
     const { coordinator, video, translateSpy, onBuiltInAiRefused, onStateChange } = await setup()
     translateSpy.mockRejectedValue(new Error("Insufficient Balance"))
 
@@ -725,8 +761,14 @@ describe("translation coordinator when batches fail", () => {
     coordinator.requestTick()
     await flush()
 
-    expect(translateSpy).toHaveBeenCalledTimes(sent)
+    // Not held: the cues playback brings into the window go out, the failed ones wait.
+    expect(
+      sentBatches(translateSpy)
+        .slice(sent)
+        .map((batch) => batch[0]!.start),
+    ).toEqual([32_000, 36_000])
     expect(onBuiltInAiRefused).not.toHaveBeenCalled()
+    // The cue on screen then has failed too: the error stays up, shown once.
     expect(onStateChange.mock.calls.filter(([state]) => state === "error")).toHaveLength(1)
   })
 
@@ -769,62 +811,245 @@ describe("translation coordinator when batches fail", () => {
   )
 
   it.each([
-    ["a bad request", relayedStatusError(400, "Bad request")],
-    ["a rate limit", relayedStatusError(429, "Rate limit reached")],
-    ["a server error", relayedStatusError(500, "Internal server error")],
-    ["a timeout", new Error("timed out")],
+    ["a bad request", relayedStatusError(400, "Bad request"), "Bad request"],
+    ["a rate limit", relayedStatusError(429, "Rate limit reached"), "Rate limit reached"],
+    ["a server error", relayedStatusError(500, "Internal server error"), "Internal server error"],
+    ["a timeout", new Error("timed out"), "timed out"],
   ])(
-    "waits for three failures in a row on an error a later batch may get past: %s",
-    async (_case, error) => {
-      const { coordinator, translateSpy, onTranslated, onStateChange } = await setup()
-      translateSpy.mockImplementation((batch: any) =>
-        batch[0].start === 0 ? Promise.reject(error) : new Promise(() => {}),
-      )
+    "shows an error a later batch may get past on the cue on screen, and tries again 10 s on: %s",
+    async (_case, error, message) => {
+      vi.useFakeTimers({ now: 0 })
+      const { coordinator, translateSpy, onBuiltInAiRefused, onStateChange } = await setup()
+      let failed = false
+      translateSpy.mockImplementation((batch: any) => {
+        if (batch[0].start === 0 && !failed) {
+          failed = true
+          return Promise.reject(error)
+        }
+        return new Promise(() => {})
+      })
+      const sendsOfFirst = () =>
+        sentBatches(translateSpy).filter((batch) => batch[0]!.start === 0).length
 
       coordinator.start()
-      await vi.waitFor(() =>
-        expect(onTranslated).toHaveBeenCalledWith([
-          expect.objectContaining({ start: 0, placeholder: "failed" }),
-          expect.objectContaining({ start: 2000, placeholder: "failed" }),
-        ]),
-      )
+      await vi.advanceTimersByTimeAsync(0)
+      expect(onStateChange).toHaveBeenCalledWith("error", { message, persistent: true })
 
-      expect(onStateChange).not.toHaveBeenCalledWith("error", expect.anything())
+      await vi.advanceTimersByTimeAsync(FAILED_BATCH_RETRY_MS - 1)
+      expect(sendsOfFirst()).toBe(1)
+      await vi.advanceTimersByTimeAsync(1)
+      expect(sendsOfFirst()).toBe(2)
+      // Not held: nothing asks the reader to act.
+      expect(onBuiltInAiRefused).not.toHaveBeenCalled()
     },
   )
 
-  it("does not show a failed cue as on its way", async () => {
+  it("takes a failed cue's error down as a batch comes back, and sends the cue again", async () => {
     const { coordinator, translateSpy, getState } = await setup({ trackState: true })
-    let fail!: (error: Error) => void
-    translateSpy.mockImplementation((batch: any) =>
-      batch[0].start === 0
-        ? new Promise((_resolve, reject) => {
-            fail = reject
+    const answers = new Map<number, { ok: () => void; fail: (error: Error) => void }>()
+    translateSpy.mockImplementation(
+      (batch: any) =>
+        new Promise((resolve, reject) => {
+          answers.set(batch[0].start, {
+            ok: () => resolve(batch.map((f: any) => ({ ...f, translation: `t:${f.text}` }))),
+            fail: reject,
           })
-        : new Promise(() => {}),
+        }),
     )
+    const sendsOfFirst = () =>
+      sentBatches(translateSpy).filter((batch) => batch[0]!.start === 0).length
 
     coordinator.start()
     expect(getState()).toBe("loading")
 
-    // It waits for a machine translation, and shows nothing meanwhile: no "Translating…".
-    fail(new Error("timed out"))
-    await vi.waitFor(() => expect(getState()).toBe("idle"))
+    answers.get(0)!.fail(new Error("timed out"))
+    await flush()
+    expect(getState()).toBe("error")
+    // Waiting out its 10 s.
+    expect(sendsOfFirst()).toBe(1)
+
+    // The provider works: the failed cue goes at once, and shows as on its way.
+    answers.get(4000)!.ok()
+    await flush()
+    expect(sendsOfFirst()).toBe(2)
+    expect(getState()).toBe("loading")
   })
 
-  it("counts failures in a row only: one batch coming back starts over", async () => {
-    const { coordinator, translateSpy, onStateChange } = await setup()
-    // Batches of the window, in the order they come back: fail, fail, ok, fail, fail, ok…
-    const failing = new Set([0, 4000, 12_000, 16_000])
+  it("sends a whole window that failed at once again 10 s on, and takes the error down", async () => {
+    vi.useFakeTimers({ now: 0 })
+    const { coordinator, translateSpy, onTranslated, onStateChange, getState } = await setup({
+      trackState: true,
+    })
+    // The network drops as the window goes out, and is back long before it goes again.
+    let down = true
     translateSpy.mockImplementation((batch: any) =>
-      failing.has(batch[0].start) ? Promise.reject(new Error("timed out")) : Promise.resolve(batch),
+      down
+        ? Promise.reject(new Error("Failed to fetch"))
+        : Promise.resolve(batch.map((f: any) => ({ ...f, translation: `t:${f.text}` }))),
     )
 
     coordinator.start()
-    await flush()
+    const wave = translateSpy.mock.calls.length
+    await vi.advanceTimersByTimeAsync(0)
+    down = false
+    expect(getState()).toBe("error")
 
-    expect(translateSpy.mock.calls.length).toBeGreaterThanOrEqual(6)
+    // Not one batch more while they wait, however many failed.
+    await vi.advanceTimersByTimeAsync(FAILED_BATCH_RETRY_MS - 1)
+    expect(translateSpy).toHaveBeenCalledTimes(wave)
+
+    await vi.advanceTimersByTimeAsync(1)
+    expect(translateSpy).toHaveBeenCalledTimes(wave * 2)
+    expect(onTranslated).toHaveBeenCalledWith([
+      expect.objectContaining({ start: 0, translation: "t:line 0" }),
+      expect.objectContaining({ start: 2000, translation: "t:line 1" }),
+    ])
+    expect(getState()).toBe("idle")
+    expect(onStateChange.mock.calls.filter(([state]) => state === "error")).toHaveLength(1)
+  })
+
+  it("goes on through failures a later batch may get past, however many in a row", async () => {
+    vi.useFakeTimers({ now: 0 })
+    const { coordinator, translateSpy, onTranslated, onStateChange, getState } = await setup({
+      trackState: true,
+    })
+    let failing = true
+    translateSpy.mockImplementation((batch: any) =>
+      failing
+        ? Promise.reject(new Error("Internal server error"))
+        : Promise.resolve(batch.map((f: any) => ({ ...f, translation: `t:${f.text}` }))),
+    )
+
+    coordinator.start()
+    // Ten tries in a row, 10 s apart, all failing: still trying, the error up all along.
+    await vi.advanceTimersByTimeAsync(9 * FAILED_BATCH_RETRY_MS)
+    expect(sentBatches(translateSpy).filter((batch) => batch[0]!.start === 0)).toHaveLength(10)
+    expect(getState()).toBe("error")
+    expect(onStateChange.mock.calls.filter(([state]) => state === "error")).toHaveLength(1)
+
+    failing = false
+    await vi.advanceTimersByTimeAsync(FAILED_BATCH_RETRY_MS)
+    expect(onTranslated).toHaveBeenCalledWith([
+      expect.objectContaining({ start: 0, translation: "t:line 0" }),
+      expect.objectContaining({ start: 2000, translation: "t:line 1" }),
+    ])
+    expect(getState()).toBe("idle")
+  })
+})
+
+describe("translation coordinator through an outage", () => {
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  /**
+   * The background queue through an outage: it tries a batch as it is sent, then 1 s and
+   * 3 s after (two retries, the delay doubling), and gives up after the third try fails.
+   */
+  function answerThroughOutage(outageEndsAtMs: number) {
+    const sentAt: { start: number; at: number }[] = []
+    const answer = (batch: SubtitlesFragment[]) =>
+      new Promise<SubtitlesFragment[]>((resolve, reject) => {
+        const now = Date.now()
+        sentAt.push({ start: batch[0]!.start, at: now })
+        const getsThroughAfter = [0, 1000, 3000].find((delay) => now + delay >= outageEndsAtMs)
+        if (getsThroughAfter === undefined) {
+          setTimeout(() => reject(new Error("Failed to fetch")), 3000)
+        } else {
+          setTimeout(
+            () => resolve(batch.map((f) => ({ ...f, translation: `t:${f.text}` }))),
+            getsThroughAfter,
+          )
+        }
+      })
+    return { answer, sendsOf: (start: number) => sentAt.filter((send) => send.start === start) }
+  }
+
+  it("shows the error 3 s into an outage of 8 s, and translates on as the batches go again", async () => {
+    vi.useFakeTimers({ now: 0 })
+    const { coordinator, translateSpy, onTranslated, onStateChange, getState } = await setup({
+      trackState: true,
+    })
+    const queue = answerThroughOutage(8000)
+    translateSpy.mockImplementation(queue.answer)
+
+    // The video stands still: no new batch comes back to bring the failed ones.
+    coordinator.start()
+    await vi.advanceTimersByTimeAsync(2999)
+    expect(getState()).toBe("loading")
+    await vi.advanceTimersByTimeAsync(1)
+    expect(onStateChange).toHaveBeenCalledWith("error", {
+      message: "Failed to fetch",
+      persistent: true,
+    })
+
+    await vi.advanceTimersByTimeAsync(20_000)
+    // Failed at 3 s, the batch goes again at 13 s, after the outage ended at 8 s.
+    expect(queue.sendsOf(0).map((send) => send.at)).toEqual([0, 13_000])
+    expect(onTranslated).toHaveBeenCalledWith([
+      expect.objectContaining({ start: 0, translation: "t:line 0" }),
+      expect.objectContaining({ start: 2000, translation: "t:line 1" }),
+    ])
+    expect(getState()).toBe("idle")
+  })
+
+  it("keeps the error up through a long outage, trying every 13 s, and goes on as it ends", async () => {
+    vi.useFakeTimers({ now: 0 })
+    const { coordinator, translateSpy, onTranslated, onStateChange, getState } = await setup({
+      trackState: true,
+    })
+    const queue = answerThroughOutage(60_000)
+    translateSpy.mockImplementation(queue.answer)
+
+    coordinator.start()
+    await vi.advanceTimersByTimeAsync(66_000)
+
+    // Each try fails 3 s after it goes, and the next goes 10 s after that. The one at 65 s,
+    // after the outage, gets through. Never held, and the error shown once, not flickering.
+    expect(queue.sendsOf(0).map((send) => send.at)).toEqual([
+      0, 13_000, 26_000, 39_000, 52_000, 65_000,
+    ])
+    expect(onStateChange.mock.calls.filter(([state]) => state === "error")).toHaveLength(1)
+    expect(onTranslated).toHaveBeenCalledWith([
+      expect.objectContaining({ start: 0, translation: "t:line 0" }),
+      expect.objectContaining({ start: 2000, translation: "t:line 1" }),
+    ])
+    expect(getState()).toBe("idle")
+  })
+
+  it("tries a batch only it fails every 10 s, its error up only while its cues show", async () => {
+    vi.useFakeTimers({ now: 0 })
+    const { coordinator, video, translateSpy, onStateChange, getState } = await setup({
+      trackState: true,
+    })
+    // Such as a content filter turning down one of its lines: a 400, which the queue does
+    // not try again, back after 300 ms. The other batches come back at once.
+    translateSpy.mockImplementation((batch: any) =>
+      batch[0].start === 4000
+        ? new Promise((_resolve, reject) =>
+            setTimeout(() => reject(relayedStatusError(400, "Content filtered")), 300),
+          )
+        : Promise.resolve(batch.map((f: any) => ({ ...f, translation: `t:${f.text}` }))),
+    )
+
+    coordinator.start()
+    await vi.advanceTimersByTimeAsync(20_700)
+    // Failed at 0.3 s, it goes again at 10.3 s and 20.6 s; the rest of the video goes on.
+    expect(sentBatches(translateSpy).filter((batch) => batch[0]!.start === 4000)).toHaveLength(3)
     expect(onStateChange).not.toHaveBeenCalledWith("error", expect.anything())
+
+    // Its cues come on screen.
+    video.currentTime = 4
+    coordinator.requestTick()
+    expect(onStateChange).toHaveBeenCalledWith("error", {
+      message: "Content filtered",
+      persistent: true,
+    })
+
+    // The next cue is translated: the error goes.
+    video.currentTime = 8
+    coordinator.requestTick()
+    expect(getState()).toBe("idle")
   })
 })
 

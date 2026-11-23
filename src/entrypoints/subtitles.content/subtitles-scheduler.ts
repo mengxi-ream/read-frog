@@ -16,12 +16,11 @@ function cueIdentityKey(fragment: Pick<SubtitlesFragment, "start" | "end" | "tex
   return `${fragment.start}\0${fragment.end}\0${fragment.text}`
 }
 
-/** The provider's own translation outranks a machine one, which outranks a failed cue's. */
+/** The provider's own translation outranks a machine one. */
 function translationRank(fragment: SubtitlesFragment): number {
   if (fragment.translation === undefined) return 0
-  if (fragment.placeholder === "failed") return 1
-  if (fragment.placeholder === "machine") return 2
-  return 3
+  if (fragment.placeholder === "machine") return 1
+  return 2
 }
 
 /**

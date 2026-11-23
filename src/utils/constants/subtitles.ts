@@ -28,10 +28,10 @@ export const MAX_LOOKAHEAD_RATE = 4
 // A line this close to showing (scaled with playback rate) without its translation gets a
 // machine one meanwhile; a few hundred milliseconds of Microsoft land before it shows.
 export const MACHINE_PLACEHOLDER_LEAD_MS = 1_500
-// Failed batches in a row before translation holds instead of covering up with machine ones.
-// An error every later batch would repeat, such as a wrong key or a spent balance, holds at
-// the first.
-export const MAX_CONSECUTIVE_FAILED_BATCHES = 3
+// A failed batch goes again this long after it failed, or as soon as another batch comes back:
+// a provider that is down is asked every 10 s instead of in a loop, and a paused or short
+// video, which sends no new batch, still gets its lines once the provider is back.
+export const FAILED_BATCH_RETRY_MS = 10_000
 
 // DOM IDs
 export const READ_FROG_SUBTITLES_UI_HOST_ID = "read-frog-subtitles-ui-host"
