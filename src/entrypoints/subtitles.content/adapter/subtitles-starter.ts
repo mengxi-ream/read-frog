@@ -151,6 +151,10 @@ export class SubtitlesStarter {
       if (useSameTrack && hasCurrentSession) {
         // Translated sessions create a coordinator; passthrough sessions only cache rendered fragments.
         if (this.session.translationCoordinator) {
+          // A setting changed while subtitles were off, such as the provider, reached no watcher.
+          if (analyticsConfig) {
+            this.session.translationCoordinator.applyConfig(analyticsConfig)
+          }
           // Clear failed states to allow retry on resume
           this.session.translationCoordinator.clearFailed()
           this.session.segmentationPipeline?.clearFailedStarts()

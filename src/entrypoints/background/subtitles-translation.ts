@@ -1,5 +1,6 @@
 import type { SubtitlePromptContext } from "@/types/content"
 import { normalizeLanguageConfig } from "@/utils/config/languages"
+import { DEFAULT_PROVIDER_CONFIG } from "@/utils/constants/providers"
 import { cleanText } from "@/utils/content/utils"
 import { db } from "@/utils/db/dexie/db"
 import { Sha256Hex } from "@/utils/hash"
@@ -8,6 +9,7 @@ import { normalizePromptContextValue } from "@/utils/host/translate/translate-te
 import { onMessage } from "@/utils/message"
 import { getSubtitlesTranslatePrompt } from "@/utils/prompts/subtitles"
 import { canProviderRefGenerateText } from "@/utils/providers/provider-ref"
+import { RequestQueue } from "@/utils/request/request-queue"
 import { getOrGenerateTranslationContextSummary } from "./translation-context-summary"
 import {
   createSubtitlesTranslationQueues,
@@ -15,9 +17,27 @@ import {
   shouldUseBatchQueue,
 } from "./translation-queues"
 
+/**
+ * Machine translations stand in for lines the AI has not returned yet, one per
+ * line as it is about to show: a request every few seconds at most, a few
+ * after a seek. Their own queue, as a rate-limit pause on the AI provider's
+ * would hold them too, and a late one is worthless: one attempt, no retries.
+ */
+function createMachinePlaceholderQueue() {
+  return new RequestQueue({
+    rate: 5,
+    capacity: 10,
+    timeoutMs: 5_000,
+    maxRetries: 0,
+    baseRetryDelayMs: 0,
+    retryPolicy: { decide: () => ({ action: "fail" }) },
+  })
+}
+
 /** Register handlers synchronously while queue initialization runs in the background. */
 export function setupSubtitlesTranslationHandlers(): void {
   const queuesPromise = createSubtitlesTranslationQueues()
+  const machineQueue = createMachinePlaceholderQueue()
 
   onMessage("enqueueSubtitlesTranslateRequest", async (message) => {
     const { requestQueue, batchQueue } = await queuesPromise
@@ -90,6 +110,33 @@ export function setupSubtitlesTranslationHandlers(): void {
       })
     }
 
+    return result
+  })
+
+  onMessage("translateSubtitleWithMachine", async (message) => {
+    const { text, langConfig: sentLangConfig, hash } = message.data
+    const cached = await db.translationCache.get(hash)
+    if (cached) {
+      return cached.translation
+    }
+
+    const langConfig = normalizeLanguageConfig(sentLangConfig)
+    const result = await machineQueue.enqueue(
+      (signal) =>
+        executeTranslate(
+          text,
+          langConfig,
+          DEFAULT_PROVIDER_CONFIG["microsoft-translate"],
+          getSubtitlesTranslatePrompt,
+          { signal },
+        ),
+      Date.now(),
+      hash,
+    )
+
+    if (result) {
+      await db.translationCache.put({ key: hash, translation: result, createdAt: new Date() })
+    }
     return result
   })
 

@@ -7,11 +7,11 @@ import type { ErrorAction } from "@/utils/error-action"
 import type { MatchedTerm } from "@/utils/glossary/types"
 import type { PromptableProviderRef, SerializableProviderRef } from "@/utils/providers/provider-ref"
 import { LANGUAGE_ENGLISH_NAMES } from "@read-frog/definitions"
-import { APICallError } from "ai"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { classifySerializedProvider } from "@/utils/analytics-provider"
 import { getLocalConfig } from "@/utils/config/storage"
+import { DEFAULT_PROVIDER_CONFIG } from "@/utils/constants/providers"
 import { TRANSLATION_BATCH_SIZE } from "@/utils/constants/subtitles"
 import { cleanText } from "@/utils/content/utils"
 import { resolveGlossaryTerms } from "@/utils/glossary/active-matcher"
@@ -31,6 +31,7 @@ import {
   serializeProviderRef,
 } from "@/utils/providers/provider-ref"
 import { resolveProviderRefForCapability } from "@/utils/providers/provider-registry"
+import { getRequestErrorMetaChain } from "@/utils/request/retry-policy"
 
 const log = createLogger("subtitles/processor/translator")
 
@@ -60,21 +61,36 @@ const SUBTITLES_TASK_ROUTE: Record<SubtitlesTask, HostedAiTextStreamRoute> = {
   segmentation: "videoSubtitlesSegmentation",
 }
 
-function toFriendlyErrorMessage(error: unknown): string {
-  if (error instanceof APICallError) {
-    switch (error.statusCode) {
-      case 429:
-        return i18n.t("subtitles.errors.aiRateLimited")
-      case 401:
-      case 403:
-        return i18n.t("subtitles.errors.aiAuthFailed")
-      case 500:
-      case 502:
-      case 503:
-        return i18n.t("subtitles.errors.aiServiceUnavailable")
-      default:
-        break
-    }
+/**
+ * Our words for the status a provider failed with, which say what to do; its own message is
+ * often long and in English. The status is read down the cause chain, as the retry policy
+ * reads it: messaging turns the AI SDK's `APICallError` into a plain error, but keeps its
+ * `statusCode`. OpenAI's empty balance is a 429 too, but the retry policy gives it no status
+ * (an access denial), so it keeps OpenAI's words rather than "too many requests", which
+ * would send the reader to wait.
+ */
+function getProviderStatusMessage(error: unknown): string | undefined {
+  const chain = getRequestErrorMetaChain(error)
+  switch (chain.find(({ statusCode }) => statusCode !== undefined)?.statusCode) {
+    case 429:
+      return i18n.t("subtitles.errors.aiRateLimited")
+    case 401:
+    case 403:
+      return i18n.t("subtitles.errors.aiAuthFailed")
+    case 500:
+    case 502:
+    case 503:
+      return i18n.t("subtitles.errors.aiServiceUnavailable")
+    default:
+      return undefined
+  }
+}
+
+function toFriendlyErrorMessage(error: unknown, providerRef: SerializableProviderRef): string {
+  // Built-in AI's errors are Read Frog's own, and already say what to do.
+  const statusMessage = providerRef.kind === "local" ? getProviderStatusMessage(error) : undefined
+  if (statusMessage) {
+    return statusMessage
   }
 
   const message = error instanceof Error ? error.message : String(error)
@@ -84,6 +100,15 @@ function toFriendlyErrorMessage(error: unknown): string {
   }
 
   return message
+}
+
+/**
+ * Names the provider an error came from, as the user named it in settings: "OpenAI: You
+ * exceeded your current quota…" is OpenAI's balance, not Read Frog's. Built-in AI is Read
+ * Frog's own, and its errors already say so.
+ */
+function withProviderName(message: string, providerRef: SerializableProviderRef): string {
+  return providerRef.kind === "local" ? `${providerRef.config.name}: ${message}` : message
 }
 
 export interface SubtitlesVideoContext {
@@ -349,6 +374,31 @@ function announceSubtitlesProviderResolution(
   return resolution.status === "ok" ? resolution.ref : null
 }
 
+/** Whether the subtitles provider is an AI (an LLM or Built-in AI) rather than a translation service. */
+export function isSubtitlesProviderAi(config: Config): boolean {
+  const resolved = resolveProviderRefForCapability(
+    "videoSubtitles",
+    config.providersConfig,
+    config.videoSubtitles.providerId,
+  )
+  return !!resolved && canResolvedProviderRefGenerateText(resolved)
+}
+
+/**
+ * Whether a line about to show without its translation gets a Microsoft one meanwhile: only
+ * an AI provider is slow enough to need it, and only while the config has Microsoft
+ * Translator enabled, as a provider that is off or missing serves no feature. The Options
+ * page has no switch for it, but an imported or synced config can have it off.
+ */
+export function shouldUseMachinePlaceholder(config: Config): boolean {
+  return (
+    isSubtitlesProviderAi(config) &&
+    config.providersConfig.some(
+      (provider) => provider.provider === "microsoft-translate" && provider.enabled,
+    )
+  )
+}
+
 /**
  * How many cues one translation pass may take. Only a provider on the batch
  * queue (the same rule as the background's `shouldUseBatchQueue`) packs them
@@ -356,18 +406,44 @@ function announceSubtitlesProviderResolution(
  * provider sends one request per cue and keeps the fixed group size.
  */
 export function getSubtitlesPassLimits(config: Config): BatchQueueConfig {
-  const resolved = resolveProviderRefForCapability(
-    "videoSubtitles",
-    config.providersConfig,
-    config.videoSubtitles.providerId,
-  )
-  if (resolved && canResolvedProviderRefGenerateText(resolved)) {
+  if (isSubtitlesProviderAi(config)) {
     return config.videoSubtitles.batchQueueConfig
   }
   return {
     maxItemsPerBatch: TRANSLATION_BATCH_SIZE,
     maxCharactersPerBatch: Number.POSITIVE_INFINITY,
   }
+}
+
+const MACHINE_PLACEHOLDER_PROVIDER_REF: SerializableProviderRef = {
+  kind: "local",
+  config: DEFAULT_PROVIDER_CONFIG["microsoft-translate"],
+}
+
+/**
+ * A Microsoft translation of one line, shown while the AI's is on its way. It
+ * takes no prompt, so it is cached under the key a Microsoft subtitles provider
+ * would use, apart from the AI's: the key holds the provider.
+ */
+export async function translateSubtitleWithMachine(text: string): Promise<string> {
+  const config = await getLocalConfig()
+  if (!config) {
+    return ""
+  }
+  const langConfig = config.language
+  const hashComponents = await buildSubtitleHashComponents(
+    text,
+    MACHINE_PLACEHOLDER_PROVIDER_REF,
+    { sourceCode: langConfig.sourceCode, targetCode: langConfig.targetCode },
+    false,
+    "",
+    [],
+  )
+  return await sendMessage("translateSubtitleWithMachine", {
+    text,
+    langConfig,
+    hash: Sha256Hex(...hashComponents),
+  })
 }
 
 export async function fetchSubtitlesSummary(
@@ -405,10 +481,16 @@ export async function fetchSubtitlesSummary(
   })
 }
 
+/**
+ * A batch every line of which failed is thrown, as is one Built-in AI refused any line of.
+ * Lines that failed while the rest came back come back with no translation, and
+ * `onLinesFailed` gets them, with the error the first of them failed with.
+ */
 export async function translateSubtitles(
   fragments: SubtitlesFragment[],
   videoContext: SubtitlesVideoContext,
   configOverride?: Config,
+  onLinesFailed?: (lines: SubtitlesFragment[], error: Error) => void,
 ): Promise<SubtitlesFragment[]> {
   const config = configOverride ?? (await getLocalConfig())
   if (!config) {
@@ -446,10 +528,18 @@ export async function translateSubtitles(
   // cue of which Built-in AI refused, so it is tried again rather than kept as blank.
   // The cause keeps the error's code for whoever classifies it.
   const rejections = results.filter((r): r is PromiseRejectedResult => r.status === "rejected")
+  const batchError = (reason: unknown) =>
+    new Error(withProviderName(toFriendlyErrorMessage(reason, providerRef), providerRef), {
+      cause: reason,
+    })
   const refusal = rejections.find((r) => getBuiltInAiRefusalKind(r.reason))
   if (refusal || (rejections.length === results.length && results.length)) {
-    const reason = (refusal ?? rejections[0]!).reason
-    throw new Error(toFriendlyErrorMessage(reason), { cause: reason })
+    throw batchError((refusal ?? rejections[0]!).reason)
+  }
+  // Lines that failed while the rest came back: the caller may send them again.
+  if (rejections.length > 0) {
+    const failed = fragments.filter((_fragment, index) => results[index]!.status === "rejected")
+    onLinesFailed?.(failed, batchError(rejections[0]!.reason))
   }
 
   return fragments.map((fragment, index) => {

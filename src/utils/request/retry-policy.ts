@@ -61,6 +61,7 @@ interface RetryAwareError {
   retryAfterMs?: unknown
   kind?: unknown
   message?: unknown
+  responseBody?: unknown
 }
 
 const RATE_LIMIT_ERROR_RE = /\b429\b|too many requests|rate[ -]?limit/i
@@ -80,6 +81,12 @@ export function attachRequestErrorMeta<T extends Error>(error: T, meta: RequestE
 
 export function getRequestErrorMeta(error: unknown): RequestErrorMeta {
   const source = isObject(error) ? (error as RetryAwareError) : undefined
+  // OpenAI answers an empty balance with a 429 as well, but no pause refills
+  // it: fail at once and drain the backlog, like a hosted quota denial. No
+  // statusCode, so nothing can read it as a rate limit.
+  if (isInsufficientQuotaError(source)) {
+    return { kind: "access-denied", isRetryable: false }
+  }
   const attachedMeta = source?.[REQUEST_ERROR_META] ?? source?.requestErrorMeta
   const response = isObject(source?.response) ? (source.response as RetryAwareError) : undefined
 
@@ -161,6 +168,42 @@ export function getHeaderValue(headers: unknown, key: string): string | undefine
 export function isRateLimitRequestError(error: unknown): boolean {
   const meta = getRequestErrorMeta(error)
   return meta.kind === "rate-limit" || meta.statusCode === 429
+}
+
+const MAX_CAUSE_DEPTH = 5
+
+/**
+ * Statuses every later request fails with as well: a wrong key (401), an empty balance
+ * (402), no permission (403), a wrong model or endpoint (404).
+ */
+const PERMANENT_FAILURE_STATUS_CODES = new Set([401, 402, 403, 404])
+
+/**
+ * The meta of each error down the cause chain, the error itself first. A request the
+ * background ran fails in the content script as itself or as the cause of a friendlier
+ * error, and messaging drops the symbol its meta rode on, but keeps the fields the meta
+ * is read from.
+ */
+export function getRequestErrorMetaChain(error: unknown): RequestErrorMeta[] {
+  const chain: RequestErrorMeta[] = []
+  let current = error
+  for (let depth = 0; depth < MAX_CAUSE_DEPTH && isObject(current); depth++) {
+    chain.push(getRequestErrorMeta(current))
+    current = (current as { cause?: unknown }).cause
+  }
+  return chain
+}
+
+/**
+ * An error every later request would fail with too, anywhere down the cause chain: an
+ * access denial (`kind: "access-denied"`) or one of the statuses above.
+ */
+export function isPermanentRequestError(error: unknown): boolean {
+  return getRequestErrorMetaChain(error).some(
+    ({ kind, statusCode }) =>
+      kind === "access-denied" ||
+      (statusCode !== undefined && PERMANENT_FAILURE_STATUS_CODES.has(statusCode)),
+  )
 }
 
 export const defaultRequestRetryPolicy: RequestRetryPolicy = {
@@ -309,6 +352,11 @@ function normalizeHeaders(headers: unknown): RequestErrorMeta["responseHeaders"]
   }
 
   return undefined
+}
+
+function isInsufficientQuotaError(source: RetryAwareError | undefined): boolean {
+  const body = source?.responseBody
+  return typeof body === "string" && body.includes('"insufficient_quota"')
 }
 
 function inferRequestErrorKind({

@@ -132,4 +132,25 @@ describe("displaySubtitleAtom", () => {
     // User toggle intent stays on.
     expect(subtitlesStore.get(subtitlesVisibleAtom)).toBe(true)
   })
+
+  it("hides the captions while an error that stops translation stays up", () => {
+    subtitlesStore.set(currentTimeMsAtom, 500)
+    subtitlesStore.set(subtitlesVisibleAtom, true)
+    subtitlesStore.set(sourceTrackAtom, [{ text: "hello", start: 0, end: 1000 }])
+    subtitlesStore.set(currentSubtitleAtom, {
+      text: "hello",
+      start: 0,
+      end: 1000,
+      translation: "你好",
+    })
+    subtitlesStore.set(subtitlesStateAtom, {
+      state: "error",
+      message: "Insufficient Balance",
+      persistent: true,
+    })
+
+    // Not even a line the AI already translated.
+    expect(subtitlesStore.get(subtitlesShowContentAtom)).toBe(false)
+    expect(subtitlesStore.get(subtitlesShowStateAtom)).toBe("error")
+  })
 })
