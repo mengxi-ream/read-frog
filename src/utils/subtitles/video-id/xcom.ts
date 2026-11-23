@@ -1,8 +1,9 @@
+// The media view adds `/video/<n>` or `/photo/<n>`, which need not name the item it shows.
 const XCOM_STATUS_PATH_PATTERNS = [
   /^\/i\/status\/(\d+)\/?$/,
-  /^\/i\/status\/(\d+)\/video\/1\/?$/,
+  /^\/i\/status\/(\d+)\/(?:video|photo)\/\d+\/?$/,
   /^\/[^/]+\/status\/(\d+)\/?$/,
-  /^\/[^/]+\/status\/(\d+)\/video\/1\/?$/,
+  /^\/[^/]+\/status\/(\d+)\/(?:video|photo)\/\d+\/?$/,
 ]
 
 function isXcomHostname(hostname: string): boolean {

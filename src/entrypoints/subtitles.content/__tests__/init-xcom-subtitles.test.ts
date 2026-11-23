@@ -20,6 +20,8 @@ vi.mock("../platforms/xcom/dom", () => ({
   getCurrentPrimaryXcomStatusVideo: () => mocks.primaryVideo,
   getCurrentXcomVideoId: () => mocks.primaryVideo?.dataset.statusId ?? null,
   getXcomStatusVideoContainer: (video: HTMLVideoElement) => video.parentElement,
+  isXcomCandidatePlayer: (container: HTMLElement | null) =>
+    !!container?.isConnected && !container.closest("[aria-hidden='true']"),
 }))
 vi.mock("../platforms/xcom/overlay-entry", () => ({
   clearXcomOverlayEntryPoints: vi.fn<() => void>(),
@@ -132,6 +134,20 @@ describe("initXcomSubtitles", () => {
 
     mocks.adapter.isAwaitingAiSubtitles.mockReturnValue(true)
     first.container.remove()
+    mocks.primaryVideo = second.video
+    mocks.onPlayerChanged()
+
+    expect(mocks.ensureEntryPoint).toHaveBeenLastCalledWith(second.container)
+    await vi.waitFor(() => expect(mocks.adapter.notifyNavigation).toHaveBeenCalledOnce())
+  })
+
+  it("lets go of that player once the media view hides it", async () => {
+    const first = addPlayer("1")
+    const second = addPlayer("2")
+    await startOn(first.video)
+
+    mocks.adapter.isAwaitingAiSubtitles.mockReturnValue(true)
+    first.container.setAttribute("aria-hidden", "true")
     mocks.primaryVideo = second.video
     mocks.onPlayerChanged()
 
