@@ -13,7 +13,6 @@ import { createSelectionToolbarPrecheckError } from "@/components/ui/selection-p
 import { ANALYTICS_SURFACE } from "@/types/analytics"
 import { resolveDifficultWordLookupAction } from "@/utils/custom-actions"
 import { DifficultWordsScanner } from "@/utils/difficult-words/scanner"
-import { segmentWords } from "@/utils/difficult-words/segment"
 import { DIFFICULT_WORD_HOVER_ATTRIBUTE } from "@/utils/difficult-words/styles"
 import { uuidv7 } from "@/utils/difficult-words/uuid"
 import { logInUrl } from "@/utils/error-action"
@@ -283,14 +282,18 @@ export class DifficultWordsSession {
     else this.scanner.showLemma(change.lang, change.lemma)
   }
 
-  /** A selection was looked up: a word in a judged paragraph counts against knowing it. */
+  /**
+   * A selection was looked up: a word in a judged paragraph counts against
+   * knowing it. The server finds the word's lemma, and drops a selection that
+   * is no single word it knows.
+   */
   onSelectionLookup(session: SelectionSession) {
     const snapshot = session.selectionSnapshot
     const rangeSnapshot = snapshot.ranges[0]
     if (!rangeSnapshot || snapshot.ranges.length !== 1 || snapshot.textControl) return
     const word = snapshot.text.trim()
-    const { words } = segmentWords(word)
-    if (words.length !== 1 || words[0] !== word) return
+    // More than one word, or none.
+    if (/\s/u.test(word) || !/\p{L}/u.test(word)) return
     let range: Range
     try {
       range = toLiveRange(rangeSnapshot)

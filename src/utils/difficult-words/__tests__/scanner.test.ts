@@ -96,7 +96,17 @@ function answer(
   return { ok: true, output: { acked: [], blocks, needsLevel } }
 }
 
-/** Judges every block as English, marking the words of `hard` where they were sent. */
+/** The words of `text` among `wanted`, each once with every place it starts, as the server gives them. */
+function findWords(text: string, wanted: string[]) {
+  const found = new Map<string, number[]>()
+  for (const match of text.matchAll(/\p{L}+/gu)) {
+    if (!wanted.includes(match[0].toLowerCase())) continue
+    found.set(match[0], [...(found.get(match[0]) ?? []), match.index])
+  }
+  return [...found].map(([w, at]) => ({ w, lemma: w.toLowerCase(), at }))
+}
+
+/** Judges every block as English, marking the words of `hard` where they are in the text sent. */
 function judgeHard(hard: string[], v: number | (() => number) = 1): Judge {
   return (blocks) =>
     answer(
@@ -104,9 +114,7 @@ function judgeHard(hard: string[], v: number | (() => number) = 1): Judge {
         id: block.id,
         lang: "eng",
         v: typeof v === "function" ? v() : v,
-        hard: (block.words ?? [])
-          .filter((word) => hard.includes(word.toLowerCase()))
-          .map((word) => ({ w: word, lemma: word.toLowerCase() })),
+        hard: findWords(block.text, hard),
         learning: [],
       })),
     )
@@ -200,7 +208,7 @@ describe("DifficultWordsScanner", () => {
 
     expect(host.judge).toHaveBeenCalledTimes(1)
     expect(host.judge.mock.calls[0]![0]).toEqual([
-      { id: "b1", words: ["The", "ubiquitous", "cat", "sat", "on", "the", "mat"], starts: [0] },
+      { id: "b1", text: PARAGRAPH, group: expect.any(String) },
     ])
     expect(painted()).toEqual(["ubiquitous", "ubiquitous"])
     expect(scanner.count).toBe(1)
@@ -215,7 +223,7 @@ describe("DifficultWordsScanner", () => {
     expect(host.onEmpty).toHaveBeenCalledTimes(1)
   })
 
-  it("detects short neighbouring paragraphs together, the nearest first", async () => {
+  it("groups neighbouring paragraphs, for the short ones to be detected together, the nearest first", async () => {
     document.body.innerHTML = "<ul><li id='a'>One cat</li><li id='b'>Two dogs</li></ul>"
     const host = createHost(judgeHard([]))
     const started = await startScanner(host)
@@ -240,7 +248,7 @@ describe("DifficultWordsScanner", () => {
     expect(sent[0]!.group).toBe(sent[1]!.group)
   })
 
-  it("sends Chinese and Japanese as text, and marks a word only where it really starts", async () => {
+  it("marks a word only where it really starts in the text sent", async () => {
     const text = "我们讨论了量子纠缠的问题，量子纠缠很难。"
     document.body.innerHTML = `<p id="a" lang="zh-CN">${text}</p>`
     const host = createHost((blocks) =>
@@ -260,7 +268,9 @@ describe("DifficultWordsScanner", () => {
     started.observer.fire([$("#a")])
     await flush()
 
-    expect(host.judge.mock.calls[0]![0]).toEqual([{ id: "b1", text, hint: "zh-CN" }])
+    expect(host.judge.mock.calls[0]![0]).toEqual([
+      { id: "b1", text, hint: "zh-CN", group: expect.any(String) },
+    ])
     expect(painted()).toEqual(["量子纠缠", "量子纠缠"])
     expect(scanner.languageAt($("#a").firstChild!)).toBe("cmn")
   })
@@ -301,7 +311,7 @@ describe("DifficultWordsScanner", () => {
     expect(painted()).toEqual(["cat"])
   })
 
-  it("sends a paragraph again when its words change, and repaints it without asking when only its nodes do", async () => {
+  it("sends a paragraph again when its text changes, and repaints it without asking when only its nodes do", async () => {
     document.body.innerHTML = `<p id="a">${PARAGRAPH}</p>`
     const host = createHost(judgeHard(["ubiquitous", "dog"]))
     const started = await startScanner(host)
@@ -315,7 +325,7 @@ describe("DifficultWordsScanner", () => {
 
     expect(host.judge).toHaveBeenCalledTimes(2)
     expect(host.judge.mock.calls[1]![0]).toEqual([
-      { id: "b1", words: ["The", "ubiquitous", "dog"], starts: [0], group: expect.any(String) },
+      { id: "b1", text: "The ubiquitous dog.", group: expect.any(String) },
     ])
     expect(painted()).toEqual(["ubiquitous", "dog"])
 
@@ -352,7 +362,7 @@ describe("DifficultWordsScanner", () => {
     await flush()
 
     expect(host.judge).toHaveBeenCalledTimes(2)
-    expect(host.judge.mock.calls[1]![0][0]!.words).toEqual(["The", "ubiquitous", "dog"])
+    expect(host.judge.mock.calls[1]![0][0]!.text).toBe("The ubiquitous dog.")
     expect(painted()).toEqual(["ubiquitous", "dog"])
   })
 
@@ -603,7 +613,7 @@ describe("DifficultWordsScanner", () => {
       await flush()
 
       expect(host.judge).toHaveBeenCalledTimes(3)
-      expect(host.judge.mock.calls[2]![0][0]!.words).toEqual(["The", "ubiquitous", "dog"])
+      expect(host.judge.mock.calls[2]![0][0]!.text).toBe("The ubiquitous dog.")
       expect(painted()).toEqual(["ubiquitous", "dog"])
     })
 

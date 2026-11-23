@@ -8,13 +8,8 @@ import type {
 } from "@read-frog/api-contract"
 import type { BlockText } from "./blocks"
 import type { MarkKind, MarkTone } from "./highlights"
-import type { SegmentedWords } from "./segment"
 import type { DifficultWordsFailure, DifficultWordsJudgeResponse } from "./types"
-import {
-  VOCAB_JUDGE_MAX_BLOCKS,
-  VOCAB_JUDGE_MAX_TEXT_LENGTH,
-  VOCAB_JUDGE_MAX_WORDS,
-} from "@read-frog/api-contract"
+import { VOCAB_JUDGE_MAX_BLOCKS, VOCAB_JUDGE_MAX_TEXT_LENGTH } from "@read-frog/api-contract"
 import { toneForColor } from "@/utils/annotate/layer"
 import {
   BlockDiscovery,
@@ -27,7 +22,6 @@ import {
   readBlockText,
 } from "./blocks"
 import { DifficultWordHighlights } from "./highlights"
-import { isTextScript, segmentWords } from "./segment"
 import { ensureDifficultWordsDocumentStyles, removeDifficultWordsDocumentStyles } from "./styles"
 import { isVocabLang } from "./types"
 
@@ -35,9 +29,10 @@ import { isVocabLang } from "./types"
 // what they are reading.
 //
 // Paragraphs are found in slices of idle time and watched: those within a
-// screen of the viewport are read, split into words and sent to be judged in
-// batches as they come near, the ones on screen first. The page changing
-// under a paragraph sends it again, but only if its words changed.
+// screen of the viewport are read and their text sent to be judged in
+// batches as they come near, the ones on screen first; the server finds the
+// words. The page changing under a paragraph sends it again, but only if its
+// text changed.
 //
 // Each answer says which version of the reader's threshold in its language
 // it was judged with. A newer version (the reader just said they know a word,
@@ -84,11 +79,6 @@ interface ScanBlock {
   /** Changed while on its way to be judged. */
   dirty: boolean
   read: BlockText | null
-  /** Word blocks: the words sent. */
-  segmented: SegmentedWords | null
-  wordIndex: Map<string, number> | null
-  /** Text blocks: the text sent. */
-  sentText: string | null
   payload: VocabJudgeBlock | null
   lang: VocabLang | null
   /** The threshold version it was judged with. */
@@ -101,9 +91,6 @@ const MAX_IN_FLIGHT = 2
 const FLUSH_DELAY_MS = 100
 const DIRTY_DELAY_MS = 100
 const SLICE_MS = 8
-/** A paragraph shorter than this is detected with its neighbours. */
-const SHORT_BLOCK_WORDS = 6
-const SHORT_BLOCK_CHARS = 12
 /** How long to wait before trying the server again, failure after failure. */
 const OFFLINE_RETRY_MS = [2_000, 10_000, 60_000]
 const RATE_LIMIT_FALLBACK_MS = 10_000
@@ -303,22 +290,17 @@ export class DifficultWordsScanner {
       return
     }
     const batch: ScanBlock[] = []
-    let words = 0
     let chars = 0
     for (const block of visible) {
-      const payload = block.payload!
-      const blockWords = payload.words?.length ?? 0
-      const blockChars = payload.text?.length ?? 0
+      const blockChars = block.payload!.text.length
       if (
         batch.length >= VOCAB_JUDGE_MAX_BLOCKS ||
-        words + blockWords > VOCAB_JUDGE_MAX_WORDS ||
         chars + blockChars > VOCAB_JUDGE_MAX_TEXT_LENGTH
       ) {
         break
       }
       this.pending.delete(block)
       batch.push(block)
-      words += blockWords
       chars += blockChars
     }
     void this.send(batch, events)
@@ -378,9 +360,6 @@ export class DifficultWordsScanner {
       seq: 0,
       dirty: false,
       read: null,
-      segmented: null,
-      wordIndex: null,
-      sentText: null,
       payload: null,
       lang: null,
       v: 0,
@@ -457,7 +436,6 @@ export class DifficultWordsScanner {
     candidates.sort((a, b) => distances.get(a)! - distances.get(b)!)
 
     const batch: ScanBlock[] = []
-    let words = 0
     let chars = 0
     for (const block of candidates) {
       if (batch.length >= VOCAB_JUDGE_MAX_BLOCKS) break
@@ -466,19 +444,15 @@ export class DifficultWordsScanner {
         this.pending.delete(block)
         continue
       }
-      const blockWords = payload.words?.length ?? 0
-      const blockChars = payload.text?.length ?? 0
-      if (words + blockWords > VOCAB_JUDGE_MAX_WORDS) continue
-      if (chars + blockChars > VOCAB_JUDGE_MAX_TEXT_LENGTH) continue
+      if (chars + payload.text.length > VOCAB_JUDGE_MAX_TEXT_LENGTH) continue
       this.pending.delete(block)
       batch.push(block)
-      words += blockWords
-      chars += blockChars
+      chars += payload.text.length
     }
     return batch
   }
 
-  /** Reads a paragraph into what is sent for it; `null` when it has no words. */
+  /** Reads a paragraph into what is sent for it; `null` when it has no letters. */
   private prepare(block: ScanBlock): VocabJudgeBlock | null {
     const read = readBlockText(block.element, this.resolver)
     if (block.payload && block.read?.text === read.text) {
@@ -486,36 +460,16 @@ export class DifficultWordsScanner {
       return block.payload
     }
     block.read = read
-    block.segmented = null
-    block.wordIndex = null
-    block.sentText = null
     block.payload = null
 
-    const text = read.text
+    const text = read.text.slice(0, VOCAB_JUDGE_MAX_TEXT_LENGTH)
+    if (!/\p{L}/u.test(text)) return this.markEmpty(block)
+    const payload: VocabJudgeBlock = { id: block.id, text }
     const hint = getLanguageHint(block.element)
-    let payload: VocabJudgeBlock
-    let short: boolean
-    if (isTextScript(text)) {
-      const sent = text.slice(0, VOCAB_JUDGE_MAX_TEXT_LENGTH)
-      if (!/\p{L}/u.test(sent)) return this.markEmpty(block)
-      block.sentText = sent
-      payload = { id: block.id, text: sent }
-      short = sent.trim().length < SHORT_BLOCK_CHARS
-    } else {
-      const segmented = segmentWords(text)
-      if (segmented.words.length === 0) return this.markEmpty(block)
-      block.segmented = segmented
-      block.wordIndex = new Map(segmented.words.map((word, index) => [word, index]))
-      payload = {
-        id: block.id,
-        words: segmented.words,
-        ...(segmented.starts.length > 0 ? { starts: segmented.starts } : {}),
-      }
-      short = segmented.words.length < SHORT_BLOCK_WORDS
-    }
     if (hint) payload.hint = hint
+    // The server detects the short ones among neighbours together.
     const parent = block.element.parentElement
-    if (short && parent) payload.group = this.groupOf(parent)
+    if (parent) payload.group = this.groupOf(parent)
     block.payload = payload
     return payload
   }
@@ -526,7 +480,7 @@ export class DifficultWordsScanner {
     return null
   }
 
-  /** Neighbouring short paragraphs, the items of one list, say, are detected together. */
+  /** Neighbouring paragraphs, the items of one list, say, share a group. */
   private groupOf(parent: Element) {
     let group = this.groups.get(parent)
     if (!group) {
@@ -706,20 +660,15 @@ export class DifficultWordsScanner {
     }
   }
 
+  /** Where `word` is in the text that was sent, each place checked against that text. */
   private rangesFor(block: ScanBlock, read: BlockText, word: VocabMarkedWord): Range[] {
+    const sent = block.payload?.text
+    if (sent === undefined) return []
     const ranges: Range[] = []
-    if (block.segmented && block.wordIndex) {
-      const index = block.wordIndex.get(word.w)
-      for (const span of index === undefined ? [] : block.segmented.spans[index]!) {
-        const range = rangeForSpan(read, span.start, span.end)
-        if (range) ranges.push(range)
-      }
-    } else if (block.sentText !== null) {
-      for (const at of word.at ?? []) {
-        if (!block.sentText.startsWith(word.w, at)) continue
-        const range = rangeForSpan(read, at, at + word.w.length)
-        if (range) ranges.push(range)
-      }
+    for (const at of word.at) {
+      if (!sent.startsWith(word.w, at)) continue
+      const range = rangeForSpan(read, at, at + word.w.length)
+      if (range) ranges.push(range)
     }
     return ranges
   }
