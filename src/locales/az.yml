@@ -1606,7 +1606,7 @@ languageLevels:
   intermediate: Orta
   advanced: Yüksək
 noAPIKeyConfig:
-  warning: Əvvəlcə seçimlər səhifəsində bu provayder üçün API açarını təyin edin
+  warning: Əvvəlcə parametrlər səhifəsində bu provayder üçün API açarını təyin edin
   warningWithLink:
     youMust: Əvvəlcə
     setTheAPIKey: API açarını
