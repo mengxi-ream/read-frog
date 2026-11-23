@@ -32,6 +32,10 @@ export const MACHINE_PLACEHOLDER_LEAD_MS = 1_500
 // a provider that is down is asked every 10 s instead of in a loop, and a paused or short
 // video, which sends no new batch, still gets its lines once the provider is back.
 export const FAILED_BATCH_RETRY_MS = 10_000
+// Requests wait this long after a seek starts, and another seek meanwhile starts the wait
+// again: a held seek key, a seek every 30–90 ms, then sends once, for where it lands, instead
+// of a look-ahead window for every place it passes. Only time tells it from separate seeks.
+export const SEEK_SETTLE_MS = 200
 
 // DOM IDs
 export const READ_FROG_SUBTITLES_UI_HOST_ID = "read-frog-subtitles-ui-host"

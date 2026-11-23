@@ -9,6 +9,7 @@ import { CONFIG_STORAGE_KEY } from "@/utils/constants/config"
 import {
   FAILED_BATCH_RETRY_MS,
   MACHINE_PLACEHOLDER_LEAD_MS,
+  SEEK_SETTLE_MS,
   TRANSLATE_LOOK_AHEAD_MS,
 } from "@/utils/constants/subtitles"
 import { DEFAULT_BATCH_CONFIG } from "@/utils/constants/translate"
@@ -100,6 +101,8 @@ export class TranslationCoordinator {
   private lastEmittedMessage: string | undefined
   private videoContext: SubtitlesVideoContext = { videoTitle: "", subtitlesTextContent: "" }
   private listenersAttached = false
+  /** Pending while a seek settles: see `handleSeeking`. */
+  private seekSettleTimer: ReturnType<typeof setTimeout> | undefined
 
   private getFragments: () => SubtitlesFragment[]
   private getVideoElement: () => HTMLVideoElement | null
@@ -203,9 +206,9 @@ export class TranslationCoordinator {
   private attachVideoListeners(video: HTMLVideoElement) {
     if (this.listenersAttached) return
     video.addEventListener("timeupdate", this.handleTranslationTick)
-    // As a seek starts, not only once it ends: the new place is asked for while the
-    // player buffers it, instead of after.
-    video.addEventListener("seeking", this.handleTranslationTick)
+    // From a seek starting, not from it ending: the new place is asked for while the player
+    // may still buffer it, instead of after.
+    video.addEventListener("seeking", this.handleSeeking)
     video.addEventListener("seeked", this.handleTranslationTick)
     if (this.segmentationPipeline) {
       video.addEventListener("seeked", this.handleSeek)
@@ -215,11 +218,13 @@ export class TranslationCoordinator {
   }
 
   private detachVideoListeners() {
+    clearTimeout(this.seekSettleTimer)
+    this.seekSettleTimer = undefined
     if (!this.listenersAttached) return
     const video = this.getVideoElement()
     if (video) {
       video.removeEventListener("timeupdate", this.handleTranslationTick)
-      video.removeEventListener("seeking", this.handleTranslationTick)
+      video.removeEventListener("seeking", this.handleSeeking)
       video.removeEventListener("seeked", this.handleTranslationTick)
       video.removeEventListener("seeked", this.handleSeek)
     }
@@ -284,6 +289,21 @@ export class TranslationCoordinator {
     this.knownIdentities.set(fragment.start, fragmentIdentity(fragment))
   }
 
+  /**
+   * Nothing is sent until a seek settles, `SEEK_SETTLE_MS` after it starts, and another seek
+   * meanwhile starts the wait again. A held seek key then sends once, for where it lands:
+   * each step is a whole seek of its own when the player is quick, so only time tells the
+   * steps from separate seeks. Only requests wait: the badge or error follows at once.
+   */
+  private handleSeeking = () => {
+    clearTimeout(this.seekSettleTimer)
+    this.seekSettleTimer = setTimeout(() => {
+      this.seekSettleTimer = undefined
+      this.handleTranslationTick()
+    }, SEEK_SETTLE_MS)
+    this.handleTranslationTick()
+  }
+
   private handleTranslationTick = () => {
     if (!this.active) return
     // Ad timeline can freeze or jump; do not translate against main-video cues mid-ad.
@@ -298,6 +318,8 @@ export class TranslationCoordinator {
     const fragments = this.getFragments()
 
     this.updateLoadingStateAt(currentTimeMs, fragments)
+    // A seek is settling: it sends once it has (`handleSeeking`).
+    if (this.seekSettleTimer !== undefined) return
 
     if (
       this.segmentationPipeline &&
@@ -315,8 +337,8 @@ export class TranslationCoordinator {
 
   /**
    * Every untranslated cue in the look-ahead window goes now, in full batches, and the
-   * queue paces them: after a seek the new place is asked for at once, whatever the old
-   * one still waits on. The window decides when to request, not how much — a batch takes
+   * queue paces them: once a seek settles the new place is asked for at once, whatever the
+   * old one still waits on. The window decides when to request, not how much — a batch takes
    * the cues after the window too, as topping up only the cues that just scrolled into it
    * sent one line per request during playback. A failed cue waits out its 10 s first.
    */

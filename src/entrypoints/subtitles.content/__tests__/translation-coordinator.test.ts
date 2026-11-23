@@ -4,7 +4,7 @@ import { storage } from "#imports"
 import { configSchema } from "@/types/config/config"
 import { CONFIG_STORAGE_KEY, DEFAULT_CONFIG } from "@/utils/constants/config"
 import { DEFAULT_PROVIDER_CONFIG } from "@/utils/constants/providers"
-import { FAILED_BATCH_RETRY_MS } from "@/utils/constants/subtitles"
+import { FAILED_BATCH_RETRY_MS, SEEK_SETTLE_MS } from "@/utils/constants/subtitles"
 import { TranslationCoordinator } from "../translation-coordinator"
 
 describe("translation coordinator loading state", () => {
@@ -506,13 +506,30 @@ function createVideo() {
   }
 }
 
+/** The listeners the coordinator put on the video once started, by event. */
+function videoListeners(video: ReturnType<typeof createVideo>) {
+  const listener = (type: string): (() => void) => {
+    const call = video.addEventListener.mock.calls.find(([eventType]) => eventType === type)
+    if (!call) throw new Error(`no ${type} listener`)
+    return call[1]
+  }
+  return {
+    onSeeking: listener("seeking"),
+    onSeeked: listener("seeked"),
+    onTimeupdate: listener("timeupdate"),
+  }
+}
+
 async function flush() {
   await new Promise((resolve) => setTimeout(resolve, 0))
 }
 
-/** `trackState` keeps the player's state as the scheduler does, error badge and all. */
-async function setup({ trackState = false, machinePlaceholder = false } = {}) {
-  const fragments = Array.from({ length: 20 }, (_, i) => ({
+/**
+ * `trackState` keeps the player's state as the scheduler does, error badge and all.
+ * `lineCount` lines start every 2 s and last 2 s.
+ */
+async function setup({ trackState = false, machinePlaceholder = false, lineCount = 20 } = {}) {
+  const fragments = Array.from({ length: lineCount }, (_, i) => ({
     text: `line ${i}`,
     start: i * 2000,
     end: i * 2000 + 2000,
@@ -1195,20 +1212,99 @@ describe("translation coordinator sending", () => {
     ])
   })
 
-  it("sends for the new place as a seek starts, while the player still buffers it", async () => {
+  it("sends for the new place once a seek settles, though the player may still buffer it", async () => {
+    vi.useFakeTimers({ now: 0 })
     const { coordinator, video, translateSpy } = await setup()
     translateSpy.mockImplementation(() => new Promise(() => {}))
 
     coordinator.start()
-    const onSeeking = video.addEventListener.mock.calls.find(([type]) => type === "seeking")?.[1]
-    expect(onSeeking).toBeTypeOf("function")
-
+    const { onSeeking, onSeeked, onTimeupdate } = videoListeners(video)
     video.currentTime = 34
     onSeeking()
+    // A quick player is done with the seek long before it settles: that waits too.
+    await vi.advanceTimersByTimeAsync(40)
+    onTimeupdate()
+    onSeeked()
+    await vi.advanceTimersByTimeAsync(SEEK_SETTLE_MS - 41)
+    expect(sentBatches(translateSpy)).toHaveLength(8)
+
+    await vi.advanceTimersByTimeAsync(1)
     expect(batchIndexes(sentBatches(translateSpy).slice(8))).toEqual([
       [16, 17],
       [18, 19],
     ])
+  })
+
+  it("shows the new place's state as a seek starts: only its requests wait", async () => {
+    vi.useFakeTimers({ now: 0 })
+    const { coordinator, video, translateSpy, getState } = await setup({ trackState: true })
+    translateSpy.mockImplementation((batch: any) =>
+      batch[0].start < 32_000
+        ? Promise.resolve(batch.map((f: any) => ({ ...f, translation: `t:${f.text}` })))
+        : new Promise(() => {}),
+    )
+
+    coordinator.start()
+    await vi.advanceTimersByTimeAsync(0)
+    expect(getState()).toBe("idle")
+
+    const { onSeeking } = videoListeners(video)
+    video.currentTime = 34
+    onSeeking()
+    expect(getState()).toBe("loading")
+    expect(sentBatches(translateSpy)).toHaveLength(8)
+
+    await vi.advanceTimersByTimeAsync(SEEK_SETTLE_MS)
+    expect(sentBatches(translateSpy)).toHaveLength(10)
+  })
+
+  it("sends once for where a held seek key lands, nothing for the places it passes", async () => {
+    vi.useFakeTimers({ now: 0 })
+    const { coordinator, video, translateSpy } = await setup({ lineCount: 100 })
+    translateSpy.mockImplementation(() => new Promise(() => {}))
+
+    coordinator.start()
+    expect(sentBatches(translateSpy)).toHaveLength(8)
+    const { onSeeking, onSeeked, onTimeupdate } = videoListeners(video)
+
+    // Key repeat: 5 s on every 33 ms for 1 s, each seek done before the next, as on a quick
+    // player, and the video playing a moment in between.
+    for (let step = 1; step <= 30; step++) {
+      video.currentTime = step * 5
+      onSeeking()
+      await vi.advanceTimersByTimeAsync(20)
+      onTimeupdate()
+      onSeeked()
+      await vi.advanceTimersByTimeAsync(13)
+    }
+    expect(sentBatches(translateSpy)).toHaveLength(8)
+
+    // Let go at 150 s: one window, from 5 s before it to 30 s after it.
+    await vi.advanceTimersByTimeAsync(SEEK_SETTLE_MS)
+    expect(batchIndexes(sentBatches(translateSpy).slice(8))).toEqual(
+      Array.from({ length: 9 }, (_, i) => [73 + 2 * i, 74 + 2 * i]),
+    )
+  })
+
+  it("sends at once while playing, before any seek and once one has settled", async () => {
+    vi.useFakeTimers({ now: 0 })
+    const { coordinator, video, translateSpy } = await setup({ lineCount: 100 })
+    translateSpy.mockImplementation(() => new Promise(() => {}))
+
+    coordinator.start()
+    const { onSeeking, onTimeupdate } = videoListeners(video)
+    video.currentTime = 4
+    onTimeupdate()
+    expect(batchIndexes(sentBatches(translateSpy).slice(8))).toEqual([[16, 17]])
+
+    video.currentTime = 100
+    onSeeking()
+    await vi.advanceTimersByTimeAsync(SEEK_SETTLE_MS)
+    const sentBySeek = sentBatches(translateSpy).length
+
+    video.currentTime = 104
+    onTimeupdate()
+    expect(batchIndexes(sentBatches(translateSpy).slice(sentBySeek))).toEqual([[66, 67]])
   })
 })
 
