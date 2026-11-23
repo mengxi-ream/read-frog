@@ -18,7 +18,7 @@ import { isPermanentRequestError } from "@/utils/request/retry-policy"
 import { effectiveLookAheadMs } from "@/utils/subtitles/lookahead"
 import {
   getSubtitlesPassLimits,
-  isSubtitlesProviderAi,
+  shouldUseMachinePlaceholder,
   translateSubtitles,
   translateSubtitleWithMachine,
 } from "@/utils/subtitles/processor/translator"
@@ -36,9 +36,8 @@ export interface TranslationCoordinatorOptions {
   /** Limits for one pass (see `getSubtitlesPassLimits`); kept current from config while running. */
   batchLimits?: BatchQueueConfig
   /**
-   * Whether a line about to show without its translation gets a machine one meanwhile:
-   * only an AI provider is slow enough to need it (see `isSubtitlesProviderAi`). Kept
-   * current from config while running.
+   * Whether a line about to show without its translation gets a machine one meanwhile (see
+   * `shouldUseMachinePlaceholder`). Kept current from config while running.
    */
   machinePlaceholder?: boolean
   /** Translation holds: every machine translation goes, the one on screen included. */
@@ -189,7 +188,7 @@ export class TranslationCoordinator {
       const parsed = configSchema.safeParse(next)
       if (!parsed.success) return
       this.batchLimits = getSubtitlesPassLimits(parsed.data)
-      this.machinePlaceholder = isSubtitlesProviderAi(parsed.data)
+      this.machinePlaceholder = shouldUseMachinePlaceholder(parsed.data)
       if (parsed.data.videoSubtitles.providerId !== previous?.videoSubtitles?.providerId) {
         this.retryFailed()
       }

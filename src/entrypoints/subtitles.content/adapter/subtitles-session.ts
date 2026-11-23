@@ -15,7 +15,7 @@ import {
   resolveSubtitlesProvider,
   fetchSubtitlesSummary,
   getSubtitlesPassLimits,
-  isSubtitlesProviderAi,
+  shouldUseMachinePlaceholder,
 } from "@/utils/subtitles/processor/translator"
 import { currentTimeMsAtom, sourceLanguageAtom, sourceTrackAtom, subtitlesStore } from "../atoms"
 import { SegmentationPipeline } from "../segmentation-pipeline"
@@ -187,7 +187,7 @@ export class SubtitlesSession {
       onTranslated: (fragments) => scheduler.supplementSubtitles(fragments),
       onStateChange: (state, data) => scheduler.setState(state, data),
       batchLimits: config ? getSubtitlesPassLimits(config) : undefined,
-      machinePlaceholder: !!config && isSubtitlesProviderAi(config),
+      machinePlaceholder: !!config && shouldUseMachinePlaceholder(config),
       onMachineTranslationsDropped: () => scheduler.removeMachineTranslations(),
       onBuiltInAiRefused: (error) => {
         promptForSubtitlesRefusal(error, {

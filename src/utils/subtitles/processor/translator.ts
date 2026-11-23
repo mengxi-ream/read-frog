@@ -385,6 +385,20 @@ export function isSubtitlesProviderAi(config: Config): boolean {
 }
 
 /**
+ * Whether a line about to show without its translation gets a Microsoft one meanwhile: only
+ * an AI provider is slow enough to need it, and only while the reader has Microsoft
+ * Translator switched on. A provider switched off, or deleted, serves no feature.
+ */
+export function shouldUseMachinePlaceholder(config: Config): boolean {
+  return (
+    isSubtitlesProviderAi(config) &&
+    config.providersConfig.some(
+      (provider) => provider.provider === "microsoft-translate" && provider.enabled,
+    )
+  )
+}
+
+/**
  * How many cues one translation pass may take. Only a provider on the batch
  * queue (the same rule as the background's `shouldUseBatchQueue`) packs them
  * into one request, so the AI batch limits apply to it alone; any other

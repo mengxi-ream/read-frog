@@ -513,3 +513,50 @@ describe("subtitles translator", () => {
     expect(first).not.toBe(differentWithinLimit)
   })
 })
+
+describe("Microsoft stand-ins for subtitles", () => {
+  const aiSubtitles = {
+    ...DEFAULT_CONFIG,
+    videoSubtitles: { ...DEFAULT_CONFIG.videoSubtitles, providerId: "openai-default" },
+  }
+
+  function withMicrosoft(state: "on" | "off" | "deleted") {
+    return {
+      ...aiSubtitles,
+      providersConfig: aiSubtitles.providersConfig
+        .filter((provider) => state !== "deleted" || provider.provider !== "microsoft-translate")
+        .map((provider) =>
+          provider.provider === "microsoft-translate"
+            ? { ...provider, enabled: state === "on" }
+            : provider,
+        ),
+    }
+  }
+
+  it("are on for an AI provider while Microsoft Translator is switched on", async () => {
+    const { shouldUseMachinePlaceholder } = await import("../translator")
+
+    expect(shouldUseMachinePlaceholder(withMicrosoft("on"))).toBe(true)
+  })
+
+  it("are off once the reader switched Microsoft Translator off, or deleted it", async () => {
+    const { shouldUseMachinePlaceholder } = await import("../translator")
+
+    expect(shouldUseMachinePlaceholder(withMicrosoft("off"))).toBe(false)
+    expect(shouldUseMachinePlaceholder(withMicrosoft("deleted"))).toBe(false)
+  })
+
+  it("are off for a translation service, which is fast on its own", async () => {
+    const { shouldUseMachinePlaceholder } = await import("../translator")
+
+    expect(
+      shouldUseMachinePlaceholder({
+        ...DEFAULT_CONFIG,
+        videoSubtitles: {
+          ...DEFAULT_CONFIG.videoSubtitles,
+          providerId: "google-translate-default",
+        },
+      }),
+    ).toBe(false)
+  })
+})

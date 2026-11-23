@@ -1,6 +1,7 @@
 import type { SubtitlesFragment, SubtitlesState } from "@/utils/subtitles/types"
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { storage } from "#imports"
+import { configSchema } from "@/types/config/config"
 import { CONFIG_STORAGE_KEY, DEFAULT_CONFIG } from "@/utils/constants/config"
 import { DEFAULT_PROVIDER_CONFIG } from "@/utils/constants/providers"
 import { FAILED_BATCH_RETRY_MS } from "@/utils/constants/subtitles"
@@ -1263,6 +1264,46 @@ describe("translation coordinator machine translations", () => {
     }
 
     expect(machineSpy).not.toHaveBeenCalled()
+  })
+
+  it("asks for none once the reader switches Microsoft Translator off mid-video", async () => {
+    const { coordinator, video, translateSpy, machineSpy } = await setup({
+      machinePlaceholder: true,
+    })
+    translateSpy.mockImplementation(() => new Promise(() => {}))
+    coordinator.start()
+    expect(machineSpy.mock.calls).toEqual([["line 0"]])
+
+    // The options let no one switch off a provider a feature uses: those moved off it first.
+    const google = DEFAULT_PROVIDER_CONFIG["google-translate"].id
+    const { selectionToolbar } = DEFAULT_CONFIG
+    const microsoftOff = {
+      ...DEFAULT_CONFIG,
+      providersConfig: DEFAULT_CONFIG.providersConfig.map((provider) =>
+        provider.provider === "microsoft-translate" ? { ...provider, enabled: false } : provider,
+      ),
+      pageTranslation: { ...DEFAULT_CONFIG.pageTranslation, providerId: google },
+      inputTranslation: { ...DEFAULT_CONFIG.inputTranslation, providerId: google },
+      selectionToolbar: {
+        ...selectionToolbar,
+        features: {
+          ...selectionToolbar.features,
+          translate: { ...selectionToolbar.features.translate, providerId: google },
+        },
+      },
+      videoSubtitles: {
+        ...DEFAULT_CONFIG.videoSubtitles,
+        providerId: DEFAULT_PROVIDER_CONFIG.openai.id,
+      },
+    }
+    expect(configSchema.safeParse(microsoftOff).success).toBe(true)
+    await storage.setItem(`local:${CONFIG_STORAGE_KEY}`, microsoftOff)
+    await flush()
+
+    // Line 1 is 1 s away now, near enough for one.
+    video.currentTime = 1
+    coordinator.requestTick()
+    expect(machineSpy.mock.calls).toEqual([["line 0"]])
   })
 
   it("asks for none for a translation service, which is fast on its own", async () => {
