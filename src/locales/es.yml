@@ -1797,6 +1797,7 @@ subtitles:
     aiVideoTooLong: Este video es demasiado largo para los subtítulos con IA
     aiVideoMismatch: Este video no coincide con la publicación de la que proviene. Abre la publicación y vuelve a intentarlo
     aiLiveReplayUnsupported: Los subtítulos con IA aún no están disponibles para transmisiones en vivo ni sus repeticiones
+    aiLiveStreamUnsupported: Los subtítulos con IA no están disponibles mientras la transmisión está en vivo. Solicítalos cuando se publique su repetición
     aiStillProcessing: La transcripción sigue en curso — vuelve a hacer clic en unos minutos para retomarla
     aiRequestFailed: Error al solicitar subtítulos con IA, inténtalo de nuevo más tarde
     aiNoResponse: El servicio AI no respondió; se usa el texto original

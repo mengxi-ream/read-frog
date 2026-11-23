@@ -1802,6 +1802,7 @@ subtitles:
     aiVideoTooLong: 影片過長，暫不支援產生 AI 字幕
     aiVideoMismatch: 影片與所在貼文不相符，請開啟貼文頁面後重試
     aiLiveReplayUnsupported: 暫不支援為直播及直播回放產生 AI 字幕
+    aiLiveStreamUnsupported: 直播進行中暫不支援 AI 字幕，回放上線後再請求
     aiStillProcessing: 轉錄仍在進行中，幾分鐘後再點一次即可繼續取得
     aiRequestFailed: AI 字幕請求失敗，請稍後重試
     aiNoResponse: AI 服務未回應，使用原文顯示
