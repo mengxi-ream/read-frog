@@ -43,7 +43,7 @@ export class SubtitlesSwitch {
   // Dropped by a newer start, a navigation reset or a leave; it may wait on a start that hangs.
   private trackChangeRefreshPromise: Promise<void> | null = null
   private pendingTranscriptLoads = 0
-  // The start a switch is running: a track check waits for the track it loads.
+  // The start a switch is running: a track check waits for its track, and X keeps its player.
   private pendingStart: Promise<boolean> | null = null
 
   get supportsAiSubtitles(): boolean {
@@ -69,6 +69,15 @@ export class SubtitlesSwitch {
     this.hasPendingNavigationReset = hasPendingNavigationReset
     this.startTranslation = startTranslation
     this.fetcher = fetchers.native()
+  }
+
+  // From the switch until its start settles, translation included; a refusal or turning off ends it.
+  isAwaitingAiSubtitles(): boolean {
+    return (
+      this.source === SUBTITLES_SOURCE.AI &&
+      !!this.pendingStart &&
+      !!this.getScheduler()?.isActive()
+    )
   }
 
   async handleSourceTrackChanged(): Promise<void> {

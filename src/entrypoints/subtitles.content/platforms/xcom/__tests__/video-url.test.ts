@@ -1,23 +1,35 @@
 // @vitest-environment jsdom
-import { afterEach, describe, expect, it } from "vitest"
-import { getCurrentXcomVideoUrl } from "../dom"
+import { afterEach, describe, expect, it, vi } from "vitest"
+import { getCurrentXcomVideoUrl, getXcomVideoPostUrl } from "../dom"
 
-function addPostWithVideo(statusPath: string) {
+const PAGE_STATUS_ID = "2119833829389041896"
+
+const page = vi.hoisted(() => ({ statusId: null as string | null }))
+
+vi.mock("@/utils/subtitles/video-id", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/utils/subtitles/video-id")>()),
+  getXcomStatusId: () => page.statusId,
+}))
+
+function addPostWithVideo(statusPath?: string): HTMLVideoElement {
   const article = document.createElement("article")
   const link = document.createElement("a")
-  link.href = `https://x.com${statusPath}`
+  link.href = `https://x.com${statusPath ?? "/an-advertiser"}`
   const player = document.createElement("div")
   player.dataset.testid = "videoComponent"
-  player.append(document.createElement("video"))
+  const video = document.createElement("video")
+  player.append(video)
   article.append(link, player)
   document.body.append(article)
+  return video
 }
 
-describe("getCurrentXcomVideoUrl", () => {
-  afterEach(() => {
-    document.body.replaceChildren()
-  })
+afterEach(() => {
+  document.body.replaceChildren()
+  page.statusId = null
+})
 
+describe("getCurrentXcomVideoUrl", () => {
   it("links to the playing video's own post, which a timeline URL does not name", () => {
     addPostWithVideo("/someone/status/1234567890")
 
@@ -26,5 +38,21 @@ describe("getCurrentXcomVideoUrl", () => {
 
   it("has no link when no video can be found", () => {
     expect(getCurrentXcomVideoUrl()).toBeNull()
+  })
+})
+
+describe("getXcomVideoPostUrl", () => {
+  it("links to the post holding the video", () => {
+    const video = addPostWithVideo("/someone/status/1234567890")
+
+    expect(getXcomVideoPostUrl(video)).toBe("https://x.com/i/status/1234567890")
+  })
+
+  it("never lends the page's post to a video whose post links to none, as an ad", () => {
+    page.statusId = PAGE_STATUS_ID
+    const ad = addPostWithVideo()
+
+    expect(getCurrentXcomVideoUrl()).toBe(`https://x.com/i/status/${PAGE_STATUS_ID}`)
+    expect(getXcomVideoPostUrl(ad)).toBeNull()
   })
 })
