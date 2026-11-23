@@ -7,7 +7,7 @@ import { SUBTITLE_FONT_FAMILIES } from "@/utils/constants/subtitles"
 import { getLanguageDirectionAndLang } from "@/utils/content/language-direction"
 import { cn } from "@/utils/styles/utils"
 import { isTranslationPending } from "@/utils/subtitles/display-rules"
-import { displaySubtitleAtom, subtitlesStateAtom } from "../atoms"
+import { displaySubtitleAtom } from "../atoms"
 import { SubtitleWordTokens } from "../learning/subtitle-word-tokens"
 import { SubtitlePendingLabel } from "./subtitle-pending-label"
 
@@ -48,9 +48,7 @@ export function TranslationSubtitle({ content, className }: SubtitleLineProps) {
   const subtitle = useAtomValue(displaySubtitleAtom)
   const { style } = useAtomValue(configFieldsAtomMap.videoSubtitles)
   const language = useAtomValue(configFieldsAtomMap.language)
-  // While an error shows, nothing is on its way: translation is held.
-  const held = useAtomValue(subtitlesStateAtom)?.state === "error"
-  const pending = content === undefined && !held && isTranslationPending(subtitle)
+  const pending = content === undefined && isTranslationPending(subtitle)
   const text = content ?? subtitle?.translation ?? ""
   const { dir, lang } = getLanguageDirectionAndLang(language.targetCode)
   const textStyleVars = getTextStyleVars(style.translation)

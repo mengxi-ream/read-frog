@@ -401,7 +401,8 @@ export class TranslationCoordinator {
    * batches that keep failing, such as a provider that is down. Machine translations would
    * cover that up for as long as the video plays. So nothing is sent until the reader
    * retries — back to the tab, or another provider — the machine translations go at once,
-   * and the error stays up; the AI's lines stay too.
+   * and the error stays up in place of the captions. The AI's lines are kept for when
+   * translation goes on.
    */
   private hold(error: unknown) {
     this.held = true
