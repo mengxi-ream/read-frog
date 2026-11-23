@@ -266,22 +266,25 @@ function renderButton(
       },
     },
   })
-  const rendered = render(
+  const renderTree = (result: Record<string, unknown>) => (
     <QueryClientProvider client={queryClient}>
       <Provider store={store}>
         <SaveToNotebaseButton
           action={action}
           failed={failed}
           isRunning={false}
-          result={{ summary: "A short summary" }}
+          result={result}
           surface={surface}
           getNoteOrigin={getNoteOrigin}
         />
         <SaveToNotebaseDialogHost />
       </Provider>
-    </QueryClientProvider>,
+    </QueryClientProvider>
   )
-  return { ...rendered, store, queryClient }
+  const rendered = render(renderTree({ summary: "A short summary" }))
+  // Shows another run's answer, as a regenerate or a new selection does.
+  const showResult = (result: Record<string, unknown>) => rendered.rerender(renderTree(result))
+  return { ...rendered, store, queryClient, showResult }
 }
 
 // What the selection popover's review-due count is added up from, cached
@@ -612,6 +615,29 @@ describe("saveToNotebaseButton notebase availability", () => {
       url: expect.stringContaining("/notebase/notebase-1"),
       active: true,
     })
+  })
+
+  it("does not save the same answer twice, but saves the next answer", async () => {
+    const config = cloneConfig(DEFAULT_CONFIG)
+    const { showResult } = renderButton(config, createConnectedAction())
+
+    fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
+    const savedButton = await screen.findByRole("button", {
+      name: i18n.t("action.saveToNotebaseSuccess"),
+    })
+    expect(savedButton).toBeDisabled()
+    fireEvent.click(savedButton)
+    expect(notebaseRowCreateMock).toHaveBeenCalledTimes(1)
+
+    // A regenerated answer for the same word is a new note to save.
+    showResult({ summary: "Another summary" })
+    fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
+    await waitFor(() => {
+      expect(notebaseRowCreateMock).toHaveBeenCalledTimes(2)
+    })
+    expect(
+      await screen.findByRole("button", { name: i18n.t("action.saveToNotebaseSuccess") }),
+    ).toBeDisabled()
   })
 
   it("refreshes the notebases and counts the review-due tab adds up after a direct save, not after a failed one", async () => {
@@ -946,11 +972,15 @@ describe("saveToNotebaseButton notebase availability", () => {
       const config = cloneConfig(DEFAULT_CONFIG)
       config.betaExperience.enabled = true
       vi.mocked(orpcClient.notebase.getSchema).mockResolvedValueOnce(createSchemaForAction(action))
-      const { store } = renderButton(config, action)
+      const { store, showResult } = renderButton(config, action)
       fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
       await waitFor(() => expect(toastManagerMock.add).toHaveBeenCalled())
       expect(notebaseRowCreateMock).toHaveBeenCalledTimes(1)
-      return { store, toast: toastManagerMock.add.mock.calls[0]?.[0] as WarningToast }
+      return {
+        store,
+        showResult,
+        toast: toastManagerMock.add.mock.calls[0]?.[0] as WarningToast,
+      }
     }
 
     it("names them with a choice to skip them or configure", async () => {
@@ -979,9 +1009,10 @@ describe("saveToNotebaseButton notebase availability", () => {
     it("names them again on the next save while they stay undecided", async () => {
       const action = createTermOnlyDictionaryAction()
       const undecidedNames = action.outputSchema.slice(1).map((field) => field.name)
-      const { store } = await saveAndGetWarning(action)
+      const { store, showResult } = await saveAndGetWarning(action)
 
-      // The reader closes the toast without choosing, and saves again.
+      // The reader closes the toast without choosing, and saves the next answer.
+      showResult({ summary: "Another summary" })
       vi.mocked(orpcClient.notebase.getSchema).mockResolvedValueOnce(createSchemaForAction(action))
       fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
 
