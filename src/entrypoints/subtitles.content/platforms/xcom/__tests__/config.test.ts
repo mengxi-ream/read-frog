@@ -81,6 +81,10 @@ describe("x AI subtitles", () => {
     expect(createAiSubtitlesContext?.()).toBeNull()
   })
 
+  it("tells a reader refused while a broadcast is live that its replay will work", () => {
+    expect(getXcomConfig().liveContentMessage?.()).toBe("subtitles.errors.aiLiveStreamUnsupported")
+  })
+
   it("treats a broadcast's replay, or no video, as not live", async () => {
     mocks.video = { duration: 2656.62, poster: REPLAY_POSTER }
     await expect(isLiveContent?.()).resolves.toBe(false)

@@ -5,6 +5,7 @@ import {
   DEFAULT_CONTROLS_HEIGHT,
   XCOM_PLAYER_CONTAINER_SELECTOR,
 } from "@/utils/constants/subtitles"
+import { i18n } from "@/utils/i18n"
 import { resolveAiSubtitlesContext } from "@/utils/subtitles/ai/ai-subtitles-context"
 import {
   getCurrentXcomSubtitlesVideo,
@@ -65,5 +66,7 @@ export function getXcomConfig(): PlatformConfig {
     getVideoPageUrl: getCurrentXcomVideoUrl,
     createAiSubtitlesContext: createXcomAiSubtitlesContext,
     isLiveContent: isXcomLiveContent,
+    // A replay gets AI subtitles, so only a broadcast still live is refused.
+    liveContentMessage: () => i18n.t("subtitles.errors.aiLiveStreamUnsupported"),
   }
 }

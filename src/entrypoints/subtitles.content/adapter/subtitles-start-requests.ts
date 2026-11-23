@@ -107,7 +107,9 @@ export class SubtitlesStartRequests {
     try {
       if (!(await ensureAiSubtitlesAccess())) return
       if (await this.config.isLiveContent?.()) {
-        showAiSubtitlesWallToast(i18n.t("subtitles.errors.aiLiveReplayUnsupported"))
+        showAiSubtitlesWallToast(
+          this.config.liveContentMessage?.() ?? i18n.t("subtitles.errors.aiLiveReplayUnsupported"),
+        )
         return
       }
     } finally {

@@ -1012,6 +1012,20 @@ describe("universalVideoAdapter", () => {
     expect(subtitlesFetcher.cleanup).not.toHaveBeenCalled()
   })
 
+  it("refuses live content with the platform's own message when it has one", async () => {
+    const { adapter } = createAdapter([])
+    ;(adapter as any).config.isLiveContent = vi.fn<() => Promise<boolean>>().mockResolvedValue(true)
+    ;(adapter as any).config.liveContentMessage = () => "replays work once the stream ends"
+    const switchSubtitlesFetcher = vi
+      .spyOn((adapter as any).subtitlesSwitch, "switchSubtitlesFetcher")
+      .mockResolvedValue(undefined)
+
+    await adapter.requestAiSubtitles()
+
+    expect(mocks.showAiSubtitlesWallToast).toHaveBeenCalledWith("replays work once the stream ends")
+    expect(switchSubtitlesFetcher).not.toHaveBeenCalled()
+  })
+
   it("switches to the AI fetcher when the video is not live content", async () => {
     const { adapter } = createAdapter([])
     ;(adapter as any).config.isLiveContent = vi

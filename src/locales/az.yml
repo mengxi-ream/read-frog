@@ -1790,6 +1790,7 @@ subtitles:
     aiVideoTooLong: Bu video süni intellekt subtitrləri üçün həddindən artıq uzundur
     aiVideoMismatch: Bu video aid olduğu paylaşıma uyğun gəlmir. Paylaşımın öz səhifəsini açıb yenidən cəhd edin
     aiLiveReplayUnsupported: Canlı yayımlar və onların yazıları üçün süni intellekt subtitrləri hələ əlçatan deyil
+    aiLiveStreamUnsupported: Canlı yayım davam edərkən süni intellekt subtitrləri hələ əlçatan deyil. Yazısı yayımlandıqdan sonra sorğu göndərin
     aiStillProcessing: Transkripsiya hələ davam edir. Nəticəni almaq üçün bir neçə dəqiqə sonra yenidən klikləyin
     aiRequestFailed: Süni intellekt subtitr sorğusu alınmadı, daha sonra yenidən cəhd edin
     aiNoResponse: Süni intellekt xidməti cavab vermədi, orijinal mətndən istifadə olunur
