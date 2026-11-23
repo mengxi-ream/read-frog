@@ -181,6 +181,16 @@ export class TranslationCoordinator {
   }
 
   /**
+   * Batch limits and Microsoft stand-ins as `config` has them. The watcher below keeps them
+   * current while running; a session resumed after subtitles were off passes the config it
+   * resumes with, as a change made in between reached no watcher.
+   */
+  applyConfig(config: Config) {
+    this.batchLimits = getSubtitlesPassLimits(config)
+    this.machinePlaceholder = shouldUseMachinePlaceholder(config)
+  }
+
+  /**
    * Settings apply mid-video, as they already do for the background queue. A new provider
    * also lifts a hold, such as one on every cue Built-in AI refused: the reader may have
    * switched just for them.
@@ -190,8 +200,7 @@ export class TranslationCoordinator {
     this.unwatchConfig = storage.watch<Config>(`local:${CONFIG_STORAGE_KEY}`, (next, previous) => {
       const parsed = configSchema.safeParse(next)
       if (!parsed.success) return
-      this.batchLimits = getSubtitlesPassLimits(parsed.data)
-      this.machinePlaceholder = shouldUseMachinePlaceholder(parsed.data)
+      this.applyConfig(parsed.data)
       if (parsed.data.videoSubtitles.providerId !== previous?.videoSubtitles?.providerId) {
         this.retryFailed()
       }

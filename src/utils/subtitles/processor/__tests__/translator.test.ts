@@ -533,13 +533,13 @@ describe("Microsoft stand-ins for subtitles", () => {
     }
   }
 
-  it("are on for an AI provider while Microsoft Translator is switched on", async () => {
+  it("are on for an AI provider while the config has Microsoft Translator enabled", async () => {
     const { shouldUseMachinePlaceholder } = await import("../translator")
 
     expect(shouldUseMachinePlaceholder(withMicrosoft("on"))).toBe(true)
   })
 
-  it("are off once the reader switched Microsoft Translator off, or deleted it", async () => {
+  it("are off while the config has Microsoft Translator off, or no Microsoft Translator", async () => {
     const { shouldUseMachinePlaceholder } = await import("../translator")
 
     expect(shouldUseMachinePlaceholder(withMicrosoft("off"))).toBe(false)

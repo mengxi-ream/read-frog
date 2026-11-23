@@ -1362,7 +1362,7 @@ describe("translation coordinator machine translations", () => {
     expect(machineSpy).not.toHaveBeenCalled()
   })
 
-  it("asks for none once the reader switches Microsoft Translator off mid-video", async () => {
+  it("asks for none once a config with Microsoft Translator off comes in mid-video", async () => {
     const { coordinator, video, translateSpy, machineSpy } = await setup({
       machinePlaceholder: true,
     })
@@ -1370,7 +1370,7 @@ describe("translation coordinator machine translations", () => {
     coordinator.start()
     expect(machineSpy.mock.calls).toEqual([["line 0"]])
 
-    // The options let no one switch off a provider a feature uses: those moved off it first.
+    // An imported or synced config: no feature may use a provider that is off (configSchema).
     const google = DEFAULT_PROVIDER_CONFIG["google-translate"].id
     const { selectionToolbar } = DEFAULT_CONFIG
     const microsoftOff = {
@@ -1400,6 +1400,40 @@ describe("translation coordinator machine translations", () => {
     video.currentTime = 1
     coordinator.requestTick()
     expect(machineSpy.mock.calls).toEqual([["line 0"]])
+  })
+
+  it("follows a config applied while stopped, either way, once it starts again", async () => {
+    const { coordinator, video, translateSpy, machineSpy } = await setup({
+      machinePlaceholder: true,
+    })
+    translateSpy.mockImplementation(() => new Promise(() => {}))
+    coordinator.start()
+    expect(machineSpy.mock.calls).toEqual([["line 0"]])
+
+    // Subtitles off, the provider changed to a translation service, subtitles on again.
+    coordinator.stop()
+    coordinator.applyConfig({
+      ...DEFAULT_CONFIG,
+      videoSubtitles: {
+        ...DEFAULT_CONFIG.videoSubtitles,
+        providerId: DEFAULT_PROVIDER_CONFIG["google-translate"].id,
+      },
+    })
+    video.currentTime = 1
+    coordinator.start()
+    expect(machineSpy.mock.calls).toEqual([["line 0"]])
+
+    // And back to an AI provider the same way: line 0 is on screen, line 1 1 s away.
+    coordinator.stop()
+    coordinator.applyConfig({
+      ...DEFAULT_CONFIG,
+      videoSubtitles: {
+        ...DEFAULT_CONFIG.videoSubtitles,
+        providerId: DEFAULT_PROVIDER_CONFIG.openai.id,
+      },
+    })
+    coordinator.start()
+    expect(machineSpy.mock.calls.slice(1)).toEqual([["line 0"], ["line 1"]])
   })
 
   it("asks for none for a translation service, which is fast on its own", async () => {

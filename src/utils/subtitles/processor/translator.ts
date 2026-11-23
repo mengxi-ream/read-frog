@@ -386,8 +386,9 @@ export function isSubtitlesProviderAi(config: Config): boolean {
 
 /**
  * Whether a line about to show without its translation gets a Microsoft one meanwhile: only
- * an AI provider is slow enough to need it, and only while the reader has Microsoft
- * Translator switched on. A provider switched off, or deleted, serves no feature.
+ * an AI provider is slow enough to need it, and only while the config has Microsoft
+ * Translator enabled, as a provider that is off or missing serves no feature. The Options
+ * page has no switch for it, but an imported or synced config can have it off.
  */
 export function shouldUseMachinePlaceholder(config: Config): boolean {
   return (

@@ -724,6 +724,34 @@ describe("universalVideoAdapter", () => {
     startSpy.mockRestore()
   })
 
+  it("resumes a session with the config as it is now, changed while subtitles were off", async () => {
+    const { adapter, subtitlesFetcher } = createAdapter([{ text: "hello", start: 0, end: 500 }])
+    attachScheduler(adapter, true)
+    subtitlesFetcher.shouldUseSameTrack.mockResolvedValue(true)
+    const coordinator = {
+      applyConfig: vi.fn<(config: unknown) => void>(),
+      clearFailed: vi.fn<() => void>(),
+      start: vi.fn<() => void>(),
+    }
+    ;(adapter as any).session.translationCoordinator = coordinator
+    ;(adapter as any).session.sessionProcessedFragments = [{ text: "hello", start: 0, end: 500 }]
+    ;(adapter as any).session.sessionVideoId = ""
+    const config = {
+      language: {},
+      providersConfig: [],
+      videoSubtitles: { aiSegmentation: false, providerId: "google-translate-default" },
+    }
+    mocks.getLocalConfig.mockResolvedValue(config)
+
+    await expect((adapter as any).starter.startTranslation()).resolves.toBe(true)
+
+    expect(coordinator.applyConfig).toHaveBeenCalledWith(config)
+    expect(coordinator.start).toHaveBeenCalledOnce()
+    expect(coordinator.applyConfig.mock.invocationCallOrder[0]).toBeLessThan(
+      coordinator.start.mock.invocationCallOrder[0]!,
+    )
+  })
+
   it("takes the translate button off when the page leaves the player", () => {
     const { adapter } = createAdapter([])
     const button = {} as HTMLElement
