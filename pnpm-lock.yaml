@@ -302,11 +302,11 @@ importers:
         specifier: ^1.5.0
         version: 1.5.0(@types/react@19.3.0)(react@19.3.1)
       '@read-frog/api-contract':
-        specifier: 0.35.0
-        version: 0.35.0(@opentelemetry/api@1.9.1)
+        specifier: 0.36.0
+        version: 0.36.0(@opentelemetry/api@1.9.1)
       '@read-frog/definitions':
-        specifier: 0.20.0
-        version: 0.20.0
+        specifier: 0.21.0
+        version: 0.21.0
       '@read-frog/layout-engine':
         specifier: 0.8.0
         version: 0.8.0(@codemirror/lang-liquid@6.3.3)(@codemirror/lint@6.9.8)(@codemirror/state@6.7.6)(@codemirror/view@6.43.15)(dompurify@3.4.18)(liquidjs@10.30.1)(morphdom@2.7.8)(react@19.3.1)(temml@0.14.0)
@@ -2212,11 +2212,11 @@ packages:
       '@types/react':
         optional: true
 
-  '@read-frog/api-contract@0.35.0':
-    resolution: {integrity: sha512-wO4NK8E1l24PFYFEA0ce1U22N4w7nltA+wJcjpTimTxyd8kfNoY5Kr/kflz0CvWhabOTuGuh9wy+rALlKc63pw==}
+  '@read-frog/api-contract@0.36.0':
+    resolution: {integrity: sha512-6B/ZZw0NPTievMvZsXLqbXBk5ar1P6+k/JofB+VwOE9dOylD1ap5EDKN8bEPvXP0GQog7/naaLpYy0922F2lAg==}
 
-  '@read-frog/definitions@0.20.0':
-    resolution: {integrity: sha512-HN6EfkRUk9xWwEkamoQidOyal9+EoPINwgv+E3CurI4oFwv0M3/SsHngDBw1zGzvPMFsOJfTEDoY6clSZNXWDQ==}
+  '@read-frog/definitions@0.21.0':
+    resolution: {integrity: sha512-zfrTSLWPvdvN9k0Ef0ju6MJkwOFQfKU6HVO8Sy6Jh8KIbOZXdpNum3EQdIR4DyZmBkl0LxEtqnAni+o8s+Bz8Q==}
 
   '@read-frog/layout-engine@0.8.0':
     resolution: {integrity: sha512-WHwMTMZyCZvmKqaSSMvcICJyTh29Wi9HvcK1jYOZHG35QBDCETbkjb0zGSgUnVolJoaPpEp87gvkwHcODMrssg==}
@@ -8393,15 +8393,15 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.3.0
 
-  '@read-frog/api-contract@0.35.0(@opentelemetry/api@1.9.1)':
+  '@read-frog/api-contract@0.36.0(@opentelemetry/api@1.9.1)':
     dependencies:
       '@orpc/contract': 1.16.4(@opentelemetry/api@1.9.1)
-      '@read-frog/definitions': 0.20.0
+      '@read-frog/definitions': 0.21.0
       zod: 4.6.7
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
-  '@read-frog/definitions@0.20.0':
+  '@read-frog/definitions@0.21.0':
     dependencies:
       temporal-polyfill: 1.0.7
       zod: 4.6.7

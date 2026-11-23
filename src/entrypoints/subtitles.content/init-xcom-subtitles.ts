@@ -32,6 +32,10 @@ function getCurrentVideoContainer(): HTMLElement | null {
   return video ? getXcomStatusVideoContainer(video) : null
 }
 
+function isPlayingIn(container: HTMLElement | null): boolean {
+  return container?.querySelector("video")?.paused === false
+}
+
 export function initXcomSubtitles(ctx: ContentScriptContext) {
   if (!isXcomHost()) {
     return
@@ -43,21 +47,32 @@ export function initXcomSubtitles(ctx: ContentScriptContext) {
   let lastVideoId: string | null = null
   let lastVideoContainer: HTMLElement | null = null
 
+  // Passing over another video keeps the AI subtitles a reader waits for; playing it instead lets go.
+  const getActiveVideoContainer = () => {
+    const current = getCurrentVideoContainer()
+    const keepsPinned =
+      adapter?.isAwaitingAiSubtitles() &&
+      lastVideoContainer?.isConnected &&
+      (isPlayingIn(lastVideoContainer) || !isPlayingIn(current))
+    return keepsPinned ? lastVideoContainer : current
+  }
+
   const remount = async (activeAdapter: NonNullable<typeof adapter>) => {
-    lastVideoContainer = getCurrentVideoContainer()
+    lastVideoContainer = getActiveVideoContainer()
     lastVideoId = getCurrentXcomVideoId()
     await mountSubtitlesUI({ adapter: activeAdapter, config })
     activeAdapter.notifyNavigation()
   }
 
   const syncEntryPoint = () => {
-    if (!adapter || !ensureXcomOverlayEntryPoint()) {
+    const videoContainer = getActiveVideoContainer()
+    if (!adapter || !ensureXcomOverlayEntryPoint(videoContainer)) {
       return
     }
 
     mountXcomTranslateButton(adapter)
 
-    if (initialized && getCurrentVideoContainer() !== lastVideoContainer) {
+    if (initialized && videoContainer !== lastVideoContainer) {
       void remount(adapter)
     }
   }
@@ -65,7 +80,7 @@ export function initXcomSubtitles(ctx: ContentScriptContext) {
   ctx.onInvalidated(watchXcomPlayer(syncEntryPoint))
 
   const tryInit = async () => {
-    if (!getCurrentVideoContainer() || !ensureXcomOverlayEntryPoint()) {
+    if (!ensureXcomOverlayEntryPoint(getActiveVideoContainer())) {
       return
     }
 
@@ -74,7 +89,7 @@ export function initXcomSubtitles(ctx: ContentScriptContext) {
     mountSubtitlesSidebar(adapter)
 
     lastVideoId = getCurrentXcomVideoId()
-    lastVideoContainer = getCurrentVideoContainer()
+    lastVideoContainer = getActiveVideoContainer()
 
     if (initialized) {
       return
@@ -89,7 +104,7 @@ export function initXcomSubtitles(ctx: ContentScriptContext) {
   void tryInit()
 
   const intervalId = setInterval(() => {
-    const videoContainer = getCurrentVideoContainer()
+    const videoContainer = getActiveVideoContainer()
     if (!videoContainer) {
       // Or the overlay's React root stays alive inside a discarded player.
       clearXcomOverlayEntryPoints()
@@ -114,7 +129,7 @@ export function initXcomSubtitles(ctx: ContentScriptContext) {
       return
     }
 
-    if (ensureXcomOverlayEntryPoint()) {
+    if (ensureXcomOverlayEntryPoint(videoContainer)) {
       void remount(adapter)
     }
   }, XCOM_STATUS_POLL_INTERVAL_MS)

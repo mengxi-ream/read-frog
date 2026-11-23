@@ -1790,7 +1790,9 @@ subtitles:
     aiSubscriptionRequired: Phụ đề AI cần gói Pro hoặc Ultra
     aiPaymentRequired: Cập nhật phương thức thanh toán để tiếp tục tạo phụ đề AI
     aiVideoTooLong: Video này quá dài để tạo phụ đề AI
-    aiLiveReplayUnsupported: Phụ đề AI chưa hỗ trợ bản phát lại của buổi phát trực tiếp
+    aiVideoMismatch: Video này không khớp với bài đăng chứa nó. Hãy mở trang của bài đăng rồi thử lại
+    aiLiveReplayUnsupported: Phụ đề AI chưa hỗ trợ buổi phát trực tiếp và bản phát lại của chúng
+    aiLiveStreamUnsupported: Phụ đề AI chưa hỗ trợ buổi phát trực tiếp đang diễn ra. Hãy yêu cầu sau khi có bản phát lại
     aiStillProcessing: Quá trình phiên âm vẫn đang chạy — hãy bấm lại sau vài phút
     aiRequestFailed: Yêu cầu phụ đề AI thất bại, vui lòng thử lại sau
     aiNoResponse: Dịch vụ AI không phản hồi, hiển thị văn bản gốc

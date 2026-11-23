@@ -1795,7 +1795,9 @@ subtitles:
     aiSubscriptionRequired: Los subtítulos con IA requieren una suscripción Pro o Ultra
     aiPaymentRequired: Actualiza tu método de pago para seguir generando subtítulos con IA
     aiVideoTooLong: Este video es demasiado largo para los subtítulos con IA
-    aiLiveReplayUnsupported: Los subtítulos con IA aún no están disponibles para repeticiones de transmisiones en vivo
+    aiVideoMismatch: Este video no coincide con la publicación de la que proviene. Abre la publicación y vuelve a intentarlo
+    aiLiveReplayUnsupported: Los subtítulos con IA aún no están disponibles para transmisiones en vivo ni sus repeticiones
+    aiLiveStreamUnsupported: Los subtítulos con IA no están disponibles mientras la transmisión está en vivo. Solicítalos cuando se publique su repetición
     aiStillProcessing: La transcripción sigue en curso — vuelve a hacer clic en unos minutos para retomarla
     aiRequestFailed: Error al solicitar subtítulos con IA, inténtalo de nuevo más tarde
     aiNoResponse: El servicio AI no respondió; se usa el texto original
