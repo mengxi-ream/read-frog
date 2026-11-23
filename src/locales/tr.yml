@@ -56,7 +56,7 @@ popup:
   blog:
     notification: Read Frog'da yenilikler
   aiSmartContext: AI Akıllı Bağlam
-  aiSmartContextDescription: Çeviri kalitesini artırmak için web sayfası bağlamını kullanır. LLM çeviri sağlayıcısı gerektirir.
+  aiSmartContextDescription: Çeviri kalitesini artırmak için web sayfası bağlamını kullanır. LLM sağlayıcısı gerektirir.
   storeReview:
     title: Read Frog'u beğendiniz mi?
     description: Mağazaya bırakacağınız kısa bir değerlendirme, diğer okurların onu bulmasına yardımcı olur.
@@ -154,11 +154,11 @@ options:
       qrCodeAlt: WeChat QR kodu
   apiProviders:
     title: API Sağlayıcıları
-    pageDescription: Read Frog'un çağırdığı yapay zekâ servislerini bağlayın ve her özelliğin hangisini kullanacağını seçin.
-    description: Read Frog'un çağırabileceği sağlayıcıları ekleyin. 20'den fazlası yerleşik gelir; ayrıca Chat Completions uyumlu ve Open Responses API'lerini özel olarak ekleyebilirsiniz.
+    pageDescription: Read Frog'un yerleşik modellerini kullanın veya üçüncü taraf yapay zekâ servislerini bağlayın, ardından her özellik için hangisinin kullanılacağını seçin.
+    description: Read Frog'un yerleşik modellerini kullanın veya üçüncü taraf sağlayıcılar ekleyin. 20'den fazla sağlayıcı önceden yapılandırılmıştır; ayrıca Chat Completions uyumlu ve Open Responses API'lerini özel olarak ekleyebilirsiniz.
     configTitle: Sağlayıcı yapılandırması
     addProvider: Sağlayıcı ekle
-    builtInProvider: Yerleşik sağlayıcı
+    builtInProvider: Yerleşik modeller
     thirdPartyProviders: Üçüncü taraf sağlayıcılar
     builtInModel:
       reasoningDescription: "$1 modelinin yanıt vermeden önce ne kadar düşüneceği. Yüksek seviyeler zor metinlerde daha iyi sonuç verir, ancak daha yavaş yanıt verir ve kotanızdan daha fazlasını kullanır."
@@ -207,8 +207,8 @@ options:
       title: Yeni sağlayıcı ekle
       groups:
         builtInProviders:
-          title: Yerleşik LLM sağlayıcıları
-          description: Yerleşik büyük dil modeli sağlayıcıları, Base URL gibi çoğu yapılandırmayı doldurmaya gerek yok
+          title: Ön ayarlı LLM sağlayıcıları
+          description: Önceden yapılandırılmış büyük dil modeli sağlayıcıları — Base URL gibi çoğu ayarı doldurmanız gerekmez
         compatibleProviders:
           title: Uyumlu API sağlayıcıları
           description: Chat Completions uyumlu API'ler için Özel Chat Complete, Open Responses API'leri için Özel Responses kullanın.
@@ -276,15 +276,13 @@ options:
       invalidJson: Geçersiz JSON formatı
     providers:
       name:
-        builtInAi: Yerleşik AI
-        builtInAiAdvance: Gelişmiş yerleşik AI
         customChatComplete: Özel Chat Complete
         customResponses: Özel Responses
       attribution:
-        builtInAi: Read Frog tarafından barındırılan standart model. Pro ve Ultra kullanıcıları haftalık kotayla tüm özelliklerde kullanabilir; ücretsiz planda yalnızca özel AI eylemlerinde kullanılabilir.
-        builtInAiAdvance: Read Frog tarafından barındırılan gelişmiş model, yalnızca Ultra üyelerine özeldir. Sayfa çevirisi, özel AI eylemleri ve diğer tüm yerleşik AI özelliklerinde çalışır; haftalık kota ortaktır. Kotayı standart modelden daha hızlı tüketir.
+        builtInAi: Read Frog tarafından barındırılan standart model. Giriş yaptığınızda haftalık kotayla ücretsiz kullanabilirsiniz.
+        builtInAiAdvance: Read Frog tarafından barındırılan gelişmiş model, yalnızca Ultra üyelerine özeldir. Kotayı standart modellerden daha hızlı tüketir.
       description:
-        openai: GPT-4o gibi modeller sağlar
+        openai: GPT modelleri için OpenAI'ın resmi API'si
         azure: Azure dağıtımlarınız üzerinden OpenAI modelleri
         deepseek: Çin'de kullanım için önerilir
         openrouter: Kullandıkça öde fiyatlandırmasıyla birden fazla LLM sağlayıcısı için birleşik arayüz
@@ -1588,7 +1586,7 @@ side:
 translateService:
   title: Çeviri Servisi
   description: Yalnızca web sayfası çevirisi için
-  builtInModels: Built-in Models
+  builtInModels: Yerleşik modeller
   llmModels: Üçüncü taraf modeller
   normalTranslator: Normal Çevirmen
   selectServices: Hizmet seçin
@@ -1603,7 +1601,7 @@ languageLevels:
   intermediate: Orta
   advanced: İleri
 noAPIKeyConfig:
-  warning: AI modelleri kullanmak istiyorsanız, lütfen önce seçenekler sayfasında API anahtarını ayarlayın
+  warning: Lütfen önce seçenekler sayfasında bu sağlayıcı için API anahtarını ayarlayın
   warningWithLink:
     youMust: Önce
     setTheAPIKey: API anahtarını ayarlamalısınız
