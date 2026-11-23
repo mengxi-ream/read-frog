@@ -62,11 +62,11 @@ describe("translation coordinator loading state", () => {
       onTranslated: vi.fn<(...args: any[]) => any>(),
       onStateChange,
     })
-    const offline = { error: new Error("Failed to fetch"), at: 0 }
+    const offline = { error: new Error("Failed to fetch"), waiting: true }
     ;(coordinator as any).failedCues = new Map([
       [0, offline],
       [2000, offline],
-      [4000, { error: new Error("Internal server error"), at: 0 }],
+      [4000, { error: new Error("Internal server error"), waiting: true }],
     ])
 
     ;(coordinator as any).updateLoadingStateAt(500, fragments)
@@ -843,6 +843,116 @@ describe("translation coordinator when batches fail", () => {
       expect(onBuiltInAiRefused).not.toHaveBeenCalled()
     },
   )
+
+  it("sends a failed cue again as its timer fires, though the clock reads a little short", async () => {
+    vi.useFakeTimers({ now: 0 })
+    const { coordinator, translateSpy } = await setup()
+    let failed = false
+    translateSpy.mockImplementation((batch: any) => {
+      if (batch[0].start === 0 && !failed) {
+        failed = true
+        return Promise.reject(new Error("timed out"))
+      }
+      return new Promise(() => {})
+    })
+    const sendsOfFirst = () =>
+      sentBatches(translateSpy).filter((batch) => batch[0]!.start === 0).length
+
+    coordinator.start()
+    await vi.advanceTimersByTimeAsync(FAILED_BATCH_RETRY_MS - 1)
+    expect(sendsOfFirst()).toBe(1)
+
+    // Firefox can fire a timer a little ahead of Date.now(). The video stands still and no
+    // batch comes back: this timer is all there is to send the cue again.
+    vi.setSystemTime(Date.now() - 1)
+    await vi.advanceTimersByTimeAsync(1)
+    expect(sendsOfFirst()).toBe(2)
+  })
+
+  it("takes lines that failed while the rest of their batch came back as failed", async () => {
+    vi.useFakeTimers({ now: 0 })
+    const { coordinator, video, translateSpy, onTranslated, onStateChange, getState } = await setup(
+      { trackState: true },
+    )
+    // Line 1 went in a background request that failed, line 0 in one that came back: the
+    // translator gives back line 1 blank, and says it failed.
+    let failed = false
+    translateSpy.mockImplementation(
+      (batch: any, _context: any, _config: any, onLinesFailed: any) => {
+        if (batch[0].start === 0 && !failed) {
+          failed = true
+          onLinesFailed?.([batch[1]], new Error("Internal server error"))
+          return Promise.resolve([
+            { ...batch[0], translation: "t:line 0" },
+            { ...batch[1], translation: "" },
+          ])
+        }
+        if (batch[0].start === 2000) {
+          return Promise.resolve(batch.map((f: any) => ({ ...f, translation: `t:${f.text}` })))
+        }
+        return new Promise(() => {})
+      },
+    )
+    const sendsOfLine1 = () =>
+      sentBatches(translateSpy).filter((batch) => batch.some((f) => f.start === 2000)).length
+
+    coordinator.start()
+    await vi.advanceTimersByTimeAsync(0)
+    // Not taken as translated: only line 0 shows.
+    expect(onTranslated.mock.calls).toEqual([
+      [[expect.objectContaining({ start: 0, translation: "t:line 0" })]],
+    ])
+
+    // Line 1 on screen shows the error, as a cue whose whole batch failed does.
+    video.currentTime = 2.5
+    coordinator.requestTick()
+    expect(onStateChange).toHaveBeenCalledWith("error", {
+      message: "Internal server error",
+      persistent: true,
+    })
+
+    // And it goes again 10 s on.
+    await vi.advanceTimersByTimeAsync(FAILED_BATCH_RETRY_MS - 1)
+    expect(sendsOfLine1()).toBe(1)
+    await vi.advanceTimersByTimeAsync(1)
+    expect(sendsOfLine1()).toBe(2)
+    expect(onTranslated).toHaveBeenLastCalledWith(
+      expect.arrayContaining([expect.objectContaining({ start: 2000, translation: "t:line 1" })]),
+    )
+    expect(getState()).toBe("idle")
+  })
+
+  it("holds when lines fail while the rest came back, with an error every batch would repeat", async () => {
+    const { coordinator, translateSpy, onTranslated, onStateChange } = await setup()
+    // Line 0 came from the cache; line 1 went to the provider, which turned the key down.
+    translateSpy.mockImplementation(
+      (batch: any, _context: any, _config: any, onLinesFailed: any) => {
+        if (batch[0].start === 0) {
+          onLinesFailed?.([batch[1]], relayedStatusError(401, "Incorrect API key provided"))
+          return Promise.resolve([
+            { ...batch[0], translation: "t:line 0" },
+            { ...batch[1], translation: "" },
+          ])
+        }
+        return new Promise(() => {})
+      },
+    )
+
+    coordinator.start()
+    await flush()
+
+    expect(onTranslated.mock.calls).toEqual([
+      [[expect.objectContaining({ start: 0, translation: "t:line 0" })]],
+    ])
+    expect(onStateChange).toHaveBeenCalledWith("error", {
+      message: "Incorrect API key provided",
+      persistent: true,
+    })
+    // Held: nothing more goes out.
+    const sent = translateSpy.mock.calls.length
+    coordinator.requestTick()
+    expect(translateSpy).toHaveBeenCalledTimes(sent)
+  })
 
   it("takes a failed cue's error down as a batch comes back, and sends the cue again", async () => {
     const { coordinator, translateSpy, getState } = await setup({ trackState: true })

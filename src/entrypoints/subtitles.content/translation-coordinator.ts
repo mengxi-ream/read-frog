@@ -86,10 +86,10 @@ export class TranslationCoordinator {
   /** Identity of the cue (end+text) associated with a booked start. */
   private knownIdentities = new Map<number, string>()
   /**
-   * Cues whose batch failed since a batch last came back, with the error and when: see
-   * `handleFailedBatch`. A batch coming back clears them all.
+   * Cues that failed since a batch last came back, with the error, and whether they still
+   * wait out their 10 s: see `handleFailedBatch`. A batch coming back clears them all.
    */
-  private failedCues = new Map<number, { error: unknown; at: number }>()
+  private failedCues = new Map<number, { error: unknown; waiting: boolean }>()
   /** Set by `hold`: nothing is sent until `retryFailed`. */
   private held = false
   /** False after stop(); blocks chained ticks and in-flight result application. */
@@ -327,12 +327,11 @@ export class TranslationCoordinator {
     playbackRate: number | undefined,
   ) {
     const windowEndMs = currentTimeMs + effectiveLookAheadMs(TRANSLATE_LOOK_AHEAD_MS, playbackRate)
-    const now = Date.now()
     const pending = fragments.filter(
       (f) =>
         !this.translatedStarts.has(f.start) &&
         !this.translatingStarts.has(f.start) &&
-        !this.isWaitingToRetry(f.start, now) &&
+        !this.failedCues.get(f.start)?.waiting &&
         f.start >= currentTimeMs - 5000,
     )
 
@@ -351,15 +350,28 @@ export class TranslationCoordinator {
     })
 
     try {
-      const translated = await translateSubtitles(batch, this.videoContext)
+      const failures: { lines: SubtitlesFragment[]; error: Error }[] = []
+      const translated = await translateSubtitles(
+        batch,
+        this.videoContext,
+        undefined,
+        (lines, error) => {
+          failures.push({ lines, error })
+        },
+      )
       if (!this.isCurrentRun(runId)) return
 
       // The provider works: the failed cues go again at once (the tick below).
       this.failedCues.clear()
       // Only accept results whose cue identity still matches the current fragment list.
-      const stillValid = this.filterIdentityValid(translated)
+      const failedStarts = new Set(failures.flatMap(({ lines }) => lines.map((f) => f.start)))
+      const stillValid = this.filterIdentityValid(translated).filter(
+        (f) => !failedStarts.has(f.start),
+      )
       stillValid.forEach((f) => this.translatedStarts.add(f.start))
       this.onTranslated(stillValid)
+      // Lines that failed while the rest came back have failed all the same.
+      failures.forEach(({ lines, error }) => this.handleFailedBatch(lines, error))
     } catch (error) {
       if (!this.isCurrentRun(runId)) return
       this.handleFailedBatch(batch, error)
@@ -389,16 +401,20 @@ export class TranslationCoordinator {
       }
       return
     }
-    const at = Date.now()
     // A cue recut while its batch was out is a new one, with nothing failed yet.
-    this.filterIdentityValid(batch).forEach((f) => this.failedCues.set(f.start, { error, at }))
-    // The next pass after the wait, even if the video is paused by then.
-    setTimeout(() => this.requestTick(), FAILED_BATCH_RETRY_MS)
-  }
-
-  private isWaitingToRetry(start: number, now: number): boolean {
-    const failure = this.failedCues.get(start)
-    return failure !== undefined && now - failure.at < FAILED_BATCH_RETRY_MS
+    const failures = this.filterIdentityValid(batch).map((f) => {
+      const failure = { error, waiting: true }
+      this.failedCues.set(f.start, failure)
+      return failure
+    })
+    // The timer ends the wait, and the next pass sends them, even if the video is paused by
+    // then. Not the clock: a timer can fire a little ahead of it, and none would come after.
+    setTimeout(() => {
+      for (const failure of failures) {
+        failure.waiting = false
+      }
+      this.requestTick()
+    }, FAILED_BATCH_RETRY_MS)
   }
 
   /**

@@ -466,10 +466,16 @@ export async function fetchSubtitlesSummary(
   })
 }
 
+/**
+ * A batch every line of which failed is thrown, as is one Built-in AI refused any line of.
+ * Lines that failed while the rest came back come back with no translation, and
+ * `onLinesFailed` gets them, with the error the first of them failed with.
+ */
 export async function translateSubtitles(
   fragments: SubtitlesFragment[],
   videoContext: SubtitlesVideoContext,
   configOverride?: Config,
+  onLinesFailed?: (lines: SubtitlesFragment[], error: Error) => void,
 ): Promise<SubtitlesFragment[]> {
   const config = configOverride ?? (await getLocalConfig())
   if (!config) {
@@ -507,12 +513,18 @@ export async function translateSubtitles(
   // cue of which Built-in AI refused, so it is tried again rather than kept as blank.
   // The cause keeps the error's code for whoever classifies it.
   const rejections = results.filter((r): r is PromiseRejectedResult => r.status === "rejected")
-  const refusal = rejections.find((r) => getBuiltInAiRefusalKind(r.reason))
-  if (refusal || (rejections.length === results.length && results.length)) {
-    const reason = (refusal ?? rejections[0]!).reason
-    throw new Error(withProviderName(toFriendlyErrorMessage(reason, providerRef), providerRef), {
+  const batchError = (reason: unknown) =>
+    new Error(withProviderName(toFriendlyErrorMessage(reason, providerRef), providerRef), {
       cause: reason,
     })
+  const refusal = rejections.find((r) => getBuiltInAiRefusalKind(r.reason))
+  if (refusal || (rejections.length === results.length && results.length)) {
+    throw batchError((refusal ?? rejections[0]!).reason)
+  }
+  // Lines that failed while the rest came back: the caller may send them again.
+  if (rejections.length > 0) {
+    const failed = fragments.filter((_fragment, index) => results[index]!.status === "rejected")
+    onLinesFailed?.(failed, batchError(rejections[0]!.reason))
   }
 
   return fragments.map((fragment, index) => {

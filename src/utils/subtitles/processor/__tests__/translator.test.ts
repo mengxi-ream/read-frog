@@ -266,6 +266,37 @@ describe("subtitles translator", () => {
     expect(error.message).toBe("OpenAI: subtitles.errors.aiAuthFailed")
   })
 
+  it("says which lines failed while the rest came back, and still gives them back blank", async () => {
+    const serverError = relayedApiError(503, "Service unavailable")
+    sendMessageMock.mockImplementation(async (type: string, request: { text: string }) => {
+      if (type !== "enqueueSubtitlesTranslateRequest") return undefined
+      if (request.text === "world") throw serverError
+      return `t:${request.text}`
+    })
+    const { translateSubtitles } = await import("../translator")
+    const onLinesFailed = vi.fn<(lines: unknown[], error: Error & { cause?: unknown }) => void>()
+    const fragments = [
+      { text: "hello", start: 0, end: 1_000 },
+      { text: "world", start: 1_000, end: 2_000 },
+    ]
+
+    const translated = await translateSubtitles(
+      fragments,
+      { videoTitle: "V", subtitlesTextContent: "hello world" },
+      undefined,
+      onLinesFailed,
+    )
+
+    // Unchanged for a caller that passes nothing, such as the download: blank.
+    expect(translated.map((fragment) => fragment.translation)).toEqual(["t:hello", ""])
+    expect(onLinesFailed).toHaveBeenCalledOnce()
+    const [lines, error] = onLinesFailed.mock.calls[0]!
+    expect(lines).toEqual([fragments[1]])
+    // The error a batch every line of which failed is thrown with.
+    expect(error.message).toBe("OpenAI: subtitles.errors.aiServiceUnavailable")
+    expect(error.cause).toBe(serverError)
+  })
+
   it("requests subtitle summary through a dedicated background message", async () => {
     sendMessageMock.mockResolvedValue("Generated summary")
 
