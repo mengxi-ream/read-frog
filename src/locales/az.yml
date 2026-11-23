@@ -56,7 +56,7 @@ popup:
   blog:
     notification: Read Frog yenilikləri
   aiSmartContext: Süni intellektlə ağıllı kontekst
-  aiSmartContextDescription: Tərcümənin keyfiyyətini artırmaq üçün səhifənin kontekstindən istifadə edir. LLM tərcümə provayderi tələb olunur.
+  aiSmartContextDescription: Tərcümənin keyfiyyətini artırmaq üçün səhifənin kontekstindən istifadə edir. LLM provayderi tələb olunur.
   storeReview:
     title: Read Frog xoşunuza gəlir?
     description: Mağazada yazacağınız qısa rəy digər oxucuların onu tapmasına kömək edir.
@@ -154,11 +154,11 @@ options:
       qrCodeAlt: WeChat QR kodu
   apiProviders:
     title: API provayderləri
-    pageDescription: Read Frog genişlənməsinin istifadə etdiyi süni intellekt xidmətlərini qoşun, sonra hər funksiyanı hansı xidmətin icra edəcəyini seçin.
-    description: Read Frog genişlənməsinin müraciət edə biləcəyi provayderləri əlavə edin. 20-dən çox hazır seçim, həmçinin Chat Completions ilə uyğun API-lər və Open Responses API-ləri üçün fərdi qoşulma dəstəyi var.
+    pageDescription: Read Frog-un daxili modellərindən istifadə edin və ya üçüncü tərəf süni intellekt xidmətlərini qoşun, sonra hər funksiyanı hansı seçimin icra edəcəyini təyin edin.
+    description: Read Frog-un daxili modellərindən istifadə edin və ya üçüncü tərəf provayderlər əlavə edin. 20-dən çox hazır provayder, həmçinin Chat Completions ilə uyğun API-lər və Open Responses API-ləri üçün fərdi qoşulma dəstəyi var.
     configTitle: Provayder konfiqurasiyası
     addProvider: Provayder əlavə et
-    builtInProvider: Daxili provayder
+    builtInProvider: Daxili modellər
     thirdPartyProviders: Üçüncü tərəf provayderləri
     builtInModel:
       reasoningDescription: "$1 modelinin cavab verməzdən əvvəl nə qədər düşünəcəyi. Yüksək səviyyələr çətin mətnlərin öhdəsindən daha yaxşı gəlir, amma daha yavaş cavab verir və kvotanızdan daha çox istifadə edir."
@@ -207,8 +207,8 @@ options:
       title: Yeni provayder əlavə et
       groups:
         builtInProviders:
-          title: Daxili LLM provayderləri
-          description: Daxili böyük dil modeli provayderləri üçün əsas URL kimi əksər parametrləri doldurmağa ehtiyac yoxdur
+          title: Hazır LLM provayderləri
+          description: Əvvəlcədən tənzimlənmiş böyük dil modeli provayderləri — Base URL kimi əksər parametrləri doldurmağa ehtiyac yoxdur
         compatibleProviders:
           title: Uyğun API provayderləri
           description: Chat Completions ilə uyğun API-lər üçün Fərdi Chat Complete, Open Responses API-ləri üçün isə Fərdi Responses seçimindən istifadə edin.
@@ -277,15 +277,13 @@ options:
       invalidJson: Yanlış JSON formatı
     providers:
       name:
-        builtInAi: Daxili süni intellekt
-        builtInAiAdvance: Təkmil daxili süni intellekt
         customChatComplete: Fərdi Chat Complete
         customResponses: Fərdi Responses
       attribution:
-        builtInAi: Read Frog serverlərində işləyən standart model. Pro və Ultra üzvləri ondan həftəlik kvota ilə bütün funksiyalarda istifadə edə bilər; pulsuz planda isə yalnız fərdi süni intellekt əməliyyatlarında işləyir.
-        builtInAiAdvance: Yalnız Ultra üzvləri üçün Read Frog serverlərində işləyən təkmil model. Səhifə tərcüməsini, fərdi süni intellekt əməliyyatlarını və bütün digər daxili süni intellekt funksiyalarını ortaq həftəlik kvota ilə icra edir. Kvotanı standart modeldən daha sürətli sərf edir.
+        builtInAi: Read Frog tərəfindən host edilən standart model. Daxil olduqdan sonra həftəlik kvota ilə pulsuz istifadə edə bilərsiniz.
+        builtInAiAdvance: Read Frog tərəfindən host edilən təkmil model, yalnız Ultra üzvləri üçündür. Kvotanı standart modellərdən daha sürətli sərf edir.
       description:
-        openai: GPT-4o kimi modellər təqdim edir
+        openai: GPT modelləri üçün OpenAI-ın rəsmi API-si
         azure: Azure üzərində yerləşdirdiyiniz OpenAI modelləri
         deepseek: Çində istifadə üçün tövsiyə olunur
         openrouter: İstifadəyə görə ödənişlə bir neçə LLM provayderi üçün vahid interfeys
@@ -1608,7 +1606,7 @@ languageLevels:
   intermediate: Orta
   advanced: Yüksək
 noAPIKeyConfig:
-  warning: Süni intellekt modellərindən istifadə etmək istəyirsinizsə, əvvəlcə parametrlər səhifəsində API açarını təyin edin
+  warning: Əvvəlcə parametrlər səhifəsində bu provayder üçün API açarını təyin edin
   warningWithLink:
     youMust: Əvvəlcə
     setTheAPIKey: API açarını

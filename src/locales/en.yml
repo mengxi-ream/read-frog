@@ -56,7 +56,7 @@ popup:
   blog:
     notification: What's new in Read Frog
   aiSmartContext: AI Smart Context
-  aiSmartContextDescription: Uses webpage context to improve translation quality. Requires LLM translation provider.
+  aiSmartContextDescription: Uses webpage context to improve translation quality. Requires an LLM provider.
   storeReview:
     title: Enjoying Read Frog?
     description: A quick store review helps other readers find it.
@@ -154,11 +154,11 @@ options:
       qrCodeAlt: WeChat QR code
   apiProviders:
     title: API Providers
-    pageDescription: Connect the AI services Read Frog calls, then choose which one runs each feature.
-    description: Add the providers Read Frog can call. Over 20 are built in, with custom support for Chat Completions-compatible and Open Responses APIs.
+    pageDescription: Use Read Frog's built-in models or connect third-party AI services, then choose which one runs each feature.
+    description: Use Read Frog's built-in models or add third-party providers. Over 20 providers are preconfigured, plus custom Chat Completions-compatible and Open Responses APIs.
     configTitle: Provider config
     addProvider: Add provider
-    builtInProvider: Built-in provider
+    builtInProvider: Built-in models
     thirdPartyProviders: Third-party providers
     builtInModel:
       reasoningDescription: "How much $1 thinks before it answers. Higher levels handle hard text better, but answer more slowly and use more of your quota."
@@ -207,8 +207,8 @@ options:
       title: Add new provider
       groups:
         builtInProviders:
-          title: Built-in LLM providers
-          description: Built-in large language model providers, no need to fill in most configurations like Base URL
+          title: Preset LLM providers
+          description: Preconfigured large language model providers — no need to fill in most settings like Base URL
         compatibleProviders:
           title: Compatible API providers
           description: Use Custom Chat Complete for Chat Completions-compatible APIs, or Custom Responses for Open Responses APIs.
@@ -277,15 +277,13 @@ options:
       invalidJson: Invalid JSON format
     providers:
       name:
-        builtInAi: Built-in AI
-        builtInAiAdvance: Advanced Built-in AI
         customChatComplete: Custom Chat Complete
         customResponses: Custom Responses
       attribution:
-        builtInAi: Read Frog's hosted standard model. Pro and Ultra members can use it on every feature, on a weekly quota; on the free plan it runs Custom AI Actions only.
-        builtInAiAdvance: Read Frog's hosted advanced model, exclusive to Ultra members. Runs page translation, Custom AI Actions, and every other Built-in AI feature on a shared weekly quota. Uses up the quota faster than the standard model.
+        builtInAi: Read Frog's hosted standard model. Free to use once you log in, on a weekly quota.
+        builtInAiAdvance: Read Frog's hosted advanced model, exclusive to Ultra members. Uses quota faster than standard models.
       description:
-        openai: Provides models like GPT-4o
+        openai: OpenAI's official API for GPT models
         azure: Azure-hosted OpenAI models through your deployments
         deepseek: Recommend to use in China
         openrouter: Unified interface for multiple LLM providers with pay-per-use pricing
@@ -1750,7 +1748,7 @@ languageLevels:
   intermediate: Intermediate
   advanced: Advanced
 noAPIKeyConfig:
-  warning: If you want to use AI models, please set API key on the options page first
+  warning: Please set an API key for this provider on the options page first
   warningWithLink:
     youMust: You must
     setTheAPIKey: set the API key

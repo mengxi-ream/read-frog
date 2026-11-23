@@ -56,7 +56,7 @@ popup:
   blog:
     notification: Read Frog의 새로운 소식
   aiSmartContext: AI 스마트 컨텍스트
-  aiSmartContextDescription: 웹페이지 컨텍스트를 사용하여 번역 품질을 향상시킵니다. LLM 번역 제공자가 필요합니다.
+  aiSmartContextDescription: 웹페이지 컨텍스트를 사용하여 번역 품질을 향상시킵니다. LLM 제공업체가 필요합니다.
   storeReview:
     title: Read Frog 잘 쓰고 계신가요?
     description: 스토어에 리뷰를 남기면 더 많은 사람이 찾을 수 있어요.
@@ -154,11 +154,11 @@ options:
       qrCodeAlt: WeChat QR 코드
   apiProviders:
     title: API 제공업체
-    pageDescription: Read Frog가 호출하는 AI 서비스를 연결하고, 각 기능에 사용할 서비스를 선택하세요.
-    description: Read Frog가 호출할 수 있는 제공업체를 추가합니다. 20개 이상이 내장되어 있으며, Chat Completions 호환 API와 Open Responses API를 사용자 정의로 추가할 수 있습니다.
+    pageDescription: Read Frog의 내장 모델을 사용하거나 타사 AI 서비스를 연결하고, 각 기능에 사용할 항목을 선택하세요.
+    description: Read Frog의 내장 모델을 사용하거나 타사 제공업체를 추가합니다. 20개 이상의 제공업체가 사전 설정되어 있으며, Chat Completions 호환 API와 Open Responses API도 사용자 정의로 추가할 수 있습니다.
     configTitle: 제공업체 구성
     addProvider: 제공업체 추가
-    builtInProvider: 내장 제공업체
+    builtInProvider: 내장 모델
     thirdPartyProviders: 타사 제공업체
     builtInModel:
       reasoningDescription: "$1 모델이 답하기 전에 얼마나 생각할지 정합니다. 수준이 높을수록 어려운 텍스트를 더 잘 다루지만, 응답이 느려지고 할당량을 더 많이 사용합니다."
@@ -207,8 +207,8 @@ options:
       title: 새 제공업체 추가
       groups:
         builtInProviders:
-          title: 내장 LLM 제공업체
-          description: 내장된 대규모 언어 모델 제공업체, Base URL과 같은 대부분의 설정이 필요 없음
+          title: 사전 설정 LLM 제공업체
+          description: 미리 설정된 대규모 언어 모델 제공업체로, Base URL 같은 대부분의 설정을 입력할 필요가 없습니다
         compatibleProviders:
           title: 호환 API 제공업체
           description: Chat Completions 호환 API에는 사용자 정의 Chat Complete를, Open Responses API에는 사용자 정의 Responses를 사용합니다.
@@ -276,15 +276,13 @@ options:
       invalidJson: 잘못된 JSON 형식
     providers:
       name:
-        builtInAi: 내장 AI
-        builtInAiAdvance: 고급 내장 AI
         customChatComplete: 사용자 정의 Chat Complete
         customResponses: 사용자 정의 Responses
       attribution:
-        builtInAi: Read Frog가 호스팅하는 일반 모델입니다. Pro 및 Ultra 사용자는 주간 할당량 안에서 모든 기능에 사용할 수 있으며, 무료 플랜에서는 사용자 지정 AI 작업에서만 사용할 수 있습니다.
-        builtInAiAdvance: Read Frog가 호스팅하는 고급 모델로, Ultra 멤버 전용입니다. 페이지 번역, 사용자 지정 AI 작업 등 모든 내장 AI 기능에서 사용할 수 있으며 주간 할당량을 공유합니다. 표준 모델보다 할당량이 더 빨리 소모됩니다.
+        builtInAi: Read Frog가 호스팅하는 표준 모델입니다. 로그인하면 주간 할당량 안에서 무료로 사용할 수 있습니다.
+        builtInAiAdvance: Read Frog가 호스팅하는 고급 모델로, Ultra 멤버 전용입니다. 표준 모델보다 할당량이 더 빨리 소모됩니다.
       description:
-        openai: GPT-4o 같은 모델을 제공합니다
+        openai: GPT 모델을 제공하는 OpenAI 공식 API
         azure: Azure 배포를 통해 OpenAI 모델 사용
         deepseek: 중국에서 사용을 권장합니다
         openrouter: 여러 LLM 제공업체를 위한 통합 인터페이스, 사용량 기반 과금
@@ -1588,7 +1586,7 @@ side:
 translateService:
   title: 번역 서비스
   description: 웹페이지 번역 전용
-  builtInModels: Built-in Models
+  builtInModels: 내장 모델
   llmModels: 서드파티 모델
   normalTranslator: 일반 번역기
   selectServices: 서비스 선택
@@ -1603,7 +1601,7 @@ languageLevels:
   intermediate: 중급
   advanced: 고급
 noAPIKeyConfig:
-  warning: AI 모델을 사용하려면 먼저 옵션 페이지에서 API 키를 설정해 주세요
+  warning: 먼저 옵션 페이지에서 이 제공업체의 API 키를 설정해 주세요
   warningWithLink:
     youMust: 반드시
     setTheAPIKey: API 키를 설정해야 합니다
