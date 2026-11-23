@@ -176,6 +176,29 @@ describe("subtitles when Built-in AI refuses a guest or a spent pool", () => {
     expect((error as Error).message).toBe("Built-in AI quota used up")
   })
 
+  it("keeps Built-in AI's own words for a status, where a provider's would get ours", async () => {
+    serializeProviderRefMock.mockResolvedValue(BUILT_IN_REF)
+    // A busy model, as the background relays it: a 429 with its own message.
+    const busy = Object.assign(
+      new Error(
+        "GPT-6 Luna is busy right now. Try again in a moment, or switch to Claude Haiku 5.5.",
+      ),
+      { statusCode: 429, kind: "rate-limit", isRetryable: true },
+    )
+    sendMessageMock.mockImplementation(async (type: string) => {
+      if (type === "enqueueSubtitlesTranslateRequest") throw busy
+      return undefined
+    })
+    const { translateSubtitles } = await import("../translator")
+
+    const error = await translateSubtitles([{ text: "hello", start: 0, end: 1_000 }], {
+      videoTitle: "V",
+      subtitlesTextContent: "hello",
+    }).catch((caught: unknown) => caught)
+
+    expect((error as Error).message).toBe(busy.message)
+  })
+
   it("keeps a refused summary to the toast: only line translation asks", async () => {
     const refusal = new HostedAiProviderUnavailableError(
       BUILT_IN_PROVIDER,

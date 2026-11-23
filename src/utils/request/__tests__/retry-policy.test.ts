@@ -3,6 +3,7 @@ import {
   attachRequestErrorMeta,
   defaultRequestRetryPolicy,
   getRequestErrorMeta,
+  getRequestErrorMetaChain,
   isPermanentRequestError,
   isRateLimitRequestError,
   MAX_CONSECUTIVE_RATE_LIMIT_PAUSES,
@@ -152,6 +153,31 @@ describe("request retry policy", () => {
       }
       expect(isPermanentRequestError(new Error("timed out"))).toBe(false)
       expect(isPermanentRequestError("access-denied")).toBe(false)
+    })
+  })
+
+  describe("getRequestErrorMetaChain", () => {
+    it("reads the meta of each error down the cause chain, the error itself first", () => {
+      const error = new Error("Translation failed", {
+        cause: Object.assign(new Error("Unauthorized"), { statusCode: 401 }),
+      })
+
+      expect(getRequestErrorMetaChain(error).map(({ statusCode }) => statusCode)).toEqual([
+        undefined,
+        401,
+      ])
+      expect(getRequestErrorMetaChain("not an error")).toEqual([])
+    })
+
+    it("gives OpenAI's empty balance no status, so nothing reads it as a rate limit", () => {
+      const quota = Object.assign(new Error("You exceeded your current quota"), {
+        statusCode: 429,
+        responseBody: JSON.stringify({ error: { code: "insufficient_quota" } }),
+      })
+
+      expect(getRequestErrorMetaChain(quota)).toEqual([
+        { kind: "access-denied", isRetryable: false },
+      ])
     })
   })
 

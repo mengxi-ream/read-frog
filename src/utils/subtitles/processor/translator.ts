@@ -7,7 +7,6 @@ import type { ErrorAction } from "@/utils/error-action"
 import type { MatchedTerm } from "@/utils/glossary/types"
 import type { PromptableProviderRef, SerializableProviderRef } from "@/utils/providers/provider-ref"
 import { LANGUAGE_ENGLISH_NAMES } from "@read-frog/definitions"
-import { APICallError } from "ai"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { classifySerializedProvider } from "@/utils/analytics-provider"
@@ -32,6 +31,7 @@ import {
   serializeProviderRef,
 } from "@/utils/providers/provider-ref"
 import { resolveProviderRefForCapability } from "@/utils/providers/provider-registry"
+import { getRequestErrorMetaChain } from "@/utils/request/retry-policy"
 
 const log = createLogger("subtitles/processor/translator")
 
@@ -61,21 +61,36 @@ const SUBTITLES_TASK_ROUTE: Record<SubtitlesTask, HostedAiTextStreamRoute> = {
   segmentation: "videoSubtitlesSegmentation",
 }
 
-function toFriendlyErrorMessage(error: unknown): string {
-  if (error instanceof APICallError) {
-    switch (error.statusCode) {
-      case 429:
-        return i18n.t("subtitles.errors.aiRateLimited")
-      case 401:
-      case 403:
-        return i18n.t("subtitles.errors.aiAuthFailed")
-      case 500:
-      case 502:
-      case 503:
-        return i18n.t("subtitles.errors.aiServiceUnavailable")
-      default:
-        break
-    }
+/**
+ * Our words for the status a provider failed with, which say what to do; its own message is
+ * often long and in English. The status is read down the cause chain, as the retry policy
+ * reads it: messaging turns the AI SDK's `APICallError` into a plain error, but keeps its
+ * `statusCode`. OpenAI's empty balance is a 429 too, but the retry policy gives it no status
+ * (an access denial), so it keeps OpenAI's words rather than "too many requests", which
+ * would send the reader to wait.
+ */
+function getProviderStatusMessage(error: unknown): string | undefined {
+  const chain = getRequestErrorMetaChain(error)
+  switch (chain.find(({ statusCode }) => statusCode !== undefined)?.statusCode) {
+    case 429:
+      return i18n.t("subtitles.errors.aiRateLimited")
+    case 401:
+    case 403:
+      return i18n.t("subtitles.errors.aiAuthFailed")
+    case 500:
+    case 502:
+    case 503:
+      return i18n.t("subtitles.errors.aiServiceUnavailable")
+    default:
+      return undefined
+  }
+}
+
+function toFriendlyErrorMessage(error: unknown, providerRef: SerializableProviderRef): string {
+  // Built-in AI's errors are Read Frog's own, and already say what to do.
+  const statusMessage = providerRef.kind === "local" ? getProviderStatusMessage(error) : undefined
+  if (statusMessage) {
+    return statusMessage
   }
 
   const message = error instanceof Error ? error.message : String(error)
@@ -495,7 +510,7 @@ export async function translateSubtitles(
   const refusal = rejections.find((r) => getBuiltInAiRefusalKind(r.reason))
   if (refusal || (rejections.length === results.length && results.length)) {
     const reason = (refusal ?? rejections[0]!).reason
-    throw new Error(withProviderName(toFriendlyErrorMessage(reason), providerRef), {
+    throw new Error(withProviderName(toFriendlyErrorMessage(reason, providerRef), providerRef), {
       cause: reason,
     })
   }

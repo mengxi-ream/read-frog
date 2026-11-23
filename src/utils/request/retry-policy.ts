@@ -179,24 +179,31 @@ const MAX_CAUSE_DEPTH = 5
 const PERMANENT_FAILURE_STATUS_CODES = new Set([401, 402, 403, 404])
 
 /**
- * An error every later request would fail with too, anywhere down the cause chain: an
- * access denial (`kind: "access-denied"`) or one of the statuses above. A request the
- * background ran fails in the content script as the cause of a friendlier error, and
- * messaging drops the symbol its meta rode on, but keeps the fields the meta is read from.
+ * The meta of each error down the cause chain, the error itself first. A request the
+ * background ran fails in the content script as itself or as the cause of a friendlier
+ * error, and messaging drops the symbol its meta rode on, but keeps the fields the meta
+ * is read from.
  */
-export function isPermanentRequestError(error: unknown): boolean {
+export function getRequestErrorMetaChain(error: unknown): RequestErrorMeta[] {
+  const chain: RequestErrorMeta[] = []
   let current = error
   for (let depth = 0; depth < MAX_CAUSE_DEPTH && isObject(current); depth++) {
-    const { kind, statusCode } = getRequestErrorMeta(current)
-    if (
-      kind === "access-denied" ||
-      (statusCode !== undefined && PERMANENT_FAILURE_STATUS_CODES.has(statusCode))
-    ) {
-      return true
-    }
+    chain.push(getRequestErrorMeta(current))
     current = (current as { cause?: unknown }).cause
   }
-  return false
+  return chain
+}
+
+/**
+ * An error every later request would fail with too, anywhere down the cause chain: an
+ * access denial (`kind: "access-denied"`) or one of the statuses above.
+ */
+export function isPermanentRequestError(error: unknown): boolean {
+  return getRequestErrorMetaChain(error).some(
+    ({ kind, statusCode }) =>
+      kind === "access-denied" ||
+      (statusCode !== undefined && PERMANENT_FAILURE_STATUS_CODES.has(statusCode)),
+  )
 }
 
 export const defaultRequestRetryPolicy: RequestRetryPolicy = {

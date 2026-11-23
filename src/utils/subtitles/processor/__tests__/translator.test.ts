@@ -189,35 +189,81 @@ describe("subtitles translator", () => {
     expect(edited).not.toBe(original)
   })
 
-  it("names the provider a batch failed with, as the user named it", async () => {
-    // As the background relays OpenAI's answer: a plain Error with the API error's fields.
-    const quota = Object.assign(
-      new Error("You exceeded your current quota, please check your plan and billing details."),
-      { name: "AI_APICallError", statusCode: 429 },
-    )
+  /** The error a batch fails with when the background relays `error` for it. */
+  async function failedBatchError(error: unknown): Promise<Error & { cause?: unknown }> {
     sendMessageMock.mockImplementation(async (type: string) => {
-      if (type === "enqueueSubtitlesTranslateRequest") throw quota
+      if (type === "enqueueSubtitlesTranslateRequest") throw error
       return undefined
     })
     const { translateSubtitles } = await import("../translator")
-    const fragments = [{ text: "hello", start: 0, end: 1_000 }]
-    const videoContext = { videoTitle: "V", subtitlesTextContent: "hello" }
+    return translateSubtitles([{ text: "hello", start: 0, end: 1_000 }], {
+      videoTitle: "V",
+      subtitlesTextContent: "hello",
+    }).then(
+      () => {
+        throw new Error("the batch did not fail")
+      },
+      (caught: Error) => caught,
+    )
+  }
 
-    const error = await translateSubtitles(fragments, videoContext).catch((caught) => caught)
+  /** An API error as the content script gets it: messaging keeps its fields, not its class. */
+  function relayedApiError(statusCode: number, message: string, responseBody?: string) {
+    return Object.assign(new Error(message), { name: "AI_APICallError", statusCode, responseBody })
+  }
+
+  it("names the provider a batch failed with, as the user named it", async () => {
+    const quota = relayedApiError(
+      429,
+      "You exceeded your current quota, please check your plan and billing details.",
+      JSON.stringify({ error: { type: "insufficient_quota", code: "insufficient_quota" } }),
+    )
+
+    const error = await failedBatchError(quota)
 
     expect(error).toBeInstanceOf(Error)
+    // An empty balance is a 429 too, but keeps the provider's words: no wait refills it.
     expect(error.message).toBe(
       "OpenAI: You exceeded your current quota, please check your plan and billing details.",
     )
     expect(error.cause).toBe(quota)
 
     // A message of our own for the error gets the name too.
-    sendMessageMock.mockImplementation(async (type: string) => {
-      if (type === "enqueueSubtitlesTranslateRequest") throw new Error("No Response from model")
-      return undefined
-    })
-    const noResponse = await translateSubtitles(fragments, videoContext).catch((caught) => caught)
+    const noResponse = await failedBatchError(new Error("No Response from model"))
     expect(noResponse.message).toBe("OpenAI: subtitles.errors.aiNoResponse")
+  })
+
+  it.each([
+    [401, "subtitles.errors.aiAuthFailed"],
+    [403, "subtitles.errors.aiAuthFailed"],
+    [429, "subtitles.errors.aiRateLimited"],
+    [500, "subtitles.errors.aiServiceUnavailable"],
+    [502, "subtitles.errors.aiServiceUnavailable"],
+    [503, "subtitles.errors.aiServiceUnavailable"],
+  ])("says what a %i from the provider means, in our words", async (statusCode, key) => {
+    const error = await failedBatchError(
+      relayedApiError(statusCode, "Incorrect API key provided: sk-…. You can find your API key…"),
+    )
+
+    expect(error.message).toBe(`OpenAI: ${key}`)
+  })
+
+  it("keeps the provider's words for a status we have none for", async () => {
+    const error = await failedBatchError(
+      relayedApiError(404, "The model `gpt-9` does not exist or you do not have access to it."),
+    )
+
+    expect(error.message).toBe(
+      "OpenAI: The model `gpt-9` does not exist or you do not have access to it.",
+    )
+  })
+
+  it("finds the status of an error the background wrapped", async () => {
+    const error = await failedBatchError(
+      new Error("Request failed", { cause: relayedApiError(401, "Incorrect API key provided") }),
+    )
+
+    expect(error.message).toBe("OpenAI: subtitles.errors.aiAuthFailed")
   })
 
   it("requests subtitle summary through a dedicated background message", async () => {
