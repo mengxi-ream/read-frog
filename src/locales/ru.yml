@@ -152,6 +152,17 @@ options:
       title: Группа в WeChat
       description: Отсканируйте QR-код, чтобы вступить в группу обсуждения в WeChat
       qrCodeAlt: QR-код WeChat
+  usage:
+    title: Использование
+    pageDescription: Ваш тариф и остаток квоты ИИ.
+    notSignedIn: Вход не выполнен
+    guest: Гость
+    manageSubscription: Управлять подпиской
+    logInToView: Войдите, чтобы посмотреть
+    footer:
+      logIn: Войдите и получайте бесплатную квоту ИИ каждую неделю
+      upgrade: Перейдите на Pro, чтобы открыть ИИ-субтитры и получить больше квоты встроенного ИИ
+      upgradeAction: Перейти на Pro
   apiProviders:
     title: API-провайдеры
     pageDescription: Используйте встроенные модели Read Frog или подключите сторонние ИИ-сервисы и выберите провайдера для каждой функции.
@@ -1462,8 +1473,6 @@ options:
     aiQuota:
       title: Лимит ИИ-субтитров
       description: ИИ распознаёт речь и создаёт точные субтитры для любого видео
-      launchBonusPromo: Оформите подписку до $1 и получите дополнительно 300 минут расшифровки
-      loginRequired: Войдите, чтобы посмотреть лимит ИИ-субтитров
       upgradeRequired: Для ИИ-субтитров нужна подписка Pro или Ultra
       pools:
         subscription: Месячная квота

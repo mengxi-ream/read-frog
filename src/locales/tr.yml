@@ -152,6 +152,17 @@ options:
       title: WeChat grubu
       description: WeChat tartışma grubuna katılmak için QR kodu tarayın
       qrCodeAlt: WeChat QR kodu
+  usage:
+    title: Kullanım
+    pageDescription: Planın ve kalan yapay zekâ kotan.
+    notSignedIn: Giriş yapılmadı
+    guest: Misafir
+    manageSubscription: Aboneliği yönet
+    logInToView: Görmek için giriş yap
+    footer:
+      logIn: Giriş yap, her hafta ücretsiz yapay zekâ kotası kazan
+      upgrade: Yapay zekâ altyazılarının kilidini açmak ve daha fazla yerleşik AI kotası için Pro'ya geç
+      upgradeAction: Yükselt
   apiProviders:
     title: API Sağlayıcıları
     pageDescription: Read Frog'un yerleşik modellerini kullanın veya üçüncü taraf yapay zekâ servislerini bağlayın, ardından her özellik için hangisinin kullanılacağını seçin.
@@ -1462,8 +1473,6 @@ options:
     aiQuota:
       title: Yapay zekâ altyazı kotası
       description: Yapay zeka konuşma tanıma ile her video için doğru altyazı üretir
-      launchBonusPromo: $1 tarihinden önce abone olun, 300 dakika ek deşifre hediyesi kazanın
-      loginRequired: Yapay zeka altyazı kotanızı görmek için giriş yapın
       upgradeRequired: Yapay zeka altyazıları için Pro veya Ultra aboneliği gerekir
       pools:
         subscription: Aylık kota

@@ -36,6 +36,20 @@ export const SEARCH_ITEMS: SearchItem[] = [
     descriptionKey: "options.advanced.glossary.library.description",
     pageKey: "options.advanced.glossary.title",
   },
+  // Usage page
+  {
+    sectionId: "built-in-ai-usage",
+    route: "/usage",
+    titleKey: "options.apiProviders.builtInAiUsage.title",
+    pageKey: "options.usage.title",
+  },
+  {
+    sectionId: "subtitles-ai-quota",
+    route: "/usage",
+    titleKey: "options.videoSubtitles.aiQuota.title",
+    descriptionKey: "options.videoSubtitles.aiQuota.description",
+    pageKey: "options.usage.title",
+  },
   // Preference page
   {
     // Titled with the section, so "appearance" still finds a row that reads "Theme".
@@ -524,13 +538,6 @@ export const SEARCH_ITEMS: SearchItem[] = [
     route: "/video-subtitles",
     titleKey: "options.videoSubtitles.preference.pauseOnHover.title",
     descriptionKey: "options.videoSubtitles.preference.pauseOnHover.description",
-    pageKey: "options.videoSubtitles.title",
-  },
-  {
-    sectionId: "subtitles-ai-quota",
-    route: "/video-subtitles",
-    titleKey: "options.videoSubtitles.aiQuota.title",
-    descriptionKey: "options.videoSubtitles.aiQuota.description",
     pageKey: "options.videoSubtitles.title",
   },
   {

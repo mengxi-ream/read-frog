@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/base-ui/skeleton"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
 import { formatHostedAiResetAtLocal, getHostedAiPools } from "@/utils/hosted-ai/status"
 import { i18n } from "@/utils/i18n"
-import { ConfigSection } from "../../../components/config-section"
+import { UsageGroup, UsageNotice } from "../usage-group"
 
 const FEATURE_LABEL_I18N_KEYS = {
   pageTranslation: "options.apiProviders.builtInAiUsage.features.pageTranslation",
@@ -124,42 +124,40 @@ function OneTimeCreditUsage({ credit }: { credit: HostedAiOneTimeCreditStatus })
   )
 }
 
-export function BuiltInAiUsageConfig() {
+/**
+ * The Built-in AI pools, in the order the server draws on them: recurring
+ * pools, then one-time ones. Guests are told to log in rather than shown their
+ * pool — all a guest holds is an ephemeral IP-keyed trial, not worth a bar.
+ */
+export function BuiltInAiUsage() {
   const { status, isSignedIn, isPending, isError } = useHostedAiStatus()
-  // In the order the server draws on them: recurring pools, then one-time ones.
   const pools = getHostedAiPools(status)
 
-  // Guests only hold an ephemeral IP-keyed trial pool — not worth a section.
-  if (!isSignedIn) {
-    return null
+  function renderContent() {
+    if (isPending) {
+      return <Skeleton className="h-13 w-full" />
+    }
+    if (!isSignedIn) {
+      return <UsageNotice>{i18n.t("options.usage.logInToView")}</UsageNotice>
+    }
+    if (isError || pools.length === 0) {
+      return <UsageNotice>{i18n.t("hostedAi.availability.serviceUnavailable")}</UsageNotice>
+    }
+    return pools.map((pool) =>
+      pool.periodKind === "once" ? (
+        <OneTimeCreditUsage
+          key={`once-${pool.expiresAt}-${pool.features.join("-")}`}
+          credit={pool}
+        />
+      ) : (
+        <RecurringCreditUsage key={`${pool.periodKind}-${pool.features.join("-")}`} credit={pool} />
+      ),
+    )
   }
 
   return (
-    <ConfigSection
-      id="built-in-ai-usage"
-      title={i18n.t("options.apiProviders.builtInAiUsage.title")}
-    >
-      {isPending ? (
-        <Skeleton className="h-13 w-full" />
-      ) : isError || pools.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          {i18n.t("hostedAi.availability.serviceUnavailable")}
-        </p>
-      ) : (
-        pools.map((pool) =>
-          pool.periodKind === "once" ? (
-            <OneTimeCreditUsage
-              key={`once-${pool.expiresAt}-${pool.features.join("-")}`}
-              credit={pool}
-            />
-          ) : (
-            <RecurringCreditUsage
-              key={`${pool.periodKind}-${pool.features.join("-")}`}
-              credit={pool}
-            />
-          ),
-        )
-      )}
-    </ConfigSection>
+    <UsageGroup id="built-in-ai-usage" title={i18n.t("options.apiProviders.builtInAiUsage.title")}>
+      {renderContent()}
+    </UsageGroup>
   )
 }

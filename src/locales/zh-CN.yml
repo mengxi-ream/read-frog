@@ -152,6 +152,17 @@ options:
       title: 微信群
       description: 扫描二维码进入微信讨论群
       qrCodeAlt: 微信二维码
+  usage:
+    title: 用量
+    pageDescription: 查看你的会员和 AI 额度。
+    notSignedIn: 未登录
+    guest: 访客
+    manageSubscription: 管理订阅
+    logInToView: 登录后查看
+    footer:
+      logIn: 登录后每周送免费 AI 额度
+      upgrade: 升级 Pro 解锁 AI 字幕和更多内置 AI 额度
+      upgradeAction: 升级会员
   apiProviders:
     title: API 提供商
     pageDescription: 使用 Read Frog 内置模型或接入第三方 AI 服务，并为每项功能指定使用哪一个。
@@ -1472,8 +1483,6 @@ options:
     aiQuota:
       title: AI 字幕额度
       description: AI 利用语音转文字技术获取任何视频的准确字幕
-      launchBonusPromo: $1 之前购买会员额外赠送 300 分钟转录额度
-      loginRequired: 登录后查看你的 AI 字幕额度
       upgradeRequired: AI 字幕需要 Pro 或 Ultra 订阅
       pools:
         subscription: 每月额度

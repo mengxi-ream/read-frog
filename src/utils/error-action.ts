@@ -34,6 +34,7 @@ export type ExtensionPricingEntry =
   | "extension_video_quota"
   | "extension_plan_badge"
   | "extension_notebase_limit"
+  | "extension_usage_page"
 
 /**
  * `feature` names the feature that hit the wall, by its analytics name, so the website

@@ -152,6 +152,17 @@ options:
       title: WeChat qrupu
       description: WeChat müzakirə qrupuna qoşulmaq üçün QR kodunu skan edin
       qrCodeAlt: WeChat QR kodu
+  usage:
+    title: İstifadə
+    pageDescription: Planınız və qalan süni intellekt kvotanız.
+    notSignedIn: Daxil olunmayıb
+    guest: Qonaq
+    manageSubscription: Abunəliyi idarə et
+    logInToView: Baxmaq üçün daxil olun
+    footer:
+      logIn: Daxil olun və hər həftə pulsuz süni intellekt kvotası alın
+      upgrade: Süni intellekt subtitrlərini açmaq və daha çox daxili süni intellekt kvotası üçün Pro-ya keçin
+      upgradeAction: Təkmilləşdir
   apiProviders:
     title: API provayderləri
     pageDescription: Read Frog-un daxili modellərindən istifadə edin və ya üçüncü tərəf süni intellekt xidmətlərini qoşun, sonra hər funksiyanı hansı seçimin icra edəcəyini təyin edin.
@@ -1467,8 +1478,6 @@ options:
     aiQuota:
       title: Süni intellekt subtitrlərinin kvotası
       description: Süni intellektlə nitqin tanınması istənilən video üçün dəqiq subtitrlər yaradır
-      launchBonusPromo: Əlavə 300 dəqiqə transkripsiya üçün $1 tarixindən əvvəl abunə olun
-      loginRequired: Süni intellekt subtitrlərinin kvotasını görmək üçün daxil olun
       upgradeRequired: Süni intellekt subtitrləri üçün Pro və ya Ultra abunəliyi tələb olunur
       pools:
         subscription: Aylıq kvota
