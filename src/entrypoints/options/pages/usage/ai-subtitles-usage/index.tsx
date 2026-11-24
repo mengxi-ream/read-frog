@@ -1,14 +1,13 @@
 import type { VideoTranscriptUsage, VideoTranscriptUsagePool } from "@read-frog/api-contract"
 import { ORPCError } from "@orpc/client"
 import { useQuery } from "@tanstack/react-query"
-import { Progress, ProgressLabel } from "@/components/ui/base-ui/progress"
-import { Skeleton } from "@/components/ui/base-ui/skeleton"
+import { useEffect, useRef } from "react"
 import { authClient } from "@/utils/auth/auth-client"
 import { i18n } from "@/utils/i18n"
+import { sendMessage } from "@/utils/message"
 import { orpc } from "@/utils/orpc/client"
-import { cn } from "@/utils/styles/utils"
 import { formatQuotaDate } from "@/utils/subtitles/ai/entitlement"
-import { UsageGroup, UsageNotice } from "../usage-group"
+import { UsageGroup, UsageNotice, UsagePoolRow, UsagePoolRowSkeleton } from "../usage-group"
 
 const NEAR_LIMIT_RATIO = 0.9
 
@@ -25,7 +24,11 @@ function errorStatus(error: unknown): number | null {
  * usage card's footer, so a second button here would ask twice.
  */
 export function AiSubtitlesUsage() {
-  const { data: session, isPending: isSessionPending } = authClient.useSession()
+  const {
+    data: session,
+    isPending: isSessionPending,
+    refetch: refetchSession,
+  } = authClient.useSession()
   const isSignedIn = !!session?.user
 
   const usageQuery = useQuery(
@@ -39,14 +42,32 @@ export function AiSubtitlesUsage() {
     }),
   )
 
+  const status = errorStatus(usageQuery.error)
+
+  // The background keeps the session for a day, so one the server has since
+  // ended (signed out elsewhere, password changed) still reads as signed in,
+  // and only this request finds out. Clear that cache and read the session
+  // again, once: the whole card then turns into the logged-out one, with its
+  // Log in button, and so does the sidebar.
+  const isStaleSession = isSignedIn && status === 401
+  const hasRecheckedSessionRef = useRef(false)
+  useEffect(() => {
+    if (!isStaleSession || hasRecheckedSessionRef.current) {
+      return
+    }
+    hasRecheckedSessionRef.current = true
+    void (async () => {
+      await sendMessage("invalidateAuthCache").catch(() => {})
+      await refetchSession()
+    })()
+  }, [isStaleSession, refetchSession])
+
   function renderContent() {
     if (isSessionPending || (isSignedIn && usageQuery.isPending)) {
-      return <QuotaSkeleton />
+      return <UsagePoolRowSkeleton />
     }
 
-    const status = errorStatus(usageQuery.error)
-
-    // Not signed in (or an expired session surfaced as 401).
+    // Not signed in, or a session the server has ended (see above).
     if (!isSignedIn || status === 401) {
       return <UsageNotice>{i18n.t("options.usage.logInToView")}</UsageNotice>
     }
@@ -77,15 +98,6 @@ export function AiSubtitlesUsage() {
   )
 }
 
-function QuotaSkeleton() {
-  return (
-    <div className="flex flex-col gap-3">
-      <Skeleton className="h-4 w-64" />
-      <Skeleton className="h-1.5 w-full" />
-    </div>
-  )
-}
-
 function QuotaUsage({ usage }: { usage: VideoTranscriptUsage }) {
   // A server that predates pools reports totals only; render them as one bar.
   const pools: VideoTranscriptUsagePool[] = usage.pools?.length
@@ -111,25 +123,18 @@ function QuotaUsage({ usage }: { usage: VideoTranscriptUsage }) {
 }
 
 /**
- * Typography and rhythm mirror the Built-in AI usage panel: the pool name and
- * the remaining count share the Progress header row, the track fill is what is
- * LEFT (a fresh pool reads as a full bar), and the metadata line below carries
- * the spent minutes and the pool's one meaningful date at text-xs.
+ * The spent minutes and the pool's one meaningful date sit under the bar; the
+ * bar turns red once 90% of the pool is gone.
  */
 function QuotaPoolUsage({ pool }: { pool: VideoTranscriptUsagePool }) {
   const { usedMinutes, limitMinutes, remainingMinutes } = pool
   const remainingRatio = limitMinutes > 0 ? remainingMinutes / limitMinutes : 0
   const remainingPercent = Math.min(100, Math.max(0, remainingRatio * 100))
-  const isNearLimit = remainingRatio <= 1 - NEAR_LIMIT_RATIO
 
   const label =
     pool.id === "launchBonus"
       ? i18n.t("options.videoSubtitles.aiQuota.pools.launchBonus")
       : i18n.t("options.videoSubtitles.aiQuota.pools.subscription")
-  const remainingText = i18n.t("options.videoSubtitles.aiQuota.remainingOf", [
-    remainingMinutes,
-    limitMinutes,
-  ])
   // The monthly pool resets; the one-time gift only expires. Show whichever
   // date the pool actually has.
   const resetAt = formatQuotaDate(pool.resetAt)
@@ -141,25 +146,16 @@ function QuotaPoolUsage({ pool }: { pool: VideoTranscriptUsagePool }) {
       : null
 
   return (
-    <div className="flex flex-col gap-1.5">
-      <Progress
-        value={remainingPercent}
-        className={cn(
-          "gap-x-3 gap-y-1.5",
-          isNearLimit && "[&_[data-slot=progress-indicator]]:bg-destructive",
-        )}
-        // Announce "X of Y min left", not a bare percentage that reads as consumption.
-        getAriaValueText={() => remainingText}
-      >
-        <ProgressLabel>{label}</ProgressLabel>
-        <span className="ml-auto text-xs text-muted-foreground tabular-nums">{remainingText}</span>
-      </Progress>
-      <div className="flex flex-wrap items-center justify-between gap-x-3 text-xs text-muted-foreground">
-        <span className="tabular-nums">
-          {i18n.t("options.videoSubtitles.aiQuota.used", [usedMinutes])}
-        </span>
-        {dateNote && <span>{dateNote}</span>}
-      </div>
-    </div>
+    <UsagePoolRow
+      value={remainingPercent}
+      remainingText={i18n.t("options.videoSubtitles.aiQuota.remainingOf", [
+        remainingMinutes,
+        limitMinutes,
+      ])}
+      label={label}
+      meta={i18n.t("options.videoSubtitles.aiQuota.used", [usedMinutes])}
+      note={dateNote}
+      nearLimit={remainingRatio <= 1 - NEAR_LIMIT_RATIO}
+    />
   )
 }

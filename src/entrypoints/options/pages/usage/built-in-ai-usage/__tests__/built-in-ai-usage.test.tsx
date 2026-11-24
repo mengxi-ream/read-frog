@@ -115,10 +115,11 @@ describe("BuiltInAiUsage", () => {
     expect(screen.queryByRole("progressbar")).not.toBeInTheDocument()
   })
 
-  it("shows a skeleton while the status is loading", () => {
+  it("shows the shared pool-row skeleton while the status is loading", () => {
     render(<BuiltInAiUsage />)
 
-    expect(document.querySelector('[data-slot="skeleton"]')).not.toBeNull()
+    // UsagePoolRowSkeleton: name and amount, bar, meta and date — the same as AI subtitles.
+    expect(document.querySelectorAll('[data-slot="skeleton"]')).toHaveLength(5)
     expect(screen.queryByRole("progressbar")).not.toBeInTheDocument()
   })
 

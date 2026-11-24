@@ -139,7 +139,7 @@ function UsageFooter({
         <Button
           variant="accent"
           size="sm"
-          onClick={() => openInNewTab(pricingUrl("extension_usage_page"))}
+          onClick={() => openInNewTab(pricingUrl("extension_upgrade"))}
         >
           {i18n.t("options.usage.footer.upgradeAction")}
         </Button>

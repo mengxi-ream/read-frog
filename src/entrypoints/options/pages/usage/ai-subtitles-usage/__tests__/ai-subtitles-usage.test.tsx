@@ -1,23 +1,49 @@
 // @vitest-environment jsdom
-import type { VideoTranscriptUsage } from "@read-frog/api-contract"
+import type { VideoTranscriptUsage, VideoTranscriptUsagePool } from "@read-frog/api-contract"
 import { ORPCError } from "@orpc/client"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { render, screen } from "@testing-library/react"
+import { render, screen, waitFor } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { AiSubtitlesUsage } from "@/entrypoints/options/pages/usage/ai-subtitles-usage"
 
 const state = vi.hoisted(() => ({
   signedIn: true,
+  sessionListeners: new Set<() => void>(),
   getUsage: vi.fn<() => Promise<VideoTranscriptUsage>>(),
+  refetchSession: vi.fn<() => Promise<void>>(),
+  sendMessage: vi.fn<(type: string) => Promise<void>>(),
 }))
 
-vi.mock("@/utils/auth/auth-client", () => ({
-  authClient: {
-    useSession: () => ({
-      data: state.signedIn ? { user: { id: "user-1" } } : null,
-      isPending: false,
-    }),
-  },
+/** Changes the session the way better-auth's store does: every reader re-renders. */
+function setSignedIn(signedIn: boolean) {
+  state.signedIn = signedIn
+  for (const listener of state.sessionListeners) listener()
+}
+
+vi.mock("@/utils/auth/auth-client", async () => {
+  const { useSyncExternalStore } = await import("react")
+  return {
+    authClient: {
+      useSession: () => {
+        const signedIn = useSyncExternalStore(
+          (listener) => {
+            state.sessionListeners.add(listener)
+            return () => state.sessionListeners.delete(listener)
+          },
+          () => state.signedIn,
+        )
+        return {
+          data: signedIn ? { user: { id: "user-1" } } : null,
+          isPending: false,
+          refetch: state.refetchSession,
+        }
+      },
+    },
+  }
+})
+
+vi.mock("@/utils/message", () => ({
+  sendMessage: (type: string) => state.sendMessage(type),
 }))
 
 vi.mock("@/utils/orpc/client", () => ({
@@ -79,6 +105,8 @@ describe("AiSubtitlesUsage", () => {
   beforeEach(() => {
     state.signedIn = true
     state.getUsage.mockReset()
+    state.refetchSession.mockReset().mockResolvedValue(undefined)
+    state.sendMessage.mockReset().mockResolvedValue(undefined)
   })
 
   it("asks a guest to log in without requesting usage", () => {
@@ -105,6 +133,23 @@ describe("AiSubtitlesUsage", () => {
     expect(screen.getByText("options.videoSubtitles.aiQuota.pools.launchBonus")).toBeInTheDocument()
   })
 
+  it("turns a pool's bar red once 90% of it is gone", async () => {
+    const [subscription, launchBonus] = PAID_USAGE.pools as [
+      VideoTranscriptUsagePool,
+      VideoTranscriptUsagePool,
+    ]
+    state.getUsage.mockResolvedValue({
+      ...PAID_USAGE,
+      pools: [{ ...subscription, usedMinutes: 950, remainingMinutes: 50 }, launchBonus],
+    })
+
+    renderUsage()
+
+    const bars = await screen.findAllByRole("progressbar")
+    expect(bars[0]?.className).toContain("bg-destructive")
+    expect(bars[1]?.className).not.toContain("bg-destructive")
+  })
+
   it("says a free account needs a subscription", async () => {
     state.getUsage.mockResolvedValue({ ...PAID_USAGE, plan: "free", pools: [] })
 
@@ -126,12 +171,64 @@ describe("AiSubtitlesUsage", () => {
     ).toBeInTheDocument()
   })
 
-  it("reads an expired session as signed out", async () => {
+  it("rechecks a session the server has ended, so the card turns logged out", async () => {
     state.getUsage.mockRejectedValue(new ORPCError("UNAUTHORIZED"))
+    const order: string[] = []
+    state.sendMessage.mockImplementation(async (type) => {
+      order.push(type)
+    })
+    state.refetchSession.mockImplementation(async () => {
+      order.push("refetchSession")
+      setSignedIn(false)
+    })
 
     renderUsage()
 
     expect(await screen.findByText("options.usage.logInToView")).toBeInTheDocument()
+    await waitFor(() => expect(state.signedIn).toBe(false))
+    // The cache goes first, or the refetch would read the stale session back.
+    expect(order).toEqual(["invalidateAuthCache", "refetchSession"])
+    expect(state.getUsage).toHaveBeenCalledTimes(1)
+  })
+
+  it("rechecks only once when the server still reports the session", async () => {
+    state.getUsage.mockRejectedValue(new ORPCError("UNAUTHORIZED"))
+    // Reloading, the session reads as signed out for a moment, then signed in again.
+    state.refetchSession.mockImplementation(async () => {
+      setSignedIn(false)
+      await new Promise((resolve) => setTimeout(resolve, 10))
+      setSignedIn(true)
+    })
+
+    renderUsage()
+
+    await waitFor(() => expect(state.refetchSession).toHaveBeenCalledTimes(1))
+    await waitFor(() => expect(state.getUsage).toHaveBeenCalledTimes(2))
+    expect(await screen.findByText("options.usage.logInToView")).toBeInTheDocument()
+    await new Promise((resolve) => setTimeout(resolve, 100))
+    expect(state.sendMessage).toHaveBeenCalledTimes(1)
+    expect(state.refetchSession).toHaveBeenCalledTimes(1)
+  })
+
+  it("does not recheck the session for any other failure", async () => {
+    state.getUsage.mockRejectedValue(new ORPCError("FORBIDDEN"))
+
+    renderUsage()
+
+    expect(
+      await screen.findByText("options.videoSubtitles.aiQuota.upgradeRequired"),
+    ).toBeInTheDocument()
+    expect(state.sendMessage).not.toHaveBeenCalled()
+    expect(state.refetchSession).not.toHaveBeenCalled()
+  })
+
+  it("holds a loading row shaped like a loaded one", () => {
+    state.getUsage.mockReturnValue(new Promise(() => {}))
+
+    renderUsage()
+
+    expect(document.querySelectorAll('[data-slot="skeleton"]')).toHaveLength(5)
+    expect(screen.queryByRole("progressbar")).not.toBeInTheDocument()
   })
 
   it("says the quota could not load on any other failure", async () => {

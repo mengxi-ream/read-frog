@@ -5,12 +5,10 @@ import type {
 } from "@/utils/hosted-ai/types"
 import { Icon } from "@iconify/react"
 import { useHostedAiStatus } from "@/components/llm-providers/use-hosted-ai-status"
-import { Progress, ProgressLabel } from "@/components/ui/base-ui/progress"
-import { Skeleton } from "@/components/ui/base-ui/skeleton"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
 import { formatHostedAiResetAtLocal, getHostedAiPools } from "@/utils/hosted-ai/status"
 import { i18n } from "@/utils/i18n"
-import { UsageGroup, UsageNotice } from "../usage-group"
+import { UsageGroup, UsageNotice, UsagePoolRow, UsagePoolRowSkeleton } from "../usage-group"
 
 const FEATURE_LABEL_I18N_KEYS = {
   pageTranslation: "options.apiProviders.builtInAiUsage.features.pageTranslation",
@@ -33,9 +31,9 @@ function getRemainingPercent(usedPercent: number): number {
 }
 
 /**
- * One bar per pool, recurring or one-time. The track is the whole quota and the
- * fill is what is left, growing from the left — so a fresh pool reads as a full
- * bar. `kindLabel` names the pool and `timeLabel` says when it resets or ends.
+ * One bar per pool, recurring or one-time. `kindLabel` names the pool and
+ * `timeLabel` says when it resets or ends; the label lists the features the
+ * pool pays for in a tooltip.
  */
 function PoolUsage({
   usedPercent,
@@ -51,16 +49,11 @@ function PoolUsage({
   const remainingPercent = getRemainingPercent(usedPercent)
 
   return (
-    <div className="flex flex-col gap-1.5">
-      <Progress
-        value={remainingPercent}
-        className="gap-x-3 gap-y-1.5"
-        // Announce "62% left", not a bare "62%" that reads as consumption.
-        getAriaValueText={(_, value) =>
-          i18n.t("options.apiProviders.builtInAiUsage.remaining", [value ?? remainingPercent])
-        }
-      >
-        <ProgressLabel className="flex items-center gap-1.5 text-sm font-medium">
+    <UsagePoolRow
+      value={remainingPercent}
+      remainingText={i18n.t("options.apiProviders.builtInAiUsage.remaining", [remainingPercent])}
+      label={
+        <>
           {i18n.t("options.apiProviders.builtInAiUsage.supportedFeatures", [features.length])}
           <Tooltip>
             <TooltipTrigger
@@ -78,16 +71,11 @@ function PoolUsage({
               </ul>
             </TooltipContent>
           </Tooltip>
-        </ProgressLabel>
-        <span className="ml-auto text-xs text-muted-foreground tabular-nums">
-          {i18n.t("options.apiProviders.builtInAiUsage.remaining", [remainingPercent])}
-        </span>
-      </Progress>
-      <div className="flex flex-wrap items-center justify-between gap-x-3 text-xs text-muted-foreground">
-        <span>{kindLabel}</span>
-        {timeLabel && <span>{timeLabel}</span>}
-      </div>
-    </div>
+        </>
+      }
+      meta={kindLabel}
+      note={timeLabel}
+    />
   )
 }
 
@@ -135,7 +123,7 @@ export function BuiltInAiUsage() {
 
   function renderContent() {
     if (isPending) {
-      return <Skeleton className="h-13 w-full" />
+      return <UsagePoolRowSkeleton />
     }
     if (!isSignedIn) {
       return <UsageNotice>{i18n.t("options.usage.logInToView")}</UsageNotice>

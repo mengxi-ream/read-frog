@@ -109,7 +109,7 @@ describe("UsageCard", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "options.usage.footer.upgradeAction" }))
     expect(openSpy).toHaveBeenCalledWith(
-      "https://readfrog.test/pricing?entry=extension_usage_page",
+      "https://readfrog.test/pricing?entry=extension_upgrade",
       "_blank",
     )
   })
