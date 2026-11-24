@@ -1566,7 +1566,7 @@ options:
           description: 这将删除所有已缓存的 AI 断句结果。下次播放启用 AI 断句的视频时，将重新处理字幕。
   simpleMode:
     title: "简洁模式"
-    pageDescription: "关掉的功能就像没装：网页上不出现，快捷键不响应，侧栏里也不再列出。它的设置会保留，重新打开后一切照旧。"
+    pageDescription: "关掉的功能就像没装：网页上不出现，快捷键也不响应。它的设置会保留，重新打开后一切照旧。"
     drawerDescription: "关掉的功能不会出现在任何地方，设置会保留"
     features:
       customActions:

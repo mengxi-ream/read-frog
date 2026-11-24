@@ -1561,7 +1561,7 @@ options:
           description: Esto eliminará todos los resultados de segmentación AI en caché. La próxima vez que reproduzcas un video con segmentación AI activada, se volverán a procesar los subtítulos.
   simpleMode:
     title: "Modo simple"
-    pageDescription: "Una función que desactivas es como si no estuviera instalada: deja de aparecer en las páginas web, sus atajos no hacen nada y la barra lateral deja de mostrarla. Su configuración se conserva, así que al volver a activarla todo queda como estaba."
+    pageDescription: "Una función que desactivas es como si no estuviera instalada: deja de aparecer en las páginas web y sus atajos no hacen nada. Su configuración se conserva, así que al volver a activarla todo queda como estaba."
     drawerDescription: "Las funciones que desactives desaparecen en todas partes. Su configuración se conserva"
     features:
       customActions:

@@ -1703,7 +1703,7 @@ options:
           description: This will delete all cached AI segmentation results. The next time you play a video with AI segmentation enabled, it will re-process the subtitles.
   simpleMode:
     title: "Simple mode"
-    pageDescription: "A feature you turn off is as if it weren't installed: it no longer shows on web pages, its shortcuts do nothing, and the sidebar stops listing it. Its settings are kept, so turning it back on brings everything back as it was."
+    pageDescription: "A feature you turn off is as if it weren't installed: it no longer shows on web pages, and its shortcuts do nothing. Its settings are kept, so turning it back on brings everything back as it was."
     drawerDescription: "Features you turn off disappear everywhere. Their settings are kept"
     features:
       customActions:

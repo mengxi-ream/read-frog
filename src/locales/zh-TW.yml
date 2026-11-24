@@ -1566,7 +1566,7 @@ options:
           description: 這將刪除所有已快取的 AI 斷句結果。下次播放啟用 AI 斷句的影片時，將重新處理字幕。
   simpleMode:
     title: "簡潔模式"
-    pageDescription: "關掉的功能就像沒裝：網頁上不出現，快速鍵不回應，側欄裡也不再列出。它的設定會保留，重新開啟後一切照舊。"
+    pageDescription: "關掉的功能就像沒裝：網頁上不出現，快速鍵也不回應。它的設定會保留，重新開啟後一切照舊。"
     drawerDescription: "關掉的功能不會出現在任何地方，設定會保留"
     features:
       customActions:

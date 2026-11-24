@@ -1556,7 +1556,7 @@ options:
           description: Tüm önbelleğe alınmış AI bölümlendirme sonuçları silinecektir. AI bölümlendirme etkinleştirilmiş bir video oynatıldığında altyazılar yeniden işlenecektir.
   simpleMode:
     title: "Sade mod"
-    pageDescription: "Kapattığınız bir özellik hiç yüklenmemiş gibi olur: web sayfalarında görünmez, kısayolları çalışmaz ve kenar çubuğunda listelenmez. Ayarları korunur; yeniden açtığınızda her şey eskisi gibi olur."
+    pageDescription: "Kapattığınız bir özellik hiç yüklenmemiş gibi olur: web sayfalarında görünmez ve kısayolları çalışmaz. Ayarları korunur; yeniden açtığınızda her şey eskisi gibi olur."
     drawerDescription: "Kapattığınız özellikler hiçbir yerde görünmez. Ayarları korunur"
     features:
       customActions:

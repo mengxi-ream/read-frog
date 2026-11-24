@@ -1556,7 +1556,7 @@ options:
           description: Tất cả kết quả AI phân đoạn đã lưu trong bộ nhớ đệm sẽ bị xóa. Lần tới khi phát video có bật AI phân đoạn, phụ đề sẽ được xử lý lại.
   simpleMode:
     title: "Chế độ đơn giản"
-    pageDescription: "Tính năng đã tắt sẽ như chưa từng được cài: không xuất hiện trên trang web, phím tắt không còn tác dụng và thanh bên cũng không liệt kê nữa. Cài đặt của nó vẫn được giữ, nên bật lại thì mọi thứ vẫn như cũ."
+    pageDescription: "Tính năng đã tắt sẽ như chưa từng được cài: không xuất hiện trên trang web và phím tắt không còn tác dụng. Cài đặt của nó vẫn được giữ, nên bật lại thì mọi thứ vẫn như cũ."
     drawerDescription: "Tính năng đã tắt sẽ không xuất hiện ở đâu cả. Cài đặt vẫn được giữ"
     features:
       customActions:

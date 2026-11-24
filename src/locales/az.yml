@@ -1561,7 +1561,7 @@ options:
           description: Keşdəki bütün süni intellekt seqmentləşdirmə nəticələri silinəcək. Növbəti dəfə süni intellekt seqmentləşdirməsi aktiv halda video açdıqda subtitrlər yenidən işlənəcək.
   simpleMode:
     title: "Sadə rejim"
-    pageDescription: "Söndürdüyünüz funksiya sanki quraşdırılmayıb: veb səhifələrdə görünmür, qısayolları işləmir və yan paneldə göstərilmir. Ayarları saxlanılır, ona görə də yenidən yandıranda hər şey əvvəlki kimi olur."
+    pageDescription: "Söndürdüyünüz funksiya sanki quraşdırılmayıb: veb səhifələrdə görünmür və qısayolları işləmir. Ayarları saxlanılır, ona görə də yenidən yandıranda hər şey əvvəlki kimi olur."
     drawerDescription: "Söndürdüyünüz funksiyalar heç yerdə görünmür. Ayarları saxlanılır"
     features:
       customActions:
