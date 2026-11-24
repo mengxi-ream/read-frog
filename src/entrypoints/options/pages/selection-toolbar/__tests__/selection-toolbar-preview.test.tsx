@@ -57,6 +57,10 @@ function toolbarIcons() {
   )
 }
 
+function separators() {
+  return screen.getByRole("img").querySelectorAll(".w-px.self-stretch")
+}
+
 describe("selection toolbar preview", () => {
   beforeEach(() => {
     testState.config = structuredClone(DEFAULT_CONFIG)
@@ -115,5 +119,27 @@ describe("selection toolbar preview", () => {
 
     expect(toolbarIcons()).toEqual([ANNOTATION_ICON])
     expect(hasMoreButton()).toBeNull()
+  })
+
+  it("draws the separator after the annotation button only when something follows it", () => {
+    // Word annotation alone: Custom AI Actions, Selection translation and Speak are off.
+    testState.config = { ...testState.config!, ...setFeatureOn("customActions", false) }
+    selectionToolbar().features.translate.enabled = false
+    selectionToolbar().features.speak.enabled = false
+
+    render(<SelectionToolbarPreview />)
+
+    expect(toolbarIcons()).toEqual([ANNOTATION_ICON])
+    expect(separators()).toHaveLength(0)
+
+    // Speak back on but unpinned: the "more" button follows the annotation button.
+    selectionToolbar().features.speak.enabled = true
+    selectionToolbar().unpinned = ["speak"]
+    cleanup()
+    render(<SelectionToolbarPreview />)
+
+    expect(toolbarIcons()).toEqual([ANNOTATION_ICON])
+    expect(hasMoreButton()).not.toBeNull()
+    expect(separators()).toHaveLength(1)
   })
 })

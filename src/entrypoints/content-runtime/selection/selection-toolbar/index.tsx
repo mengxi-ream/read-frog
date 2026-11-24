@@ -736,7 +736,10 @@ export function SelectionToolbar() {
               {annotation.enabled && (
                 <>
                   <AnnotateButton onPointerEnter={reveal.openReveal} />
-                  <div className="w-px shrink-0 self-stretch bg-border" />
+                  {/* Only with something after it: annotation can be all the bar has. */}
+                  {(hasAnyPinnedItem || hasMoreMenu) && (
+                    <div className="w-px shrink-0 self-stretch bg-border" />
+                  )}
                 </>
               )}
               <div className="no-scrollbar flex max-w-105 items-center overflow-x-auto overflow-y-hidden scroll-driven:scroll-fade-x">

@@ -120,7 +120,10 @@ export function SelectionToolbarPreview() {
                             <span className={BUTTON_CLASS_NAME}>
                               <Icon icon={ANNOTATION_ICON} className="size-4.5" />
                             </span>
-                            <span className={SEPARATOR_CLASS_NAME} />
+                            {/* Only with something after it, as in the toolbar. */}
+                            {(pinnedItems.length > 0 || hasMoreMenu) && (
+                              <span className={SEPARATOR_CLASS_NAME} />
+                            )}
                           </>
                         )}
                         {/* `clip` rather than `hidden`: it clips the row at the toolbar's width
