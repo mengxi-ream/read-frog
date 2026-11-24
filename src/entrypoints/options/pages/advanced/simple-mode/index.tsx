@@ -6,7 +6,7 @@ import { configAtom } from "@/utils/atoms/config"
 import { getFeatureDescription, getFeatureTitle } from "@/utils/feature-text"
 import { childrenOf, isFeatureOn, parentOf, TOP_LEVEL_FEATURES } from "@/utils/features"
 import { i18n } from "@/utils/i18n"
-import { getSimpleModeRowId } from "@/utils/navigation"
+import { getSimpleModeRowId, SIMPLE_MODE_SECTION_ID } from "@/utils/navigation"
 import { cn } from "@/utils/styles/utils"
 import { getSectionIdFromSearch } from "../../../command-palette/section-scroll"
 import { ConfigItem } from "../../../components/config-item"
@@ -22,11 +22,13 @@ export function SimpleModePage() {
     <PageLayout
       title={i18n.t("options.simpleMode.title")}
       description={i18n.t("options.simpleMode.pageDescription")}
-      innerClassName="flex flex-col gap-6"
     >
-      {TOP_LEVEL_FEATURES.map((id) => (
-        <FeatureRow key={id} id={id} />
-      ))}
+      {/* What the page's own search result opens at, so that no single row lights up. */}
+      <div id={SIMPLE_MODE_SECTION_ID} className="flex scroll-mt-8 flex-col gap-6">
+        {TOP_LEVEL_FEATURES.map((id) => (
+          <FeatureRow key={id} id={id} />
+        ))}
+      </div>
     </PageLayout>
   )
 }

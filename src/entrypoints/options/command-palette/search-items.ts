@@ -2,6 +2,7 @@ import type { GeneratedI18nStructure } from "#i18n"
 import {
   CUSTOM_ACTION_LAYOUT_SECTION_ID,
   CUSTOM_ACTION_NOTEBASE_SECTION_ID,
+  SIMPLE_MODE_SECTION_ID,
 } from "@/utils/navigation"
 
 type I18nKey = keyof GeneratedI18nStructure
@@ -23,9 +24,9 @@ type SearchItemDefinition = Omit<SearchItem, "titleKey" | "descriptionKey" | "pa
 export const SEARCH_ITEMS: SearchItem[] = [
   // Advanced page
   {
-    // Its first row: the page is one list of switches, under a description that says what
-    // turning a feature off does.
-    sectionId: "simple-mode-customActions",
+    // The page's list of switches, under the description that says what turning a feature off
+    // does. Not its first row: the row a link names lights up as the one it pointed at.
+    sectionId: SIMPLE_MODE_SECTION_ID,
     route: "/advanced/simple-mode",
     titleKey: "options.simpleMode.title",
     descriptionKey: "options.simpleMode.pageDescription",

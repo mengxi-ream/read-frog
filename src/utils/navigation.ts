@@ -147,6 +147,12 @@ export function buildAddCustomActionOptionsRoute(): `/${string}` {
 /** The options page that has a switch for every feature. */
 export const SIMPLE_MODE_PATH = "/advanced/simple-mode"
 
+/**
+ * The id of the simple mode page's list of switches, for `?section=` to open the page at the
+ * whole list. A row's own id lights that row up as the one a link pointed at.
+ */
+export const SIMPLE_MODE_SECTION_ID = "simple-mode"
+
 /** The id of a feature's row on the simple mode page, for `?section=` to scroll to. */
 export function getSimpleModeRowId(id: FeatureId): string {
   return `simple-mode-${id.replaceAll(".", "-")}`
