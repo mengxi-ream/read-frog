@@ -28,8 +28,8 @@ function switchAt<const Path extends readonly string[]>(
  *
  * A feature that is off behaves as if it were not installed. Nothing of it shows on web
  * pages, its shortcuts do nothing, it leaves the context menu and the popup, and its pages
- * leave the options sidebar. Its settings are kept, so turning it back on restores it as it
- * was.
+ * leave the options sidebar, except pages other features use too (see nav-items.ts). Its
+ * settings are kept, so turning it back on restores it as it was.
  *
  * The id is the tree. "selectionToolbar.speak" sits under "selectionToolbar", so turning the
  * toolbar off turns its speak button off too, without touching the speak switch itself. The

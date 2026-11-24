@@ -5,6 +5,10 @@ import type { FeatureTag } from "@/utils/features"
  * away with the feature: it leaves the sidebar, and opening it lands on the feature's switch
  * instead. Untagged pages, like the API providers or Custom AI Actions that several features
  * share, are always there.
+ *
+ * Page Translation's pages are untagged for that reason: selection translation, input
+ * translation and the Translation Hub use its prompts, its translation queue and the cache it
+ * clears, so they stay while Page Translation is off.
  */
 export const ROUTE_DEFS = [
   { path: "/" },
@@ -12,7 +16,7 @@ export const ROUTE_DEFS = [
   { path: "/shortcuts" },
   { path: "/api-providers" },
   { path: "/custom-actions" },
-  { path: "/page-translation", feature: "pageTranslation" },
+  { path: "/page-translation" },
   { path: "/video-subtitles", feature: "videoSubtitles" },
   { path: "/floating-button", feature: "floatingButton" },
   { path: "/selection-toolbar", feature: "selectionToolbar" },
@@ -31,19 +35,13 @@ export const ROUTE_DEFS = [
   { path: "/advanced/simple-mode" },
   { path: "/preference/config-backup" },
   { path: "/preference/extension-activation" },
-  { path: "/page-translation/custom-css", feature: "pageTranslation" },
-  { path: "/page-translation/prompts", feature: "pageTranslation" },
-  { path: "/page-translation/translation-control", feature: "pageTranslation" },
-  {
-    path: "/page-translation/translation-control/auto-translate-websites",
-    feature: "pageTranslation",
-  },
-  {
-    path: "/page-translation/translation-control/never-auto-translate-websites",
-    feature: "pageTranslation",
-  },
-  { path: "/page-translation/translation-control/site-rules", feature: "pageTranslation" },
-  { path: "/page-translation/translation-queue", feature: "pageTranslation" },
+  { path: "/page-translation/custom-css" },
+  { path: "/page-translation/prompts" },
+  { path: "/page-translation/translation-control" },
+  { path: "/page-translation/translation-control/auto-translate-websites" },
+  { path: "/page-translation/translation-control/never-auto-translate-websites" },
+  { path: "/page-translation/translation-control/site-rules" },
+  { path: "/page-translation/translation-queue" },
   { path: "/video-subtitles/sites", feature: "videoSubtitles" },
   { path: "/video-subtitles/style", feature: "videoSubtitles" },
   { path: "/video-subtitles/style/custom-css", feature: "videoSubtitles" },
