@@ -27,6 +27,7 @@ import {
   setAppliedDocumentTitleTranslation,
 } from "@/utils/content/document-title"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
+import { isFeatureOn } from "@/utils/features"
 import { isGuideStepUrl } from "@/utils/guide/guide-url"
 import {
   hasNoWalkAncestor,
@@ -417,6 +418,13 @@ export class PageTranslationManager implements IPageTranslationManager {
     }
     if (!config) {
       log.error("Global config is not initialized")
+      return
+    }
+    // Every way of starting comes through here: the shortcut, the popup, the floating button,
+    // the context menu, auto-translation, a frame following the top frame. With page
+    // translation switched off in simple mode, none of them translates.
+    if (!isFeatureOn(config, "pageTranslation")) {
+      log.debug("Ignored a start: page translation is switched off")
       return
     }
     this.titleTranslationEnabled = config.pageTranslation.page.translateTitle

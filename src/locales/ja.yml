@@ -51,8 +51,6 @@ popup:
         action: クリックしてバイリンガルへ切り替え
   hub:
     tooltip: 複数の翻訳モデルで同時にテキストを翻訳
-  discord:
-    tooltip: Discordに参加して開発者とつながり、新機能を先行体験しましょう
   blog:
     notification: Read Frog の最新情報
   aiSmartContext: AI スマートコンテキスト
@@ -594,9 +592,7 @@ options:
     pageDescription: 入力欄に書いた内容を、送信する前に翻訳します。
     trigger:
       title: トリガー
-      enable:
-        title: 有効化
-        description: 任意の入力欄でスペースキーを素早く3回押すと、入力した内容を翻訳します。
+      description: 任意の入力欄でスペースキーを素早く3回押すと、入力した内容を翻訳します。
       threshold:
         title: トリガーしきい値
         description: 連続する押下の間隔として許される長さ（ミリ秒）です。反応しないときは大きく、入力中に誤って動くときは小さくします。
@@ -615,9 +611,6 @@ options:
     title: フローティングボタン
     pageDescription: フローティングボタンを表示する側、クリック時の動作、非表示にするサイトを設定します。
     demoImageAlt: フローティングボタンデモ
-    enable:
-      title: フローティングボタンを有効化
-      description: ウェブページにフローティングボタンを表示し、Read Frog機能に素早くアクセス
     display:
       title: 表示
       side:
@@ -637,6 +630,7 @@ options:
       translate: ページ翻訳を切り替え
     closeMenu:
       title: フローティングボタンを非表示
+    pageTranslationOff: "ページ翻訳はシンプルモードでオフになっています"
     tooltips:
       togglePageTranslation: ページ翻訳を切り替え
       floatingButtonOptions: フローティングボタンのオプション
@@ -647,9 +641,6 @@ options:
     title: 選択ツールバー
     pageDescription: テキストを選択したときに表示するアクションと、ツールバーを表示するサイトを設定します。
     demoImageAlt: 選択ツールバーデモ
-    enable:
-      title: 選択ツールバーを有効化
-      description: ウェブページでテキストを選択したときにツールバーを表示し、すばやく翻訳・読み上げ・AIアクションを実行します
     annotation:
       title: "単語注釈"
       enable:
@@ -661,13 +652,10 @@ options:
     actions:
       title: アクション
       translate:
-        title: 翻訳
         description: ツールバーに翻訳ボタンを表示します
       speak:
-        title: 読み上げ
         description: 選択したテキストを読み上げる読み上げボタンをツールバーに表示します
       noteSuggestion:
-        title: ノートの提案
         description: AI プロバイダーで選択テキストを翻訳した後、Notebase に保存する単語を提案します
         action: アクション
         actionDescription: 保存候補を生成するアクション
@@ -1093,8 +1081,8 @@ options:
       pageDescription: 大切な言葉に決まった訳語を指定し、それぞれの用語集を適用する範囲を選びます。
       untitled: 無題の用語集
       noGlossaries: 用語集がまだありません。
-      enable:
-        title: 有効にする
+      appliesTo:
+        title: 適用される機能
         description: 一致した用語を LLM に渡し、指定どおりの訳語で出力させます。用語集はプロンプトに含めて送られるため、LLM プロバイダーで動作する機能にのみ適用されます。
       library:
         title: 登録した用語集
@@ -1198,9 +1186,6 @@ options:
     title: コンテキストメニュー
     pageDescription: ブラウザーの右クリックメニューに表示される Read Frog の項目を設定します。
     demoImageAlt: コンテキストメニューデモ
-    enable:
-      title: 右クリック翻訳を有効化
-      description: ブラウザの右クリックメニューに翻訳オプションを追加し、ページや選択テキストを素早く翻訳
   translation:
     title: ページ翻訳
     pageDescription: ページ翻訳の方法を設定します。モード、範囲、プロンプト、リクエスト制限など。
@@ -1569,6 +1554,53 @@ options:
           confirm: 確認
           cancel: キャンセル
           description: すべてのキャッシュされたAI区切り結果が削除されます。次回AI区切りを有効にして動画を再生すると、字幕が再処理されます。
+  simpleMode:
+    title: "シンプルモード"
+    pageDescription: "オフにした機能は、インストールしていないのと同じになります。ウェブページに表示されず、ショートカットも反応しません。設定は保持されるので、オンに戻せば元どおりに使えます。"
+    drawerDescription: "オフにした機能はどこにも表示されなくなります。設定は保持されます"
+    features:
+      customActions:
+        title: "カスタム AI アクション"
+        description: "選択ツールバーと右クリックメニューの AI アクション。組み込みの「辞書」「構文解析」も含みます"
+      pageTranslation:
+        title: "ページ翻訳"
+        description: "ウェブページ全体を翻訳します"
+        hover:
+          title: "ホバー翻訳"
+          description: "段落にホバーまたは長押しすると、その段落だけ翻訳します"
+      videoSubtitles:
+        title: "動画字幕"
+        description: "動画プレーヤーに翻訳字幕のボタンを追加します"
+      inputTranslation:
+        title: "入力翻訳"
+        description: "任意の入力欄でスペースキーを素早く3回押すと、入力した内容を翻訳します"
+      floatingButton:
+        title: "フローティングボタン"
+        description: "ウェブページにフローティングボタンを表示し、Read Frog機能に素早くアクセス"
+      selectionToolbar:
+        title: "選択ツールバー"
+        description: "ウェブページでテキストを選択したときにツールバーを表示し、すばやく翻訳・読み上げ・AIアクションを実行します"
+        annotation:
+          title: "単語注釈"
+          description: "選択した単語やフレーズに下線を引き、行間に意味を書き込みます"
+        translate:
+          title: "選択範囲の翻訳"
+          description: "ツールバーに翻訳ボタンを表示します"
+          noteSuggestion:
+            title: "ノートの提案"
+            description: "AI プロバイダーで選択テキストを翻訳した後、Notebase に保存する単語を提案します"
+        speak:
+          title: "読み上げ"
+          description: "選択したテキストを読み上げる読み上げボタンをツールバーに表示します"
+      contextMenu:
+        title: "コンテキストメニュー"
+        description: "ブラウザーの右クリックメニューに表示される Read Frog の項目"
+      translationHub:
+        title: "翻訳ハブ"
+        description: "複数の翻訳モデルで同時にテキストを翻訳"
+      glossary:
+        title: "用語集"
+        description: "大切な言葉を、決めた訳語で翻訳します"
   whatsNew:
     title: 新機能
     postType:
@@ -1658,7 +1690,7 @@ hideMenu:
   untilReload: ページを再読み込みするまで
   onSite: $1 で
   onAllSites: すべてのサイトで
-  restoreHint: 「$1」からいつでも再表示できます。
+  restoreHint: "「$1」または「$2」からいつでも再表示できます。"
 action:
   copy: コピー
   copied: コピー済み

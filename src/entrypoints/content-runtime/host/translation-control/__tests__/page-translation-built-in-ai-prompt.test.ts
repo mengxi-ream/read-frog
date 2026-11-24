@@ -438,6 +438,28 @@ describe("page translation when Built-in AI refuses at the start", () => {
   })
 })
 
+describe("page translation stopped while Built-in AI's availability check is out", () => {
+  it("starts nothing once the check passes", async () => {
+    // The check can wait on a network status call. Switching page translation off in simple
+    // mode stops the manager during it, from the top frame's config watch.
+    const checked = createDeferred<void>()
+    mockCheckProviderAvailability.mockImplementation(async (provider: { id: string }) => {
+      await checked.promise
+      return { available: true, providerRef: { kind: "local", config: provider } }
+    })
+
+    const manager = createManager()
+    const starting = manager.start(popupClick())
+    await vi.waitFor(() => expect(mockCheckProviderAvailability).toHaveBeenCalled())
+
+    manager.stop()
+    checked.resolve()
+    await starting
+
+    expect(manager.isActive).toBe(false)
+  })
+})
+
 describe("page translation when Built-in AI's pool runs dry partway down a page", () => {
   beforeEach(() => {
     mockCheckProviderAvailability.mockImplementation(async (provider: { id: string }) => ({

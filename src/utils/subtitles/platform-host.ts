@@ -27,9 +27,10 @@ export function getSubtitlesPlatformForHostname(hostname: string): SubtitlesPlat
 }
 
 /**
- * Whether subtitles are set to "off" for the platform on `hostname`. Reads the subtitles
- * config as stored, so it also takes one from before v126, whose single `enabled` switch
- * covered every platform. A host that is no platform's is never off here: the platform code
+ * Whether subtitles are off on `hostname`: video subtitles are switched off as a whole (simple
+ * mode's switch), or the platform there is set to "off". Reads the subtitles config as stored,
+ * so it also takes one from before v126, whose `enabled` switch meant the same as simple
+ * mode's. With the switch on, a host that is no platform's is never off here: the platform code
  * passes it over on its own.
  */
 export function isSubtitlesOffOnHost(
@@ -40,8 +41,7 @@ export function isSubtitlesOffOnHost(
   hostname: string,
 ): boolean {
   if (!videoSubtitles) return false
+  if (videoSubtitles.enabled === false) return true
   const platform = getSubtitlesPlatformForHostname(hostname)
-  const mode = platform ? videoSubtitles.platforms?.[platform] : undefined
-  if (mode !== undefined) return mode === "off"
-  return videoSubtitles.enabled === false
+  return platform !== null && videoSubtitles.platforms?.[platform] === "off"
 }

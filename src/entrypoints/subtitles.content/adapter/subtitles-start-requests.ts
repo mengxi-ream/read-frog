@@ -6,6 +6,7 @@ import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext } from "@/utils/analytics"
 import { getLocalConfig } from "@/utils/config/storage"
 import { SUBTITLES_SOURCE } from "@/utils/constants/subtitles"
+import { isFeatureOn } from "@/utils/features"
 import { i18n } from "@/utils/i18n"
 import { ensureAiSubtitlesAccess } from "@/utils/subtitles/ai/access-guard"
 import { showAiSubtitlesWallToast } from "@/utils/subtitles/toast"
@@ -52,7 +53,12 @@ export class SubtitlesStartRequests {
     const generation = this.lifecycle.playerGeneration.current()
     const config = await getLocalConfig()
     if (this.lifecycle.isPlayerSuperseded(generation)) return
-    const autoStart = config?.videoSubtitles?.platforms?.[this.config.platform] === "auto"
+    // Like a platform set to "off", simple mode's Video Subtitles switch stops this from the
+    // next video on; the player button and the shortcut go when the page reloads.
+    const autoStart =
+      config !== null &&
+      isFeatureOn(config, "videoSubtitles") &&
+      config.videoSubtitles?.platforms?.[this.config.platform] === "auto"
 
     const learningOpen = subtitlesStore.get(subtitlesSidebarOpenAtom)
 

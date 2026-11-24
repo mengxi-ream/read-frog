@@ -11,6 +11,7 @@ import {
   FEATURE_PROVIDER_DEFS,
 } from "@/utils/constants/feature-providers"
 import { getSelectionToolbarActions, patchSelectionToolbarAction } from "@/utils/custom-actions"
+import { isFeatureOn } from "@/utils/features"
 import { isSystemProviderSelectorItem } from "@/utils/providers/provider-display"
 import { getSelectableProvidersForCapability } from "@/utils/providers/provider-registry"
 import { providerSupportsTranslationOnlyMode } from "@/utils/providers/translation-only-gate"
@@ -71,7 +72,10 @@ export function useFeatureProvider(featureKey: FeatureKey): FeatureProviderBindi
 }
 
 export interface CustomActionProvidersBinding {
-  /** Only the actions the user can actually trigger, so disabled ones stay out of the UI. */
+  /**
+   * Only the actions the user can actually trigger, so disabled ones stay out of the UI, and
+   * none while simple mode has custom AI actions turned off.
+   */
   actions: SelectionToolbarCustomAction[]
   providers: ProviderSelectorOption[]
   getProviderConfig: (action: SelectionToolbarCustomAction) => ProviderConfig | null
@@ -85,12 +89,15 @@ export function useCustomActionProviders(): CustomActionProvidersBinding {
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
 
   const { models: builtInAiModels } = useBuiltInAiModels()
+  const customActionsOn = isFeatureOn(config, "customActions")
   const actions = useMemo(
     () =>
-      getSelectionToolbarActions(config.selectionToolbar).filter(
-        (action) => action.enabled !== false,
-      ),
-    [config.selectionToolbar],
+      customActionsOn
+        ? getSelectionToolbarActions(config.selectionToolbar).filter(
+            (action) => action.enabled !== false,
+          )
+        : [],
+    [config.selectionToolbar, customActionsOn],
   )
 
   const baseProviders = useMemo(

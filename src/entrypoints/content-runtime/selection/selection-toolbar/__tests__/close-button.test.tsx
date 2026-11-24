@@ -2,7 +2,7 @@
 import type { Config } from "@/types/config/config"
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { createStore, Provider } from "jotai"
-import { afterEach, describe, expect, it, vi } from "vitest"
+import { afterEach, describe, expect, it, onTestFinished, vi } from "vitest"
 import { fakeBrowser } from "wxt/testing/fake-browser"
 import { configAtom, configFieldsAtomMap } from "@/utils/atoms/config"
 import { CONFIG_STORAGE_KEY, DEFAULT_CONFIG } from "@/utils/constants/config"
@@ -28,6 +28,18 @@ afterEach(() => {
   cleanup()
   fakeBrowser.reset()
 })
+
+/** The test setup's `t` returns the bare key; this spells out the two places in the hint. */
+function spellOutRestoreHint() {
+  const spy = vi
+    .spyOn(i18n, "t")
+    .mockImplementation((key: string, substitutions?: unknown[]) =>
+      key === "hideMenu.restoreHint" && substitutions
+        ? `${key}: ${substitutions.join(" | ")}`
+        : key,
+    )
+  onTestFinished(() => spy.mockRestore())
+}
 
 // The stored config too: the config atom reloads it once mounted.
 async function renderCloseButton(edit?: (config: Config) => void) {
@@ -55,14 +67,17 @@ async function choose(key: Parameters<typeof i18n.t>[0]) {
 }
 
 describe("selection toolbar close menu", () => {
-  it("names what it hides and where to turn it back on", async () => {
+  it("names what it hides and both places to turn it back on", async () => {
+    spellOutRestoreHint()
     await renderCloseButton()
     await openMenu()
 
     expect(screen.getByText(i18n.t("options.selectionToolbar.closeMenu.title"))).toBeInTheDocument()
     expect(screen.getAllByRole("menuitem")).toHaveLength(3)
+    // On one site: the toolbar's page, which lists the sites. On all sites: simple mode, which
+    // switches it back on, as the toolbar's page is gone while it is off.
     expect(screen.getByText(/^hideMenu\.restoreHint/)).toHaveTextContent(
-      "popup.options → options.selectionToolbar.title",
+      "hideMenu.restoreHint: popup.options → options.selectionToolbar.title | popup.options → options.simpleMode.title",
     )
     // The site choice carries the host it would add.
     expect(screen.getByRole("menuitem", { name: /hideMenu\.onSite/ })).toHaveAttribute(

@@ -11,6 +11,7 @@ export function TranslationModeShortcut() {
       id="translation-mode-shortcut"
       title={i18n.t("options.shortcuts.translationMode.title")}
       description={i18n.t("options.shortcuts.translationMode.description")}
+      feature="pageTranslation"
       shortcut={translateConfig.modeShortcut ?? ""}
       onChange={(nextShortcut) => {
         void setTranslateConfig({

@@ -51,8 +51,6 @@ popup:
         action: 点击切换为双语对照
   hub:
     tooltip: 一次性调用多个翻译模型翻译文本
-  discord:
-    tooltip: 加入 Discord 与开发者交流，抢先体验新功能
   blog:
     notification: 陪读蛙更新动态
   aiSmartContext: AI 智能上下文
@@ -595,9 +593,7 @@ options:
     pageDescription: 在发送之前，把你在输入框里写的内容翻译好。
     trigger:
       title: 触发方式
-      enable:
-        title: 启用
-        description: 在任意输入框中快速连按 3 次空格键，即可翻译你输入的内容。
+      description: 在任意输入框中快速连按 3 次空格键，即可翻译你输入的内容。
       threshold:
         title: 触发阈值
         description: 相邻两次按键之间最多可以间隔多少毫秒。经常触发不了就调大，打字时误触发就调小。
@@ -616,9 +612,6 @@ options:
     title: 悬浮按钮
     pageDescription: 设置悬浮按钮停在哪一侧、点击后做什么，以及在哪些网站不显示。
     demoImageAlt: 悬浮按钮演示
-    enable:
-      title: 启用悬浮按钮
-      description: 在网页上显示悬浮按钮，快速访问陪读蛙功能
     display:
       title: 显示
       side:
@@ -638,6 +631,7 @@ options:
       translate: 切换页面翻译
     closeMenu:
       title: 隐藏悬浮按钮
+    pageTranslationOff: "网页翻译已在简洁模式中关闭"
     tooltips:
       togglePageTranslation: 切换页面翻译
       floatingButtonOptions: 悬浮按钮选项
@@ -648,9 +642,6 @@ options:
     title: 选择工具栏
     pageDescription: 设置选中文本时出现哪些操作，以及工具栏在哪些网站显示。
     demoImageAlt: 选择工具栏演示
-    enable:
-      title: 启用选择工具栏
-      description: 在网页上选择文本时显示工具栏，快速翻译、朗读和使用 AI 指令
     annotation:
       title: "划词标注"
       enable:
@@ -662,13 +653,10 @@ options:
     actions:
       title: 操作
       translate:
-        title: 翻译
         description: 在工具栏中显示翻译按钮
       speak:
-        title: 朗读
         description: 在工具栏中显示朗读按钮，用于朗读选中的文本
       noteSuggestion:
-        title: 猜你想存
         description: 使用 AI 提供商进行划词翻译后，推荐可存入笔记库的词条
         action: 指令
         actionDescription: 用于生成「猜你想存」的指令
@@ -1103,8 +1091,8 @@ options:
       pageDescription: 给你在意的词固定一个译法，并选择每份术语库在哪些网站生效。
       untitled: 未命名术语库
       noGlossaries: 还没有术语库。
-      enable:
-        title: 启用
+      appliesTo:
+        title: 生效范围
         description: 把命中的术语一并发给 LLM，让它按你的写法翻译。术语库是随提示词一起发送的，所以只对运行在 LLM 提供商上的功能生效。
       library:
         title: 你的术语库
@@ -1208,9 +1196,6 @@ options:
     title: 右键菜单
     pageDescription: 控制浏览器右键菜单里的 Read Frog 选项。
     demoImageAlt: 右键菜单演示
-    enable:
-      title: 启用右键翻译
-      description: 在浏览器右键菜单中添加翻译选项，快速翻译页面或所选文本
   translation:
     title: 网页翻译
     pageDescription: 控制页面翻译的方式：模式、范围、提示词和请求限制。
@@ -1579,6 +1564,53 @@ options:
           confirm: 确认
           cancel: 取消
           description: 这将删除所有已缓存的 AI 断句结果。下次播放启用 AI 断句的视频时，将重新处理字幕。
+  simpleMode:
+    title: "简洁模式"
+    pageDescription: "关掉的功能就像没装：网页上不出现，快捷键也不响应。它的设置会保留，重新打开后一切照旧。"
+    drawerDescription: "关掉的功能不会出现在任何地方，设置会保留"
+    features:
+      customActions:
+        title: "自定义 AI 指令"
+        description: "选择工具栏和右键菜单里的 AI 指令，包括内置的词典、长难句分析"
+      pageTranslation:
+        title: "网页翻译"
+        description: "翻译整个网页"
+        hover:
+          title: "悬停翻译"
+          description: "悬停或长按段落，只翻译这一段"
+      videoSubtitles:
+        title: "视频字幕"
+        description: "在视频播放器里加上翻译字幕按钮"
+      inputTranslation:
+        title: "输入翻译"
+        description: "在任意输入框中快速连按 3 次空格键，即可翻译你输入的内容"
+      floatingButton:
+        title: "悬浮按钮"
+        description: "在网页上显示悬浮按钮，快速访问陪读蛙功能"
+      selectionToolbar:
+        title: "选择工具栏"
+        description: "在网页上选择文本时显示工具栏，快速翻译、朗读和使用 AI 指令"
+        annotation:
+          title: "划词标注"
+          description: "给选中的词或短语加下划线，并在行间写出释义"
+        translate:
+          title: "划词翻译"
+          description: "在工具栏中显示翻译按钮"
+          noteSuggestion:
+            title: "猜你想存"
+            description: "使用 AI 提供商进行划词翻译后，推荐可存入笔记库的词条"
+        speak:
+          title: "朗读"
+          description: "在工具栏中显示朗读按钮，用于朗读选中的文本"
+      contextMenu:
+        title: "右键菜单"
+        description: "浏览器右键菜单里的陪读蛙选项"
+      translationHub:
+        title: "翻译中心"
+        description: "一次性调用多个翻译模型翻译文本"
+      glossary:
+        title: "术语库"
+        description: "让你在意的词按你定的译法翻译"
   whatsNew:
     title: 最近更新
     postType:
@@ -1668,7 +1700,7 @@ hideMenu:
   untilReload: 直到刷新页面
   onSite: 在 $1 上
   onAllSites: 在所有网站上
-  restoreHint: 可在「$1」中重新开启。
+  restoreHint: "可在「$1」或「$2」中重新开启。"
 action:
   copy: 复制
   copied: 已复制

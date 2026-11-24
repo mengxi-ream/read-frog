@@ -1446,7 +1446,7 @@ describe("selection toolbar requests", () => {
     )
   })
 
-  it("opens selection translation from the shortcut when the toolbar UI is disabled", async () => {
+  it("opens selection translation from the shortcut while the toolbar is hidden on the site", async () => {
     translateTextCoreMock.mockResolvedValue("Toolbar disabled shortcut result")
     getOrCreateWebPageContextMock.mockResolvedValue(null)
 
@@ -1455,7 +1455,7 @@ describe("selection toolbar requests", () => {
     document.body.appendChild(paragraph)
 
     const config = cloneConfig(DEFAULT_CONFIG)
-    config.selectionToolbar.enabled = false
+    config.selectionToolbar.disabledSelectionToolbarPatterns = [window.location.hostname]
 
     const store = createStore()
     store.set(configAtom, config)
@@ -1497,27 +1497,33 @@ describe("selection toolbar requests", () => {
     expect(event.defaultPrevented).toBe(false)
   })
 
-  it("leaves the selection translation key to the page while Translate is turned off", async () => {
-    const paragraph = document.createElement("p")
-    paragraph.textContent = "Selected text inside a paragraph."
-    document.body.appendChild(paragraph)
+  it.each([
+    ["Translate", (config: Config) => (config.selectionToolbar.features.translate.enabled = false)],
+    ["the whole toolbar", (config: Config) => (config.selectionToolbar.enabled = false)],
+  ])(
+    "leaves the selection translation key to the page while %s is turned off",
+    async (_, turnOff) => {
+      const paragraph = document.createElement("p")
+      paragraph.textContent = "Selected text inside a paragraph."
+      document.body.appendChild(paragraph)
 
-    const config = cloneConfig(DEFAULT_CONFIG)
-    config.selectionToolbar.features.translate.enabled = false
-    const store = createStore()
-    store.set(configAtom, config)
-    setSelectionState(store, { text: "Selected text", range: createRangeFor(paragraph) })
-    renderWithProviders(<TranslateButton />, store)
+      const config = cloneConfig(DEFAULT_CONFIG)
+      turnOff(config)
+      const store = createStore()
+      store.set(configAtom, config)
+      setSelectionState(store, { text: "Selected text", range: createRangeFor(paragraph) })
+      renderWithProviders(<TranslateButton />, store)
 
-    let event!: KeyboardEvent
-    act(() => {
-      event = pressShortcut()
-    })
-    await act(() => Promise.resolve())
+      let event!: KeyboardEvent
+      act(() => {
+        event = pressShortcut()
+      })
+      await act(() => Promise.resolve())
 
-    expect(event.defaultPrevented).toBe(false)
-    expect(translateTextCoreMock).not.toHaveBeenCalled()
-  })
+      expect(event.defaultPrevented).toBe(false)
+      expect(translateTextCoreMock).not.toHaveBeenCalled()
+    },
+  )
 
   it("binds no key for an empty or invalid selection translation shortcut", () => {
     const paragraph = document.createElement("p")

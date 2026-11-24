@@ -51,8 +51,6 @@ popup:
         action: 클릭하여 이중 언어로 전환
   hub:
     tooltip: 여러 번역 모델로 동시에 텍스트 번역
-  discord:
-    tooltip: Discord에 참여하여 개발자와 소통하고 새 기능을 먼저 체험하세요
   blog:
     notification: Read Frog의 새로운 소식
   aiSmartContext: AI 스마트 컨텍스트
@@ -594,9 +592,7 @@ options:
     pageDescription: 입력창에 쓴 내용을 보내기 전에 번역합니다.
     trigger:
       title: 트리거
-      enable:
-        title: 활성화
-        description: 입력 필드에서 스페이스바를 빠르게 3번 누르면 입력한 내용을 번역합니다.
+      description: 입력 필드에서 스페이스바를 빠르게 3번 누르면 입력한 내용을 번역합니다.
       threshold:
         title: 트리거 임계값
         description: 연속된 누름 사이에 허용되는 간격(밀리초)입니다. 잘 실행되지 않으면 늘리고, 입력하는 중에 실행되면 줄이세요.
@@ -615,9 +611,6 @@ options:
     title: 플로팅 버튼
     pageDescription: 플로팅 버튼이 놓일 위치와 클릭 동작, 숨길 사이트를 설정하세요.
     demoImageAlt: 플로팅 버튼 데모
-    enable:
-      title: 플로팅 버튼 활성화
-      description: 웹 페이지에 플로팅 버튼을 표시하여 Read Frog 기능에 빠르게 액세스
     display:
       title: 표시
       side:
@@ -637,6 +630,7 @@ options:
       translate: 페이지 번역 전환
     closeMenu:
       title: 플로팅 버튼 숨기기
+    pageTranslationOff: "페이지 번역이 심플 모드에서 꺼져 있습니다"
     tooltips:
       togglePageTranslation: 페이지 번역 전환
       floatingButtonOptions: 플로팅 버튼 옵션
@@ -647,9 +641,6 @@ options:
     title: 선택 툴바
     pageDescription: 텍스트를 선택했을 때 나타날 동작과 도구 모음을 표시할 사이트를 설정하세요.
     demoImageAlt: 선택 툴바 데모
-    enable:
-      title: 선택 툴바 활성화
-      description: 웹 페이지에서 텍스트를 선택할 때 도구 모음을 표시하여 빠르게 번역, 읽기, AI 액션을 사용할 수 있습니다
     annotation:
       title: "단어 주석"
       enable:
@@ -661,13 +652,10 @@ options:
     actions:
       title: 작업
       translate:
-        title: 번역
         description: 툴바에 번역 버튼을 표시합니다
       speak:
-        title: 읽기
         description: 선택한 텍스트를 읽어 주는 읽기 버튼을 툴바에 표시합니다
       noteSuggestion:
-        title: 노트 제안
         description: AI 제공자로 선택 번역 후 Notebase에 저장할 단어를 추천합니다
         action: 작업
         actionDescription: 저장 제안을 만드는 작업
@@ -1093,8 +1081,8 @@ options:
       pageDescription: 중요한 단어에 고정된 번역을 지정하고, 각 목록이 적용될 곳을 선택하세요.
       untitled: 제목 없는 용어집
       noGlossaries: 아직 용어집이 없습니다.
-      enable:
-        title: 사용
+      appliesTo:
+        title: 적용 범위
         description: 일치하는 용어를 LLM에 함께 전달해 원하는 표현으로 번역하게 합니다. 용어집은 프롬프트에 담겨 전달되므로, LLM 제공업체로 실행되는 기능에만 적용됩니다.
       library:
         title: 내 용어집
@@ -1198,9 +1186,6 @@ options:
     title: 컨텍스트 메뉴
     pageDescription: 브라우저 우클릭 메뉴에 표시되는 Read Frog 항목을 설정하세요.
     demoImageAlt: 컨텍스트 메뉴 데모
-    enable:
-      title: 우클릭 번역 활성화
-      description: 브라우저 우클릭 메뉴에 번역 옵션을 추가하여 페이지나 선택한 텍스트를 빠르게 번역
   translation:
     title: 페이지 번역
     pageDescription: 페이지 번역 방식을 설정하세요 — 모드, 범위, 프롬프트, 요청 제한.
@@ -1569,6 +1554,53 @@ options:
           confirm: 확인
           cancel: 취소
           description: 모든 캐시된 AI 분할 결과가 삭제됩니다. 다음에 AI 분할이 활성화된 비디오를 재생하면 자막이 다시 처리됩니다.
+  simpleMode:
+    title: "심플 모드"
+    pageDescription: "끈 기능은 설치하지 않은 것처럼 됩니다. 웹 페이지에 나타나지 않고, 단축키도 반응하지 않습니다. 설정은 그대로 남아 있어 다시 켜면 이전과 똑같이 돌아옵니다."
+    drawerDescription: "끈 기능은 어디에도 나타나지 않습니다. 설정은 유지됩니다"
+    features:
+      customActions:
+        title: "커스텀 AI 액션"
+        description: "선택 툴바와 우클릭 메뉴의 AI 액션. 기본 제공되는 사전과 문장 구조 분석도 포함됩니다"
+      pageTranslation:
+        title: "페이지 번역"
+        description: "웹 페이지 전체를 번역합니다"
+        hover:
+          title: "호버 번역"
+          description: "단락에 마우스를 올리거나 길게 누르면 그 단락만 번역합니다"
+      videoSubtitles:
+        title: "비디오 자막"
+        description: "동영상 플레이어에 번역 자막 버튼을 추가합니다"
+      inputTranslation:
+        title: "입력 번역"
+        description: "입력 필드에서 스페이스바를 빠르게 3번 누르면 입력한 내용을 번역합니다"
+      floatingButton:
+        title: "플로팅 버튼"
+        description: "웹 페이지에 플로팅 버튼을 표시하여 Read Frog 기능에 빠르게 액세스"
+      selectionToolbar:
+        title: "선택 툴바"
+        description: "웹 페이지에서 텍스트를 선택할 때 도구 모음을 표시하여 빠르게 번역, 읽기, AI 액션을 사용할 수 있습니다"
+        annotation:
+          title: "단어 주석"
+          description: "선택한 단어나 구에 밑줄을 긋고 줄 사이에 뜻을 적습니다"
+        translate:
+          title: "선택 영역 번역"
+          description: "툴바에 번역 버튼을 표시합니다"
+          noteSuggestion:
+            title: "노트 제안"
+            description: "AI 제공자로 선택 번역 후 Notebase에 저장할 단어를 추천합니다"
+        speak:
+          title: "읽기"
+          description: "선택한 텍스트를 읽어 주는 읽기 버튼을 툴바에 표시합니다"
+      contextMenu:
+        title: "컨텍스트 메뉴"
+        description: "브라우저 우클릭 메뉴에 표시되는 Read Frog 항목"
+      translationHub:
+        title: "번역 허브"
+        description: "여러 번역 모델로 동시에 텍스트 번역"
+      glossary:
+        title: "용어집"
+        description: "중요한 단어를 정해 둔 번역으로 옮깁니다"
   whatsNew:
     title: 새로운 기능
     postType:
@@ -1658,7 +1690,7 @@ hideMenu:
   untilReload: 페이지를 새로고침할 때까지
   onSite: $1에서
   onAllSites: 모든 사이트에서
-  restoreHint: "'$1'에서 다시 켤 수 있습니다."
+  restoreHint: "'$1' 또는 '$2'에서 다시 켤 수 있습니다."
 action:
   copy: 복사
   copied: 복사됨

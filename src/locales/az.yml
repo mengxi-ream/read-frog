@@ -51,8 +51,6 @@ popup:
         action: İkidilli rejimə keçmək üçün klikləyin
   hub:
     tooltip: Mətni eyni anda bir neçə modellə tərcümə edin
-  discord:
-    tooltip: Tərtibatçılarla ünsiyyət qurmaq və yeni funksiyaları erkən sınamaq üçün Discord icmasına qoşulun
   blog:
     notification: Read Frog yenilikləri
   aiSmartContext: Süni intellektlə ağıllı kontekst
@@ -595,9 +593,7 @@ options:
     pageDescription: Mətn sahələrinə yazdıqlarınızı göndərməzdən əvvəl tərcümə edin.
     trigger:
       title: İşə salma
-      enable:
-        title: Aktiv et
-        description: İstənilən mətn sahəsində yazdığınızı tərcümə etmək üçün boşluq düyməsini sürətlə üç dəfə basın.
+      description: İstənilən mətn sahəsində yazdığınızı tərcümə etmək üçün boşluq düyməsini sürətlə üç dəfə basın.
       threshold:
         title: İşə salma həddi
         description: Düyməyə ardıcıl basmalar arasında icazə verilən ən uzun fasilə (millisaniyə ilə). Tərcümə başlamırsa, dəyəri artırın; hələ yazarkən başlayırsa, azaldın.
@@ -616,9 +612,6 @@ options:
     title: Üzən düymə
     pageDescription: Üzən düymənin hansı tərəfdə yerləşdiyini, kliklədikdə nə etdiyini və harada gizləndiyini təyin edin.
     demoImageAlt: Üzən düymə nümunəsi
-    enable:
-      title: Üzən düyməni aktiv et
-      description: Read Frog funksiyalarına sürətli çıxış üçün veb səhifələrdə üzən düyməni göstərin
     display:
       title: Görünüş
       side:
@@ -638,6 +631,7 @@ options:
       translate: Səhifə tərcüməsini aktiv və ya deaktiv et
     closeMenu:
       title: Üzən düyməni gizlət
+    pageTranslationOff: "Səhifə tərcüməsi sadə rejimdə söndürülüb"
     tooltips:
       togglePageTranslation: Səhifə tərcüməsini aktiv və ya deaktiv et
       floatingButtonOptions: Üzən düymə parametrləri
@@ -648,9 +642,6 @@ options:
     title: Seçim alətlər paneli
     pageDescription: Mətn seçdikdə hansı əməliyyatların göründüyünü və alətlər panelinin harada açıldığını təyin edin.
     demoImageAlt: Seçim alətlər paneli nümunəsi
-    enable:
-      title: Seçim alətlər panelini aktiv et
-      description: Sürətli tərcümə, səsləndirmə və süni intellekt əməliyyatları üçün veb səhifələrdə mətn seçərkən alətlər panelini göstərin
     annotation:
       title: "Söz qeydləri"
       enable:
@@ -662,13 +653,10 @@ options:
     actions:
       title: Əməliyyatlar
       translate:
-        title: Tərcümə et
         description: Alətlər panelində tərcümə düyməsini göstərin
       speak:
-        title: Səsləndir
         description: Seçilmiş mətni ucadan oxuyan səsləndirmə düyməsini göstərin
       noteSuggestion:
-        title: Qeyd təklifləri
         description: Seçilmiş mətn süni intellekt provayderi ilə tərcümə edildikdən sonra Notebase daxilində saxlamaq üçün sözlər təklif edin
         action: Əməliyyat
         actionDescription: Təklifi yaradan əməliyyat
@@ -1098,8 +1086,8 @@ options:
       pageDescription: Sizin üçün vacib olan sözlərə sabit tərcümə təyin edin və hər siyahının harada tətbiq olunacağını seçin.
       untitled: Adsız lüğət
       noGlossaries: Hələ lüğət yoxdur.
-      enable:
-        title: Aktiv et
+      appliesTo:
+        title: Tətbiq olunduğu yerlər
         description: Uyğun gələn terminləri LLM-ə göndərir ki, onları istədiyiniz kimi tərcümə etsin. Lüğət sorğunun içində göndərilir, ona görə də yalnız LLM provayderi üzərində işləyən funksiyalara tətbiq olunur.
       library:
         title: Lüğətləriniz
@@ -1203,9 +1191,6 @@ options:
     title: Kontekst menyusu
     pageDescription: Brauzerin sağ klik menyusundakı Read Frog elementlərini idarə edin.
     demoImageAlt: Kontekst menyusu nümunəsi
-    enable:
-      title: Kontekst menyusunda tərcüməni aktiv et
-      description: Səhifəni və seçilmiş mətni sürətlə tərcümə etmək üçün brauzerin sağ klik menyusuna tərcümə seçimləri əlavə edin
   translation:
     title: Səhifə tərcüməsi
     pageDescription: Səhifə tərcüməsinin rejimini, əhatəsini, təlimatlarını və sorğu hədlərini idarə edin.
@@ -1574,6 +1559,53 @@ options:
           confirm: Təsdiqlə
           cancel: Ləğv et
           description: Keşdəki bütün süni intellekt seqmentləşdirmə nəticələri silinəcək. Növbəti dəfə süni intellekt seqmentləşdirməsi aktiv halda video açdıqda subtitrlər yenidən işlənəcək.
+  simpleMode:
+    title: "Sadə rejim"
+    pageDescription: "Söndürdüyünüz funksiya sanki quraşdırılmayıb: veb səhifələrdə görünmür və qısayolları işləmir. Ayarları saxlanılır, ona görə də yenidən yandıranda hər şey əvvəlki kimi olur."
+    drawerDescription: "Söndürdüyünüz funksiyalar heç yerdə görünmür. Ayarları saxlanılır"
+    features:
+      customActions:
+        title: "Fərdi süni intellekt əməliyyatları"
+        description: "Seçim alətlər panelində və sağ klik menyusunda olan süni intellekt əməliyyatları, daxili Lüğət və Cümlə təhlili də daxil olmaqla"
+      pageTranslation:
+        title: "Səhifə tərcüməsi"
+        description: "Veb səhifələri bütövlükdə tərcümə edir"
+        hover:
+          title: "Kursorla tərcümə"
+          description: "Yalnız bir abzası tərcümə etmək üçün kursoru üzərinə gətirin və ya basıb saxlayın"
+      videoSubtitles:
+        title: "Video subtitrləri"
+        description: "Video pleyerlərə tərcümə olunmuş subtitr düyməsi əlavə edir"
+      inputTranslation:
+        title: "Daxil edilən mətnin tərcüməsi"
+        description: "İstənilən mətn sahəsində yazdığınızı tərcümə etmək üçün boşluq düyməsini sürətlə üç dəfə basın"
+      floatingButton:
+        title: "Üzən düymə"
+        description: "Read Frog funksiyalarına sürətli çıxış üçün veb səhifələrdə üzən düyməni göstərin"
+      selectionToolbar:
+        title: "Seçim alətlər paneli"
+        description: "Sürətli tərcümə, səsləndirmə və süni intellekt əməliyyatları üçün veb səhifələrdə mətn seçərkən alətlər panelini göstərin"
+        annotation:
+          title: "Söz qeydləri"
+          description: "Seçilmiş sözün və ya ifadənin altını cızır və mənasını sətirlər arasına yazır"
+        translate:
+          title: "Seçilmiş mətnin tərcüməsi"
+          description: "Alətlər panelində tərcümə düyməsini göstərin"
+          noteSuggestion:
+            title: "Qeyd təklifləri"
+            description: "Seçilmiş mətn süni intellekt provayderi ilə tərcümə edildikdən sonra Notebase daxilində saxlamaq üçün sözlər təklif edin"
+        speak:
+          title: "Səsləndir"
+          description: "Seçilmiş mətni ucadan oxuyan səsləndirmə düyməsini göstərin"
+      contextMenu:
+        title: "Kontekst menyusu"
+        description: "Brauzerin sağ klik menyusundakı Read Frog elementləri"
+      translationHub:
+        title: "Tərcümə mərkəzi"
+        description: "Mətni eyni anda bir neçə modellə tərcümə edin"
+      glossary:
+        title: "Terminlər lüğəti"
+        description: "Sizin üçün vacib olan sözləri seçdiyiniz kimi tərcümə edir"
   whatsNew:
     title: Yeniliklər
     postType:
@@ -1663,7 +1695,7 @@ hideMenu:
   untilReload: Səhifəni yeniləyənə qədər
   onSite: $1 saytında
   onAllSites: Bütün saytlarda
-  restoreHint: $1 bölməsində yenidən aktivləşdirə bilərsiniz.
+  restoreHint: "$1 və ya $2 bölməsində yenidən aktivləşdirə bilərsiniz."
 action:
   copy: Köçür
   copied: Köçürüldü

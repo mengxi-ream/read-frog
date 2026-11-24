@@ -14,8 +14,9 @@ import { Avatar, AvatarGroup, AvatarGroupCount, AvatarImage } from "@/components
 import { Button } from "@/components/ui/base-ui/button"
 import { Drawer, DrawerBody, DrawerContent, DrawerTrigger } from "@/components/ui/base-ui/drawer"
 import { configAtom, configFieldsAtomMap } from "@/utils/atoms/config"
-import { FEATURE_KEYS, FEATURE_PROVIDER_DEFS } from "@/utils/constants/feature-providers"
+import { FEATURE_PROVIDER_DEFS, getShownFeatureKeys } from "@/utils/constants/feature-providers"
 import { getSelectionToolbarActions } from "@/utils/custom-actions"
+import { isFeatureOn } from "@/utils/features"
 import { i18n } from "@/utils/i18n"
 import { isProviderIdPlanWalled } from "@/utils/providers/provider-availability"
 import {
@@ -58,11 +59,15 @@ function getSelectedProviderOptions(
     selectedProviders.push({ provider: selectedProvider, capability })
   }
 
-  for (const featureKey of FEATURE_KEYS) {
+  // Same rows as the drawer this summarizes: none for a feature simple mode turned off.
+  for (const featureKey of getShownFeatureKeys(config)) {
     addProvider(featureKey, FEATURE_PROVIDER_DEFS[featureKey].getProviderId(config))
   }
 
-  for (const action of getSelectionToolbarActions(config.selectionToolbar)) {
+  const actions = isFeatureOn(config, "customActions")
+    ? getSelectionToolbarActions(config.selectionToolbar)
+    : []
+  for (const action of actions) {
     if (action.enabled === false) {
       continue
     }

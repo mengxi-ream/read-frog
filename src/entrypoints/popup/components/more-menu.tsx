@@ -18,7 +18,9 @@ import { i18n } from "@/utils/i18n"
 import { resolveUiLocale } from "@/utils/i18n/locale-map"
 import { createLogger } from "@/utils/logging/logger"
 import { sendMessage } from "@/utils/message"
+import { cn } from "@/utils/styles/utils"
 import { getReviewUrl } from "@/utils/utils"
+import { useLatestBlogPost } from "./use-latest-blog-post"
 
 const SUPPORT_EMAIL = "contact@readfrog.app"
 const DISCORD_INVITE_URL = "https://discord.gg/ej45e3PezJ"
@@ -45,13 +47,20 @@ async function diagnoseCurrentPage() {
   }
 }
 
+/** Marks a blog post the user has not opened yet, on the menu's trigger and on its item. */
+function NewPostDot({ className }: { className?: string }) {
+  return <span className={cn("size-1.5 shrink-0 rounded-full bg-accent", className)} />
+}
+
 /**
  * Grouped the same way as the options page it mirrors: what to read or reach us through
- * under Help, and where to find the other users under Community.
+ * under Help, and where to find the other users under Community. "What's New" leads Help, and
+ * a new blog post puts a dot on it and on the menu's trigger.
  */
 export function MoreMenu() {
   const uiLanguage = useAtomValue(configFieldsAtomMap.uiLanguage)
   const locale = resolveUiLocale(uiLanguage)
+  const latestBlogPost = useLatestBlogPost()
 
   return (
     <DropdownMenu>
@@ -65,10 +74,22 @@ export function MoreMenu() {
       >
         <Icon icon="tabler:dots" className="size-4" strokeWidth={1.6} />
         <span className="text-[13px] font-medium">{i18n.t("popup.more.title")}</span>
+        {latestBlogPost.hasNewPost && (
+          <>
+            <NewPostDot />
+            <span className="sr-only">{i18n.t("popup.blog.notification")}</span>
+          </>
+        )}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" side="top" className="w-fit">
         <DropdownMenuGroup>
           <DropdownMenuLabel>{i18n.t("popup.more.help")}</DropdownMenuLabel>
+
+          <DropdownMenuItem onClick={() => void latestBlogPost.open()} className="cursor-pointer">
+            <Icon icon="tabler:rss" className="size-4" strokeWidth={1.6} />
+            {i18n.t("options.whatsNew.title")}
+            {latestBlogPost.hasNewPost && <NewPostDot className="ml-auto" />}
+          </DropdownMenuItem>
 
           <DropdownMenuItem
             // The docs site picks its own locale from the browser.

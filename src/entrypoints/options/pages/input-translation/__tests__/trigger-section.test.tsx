@@ -45,14 +45,11 @@ describe("input translation trigger section", () => {
     addToastMock.mockReset()
   })
 
-  it("turns the feature on without touching how it is triggered", () => {
-    const inputTranslation = testState.inputTranslation!
-    inputTranslation.enabled = false
-
+  it("says what triggers it, and leaves turning it on and off to simple mode", () => {
     render(<TriggerSection />)
-    fireEvent.click(screen.getByRole("switch"))
 
-    expect(setInputTranslationMock).toHaveBeenCalledWith({ ...inputTranslation, enabled: true })
+    expect(screen.queryByRole("switch")).toBeNull()
+    expect(screen.getByText("options.inputTranslation.trigger.description")).toBeInTheDocument()
   })
 
   it("keeps the config on its last good value while a new one is typed out", () => {

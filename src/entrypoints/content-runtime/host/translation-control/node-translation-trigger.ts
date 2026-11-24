@@ -5,6 +5,7 @@ import type { Point } from "@/types/dom"
 import { matchesKeyboardEvent } from "@tanstack/hotkeys"
 import { HOTKEY_EVENT_KEYS, isSingleKeyHotkey } from "@/utils/constants/hotkeys"
 import { SELECTION_SHORTCUT_CLAIMED_EVENT } from "@/utils/constants/selection"
+import { isFeatureOn } from "@/utils/features"
 import { findNearestAncestorBlockNodeAt } from "@/utils/host/dom/find"
 import { isShortcutEmpty, isValidShortcut } from "@/utils/shortcut"
 
@@ -50,7 +51,7 @@ function isDocumentSurfaceTarget(target: EventTarget | null): boolean {
 
 /** The key a single-key hotkey listens for; null while the feature is off or uses another trigger. */
 function getHotkeyEventKey(config: Config | null): string | null {
-  if (!config?.pageTranslation.node.enabled) return null
+  if (!config || !isFeatureOn(config, "pageTranslation.hover")) return null
 
   const { hotkey } = config.pageTranslation.node
   return isSingleKeyHotkey(hotkey) ? HOTKEY_EVENT_KEYS[hotkey] : null
@@ -58,7 +59,7 @@ function getHotkeyEventKey(config: Config | null): string | null {
 
 /** Whether the event presses the recorded combination of the `custom` hotkey. */
 function matchesCustomShortcut(event: KeyboardEvent, config: Config | null): boolean {
-  if (!config?.pageTranslation.node.enabled) return false
+  if (!config || !isFeatureOn(config, "pageTranslation.hover")) return false
 
   const { hotkey, shortcut } = config.pageTranslation.node
   if (hotkey !== "custom" || isShortcutEmpty(shortcut) || !isValidShortcut(shortcut)) return false
@@ -227,7 +228,8 @@ export function registerNodeTranslationTriggerListeners({
   // Whether `config` still has the hotkey that started the press.
   const isActiveHotkey = (config: Config): boolean =>
     activeShortcutCode
-      ? config.pageTranslation.node.enabled && config.pageTranslation.node.hotkey === "custom"
+      ? isFeatureOn(config, "pageTranslation.hover") &&
+        config.pageTranslation.node.hotkey === "custom"
       : getHotkeyEventKey(config) === activeHotkeyEventKey
 
   // Whether letting go of this key ends the press: its own key, or any key of the combination.
@@ -319,7 +321,7 @@ export function registerNodeTranslationTriggerListeners({
         const config = await getCurrentConfig()
         if (
           !config ||
-          !config.pageTranslation.node.enabled ||
+          !isFeatureOn(config, "pageTranslation.hover") ||
           config.pageTranslation.node.hotkey !== "clickAndHold"
         )
           return
@@ -338,7 +340,7 @@ export function registerNodeTranslationTriggerListeners({
             const currentConfig = await getCurrentConfig()
             if (
               !currentConfig ||
-              !currentConfig.pageTranslation.node.enabled ||
+              !isFeatureOn(currentConfig, "pageTranslation.hover") ||
               currentConfig.pageTranslation.node.hotkey !== "clickAndHold"
             )
               return
