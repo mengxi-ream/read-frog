@@ -577,6 +577,80 @@ describe("registerNodeTranslationTriggerListeners", () => {
     expect(onTrigger).not.toHaveBeenCalled()
   })
 
+  it("cancels a held hotkey on a second mouse button, which sends mousedown but no pointerdown", async () => {
+    vi.useFakeTimers()
+    const onTrigger = vi.fn<(...args: any[]) => any>()
+    const paragraph = document.createElement("p")
+    document.body.append(paragraph)
+
+    teardown = registerNodeTranslationTriggerListeners({
+      getConfig: () => Promise.resolve(createConfig("control")),
+      onTrigger,
+    })
+
+    dispatchMouseEvent("mouseover", { clientX: 70, clientY: 80 })
+    // The left button is held from before the hotkey.
+    paragraph.dispatchEvent(
+      new PointerEvent("pointerdown", {
+        bubbles: true,
+        button: 0,
+        buttons: 1,
+        clientX: 70,
+        clientY: 80,
+      }),
+    )
+    dispatchMouseEvent("mousedown", { button: 0, buttons: 1, clientX: 70, clientY: 80 }, paragraph)
+    dispatchKeyboardEvent("keydown", "Control")
+    await flushMicrotasks()
+    // The right button joins it.
+    dispatchMouseEvent("mousedown", { button: 2, buttons: 3, clientX: 70, clientY: 80 }, paragraph)
+    dispatchMouseEvent("mouseup", { button: 2, buttons: 1, clientX: 70, clientY: 80 }, paragraph)
+    dispatchKeyboardEvent("keyup", "Control")
+    await flushMicrotasks()
+    dispatchMouseEvent("mouseup", { button: 0, buttons: 0, clientX: 70, clientY: 80 }, paragraph)
+
+    expect(onTrigger).not.toHaveBeenCalled()
+  })
+
+  it("hears the release of a hotkey whose keydown and keyup the page both keeps to itself", async () => {
+    vi.useFakeTimers()
+    const onTrigger = vi.fn<(...args: any[]) => any>()
+    const preview = createPreview()
+    // A focused widget, such as a remote desktop console, keeps every key from the document.
+    const widget = document.createElement("div")
+    for (const type of ["keydown", "keyup"] as const) {
+      widget.addEventListener(type, (event) => event.stopPropagation())
+    }
+    document.body.append(widget)
+
+    teardown = registerNodeTranslationTriggerListeners({
+      getConfig: () => Promise.resolve(createConfig("control")),
+      onTrigger,
+      preview,
+    })
+
+    dispatchMouseEvent("mouseover", { clientX: 70, clientY: 80 })
+    // A key typed into the widget comes up there too, so the next press starts clean.
+    dispatchKeyboardEvent("keydown", "a", {}, widget)
+    dispatchKeyboardEvent("keyup", "a", {}, widget)
+    await flushMicrotasks()
+
+    dispatchKeyboardEvent("keydown", "Control", {}, widget)
+    await vi.advanceTimersByTimeAsync(600)
+    expect(preview.show).toHaveBeenCalledTimes(1)
+    dispatchKeyboardEvent("keyup", "Control", {}, widget)
+    await vi.advanceTimersByTimeAsync(10)
+    expect(preview.hide).toHaveBeenCalled()
+    expect(onTrigger).toHaveBeenCalledTimes(1)
+
+    // The press ended, so the next one works too.
+    dispatchKeyboardEvent("keydown", "Control", {}, widget)
+    await vi.advanceTimersByTimeAsync(10)
+    dispatchKeyboardEvent("keyup", "Control", {}, widget)
+    await vi.advanceTimersByTimeAsync(10)
+    expect(onTrigger).toHaveBeenCalledTimes(2)
+  })
+
   it("drops a held hotkey when the window loses focus", async () => {
     vi.useFakeTimers()
     const onTrigger = vi.fn<(...args: any[]) => any>()

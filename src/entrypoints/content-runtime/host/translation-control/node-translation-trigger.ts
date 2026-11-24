@@ -307,15 +307,14 @@ export function registerNodeTranslationTriggerListeners({
 
   // Ctrl+click opens a link and Shift+click extends a selection. A page that cancels
   // pointerdown gets no mousedown at all, and one can stop mousedown before the document.
-  window.addEventListener(
-    "pointerdown",
-    () => {
-      if (shouldIgnoreEvent()) return
-      pointerPresses++
-      if (isHotkeyPressed) cancelHotkeySession()
-    },
-    { capture: true, signal },
-  )
+  // A second button pressed while one is held sends mousedown but no pointerdown.
+  const onButtonPress = () => {
+    if (shouldIgnoreEvent()) return
+    pointerPresses++
+    if (isHotkeyPressed) cancelHotkeySession()
+  }
+  window.addEventListener("pointerdown", onButtonPress, { capture: true, signal })
+  window.addEventListener("mousedown", onButtonPress, { capture: true, signal })
 
   document.addEventListener(
     "mousedown",
@@ -467,7 +466,8 @@ export function registerNodeTranslationTriggerListeners({
     { signal },
   )
 
-  document.addEventListener(
+  // Heard where keydown is, so a press the page keeps to itself still ends.
+  window.addEventListener(
     "keyup",
     (event) => {
       void (async () => {
@@ -496,7 +496,7 @@ export function registerNodeTranslationTriggerListeners({
         else translateBlockAt(point, config)
       })()
     },
-    { signal },
+    { capture: true, signal },
   )
 
   return () => {
