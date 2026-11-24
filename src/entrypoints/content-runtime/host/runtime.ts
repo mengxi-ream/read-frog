@@ -60,7 +60,10 @@ export async function bootstrapHostContent(
             manager.setTitleTranslationEnabled(
               parsedConfig.data.pageTranslation.page.translateTitle,
             )
-            if (manager.isActive && !isFeatureOn(parsedConfig.data, "pageTranslation")) {
+            // Not only while active: stop() also cancels a start still awaiting its
+            // checks, which would translate the page once they pass. On an idle page
+            // it does nothing.
+            if (!isFeatureOn(parsedConfig.data, "pageTranslation")) {
               manager.stop()
             }
           }
