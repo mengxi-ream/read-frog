@@ -1,4 +1,5 @@
 import type { GeneratedI18nStructure } from "#i18n"
+import type { FeatureTag } from "@/utils/features"
 import {
   CUSTOM_ACTION_LAYOUT_SECTION_ID,
   CUSTOM_ACTION_NOTEBASE_SECTION_ID,
@@ -13,6 +14,11 @@ export interface SearchItem {
   titleKey: string
   descriptionKey?: string
   pageKey: string
+  /**
+   * The feature a section belongs to when its page does not, so simple mode takes it away
+   * with that feature, like the feature's pages: choosing it lands on the feature's switch.
+   */
+  feature?: FeatureTag
 }
 
 type SearchItemDefinition = Omit<SearchItem, "titleKey" | "descriptionKey" | "pageKey"> & {
@@ -56,6 +62,7 @@ export const SEARCH_ITEMS: SearchItem[] = [
   {
     sectionId: "subtitles-ai-quota",
     route: "/usage",
+    feature: "videoSubtitles",
     titleKey: "options.videoSubtitles.aiQuota.title",
     descriptionKey: "options.videoSubtitles.aiQuota.description",
     pageKey: "options.usage.title",

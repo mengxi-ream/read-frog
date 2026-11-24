@@ -9,6 +9,12 @@ const account = vi.hoisted(() => ({
   value: {} as Record<string, unknown>,
 }))
 
+const features = vi.hoisted(() => ({ subtitlesOn: true }))
+
+vi.mock("@/hooks/use-feature-on", () => ({
+  useFeatureOn: (id: string) => (id === "videoSubtitles" ? features.subtitlesOn : true),
+}))
+
 vi.mock("@/components/user-account-menu/shared", () => ({
   ACCOUNT_STATE: { LOADING: "loading", GUEST: "guest", AUTHED: "authed" },
   AccountAvatar: () => <span data-testid="avatar" />,
@@ -50,6 +56,7 @@ describe("UsageCard", () => {
 
   beforeEach(() => {
     openSpy.mockReset().mockReturnValue(null)
+    features.subtitlesOn = true
   })
 
   afterEach(() => {
@@ -63,6 +70,16 @@ describe("UsageCard", () => {
 
     expect(screen.getByTestId("built-in-ai-usage")).toBeInTheDocument()
     expect(screen.getByTestId("ai-subtitles-usage")).toBeInTheDocument()
+  })
+
+  it("leaves out the AI subtitles quota when simple mode turned video subtitles off", () => {
+    features.subtitlesOn = false
+    setAccount({ plan: "pro" })
+
+    render(<UsageCard />)
+
+    expect(screen.getByTestId("built-in-ai-usage")).toBeInTheDocument()
+    expect(screen.queryByTestId("ai-subtitles-usage")).not.toBeInTheDocument()
   })
 
   it("asks a guest to log in for the weekly free quota", () => {

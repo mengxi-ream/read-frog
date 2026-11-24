@@ -19,6 +19,7 @@ import {
   AccountAvatar,
   useUserAccountMenu,
 } from "@/components/user-account-menu/shared"
+import { useFeatureOn } from "@/hooks/use-feature-on"
 import { billingUrl, pricingUrl } from "@/utils/error-action"
 import { i18n } from "@/utils/i18n"
 import { AiSubtitlesUsage } from "./ai-subtitles-usage"
@@ -37,14 +38,20 @@ function openInNewTab(url: string) {
  */
 export function UsageCard() {
   const account = useUserAccountMenu()
+  // Simple mode: with video subtitles off, its quota leaves along with its pages.
+  const subtitlesOn = useFeatureOn("videoSubtitles")
 
   return (
     <Card>
       <AccountHeader account={account} />
       <CardContent className="flex flex-col gap-5">
         <BuiltInAiUsage />
-        <Separator />
-        <AiSubtitlesUsage />
+        {subtitlesOn && (
+          <>
+            <Separator />
+            <AiSubtitlesUsage />
+          </>
+        )}
       </CardContent>
       <UsageFooter
         state={account.state}
