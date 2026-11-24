@@ -51,8 +51,6 @@ popup:
         action: Click to switch to bilingual
   hub:
     tooltip: Translate text with multiple models simultaneously
-  discord:
-    tooltip: Join Discord to connect with developers and get early access to new features
   blog:
     notification: What's new in Read Frog
   aiSmartContext: AI Smart Context
@@ -606,9 +604,7 @@ options:
     pageDescription: Translate what you type in input boxes before you send it.
     trigger:
       title: Trigger
-      enable:
-        title: Enable
-        description: Press the space bar three times quickly in any input box to translate what you typed there.
+      description: Press the space bar three times quickly in any input box to translate what you typed there.
       threshold:
         title: Trigger threshold
         description: How long the presses may be apart, in milliseconds. Raise it if the trigger keeps missing, lower it if it fires while you are still typing.
@@ -627,9 +623,6 @@ options:
     title: Floating Button
     pageDescription: Set which side the floating button sits on, what a click does, and where it stays hidden.
     demoImageAlt: Floating button demo
-    enable:
-      title: Enable floating button
-      description: Display the floating button on web pages for quick access to Read Frog features
     display:
       title: Display
       side:
@@ -649,6 +642,7 @@ options:
       translate: Toggle page translation
     closeMenu:
       title: Hide floating button
+    pageTranslationOff: "Page Translation is turned off in Simple mode"
     tooltips:
       togglePageTranslation: Toggle page translation
       floatingButtonOptions: Floating button options
@@ -659,9 +653,6 @@ options:
     title: Selection Toolbar
     pageDescription: Set which actions appear when you select text, and where the toolbar shows up.
     demoImageAlt: Selection toolbar demo
-    enable:
-      title: Enable selection toolbar
-      description: Display the toolbar when selecting text on web pages for quick translation, speech, and AI actions
     annotation:
       title: "Word annotation"
       enable:
@@ -673,13 +664,10 @@ options:
     actions:
       title: Actions
       translate:
-        title: Translate
         description: Show the translate button in the toolbar
       speak:
-        title: Speak
         description: Show the speak button, which reads the selected text aloud
       noteSuggestion:
-        title: Note suggestions
         description: After selection translation with an AI provider, suggest words to save to your Notebase
         action: Action
         actionDescription: The action that produces the suggestion
@@ -1251,8 +1239,8 @@ options:
       pageDescription: Give the words that matter to you a fixed translation, and choose where each list applies.
       untitled: Untitled glossary
       noGlossaries: No glossaries yet.
-      enable:
-        title: Enable
+      appliesTo:
+        title: Applies to
         description: Send matching terms to the LLM so it renders them your way. The glossary travels in the prompt, so it only applies to features running on an LLM provider.
       library:
         title: Your glossaries
@@ -1356,9 +1344,6 @@ options:
     title: Context Menu
     pageDescription: Control the Read Frog entries in the browser's right-click menu.
     demoImageAlt: Context menu demo
-    enable:
-      title: Enable context menu translate
-      description: Add translate options to the browser right-click menu for quick page and selection translation
   translation:
     title: Page Translation
     pageDescription: Control how pages get translated — mode, range, prompts, and request limits.
@@ -1725,6 +1710,53 @@ options:
           confirm: Confirm
           cancel: Cancel
           description: This will delete all cached AI segmentation results. The next time you play a video with AI segmentation enabled, it will re-process the subtitles.
+  simpleMode:
+    title: "Simple mode"
+    pageDescription: "A feature you turn off is as if it weren't installed: it no longer shows on web pages, and its shortcuts do nothing. Its settings are kept, so turning it back on brings everything back as it was."
+    drawerDescription: "Features you turn off disappear everywhere. Their settings are kept"
+    features:
+      customActions:
+        title: "Custom AI Actions"
+        description: "AI actions in the selection toolbar and the context menu, including the built-in Dictionary and Sentence Analysis"
+      pageTranslation:
+        title: "Page Translation"
+        description: "Translate whole web pages"
+        hover:
+          title: "Hover translation"
+          description: "Hover or long-press a paragraph to translate just that one"
+      videoSubtitles:
+        title: "Video Subtitles"
+        description: "Add a translated subtitles button to video players"
+      inputTranslation:
+        title: "Input Translation"
+        description: "Press the space bar three times quickly in any input box to translate what you typed there"
+      floatingButton:
+        title: "Floating Button"
+        description: "Display the floating button on web pages for quick access to Read Frog features"
+      selectionToolbar:
+        title: "Selection Toolbar"
+        description: "Display the toolbar when selecting text on web pages for quick translation, speech, and AI actions"
+        annotation:
+          title: "Word annotation"
+          description: "Underline the selected word or phrase and write its meaning between the lines"
+        translate:
+          title: "Selection translation"
+          description: "Show the translate button in the toolbar"
+          noteSuggestion:
+            title: "Note suggestions"
+            description: "After selection translation with an AI provider, suggest words to save to your Notebase"
+        speak:
+          title: "Speak"
+          description: "Show the speak button, which reads the selected text aloud"
+      contextMenu:
+        title: "Context Menu"
+        description: "Read Frog's items in the browser's right-click menu"
+      translationHub:
+        title: "Translation Hub"
+        description: "Translate text with multiple models simultaneously"
+      glossary:
+        title: "Glossary"
+        description: "Translate the words you care about the way you decided"
   whatsNew:
     title: What's New
     postType:
@@ -1814,7 +1846,7 @@ hideMenu:
   untilReload: Until I reload this page
   onSite: On $1
   onAllSites: On all sites
-  restoreHint: Turn it back on in $1.
+  restoreHint: "Turn it back on in $1 or $2."
 action:
   copy: Copy
   copied: Copied

@@ -51,8 +51,6 @@ popup:
         action: Nhấp để chuyển sang song ngữ
   hub:
     tooltip: Dịch văn bản với nhiều mô hình đồng thời
-  discord:
-    tooltip: Tham gia Discord để kết nối với các nhà phát triển và truy cập sớm các tính năng mới
   blog:
     notification: Có gì mới trong Read Frog
   aiSmartContext: Ngữ cảnh thông minh AI
@@ -605,9 +603,7 @@ options:
     pageDescription: Dịch nội dung bạn gõ trong ô nhập trước khi gửi đi.
     trigger:
       title: Kích hoạt
-      enable:
-        title: Bật
-        description: Nhấn phím cách nhanh ba lần trong bất kỳ ô nhập nào để dịch nội dung bạn vừa gõ.
+      description: Nhấn phím cách nhanh ba lần trong bất kỳ ô nhập nào để dịch nội dung bạn vừa gõ.
       threshold:
         title: Ngưỡng kích hoạt
         description: Khoảng cách tối đa giữa các lần nhấn, tính bằng mili giây. Tăng lên nếu không kích hoạt được, giảm xuống nếu bị kích hoạt khi đang gõ.
@@ -626,9 +622,6 @@ options:
     title: Nút nổi
     pageDescription: Đặt vị trí nút nổi, hành động khi nhấp và những trang web cần ẩn nút.
     demoImageAlt: Demo nút nổi
-    enable:
-      title: Bật nút nổi
-      description: Hiển thị nút nổi trên các trang web để truy cập nhanh các tính năng Read Frog
     display:
       title: Hiển thị
       side:
@@ -648,6 +641,7 @@ options:
       translate: Bật/tắt dịch trang
     closeMenu:
       title: Ẩn nút nổi
+    pageTranslationOff: "Dịch trang đang tắt trong chế độ đơn giản"
     tooltips:
       togglePageTranslation: Bật/tắt dịch trang
       floatingButtonOptions: Tùy chọn nút nổi
@@ -658,9 +652,6 @@ options:
     title: Thanh công cụ chọn
     pageDescription: Đặt các thao tác xuất hiện khi bạn chọn văn bản và nơi hiển thị thanh công cụ.
     demoImageAlt: Demo thanh công cụ chọn văn bản
-    enable:
-      title: Bật thanh công cụ chọn văn bản
-      description: Hiển thị thanh công cụ khi chọn văn bản trên trang web để dịch nhanh, đọc to và dùng các hành động AI
     annotation:
       title: "Chú thích từ"
       enable:
@@ -672,13 +663,10 @@ options:
     actions:
       title: Hành động
       translate:
-        title: Dịch
         description: Hiển thị nút dịch trên thanh công cụ
       speak:
-        title: Đọc
         description: Hiển thị nút đọc, dùng để đọc to văn bản đã chọn
       noteSuggestion:
-        title: Gợi ý ghi chú
         description: Sau khi dịch vùng chọn bằng nhà cung cấp AI, gợi ý các từ để lưu vào Notebase
         action: Hành động
         actionDescription: Hành động tạo ra gợi ý
@@ -1104,8 +1092,8 @@ options:
       pageDescription: Đặt bản dịch cố định cho những từ quan trọng với bạn, và chọn nơi áp dụng cho từng danh sách.
       untitled: Bảng thuật ngữ chưa đặt tên
       noGlossaries: Chưa có bảng thuật ngữ nào.
-      enable:
-        title: Bật
+      appliesTo:
+        title: Áp dụng cho
         description: Gửi các thuật ngữ khớp cho LLM để dịch đúng theo cách bạn muốn. Bảng thuật ngữ được gửi kèm trong câu lệnh, nên nó chỉ áp dụng cho các tính năng chạy trên nhà cung cấp LLM.
       library:
         title: Bảng thuật ngữ của bạn
@@ -1209,9 +1197,6 @@ options:
     title: Menu ngữ cảnh
     pageDescription: Kiểm soát các mục Read Frog trong menu chuột phải của trình duyệt.
     demoImageAlt: Demo menu ngữ cảnh
-    enable:
-      title: Bật dịch menu ngữ cảnh
-      description: Thêm các tùy chọn dịch vào menu chuột phải của trình duyệt để dịch nhanh trang hoặc văn bản đã chọn
   translation:
     title: Dịch trang
     pageDescription: Kiểm soát cách dịch trang — chế độ, phạm vi, prompt và giới hạn yêu cầu.
@@ -1578,6 +1563,53 @@ options:
           confirm: Xác nhận
           cancel: Hủy
           description: Tất cả kết quả AI phân đoạn đã lưu trong bộ nhớ đệm sẽ bị xóa. Lần tới khi phát video có bật AI phân đoạn, phụ đề sẽ được xử lý lại.
+  simpleMode:
+    title: "Chế độ đơn giản"
+    pageDescription: "Tính năng đã tắt sẽ như chưa từng được cài: không xuất hiện trên trang web và phím tắt không còn tác dụng. Cài đặt của nó vẫn được giữ, nên bật lại thì mọi thứ vẫn như cũ."
+    drawerDescription: "Tính năng đã tắt sẽ không xuất hiện ở đâu cả. Cài đặt vẫn được giữ"
+    features:
+      customActions:
+        title: "Hành động AI tùy chỉnh"
+        description: "Các hành động AI trên thanh công cụ chọn và menu chuột phải, gồm cả Từ điển và Phân tích câu có sẵn"
+      pageTranslation:
+        title: "Dịch trang"
+        description: "Dịch toàn bộ trang web"
+        hover:
+          title: "Dịch khi di chuột"
+          description: "Di chuột hoặc nhấn giữ một đoạn để chỉ dịch đoạn đó"
+      videoSubtitles:
+        title: "Phụ đề video"
+        description: "Thêm nút phụ đề đã dịch vào trình phát video"
+      inputTranslation:
+        title: "Dịch đầu vào"
+        description: "Nhấn phím cách nhanh ba lần trong bất kỳ ô nhập nào để dịch nội dung bạn vừa gõ"
+      floatingButton:
+        title: "Nút nổi"
+        description: "Hiển thị nút nổi trên các trang web để truy cập nhanh các tính năng Read Frog"
+      selectionToolbar:
+        title: "Thanh công cụ chọn"
+        description: "Hiển thị thanh công cụ khi chọn văn bản trên trang web để dịch nhanh, đọc to và dùng các hành động AI"
+        annotation:
+          title: "Chú thích từ"
+          description: "Gạch chân từ hoặc cụm từ đã chọn và ghi nghĩa của nó giữa các dòng"
+        translate:
+          title: "Dịch vùng chọn"
+          description: "Hiển thị nút dịch trên thanh công cụ"
+          noteSuggestion:
+            title: "Gợi ý ghi chú"
+            description: "Sau khi dịch vùng chọn bằng nhà cung cấp AI, gợi ý các từ để lưu vào Notebase"
+        speak:
+          title: "Đọc"
+          description: "Hiển thị nút đọc, dùng để đọc to văn bản đã chọn"
+      contextMenu:
+        title: "Menu ngữ cảnh"
+        description: "Các mục Read Frog trong menu chuột phải của trình duyệt"
+      translationHub:
+        title: "Trung tâm Dịch thuật"
+        description: "Dịch văn bản với nhiều mô hình đồng thời"
+      glossary:
+        title: "Bảng thuật ngữ"
+        description: "Dịch những từ quan trọng với bạn theo cách bạn đã chọn"
   whatsNew:
     title: Có gì mới
     postType:
@@ -1667,7 +1699,7 @@ hideMenu:
   untilReload: Cho đến khi tải lại trang
   onSite: Trên $1
   onAllSites: Trên mọi trang web
-  restoreHint: Có thể bật lại trong $1.
+  restoreHint: "Có thể bật lại trong $1 hoặc $2."
 action:
   copy: Sao chép
   copied: Đã sao chép

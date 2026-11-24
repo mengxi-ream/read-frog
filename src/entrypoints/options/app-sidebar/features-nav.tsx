@@ -1,5 +1,7 @@
 import type { ReactNode } from "react"
+import type { RoutePath } from "./nav-items"
 import { Icon } from "@iconify/react"
+import { useAtomValue } from "jotai"
 import { useState } from "react"
 import { Link, useLocation } from "react-router"
 import { browser } from "#imports"
@@ -21,8 +23,11 @@ import {
   SidebarMenuSubItem,
 } from "@/components/ui/base-ui/sidebar"
 import { env } from "@/env"
+import { configAtom } from "@/utils/atoms/config"
 import { TRANSLATION_HUB_PAGE_PATH } from "@/utils/constants/translation-hub"
+import { isFeatureOn, isShown } from "@/utils/features"
 import { i18n } from "@/utils/i18n"
+import { getRouteFeature } from "./nav-items"
 
 const OVERLAY_TOOLS_PATHS = ["/floating-button", "/selection-toolbar", "/context-menu"] as const
 /**
@@ -37,6 +42,11 @@ const TRANSLATION_PATHS = ["/page-translation", "/video-subtitles", "/input-tran
 
 export function FeaturesNav() {
   const { pathname } = useLocation()
+  const config = useAtomValue(configAtom)
+  // A page of a feature simple mode turned off leaves the sidebar with it, and a group left
+  // with nothing to list goes too. Pages several features share stay.
+  const shows = (path: RoutePath) => isShown(config, getRouteFeature(path))
+  const shownOverlayToolsPaths = OVERLAY_TOOLS_PATHS.filter(shows)
   const isOverlayToolsActive = OVERLAY_TOOLS_PATHS.includes(pathname)
   const isTranslationActive = TRANSLATION_PATHS.some((path) => pathname.startsWith(path))
   // `startsWith`, so the group stays lit while a single glossary is open on
@@ -80,30 +90,36 @@ export function FeaturesNav() {
               </CollapsibleTrigger>
               <CollapsibleContent>
                 <SidebarMenuSub>
-                  <SidebarMenuSubItem>
-                    <SidebarMenuSubButton
-                      render={<Link to="/page-translation" />}
-                      isActive={pathname.startsWith("/page-translation")}
-                    >
-                      <span>{i18n.t("options.translation.title")}</span>
-                    </SidebarMenuSubButton>
-                  </SidebarMenuSubItem>
-                  <SidebarMenuSubItem>
-                    <SidebarMenuSubButton
-                      render={<Link to="/video-subtitles" />}
-                      isActive={pathname.startsWith("/video-subtitles")}
-                    >
-                      <span>{i18n.t("options.videoSubtitles.title")}</span>
-                    </SidebarMenuSubButton>
-                  </SidebarMenuSubItem>
-                  <SidebarMenuSubItem>
-                    <SidebarMenuSubButton
-                      render={<Link to="/input-translation" />}
-                      isActive={pathname === "/input-translation"}
-                    >
-                      <span>{i18n.t("options.inputTranslation.title")}</span>
-                    </SidebarMenuSubButton>
-                  </SidebarMenuSubItem>
+                  {shows("/page-translation") && (
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton
+                        render={<Link to="/page-translation" />}
+                        isActive={pathname.startsWith("/page-translation")}
+                      >
+                        <span>{i18n.t("options.translation.title")}</span>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  )}
+                  {shows("/video-subtitles") && (
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton
+                        render={<Link to="/video-subtitles" />}
+                        isActive={pathname.startsWith("/video-subtitles")}
+                      >
+                        <span>{i18n.t("options.videoSubtitles.title")}</span>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  )}
+                  {shows("/input-translation") && (
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton
+                        render={<Link to="/input-translation" />}
+                        isActive={pathname === "/input-translation"}
+                      >
+                        <span>{i18n.t("options.inputTranslation.title")}</span>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  )}
                   <SidebarMenuSubItem>
                     <SidebarMenuSubButton
                       render={
@@ -123,53 +139,61 @@ export function FeaturesNav() {
             </SidebarMenuItem>
           </CollapsibleNavGroup>
 
-          <CollapsibleNavGroup active={isOverlayToolsActive}>
-            <SidebarMenuItem>
-              <CollapsibleTrigger
-                render={
-                  <SidebarMenuButton
-                    isActive={isOverlayToolsActive}
-                    tooltip={i18n.t("options.overlayTools.title")}
+          {shownOverlayToolsPaths.length > 0 && (
+            <CollapsibleNavGroup active={isOverlayToolsActive}>
+              <SidebarMenuItem>
+                <CollapsibleTrigger
+                  render={
+                    <SidebarMenuButton
+                      isActive={isOverlayToolsActive}
+                      tooltip={i18n.t("options.overlayTools.title")}
+                    />
+                  }
+                >
+                  <Icon icon="tabler:layers-intersect" />
+                  <span>{i18n.t("options.overlayTools.title")}</span>
+                  <Icon
+                    icon="tabler:chevron-right"
+                    className="ml-auto transition-transform duration-200 group-data-open/collapsible:rotate-90"
                   />
-                }
-              >
-                <Icon icon="tabler:layers-intersect" />
-                <span>{i18n.t("options.overlayTools.title")}</span>
-                <Icon
-                  icon="tabler:chevron-right"
-                  className="ml-auto transition-transform duration-200 group-data-open/collapsible:rotate-90"
-                />
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <SidebarMenuSub>
-                  <SidebarMenuSubItem>
-                    <SidebarMenuSubButton
-                      render={<Link to="/floating-button" />}
-                      isActive={pathname === "/floating-button"}
-                    >
-                      <span>{i18n.t("options.floatingButton.title")}</span>
-                    </SidebarMenuSubButton>
-                  </SidebarMenuSubItem>
-                  <SidebarMenuSubItem>
-                    <SidebarMenuSubButton
-                      render={<Link to="/selection-toolbar" />}
-                      isActive={pathname === "/selection-toolbar"}
-                    >
-                      <span>{i18n.t("options.selectionToolbar.title")}</span>
-                    </SidebarMenuSubButton>
-                  </SidebarMenuSubItem>
-                  <SidebarMenuSubItem>
-                    <SidebarMenuSubButton
-                      render={<Link to="/context-menu" />}
-                      isActive={pathname === "/context-menu"}
-                    >
-                      <span>{i18n.t("options.contextMenu.title")}</span>
-                    </SidebarMenuSubButton>
-                  </SidebarMenuSubItem>
-                </SidebarMenuSub>
-              </CollapsibleContent>
-            </SidebarMenuItem>
-          </CollapsibleNavGroup>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <SidebarMenuSub>
+                    {shows("/floating-button") && (
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton
+                          render={<Link to="/floating-button" />}
+                          isActive={pathname === "/floating-button"}
+                        >
+                          <span>{i18n.t("options.floatingButton.title")}</span>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    )}
+                    {shows("/selection-toolbar") && (
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton
+                          render={<Link to="/selection-toolbar" />}
+                          isActive={pathname === "/selection-toolbar"}
+                        >
+                          <span>{i18n.t("options.selectionToolbar.title")}</span>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    )}
+                    {shows("/context-menu") && (
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton
+                          render={<Link to="/context-menu" />}
+                          isActive={pathname === "/context-menu"}
+                        >
+                          <span>{i18n.t("options.contextMenu.title")}</span>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    )}
+                  </SidebarMenuSub>
+                </CollapsibleContent>
+              </SidebarMenuItem>
+            </CollapsibleNavGroup>
+          )}
 
           <SidebarMenuItem>
             <SidebarMenuButton
@@ -182,21 +206,23 @@ export function FeaturesNav() {
             </SidebarMenuButton>
           </SidebarMenuItem>
 
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              render={
-                <a
-                  href={browser.runtime.getURL(TRANSLATION_HUB_PAGE_PATH)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                />
-              }
-              tooltip={i18n.t("options.tools.translationHub")}
-            >
-              <Icon icon="tabler:language-hiragana" />
-              <span>{i18n.t("options.tools.translationHub")}</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+          {isFeatureOn(config, "translationHub") && (
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                render={
+                  <a
+                    href={browser.runtime.getURL(TRANSLATION_HUB_PAGE_PATH)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  />
+                }
+                tooltip={i18n.t("options.tools.translationHub")}
+              >
+                <Icon icon="tabler:language-hiragana" />
+                <span>{i18n.t("options.tools.translationHub")}</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
           <CollapsibleNavGroup active={isAdvancedActive}>
             <SidebarMenuItem>
               <CollapsibleTrigger
@@ -216,12 +242,22 @@ export function FeaturesNav() {
               </CollapsibleTrigger>
               <CollapsibleContent>
                 <SidebarMenuSub>
+                  {shows("/advanced/glossary") && (
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton
+                        render={<Link to="/advanced/glossary" />}
+                        isActive={pathname.startsWith("/advanced/glossary")}
+                      >
+                        <span>{i18n.t("options.advanced.glossary.title")}</span>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  )}
                   <SidebarMenuSubItem>
                     <SidebarMenuSubButton
-                      render={<Link to="/advanced/glossary" />}
-                      isActive={pathname.startsWith("/advanced/glossary")}
+                      render={<Link to="/advanced/simple-mode" />}
+                      isActive={pathname === "/advanced/simple-mode"}
                     >
-                      <span>{i18n.t("options.advanced.glossary.title")}</span>
+                      <span>{i18n.t("options.simpleMode.title")}</span>
                     </SidebarMenuSubButton>
                   </SidebarMenuSubItem>
                 </SidebarMenuSub>

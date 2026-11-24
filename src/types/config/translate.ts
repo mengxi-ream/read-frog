@@ -190,6 +190,10 @@ export const pageCustomPromptsConfigSchema = createCustomPromptsConfigSchema(
 export const customPromptsConfigSchema = pageCustomPromptsConfigSchema
 
 export const translateConfigSchema = z.object({
+  // Simple mode's page translation switch (src/utils/features.ts). `.default()` for
+  // the same reason as `node.forceRetranslation`: pre-v130 config must still parse
+  // in UI contexts that load before the migration.
+  enabled: z.boolean().default(true),
   providerId: storedProviderIdSchema,
   mode: translationModeSchema,
   modeShortcut: shortcutSchema,

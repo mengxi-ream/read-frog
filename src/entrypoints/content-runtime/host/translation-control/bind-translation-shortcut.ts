@@ -4,15 +4,21 @@ import { HotkeyManager } from "@tanstack/hotkeys"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext } from "@/utils/analytics"
 import { getLocalConfig } from "@/utils/config/storage"
+import { isFeatureOn } from "@/utils/features"
 import { isShortcutEmpty, isValidShortcut } from "@/utils/shortcut"
 
 /**
- * Binds page translation shortcut key from the given config.
- * Uses sync cached config inside the hotkey callback to avoid async overhead.
+ * Binds page translation shortcut key from the given config. With page translation switched
+ * off in simple mode the key is left to the page; switched off after this, the manager turns
+ * a start down itself.
  */
 export async function bindTranslationShortcutKey(pageTranslationManager: PageTranslationManager) {
   const config = await getLocalConfig()
-  if (!config || isShortcutEmpty(config.pageTranslation.page.shortcut)) {
+  if (
+    !config ||
+    !isFeatureOn(config, "pageTranslation") ||
+    isShortcutEmpty(config.pageTranslation.page.shortcut)
+  ) {
     return () => {}
   }
 

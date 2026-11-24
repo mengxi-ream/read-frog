@@ -3,7 +3,6 @@ import { PageLayout } from "../../components/page-layout"
 import { ActionsSection } from "./actions"
 import { AnnotationSection } from "./annotation"
 import { DisplaySection } from "./display"
-import { EnableItem } from "./enable-item"
 import { SelectionToolbarPreview } from "./selection-toolbar-preview"
 
 export function SelectionToolbarPage() {
@@ -14,9 +13,9 @@ export function SelectionToolbarPage() {
       innerClassName="flex flex-col gap-10"
     >
       <SelectionToolbarPreview />
-      <EnableItem />
-      <ActionsSection />
+      {/* In simple mode's order: annotation, then the toolbar's buttons. */}
       <AnnotationSection />
+      <ActionsSection />
       <DisplaySection />
     </PageLayout>
   )

@@ -6,11 +6,12 @@ import { useAtomValue } from "jotai"
 import { useCallback, useRef, useState } from "react"
 import { isAbortError } from "@/components/ui/selection-popover/inline-error"
 import { classifyResolvedProvider } from "@/utils/analytics-provider"
-import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { configAtom } from "@/utils/atoms/config"
 import { streamBackgroundNoteSuggestion } from "@/utils/content-script/background-stream-client"
 import { STREAM_PORT_DISCONNECTED_MESSAGE } from "@/utils/content-script/port-streaming"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { resolveNoteSuggestionAction } from "@/utils/custom-actions"
+import { isFeatureOn } from "@/utils/features"
 import { getOrCreateWebPageContext } from "@/utils/host/translate/webpage-context"
 import { getHostedAiModelVerdict } from "@/utils/hosted-ai/status"
 import { createLogger } from "@/utils/logging/logger"
@@ -73,7 +74,7 @@ export interface NoteSuggestionFireInput {
  * no card.
  */
 export function useNoteSuggestion() {
-  const selectionToolbar = useAtomValue(configFieldsAtomMap.selectionToolbar)
+  const config = useAtomValue(configAtom)
   const [suggestion, setSuggestion] = useState<NoteSuggestionSessionResult | null>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
   // Sets rather than single slots so an A→B→A key round-trip inside one
@@ -82,9 +83,9 @@ export function useNoteSuggestion() {
   // when the popover closes to keep them bounded.
   const completedSessionKeysRef = useRef<Set<string>>(new Set())
   const shownSessionKeysRef = useRef<Set<string>>(new Set())
-  const latestRef = useRef(selectionToolbar)
+  const latestRef = useRef(config)
   // oxlint-disable-next-line react/refs -- latest-value ref: writing it during render is what keeps callbacks in sync
-  latestRef.current = selectionToolbar
+  latestRef.current = config
 
   const cancel = useCallback(() => {
     abortControllerRef.current?.abort()
@@ -108,8 +109,10 @@ export function useNoteSuggestion() {
   }, [])
 
   const maybeFire = useCallback((input: NoteSuggestionFireInput) => {
-    const config = latestRef.current
-    if (!config.noteSuggestion.enabled) {
+    const currentConfig = latestRef.current
+    // Also off while selection translation is: the translation the context menu opens
+    // goes without suggestions then, as the toolbar's would.
+    if (!isFeatureOn(currentConfig, "selectionToolbar.translate.noteSuggestion")) {
       return
     }
     if (completedSessionKeysRef.current.has(input.sessionKey)) {
@@ -122,7 +125,9 @@ export function useNoteSuggestion() {
       return
     }
 
-    const actionSnapshot = structuredClone(resolveNoteSuggestionAction(config))
+    const actionSnapshot = structuredClone(
+      resolveNoteSuggestionAction(currentConfig.selectionToolbar),
+    )
 
     const abortController = new AbortController()
     abortControllerRef.current = abortController

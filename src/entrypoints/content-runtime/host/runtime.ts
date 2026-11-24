@@ -5,6 +5,7 @@ import { storage } from "#imports"
 import { configSchema } from "@/types/config/config"
 import { CONFIG_STORAGE_KEY, DEFAULT_CONFIG } from "@/utils/constants/config"
 import { detectPageLanguageLightweight } from "@/utils/content/page-language"
+import { isFeatureOn } from "@/utils/features"
 import { ensurePresetStyles } from "@/utils/host/translate/ui/style-injector"
 import { createLogger } from "@/utils/logging/logger"
 import { onMessage, sendMessage } from "@/utils/message"
@@ -47,9 +48,11 @@ export async function bootstrapHostContent(
 
   const cleanupPageTranslationTriggers = manager.registerPageTranslationTriggers()
 
-  // The tab-title switch applies to an already-translated page at once. Only
-  // the top frame owns the title, so iframes skip parsing every config write.
-  const cleanupTitleTranslationWatch =
+  // The tab-title switch applies to an already-translated page at once, and
+  // switching page translation off in simple mode takes the translations off
+  // the page. Only the top frame owns the title, so iframes skip parsing every
+  // config write; they stop when the top frame's stop reaches them.
+  const cleanupConfigWatch =
     window === window.top
       ? storage.watch<Config>(`local:${CONFIG_STORAGE_KEY}`, (config) => {
           const parsedConfig = configSchema.safeParse(config)
@@ -57,6 +60,12 @@ export async function bootstrapHostContent(
             manager.setTitleTranslationEnabled(
               parsedConfig.data.pageTranslation.page.translateTitle,
             )
+            // Not only while active: stop() also cancels a start still awaiting its
+            // checks, which would translate the page once they pass. On an idle page
+            // it does nothing.
+            if (!isFeatureOn(parsedConfig.data, "pageTranslation")) {
+              manager.stop()
+            }
           }
         })
       : () => {}
@@ -165,7 +174,7 @@ export async function bootstrapHostContent(
     cleanupUrlListener()
     teardownNodeTranslation()
     cleanupPageTranslationTriggers()
-    cleanupTitleTranslationWatch()
+    cleanupConfigWatch()
     cleanupTranslationShortcut()
     cleanupTranslationModeShortcut()
     cleanupTranslationHubShortcut()

@@ -2,12 +2,14 @@
 import { act, cleanup, render, screen, waitFor } from "@testing-library/react"
 import { atom, getDefaultStore, useAtomValue } from "jotai"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import { configFieldsAtomMap } from "@/utils/atoms/config"
+// Renamed because the config mock below declares a `configAtom` of its own.
+import { configAtom as mockedConfigAtom, configFieldsAtomMap } from "@/utils/atoms/config"
 import {
   DEFERRED_SELECTION_OPEN_EVENT,
   EXTERNAL_SELECTION_OPEN_EVENT,
 } from "@/utils/constants/selection"
 import { SELECTION_CONTENT_OVERLAY_ROOT_ATTRIBUTE } from "@/utils/constants/selection-overlay-layers"
+import { setFeatureOn } from "@/utils/features"
 import { createShadowSelection } from "../../__tests__/composed-selection"
 import { isSelectionToolbarHiddenUntilReloadAtom, selectionSessionAtom } from "../atoms"
 import { SelectionToolbar } from "../index"
@@ -68,28 +70,39 @@ vi.mock("../../annotation/toolbar-slot", () => ({
   }),
 }))
 
-// Mock atoms
+// Mock atoms. The toolbar section is the one the tests set; the toolbar reads it
+// both on its own and as part of the whole config.
 vi.mock("@/utils/atoms/config", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/utils/atoms/config")>()
+  const configAtom = atom({
+    ...actual.configAtom.init,
+    selectionToolbar: {
+      enabled: true,
+      disabledSelectionToolbarPatterns: [],
+      opacity: 100,
+      features: {
+        translate: {
+          enabled: true,
+          providerId: "google-translate-default",
+          shortcut: "Alt+T",
+        },
+        speak: { enabled: true },
+      },
+      annotation: { enabled: true, shortcut: "Alt+Shift+E" },
+      customActions: [],
+    } as any,
+  })
   return {
     ...actual,
+    configAtom,
     configFieldsAtomMap: {
       ...actual.configFieldsAtomMap,
-      selectionToolbar: atom({
-        enabled: true,
-        disabledSelectionToolbarPatterns: [],
-        opacity: 100,
-        features: {
-          translate: {
-            enabled: true,
-            providerId: "google-translate-default",
-            shortcut: "Alt+T",
-          },
-          speak: { enabled: true },
+      selectionToolbar: atom(
+        (get) => get(configAtom).selectionToolbar,
+        (get, set, selectionToolbar: any) => {
+          set(configAtom, { ...get(configAtom), selectionToolbar })
         },
-        annotation: { enabled: true, shortcut: "Alt+Shift+E" },
-        customActions: [],
-      }),
+      ),
     },
   }
 })
@@ -201,6 +214,11 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
 
   const getOverlayRoot = () =>
     document.querySelector<HTMLElement>(`[${SELECTION_CONTENT_OVERLAY_ROOT_ATTRIBUTE}]`)
+
+  const getToolbarDividers = () =>
+    [...(document.querySelector("[data-slot='selection-toolbar-buttons']")?.children ?? [])].filter(
+      (element) => element.classList.contains("w-px"),
+    )
 
   const expectOverlayCollapsed = () => {
     expect(getOverlayRoot()).toHaveClass("h-0")
@@ -385,6 +403,51 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     })
     expectToolbarVisible()
     expect(screen.getByTestId("more-menu")).toBeInTheDocument()
+  })
+
+  it("draws the annotation button's divider only when something follows it", async () => {
+    const config = store.get(mockedConfigAtom)
+    const { features } = DEFAULT_SELECTION_TOOLBAR_CONFIG
+    // Word annotation alone: Custom AI Actions, Selection translation and Speak are off.
+    store.set(mockedConfigAtom, { ...config, ...setFeatureOn("customActions", false) })
+    await store.set(configFieldsAtomMap.selectionToolbar, {
+      ...DEFAULT_SELECTION_TOOLBAR_CONFIG,
+      features: {
+        translate: { ...features.translate, enabled: false },
+        speak: { ...features.speak, enabled: false },
+      },
+    })
+    try {
+      render(
+        <div>
+          <SelectionToolbar />
+          <div data-testid="test-element">{MOCK_SELECTED_TEXT}</div>
+        </div>,
+      )
+
+      await triggerMouseUpWithSelection(screen.getByTestId("test-element"))
+
+      await waitFor(() => expectToolbarVisible())
+      expect(screen.queryByTestId("more-menu")).not.toBeInTheDocument()
+      expect(getToolbarDividers()).toHaveLength(0)
+
+      // Speak back on but unpinned: the "more" menu follows the annotation button.
+      await act(async () => {
+        await store.set(configFieldsAtomMap.selectionToolbar, {
+          ...DEFAULT_SELECTION_TOOLBAR_CONFIG,
+          features: {
+            translate: { ...features.translate, enabled: false },
+            speak: { ...features.speak, enabled: true },
+          },
+          unpinned: ["speak"],
+        })
+      })
+
+      expect(screen.getByTestId("more-menu")).toBeInTheDocument()
+      expect(getToolbarDividers()).toHaveLength(1)
+    } finally {
+      store.set(mockedConfigAtom, config)
+    }
   })
 
   it("should show toolbar when selecting text in a normal div element", async () => {

@@ -181,6 +181,37 @@ describe("background context menu", () => {
     expect(browser.contextMenus.update).not.toHaveBeenCalled()
   })
 
+  it("leaves the page item out while simple mode has page translation off", async () => {
+    const config = createConfig(true)
+    Object.assign(config, { pageTranslation: { enabled: false } })
+    ensureInitializedConfigMock.mockResolvedValue(config)
+
+    await initializeContextMenu()
+
+    const createdIds = vi.mocked(browser.contextMenus.create).mock.calls.map(([item]) => item.id)
+    expect(createdIds).toEqual([MENU_ID_SELECTION_TRANSLATE, MENU_ID_SELECTION_READ_ALOUD])
+    expect(browser.contextMenus.update).not.toHaveBeenCalled()
+  })
+
+  it("leaves the actions out while simple mode has custom AI actions off", async () => {
+    const config = createConfig(true)
+    config.selectionToolbar.builtInActions.dictionary.enabled = true
+    config.selectionToolbar.customActions = [
+      { id: "rewrite", name: "Rewrite", enabled: true },
+    ] as Config["selectionToolbar"]["customActions"]
+    config.customActions = { enabled: false }
+    ensureInitializedConfigMock.mockResolvedValue(config)
+
+    await initializeContextMenu()
+
+    const createdIds = vi.mocked(browser.contextMenus.create).mock.calls.map(([item]) => item.id)
+    expect(createdIds).toEqual([
+      MENU_ID_TRANSLATE,
+      MENU_ID_SELECTION_TRANSLATE,
+      MENU_ID_SELECTION_READ_ALOUD,
+    ])
+  })
+
   it("waits until the background is ready before rebuilding the menu on a config change", async () => {
     let configWatcher: ((config: Config) => Promise<void>) | undefined
     storage.watch = vi.fn<(...args: any[]) => any>((_key, callback) => {

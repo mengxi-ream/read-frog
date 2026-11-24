@@ -4,10 +4,14 @@ import { RiTranslate } from "@remixicon/react"
 import { IconDotsVertical, IconVolume, IconX } from "@tabler/icons-react"
 import { useAtomValue } from "jotai"
 import { useLayoutEffect, useRef, useState } from "react"
-import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { configAtom } from "@/utils/atoms/config"
+import { isFeatureOn } from "@/utils/features"
 import { i18n } from "@/utils/i18n"
 import { ANNOTATION_ICON } from "@/utils/iconify/bundled-icons"
-import { getSelectionToolbarItems } from "@/utils/selection-toolbar-items"
+import {
+  getSelectionToolbarItems,
+  hasSelectionToolbarMoreMenu,
+} from "@/utils/selection-toolbar-items"
 import {
   PREVIEW_SELECTION_CLASS_NAME,
   PreviewBackdrop,
@@ -37,14 +41,14 @@ function PinnedItemIcon({ item }: { item: SelectionToolbarItem }) {
 
 /**
  * The toolbar as the settings make it — the annotation button, the pinned items in their order,
- * and the "more" menu, at the chosen opacity — over a selection on a web page, with the pointer on
- * it so its close button shows.
+ * and the "more" menu when it has rows, at the chosen opacity — over a selection on a web page,
+ * with the pointer on it so its close button shows.
  */
 export function SelectionToolbarPreview() {
-  const selectionToolbar = useAtomValue(configFieldsAtomMap.selectionToolbar)
-  const pinnedItems = getSelectionToolbarItems(selectionToolbar).filter(
-    (item) => item.enabled && item.pinned,
-  )
+  const config = useAtomValue(configAtom)
+  const { selectionToolbar } = config
+  const pinnedItems = getSelectionToolbarItems(config).filter((item) => item.shown && item.pinned)
+  const hasMoreMenu = hasSelectionToolbarMoreMenu(config)
   const pageRef = useRef<HTMLDivElement>(null)
   const toolbarRef = useRef<HTMLSpanElement>(null)
   const closeRef = useRef<HTMLSpanElement>(null)
@@ -111,12 +115,15 @@ export function SelectionToolbarPreview() {
                     >
                       <span className="absolute inset-0 rounded-lg border border-border/50 bg-popover shadow-md" />
                       <span className="relative flex items-center">
-                        {selectionToolbar.annotation.enabled && (
+                        {isFeatureOn(config, "selectionToolbar.annotation") && (
                           <>
                             <span className={BUTTON_CLASS_NAME}>
                               <Icon icon={ANNOTATION_ICON} className="size-4.5" />
                             </span>
-                            <span className={SEPARATOR_CLASS_NAME} />
+                            {/* Only with something after it, as in the toolbar. */}
+                            {(pinnedItems.length > 0 || hasMoreMenu) && (
+                              <span className={SEPARATOR_CLASS_NAME} />
+                            )}
                           </>
                         )}
                         {/* `clip` rather than `hidden`: it clips the row at the toolbar's width
@@ -130,10 +137,14 @@ export function SelectionToolbarPreview() {
                             </span>
                           ))}
                         </span>
-                        {pinnedItems.length > 0 && <span className={SEPARATOR_CLASS_NAME} />}
-                        <span className="flex h-7 shrink-0 items-center justify-center px-1">
-                          <IconDotsVertical className="size-4" strokeWidth={1.6} />
-                        </span>
+                        {pinnedItems.length > 0 && hasMoreMenu && (
+                          <span className={SEPARATOR_CLASS_NAME} />
+                        )}
+                        {hasMoreMenu && (
+                          <span className="flex h-7 shrink-0 items-center justify-center px-1">
+                            <IconDotsVertical className="size-4" strokeWidth={1.6} />
+                          </span>
+                        )}
                       </span>
                       <span
                         ref={closeRef}

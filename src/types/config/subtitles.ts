@@ -76,6 +76,11 @@ export const subtitlePositionSchema = z.object({
 })
 
 export const videoSubtitlesSchema = z.object({
+  // Simple mode's video subtitles switch (src/utils/features.ts). A config stored
+  // before v126 had an `enabled` that meant the same thing; v126 folded it into
+  // `platforms` and v130 adds this one. `.default()` lets pre-v130 config parse
+  // until the migration runs.
+  enabled: z.boolean().default(true),
   // `.prefault()` is load-bearing: a config stored before v126 has `enabled` and `autoStart`
   // instead, and still has to parse until the v126 migration turns them into this.
   platforms: subtitlesPlatformModesSchema.prefault({}),

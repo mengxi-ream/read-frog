@@ -14,6 +14,7 @@ import {
 } from "react"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { isAbortError } from "@/components/ui/selection-popover/inline-error"
+import { useFeatureOn } from "@/hooks/use-feature-on"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
 import { classifyFailureReason } from "@/utils/analytics-failure-reason"
@@ -95,7 +96,7 @@ function useAnnotationController(): AnnotationContextValue {
   useAtomValue(selectionToolbarTranslateRequestAtom)
   const [mode, setModeState] = useAtom(annotationModeAtom)
   const setIsSelectionToolbarOpen = useSetAtom(isSelectionToolbarOpenAtom)
-  const enabled = selectionToolbar.enabled && selectionToolbar.annotation.enabled
+  const enabled = useFeatureOn("selectionToolbar.annotation")
   const controllerRef = useRef<AnnotationController | null>(null)
   const inFlight = useRef(new Map<string, AbortController>())
 

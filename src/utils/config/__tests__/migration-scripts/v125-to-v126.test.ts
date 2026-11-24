@@ -103,9 +103,11 @@ describe("v125-to-v126 migration", () => {
 
   it("produces the v126 fixtures, and a valid current config, from every v125 series", async () => {
     for (const [seriesId, series] of Object.entries(v125TestSeries)) {
+      expect(migrate(structuredClone(series.config)).videoSubtitles).toEqual(
+        v126TestSeries[seriesId]!.config.videoSubtitles,
+      )
       const migrated = await migrateConfig(structuredClone(series.config), 125)
       expect(configSchema.safeParse(migrated).success).toBe(true)
-      expect(migrated.videoSubtitles).toEqual(v126TestSeries[seriesId]!.config.videoSubtitles)
     }
   })
 })
