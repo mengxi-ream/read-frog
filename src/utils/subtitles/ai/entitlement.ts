@@ -14,27 +14,6 @@ export function quotaResetAt(pools: VideoTranscriptUsagePool[] | undefined): str
   return resets[0] ?? null
 }
 
-/**
- * Mirrors `TRANSCRIPTION_LAUNCH_BONUS_CUTOFF_AT` in the server's minute policy.
- * The grant is decided entirely server-side; this copy only decides whether to
- * advertise it, so drift shows up as a banner that stops (or keeps) offering
- * something — never as a wrong grant.
- */
-export const LAUNCH_BONUS_CUTOFF_AT = "2026-09-14T00:00:00Z"
-
-/**
- * The formatted cutoff while the launch offer is still open, else null. The
- * offer is time-boxed on purpose: past the cutoff the server stops issuing the
- * grant, so an ungated banner would age into a promise we no longer keep.
- *
- * The label is local, so a reader west of UTC sees the last date that is still
- * safe for them rather than one that has already passed by their clock. The
- * gate compares instants, so it flips at the same moment everywhere.
- */
-export function launchBonusCutoffLabel(now: Date = new Date()): string | null {
-  return now < new Date(LAUNCH_BONUS_CUTOFF_AT) ? formatQuotaDate(LAUNCH_BONUS_CUTOFF_AT) : null
-}
-
 /** Renders a pool's `resetAt` / `expiresAt` in the reader's own locale. */
 export function formatQuotaDate(iso: string | null | undefined): string | null {
   if (!iso) {

@@ -150,6 +150,17 @@ options:
       title: 微信群
       description: 掃描 QR code 進入微信討論群
       qrCodeAlt: 微信 QR code
+  usage:
+    title: 用量
+    pageDescription: 查看你的會員和 AI 額度。
+    notSignedIn: 未登入
+    guest: 訪客
+    manageSubscription: 管理訂閱
+    logInToView: 登入後查看
+    footer:
+      logIn: 登入後每週送免費 AI 額度
+      upgrade: 升級 Pro 解鎖 AI 字幕和更多內建 AI 額度
+      upgradeAction: 升級會員
   apiProviders:
     title: API 提供者
     pageDescription: 使用 Read Frog 內建模型或接入第三方 AI 服務，並為每項功能指定使用哪一個。
@@ -1457,8 +1468,6 @@ options:
     aiQuota:
       title: AI 字幕額度
       description: AI 利用語音轉文字技術取得任何影片的準確字幕
-      launchBonusPromo: $1 之前購買會員額外贈送 300 分鐘轉錄額度
-      loginRequired: 登入後查看你的 AI 字幕額度
       upgradeRequired: AI 字幕需要 Pro 或 Ultra 訂閱
       pools:
         subscription: 每月額度

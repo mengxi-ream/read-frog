@@ -150,6 +150,17 @@ options:
       title: Nhóm WeChat
       description: Quét mã QR để tham gia nhóm thảo luận trên WeChat
       qrCodeAlt: Mã QR WeChat
+  usage:
+    title: Mức sử dụng
+    pageDescription: Gói của bạn và hạn mức AI còn lại.
+    notSignedIn: Chưa đăng nhập
+    guest: Khách
+    manageSubscription: Quản lý gói đăng ký
+    logInToView: Đăng nhập để xem
+    footer:
+      logIn: Đăng nhập để nhận hạn mức AI miễn phí mỗi tuần
+      upgrade: Nâng cấp lên Pro để mở khóa phụ đề AI và thêm hạn mức AI tích hợp
+      upgradeAction: Nâng cấp
   apiProviders:
     title: Nhà cung cấp API
     pageDescription: Dùng các mô hình tích hợp của Read Frog hoặc kết nối dịch vụ AI bên thứ ba, rồi chọn dịch vụ cho từng tính năng.
@@ -1447,8 +1458,6 @@ options:
     aiQuota:
       title: Hạn mức phụ đề AI
       description: AI dùng công nghệ nhận dạng giọng nói để tạo phụ đề chính xác cho mọi video
-      launchBonusPromo: Đăng ký trước $1 để nhận thêm 300 phút chuyển lời nói thành văn bản
-      loginRequired: Đăng nhập để xem hạn mức phụ đề AI của bạn
       upgradeRequired: Phụ đề AI cần gói Pro hoặc Ultra
       pools:
         subscription: Hạn mức hằng tháng

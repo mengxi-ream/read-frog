@@ -150,6 +150,17 @@ options:
       title: Grupo de WeChat
       description: Escanea el código QR para unirte al grupo de discusión de WeChat
       qrCodeAlt: Código QR de WeChat
+  usage:
+    title: Uso
+    pageDescription: Tu plan y cuánta cuota de IA te queda.
+    notSignedIn: Sin iniciar sesión
+    guest: Invitado
+    manageSubscription: Gestionar suscripción
+    logInToView: Inicia sesión para verlo
+    footer:
+      logIn: Inicia sesión y recibe cuota de IA gratis cada semana
+      upgrade: Pásate a Pro para desbloquear los subtítulos con IA y más cuota de IA integrada
+      upgradeAction: Mejorar plan
   apiProviders:
     title: Proveedores de API
     pageDescription: Usa los modelos integrados de Read Frog o conecta servicios de IA de terceros y elige cuál se encarga de cada función.
@@ -1452,8 +1463,6 @@ options:
     aiQuota:
       title: Cuota de subtítulos con IA
       description: El reconocimiento de voz con IA te da subtítulos precisos para cualquier vídeo
-      launchBonusPromo: Suscríbete antes del $1 y obtén 300 minutos de transcripción adicionales
-      loginRequired: Inicia sesión para ver tu cuota de subtítulos con IA
       upgradeRequired: Los subtítulos con IA requieren una suscripción Pro o Ultra
       pools:
         subscription: Cuota mensual

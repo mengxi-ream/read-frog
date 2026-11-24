@@ -150,6 +150,17 @@ options:
       title: WeChat グループ
       description: QR コードをスキャンして WeChat のディスカッショングループに参加
       qrCodeAlt: WeChat QR コード
+  usage:
+    title: 使用量
+    pageDescription: プランと AI の残り利用枠を確認できます。
+    notSignedIn: 未ログイン
+    guest: ゲスト
+    manageSubscription: サブスクリプションを管理
+    logInToView: ログインすると表示されます
+    footer:
+      logIn: ログインすると毎週無料の AI 利用枠がもらえます
+      upgrade: Pro にアップグレードすると AI 字幕と、より多くの組み込み AI 利用枠が使えます
+      upgradeAction: アップグレード
   apiProviders:
     title: APIプロバイダー
     pageDescription: Read Frog の組み込みモデルを使うかサードパーティの AI サービスを接続し、各機能で使うものを選びます。
@@ -1447,8 +1458,6 @@ options:
     aiQuota:
       title: AI字幕の利用枠
       description: AIの音声認識で、どんな動画にも正確な字幕を生成します
-      launchBonusPromo: $1 までに加入すると、文字起こし 300 分を追加でプレゼント
-      loginRequired: ログインしてAI字幕の利用枠を確認
       upgradeRequired: AI字幕には Pro または Ultra プランが必要です
       pools:
         subscription: 月間クォータ

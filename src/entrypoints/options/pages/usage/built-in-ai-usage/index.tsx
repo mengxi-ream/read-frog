@@ -5,12 +5,10 @@ import type {
 } from "@/utils/hosted-ai/types"
 import { Icon } from "@iconify/react"
 import { useHostedAiStatus } from "@/components/llm-providers/use-hosted-ai-status"
-import { Progress, ProgressLabel } from "@/components/ui/base-ui/progress"
-import { Skeleton } from "@/components/ui/base-ui/skeleton"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
 import { formatHostedAiResetAtLocal, getHostedAiPools } from "@/utils/hosted-ai/status"
 import { i18n } from "@/utils/i18n"
-import { ConfigSection } from "../../../components/config-section"
+import { UsageGroup, UsageNotice, UsagePoolRow, UsagePoolRowSkeleton } from "../usage-group"
 
 const FEATURE_LABEL_I18N_KEYS = {
   pageTranslation: "options.apiProviders.builtInAiUsage.features.pageTranslation",
@@ -33,9 +31,9 @@ function getRemainingPercent(usedPercent: number): number {
 }
 
 /**
- * One bar per pool, recurring or one-time. The track is the whole quota and the
- * fill is what is left, growing from the left — so a fresh pool reads as a full
- * bar. `kindLabel` names the pool and `timeLabel` says when it resets or ends.
+ * One bar per pool, recurring or one-time. `kindLabel` names the pool and
+ * `timeLabel` says when it resets or ends; the label lists the features the
+ * pool pays for in a tooltip.
  */
 function PoolUsage({
   usedPercent,
@@ -51,16 +49,11 @@ function PoolUsage({
   const remainingPercent = getRemainingPercent(usedPercent)
 
   return (
-    <div className="flex flex-col gap-1.5">
-      <Progress
-        value={remainingPercent}
-        className="gap-x-3 gap-y-1.5"
-        // Announce "62% left", not a bare "62%" that reads as consumption.
-        getAriaValueText={(_, value) =>
-          i18n.t("options.apiProviders.builtInAiUsage.remaining", [value ?? remainingPercent])
-        }
-      >
-        <ProgressLabel className="flex items-center gap-1.5 text-sm font-medium">
+    <UsagePoolRow
+      value={remainingPercent}
+      remainingText={i18n.t("options.apiProviders.builtInAiUsage.remaining", [remainingPercent])}
+      label={
+        <>
           {i18n.t("options.apiProviders.builtInAiUsage.supportedFeatures", [features.length])}
           <Tooltip>
             <TooltipTrigger
@@ -78,16 +71,11 @@ function PoolUsage({
               </ul>
             </TooltipContent>
           </Tooltip>
-        </ProgressLabel>
-        <span className="ml-auto text-xs text-muted-foreground tabular-nums">
-          {i18n.t("options.apiProviders.builtInAiUsage.remaining", [remainingPercent])}
-        </span>
-      </Progress>
-      <div className="flex flex-wrap items-center justify-between gap-x-3 text-xs text-muted-foreground">
-        <span>{kindLabel}</span>
-        {timeLabel && <span>{timeLabel}</span>}
-      </div>
-    </div>
+        </>
+      }
+      meta={kindLabel}
+      note={timeLabel}
+    />
   )
 }
 
@@ -124,42 +112,40 @@ function OneTimeCreditUsage({ credit }: { credit: HostedAiOneTimeCreditStatus })
   )
 }
 
-export function BuiltInAiUsageConfig() {
+/**
+ * The Built-in AI pools, in the order the server draws on them: recurring
+ * pools, then one-time ones. Guests are told to log in rather than shown their
+ * pool — all a guest holds is an ephemeral IP-keyed trial, not worth a bar.
+ */
+export function BuiltInAiUsage() {
   const { status, isSignedIn, isPending, isError } = useHostedAiStatus()
-  // In the order the server draws on them: recurring pools, then one-time ones.
   const pools = getHostedAiPools(status)
 
-  // Guests only hold an ephemeral IP-keyed trial pool — not worth a section.
-  if (!isSignedIn) {
-    return null
+  function renderContent() {
+    if (isPending) {
+      return <UsagePoolRowSkeleton />
+    }
+    if (!isSignedIn) {
+      return <UsageNotice>{i18n.t("options.usage.logInToView")}</UsageNotice>
+    }
+    if (isError || pools.length === 0) {
+      return <UsageNotice>{i18n.t("hostedAi.availability.serviceUnavailable")}</UsageNotice>
+    }
+    return pools.map((pool) =>
+      pool.periodKind === "once" ? (
+        <OneTimeCreditUsage
+          key={`once-${pool.expiresAt}-${pool.features.join("-")}`}
+          credit={pool}
+        />
+      ) : (
+        <RecurringCreditUsage key={`${pool.periodKind}-${pool.features.join("-")}`} credit={pool} />
+      ),
+    )
   }
 
   return (
-    <ConfigSection
-      id="built-in-ai-usage"
-      title={i18n.t("options.apiProviders.builtInAiUsage.title")}
-    >
-      {isPending ? (
-        <Skeleton className="h-13 w-full" />
-      ) : isError || pools.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          {i18n.t("hostedAi.availability.serviceUnavailable")}
-        </p>
-      ) : (
-        pools.map((pool) =>
-          pool.periodKind === "once" ? (
-            <OneTimeCreditUsage
-              key={`once-${pool.expiresAt}-${pool.features.join("-")}`}
-              credit={pool}
-            />
-          ) : (
-            <RecurringCreditUsage
-              key={`${pool.periodKind}-${pool.features.join("-")}`}
-              credit={pool}
-            />
-          ),
-        )
-      )}
-    </ConfigSection>
+    <UsageGroup id="built-in-ai-usage" title={i18n.t("options.apiProviders.builtInAiUsage.title")}>
+      {renderContent()}
+    </UsageGroup>
   )
 }

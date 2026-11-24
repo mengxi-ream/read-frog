@@ -9,6 +9,9 @@ import { switchedOffFeature } from "@/utils/features"
 import { getRouteFeature, ROUTE_DEFS } from "./app-sidebar/nav-items"
 import { buildSimpleModeRowLink } from "./pages/advanced/simple-mode/links"
 
+const UsagePage = lazy(() =>
+  import("./pages/usage").then((module) => ({ default: module.UsagePage })),
+)
 const PreferencePage = lazy(() =>
   import("./pages/preference").then((module) => ({ default: module.PreferencePage })),
 )
@@ -136,7 +139,8 @@ const SubtitlesQueuePage = lazy(() =>
 )
 
 const ROUTE_COMPONENTS: Record<RoutePath, ComponentType> = {
-  "/": ApiProvidersPage,
+  "/": PreferencePage,
+  "/usage": UsagePage,
   "/preference": PreferencePage,
   "/shortcuts": ShortcutsPage,
   "/api-providers": ApiProvidersPage,

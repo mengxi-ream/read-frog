@@ -150,6 +150,17 @@ options:
       title: WeChat group
       description: Scan the QR code to join the WeChat discussion group
       qrCodeAlt: WeChat QR code
+  usage:
+    title: Usage
+    pageDescription: Your plan and how much AI quota you have left.
+    notSignedIn: Not signed in
+    guest: Guest
+    manageSubscription: Manage subscription
+    logInToView: Log in to view
+    footer:
+      logIn: Log in to get free AI quota every week
+      upgrade: Upgrade to Pro to unlock AI subtitles and more Built-in AI quota
+      upgradeAction: Upgrade
   apiProviders:
     title: API Providers
     pageDescription: Use Read Frog's built-in models or connect third-party AI services, then choose which one runs each feature.
@@ -1594,8 +1605,6 @@ options:
     aiQuota:
       title: AI subtitles quota
       description: AI speech recognition gets you accurate subtitles for any video
-      launchBonusPromo: Subscribe before $1 for an extra 300 transcription minutes
-      loginRequired: Log in to view your AI subtitles quota
       upgradeRequired: AI subtitles require a Pro or Ultra subscription
       pools:
         subscription: Monthly quota
