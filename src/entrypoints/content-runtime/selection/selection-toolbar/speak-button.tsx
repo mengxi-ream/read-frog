@@ -7,6 +7,7 @@ import {
   SelectionToolbarTooltip,
   useSelectionTooltipState,
 } from "@/components/ui/selection-popover/selection-tooltip"
+import { useFeatureOn } from "@/hooks/use-feature-on"
 import { useTextToSpeech } from "@/hooks/use-text-to-speech"
 import { ANALYTICS_SURFACE } from "@/types/analytics"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
@@ -21,26 +22,24 @@ function useSelectionSpeechController() {
   const selectionContent = useAtomValue(selectionContentAtom)
   const ttsConfig = useAtomValue(configFieldsAtomMap.tts)
   const { speak } = useAtomValue(configFieldsAtomMap.selectionToolbar).features
+  const speakOn = useFeatureOn("selectionToolbar.speak")
   const { play, stop, isFetching, isPlaying } = useTextToSpeech(ANALYTICS_SURFACE.SELECTION_TOOLBAR)
   const isBusy = isFetching || isPlaying
 
   // The key toggles like the button, but with nothing to read it lets the
   // page have the keystroke rather than complain.
-  useSelectionShortcuts(
-    { speak: speak.enabled ? getSpeakShortcut(speak) : undefined },
-    (_, session) => {
-      if (isBusy) {
-        stop()
-        return true
-      }
-      const text = session?.selectionSnapshot.text
-      if (!text) {
-        return false
-      }
-      void play(text, ttsConfig, { surface: ANALYTICS_SURFACE.SHORTCUT })
+  useSelectionShortcuts({ speak: speakOn ? getSpeakShortcut(speak) : undefined }, (_, session) => {
+    if (isBusy) {
+      stop()
       return true
-    },
-  )
+    }
+    const text = session?.selectionSnapshot.text
+    if (!text) {
+      return false
+    }
+    void play(text, ttsConfig, { surface: ANALYTICS_SURFACE.SHORTCUT })
+    return true
+  })
 
   // Starts reading, or stops the reading in progress. False when nothing is
   // selected to read.

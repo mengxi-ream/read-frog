@@ -1,27 +1,17 @@
-import { useAtom } from "jotai"
-import { Switch } from "@/components/ui/base-ui/switch"
-import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { FeatureSwitch } from "@/components/feature-switch"
+import { getFeatureTitle } from "@/utils/feature-text"
 import { i18n } from "@/utils/i18n"
 import { ConfigItem } from "../../../components/config-item"
 import { ConfigSection } from "../../../components/config-section"
+import { NestedFeatureItems } from "../../../components/nested-feature-items"
 import { ShortcutLink } from "../../../components/shortcut-link"
 import { NoteSuggestionItems } from "./note-suggestion-items"
 
-/** What the toolbar can do with a selection: the two built-in buttons, and the save prompt. */
+/**
+ * What the toolbar can do with a selection: the two built-in buttons, and under translate, the
+ * save prompt that follows a translation. The rows are simple mode's switches for them.
+ */
 export function ActionsSection() {
-  const [selectionToolbar, setSelectionToolbar] = useAtom(configFieldsAtomMap.selectionToolbar)
-  const { features } = selectionToolbar
-
-  const setFeatureEnabled = (key: "translate" | "speak", enabled: boolean) => {
-    void setSelectionToolbar({
-      ...selectionToolbar,
-      features: {
-        ...features,
-        [key]: { ...features[key], enabled },
-      },
-    })
-  }
-
   return (
     <ConfigSection
       id="selection-toolbar-actions"
@@ -29,7 +19,7 @@ export function ActionsSection() {
     >
       <ConfigItem
         id="selection-toolbar-translate"
-        title={i18n.t("options.selectionToolbar.actions.translate.title")}
+        title={getFeatureTitle("selectionToolbar.translate")}
         description={
           <>
             {i18n.t("options.selectionToolbar.actions.translate.description")}
@@ -37,14 +27,14 @@ export function ActionsSection() {
           </>
         }
       >
-        <Switch
-          checked={features.translate.enabled}
-          onCheckedChange={(checked) => setFeatureEnabled("translate", checked)}
-        />
+        <FeatureSwitch id="selectionToolbar.translate" />
       </ConfigItem>
+      <NestedFeatureItems feature="selectionToolbar.translate">
+        <NoteSuggestionItems />
+      </NestedFeatureItems>
       <ConfigItem
         id="selection-toolbar-speak"
-        title={i18n.t("options.selectionToolbar.actions.speak.title")}
+        title={getFeatureTitle("selectionToolbar.speak")}
         description={
           <>
             {i18n.t("options.selectionToolbar.actions.speak.description")}
@@ -52,12 +42,8 @@ export function ActionsSection() {
           </>
         }
       >
-        <Switch
-          checked={features.speak.enabled}
-          onCheckedChange={(checked) => setFeatureEnabled("speak", checked)}
-        />
+        <FeatureSwitch id="selectionToolbar.speak" />
       </ConfigItem>
-      <NoteSuggestionItems />
     </ConfigSection>
   )
 }

@@ -2,7 +2,6 @@ import { useAtom } from "jotai"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { getAnnotationShortcut } from "@/utils/constants/selection"
 import { i18n } from "@/utils/i18n"
-import { buildSectionLink } from "../../command-palette/section-scroll"
 import { ShortcutConfigItem } from "./shortcut-config-item"
 
 export function SelectionAnnotationShortcut() {
@@ -14,11 +13,7 @@ export function SelectionAnnotationShortcut() {
       id="selection-annotation-shortcut"
       title={i18n.t("options.shortcuts.selectionAnnotation.title")}
       description={i18n.t("options.shortcuts.selectionAnnotation.description")}
-      turnOn={
-        annotation.enabled
-          ? undefined
-          : buildSectionLink("/selection-toolbar", "selection-toolbar-annotation-enable")
-      }
+      feature="selectionToolbar.annotation"
       shortcut={getAnnotationShortcut(annotation)}
       onChange={(nextShortcut) => {
         void setSelectionToolbar((current) => ({

@@ -8,14 +8,20 @@ import {
 import { i18n } from "@/utils/i18n"
 import { sitePatternForHost } from "@/utils/url-pattern"
 
-// Stands in for the settings location, so the sentence around it can be split
-// off and the location rendered as one unbreakable piece.
-const LOCATION_SLOT = "\uE000"
+// Stand in for the two places it is turned back on, so the sentence around them
+// can be split off and each place rendered as one unbreakable piece.
+const SITE_LIST_SLOT = "\uE000"
+const SIMPLE_MODE_SLOT = "\uE001"
+const SLOTS = new RegExp(`(${SITE_LIST_SLOT}|${SIMPLE_MODE_SLOT})`)
 
 interface HideMenuItemsProps {
   /** Names what gets hidden, so the choices below only have to name a scope. */
   title: string
-  /** Where it is turned back on, e.g. "Options → Floating Button". */
+  /**
+   * The page with its list of sites, e.g. "Options → Floating Button", where hiding it on one
+   * site is undone. Hiding it on all sites switches it off in simple mode, and the note names
+   * that place too.
+   */
   settingsLocation: string
   onHideUntilReload: () => void
   onHideOnSite: (hostname: string) => void
@@ -41,9 +47,22 @@ export function HideMenuItems({
 }: HideMenuItemsProps) {
   // Empty for local files: there is no site to name, so that choice is left out.
   const hostname = window.location.hostname
-  const [hintBefore, hintAfter = ""] = i18n
-    .t("hideMenu.restoreHint", [LOCATION_SLOT])
-    .split(LOCATION_SLOT)
+  const locations: Record<string, string> = {
+    [SITE_LIST_SLOT]: settingsLocation,
+    [SIMPLE_MODE_SLOT]: `${i18n.t("popup.options")} → ${i18n.t("options.simpleMode.title")}`,
+  }
+  const hint = i18n
+    .t("hideMenu.restoreHint", [SITE_LIST_SLOT, SIMPLE_MODE_SLOT])
+    .split(SLOTS)
+    .map((part) =>
+      part in locations ? (
+        <span key={part} className="whitespace-nowrap">
+          {locations[part]}
+        </span>
+      ) : (
+        part
+      ),
+    )
 
   return (
     <>
@@ -77,9 +96,7 @@ export function HideMenuItems({
           around the location but never inside it ("悬浮/按钮"), and balance keeps
           a CJK break from stranding one character. */}
       <p className="w-0 min-w-full px-1.5 py-1 text-xs text-balance whitespace-normal text-muted-foreground">
-        {hintBefore}
-        <span className="whitespace-nowrap">{settingsLocation}</span>
-        {hintAfter}
+        {hint}
       </p>
     </>
   )

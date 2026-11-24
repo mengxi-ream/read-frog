@@ -42,13 +42,16 @@ export function UserAccountMenuPopup() {
   return match(account.state)
     .with(ACCOUNT_STATE.LOADING, () => <div className="flex items-center gap-2">{avatar}</div>)
     .with(ACCOUNT_STATE.GUEST, () => (
-      <div className="flex items-center gap-2">
+      // `min-w-0` + `truncate`: the popup header shares its row with the buttons on the
+      // right, and a long localized name gives way rather than pushing them out.
+      <div className="flex min-w-0 items-center gap-2">
         {avatar}
-        <span className="text-sm text-muted-foreground">{displayName}</span>
+        <span className="min-w-0 truncate text-sm text-muted-foreground">{displayName}</span>
         <Button
           ref={account.logInAnchorRef}
           size="xs"
           variant="outline"
+          className="shrink-0"
           disabled={account.grantAccess.isPending}
           onClick={account.logIn}
         >

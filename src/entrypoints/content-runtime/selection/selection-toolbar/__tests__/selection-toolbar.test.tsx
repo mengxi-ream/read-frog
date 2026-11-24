@@ -68,28 +68,39 @@ vi.mock("../../annotation/toolbar-slot", () => ({
   }),
 }))
 
-// Mock atoms
+// Mock atoms. The toolbar section is the one the tests set; the toolbar reads it
+// both on its own and as part of the whole config.
 vi.mock("@/utils/atoms/config", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/utils/atoms/config")>()
+  const configAtom = atom({
+    ...actual.configAtom.init,
+    selectionToolbar: {
+      enabled: true,
+      disabledSelectionToolbarPatterns: [],
+      opacity: 100,
+      features: {
+        translate: {
+          enabled: true,
+          providerId: "google-translate-default",
+          shortcut: "Alt+T",
+        },
+        speak: { enabled: true },
+      },
+      annotation: { enabled: true, shortcut: "Alt+Shift+E" },
+      customActions: [],
+    } as any,
+  })
   return {
     ...actual,
+    configAtom,
     configFieldsAtomMap: {
       ...actual.configFieldsAtomMap,
-      selectionToolbar: atom({
-        enabled: true,
-        disabledSelectionToolbarPatterns: [],
-        opacity: 100,
-        features: {
-          translate: {
-            enabled: true,
-            providerId: "google-translate-default",
-            shortcut: "Alt+T",
-          },
-          speak: { enabled: true },
+      selectionToolbar: atom(
+        (get) => get(configAtom).selectionToolbar,
+        (get, set, selectionToolbar: any) => {
+          set(configAtom, { ...get(configAtom), selectionToolbar })
         },
-        annotation: { enabled: true, shortcut: "Alt+Shift+E" },
-        customActions: [],
-      }),
+      ),
     },
   }
 })

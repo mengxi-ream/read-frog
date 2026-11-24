@@ -1,9 +1,12 @@
+import type { Config } from "@/types/config/config"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import { describe, expect, it } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { getBuiltInDictionaryAction } from "@/utils/custom-actions"
+import { setFeatureOn } from "@/utils/features"
 import {
   getSelectionToolbarItems,
+  hasSelectionToolbarMoreMenu,
   reorderSelectionToolbarItems,
   setSelectionToolbarCustomActions,
   setSelectionToolbarItemPinned,
@@ -21,8 +24,18 @@ function toolbarWith(customIds: string[] = [], order?: string[]) {
   return selectionToolbar
 }
 
-const idsOf = (selectionToolbar: ReturnType<typeof toolbarWith>) =>
-  getSelectionToolbarItems(selectionToolbar).map((item) => item.id)
+type SelectionToolbarConfig = ReturnType<typeof toolbarWith>
+
+const itemsOf = (selectionToolbar: SelectionToolbarConfig, config: Config = DEFAULT_CONFIG) =>
+  getSelectionToolbarItems({ ...config, selectionToolbar })
+
+const idsOf = (selectionToolbar: SelectionToolbarConfig) =>
+  itemsOf(selectionToolbar).map((item) => item.id)
+
+const statesOf = (selectionToolbar: SelectionToolbarConfig, config?: Config) =>
+  Object.fromEntries(
+    itemsOf(selectionToolbar, config).map((item) => [item.id, [item.shown, item.pinned]]),
+  )
 
 describe("getSelectionToolbarItems", () => {
   it("lists the features, built-in actions and custom actions in the default order", () => {
@@ -72,13 +85,7 @@ describe("getSelectionToolbarItems", () => {
     selectionToolbar.builtInActions.sentenceAnalysis.enabled = false
     selectionToolbar.customActions[0]!.enabled = false
     selectionToolbar.unpinned = ["speak", "b", "gone"]
-    const states = Object.fromEntries(
-      getSelectionToolbarItems(selectionToolbar).map((item) => [
-        item.id,
-        [item.enabled, item.pinned],
-      ]),
-    )
-    expect(states).toEqual({
+    expect(statesOf(selectionToolbar)).toEqual({
       translate: [true, true],
       speak: [false, false],
       "default-dictionary": [true, true],
@@ -87,6 +94,41 @@ describe("getSelectionToolbarItems", () => {
       a: [false, true],
       b: [true, false],
     })
+  })
+
+  it("shows no action while simple mode has custom actions off, and keeps their pins", () => {
+    const selectionToolbar = toolbarWith(["a"])
+    const config = { ...DEFAULT_CONFIG, ...setFeatureOn("customActions", false) }
+    expect(statesOf(selectionToolbar, config)).toEqual({
+      translate: [true, true],
+      speak: [true, true],
+      "default-dictionary": [false, true],
+      "default-sentence-analysis": [false, true],
+      "default-improve-writing": [false, false],
+      a: [false, true],
+    })
+  })
+})
+
+describe("hasSelectionToolbarMoreMenu", () => {
+  it("has the menu while it lists an item, or while custom actions can be added from it", () => {
+    const withCustomActions = (on: boolean): Config => ({
+      ...DEFAULT_CONFIG,
+      ...setFeatureOn("customActions", on),
+    })
+    const allOff = toolbarWith()
+    allOff.features.translate.enabled = false
+    allOff.features.speak.enabled = false
+
+    expect(
+      hasSelectionToolbarMoreMenu({ ...withCustomActions(false), selectionToolbar: allOff }),
+    ).toBe(false)
+    expect(
+      hasSelectionToolbarMoreMenu({ ...withCustomActions(true), selectionToolbar: allOff }),
+    ).toBe(true)
+    expect(
+      hasSelectionToolbarMoreMenu({ ...withCustomActions(false), selectionToolbar: toolbarWith() }),
+    ).toBe(true)
   })
 })
 
@@ -197,6 +239,6 @@ describe("setSelectionToolbarItemPinned", () => {
 
     next.customActions = [{ ...next.customActions[0]!, enabled: false }]
     next.customActions = [{ ...next.customActions[0]!, enabled: true }]
-    expect(getSelectionToolbarItems(next).find((item) => item.id === "a")?.pinned).toBe(false)
+    expect(itemsOf(next).find((item) => item.id === "a")?.pinned).toBe(false)
   })
 })

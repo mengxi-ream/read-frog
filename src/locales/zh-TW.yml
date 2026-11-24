@@ -51,8 +51,6 @@ popup:
         action: 點選切換為雙語對照
   hub:
     tooltip: 一次使用多個翻譯模型翻譯文字
-  discord:
-    tooltip: 加入 Discord 與開發者討論，搶先體驗新功能
   blog:
     notification: 陪讀蛙更新動態
   aiSmartContext: AI 智慧上下文
@@ -595,9 +593,7 @@ options:
     pageDescription: 在送出之前，把你在輸入框裡寫的內容翻譯好。
     trigger:
       title: 觸發方式
-      enable:
-        title: 啟用
-        description: 在任何輸入欄位中快速連按 3 次空白鍵，即可翻譯你輸入的內容。
+      description: 在任何輸入欄位中快速連按 3 次空白鍵，即可翻譯你輸入的內容。
       threshold:
         title: 觸發門檻值
         description: 相鄰兩次按鍵之間最多可間隔多少毫秒。經常觸發不了就調大，打字時誤觸發就調小。
@@ -616,9 +612,6 @@ options:
     title: 懸浮按鈕
     pageDescription: 設定懸浮按鈕停在哪一側、點擊後做什麼，以及在哪些網站不顯示。
     demoImageAlt: 懸浮按鈕示範
-    enable:
-      title: 啟用懸浮按鈕
-      description: 在網頁上顯示懸浮按鈕，快速存取陪讀蛙功能
     display:
       title: 顯示
       side:
@@ -638,6 +631,7 @@ options:
       translate: 切換頁面翻譯
     closeMenu:
       title: 隱藏懸浮按鈕
+    pageTranslationOff: "網頁翻譯已在簡潔模式中關閉"
     tooltips:
       togglePageTranslation: 切換頁面翻譯
       floatingButtonOptions: 懸浮按鈕選項
@@ -648,9 +642,6 @@ options:
     title: 選取工具列
     pageDescription: 設定選取文字時出現哪些操作，以及工具列在哪些網站顯示。
     demoImageAlt: 選取工具列示範
-    enable:
-      title: 啟用選取工具列
-      description: 在網頁上選取文字時顯示工具列，快速翻譯、朗讀和使用 AI 指令
     annotation:
       title: "劃詞標註"
       enable:
@@ -662,13 +653,10 @@ options:
     actions:
       title: 操作
       translate:
-        title: 翻譯
         description: 在工具列中顯示翻譯按鈕
       speak:
-        title: 朗讀
         description: 在工具列中顯示朗讀按鈕，用於朗讀選取的文字
       noteSuggestion:
-        title: 猜你想存
         description: 使用 AI 供應商進行劃詞翻譯後，推薦可存入筆記庫的詞條
         action: 指令
         actionDescription: 用於產生「猜你想存」的指令
@@ -1103,8 +1091,8 @@ options:
       pageDescription: 為你在意的詞語指定固定的譯文，並決定每份清單在哪些網站生效。
       untitled: 未命名術語庫
       noGlossaries: 還沒有術語庫。
-      enable:
-        title: 啟用
+      appliesTo:
+        title: 生效範圍
         description: 把命中的術語一併傳給 LLM，讓它照你的寫法翻譯。術語庫是隨提示詞一起送出的，所以只對執行於 LLM 提供者的功能生效。
       library:
         title: 你的術語庫
@@ -1208,9 +1196,6 @@ options:
     title: 右鍵選單
     pageDescription: 控制瀏覽器右鍵選單裡的 Read Frog 選項。
     demoImageAlt: 右鍵選單示範
-    enable:
-      title: 啟用右鍵翻譯
-      description: 在瀏覽器右鍵選單中新增翻譯選項，快速翻譯頁面或選取的文字
   translation:
     title: 網頁翻譯
     pageDescription: 控制頁面翻譯的方式：模式、範圍、提示詞和請求限制。
@@ -1579,6 +1564,53 @@ options:
           confirm: 確認
           cancel: 取消
           description: 這將刪除所有已快取的 AI 斷句結果。下次播放啟用 AI 斷句的影片時，將重新處理字幕。
+  simpleMode:
+    title: "簡潔模式"
+    pageDescription: "關掉的功能就像沒裝：網頁上不出現，快速鍵不回應，側欄裡也不再列出。它的設定會保留，重新開啟後一切照舊。"
+    drawerDescription: "關掉的功能不會出現在任何地方，設定會保留"
+    features:
+      customActions:
+        title: "自訂 AI 指令"
+        description: "選取工具列和右鍵選單裡的 AI 指令，包括內建的字典、長難句分析"
+      pageTranslation:
+        title: "網頁翻譯"
+        description: "翻譯整個網頁"
+        hover:
+          title: "滑鼠停留翻譯"
+          description: "滑鼠停留或長按段落，只翻譯這一段"
+      videoSubtitles:
+        title: "影片字幕"
+        description: "在影片播放器裡加上翻譯字幕按鈕"
+      inputTranslation:
+        title: "輸入翻譯"
+        description: "在任何輸入欄位中快速連按 3 次空白鍵，即可翻譯你輸入的內容"
+      floatingButton:
+        title: "懸浮按鈕"
+        description: "在網頁上顯示懸浮按鈕，快速存取陪讀蛙功能"
+      selectionToolbar:
+        title: "選取工具列"
+        description: "在網頁上選取文字時顯示工具列，快速翻譯、朗讀和使用 AI 指令"
+        annotation:
+          title: "劃詞標註"
+          description: "為選取的詞或短語加上底線，並在行間寫出釋義"
+        translate:
+          title: "選取文字翻譯"
+          description: "在工具列中顯示翻譯按鈕"
+          noteSuggestion:
+            title: "猜你想存"
+            description: "使用 AI 供應商進行劃詞翻譯後，推薦可存入筆記庫的詞條"
+        speak:
+          title: "朗讀"
+          description: "在工具列中顯示朗讀按鈕，用於朗讀選取的文字"
+      contextMenu:
+        title: "右鍵選單"
+        description: "瀏覽器右鍵選單裡的陪讀蛙選項"
+      translationHub:
+        title: "翻譯中心"
+        description: "一次使用多個翻譯模型翻譯文字"
+      glossary:
+        title: "術語庫"
+        description: "讓你在意的詞語按你定的譯法翻譯"
   whatsNew:
     title: 最近更新
     postType:
@@ -1668,7 +1700,7 @@ hideMenu:
   untilReload: 直到重新整理頁面
   onSite: 在 $1 上
   onAllSites: 在所有網站上
-  restoreHint: 可在「$1」中重新開啟。
+  restoreHint: "可在「$1」或「$2」中重新開啟。"
 action:
   copy: 複製
   copied: 已複製

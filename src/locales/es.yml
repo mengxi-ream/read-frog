@@ -51,8 +51,6 @@ popup:
         action: Haz clic para cambiar a bilingüe
   hub:
     tooltip: Traduce texto con varios modelos al mismo tiempo
-  discord:
-    tooltip: Únete a Discord para conectar con desarrolladores y obtener acceso anticipado a nuevas funciones
   blog:
     notification: Novedades de Read Frog
   aiSmartContext: Contexto inteligente de IA
@@ -595,9 +593,7 @@ options:
     pageDescription: Traduce lo que escribes en los campos de texto antes de enviarlo.
     trigger:
       title: Activación
-      enable:
-        title: Activar
-        description: Pulsa la barra espaciadora tres veces seguidas en cualquier campo de entrada para traducir lo que has escrito.
+      description: Pulsa la barra espaciadora tres veces seguidas en cualquier campo de entrada para traducir lo que has escrito.
       threshold:
         title: Umbral de activación
         description: Cuánto pueden separarse las pulsaciones, en milisegundos. Auméntalo si la traducción no llega a activarse; redúcelo si salta mientras escribes.
@@ -616,9 +612,6 @@ options:
     title: Botón flotante
     pageDescription: Elige en qué lado se coloca el botón flotante, qué hace al pulsarlo y dónde permanece oculto.
     demoImageAlt: Demostración del botón flotante
-    enable:
-      title: Activar botón flotante
-      description: Muestra el botón flotante en páginas web para acceder rápidamente a las funciones de Read Frog
     display:
       title: Visualización
       side:
@@ -638,6 +631,7 @@ options:
       translate: Alternar traducción de página
     closeMenu:
       title: Ocultar botón flotante
+    pageTranslationOff: "La traducción de páginas está desactivada en el modo simple"
     tooltips:
       togglePageTranslation: Alternar traducción de página
       floatingButtonOptions: Opciones del botón flotante
@@ -648,9 +642,6 @@ options:
     title: Barra de selección
     pageDescription: Define qué acciones aparecen al seleccionar texto y dónde se muestra la barra.
     demoImageAlt: Demostración de la barra de selección
-    enable:
-      title: Activar barra de selección
-      description: Muestra la barra de herramientas al seleccionar texto en páginas web para traducción rápida, voz y acciones AI
     annotation:
       title: "Anotación de palabras"
       enable:
@@ -662,13 +653,10 @@ options:
     actions:
       title: Acciones
       translate:
-        title: Traducir
         description: Muestra el botón de traducción en la barra de herramientas
       speak:
-        title: Leer en voz alta
         description: Muestra el botón de voz, que lee en voz alta el texto seleccionado
       noteSuggestion:
-        title: Sugerencias de notas
         description: Después de traducir una selección con un proveedor de IA, sugerir palabras para guardar en tu Notebase
         action: Acción
         actionDescription: La acción que genera la sugerencia
@@ -1098,8 +1086,8 @@ options:
       pageDescription: Da una traducción fija a las palabras que te importan y elige dónde se aplica cada lista.
       untitled: Glosario sin título
       noGlossaries: Aún no hay glosarios.
-      enable:
-        title: Activar
+      appliesTo:
+        title: Se aplica a
         description: Envía los términos coincidentes al LLM para que los traduzca a tu manera. El glosario viaja dentro del prompt, así que solo se aplica a las funciones que usan un proveedor LLM.
       library:
         title: Tus glosarios
@@ -1203,9 +1191,6 @@ options:
     title: Menú contextual
     pageDescription: Controla las opciones de Read Frog en el menú contextual del navegador.
     demoImageAlt: Demostración del menú contextual
-    enable:
-      title: Activar traducción en menú contextual
-      description: Añade opciones de traducción al menú contextual del navegador para traducir rápidamente páginas y selecciones
   translation:
     title: Traducción de páginas
     pageDescription: Controla cómo se traducen las páginas — modo, alcance, prompts y límites de solicitudes.
@@ -1574,6 +1559,53 @@ options:
           confirm: Confirmar
           cancel: Cancelar
           description: Esto eliminará todos los resultados de segmentación AI en caché. La próxima vez que reproduzcas un video con segmentación AI activada, se volverán a procesar los subtítulos.
+  simpleMode:
+    title: "Modo simple"
+    pageDescription: "Una función que desactivas es como si no estuviera instalada: deja de aparecer en las páginas web, sus atajos no hacen nada y la barra lateral deja de mostrarla. Su configuración se conserva, así que al volver a activarla todo queda como estaba."
+    drawerDescription: "Las funciones que desactives desaparecen en todas partes. Su configuración se conserva"
+    features:
+      customActions:
+        title: "Acciones AI personalizadas"
+        description: "Las acciones AI de la barra de selección y del menú contextual, incluidos el Diccionario y el Análisis de oraciones integrados"
+      pageTranslation:
+        title: "Traducción de páginas"
+        description: "Traduce páginas web completas"
+        hover:
+          title: "Traducción al pasar el cursor"
+          description: "Pasa el cursor o mantén pulsado un párrafo para traducir solo ese"
+      videoSubtitles:
+        title: "Subtítulos de video"
+        description: "Añade a los reproductores de video un botón de subtítulos traducidos"
+      inputTranslation:
+        title: "Traducción de entrada"
+        description: "Pulsa la barra espaciadora tres veces seguidas en cualquier campo de entrada para traducir lo que has escrito"
+      floatingButton:
+        title: "Botón flotante"
+        description: "Muestra el botón flotante en páginas web para acceder rápidamente a las funciones de Read Frog"
+      selectionToolbar:
+        title: "Barra de selección"
+        description: "Muestra la barra de herramientas al seleccionar texto en páginas web para traducción rápida, voz y acciones AI"
+        annotation:
+          title: "Anotación de palabras"
+          description: "Subraya la palabra o frase seleccionada y escribe su significado entre las líneas"
+        translate:
+          title: "Traducción de la selección"
+          description: "Muestra el botón de traducción en la barra de herramientas"
+          noteSuggestion:
+            title: "Sugerencias de notas"
+            description: "Después de traducir una selección con un proveedor de IA, sugerir palabras para guardar en tu Notebase"
+        speak:
+          title: "Leer en voz alta"
+          description: "Muestra el botón de voz, que lee en voz alta el texto seleccionado"
+      contextMenu:
+        title: "Menú contextual"
+        description: "Las opciones de Read Frog en el menú contextual del navegador"
+      translationHub:
+        title: "Centro de traducción"
+        description: "Traduce texto con varios modelos al mismo tiempo"
+      glossary:
+        title: "Glosario"
+        description: "Traduce las palabras que te importan como tú decidiste"
   whatsNew:
     title: Novedades
     postType:
@@ -1663,7 +1695,7 @@ hideMenu:
   untilReload: Hasta que recargue la página
   onSite: En $1
   onAllSites: En todos los sitios
-  restoreHint: Se puede volver a activar en $1.
+  restoreHint: "Se puede volver a activar en $1 o en $2."
 action:
   copy: Copiar
   copied: Copiado

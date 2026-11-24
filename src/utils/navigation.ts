@@ -1,3 +1,4 @@
+import type { FeatureId } from "./features"
 import type { APIProviderTypes } from "@/types/config/provider"
 import { browser } from "#imports"
 
@@ -141,6 +142,20 @@ export function buildCustomActionOptionsRoute(
 /** Route to the custom action page with the "add action" dialog already open. */
 export function buildAddCustomActionOptionsRoute(): `/${string}` {
   return `/custom-actions?${CUSTOM_ACTION_ADD_QUERY_PARAM}=1`
+}
+
+/** The options page that has a switch for every feature. */
+export const SIMPLE_MODE_PATH = "/advanced/simple-mode"
+
+/** The id of a feature's row on the simple mode page, for `?section=` to scroll to. */
+export function getSimpleModeRowId(id: FeatureId): string {
+  return `simple-mode-${id.replaceAll(".", "-")}`
+}
+
+/** Route to a feature's switch on the simple mode page, for opening the options page at it. */
+export function buildSimpleModeRowRoute(id: FeatureId): `/${string}` {
+  const params = new URLSearchParams({ [SECTION_QUERY_PARAM]: getSimpleModeRowId(id) })
+  return `${SIMPLE_MODE_PATH}?${params.toString()}`
 }
 
 function parseCustomActionEditorTab(value: string | null): CustomActionEditorTab | null {

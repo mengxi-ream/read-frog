@@ -1,4 +1,5 @@
 import { useAtom } from "jotai"
+import { FeatureSwitch } from "@/components/feature-switch"
 import { Switch } from "@/components/ui/base-ui/switch"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
@@ -27,12 +28,7 @@ export function HoverTranslationSection() {
           </>
         }
       >
-        <Switch
-          checked={translateConfig.node.enabled}
-          onCheckedChange={(checked) => {
-            void setTranslateConfig({ node: { ...translateConfig.node, enabled: checked } })
-          }}
-        />
+        <FeatureSwitch id="pageTranslation.hover" />
       </ConfigItem>
       <ConfigItem
         title={i18n.t("options.translation.hoverTranslation.forceRetranslation.title")}

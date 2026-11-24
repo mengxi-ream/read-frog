@@ -1,21 +1,26 @@
 import { Icon } from "@iconify/react"
-import { useAtom } from "jotai"
-import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { useAtomValue, useSetAtom } from "jotai"
+import { configAtom, configFieldsAtomMap } from "@/utils/atoms/config"
 import { patchSelectionToolbarAction } from "@/utils/custom-actions"
 import { i18n } from "@/utils/i18n"
 import { buildCustomActionOptionsRoute } from "@/utils/navigation"
-import { getSelectionToolbarItems } from "@/utils/selection-toolbar-items"
+import {
+  getSelectionToolbarItems,
+  SELECTION_TOOLBAR_ITEM_FEATURES,
+} from "@/utils/selection-toolbar-items"
 import { ConfigSection } from "../../components/config-section"
 import { getActionShortcutId } from "./shortcut-bindings"
 import { ShortcutConfigItem } from "./shortcut-config-item"
 
 /**
  * A key for every AI action, built-in or the user's own, in the selection toolbar's order. A
- * new custom action has none until one is recorded here.
+ * new custom action has none until one is recorded here. A key works while its action's
+ * toolbar item shows, so it has the item's features, and the action's own switch after them.
  */
 export function ActionShortcuts() {
-  const [selectionToolbar, setSelectionToolbar] = useAtom(configFieldsAtomMap.selectionToolbar)
-  const actions = getSelectionToolbarItems(selectionToolbar).flatMap((item) =>
+  const config = useAtomValue(configAtom)
+  const setSelectionToolbar = useSetAtom(configFieldsAtomMap.selectionToolbar)
+  const actions = getSelectionToolbarItems(config).flatMap((item) =>
     item.kind === "action" ? [item.action] : [],
   )
 
@@ -38,6 +43,7 @@ export function ActionShortcuts() {
               {action.name}
             </span>
           }
+          feature={SELECTION_TOOLBAR_ITEM_FEATURES.action}
           turnOn={action.enabled === false ? buildCustomActionOptionsRoute(action.id) : undefined}
           shortcut={action.shortcut ?? ""}
           onChange={(nextShortcut) => {

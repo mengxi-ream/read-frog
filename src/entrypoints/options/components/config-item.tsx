@@ -7,7 +7,8 @@ export interface ConfigItemProps {
   title?: ReactNode
   /** Omit where the title says everything; the block is dropped rather than left empty. */
   description?: ReactNode
-  children: ReactNode
+  /** The control. Omit for a row that only says something; no control column is left for it. */
+  children?: ReactNode
   /** `vertical` stacks the control under the label — for controls too wide to sit beside it. */
   orientation?: "horizontal" | "vertical"
   className?: string
@@ -54,7 +55,9 @@ export function ConfigItem({
           )}
         </div>
       </div>
-      <div className={cn("flex flex-col justify-start", layout.control)}>{children}</div>
+      {children !== undefined && (
+        <div className={cn("flex flex-col justify-start", layout.control)}>{children}</div>
+      )}
     </div>
   )
 }

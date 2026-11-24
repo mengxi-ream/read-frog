@@ -23,10 +23,19 @@ type SearchItemDefinition = Omit<SearchItem, "titleKey" | "descriptionKey" | "pa
 export const SEARCH_ITEMS: SearchItem[] = [
   // Advanced page
   {
-    sectionId: "glossary-enabled",
+    // Its first row: the page is one list of switches, under a description that says what
+    // turning a feature off does.
+    sectionId: "simple-mode-customActions",
+    route: "/advanced/simple-mode",
+    titleKey: "options.simpleMode.title",
+    descriptionKey: "options.simpleMode.pageDescription",
+    pageKey: "options.simpleMode.title",
+  },
+  {
+    sectionId: "glossary-applies-to",
     route: "/advanced/glossary",
-    titleKey: "options.advanced.glossary.enable.title",
-    descriptionKey: "options.advanced.glossary.enable.description",
+    titleKey: "options.advanced.glossary.appliesTo.title",
+    descriptionKey: "options.advanced.glossary.appliesTo.description",
     pageKey: "options.advanced.glossary.title",
   },
   {
@@ -382,13 +391,6 @@ export const SEARCH_ITEMS: SearchItem[] = [
 
   // Floating Button page
   {
-    sectionId: "floating-button-toggle",
-    route: "/floating-button",
-    titleKey: "options.floatingButton.enable.title",
-    descriptionKey: "options.floatingButton.enable.description",
-    pageKey: "options.floatingButton.title",
-  },
-  {
     sectionId: "floating-button-side",
     route: "/floating-button",
     titleKey: "options.floatingButton.display.side.title",
@@ -412,13 +414,6 @@ export const SEARCH_ITEMS: SearchItem[] = [
 
   // Selection Toolbar page
   {
-    sectionId: "selection-toolbar-toggle",
-    route: "/selection-toolbar",
-    titleKey: "options.selectionToolbar.enable.title",
-    descriptionKey: "options.selectionToolbar.enable.description",
-    pageKey: "options.selectionToolbar.title",
-  },
-  {
     // Titled with the section, so "translate" and "speak" both find the rows that switch
     // them on without either row's one-word title standing alone in the results.
     sectionId: "selection-toolbar-actions",
@@ -430,7 +425,7 @@ export const SEARCH_ITEMS: SearchItem[] = [
   {
     sectionId: "selection-toolbar-note-suggestion",
     route: "/selection-toolbar",
-    titleKey: "options.selectionToolbar.actions.noteSuggestion.title",
+    titleKey: "options.simpleMode.features.selectionToolbar.translate.noteSuggestion.title",
     descriptionKey: "options.selectionToolbar.actions.noteSuggestion.description",
     pageKey: "options.selectionToolbar.title",
   },
@@ -463,22 +458,13 @@ export const SEARCH_ITEMS: SearchItem[] = [
     pageKey: "options.selectionToolbar.title",
   },
 
-  // Context Menu page
-  {
-    sectionId: "context-menu-translate",
-    route: "/context-menu",
-    titleKey: "options.contextMenu.enable.title",
-    descriptionKey: "options.contextMenu.enable.description",
-    pageKey: "options.contextMenu.title",
-  },
-
   // Input Translation page
   {
-    // Titled with the section, so the row that reads "Enable" is still findable on its own.
+    // Titled with the section, so "trigger" finds what the three presses are.
     sectionId: "input-translation-trigger",
     route: "/input-translation",
     titleKey: "options.inputTranslation.trigger.title",
-    descriptionKey: "options.inputTranslation.trigger.enable.description",
+    descriptionKey: "options.inputTranslation.trigger.description",
     pageKey: "options.inputTranslation.title",
   },
   {

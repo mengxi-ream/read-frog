@@ -10,31 +10,51 @@ import { getBuiltInActions, getBuiltInDictionaryAction } from "@/utils/custom-ac
 import { NoteSuggestionItems } from "../actions/note-suggestion-items"
 
 const {
+  configAtom,
   selectionToolbarAtom,
+  writeConfigAtom,
   setSelectionToolbarMock,
+  writeConfigMock,
   setProviderIdMock,
   useFeatureProviderMock,
   testState,
 } = vi.hoisted(() => ({
+  configAtom: {},
   selectionToolbarAtom: {},
+  writeConfigAtom: {},
   setSelectionToolbarMock: vi.fn<(value: Config["selectionToolbar"]) => Promise<void>>(),
+  writeConfigMock: vi.fn<(patch: Partial<Config>) => Promise<void>>(),
   setProviderIdMock: vi.fn<(providerId: string) => void>(),
   useFeatureProviderMock: vi.fn<(featureKey: string) => unknown>(),
   testState: {
-    selectionToolbar: null as Config["selectionToolbar"] | null,
+    config: null as Config | null,
   },
 }))
 
 vi.mock("jotai", () => ({
   useAtom: (atom: object) => {
-    if (atom !== selectionToolbarAtom || !testState.selectionToolbar) {
+    if (atom !== selectionToolbarAtom || !testState.config) {
       throw new Error("Unexpected atom")
     }
-    return [testState.selectionToolbar, setSelectionToolbarMock]
+    return [testState.config.selectionToolbar, setSelectionToolbarMock]
+  },
+  useAtomValue: (atom: object) => {
+    if (atom !== configAtom || !testState.config) {
+      throw new Error("Unexpected atom")
+    }
+    return testState.config
+  },
+  useSetAtom: (atom: object) => {
+    if (atom !== writeConfigAtom) {
+      throw new Error("Unexpected atom")
+    }
+    return writeConfigMock
   },
 }))
 
 vi.mock("@/utils/atoms/config", () => ({
+  configAtom,
+  writeConfigAtom,
   configFieldsAtomMap: {
     selectionToolbar: selectionToolbarAtom,
   },
@@ -112,7 +132,7 @@ function createCustomAction(
   name: string,
   enabled: boolean,
 ): SelectionToolbarCustomAction {
-  const selectionToolbar = testState.selectionToolbar
+  const selectionToolbar = testState.config?.selectionToolbar
   if (!selectionToolbar) {
     throw new Error("Expected selection toolbar test state")
   }
@@ -138,9 +158,11 @@ function createCustomAction(
 
 describe("NoteSuggestionItems", () => {
   beforeEach(() => {
-    testState.selectionToolbar = structuredClone(DEFAULT_CONFIG.selectionToolbar)
+    testState.config = structuredClone(DEFAULT_CONFIG)
     setSelectionToolbarMock.mockReset()
     setSelectionToolbarMock.mockResolvedValue()
+    writeConfigMock.mockReset()
+    writeConfigMock.mockResolvedValue()
     setProviderIdMock.mockReset()
     useFeatureProviderMock.mockReset()
     useFeatureProviderMock.mockReturnValue({
@@ -152,7 +174,7 @@ describe("NoteSuggestionItems", () => {
   })
 
   it("lists the built-in actions first and keeps disabled custom actions selectable", () => {
-    const selectionToolbar = testState.selectionToolbar!
+    const selectionToolbar = testState.config!.selectionToolbar
     const disabledAction = createCustomAction("disabled-action", "Disabled Action", false)
     const enabledAction = createCustomAction("enabled-action", "Enabled Action", true)
     selectionToolbar.customActions = [disabledAction, enabledAction]
@@ -190,7 +212,7 @@ describe("NoteSuggestionItems", () => {
   })
 
   it("renders the configured built-in action without writing during render", () => {
-    const selectionToolbar = testState.selectionToolbar!
+    const selectionToolbar = testState.config!.selectionToolbar
     selectionToolbar.customActions = [createCustomAction("action-1", "Custom Action", true)]
     selectionToolbar.noteSuggestion.actionId = "default-dictionary"
 
@@ -204,8 +226,8 @@ describe("NoteSuggestionItems", () => {
     expect(setSelectionToolbarMock).not.toHaveBeenCalled()
   })
 
-  it("preserves the existing enable switch and the selected action when toggled", () => {
-    const selectionToolbar = testState.selectionToolbar!
+  it("writes only its own switch when toggled, keeping the selected action", () => {
+    const selectionToolbar = testState.config!.selectionToolbar
     const action = createCustomAction("action-1", "Custom Action", true)
     selectionToolbar.customActions = [action]
     selectionToolbar.noteSuggestion.actionId = action.id
@@ -214,13 +236,10 @@ describe("NoteSuggestionItems", () => {
 
     fireEvent.click(screen.getByRole("switch"))
 
-    expect(setSelectionToolbarMock).toHaveBeenCalledWith({
-      ...selectionToolbar,
-      noteSuggestion: {
-        ...selectionToolbar.noteSuggestion,
-        enabled: false,
-      },
+    expect(writeConfigMock).toHaveBeenCalledExactlyOnceWith({
+      selectionToolbar: { noteSuggestion: { enabled: false } },
     })
+    expect(setSelectionToolbarMock).not.toHaveBeenCalled()
   })
 
   it("renders a provider row bound to the noteSuggestion feature", () => {

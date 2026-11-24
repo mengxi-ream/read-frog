@@ -51,8 +51,6 @@ popup:
         action: İki dilli moda geçmek için tıklayın
   hub:
     tooltip: Birden fazla çeviri modeliyle aynı anda metin çevirin
-  discord:
-    tooltip: Geliştiricilerle bağlantı kurmak ve yeni özelliklere erken erişim sağlamak için Discord'a katılın
   blog:
     notification: Read Frog'da yenilikler
   aiSmartContext: AI Akıllı Bağlam
@@ -594,9 +592,7 @@ options:
     pageDescription: Giriş kutularına yazdıklarınızı göndermeden önce çevirin.
     trigger:
       title: Tetikleme
-      enable:
-        title: Etkinleştir
-        description: Herhangi bir giriş alanında boşluk tuşuna hızlıca üç kez basarak yazdıklarınızı çevirin.
+      description: Herhangi bir giriş alanında boşluk tuşuna hızlıca üç kez basarak yazdıklarınızı çevirin.
       threshold:
         title: Tetikleme eşiği
         description: Basışlar arasında izin verilen süre, milisaniye cinsinden. Çeviri tetiklenmiyorsa artırın, yazarken kendiliğinden tetikleniyorsa azaltın.
@@ -615,9 +611,6 @@ options:
     title: Yüzen Buton
     pageDescription: Yüzen düğmenin hangi tarafta duracağını, tıklamanın ne yapacağını ve nerede gizleneceğini ayarlayın.
     demoImageAlt: Yüzen buton demosu
-    enable:
-      title: Yüzen butonu etkinleştir
-      description: Read Frog özelliklerine hızlı erişim için web sayfalarında yüzen butonu görüntüle
     display:
       title: Görünüm
       side:
@@ -637,6 +630,7 @@ options:
       translate: Sayfa çevirisini aç/kapat
     closeMenu:
       title: Yüzen butonu gizle
+    pageTranslationOff: "Sayfa Çevirisi sade modda kapalı"
     tooltips:
       togglePageTranslation: Sayfa çevirisini aç/kapat
       floatingButtonOptions: Kayan düğme seçenekleri
@@ -647,9 +641,6 @@ options:
     title: Seçim Araç Çubuğu
     pageDescription: Metin seçtiğinizde hangi eylemlerin görüneceğini ve araç çubuğunun nerede çıkacağını belirleyin.
     demoImageAlt: Seçim araç çubuğu demosu
-    enable:
-      title: Seçim araç çubuğunu etkinleştir
-      description: Web sayfalarında metin seçtiğinizde araç çubuğunu göstererek hızlı çeviri, seslendirme ve AI eylemleri sunar
     annotation:
       title: "Sözcük notları"
       enable:
@@ -661,13 +652,10 @@ options:
     actions:
       title: Eylemler
       translate:
-        title: Çeviri
         description: Araç çubuğunda çeviri düğmesini göster
       speak:
-        title: Sesli okuma
         description: Seçili metni sesli okuyan seslendirme düğmesini araç çubuğunda göster
       noteSuggestion:
-        title: Not önerileri
         description: Bir yapay zekâ sağlayıcısıyla seçim çevirisinden sonra Notebase'inize kaydedilecek kelimeler önerilir
         action: Eylem
         actionDescription: Öneriyi üreten eylem
@@ -1093,8 +1081,8 @@ options:
       pageDescription: Sizin için önemli olan sözcüklere sabit bir çeviri verin ve her listenin nerede geçerli olacağını seçin.
       untitled: Adsız terim sözlüğü
       noGlossaries: Henüz terim sözlüğü yok.
-      enable:
-        title: Etkinleştir
+      appliesTo:
+        title: Geçerli olduğu yerler
         description: Eşleşen terimleri LLM'ye gönderir, böylece onları istediğiniz gibi çevirir. Terim sözlüğü istemin içinde gönderilir, bu yüzden yalnızca LLM sağlayıcısı üzerinde çalışan özellikler için geçerlidir.
       library:
         title: Terim sözlükleriniz
@@ -1198,9 +1186,6 @@ options:
     title: Bağlam Menüsü
     pageDescription: Tarayıcının sağ tık menüsündeki Read Frog seçeneklerini yönetin.
     demoImageAlt: Bağlam menüsü demosu
-    enable:
-      title: Bağlam menüsü çevirisini etkinleştir
-      description: Sayfa veya seçili metni hızlıca çevirmek için tarayıcı sağ tıklama menüsüne çeviri seçenekleri ekle
   translation:
     title: Sayfa Çevirisi
     pageDescription: Sayfaların nasıl çevrileceğini belirleyin — mod, kapsam, istemler ve istek limitleri.
@@ -1569,6 +1554,53 @@ options:
           confirm: Onayla
           cancel: İptal
           description: Tüm önbelleğe alınmış AI bölümlendirme sonuçları silinecektir. AI bölümlendirme etkinleştirilmiş bir video oynatıldığında altyazılar yeniden işlenecektir.
+  simpleMode:
+    title: "Sade mod"
+    pageDescription: "Kapattığınız bir özellik hiç yüklenmemiş gibi olur: web sayfalarında görünmez, kısayolları çalışmaz ve kenar çubuğunda listelenmez. Ayarları korunur; yeniden açtığınızda her şey eskisi gibi olur."
+    drawerDescription: "Kapattığınız özellikler hiçbir yerde görünmez. Ayarları korunur"
+    features:
+      customActions:
+        title: "Özel AI Eylemleri"
+        description: "Seçim araç çubuğundaki ve sağ tık menüsündeki AI eylemleri; yerleşik Sözlük ve Cümle Analizi dahil"
+      pageTranslation:
+        title: "Sayfa Çevirisi"
+        description: "Web sayfalarının tamamını çevirir"
+        hover:
+          title: "Üzerine gelme çevirisi"
+          description: "Bir paragrafın üzerine gelin veya uzun basın; yalnızca o paragraf çevrilir"
+      videoSubtitles:
+        title: "Video Altyazıları"
+        description: "Video oynatıcılara çevrilmiş altyazı düğmesi ekler"
+      inputTranslation:
+        title: "Giriş Çevirisi"
+        description: "Herhangi bir giriş alanında boşluk tuşuna hızlıca üç kez basarak yazdıklarınızı çevirin"
+      floatingButton:
+        title: "Yüzen Buton"
+        description: "Read Frog özelliklerine hızlı erişim için web sayfalarında yüzen butonu görüntüle"
+      selectionToolbar:
+        title: "Seçim Araç Çubuğu"
+        description: "Web sayfalarında metin seçtiğinizde araç çubuğunu göstererek hızlı çeviri, seslendirme ve AI eylemleri sunar"
+        annotation:
+          title: "Sözcük notları"
+          description: "Seçili sözcüğün veya ifadenin altını çizer ve anlamını satırların arasına yazar"
+        translate:
+          title: "Seçim çevirisi"
+          description: "Araç çubuğunda çeviri düğmesini göster"
+          noteSuggestion:
+            title: "Not önerileri"
+            description: "Bir yapay zekâ sağlayıcısıyla seçim çevirisinden sonra Notebase'inize kaydedilecek kelimeler önerilir"
+        speak:
+          title: "Sesli okuma"
+          description: "Seçili metni sesli okuyan seslendirme düğmesini araç çubuğunda göster"
+      contextMenu:
+        title: "Bağlam Menüsü"
+        description: "Tarayıcının sağ tık menüsündeki Read Frog seçenekleri"
+      translationHub:
+        title: "Çeviri Merkezi"
+        description: "Birden fazla çeviri modeliyle aynı anda metin çevirin"
+      glossary:
+        title: "Terim sözlüğü"
+        description: "Sizin için önemli sözcükleri belirlediğiniz şekilde çevirir"
   whatsNew:
     title: Yenilikler
     postType:
@@ -1658,7 +1690,7 @@ hideMenu:
   untilReload: Sayfayı yenileyene kadar
   onSite: $1 sitesinde
   onAllSites: Tüm sitelerde
-  restoreHint: $1 bölümünden yeniden açabilirsiniz.
+  restoreHint: "$1 veya $2 bölümünden yeniden açabilirsiniz."
 action:
   copy: Kopyala
   copied: Kopyalandı

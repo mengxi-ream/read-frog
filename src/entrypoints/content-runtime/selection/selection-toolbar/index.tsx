@@ -8,7 +8,7 @@ import type { DeferredSelectionOpenDetail } from "@/utils/constants/selection"
 import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { useCallback, useEffect, useEffectEvent, useLayoutEffect, useRef, useState } from "react"
 import { ANALYTICS_SURFACE } from "@/types/analytics"
-import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { configAtom } from "@/utils/atoms/config"
 import { NOTRANSLATE_CLASS } from "@/utils/constants/dom-labels"
 import {
   DEFERRED_SELECTION_OPEN_EVENT,
@@ -22,7 +22,10 @@ import {
   SELECTION_CONTENT_OVERLAY_ROOT_ATTRIBUTE,
 } from "@/utils/constants/selection-overlay-layers"
 import { getEbookNoteOrigin } from "@/utils/note-origin"
-import { getSelectionToolbarItems } from "@/utils/selection-toolbar-items"
+import {
+  getSelectionToolbarItems,
+  hasSelectionToolbarMoreMenu,
+} from "@/utils/selection-toolbar-items"
 import { cn } from "@/utils/styles/utils"
 import { urlMatchesPattern } from "@/utils/url-pattern"
 import { useAnnotation } from "../annotation/provider"
@@ -246,7 +249,8 @@ export function SelectionToolbar() {
   const [isSelectionToolbarOpen, setIsSelectionToolbarOpen] = useAtom(isSelectionToolbarOpenAtom)
   const setSelectionState = useSetAtom(setSelectionStateAtom)
   const clearSelectionState = useSetAtom(clearSelectionStateAtom)
-  const selectionToolbar = useAtomValue(configFieldsAtomMap.selectionToolbar)
+  const config = useAtomValue(configAtom)
+  const { selectionToolbar } = config
   const placement = selectionToolbar.placement
   const isHiddenUntilReload = useAtomValue(isSelectionToolbarHiddenUntilReloadAtom)
   const isHiddenOnPage =
@@ -256,12 +260,13 @@ export function SelectionToolbar() {
     )
   const annotation = useAnnotation()
   // With nothing pinned the toolbar still shows its "more" menu; with nothing
-  // enabled — and the annotation slot off — there is nothing to show.
-  const enabledItems = getSelectionToolbarItems(selectionToolbar).filter((item) => item.enabled)
-  const hasAnyEnabledItem = enabledItems.length > 0 || annotation.enabled
-  const hasAnyPinnedItem = enabledItems.some((item) => item.pinned)
+  // shown — and the annotation slot off — there is nothing to show.
+  const shownItems = getSelectionToolbarItems(config).filter((item) => item.shown)
+  const hasAnyShownItem = shownItems.length > 0 || annotation.enabled
+  const hasAnyPinnedItem = shownItems.some((item) => item.pinned)
+  const hasMoreMenu = hasSelectionToolbarMoreMenu(config)
   const isSelectionToolbarVisible =
-    isSelectionToolbarOpen && selectionToolbar.enabled && !isHiddenOnPage && hasAnyEnabledItem
+    isSelectionToolbarOpen && selectionToolbar.enabled && !isHiddenOnPage && hasAnyShownItem
   const reveal = useAnnotateReveal(tooltipRef, isSelectionToolbarVisible)
   // In annotation mode a selection is annotated where it is made; the toolbar
   // never opens for it. Selections in text controls have nothing to annotate.
@@ -686,7 +691,7 @@ export function SelectionToolbar() {
       )}
       {...{ [SELECTION_CONTENT_OVERLAY_ROOT_ATTRIBUTE]: "" }}
     >
-      {selectionToolbar.enabled && !isHiddenOnPage && hasAnyEnabledItem && (
+      {selectionToolbar.enabled && !isHiddenOnPage && hasAnyShownItem && (
         <div
           ref={tooltipRef}
           inert={!isSelectionToolbarVisible}
@@ -737,8 +742,10 @@ export function SelectionToolbar() {
               <div className="no-scrollbar flex max-w-105 items-center overflow-x-auto overflow-y-hidden scroll-driven:scroll-fade-x">
                 <SelectionToolbarPinnedItems />
               </div>
-              {hasAnyPinnedItem && <div className="w-px shrink-0 self-stretch bg-border" />}
-              <SelectionToolbarMoreMenu />
+              {hasAnyPinnedItem && hasMoreMenu && (
+                <div className="w-px shrink-0 self-stretch bg-border" />
+              )}
+              {hasMoreMenu && <SelectionToolbarMoreMenu />}
             </div>
           </div>
           {/* Outside the surface, which is positioned now, yet as faded as the

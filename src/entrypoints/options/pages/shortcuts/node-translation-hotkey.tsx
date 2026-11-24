@@ -1,5 +1,5 @@
 import type { NodeHotkey } from "@/utils/constants/hotkeys"
-import { useAtom } from "jotai"
+import { useAtom, useAtomValue } from "jotai"
 import { NodeHotkeyIcon } from "@/components/node-hotkey-icon"
 import {
   Select,
@@ -10,12 +10,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/base-ui/select"
-import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { configAtom, configFieldsAtomMap } from "@/utils/atoms/config"
 import { HOTKEYS } from "@/utils/constants/hotkeys"
 import { i18n } from "@/utils/i18n"
-import { buildSectionLink } from "../../command-palette/section-scroll"
 import { ConfigItem } from "../../components/config-item"
 import { SELECT_CONTENT_PROPS } from "../../components/select-content-props"
+import { buildTurnOnLink } from "../advanced/simple-mode/links"
 import { ShortcutConfigItem } from "./shortcut-config-item"
 import { ShortcutTitle } from "./shortcut-title"
 
@@ -28,8 +28,9 @@ const PRESET_HOTKEYS = HOTKEYS.filter((hotkey) => hotkey !== "custom")
  * page; this page only sets keys.
  */
 export function NodeTranslationHotkey() {
+  const config = useAtomValue(configAtom)
   const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.pageTranslation)
-  const { enabled, hotkey, shortcut } = translateConfig.node
+  const { hotkey, shortcut } = translateConfig.node
 
   return (
     <>
@@ -38,9 +39,7 @@ export function NodeTranslationHotkey() {
         title={
           <ShortcutTitle
             title={i18n.t("options.shortcuts.nodeTranslation.title")}
-            turnOn={
-              enabled ? undefined : buildSectionLink("/page-translation", "hover-translation")
-            }
+            turnOn={buildTurnOnLink(config, "pageTranslation.hover")}
           />
         }
         description={i18n.t("options.shortcuts.nodeTranslation.description")}

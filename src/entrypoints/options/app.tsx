@@ -1,9 +1,13 @@
-import type { ComponentType } from "react"
+import type { ComponentType, ReactNode } from "react"
+import type { RoutePath } from "./app-sidebar/nav-items"
+import type { FeatureTag } from "@/utils/features"
+import { useAtomValue } from "jotai"
 import { lazy, Suspense } from "react"
 import { Navigate, Route, Routes } from "react-router"
-import { ROUTE_DEFS } from "./app-sidebar/nav-items"
-
-type RoutePath = (typeof ROUTE_DEFS)[number]["path"]
+import { configAtom } from "@/utils/atoms/config"
+import { switchedOffFeature } from "@/utils/features"
+import { getRouteFeature, ROUTE_DEFS } from "./app-sidebar/nav-items"
+import { buildSimpleModeRowLink } from "./pages/advanced/simple-mode/links"
 
 const PreferencePage = lazy(() =>
   import("./pages/preference").then((module) => ({ default: module.PreferencePage })),
@@ -46,8 +50,14 @@ const GlossaryEditorPage = lazy(() =>
     default: module.GlossaryEditorPage,
   })),
 )
+const SimpleModePage = lazy(() =>
+  import("./pages/advanced/simple-mode").then((module) => ({ default: module.SimpleModePage })),
+)
 
-/** Advanced has no page of its own; its group's only entry is the glossary. */
+/**
+ * Advanced has no page of its own: old links to it land on its first entry, the glossary, or with
+ * the glossary switched off, on its switch in simple mode.
+ */
 function AdvancedRedirect() {
   return <Navigate to="/advanced/glossary" replace />
 }
@@ -142,6 +152,7 @@ const ROUTE_COMPONENTS: Record<RoutePath, ComponentType> = {
   "/help-and-community": HelpAndCommunityPage,
   "/advanced/glossary": GlossaryPage,
   "/advanced/glossary/:glossaryId": GlossaryEditorPage,
+  "/advanced/simple-mode": SimpleModePage,
   "/preference/config-backup": ConfigBackupPage,
   "/preference/extension-activation": ExtensionActivationPage,
   "/page-translation/custom-css": CustomCssPage,
@@ -167,13 +178,41 @@ function RouteLoadingFallback() {
   )
 }
 
+/**
+ * A page of a feature simple mode turned off is not there, the same as its sidebar entry: a link
+ * or the address bar that still leads to it lands on the switch that brings it back.
+ */
+function FeatureRoute({ feature, children }: { feature: FeatureTag; children: ReactNode }) {
+  const config = useAtomValue(configAtom)
+  const off = switchedOffFeature(config, feature)
+  if (off !== undefined) {
+    return <Navigate to={buildSimpleModeRowLink(off)} replace />
+  }
+  return children
+}
+
 export default function App() {
   return (
     <Suspense fallback={<RouteLoadingFallback />}>
       <Routes>
         {ROUTE_DEFS.map(({ path }) => {
           const Component = ROUTE_COMPONENTS[path]
-          return <Route key={path} path={path} element={<Component />} />
+          const feature = getRouteFeature(path)
+          return (
+            <Route
+              key={path}
+              path={path}
+              element={
+                feature === undefined ? (
+                  <Component />
+                ) : (
+                  <FeatureRoute feature={feature}>
+                    <Component />
+                  </FeatureRoute>
+                )
+              }
+            />
+          )
         })}
       </Routes>
     </Suspense>

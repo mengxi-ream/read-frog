@@ -2,7 +2,7 @@ import { IconChevronRight } from "@tabler/icons-react"
 import { useAtomValue } from "jotai"
 import { browser } from "#imports"
 import readFrogLogo from "@/assets/icons/read-frog.png"
-import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { configAtom } from "@/utils/atoms/config"
 import { getSelectionContextMenuItems } from "@/utils/context-menu"
 import { i18n } from "@/utils/i18n"
 import { cn } from "@/utils/styles/utils"
@@ -52,8 +52,8 @@ function BrowserMenuItem({ className }: { className: string }) {
  * the background puts there, actions included.
  */
 export function ContextMenuPreview() {
-  const selectionToolbar = useAtomValue(configFieldsAtomMap.selectionToolbar)
-  const items = getSelectionContextMenuItems(selectionToolbar)
+  const config = useAtomValue(configAtom)
+  const items = getSelectionContextMenuItems(config)
   // The browser names the submenu after the extension in the browser's language, which needn't be
   // the one Read Frog's settings are in. WXT types `getMessage` for the predefined messages only.
   const extensionName = (browser.i18n.getMessage as (messageName: string) => string)("extName")

@@ -1,33 +1,32 @@
 // @vitest-environment jsdom
 
 import type { Config } from "@/types/config/config"
-import { render, screen } from "@testing-library/react"
+import { cleanup, render, screen } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { findSelectionToolbarAction } from "@/utils/custom-actions"
+import { setFeatureOn } from "@/utils/features"
 import { ANNOTATION_ICON } from "@/utils/iconify/bundled-icons"
 import { SelectionToolbarPreview } from "../selection-toolbar-preview"
 
-const { selectionToolbarAtom, testState } = vi.hoisted(() => ({
-  selectionToolbarAtom: {},
+const { configAtom, testState } = vi.hoisted(() => ({
+  configAtom: {},
   testState: {
-    selectionToolbar: null as Config["selectionToolbar"] | null,
+    config: null as Config | null,
   },
 }))
 
 vi.mock("jotai", () => ({
   useAtomValue: (atom: object) => {
-    if (atom !== selectionToolbarAtom || !testState.selectionToolbar) {
+    if (atom !== configAtom || !testState.config) {
       throw new Error("Unexpected atom")
     }
-    return testState.selectionToolbar
+    return testState.config
   },
 }))
 
 vi.mock("@/utils/atoms/config", () => ({
-  configFieldsAtomMap: {
-    selectionToolbar: selectionToolbarAtom,
-  },
+  configAtom,
 }))
 
 // Iconify's <Icon> is already a span carrying its icon name (vitest.setup.ts); give the two
@@ -40,8 +39,16 @@ vi.mock("@tabler/icons-react", async (importOriginal) => ({
   IconVolume: () => <span data-icon="speak" />,
 }))
 
+function selectionToolbar() {
+  return testState.config!.selectionToolbar
+}
+
 function iconOf(actionId: string) {
-  return findSelectionToolbarAction(testState.selectionToolbar!, actionId)!.icon
+  return findSelectionToolbarAction(selectionToolbar(), actionId)!.icon
+}
+
+function hasMoreButton() {
+  return screen.getByRole("img").querySelector(".tabler-icon-dots-vertical")
 }
 
 function toolbarIcons() {
@@ -52,7 +59,7 @@ function toolbarIcons() {
 
 describe("selection toolbar preview", () => {
   beforeEach(() => {
-    testState.selectionToolbar = structuredClone(DEFAULT_CONFIG.selectionToolbar)
+    testState.config = structuredClone(DEFAULT_CONFIG)
   })
 
   it("shows the annotation button, then the pinned items in the toolbar's order", () => {
@@ -69,9 +76,9 @@ describe("selection toolbar preview", () => {
   })
 
   it("leaves out items that are unpinned or turned off, and the annotation button when it's off", () => {
-    testState.selectionToolbar!.annotation.enabled = false
-    testState.selectionToolbar!.features.speak.enabled = false
-    testState.selectionToolbar!.unpinned = ["translate", "default-improve-writing"]
+    selectionToolbar().annotation.enabled = false
+    selectionToolbar().features.speak.enabled = false
+    selectionToolbar().unpinned = ["translate", "default-improve-writing"]
 
     render(<SelectionToolbarPreview />)
 
@@ -82,7 +89,7 @@ describe("selection toolbar preview", () => {
   })
 
   it("draws the toolbar at the opacity the settings give it", () => {
-    testState.selectionToolbar!.opacity = 60
+    selectionToolbar().opacity = 60
 
     render(<SelectionToolbarPreview />)
 
@@ -91,5 +98,22 @@ describe("selection toolbar preview", () => {
       .querySelector("[data-icon='translate']")!
       .closest<HTMLElement>("[style*='opacity']")
     expect(toolbar).toHaveStyle({ opacity: "0.6" })
+  })
+
+  it("leaves out the actions while simple mode has custom actions off, and the more button with nothing to list", () => {
+    testState.config = { ...testState.config!, ...setFeatureOn("customActions", false) }
+
+    render(<SelectionToolbarPreview />)
+
+    expect(toolbarIcons()).toEqual([ANNOTATION_ICON, "translate", "speak"])
+    expect(hasMoreButton()).not.toBeNull()
+
+    selectionToolbar().features.translate.enabled = false
+    selectionToolbar().features.speak.enabled = false
+    cleanup()
+    render(<SelectionToolbarPreview />)
+
+    expect(toolbarIcons()).toEqual([ANNOTATION_ICON])
+    expect(hasMoreButton()).toBeNull()
   })
 })

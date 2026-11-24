@@ -9,31 +9,27 @@ import { findSelectionToolbarAction } from "@/utils/custom-actions"
 import { i18n } from "@/utils/i18n"
 import { ContextMenuPreview } from "../context-menu-preview"
 
-const { selectionToolbarAtom, testState } = vi.hoisted(() => ({
-  selectionToolbarAtom: {},
+const { configAtom, testState } = vi.hoisted(() => ({
+  configAtom: {},
   testState: {
-    selectionToolbar: null as Config["selectionToolbar"] | null,
+    config: null as Config | null,
   },
 }))
 
 vi.mock("jotai", () => ({
   useAtomValue: (atom: object) => {
-    if (atom !== selectionToolbarAtom || !testState.selectionToolbar) {
+    if (atom !== configAtom || !testState.config) {
       throw new Error("Unexpected atom")
     }
-    return testState.selectionToolbar
+    return testState.config
   },
 }))
 
-vi.mock("@/utils/atoms/config", () => ({
-  configFieldsAtomMap: {
-    selectionToolbar: selectionToolbarAtom,
-  },
-}))
+vi.mock("@/utils/atoms/config", () => ({ configAtom }))
 
 describe("context menu preview", () => {
   beforeEach(() => {
-    testState.selectionToolbar = structuredClone(DEFAULT_CONFIG.selectionToolbar)
+    testState.config = structuredClone(DEFAULT_CONFIG)
     i18n.t = vi.fn<(...args: any[]) => any>(
       (key: string) =>
         ({
@@ -60,7 +56,7 @@ describe("context menu preview", () => {
     expect(screen.getByRole("img").firstElementChild).toHaveStyle({ height: "330px" })
     unmount()
 
-    testState.selectionToolbar!.customActions = [
+    testState.config!.selectionToolbar.customActions = [
       { id: "rewrite", name: "Rewrite", enabled: true },
       { id: "summarize", name: "Summarize", enabled: true },
     ] as Config["selectionToolbar"]["customActions"]
@@ -79,20 +75,34 @@ describe("context menu preview", () => {
   })
 
   it("shows the enabled actions and not the ones turned off", () => {
-    testState.selectionToolbar!.builtInActions.improveWriting.enabled = false
-    testState.selectionToolbar!.customActions = [
+    testState.config!.selectionToolbar.builtInActions.improveWriting.enabled = false
+    testState.config!.selectionToolbar.customActions = [
       { id: "rewrite", name: "Rewrite", enabled: true },
       { id: "summarize", name: "Summarize", enabled: false },
     ] as Config["selectionToolbar"]["customActions"]
 
     render(<ContextMenuPreview />)
 
-    const nameOf = (id: string) => findSelectionToolbarAction(testState.selectionToolbar!, id)!.name
+    const nameOf = (id: string) =>
+      findSelectionToolbarAction(testState.config!.selectionToolbar, id)!.name
     const preview = screen.getByRole("img")
     expect(preview).toHaveTextContent("Rewrite")
     expect(preview).not.toHaveTextContent("Summarize")
     expect(preview).toHaveTextContent(nameOf("default-dictionary"))
     expect(preview).not.toHaveTextContent(nameOf("default-improve-writing"))
+  })
+
+  it("leaves the actions out while simple mode has custom AI actions off", () => {
+    testState.config!.customActions.enabled = false
+
+    render(<ContextMenuPreview />)
+
+    const preview = screen.getByRole("img")
+    expect(preview).toHaveTextContent('Translate "Mr. Kamiya"')
+    expect(preview).not.toHaveTextContent(
+      findSelectionToolbarAction(testState.config!.selectionToolbar, "default-dictionary")!.name,
+    )
+    expect(screen.getByRole("img").firstElementChild).toHaveStyle({ height: "330px" })
   })
 
   it("is one labelled image to assistive technology", () => {

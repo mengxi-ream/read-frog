@@ -1,8 +1,6 @@
-import { useAtom } from "jotai"
+import { FeatureSwitch } from "@/components/feature-switch"
 import ProviderSelector from "@/components/llm-providers/provider-selector"
 import { useFeatureProvider } from "@/components/llm-providers/use-feature-providers"
-import { Switch } from "@/components/ui/base-ui/switch"
-import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
 import { ConfigItem } from "../../../components/config-item"
 import { ConfigSection } from "../../../components/config-section"
@@ -14,8 +12,6 @@ import { ShortcutLink } from "../../../components/shortcut-link"
  * provider is the translate feature's, and this row edits that one setting.
  */
 export function AnnotationSection() {
-  const [selectionToolbar, setSelectionToolbar] = useAtom(configFieldsAtomMap.selectionToolbar)
-  const { annotation } = selectionToolbar
   const translateProvider = useFeatureProvider("selectionTranslation")
 
   return (
@@ -33,15 +29,7 @@ export function AnnotationSection() {
           </>
         }
       >
-        <Switch
-          checked={annotation.enabled}
-          onCheckedChange={(checked) => {
-            void setSelectionToolbar({
-              ...selectionToolbar,
-              annotation: { ...annotation, enabled: checked },
-            })
-          }}
-        />
+        <FeatureSwitch id="selectionToolbar.annotation" />
       </ConfigItem>
       <ConfigItem
         id="selection-toolbar-annotation-provider"

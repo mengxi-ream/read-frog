@@ -11,15 +11,18 @@ import { PersonalizedPromptsSection } from "../personalized-prompts"
 import { PreferenceSection } from "../preference"
 import { TranslationStyleSection } from "../translation-style"
 
-const { translateAtom, configAtom, setTranslateMock, testState } = vi.hoisted(() => ({
-  translateAtom: {},
-  configAtom: {},
-  setTranslateMock: vi.fn<(value: Partial<Config["pageTranslation"]>) => Promise<void>>(),
-  testState: {
-    pageTranslation: null as Config["pageTranslation"] | null,
-    config: null as Config | null,
-  },
-}))
+const { translateAtom, configAtom, writeConfigAtom, setTranslateMock, writeConfigMock, testState } =
+  vi.hoisted(() => ({
+    translateAtom: {},
+    configAtom: {},
+    writeConfigAtom: {},
+    setTranslateMock: vi.fn<(value: Partial<Config["pageTranslation"]>) => Promise<void>>(),
+    writeConfigMock: vi.fn<(patch: Partial<Config>) => Promise<void>>(),
+    testState: {
+      pageTranslation: null as Config["pageTranslation"] | null,
+      config: null as Config | null,
+    },
+  }))
 
 vi.mock("jotai", () => ({
   useAtom: (atom: object) => {
@@ -37,6 +40,12 @@ vi.mock("jotai", () => ({
     }
     return testState.pageTranslation
   },
+  useSetAtom: (atom: object) => {
+    if (atom !== writeConfigAtom) {
+      throw new Error("Unexpected atom")
+    }
+    return writeConfigMock
+  },
 }))
 
 vi.mock("@/utils/host/translate/ui/decorate-translation", () => ({
@@ -45,6 +54,7 @@ vi.mock("@/utils/host/translate/ui/decorate-translation", () => ({
 
 vi.mock("@/utils/atoms/config", () => ({
   configAtom,
+  writeConfigAtom,
   configFieldsAtomMap: {
     pageTranslation: translateAtom,
   },
@@ -78,6 +88,8 @@ describe("translation page sections", () => {
     }
     setTranslateMock.mockReset()
     setTranslateMock.mockResolvedValue()
+    writeConfigMock.mockReset()
+    writeConfigMock.mockResolvedValue()
   })
 
   it("sends the mode row to the shortcut that switches it", () => {
@@ -125,16 +137,16 @@ describe("translation page sections", () => {
   })
 
   it("toggles hover translation without disturbing the hotkey it listens for", () => {
-    const translate = testState.pageTranslation!
-    translate.node.enabled = true
+    testState.pageTranslation!.node.enabled = true
 
     renderInRouter(<HoverTranslationSection />)
 
     fireEvent.click(screen.getAllByRole("switch")[0]!)
 
-    expect(setTranslateMock).toHaveBeenCalledWith({
-      node: { ...translate.node, enabled: false },
+    expect(writeConfigMock).toHaveBeenCalledExactlyOnceWith({
+      pageTranslation: { node: { enabled: false } },
     })
+    expect(setTranslateMock).not.toHaveBeenCalled()
   })
 
   it("toggles fresh hover translations without disturbing the hover trigger", () => {

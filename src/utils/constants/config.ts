@@ -78,7 +78,7 @@ export const GOOGLE_DRIVE_TOKEN_STORAGE_KEY = "__googleDriveToken"
 
 export const THEME_STORAGE_KEY = "theme"
 export const DEFAULT_DETECTED_CODE = "en" as const
-export const CONFIG_SCHEMA_VERSION = 129
+export const CONFIG_SCHEMA_VERSION = 130
 
 export const DEFAULT_FLOATING_BUTTON_POSITION = 0.66
 export const DEFAULT_FLOATING_BUTTON_SIDE: FloatingButtonSide = "right"
@@ -175,6 +175,7 @@ export const DEFAULT_CONFIG: Config = {
   },
   providersConfig: DEFAULT_PROVIDER_CONFIG_LIST,
   pageTranslation: {
+    enabled: true,
     providerId: MICROSOFT_TRANSLATE_PROVIDER_ID,
     mode: "bilingual",
     modeShortcut: DEFAULT_TRANSLATION_MODE_SHORTCUT_KEY,
@@ -288,6 +289,9 @@ export const DEFAULT_CONFIG: Config = {
   contextMenu: {
     enabled: true,
   },
+  customActions: {
+    enabled: true,
+  },
   inputTranslation: {
     enabled: true,
     providerId: MICROSOFT_TRANSLATE_PROVIDER_ID,
@@ -297,6 +301,7 @@ export const DEFAULT_CONFIG: Config = {
     timeThreshold: 300,
   },
   videoSubtitles: {
+    enabled: true,
     platforms: {
       youtube: "manual",
       xcom: "manual",
@@ -353,6 +358,7 @@ export const DEFAULT_CONFIG: Config = {
   },
   uiLanguage: "auto",
   translationHub: {
+    enabled: true,
     shortcut: DEFAULT_TRANSLATION_HUB_SHORTCUT_KEY,
     selectedProviderIds: null,
     sourceCode: null,

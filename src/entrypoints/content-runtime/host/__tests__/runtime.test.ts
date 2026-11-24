@@ -205,6 +205,36 @@ describe("bootstrapHostContent URL changes", () => {
     }
   })
 
+  it("takes the translations off the page when simple mode switches page translation off", async () => {
+    const watch = vi.spyOn(storage, "watch").mockReturnValue(vi.fn<() => void>())
+    const { ctx, invalidate } = createContentScriptContext()
+    try {
+      await bootstrapHostContent(ctx, null)
+      const manager = managerInstances[0]!
+      const onConfigChange = watch.mock.calls.find(
+        ([key]) => key === `local:${CONFIG_STORAGE_KEY}`,
+      )?.[1]
+
+      const switchedOff = structuredClone(DEFAULT_CONFIG)
+      switchedOff.pageTranslation.enabled = false
+      onConfigChange!(switchedOff, DEFAULT_CONFIG)
+      expect(manager.stop).not.toHaveBeenCalled()
+
+      manager.isActive = true
+      onConfigChange!(DEFAULT_CONFIG, switchedOff)
+      expect(manager.stop).not.toHaveBeenCalled()
+
+      onConfigChange!(switchedOff, DEFAULT_CONFIG)
+      // Not a refusal of this site: auto-translation comes back with the switch.
+      expect(manager.stop).toHaveBeenCalledExactlyOnceWith()
+      expect(manager.isActive).toBe(false)
+
+      invalidate()
+    } finally {
+      watch.mockRestore()
+    }
+  })
+
   it("keeps inactive page translation inactive and only asks auto-translation on SPA navigation", async () => {
     const { ctx, invalidate } = createContentScriptContext()
     await bootstrapHostContent(ctx, null)

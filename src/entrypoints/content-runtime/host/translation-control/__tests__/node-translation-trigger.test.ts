@@ -778,6 +778,35 @@ describe("registerNodeTranslationTriggerListeners", () => {
     expect(keyQ.defaultPrevented).toBe(false)
   })
 
+  it("does nothing, and keeps no keys from the page, while page translation is switched off", async () => {
+    vi.useFakeTimers()
+    const onTrigger = vi.fn<(...args: any[]) => any>()
+    const switchedOff = (hotkey: Config["pageTranslation"]["node"]["hotkey"]) => {
+      const config = createConfig(hotkey)
+      config.pageTranslation.enabled = false
+      return config
+    }
+    let config = switchedOff("custom")
+
+    teardown = registerNodeTranslationTriggerListeners({
+      getConfig: () => Promise.resolve(config),
+      onTrigger,
+    })
+
+    const keyQ = await pressAltQ()
+    await vi.advanceTimersByTimeAsync(500)
+    expect(keyQ.defaultPrevented).toBe(false)
+
+    config = switchedOff("backtick")
+    dispatchMouseEvent("mousemove", { clientX: 50, clientY: 60 })
+    dispatchKeyboardEvent("keydown", "`")
+    await flushMicrotasks()
+    dispatchKeyboardEvent("keyup", "`")
+    await vi.advanceTimersByTimeAsync(500)
+
+    expect(onTrigger).not.toHaveBeenCalled()
+  })
+
   it("lets the custom shortcut through to a field, also one inside a shadow root", async () => {
     const onTrigger = vi.fn<(...args: any[]) => any>()
     const host = document.createElement("div")

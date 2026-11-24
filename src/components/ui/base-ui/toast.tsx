@@ -310,7 +310,10 @@ function AnchoredToasts({
           return (
             <Toast.Positioner
               key={toast.id}
-              className="pointer-events-none z-[2147483647] max-w-[min(22.5rem,var(--available-width))] data-anchor-hidden:invisible"
+              // Sized by its content, up to the cap: without w-max a toast beside a control near the
+              // viewport's edge shrinks to the room left of where it lands, down to a word or a
+              // CJK character per line.
+              className="pointer-events-none z-[2147483647] w-max max-w-[min(22.5rem,var(--available-width))] data-anchor-hidden:invisible"
               data-slot="toast-positioner"
               sideOffset={toast.positionerProps?.sideOffset ?? 4}
               toast={toast}
