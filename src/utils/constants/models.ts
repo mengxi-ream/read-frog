@@ -179,6 +179,7 @@ export const LLM_PROVIDER_MODELS = {
     "glm-5.3-flash",
     "minimax-m3.1-flash",
   ],
+  "rapid-mlx": ["mlx-community/Qwen3.5-4B-MLX-4bit"],
   "openai-compatible": ["use-custom-model"],
   "open-responses": ["use-custom-model"],
   xai: [

@@ -288,6 +288,7 @@ options:
         deepseek: Çində istifadə üçün tövsiyə olunur
         openrouter: İstifadəyə görə ödənişlə bir neçə LLM provayderi üçün vahid interfeys
         ollama: Tam məxfilik üçün böyük dil modellərini öz kompüterinizdə işlədin
+        rapidMlx: OpenAI ilə uyğun API vasitəsilə Apple Silicon üzərində yerli LLM
         google: Təkmil mühakimə imkanlarına malik aparıcı Google süni intellekt modelləri
         anthropic: Təhlükəsizliyi və güclü mühakimə qabiliyyəti ilə tanınan Claude modelləri
         xai: Real vaxt məlumatlarına çıxışı olan Grok modellərini təqdim edən, Elon Musk tərəfindən qurulmuş süni intellekt şirkəti

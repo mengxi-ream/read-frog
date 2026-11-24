@@ -288,6 +288,7 @@ options:
         deepseek: 建議在中國使用
         openrouter: 多個 LLM 提供者的統一介面，按使用量付費
         ollama: 在本機執行大型語言模型，確保完整隱私
+        rapidMlx: 透過相容 OpenAI 的 API 在 Apple Silicon 上執行本機大型語言模型
         google: 具有先進推理能力的 Google 旗艦 AI 模型
         anthropic: 以安全性和推理能力著稱的 Claude 模型
         xai: 馬斯克的 AI 公司，提供具有即時資料存取能力的 Grok 模型

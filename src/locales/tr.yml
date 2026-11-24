@@ -287,6 +287,7 @@ options:
         deepseek: Çin'de kullanım için önerilir
         openrouter: Kullandıkça öde fiyatlandırmasıyla birden fazla LLM sağlayıcısı için birleşik arayüz
         ollama: Tam gizlilik için büyük dil modellerini makinenizde yerel olarak çalıştırın
+        rapidMlx: OpenAI uyumlu API ile Apple Silicon üzerinde yerel LLM çıkarımı
         google: Gelişmiş akıl yürütme yeteneklerine sahip Google'ın amiral gemisi AI modelleri
         anthropic: Güvenlik ve akıl yürütme mükemmelliğiyle tanınan Claude modelleri
         xai: Gerçek zamanlı veri erişimli Grok modelleri sunan Elon Musk'ın AI şirketi

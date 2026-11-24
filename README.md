@@ -244,6 +244,21 @@ Plus free translation options: Google Translate, Microsoft Translate, and DeepLX
 
 </div>
 
+### Local translation with Rapid-MLX
+
+[Rapid-MLX](https://github.com/raullenchai/Rapid-MLX) runs models locally on Apple Silicon.
+Install it and start a server:
+
+```sh
+brew install rapid-mlx
+rapid-mlx serve qwen3.5-4b-4bit --port 8000
+```
+
+In **Settings → API Providers → Add new provider**, select **Rapid-MLX**.
+The preset uses `http://localhost:8000/v1` and `mlx-community/Qwen3.5-4B-MLX-4bit`.
+No API key is required by the server; leave the prefilled `rapid-mlx` placeholder in place.
+For another model, enter its ID from `http://localhost:8000/v1/models` as a custom model.
+
 ## 🤝 Contribute
 
 Contributions of all types are more than welcome.

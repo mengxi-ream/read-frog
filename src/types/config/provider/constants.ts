@@ -37,6 +37,7 @@ export const TRANSLATE_PROVIDER_TYPES = [
   "minimax",
   "siliconflow",
   "tensdaq",
+  "rapid-mlx",
   "azure",
   "bedrock",
   "groq",
@@ -76,6 +77,7 @@ export const LLM_PROVIDER_TYPES = [
   "minimax",
   "siliconflow",
   "tensdaq",
+  "rapid-mlx",
   "azure",
   "bedrock",
   "groq",
@@ -101,7 +103,7 @@ export function isLLMProvider(provider: string): provider is LLMProviderTypes {
 const OPENAI_COMPATIBLE_CUSTOM_LLM_PROVIDER_TYPE = "openai-compatible"
 const OPEN_RESPONSES_CUSTOM_LLM_PROVIDER_TYPE = "open-responses"
 
-const HOSTED_OPENAI_COMPATIBLE_LLM_PROVIDER_TYPES = [
+const PRESET_OPENAI_COMPATIBLE_LLM_PROVIDER_TYPES = [
   "jalapenocloud",
   "ifapi",
   "atlascloud",
@@ -109,12 +111,13 @@ const HOSTED_OPENAI_COMPATIBLE_LLM_PROVIDER_TYPES = [
   "minimax",
   "siliconflow",
   "tensdaq",
+  "rapid-mlx",
   "volcengine",
 ] as const satisfies Readonly<LLMProviderTypes[]>
 
 export const OPENAI_COMPATIBLE_LLM_PROVIDER_TYPES = [
   OPENAI_COMPATIBLE_CUSTOM_LLM_PROVIDER_TYPE,
-  ...HOSTED_OPENAI_COMPATIBLE_LLM_PROVIDER_TYPES,
+  ...PRESET_OPENAI_COMPATIBLE_LLM_PROVIDER_TYPES,
 ] as const satisfies Readonly<LLMProviderTypes[]>
 export type OpenAICompatibleLLMProviderTypes = (typeof OPENAI_COMPATIBLE_LLM_PROVIDER_TYPES)[number]
 export function isOpenAICompatibleLLMProvider(
@@ -136,7 +139,7 @@ export function isOpenResponsesLLMProvider(
 export const PROTOCOL_COMPATIBLE_LLM_PROVIDER_TYPES = [
   OPENAI_COMPATIBLE_CUSTOM_LLM_PROVIDER_TYPE,
   OPEN_RESPONSES_CUSTOM_LLM_PROVIDER_TYPE,
-  ...HOSTED_OPENAI_COMPATIBLE_LLM_PROVIDER_TYPES,
+  ...PRESET_OPENAI_COMPATIBLE_LLM_PROVIDER_TYPES,
 ] as const satisfies Readonly<(OpenAICompatibleLLMProviderTypes | OpenResponsesLLMProviderTypes)[]>
 export type ProtocolCompatibleLLMProviderTypes =
   (typeof PROTOCOL_COMPATIBLE_LLM_PROVIDER_TYPES)[number]
@@ -194,6 +197,7 @@ export const API_PROVIDER_TYPES = [
   "minimax",
   "siliconflow",
   "tensdaq",
+  "rapid-mlx",
   "volcengine",
   "openai",
   "deepseek",
@@ -251,6 +255,7 @@ export const ALL_PROVIDER_TYPES = [
   "minimax",
   "siliconflow",
   "tensdaq",
+  "rapid-mlx",
   "volcengine",
   "openai",
   "deepseek",

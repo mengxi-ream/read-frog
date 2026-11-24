@@ -79,6 +79,10 @@ const topLevelReasoningConfigSchema = {
 
 const llmProviderConfigSchemaList = [
   baseOpenAICompatibleLLMProviderConfigSchema.extend({
+    provider: z.literal("rapid-mlx"),
+    model: createProviderModelSchema<"rapid-mlx">("rapid-mlx"),
+  }),
+  baseOpenAICompatibleLLMProviderConfigSchema.extend({
     provider: z.literal("atlascloud"),
     model: createProviderModelSchema<"atlascloud">("atlascloud"),
   }),

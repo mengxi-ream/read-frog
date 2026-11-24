@@ -18,6 +18,7 @@ import deeplxLogoLight from "@/assets/providers/deeplx-light.svg?url&no-inline"
 import ifapiLogoDark from "@/assets/providers/ifapi-dark.svg?url&no-inline"
 import ifapiLogoLight from "@/assets/providers/ifapi-light.svg?url&no-inline"
 import jalapenoCloudLogo from "@/assets/providers/jalapeno-cloud.png?url&no-inline"
+import rapidMlxLogo from "@/assets/providers/rapid-mlx.png?url&no-inline"
 import tensdaqLogoColor from "@/assets/providers/tensdaq-color.svg?url&no-inline"
 import { env } from "@/env"
 import {
@@ -144,6 +145,11 @@ export const DEFAULT_LLM_PROVIDER_MODELS: LLMProviderModels = {
   },
   perplexity: {
     model: "perplexity/sonar",
+    isCustomModel: false,
+    customModel: null,
+  },
+  "rapid-mlx": {
+    model: "mlx-community/Qwen3.5-4B-MLX-4bit",
     isCustomModel: false,
     customModel: null,
   },
@@ -366,6 +372,11 @@ export const PROVIDER_ITEMS: Record<
     logo: () => tensdaqLogoColor,
     name: "Tensdaq",
     website: "https://dashboard.x-aio.com/zh/register?ref=c356c1daba9a4641a18e",
+  },
+  "rapid-mlx": {
+    logo: () => rapidMlxLogo,
+    name: "Rapid-MLX",
+    website: "https://github.com/raullenchai/Rapid-MLX",
   },
   ollama: {
     logo: getLobeIconsCDNUrlFn("ollama"),
@@ -626,6 +637,16 @@ export const DEFAULT_PROVIDER_CONFIG = {
     baseURL: "https://openrouter.ai/api/v1",
     model: DEFAULT_LLM_PROVIDER_MODELS.openrouter,
   },
+  "rapid-mlx": {
+    id: "rapid-mlx-default",
+    name: PROVIDER_ITEMS["rapid-mlx"].name,
+    enabled: true,
+    provider: "rapid-mlx",
+    baseURL: "http://localhost:8000/v1",
+    // Local servers need no secret; the placeholder also satisfies the API key checks.
+    apiKey: "rapid-mlx",
+    model: DEFAULT_LLM_PROVIDER_MODELS["rapid-mlx"],
+  },
   ollama: {
     id: "ollama-default",
     name: PROVIDER_ITEMS.ollama.name,
@@ -726,6 +747,7 @@ export const PROVIDER_URL_PLACEHOLDERS: Partial<Record<APIProviderTypes, string>
   replicate: "https://api.replicate.com/v1",
   perplexity: "https://api.perplexity.ai",
   openrouter: "https://openrouter.ai/api/v1",
+  "rapid-mlx": DEFAULT_PROVIDER_CONFIG["rapid-mlx"].baseURL,
   ollama: "http://127.0.0.1:11434/",
   volcengine: DEFAULT_PROVIDER_CONFIG.volcengine.baseURL,
   minimax: DEFAULT_PROVIDER_CONFIG.minimax.baseURL,

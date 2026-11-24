@@ -288,6 +288,7 @@ options:
         deepseek: Recomendado para usar en China
         openrouter: Interfaz unificada para varios proveedores LLM con precios de pago por uso
         ollama: Ejecuta modelos de lenguaje grandes localmente en tu equipo con privacidad completa
+        rapidMlx: Inferencia local de LLM en Apple Silicon con una API compatible con OpenAI
         google: Modelos AI principales de Google con capacidades avanzadas de razonamiento
         anthropic: Modelos Claude conocidos por su seguridad y excelente razonamiento
         xai: Empresa de AI de Elon Musk que ofrece modelos Grok con acceso a datos en tiempo real
