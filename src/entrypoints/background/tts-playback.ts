@@ -87,9 +87,6 @@ function isClosedMessageChannelError(error: unknown): boolean {
 
 class ChromeOffscreenPlaybackAdapter implements TTSPlaybackAdapter {
   private ensureOffscreenPromise: Promise<void> | null = null
-  // Each play() and each stop() of the active request starts a new generation.
-  // A play() that finds the generation changed after an await was stopped or
-  // replaced meanwhile, and answers with the reason instead of playing.
   private playbackGeneration = 0
   private activeRequestId: string | null = null
   private lastStopReason: TTSPlaybackStopReason = "stopped"
