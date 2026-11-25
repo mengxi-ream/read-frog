@@ -32,8 +32,9 @@ export const TranslateModelSelector = withForm({
 
     const connectionURL = getProviderConnectionURL(providerConfig)
     const defaultURL = DEFAULT_PROVIDER_CONFIG.volcengine.baseURL
-    const isDefaultVolcengineEndpoint = providerConfig.provider === "volcengine"
-      && (connectionURL === defaultURL || connectionURL === `${defaultURL}/`)
+    const isDefaultVolcengineEndpoint =
+      providerConfig.provider === "volcengine" &&
+      (connectionURL === defaultURL || connectionURL === `${defaultURL}/`)
     const modelId = resolveModelId(providerConfig.model)
     const { isCustomModel, customModel, model } = providerConfig.model
 
@@ -60,16 +61,17 @@ export const TranslateModelSelector = withForm({
                 labelExtra={
                   <div className="flex items-center gap-2">
                     {recommendationTrigger}
-                    {isProtocolCompatibleLLMProviderConfig(providerConfig) && !isDefaultVolcengineEndpoint && (
-                      <ModelSuggestionButton
-                        providerConfig={providerConfig}
-                        onSelect={(selectedModel) => {
-                          autosave.edit(() => field.handleChange(selectedModel), {
-                            immediate: true,
-                          })
-                        }}
-                      />
-                    )}
+                    {isProtocolCompatibleLLMProviderConfig(providerConfig) &&
+                      !isDefaultVolcengineEndpoint && (
+                        <ModelSuggestionButton
+                          providerConfig={providerConfig}
+                          onSelect={(selectedModel) => {
+                            autosave.edit(() => field.handleChange(selectedModel), {
+                              immediate: true,
+                            })
+                          }}
+                        />
+                      )}
                   </div>
                 }
                 value={customModel ?? ""}

@@ -117,9 +117,15 @@ describe("translateModelSelector", () => {
     volcengine,
     { ...volcengine, name: "Renamed", id: "custom-instance", baseURL: `${volcengine.baseURL}/` },
   ])("allows manual entry without model discovery for $name", ({ model, ...config }) => {
-    render(<TranslateModelSelectorHarness initialConfig={{ ...config, model: { ...model, isCustomModel: true } }} />)
+    render(
+      <TranslateModelSelectorHarness
+        initialConfig={{ ...config, model: { ...model, isCustomModel: true } }}
+      />,
+    )
 
-    expect(screen.queryByRole("button", { name: "options.apiProviders.form.models.fetchModels" })).toBeNull()
+    expect(
+      screen.queryByRole("button", { name: "options.apiProviders.form.models.fetchModels" }),
+    ).toBeNull()
     const input = screen.getByLabelText("options.apiProviders.form.models.label")
     fireEvent.change(input, { target: { value: "ep-custom" } })
     expect(input).toHaveValue("ep-custom")
@@ -131,11 +137,15 @@ describe("translateModelSelector", () => {
   ])("offers model discovery for $provider on $baseURL", ({ model, ...config }) => {
     render(
       <QueryClientProvider client={new QueryClient()}>
-        <TranslateModelSelectorHarness initialConfig={{ ...config, model: { ...model, isCustomModel: true } }} />
+        <TranslateModelSelectorHarness
+          initialConfig={{ ...config, model: { ...model, isCustomModel: true } }}
+        />
       </QueryClientProvider>,
     )
 
-    expect(screen.getByRole("button", { name: "options.apiProviders.form.models.fetchModels" })).toBeInTheDocument()
+    expect(
+      screen.getByRole("button", { name: "options.apiProviders.form.models.fetchModels" }),
+    ).toBeInTheDocument()
   })
 
   it("keeps invalid form values while staging recommended provider options", async () => {
