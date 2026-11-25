@@ -13,7 +13,7 @@ const SOL = "read-frog-ai:gpt-6.2-sol"
 const SONNET = "read-frog-ai:claude-sonnet-5-5"
 
 describe("v130-to-v131 migration", () => {
-  it("moves every stored normal-tier model other than Haiku to Haiku", () => {
+  it("moves every stored GPT-6 Luna to Haiku and leaves every other model", () => {
     const oldConfig = {
       pageTranslation: { providerId: LUNA, mode: "bilingual" },
       videoSubtitles: { providerId: DEEPSEEK },
@@ -47,12 +47,12 @@ describe("v130-to-v131 migration", () => {
 
     expect(migrated).toEqual({
       pageTranslation: { providerId: HAIKU, mode: "bilingual" },
-      videoSubtitles: { providerId: HAIKU },
+      videoSubtitles: { providerId: DEEPSEEK },
       inputTranslation: { providerId: HAIKU, enabled: true },
-      languageDetection: { mode: "llm", providerId: HAIKU },
+      languageDetection: { mode: "llm", providerId: DEEPSEEK },
       selectionToolbar: {
         features: {
-          translate: { enabled: true, providerId: HAIKU },
+          translate: { enabled: true, providerId: DEEPSEEK },
           speak: { enabled: true },
         },
         builtInActions: {
@@ -61,7 +61,7 @@ describe("v130-to-v131 migration", () => {
           improveWriting: { enabled: true, providerId: SOL },
         },
         customActions: [
-          { id: "a", providerId: HAIKU },
+          { id: "a", providerId: DEEPSEEK },
           { id: "b", providerId: "deepseek-default" },
           { id: "c", providerId: SONNET },
           { id: "d", providerId: HAIKU },
@@ -74,7 +74,12 @@ describe("v130-to-v131 migration", () => {
     })
     expect(oldConfig).toEqual(snapshot)
     // Holders that named nothing to move are kept by identity.
-    expect(migrated.selectionToolbar.features.speak).toBe(oldConfig.selectionToolbar.features.speak)
+    expect(migrated.videoSubtitles).toBe(oldConfig.videoSubtitles)
+    expect(migrated.languageDetection).toBe(oldConfig.languageDetection)
+    expect(migrated.selectionToolbar.features).toBe(oldConfig.selectionToolbar.features)
+    expect(migrated.selectionToolbar.customActions[0]).toBe(
+      oldConfig.selectionToolbar.customActions[0],
+    )
     expect(migrated.selectionToolbar.customActions[1]).toBe(
       oldConfig.selectionToolbar.customActions[1],
     )
@@ -82,23 +87,7 @@ describe("v130-to-v131 migration", () => {
     expect(migrate(migrated)).toBe(migrated)
   })
 
-  it("moves the tier ids from before v127 to Haiku too", () => {
-    const migrated = migrate({
-      pageTranslation: { providerId: "read-frog-free-ai" },
-      selectionToolbar: {
-        builtInActions: { dictionary: { providerId: "read-frog-advance-ai" } },
-      },
-      translationHub: { selectedProviderIds: ["read-frog-advance-ai", "read-frog-free-ai"] },
-    })
-
-    expect(migrated).toEqual({
-      pageTranslation: { providerId: HAIKU },
-      selectionToolbar: { builtInActions: { dictionary: { providerId: HAIKU } } },
-      translationHub: { selectedProviderIds: [HAIKU] },
-    })
-  })
-
-  it("keeps one hub card for the models that collapse into Haiku, where the first of them was", () => {
+  it("keeps one hub card when Luna and Haiku collapse, where the first of them was", () => {
     const migrated = migrate({
       translationHub: {
         selectedProviderIds: [
@@ -113,8 +102,9 @@ describe("v130-to-v131 migration", () => {
     })
     expect(migrated.translationHub.selectedProviderIds).toEqual([
       "microsoft-translate-default",
-      HAIKU,
+      DEEPSEEK,
       "openai-default",
+      HAIKU,
       SOL,
     ])
 
@@ -128,7 +118,7 @@ describe("v130-to-v131 migration", () => {
     const current = {
       pageTranslation: { providerId: HAIKU },
       videoSubtitles: { providerId: SOL },
-      inputTranslation: { providerId: "microsoft-translate-default" },
+      inputTranslation: { providerId: DEEPSEEK },
       languageDetection: { mode: "llm", providerId: SONNET },
       selectionToolbar: {
         features: { translate: { providerId: "google-translate-default" } },
@@ -136,7 +126,7 @@ describe("v130-to-v131 migration", () => {
         customActions: [{ id: "a", providerId: HAIKU }],
         noteSuggestion: { providerId: SONNET },
       },
-      translationHub: { selectedProviderIds: [HAIKU, SOL, "google-translate-default"] },
+      translationHub: { selectedProviderIds: [HAIKU, DEEPSEEK, SOL, "google-translate-default"] },
       // A BYOK provider's own model of the same name is not Built-in AI.
       providersConfig: [{ id: "openai-default", provider: "openai", model: "gpt-6-luna" }],
       builtInAi: { models: { "gpt-6-luna": { reasoning: "high" } } },
@@ -184,7 +174,7 @@ describe("v130-to-v131 migration", () => {
           features: { translate: null },
           customActions: [null, { id: "a", providerId: LUNA }],
         },
-        translationHub: { selectedProviderIds: [DEEPSEEK, 7, null] },
+        translationHub: { selectedProviderIds: [LUNA, 7, null] },
       }),
     ).toEqual({
       selectionToolbar: {

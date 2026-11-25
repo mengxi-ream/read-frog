@@ -1,20 +1,18 @@
 /**
  * Migration script from v130 to v131
- * - Every Built-in AI reference to a normal-tier model other than Claude Haiku
- *   5.5 moves to Claude Haiku 5.5, the model new installs start on:
- *   - `read-frog-ai:gpt-6-luna` (GPT-6 Luna, where v127 put both old tiers)
- *   - `read-frog-ai:deepseek-v4.1-flash` (DeepSeek V4.1 Flash)
- *   - `read-frog-free-ai` and `read-frog-advance-ai`, the tier ids from before
- *     v127, in case one is still stored
- *   A stored config cannot tell a model the user picked from one it started
- *   on, so a picked Luna or DeepSeek moves too. The advance-tier models (GPT-6.2
- *   Sol, Claude Sonnet 5.5) and every other provider stay.
+ * - Every Built-in AI reference to GPT-6 Luna (`read-frog-ai:gpt-6-luna`)
+ *   moves to Claude Haiku 5.5 (`read-frog-ai:claude-haiku-5-5`), the model new
+ *   installs start on. v127 already moved the old tier ids
+ *   (`read-frog-free-ai`, `read-frog-advance-ai`) to Luna, so they end on Haiku
+ *   too. A stored config cannot tell a model the user picked from one it
+ *   started on, so a picked Luna moves too. Every other model stays: DeepSeek
+ *   V4.1 Flash, GPT-6.2 Sol, Claude Sonnet 5.5 and every other provider.
  *   References live where v127 moved them: every feature's `providerId`,
  *   language detection's, every selection toolbar action's, and the
- *   translation hub's `selectedProviderIds`, where several can collapse into
- *   one card and are de-duplicated, each id kept where it first was.
+ *   translation hub's `selectedProviderIds`, where Luna and Haiku can collapse
+ *   into one card and are de-duplicated, each id kept where it first was.
  * - `builtInAi.models` stays as is: Haiku starts on its own reasoning default,
- *   and the old models keep theirs in case the user switches back.
+ *   and Luna keeps its own in case the user switches back.
  *
  * Idempotent: a config with nothing to move is returned by identity. A missing
  * or malformed section is left for the schema parse that follows.
@@ -25,19 +23,14 @@
 
 const HAIKU_PROVIDER_ID = "read-frog-ai:claude-haiku-5-5"
 
-const MOVED_PROVIDER_IDS = new Set([
-  "read-frog-ai:gpt-6-luna",
-  "read-frog-ai:deepseek-v4.1-flash",
-  "read-frog-free-ai",
-  "read-frog-advance-ai",
-])
+const LUNA_PROVIDER_ID = "read-frog-ai:gpt-6-luna"
 
 function isPlainObject(value: unknown): value is Record<string, any> {
   return !!value && typeof value === "object" && !Array.isArray(value)
 }
 
 function isMovedId(value: unknown): value is string {
-  return typeof value === "string" && MOVED_PROVIDER_IDS.has(value)
+  return value === LUNA_PROVIDER_ID
 }
 
 /** `holder` with its `providerId` moved to Haiku, or `holder` itself when it names nothing to move. */
@@ -104,7 +97,7 @@ function migrateTranslationHub(translationHub: unknown): unknown {
     return translationHub
   }
 
-  // Luna, DeepSeek and Haiku can all be selected; the hub shows one card per id.
+  // Luna and Haiku can both be selected; the hub shows one card per id.
   const selectedProviderIds = [
     ...new Set(
       translationHub.selectedProviderIds.map((id: unknown) =>
