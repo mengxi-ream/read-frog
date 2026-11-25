@@ -1665,6 +1665,7 @@ translation:
   sameLanguage: 源语言和目标语言必须不同
   autoModeSameLanguage: 检测到的语言 '$1' 与目标语言相同
   extensionContextInvalidated: 扩展已更新，请刷新此页面后重试。
+  inputTranslationFailed: "输入翻译失败"
 pageDiagnosis:
   title: "页面诊断"
   summary: "已翻译 $1 段，未翻译 $2 段"
@@ -1860,6 +1861,9 @@ hostedAi:
     serviceUnavailable: 暂时不可用
     usedPercent: "额度已使用 $1%"
     resetsAt: "$1 重置"
+  requestId:
+    label: "请求 ID："
+    copy: "复制请求 ID"
   errors:
     rateLimited: 请求过于频繁，请稍后再试
     guestRateLimited: 游客请求过于频繁，请稍后再试

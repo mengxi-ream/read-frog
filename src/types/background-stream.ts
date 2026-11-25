@@ -124,6 +124,8 @@ export interface StreamPortErrorPayload {
   action?: ErrorAction
   /** Classified where the original error still exists, for failure analytics. */
   reason?: AnalyticsFailureReason
+  /** A failed Built-in AI call's id on the server, for the user to quote in a report. */
+  builtInAiRequestId?: string
 }
 
 export type StreamPortResponse<T = string> =

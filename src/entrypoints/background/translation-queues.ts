@@ -17,13 +17,14 @@ import { BATCH_TIMEOUT_PER_CHAR_MS, MAX_BATCH_EXTRA_TIMEOUT_MS } from "@/utils/c
 import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { Sha256Hex } from "@/utils/hash"
 import { executeTranslate } from "@/utils/host/translate/execute-translate"
+import { withBuiltInAiRequestId } from "@/utils/hosted-ai/request-id"
 import { requireHostedFeature } from "@/utils/hosted-ai/routing"
 import { createLogger } from "@/utils/logging/logger"
 import { getSubtitlesTranslatePrompt } from "@/utils/prompts/subtitles"
 import { getTranslatePrompt } from "@/utils/prompts/translate"
 import { BatchQueue } from "@/utils/request/batch-queue"
 import { CancelledScopeRegistry, isTranslationCancelledError } from "@/utils/request/cancellation"
-import { RequestQueue } from "@/utils/request/request-queue"
+import { RequestQueue, RequestQueueTimeoutError } from "@/utils/request/request-queue"
 import { runStreamTextInBackground } from "./background-stream"
 import { ensureInitializedConfig } from "./config"
 
@@ -120,6 +121,21 @@ async function executeQueuedTranslation<TContext>(
     { signal: options.signal },
   )
   return result.output.trim()
+}
+
+/**
+ * Rethrows a queued Built-in AI request's timeout tagged with the id its attempts shared.
+ * The call tags its own failures; a timeout is the one the queue raises for the request
+ * itself. Nothing else is tagged here: an error the queue fails its whole backlog with is
+ * one object handed to every task, raised by whichever provider's task failed, so it is
+ * not this request's to name.
+ */
+function rethrowWithHostedRequestId(hostedRequestId: string | undefined) {
+  return (error: unknown): never => {
+    throw hostedRequestId !== undefined && error instanceof RequestQueueTimeoutError
+      ? withBuiltInAiRequestId(error, hostedRequestId)
+      : error
+  }
 }
 
 export function parseBatchResult(result: string): string[] {
@@ -380,9 +396,11 @@ async function createTranslationQueues<TContext>(config: TranslationQueueSetupCo
         return await executeBatchTranslation(dataList, promptResolver, signal, hostedRequestId)
       }
 
-      return requestQueue.enqueue(batchThunk, earliestScheduleAt, hash, meta.scopes, {
-        extraTimeoutMs: getBatchExtraTimeoutMs(totalCharacters),
-      })
+      return requestQueue
+        .enqueue(batchThunk, earliestScheduleAt, hash, meta.scopes, {
+          extraTimeoutMs: getBatchExtraTimeoutMs(totalCharacters),
+        })
+        .catch(rethrowWithHostedRequestId(hostedRequestId))
     },
     executeIndividual: async (data) => {
       const { text, langConfig, provider, hash, scheduleAt, context, scope, glossaryTerms } = data
@@ -406,7 +424,9 @@ async function createTranslationQueues<TContext>(config: TranslationQueueSetupCo
           glossaryTerms,
         })
       }
-      return requestQueue.enqueue(thunk, scheduleAt, hash, scope ? [scope] : undefined)
+      return requestQueue
+        .enqueue(thunk, scheduleAt, hash, scope ? [scope] : undefined)
+        .catch(rethrowWithHostedRequestId(hostedRequestId))
     },
     onError: (error, context) => {
       // Turning page translation off cancels its batches on purpose: no failure to keep.

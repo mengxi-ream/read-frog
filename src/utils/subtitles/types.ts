@@ -9,6 +9,8 @@ export interface StateData {
    * must not disappear while it is. The coordinator takes it down itself.
    */
   persistent?: boolean
+  /** A failed Built-in AI call's id, for the user to quote in a report. */
+  requestId?: string
 }
 
 export interface SubtitlesFragment {

@@ -6,6 +6,12 @@ import { TranslationCancelledError } from "./cancellation"
 import { BinaryHeapPQ } from "./priority-queue"
 import { defaultRequestRetryPolicy } from "./retry-policy"
 
+/**
+ * A task's attempt that ran out of time: raised by the queue for that task alone, never
+ * one it fails the whole backlog with.
+ */
+export class RequestQueueTimeoutError extends Error {}
+
 export interface RequestTask {
   id: string
   thunk: (signal?: AbortSignal) => Promise<any>
@@ -284,7 +290,9 @@ export class RequestQueue {
       const timeoutPromise = new Promise((_, reject) => {
         timeoutId = setTimeout(() => {
           // console.info(`⏰ Task ${task.id} timed out after ${timeoutMs}ms`)
-          const timeoutError = new Error(`Task ${task.id} timed out after ${timeoutMs}ms`)
+          const timeoutError = new RequestQueueTimeoutError(
+            `Task ${task.id} timed out after ${timeoutMs}ms`,
+          )
           // Reject before aborting: the race must settle with the timeout error
           // (which the retry policy treats as retryable), not with whatever abort
           // error the cancelled thunk rejects with.

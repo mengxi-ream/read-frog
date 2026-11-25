@@ -483,6 +483,27 @@ describe("TranslationCard error display", () => {
     expect(errorParagraph.className).toContain("break-words")
     // whitespace-pre-wrap preserves newlines in multi-line provider errors
     expect(errorParagraph.className).toContain("whitespace-pre-wrap")
+    // A provider's error has no Built-in AI request id.
+    expect(screen.queryByText("hostedAi.requestId.label")).not.toBeInTheDocument()
+  })
+
+  it("shows a failed Built-in AI call's request id under its message", () => {
+    const requestId = "123e4567-e89b-42d3-a456-426614174000"
+    useMutationMock.current = {
+      ...useMutationMock.current,
+      error: Object.assign(new Error("Internal server error"), { builtInAiRequestId: requestId }),
+    }
+
+    render(
+      <TranslationCard
+        providerId="provider-1"
+        isExpanded
+        onExpandedChange={vi.fn<(expanded: boolean) => void>()}
+      />,
+    )
+
+    expect(screen.getByText("Internal server error")).toBeInTheDocument()
+    expect(screen.getByText(requestId)).toBeInTheDocument()
   })
 })
 

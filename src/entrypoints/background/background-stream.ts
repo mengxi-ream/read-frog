@@ -46,6 +46,7 @@ import { isLLMProviderConfig, llmProviderConfigItemSchema } from "@/types/config
 import { createStructuredObjectSchema } from "@/utils/ai/structured-object-schema"
 import { classifyFailureReason } from "@/utils/analytics-failure-reason"
 import { getBuiltInAiModelId } from "@/utils/constants/provider-ids"
+import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { logInAction, upgradeAction } from "@/utils/error-action"
 import { extractAISDKErrorMessage } from "@/utils/error/extract-message"
 import { getAnalyticsFeatureForHostedFeature } from "@/utils/hosted-ai/analytics-feature"
@@ -61,6 +62,7 @@ import {
   readHostedAiReasoningChoice,
   readStoredHostedAiModels,
 } from "@/utils/hosted-ai/models"
+import { getBuiltInAiRequestId, withBuiltInAiRequestId } from "@/utils/hosted-ai/request-id"
 import { hostedTextStreamRouteSchema, requireHostedFeature } from "@/utils/hosted-ai/routing"
 import { i18n } from "@/utils/i18n"
 import { createLogger } from "@/utils/logging/logger"
@@ -302,12 +304,14 @@ function createStreamPortHandler<TSerializablePayload, TResponse>(
           error: finalError,
           ...getLoggedBuiltInAiModel(startMessage.payload),
         })
+        const builtInAiRequestId = getBuiltInAiRequestId(finalError)
         safePost({
           type: "error",
           error: {
             message: extractAISDKErrorMessage(finalError),
             action: finalError instanceof BackgroundStreamError ? finalError.action : undefined,
             reason: classifyFailureReason(finalError),
+            ...(builtInAiRequestId && { builtInAiRequestId }),
           },
         })
       } finally {
@@ -608,6 +612,24 @@ function normalizeHostedAiError(
   }
 
   return error
+}
+
+/**
+ * Runs one Built-in AI request under the id the server files it under. A caller whose
+ * retries are the same request sends the id they share, as page translation does; a
+ * request sent without one gets a fresh one here, so its failure still names a call to
+ * look up on a server too old to say which id it used.
+ */
+async function runHostedRequest<T>(
+  sentRequestId: string | undefined,
+  run: (requestId: string) => Promise<T>,
+): Promise<T> {
+  const requestId = sentRequestId ?? getRandomUUID()
+  try {
+    return await run(requestId)
+  } catch (error) {
+    throw withBuiltInAiRequestId(error, requestId)
+  }
 }
 
 async function* normalizeHostedPartStreamErrors(
@@ -983,20 +1005,22 @@ export async function generateTextForProviderRef(
   }
 
   if (providerRef.kind === "system") {
-    const partStream = await createHostedTextPartStream(
-      {
-        providerKind: "system",
-        providerId: providerRef.providerId,
-        builtInAiReasoning: providerRef.reasoning,
-        requestId,
-        hostedFeature: requireHostedFeature(hostedFeature),
-        instructions,
-        prompt,
-      },
-      signal,
-    )
-    const snapshot = await consumeTextPartStream(partStream, { signal })
-    return snapshot.output.trim()
+    return runHostedRequest(requestId, async (hostedRequestId) => {
+      const partStream = await createHostedTextPartStream(
+        {
+          providerKind: "system",
+          providerId: providerRef.providerId,
+          builtInAiReasoning: providerRef.reasoning,
+          requestId: hostedRequestId,
+          hostedFeature: requireHostedFeature(hostedFeature),
+          instructions,
+          prompt,
+        },
+        signal,
+      )
+      const snapshot = await consumeTextPartStream(partStream, { signal })
+      return snapshot.output.trim()
+    })
   }
 
   // Local text generation needs a real LLM: pure translate providers (DeepLX,
@@ -1041,11 +1065,17 @@ export async function runStreamTextInBackground(
     throw new DOMException("stream aborted", "AbortError")
   }
 
-  const partStream =
-    serializablePayload.providerKind === "system"
-      ? await createHostedTextPartStream(serializablePayload, signal)
-      : await createLocalTextPartStream(serializablePayload, options)
+  if (serializablePayload.providerKind === "system") {
+    return runHostedRequest(serializablePayload.requestId, async (requestId) => {
+      const partStream = await createHostedTextPartStream(
+        { ...serializablePayload, requestId },
+        signal,
+      )
+      return consumeTextPartStream(partStream, { onChunk, signal })
+    })
+  }
 
+  const partStream = await createLocalTextPartStream(serializablePayload, options)
   return consumeTextPartStream(partStream, {
     onChunk,
     signal,
@@ -1126,10 +1156,21 @@ export async function runStructuredObjectStreamInBackground(
   }
 
   const objectSchema = createStructuredObjectSchema(serializablePayload.outputSchema)
-  const partStream = isBuiltInAiProviderId(serializablePayload.providerId)
-    ? await createHostedStructuredObjectPartStream(serializablePayload, signal)
-    : await createLocalStructuredObjectPartStream(serializablePayload, objectSchema, options)
+  if (isBuiltInAiProviderId(serializablePayload.providerId)) {
+    return runHostedRequest(serializablePayload.requestId, async (requestId) => {
+      const partStream = await createHostedStructuredObjectPartStream(
+        { ...serializablePayload, requestId },
+        signal,
+      )
+      return consumeStructuredObjectPartStream(partStream, { objectSchema, onChunk, signal })
+    })
+  }
 
+  const partStream = await createLocalStructuredObjectPartStream(
+    serializablePayload,
+    objectSchema,
+    options,
+  )
   return consumeStructuredObjectPartStream(partStream, {
     objectSchema,
     onChunk,
@@ -1195,21 +1236,28 @@ export async function runNoteSuggestionStreamInBackground(
     // and `action.targetActionId` fields belong to a richer server-driven flow
     // this client does not implement yet, so they are dropped in the envelope
     // adaptation below.
-    const partStream = await createHostedNoteSuggestionPartStream(serializablePayload, signal)
-    const hostedSnapshot = await consumeStructuredObjectPartStream(partStream, {
-      objectSchema: HostedAiNoteSuggestionObjectSchema,
-      signal,
-    })
-    const envelope = noteSuggestionEnvelopeSchema.safeParse({
-      summaryFieldName: hostedSnapshot.output.action.summaryFieldName,
-      notes: hostedSnapshot.output.notes,
-    })
-    if (!envelope.success) {
-      throw new BackgroundStreamError("output_validation_failed", aiOutputValidationErrorMessage, {
-        cause: envelope.error,
+    return runHostedRequest(serializablePayload.requestId, async (requestId) => {
+      const partStream = await createHostedNoteSuggestionPartStream(
+        { ...serializablePayload, requestId },
+        signal,
+      )
+      const hostedSnapshot = await consumeStructuredObjectPartStream(partStream, {
+        objectSchema: HostedAiNoteSuggestionObjectSchema,
+        signal,
       })
-    }
-    return createStreamSnapshot(envelope.data, hostedSnapshot.thinking)
+      const envelope = noteSuggestionEnvelopeSchema.safeParse({
+        summaryFieldName: hostedSnapshot.output.action.summaryFieldName,
+        notes: hostedSnapshot.output.notes,
+      })
+      if (!envelope.success) {
+        throw new BackgroundStreamError(
+          "output_validation_failed",
+          aiOutputValidationErrorMessage,
+          { cause: envelope.error },
+        )
+      }
+      return createStreamSnapshot(envelope.data, hostedSnapshot.thinking)
+    })
   }
 
   const partStream = await createLocalStructuredObjectPartStream(

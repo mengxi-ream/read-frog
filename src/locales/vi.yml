@@ -1655,6 +1655,7 @@ translation:
   sameLanguage: Ngôn ngữ nguồn và đích phải khác nhau
   autoModeSameLanguage: Ngôn ngữ phát hiện '$1' giống với ngôn ngữ đích
   extensionContextInvalidated: Tiện ích đã được cập nhật. Hãy tải lại trang này rồi thử lại.
+  inputTranslationFailed: "Dịch đầu vào thất bại"
 pageDiagnosis:
   title: "Chẩn đoán trang"
   summary: "Đã dịch $1, chưa dịch $2"
@@ -1850,6 +1851,9 @@ hostedAi:
     serviceUnavailable: Tạm thời không khả dụng
     usedPercent: "Đã dùng hạn mức: $1%"
     resetsAt: "Đặt lại lúc $1"
+  requestId:
+    label: "Mã yêu cầu:"
+    copy: "Sao chép mã yêu cầu"
   errors:
     rateLimited: Quá nhiều yêu cầu, vui lòng thử lại sau.
     guestRateLimited: Quá nhiều yêu cầu từ khách. Vui lòng thử lại sau.

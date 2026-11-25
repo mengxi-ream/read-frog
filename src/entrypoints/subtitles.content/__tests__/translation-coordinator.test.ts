@@ -87,6 +87,48 @@ describe("translation coordinator loading state", () => {
     expect(onStateChange).toHaveBeenLastCalledWith("idle")
   })
 
+  it("shows the id of the Built-in AI call the cue on screen failed in", () => {
+    const onStateChange = vi.fn<(...args: any[]) => any>()
+    const fragments = [
+      { text: "hello", start: 0, end: 1000 },
+      { text: "world", start: 2000, end: 3000 },
+    ]
+    const coordinator = new TranslationCoordinator({
+      getFragments: () => fragments,
+      getVideoElement: () => ({ currentTime: 0.5 }) as HTMLVideoElement,
+      getCurrentState: () => "idle",
+      segmentationPipeline: null,
+      onTranslated: vi.fn<(...args: any[]) => any>(),
+      onStateChange,
+    })
+    // Two batches failing the same way, each worded by translateSubtitles over the
+    // background's tagged error.
+    const failedBatch = (requestId: string) =>
+      new Error("Built-in AI: Internal server error", {
+        cause: Object.assign(new Error("Internal server error"), { builtInAiRequestId: requestId }),
+      })
+    const first = "123e4567-e89b-42d3-a456-426614174000"
+    const second = "0b9a1c52-6f1e-4d1f-9a54-1f7e9c2d3b4a"
+    ;(coordinator as any).failedCues = new Map([
+      [0, { error: failedBatch(first), waiting: true }],
+      [2000, { error: failedBatch(second), waiting: true }],
+    ])
+
+    ;(coordinator as any).updateLoadingStateAt(500, fragments)
+    ;(coordinator as any).updateLoadingStateAt(2500, fragments)
+
+    expect(onStateChange.mock.calls).toEqual([
+      [
+        "error",
+        { message: "Built-in AI: Internal server error", requestId: first, persistent: true },
+      ],
+      [
+        "error",
+        { message: "Built-in AI: Internal server error", requestId: second, persistent: true },
+      ],
+    ])
+  })
+
   it("clears adapter loading during a music intro with no active cue", () => {
     const onStateChange = vi.fn<(...args: any[]) => any>()
     const coordinator = new TranslationCoordinator({

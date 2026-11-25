@@ -1660,6 +1660,7 @@ translation:
   sameLanguage: Mənbə və hədəf dilləri fərqli olmalıdır
   autoModeSameLanguage: Aşkarlanan '$1' dili hədəf dili ilə eynidir
   extensionContextInvalidated: Genişlənmə yeniləndi. Bu səhifəni yeniləyib yenidən cəhd edin.
+  inputTranslationFailed: "Daxil edilən mətnin tərcüməsi alınmadı"
 pageDiagnosis:
   title: "Səhifə diaqnostikası"
   summary: "$1 tərcümə olundu, $2 tərcümə olunmadı"
@@ -1848,6 +1849,9 @@ hostedAi:
     serviceUnavailable: Müvəqqəti olaraq əlçatan deyil
     usedPercent: "İstifadə edilmiş kvota: $1%"
     resetsAt: "$1 vaxtında yenilənir"
+  requestId:
+    label: "Sorğu ID-si:"
+    copy: "Sorğu ID-sini köçür"
   errors:
     rateLimited: Həddindən artıq sorğu var, daha sonra yenidən cəhd edin.
     guestRateLimited: Qonaq sorğularının sayı həddindən artıq çoxdur. Daha sonra yenidən cəhd edin.

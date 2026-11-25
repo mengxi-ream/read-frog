@@ -1775,4 +1775,209 @@ describe("background-stream", () => {
       })
     })
   })
+
+  describe("Built-in AI request ids", () => {
+    const SENT_ID = "123e4567-e89b-42d3-a456-426614174099"
+    const SERVER_ID = "0b9a1c52-6f1e-4d1f-9a54-1f7e9c2d3b4a"
+    const UUID = /^[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$/i
+
+    function serverError(data?: unknown) {
+      return Object.assign(new Error("Internal server error"), {
+        code: "INTERNAL_SERVER_ERROR",
+        status: 500,
+        data,
+      })
+    }
+
+    async function requestIdOf(error: unknown) {
+      const { getBuiltInAiRequestId } = await import("@/utils/hosted-ai/request-id")
+      return getBuiltInAiRequestId(error)
+    }
+
+    async function runHostedPageTranslation(requestId?: string) {
+      const { runStreamTextInBackground } = await import("../background-stream")
+      return runStreamTextInBackground({
+        providerKind: "system",
+        hostedFeature: "pageTranslation",
+        providerId: "read-frog-ai:gpt-6-luna",
+        ...(requestId && { requestId }),
+        instructions: "Translate text",
+        prompt: "Hello world",
+      }).catch((error: unknown) => error)
+    }
+
+    it("sends the id the server names on an error raised mid-stream across the port", async () => {
+      hostedSelectionStreamTextMock.mockResolvedValue(
+        (async function* () {
+          yield { type: "start" }
+          yield { type: "text-delta", id: "text-1", text: "Hola" }
+          throw serverError({ requestId: SERVER_ID })
+        })(),
+      )
+      const { handleStreamTextPort } = await import("../background-stream")
+      const mockPort = createMockPort("stream-text")
+      handleStreamTextPort(mockPort.port as never)
+      await mockPort.emitMessage({
+        type: "start",
+        streamRequestId: "req-mid-stream-id",
+        payload: {
+          providerKind: "system",
+          hostedFeature: "selectionTranslation",
+          providerId: "read-frog-ai:gpt-6-luna",
+          requestId: SENT_ID,
+          instructions: "Translate text",
+          prompt: "Hello world",
+        },
+      })
+
+      expect(mockPort.postMessage).toHaveBeenLastCalledWith({
+        type: "error",
+        streamRequestId: "req-mid-stream-id",
+        error: expect.objectContaining({
+          message: "Internal server error",
+          builtInAiRequestId: SERVER_ID,
+        }),
+      })
+    })
+
+    it("falls back to the id it sent when the server names none", async () => {
+      hostedStreamTextMock.mockRejectedValue(serverError({}))
+      expect(await requestIdOf(await runHostedPageTranslation(SENT_ID))).toBe(SENT_ID)
+    })
+
+    it("ignores an id from the server that is not a UUID", async () => {
+      hostedStreamTextMock.mockRejectedValue(serverError({ requestId: "<script>" }))
+      expect(await requestIdOf(await runHostedPageTranslation(SENT_ID))).toBe(SENT_ID)
+    })
+
+    it("gives a request sent without an id one of its own, and names it when it fails", async () => {
+      hostedStreamTextMock.mockRejectedValue(serverError())
+
+      const caught = await runHostedPageTranslation()
+
+      const sent = (hostedStreamTextMock.mock.calls[0]![0] as { requestId?: string }).requestId
+      expect(sent).toMatch(UUID)
+      expect(await requestIdOf(caught)).toBe(sent)
+    })
+
+    it("keeps the error otherwise as it was, so retries read it the same", async () => {
+      hostedStreamTextMock.mockRejectedValue(serverError({ requestId: SERVER_ID }))
+
+      const caught = await runHostedPageTranslation(SENT_ID)
+
+      expect(caught).toMatchObject({ code: "INTERNAL_SERVER_ERROR", status: 500 })
+      expect(defaultRequestRetryPolicy.decide(caught, RETRY_CONTEXT).action).toBe(
+        defaultRequestRetryPolicy.decide(serverError(), RETRY_CONTEXT).action,
+      )
+    })
+
+    it("names the call when its stream breaks off without finishing", async () => {
+      hostedStreamTextMock.mockResolvedValue(
+        (async function* () {
+          yield { type: "start" }
+          yield { type: "text-delta", id: "text-1", text: "Hola" }
+        })(),
+      )
+      expect(await requestIdOf(await runHostedPageTranslation(SENT_ID))).toBe(SENT_ID)
+    })
+
+    it("names the call on a custom action's failure across the port", async () => {
+      hostedStreamStructuredObjectMock.mockRejectedValue(serverError({ requestId: SERVER_ID }))
+
+      const message = await runHostedCustomActionOverPort("req-custom-action-id")
+
+      expect(message?.error).toMatchObject({ builtInAiRequestId: SERVER_ID })
+    })
+
+    it("names the call on a hosted note suggestion's failure", async () => {
+      hostedNoteSuggestionStreamMock.mockRejectedValue(serverError())
+      const { runNoteSuggestionStreamInBackground } = await import("../background-stream")
+
+      const caught = await runNoteSuggestionStreamInBackground({
+        providerId: "read-frog-ai:gpt-6-luna",
+        requestId: SENT_ID,
+        instructions: "Suggest notes",
+        prompt: "Selection",
+      }).catch((error: unknown) => error)
+
+      expect(await requestIdOf(caught)).toBe(SENT_ID)
+    })
+
+    it("names the call on a one-shot generation, such as a summary", async () => {
+      hostedStreamTextMock.mockRejectedValue(serverError())
+      const { generateTextForProviderRef } = await import("../background-stream")
+
+      const caught = await generateTextForProviderRef({
+        providerRef: {
+          kind: "system",
+          providerId: "read-frog-ai:gpt-6-luna",
+          model: "gpt-6-luna",
+          modelTier: "normal",
+          modelRevision: "r1",
+          reasoning: null,
+        },
+        hostedFeature: "pageTranslation",
+        instructions: "Summarize",
+        prompt: "Article",
+        requestId: SENT_ID,
+      }).catch((error: unknown) => error)
+
+      expect(await requestIdOf(caught)).toBe(SENT_ID)
+    })
+
+    it.each([
+      { code: "HOSTED_AI_QUOTA_EXHAUSTED", status: 429 },
+      { code: "HOSTED_AI_TIER_RESTRICTED", status: 403 },
+      { code: "HOSTED_AI_MODEL_UNAVAILABLE", status: 403 },
+      { code: "UNAUTHORIZED", status: 401 },
+    ])("leaves $code without an id: its message says what to do", async ({ code, status }) => {
+      hostedStreamTextMock.mockRejectedValue(
+        Object.assign(new Error("refused"), { code, status, data: { requestId: SERVER_ID } }),
+      )
+      expect(await requestIdOf(await runHostedPageTranslation(SENT_ID))).toBeUndefined()
+    })
+
+    it("names the call on a rate limit, which carries no instruction", async () => {
+      hostedStreamTextMock.mockRejectedValue(
+        Object.assign(new Error("Too Many Requests"), {
+          code: "TOO_MANY_REQUESTS",
+          status: 429,
+          data: { quotaScope: "user", retryAfterMs: 1_000, requestId: SERVER_ID },
+        }),
+      )
+      expect(await requestIdOf(await runHostedPageTranslation(SENT_ID))).toBe(SERVER_ID)
+    })
+
+    it("leaves a request that never left the extension without an id", async () => {
+      const caught = await runHostedPageTranslation("not-a-uuid")
+      expect((caught as Error).message).toBe("Invalid hosted AI request")
+      expect(hostedStreamTextMock).not.toHaveBeenCalled()
+      expect(await requestIdOf(caught)).toBeUndefined()
+    })
+
+    it("never tags a failure of the user's own provider", async () => {
+      getModelByIdMock.mockRejectedValue(
+        Object.assign(new Error("Invalid API key"), { data: { requestId: SERVER_ID } }),
+      )
+      const { handleStreamTextPort } = await import("../background-stream")
+      const mockPort = createMockPort("stream-text")
+      handleStreamTextPort(mockPort.port as never)
+      await mockPort.emitMessage({
+        type: "start",
+        streamRequestId: "req-byok-error",
+        payload: {
+          providerKind: "local",
+          providerId: "openai-default",
+          requestId: SENT_ID,
+          prompt: "Say hello",
+        },
+      })
+
+      const errorMessage = mockPort.postMessage.mock.calls
+        .map((call) => call[0] as { type: string; error?: Record<string, unknown> })
+        .find((message) => message.type === "error")
+      expect(errorMessage?.error?.message).toBe("Invalid API key")
+      expect(errorMessage?.error).not.toHaveProperty("builtInAiRequestId")
+    })
+  })
 })

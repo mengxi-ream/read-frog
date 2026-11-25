@@ -1,4 +1,5 @@
 import type { SubtitlesState } from "@/utils/subtitles/types"
+import { CopyBuiltInAiRequestIdButton } from "@/components/built-in-ai-request-id"
 import { STATE_MESSAGE_CLASS } from "@/utils/constants/subtitles"
 import { i18n } from "@/utils/i18n"
 
@@ -19,9 +20,10 @@ const STATE_CONFIG: Record<
 interface StateMessageProps {
   state?: Exclude<SubtitlesState, "idle">
   message?: string
+  requestId?: string
 }
 
-export function StateMessage({ state, message }: StateMessageProps) {
+export function StateMessage({ state, message, requestId }: StateMessageProps) {
   if (!state) return null
 
   const { color, getText } = STATE_CONFIG[state]
@@ -32,7 +34,8 @@ export function StateMessage({ state, message }: StateMessageProps) {
 
   return (
     // One line that ends at the player's right edge, as far from it as from the left: a
-    // provider's error can be longer than the player is wide. The whole text is the tooltip.
+    // provider's error can be longer than the player is wide. The whole text is the tooltip,
+    // and a failed Built-in AI call's id too, beside a button that copies it.
     <div
       className={`${STATE_MESSAGE_CLASS} pointer-events-auto absolute bottom-18 left-4 max-w-[calc(100%-2rem)]`}
       style={{
@@ -43,13 +46,22 @@ export function StateMessage({ state, message }: StateMessageProps) {
       <div
         className="flex items-center justify-center rounded-md bg-black/50 px-3 py-2 text-base leading-tight font-medium whitespace-nowrap shadow-[0_4px_16px_rgba(0,0,0,0.35)] backdrop-blur-sm"
         style={{ color }}
-        title={text}
+        title={requestId ? `${text}\n${i18n.t("hostedAi.requestId.label")} ${requestId}` : text}
       >
         {/* AI subtitles can take minutes; a static label reads as stuck. The box is
             always dark over the video, so the sweep brightens toward white. */}
         <span className={state === "loading" ? "shimmer truncate shimmer-color-white" : "truncate"}>
           {text}
         </span>
+        {requestId && (
+          <CopyBuiltInAiRequestIdButton
+            // The id changes as playback reaches another failed batch: "Copied" stays with
+            // the one copied.
+            key={requestId}
+            requestId={requestId}
+            className="-my-1 -mr-1.5 ml-1.5 shrink-0 text-white/70 hover:bg-white/15 hover:text-white dark:hover:bg-white/15"
+          />
+        )}
       </div>
     </div>
   )

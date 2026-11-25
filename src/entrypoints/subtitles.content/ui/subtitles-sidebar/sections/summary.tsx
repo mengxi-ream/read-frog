@@ -3,11 +3,13 @@ import { useQuery } from "@tanstack/react-query"
 import { useAtomValue } from "jotai"
 import { match } from "ts-pattern"
 import { browser } from "#imports"
+import { BuiltInAiRequestId } from "@/components/built-in-ai-request-id"
 import { MarkdownRenderer } from "@/components/markdown-renderer"
 import { Button } from "@/components/ui/base-ui/button"
 import { Skeleton } from "@/components/ui/base-ui/skeleton"
 import { configAtom } from "@/utils/atoms/config"
 import { featureProviderRefAtom } from "@/utils/atoms/provider"
+import { getBuiltInAiRequestId } from "@/utils/hosted-ai/request-id"
 import { i18n } from "@/utils/i18n"
 import { sendMessage } from "@/utils/message"
 import {
@@ -141,13 +143,22 @@ export function SummarySection() {
         <SummarySkeleton />
       ),
     )
-    .with({ status: "error" }, () => (
-      <StatusCard icon={<IconFileTextAi />} title={i18n.t("subtitles.sidebar.summary.failedTitle")}>
-        <Button type="button" variant="accent" size="sm" onClick={() => void query.refetch()}>
-          {i18n.t("subtitles.sidebar.summary.retry")}
-        </Button>
-      </StatusCard>
-    ))
+    .with({ status: "error" }, ({ error }) => {
+      const requestId = getBuiltInAiRequestId(error)
+      return (
+        <StatusCard
+          icon={<IconFileTextAi />}
+          title={i18n.t("subtitles.sidebar.summary.failedTitle")}
+        >
+          <div className="flex flex-col items-center gap-3">
+            <Button type="button" variant="accent" size="sm" onClick={() => void query.refetch()}>
+              {i18n.t("subtitles.sidebar.summary.retry")}
+            </Button>
+            {requestId && <BuiltInAiRequestId requestId={requestId} className="justify-center" />}
+          </div>
+        </StatusCard>
+      )
+    })
     .with({ status: "success" }, ({ data }) => (
       <SummaryBody>
         <MarkdownRenderer content={data} />

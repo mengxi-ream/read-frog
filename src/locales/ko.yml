@@ -1655,6 +1655,7 @@ translation:
   sameLanguage: 원본 언어와 대상 언어는 달라야 합니다
   autoModeSameLanguage: 감지된 언어 '$1'은(는) 대상 언어와 같습니다
   extensionContextInvalidated: 확장 프로그램이 업데이트되었습니다. 이 페이지를 새로고침한 후 다시 시도하세요.
+  inputTranslationFailed: "입력 번역 실패"
 pageDiagnosis:
   title: "페이지 진단"
   summary: "번역됨 $1개, 번역 안 됨 $2개"
@@ -1850,6 +1851,9 @@ hostedAi:
     serviceUnavailable: 일시적으로 사용할 수 없습니다
     usedPercent: "할당량 사용: $1%"
     resetsAt: "$1에 초기화"
+  requestId:
+    label: "요청 ID:"
+    copy: "요청 ID 복사"
   errors:
     rateLimited: 요청이 너무 많습니다. 나중에 다시 시도해 주세요.
     guestRateLimited: 게스트 요청이 너무 많습니다. 나중에 다시 시도해 주세요.
