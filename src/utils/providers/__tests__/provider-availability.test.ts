@@ -202,8 +202,8 @@ describe("getUsableProviderIdsForCapability", () => {
         statusWith(guestNormal, guestAdvance),
       ),
     ).toEqual([
+      DEFAULT_BUILT_IN_AI_PROVIDER_ID,
       LUNA_PROVIDER_ID,
-      "read-frog-ai:claude-haiku-5-5",
       "read-frog-ai:deepseek-v4.1-flash",
     ])
   })
