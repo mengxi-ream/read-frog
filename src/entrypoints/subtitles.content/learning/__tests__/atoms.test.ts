@@ -18,7 +18,7 @@ describe("word lookup atoms", () => {
     subtitlesStore.set(sourceTrackAtom, [])
   })
 
-  it("looks up a word with Dictionary, using only the source line as context", () => {
+  it("looks up a word with Dictionary, using the cue and its translation as context", () => {
     showCue("I'm running out of patience.", "我快没耐心了。")
 
     subtitlesStore.set(lookUpAtom, indexOf("patience"))
@@ -28,9 +28,19 @@ describe("word lookup atoms", () => {
       actionId: "default-dictionary",
       selectionText: "patience",
       cleanSelection: "patience",
-      contextText: "I'm running out of patience.",
+      contextText: "I'm running out of patience.\n\n我快没耐心了。",
       surface: "video_subtitles",
       rerunNonce: 0,
+    })
+  })
+
+  it("uses only the cue as context while its translation has not arrived", () => {
+    showCue("I'm running out of patience.")
+
+    subtitlesStore.set(lookUpAtom, indexOf("patience"))
+
+    expect(subtitlesStore.get(customActionRequestAtom)).toMatchObject({
+      contextText: "I'm running out of patience.",
     })
   })
 
