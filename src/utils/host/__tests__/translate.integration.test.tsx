@@ -2066,6 +2066,59 @@ describe("translate", () => {
           const translatedContent = expectTranslatedContent(wrapper, BLOCK_CONTENT_CLASS)
           expect(translatedContent).not.toHaveAttribute(FLOAT_WRAP_ATTRIBUTE)
         })
+
+        // Custom CSS that shrinks the translation (16px under an 80px heading
+        // with a 115px line height) leaves the box low in the heading's tall
+        // line. That gap is the line's leading, not a float.
+        function mockLineHeights({ translation, source }: { translation: string; source: string }) {
+          const previous = window.getComputedStyle
+          window.getComputedStyle = vi.fn<typeof window.getComputedStyle>((element, pseudo) => {
+            const style = previous(element, pseudo)
+            const lineHeight = element.classList.contains(BLOCK_CONTENT_CLASS)
+              ? translation
+              : element.classList.contains(CONTENT_WRAPPER_CLASS)
+                ? source
+                : null
+            if (lineHeight) {
+              Object.defineProperty(style, "lineHeight", { value: lineHeight, configurable: true })
+            }
+            return style
+          })
+          return () => {
+            window.getComputedStyle = previous
+          }
+        }
+
+        it.each([
+          { translatedTop: 220, floatWrap: null, case: "sits in a taller source line" },
+          { translatedTop: 420, floatWrap: "true", case: "drops below a float" },
+        ])(
+          "bilingual mode: judges a translation smaller than its source by the source line height when it $case",
+          async ({ translatedTop, floatWrap }) => {
+            render(
+              <div data-testid="test-node">
+                <figure data-testid="float-node" style={{ float: "right" }}>
+                  <span aria-hidden="true" />
+                </figure>
+                <p data-testid="paragraph">{MOCK_ORIGINAL_TEXT}</p>
+              </div>,
+            )
+            const paragraph = screen.getByTestId("paragraph")
+
+            const restoreLayout = mockLayout({ sourceBottom: 160, translatedTop })
+            const restoreLineHeights = mockLineHeights({ translation: "24px", source: "115px" })
+            try {
+              await removeOrShowPageTranslation("bilingual", true)
+            } finally {
+              restoreLineHeights()
+              restoreLayout()
+            }
+
+            const wrapper = expectTranslationWrapper(paragraph, "bilingual")
+            const translatedContent = expectTranslatedContent(wrapper, BLOCK_CONTENT_CLASS)
+            expect(translatedContent?.getAttribute(FLOAT_WRAP_ATTRIBUTE)).toBe(floatWrap)
+          },
+        )
       })
     })
     describe("br dom between inline nodes", () => {
