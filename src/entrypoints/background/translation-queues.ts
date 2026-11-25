@@ -17,6 +17,7 @@ import { BATCH_TIMEOUT_PER_CHAR_MS, MAX_BATCH_EXTRA_TIMEOUT_MS } from "@/utils/c
 import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { Sha256Hex } from "@/utils/hash"
 import { executeTranslate } from "@/utils/host/translate/execute-translate"
+import { withBuiltInAiRequestId } from "@/utils/hosted-ai/request-id"
 import { requireHostedFeature } from "@/utils/hosted-ai/routing"
 import { createLogger } from "@/utils/logging/logger"
 import { getSubtitlesTranslatePrompt } from "@/utils/prompts/subtitles"
@@ -120,6 +121,20 @@ async function executeQueuedTranslation<TContext>(
     { signal: options.signal },
   )
   return result.output.trim()
+}
+
+/**
+ * Rethrows a queued Built-in AI request's failure tagged with the id its attempts shared.
+ * The call tags its own failures; this covers the ones the queue raises itself, such as a
+ * timeout, which reach the user just the same. A cancellation is never shown, so stays as
+ * it is.
+ */
+function rethrowWithHostedRequestId(hostedRequestId: string | undefined) {
+  return (error: unknown): never => {
+    throw hostedRequestId === undefined || isTranslationCancelledError(error)
+      ? error
+      : withBuiltInAiRequestId(error, hostedRequestId)
+  }
 }
 
 export function parseBatchResult(result: string): string[] {
@@ -380,9 +395,11 @@ async function createTranslationQueues<TContext>(config: TranslationQueueSetupCo
         return await executeBatchTranslation(dataList, promptResolver, signal, hostedRequestId)
       }
 
-      return requestQueue.enqueue(batchThunk, earliestScheduleAt, hash, meta.scopes, {
-        extraTimeoutMs: getBatchExtraTimeoutMs(totalCharacters),
-      })
+      return requestQueue
+        .enqueue(batchThunk, earliestScheduleAt, hash, meta.scopes, {
+          extraTimeoutMs: getBatchExtraTimeoutMs(totalCharacters),
+        })
+        .catch(rethrowWithHostedRequestId(hostedRequestId))
     },
     executeIndividual: async (data) => {
       const { text, langConfig, provider, hash, scheduleAt, context, scope, glossaryTerms } = data
@@ -406,7 +423,9 @@ async function createTranslationQueues<TContext>(config: TranslationQueueSetupCo
           glossaryTerms,
         })
       }
-      return requestQueue.enqueue(thunk, scheduleAt, hash, scope ? [scope] : undefined)
+      return requestQueue
+        .enqueue(thunk, scheduleAt, hash, scope ? [scope] : undefined)
+        .catch(rethrowWithHostedRequestId(hostedRequestId))
     },
     onError: (error, context) => {
       // Turning page translation off cancels its batches on purpose: no failure to keep.

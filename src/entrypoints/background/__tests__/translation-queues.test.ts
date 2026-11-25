@@ -308,6 +308,71 @@ describe("translation queue helpers", () => {
     expect(putBatchRequestRecordMock).not.toHaveBeenCalled()
   }, 5_000)
 
+  it("names the Built-in AI call a request timed out on, as its attempts sent it", async () => {
+    vi.useFakeTimers()
+    ensureInitializedConfigMock.mockResolvedValue({
+      ...DEFAULT_CONFIG,
+      pageTranslation: {
+        ...DEFAULT_CONFIG.pageTranslation,
+        requestQueueConfig: { rate: 10, capacity: 10, timeoutMs: 1_000 },
+        batchQueueConfig: { maxCharactersPerBatch: 1000, maxItemsPerBatch: 1 },
+      },
+    })
+    // Never answers: the queue's own timeout is what fails the request.
+    runStreamTextInBackgroundMock.mockImplementation(() => new Promise(() => {}))
+
+    const { setupPageTranslationHandlers } = await import("../page-translation")
+    setupPageTranslationHandlers()
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+    const caught = await fastForward(
+      handler({
+        data: {
+          text: "hello",
+          langConfig: DEFAULT_CONFIG.language,
+          providerRef: {
+            kind: "system",
+            providerId: "read-frog-ai:gpt-6-luna",
+            model: "gpt-6-luna",
+            modelTier: "normal",
+            modelRevision: "normal-r1",
+            reasoning: null,
+          },
+          scheduleAt: Date.now(),
+          hash: "hosted-timeout-hash",
+          hostedFeature: "pageTranslation",
+        },
+      }),
+    ).catch((error: unknown) => error)
+
+    const { getBuiltInAiRequestId } = await import("@/utils/hosted-ai/request-id")
+    expect((caught as Error).message).toMatch(/timed out/)
+    const lastSent = runStreamTextInBackgroundMock.mock.calls.at(-1)![0] as { requestId: string }
+    expect(getBuiltInAiRequestId(caught)).toBe(lastSent.requestId)
+  }, 10_000)
+
+  it("never names a call for a request on the user's own provider", async () => {
+    vi.useFakeTimers()
+    executeTranslateMock.mockRejectedValue(new Error("Invalid API key"))
+
+    const { setupPageTranslationHandlers } = await import("../page-translation")
+    setupPageTranslationHandlers()
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+    const caught = await fastForward(
+      handler({
+        data: {
+          text: "hello",
+          langConfig: DEFAULT_CONFIG.language,
+          providerRef: localProviderRef(llmProvider),
+          scheduleAt: Date.now(),
+          hash: "byok-failure-hash",
+        },
+      }),
+    ).catch((error: unknown) => error)
+
+    expect((caught as Error).message).toBe("Invalid API key")
+    expect(caught).not.toHaveProperty("builtInAiRequestId")
+  }, 10_000)
+
   it("routes hosted tasks through the shared user-configured request queue", async () => {
     ensureInitializedConfigMock.mockResolvedValue({
       ...DEFAULT_CONFIG,

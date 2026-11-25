@@ -25,12 +25,15 @@ export const STREAM_PORT_DISCONNECTED_MESSAGE = "Stream disconnected unexpectedl
 export class StreamPortError extends Error {
   readonly action?: ErrorAction
   readonly reason?: AnalyticsFailureReason
+  /** Read through `getBuiltInAiRequestId`, like an error relayed by messaging. */
+  readonly builtInAiRequestId?: string
 
-  constructor({ message, action, reason }: StreamPortErrorPayload) {
+  constructor({ message, action, reason, builtInAiRequestId }: StreamPortErrorPayload) {
     super(message)
     this.name = "StreamPortError"
     this.action = action
     this.reason = reason
+    this.builtInAiRequestId = builtInAiRequestId
   }
 }
 
