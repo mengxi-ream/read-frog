@@ -16,7 +16,6 @@ const OFFSCREEN_DOCUMENT_URL = browser.runtime.getURL(OFFSCREEN_DOCUMENT_PATH)
 const OFFSCREEN_REASON = "AUDIO_PLAYBACK"
 const OFFSCREEN_JUSTIFICATION =
   "Play synthesized speech from extension context to avoid webpage CSP media restrictions."
-const OFFSCREEN_PLAYBACK_KEEPALIVE_INTERVAL_MS = 20_000
 
 interface ChromeRuntimeContext {
   contextType?: string
@@ -143,7 +142,7 @@ class ChromeOffscreenPlaybackAdapter implements TTSPlaybackAdapter {
       }
 
       try {
-        return await this.withOffscreenKeepalive(() => sendMessage("ttsOffscreenPlay", request))
+        return await sendMessage("ttsOffscreenPlay", request)
       } catch (error) {
         if (!isMissingReceiverError(error)) {
           throw error
@@ -161,25 +160,13 @@ class ChromeOffscreenPlaybackAdapter implements TTSPlaybackAdapter {
           return { ok: false, reason: this.lastStopReason }
         }
 
-        return this.withOffscreenKeepalive(() => sendMessage("ttsOffscreenPlay", request))
+        // Awaited so the cleanup below runs when the retry ends, not when it starts.
+        return await sendMessage("ttsOffscreenPlay", request)
       }
     } finally {
       if (generation === this.playbackGeneration && this.activeRequestId === request.requestId) {
         this.activeRequestId = null
       }
-    }
-  }
-
-  // Resets Chrome's 30-second MV3 service worker idle timer while awaiting long offscreen playback
-  // (note: Chrome's separate 5-minute single-event execution cap still applies).
-  private async withOffscreenKeepalive<T>(run: () => Promise<T>): Promise<T> {
-    const timer = setInterval(() => {
-      void this.hasOffscreenDocument().catch(() => {})
-    }, OFFSCREEN_PLAYBACK_KEEPALIVE_INTERVAL_MS)
-    try {
-      return await run()
-    } finally {
-      clearInterval(timer)
     }
   }
 

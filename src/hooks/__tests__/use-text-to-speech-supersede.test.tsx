@@ -239,19 +239,22 @@ describe("useTextToSpeech failures", () => {
     expect(synthCount).toBe(2)
   })
 
-  it("sends a best-effort ttsPlaybackStop when playback fails mid-run", async () => {
+  it("stops the failed request and explains a closed player in plain words", async () => {
     detectLanguageMock.mockResolvedValue("eng")
-    sendMessageMock.mockImplementation(async (type) => {
+    let startedRequestId: string | undefined
+    sendMessageMock.mockImplementation(async (type, data) => {
       if (type === "edgeTtsSynthesize") {
         return { ok: true, audioBase64: "chunk-1", contentType: "audio/mpeg" }
       }
       if (type === "ttsPlaybackStart") {
+        startedRequestId = data.requestId
         throw new Error(
           "A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received",
         )
       }
       return undefined
     })
+    const { toastManager } = await import("@/components/ui/base-ui/toast")
 
     const { result } = renderHook(() => useTextToSpeech(), { wrapper })
     await act(async () => {
@@ -260,9 +263,14 @@ describe("useTextToSpeech failures", () => {
       )
     })
 
-    expect(sendMessageMock).toHaveBeenCalledWith(
-      "ttsPlaybackStop",
-      expect.objectContaining({ requestId: expect.any(String) }),
+    expect(startedRequestId).toEqual(expect.any(String))
+    expect(sendMessageMock).toHaveBeenCalledWith("ttsPlaybackStop", {
+      requestId: startedRequestId,
+    })
+    expect(toastManager.add).toHaveBeenCalledWith(
+      expect.objectContaining({
+        description: "Audio playback was interrupted. Please try again.",
+      }),
     )
   })
 })

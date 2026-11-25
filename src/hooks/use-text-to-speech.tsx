@@ -109,6 +109,11 @@ function getTTSFriendlyErrorDescription(error: Error): string | undefined {
     return "Edge TTS is temporarily unavailable. Please check your network and retry."
   }
 
+  // Chrome's wording for the player going away while it still had audio to play.
+  if (error.message.includes("message channel closed")) {
+    return "Audio playback was interrupted. Please try again."
+  }
+
   return error.message || undefined
 }
 
@@ -188,17 +193,15 @@ export function useTextToSpeech(
       } catch (error) {
         // A run the user already stopped or replaced reports nothing.
         if (isSuperseded()) return
+        // The failed run may have left its audio playing with nothing in the
+        // UI to stop it. It is still the active request, so end it here.
+        activeRequestIdRef.current = null
+        void sendMessage("ttsPlaybackStop", { requestId }).catch(() => {})
         throw error
       }
     },
     onError: (error, variables) => {
       log.warn("Text-to-speech playback failed", { error })
-      const failedRequestId = activeRequestIdRef.current
-      activeRequestIdRef.current = null
-      if (failedRequestId) {
-        void sendMessage("ttsPlaybackStop", { requestId: failedRequestId }).catch(() => {})
-      }
-
       void trackFeatureUsed({
         ...variables.analyticsContext,
         outcome: "failure",
