@@ -49,9 +49,12 @@ export const lookUpAtom = atom(null, (get, set, index: number | null) => {
     actionId: action.id,
     selectionText: word.text,
     cleanSelection: word.text,
-    // The source line only: the translation may be a machine placeholder, or
-    // an AI line still on its way, and either would mislead the lookup.
-    contextText: cue.text,
+    // The line and its translation, so the card translates the sentence the
+    // same way the subtitles do. A translation equal to the line (same-language
+    // passthrough) is left out, as the subtitles and transcript do.
+    contextText: [cue.text, cue.translation !== cue.text && cue.translation]
+      .filter(Boolean)
+      .join("\n\n"),
     surface: ANALYTICS_SURFACE.VIDEO_SUBTITLES,
     // The card reads the video, its link and playing time, when a save starts
     // (WordLookupCard), where the platform's player can be reached.
