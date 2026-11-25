@@ -494,4 +494,83 @@ describe("setupTTSPlaybackMessageHandlers", () => {
       "req-new",
     ])
   })
+
+  it("reports a stopped request as stopped even when newer speech starts before it resumes", async () => {
+    const getContextsMock = vi
+      .fn<(...args: any[]) => any>()
+      .mockResolvedValueOnce([{ contextType: "OFFSCREEN_DOCUMENT" }])
+      .mockResolvedValueOnce([])
+      .mockResolvedValue([{ contextType: "OFFSCREEN_DOCUMENT" }])
+
+    let resolveCreateDocument!: () => void
+    const createDocumentDeferred = new Promise<void>((resolve) => {
+      resolveCreateDocument = resolve
+    })
+    const createDocumentMock = vi
+      .fn<(...args: any[]) => any>()
+      .mockReturnValue(createDocumentDeferred)
+    ;(globalThis as { chrome?: unknown }).chrome = {
+      runtime: {
+        getContexts: getContextsMock,
+      },
+      offscreen: {
+        createDocument: createDocumentMock,
+      },
+    }
+
+    sendMessageMock.mockImplementation(async (type: string, data?: { requestId?: string }) => {
+      if (type === "ttsOffscreenStop") {
+        return { ok: true as const }
+      }
+
+      if (type === "ttsOffscreenPlay") {
+        if (data?.requestId === "req-old") {
+          throw new Error("Could not establish connection. Receiving end does not exist.")
+        }
+        return { ok: true as const }
+      }
+
+      throw new Error(`Unexpected message: ${type}`)
+    })
+
+    const { setupTTSPlaybackMessageHandlers } = await import("../tts-playback")
+    setupTTSPlaybackMessageHandlers()
+    const startHandler = getRegisteredMessageHandler<{ ok: boolean; reason?: string }>(
+      "ttsPlaybackStart",
+    )
+
+    const stopHandler = getRegisteredMessageHandler<{ ok: true }>("ttsPlaybackStop")
+
+    const oldPlayPromise = startHandler({
+      data: {
+        requestId: "req-old",
+        audioBase64: "ZmFrZQ==",
+        contentType: "audio/mpeg",
+      },
+    })
+
+    await vi.waitFor(() => {
+      expect(createDocumentMock).toHaveBeenCalledTimes(1)
+    })
+
+    await stopHandler({ data: { requestId: "req-old", reason: "stopped" } })
+
+    const newPlayResult = await startHandler({
+      data: {
+        requestId: "req-new",
+        audioBase64: "bmV3",
+        contentType: "audio/mpeg",
+      },
+    })
+    expect(newPlayResult).toEqual({ ok: true })
+
+    resolveCreateDocument()
+    await expect(oldPlayPromise).resolves.toEqual({ ok: false, reason: "stopped" })
+
+    const playCalls = sendMessageMock.mock.calls.filter((call) => call[0] === "ttsOffscreenPlay")
+    expect(playCalls.map((call) => (call[1] as { requestId?: string })?.requestId)).toEqual([
+      "req-old",
+      "req-new",
+    ])
+  })
 })

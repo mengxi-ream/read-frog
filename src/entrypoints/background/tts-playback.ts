@@ -41,6 +41,11 @@ interface ChromeLike {
   offscreen?: ChromeOffscreenApi
 }
 
+interface OffscreenPlaybackRun {
+  requestId: string
+  cancelled?: TTSPlaybackStopReason
+}
+
 interface TTSPlaybackAdapter {
   prepare: () => Promise<void>
   play: (request: TTSPlaybackStartRequest) => Promise<TTSPlaybackStartResponse>
@@ -87,9 +92,7 @@ function isClosedMessageChannelError(error: unknown): boolean {
 
 class ChromeOffscreenPlaybackAdapter implements TTSPlaybackAdapter {
   private ensureOffscreenPromise: Promise<void> | null = null
-  private playbackGeneration = 0
-  private activeRequestId: string | null = null
-  private lastStopReason: TTSPlaybackStopReason = "stopped"
+  private activeRun: OffscreenPlaybackRun | null = null
 
   async prepare(): Promise<void> {
     if (await this.hasOffscreenDocument()) {
@@ -125,20 +128,22 @@ class ChromeOffscreenPlaybackAdapter implements TTSPlaybackAdapter {
   }
 
   async play(request: TTSPlaybackStartRequest): Promise<TTSPlaybackStartResponse> {
-    const generation = ++this.playbackGeneration
-    this.activeRequestId = request.requestId
-    this.lastStopReason = "interrupted"
+    if (this.activeRun) {
+      this.activeRun.cancelled = "interrupted"
+    }
+    const run: OffscreenPlaybackRun = { requestId: request.requestId }
+    this.activeRun = run
 
     try {
       await this.prepare()
-      if (generation !== this.playbackGeneration) {
-        return { ok: false, reason: this.lastStopReason }
+      if (run.cancelled) {
+        return { ok: false, reason: run.cancelled }
       }
 
       // Latest request wins: always stop any in-progress playback first.
       await this.stopOffscreen({ reason: "interrupted" })
-      if (generation !== this.playbackGeneration) {
-        return { ok: false, reason: this.lastStopReason }
+      if (run.cancelled) {
+        return { ok: false, reason: run.cancelled }
       }
 
       try {
@@ -148,33 +153,33 @@ class ChromeOffscreenPlaybackAdapter implements TTSPlaybackAdapter {
           throw error
         }
 
-        if (generation !== this.playbackGeneration) {
-          return { ok: false, reason: this.lastStopReason }
+        if (run.cancelled) {
+          return { ok: false, reason: run.cancelled }
         }
 
         log.warn("[TTSPlayback] offscreen receiver missing, retrying once", { error })
 
         // Offscreen documents can be reclaimed by the browser and briefly lose handlers.
         await this.prepare()
-        if (generation !== this.playbackGeneration) {
-          return { ok: false, reason: this.lastStopReason }
+        if (run.cancelled) {
+          return { ok: false, reason: run.cancelled }
         }
 
         // Awaited so the cleanup below runs when the retry ends, not when it starts.
         return await sendMessage("ttsOffscreenPlay", request)
       }
     } finally {
-      if (generation === this.playbackGeneration && this.activeRequestId === request.requestId) {
-        this.activeRequestId = null
+      if (this.activeRun === run) {
+        this.activeRun = null
       }
     }
   }
 
   async stop(request: TTSPlaybackStopRequest): Promise<void> {
-    if (!request.requestId || request.requestId === this.activeRequestId) {
-      this.playbackGeneration += 1
-      this.lastStopReason = request.reason ?? "stopped"
-      this.activeRequestId = null
+    const run = this.activeRun
+    if (run && (!request.requestId || request.requestId === run.requestId)) {
+      run.cancelled = request.reason ?? "stopped"
+      this.activeRun = null
     }
 
     await this.stopOffscreen(request)
