@@ -18,7 +18,7 @@ export function useContextMenuReadAloud() {
     const text = fromEbookSection
       ? selectionText
       : readSelectionSnapshot(window.getSelection())?.text || selectionText
-    void play(text, ttsConfig)
+    void play(text, ttsConfig).catch(() => {})
   })
 
   useEffect(() => {

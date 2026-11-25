@@ -40,7 +40,7 @@ export function SpeakButton({
       text,
       ttsConfig,
       language ? { forcedVoice: selectTTSVoice(ttsConfig, language) } : undefined,
-    )
+    ).catch(() => {})
   }, [handlePress, isFetching, isPlaying, language, play, stop, text, ttsConfig])
 
   const tooltipText = isFetching
