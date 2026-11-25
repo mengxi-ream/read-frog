@@ -166,4 +166,103 @@ describe("useTextToSpeech failures", () => {
     })
     expect(toastManager.add).toHaveBeenCalledOnce()
   })
+
+  it("does not emit unhandledRejection when a prefetched chunk rejects after the active chunk fails", async () => {
+    const longText = "Hello world. ".repeat(200)
+    const secondChunkFetch = deferred<{ ok: false; error: { code: string; message: string } }>()
+    let synthCount = 0
+
+    detectLanguageMock.mockResolvedValue("eng")
+    sendMessageMock.mockImplementation(async (type) => {
+      if (type === "edgeTtsSynthesize") {
+        synthCount += 1
+        if (synthCount === 1) {
+          return { ok: true, audioBase64: "chunk-1", contentType: "audio/mpeg" }
+        }
+        return secondChunkFetch.promise
+      }
+      if (type === "ttsPlaybackStart") {
+        throw new Error(
+          "A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received",
+        )
+      }
+      return undefined
+    })
+
+    const unhandledRejections: unknown[] = []
+    const onUnhandledRejection = (reason: unknown) => {
+      unhandledRejections.push(reason)
+    }
+    process.on("unhandledRejection", onUnhandledRejection)
+
+    try {
+      const { result } = renderHook(() => useTextToSpeech(), { wrapper })
+      await act(async () => {
+        await expect(result.current.play(longText, ttsConfig)).rejects.toThrow(
+          "message channel closed",
+        )
+      })
+
+      secondChunkFetch.resolve({ ok: false, error: { code: "NETWORK_ERROR", message: "offline" } })
+      await new Promise((resolve) => setTimeout(resolve, 0))
+
+      expect(synthCount).toBe(2)
+      expect(unhandledRejections).toEqual([])
+    } finally {
+      process.off("unhandledRejection", onUnhandledRejection)
+    }
+  })
+
+  it("still surfaces a prefetched next chunk error when playback reaches it", async () => {
+    const longText = "Hello world. ".repeat(200)
+    let synthCount = 0
+
+    detectLanguageMock.mockResolvedValue("eng")
+    sendMessageMock.mockImplementation(async (type) => {
+      if (type === "edgeTtsSynthesize") {
+        synthCount += 1
+        if (synthCount === 1) {
+          return { ok: true, audioBase64: "chunk-1", contentType: "audio/mpeg" }
+        }
+        return { ok: false, error: { code: "NETWORK_ERROR", message: "chunk-2 offline" } }
+      }
+      if (type === "ttsPlaybackStart") {
+        return { ok: true }
+      }
+      return undefined
+    })
+
+    const { result } = renderHook(() => useTextToSpeech(), { wrapper })
+    await act(async () => {
+      await expect(result.current.play(longText, ttsConfig)).rejects.toThrow("chunk-2 offline")
+    })
+    expect(synthCount).toBe(2)
+  })
+
+  it("sends a best-effort ttsPlaybackStop when playback fails mid-run", async () => {
+    detectLanguageMock.mockResolvedValue("eng")
+    sendMessageMock.mockImplementation(async (type) => {
+      if (type === "edgeTtsSynthesize") {
+        return { ok: true, audioBase64: "chunk-1", contentType: "audio/mpeg" }
+      }
+      if (type === "ttsPlaybackStart") {
+        throw new Error(
+          "A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received",
+        )
+      }
+      return undefined
+    })
+
+    const { result } = renderHook(() => useTextToSpeech(), { wrapper })
+    await act(async () => {
+      await expect(result.current.play("Hello world", ttsConfig)).rejects.toThrow(
+        "message channel closed",
+      )
+    })
+
+    expect(sendMessageMock).toHaveBeenCalledWith(
+      "ttsPlaybackStop",
+      expect.objectContaining({ requestId: expect.any(String) }),
+    )
+  })
 })

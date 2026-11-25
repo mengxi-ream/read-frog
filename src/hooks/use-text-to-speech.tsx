@@ -192,6 +192,13 @@ export function useTextToSpeech(
       }
     },
     onError: (error, variables) => {
+      log.warn("Text-to-speech playback failed", { error })
+      const failedRequestId = activeRequestIdRef.current
+      activeRequestIdRef.current = null
+      if (failedRequestId) {
+        void sendMessage("ttsPlaybackStop", { requestId: failedRequestId }).catch(() => {})
+      }
+
       void trackFeatureUsed({
         ...variables.analyticsContext,
         outcome: "failure",
@@ -205,7 +212,6 @@ export function useTextToSpeech(
           description: getTTSFriendlyErrorDescription(error),
         })
       }
-      activeRequestIdRef.current = null
       setIsPlaying(false)
       setCurrentChunk(0)
       setTotalChunks(0)
@@ -290,6 +296,9 @@ export function useTextToSpeech(
       const currentAudioPromise = fetchChunkAudio(chunks[index]!)
       const nextAudioPromise =
         index + 1 < chunks.length ? fetchChunkAudio(chunks[index + 1]!) : null
+      // Prevent an unhandled rejection if the current chunk fails or playback is stopped
+      // before nextAudioPromise is awaited below; awaiting nextAudioPromise still rethrows.
+      void nextAudioPromise?.catch(() => {})
       const audioChunk = await currentAudioPromise
 
       if (isSuperseded()) {
