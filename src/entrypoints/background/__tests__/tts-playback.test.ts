@@ -265,4 +265,367 @@ describe("setupTTSPlaybackMessageHandlers", () => {
     await expect(playbackPromise).resolves.toEqual({ ok: false, reason: "stopped" })
     expect(FakeAudio.instances[0]!.pause).toHaveBeenCalled()
   })
+
+  it("ignores closed message channel errors when stopping stale offscreen playback", async () => {
+    const getContextsMock = vi
+      .fn<(...args: any[]) => any>()
+      .mockResolvedValue([{ contextType: "OFFSCREEN_DOCUMENT" }])
+    const createDocumentMock = vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined)
+    ;(globalThis as { chrome?: unknown }).chrome = {
+      runtime: {
+        getContexts: getContextsMock,
+      },
+      offscreen: {
+        createDocument: createDocumentMock,
+      },
+    }
+
+    sendMessageMock.mockImplementation(async (type: string) => {
+      if (type === "ttsOffscreenStop") {
+        throw new Error(
+          "A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received",
+        )
+      }
+
+      if (type === "ttsOffscreenPlay") {
+        return { ok: true as const }
+      }
+
+      throw new Error(`Unexpected message: ${type}`)
+    })
+
+    const { setupTTSPlaybackMessageHandlers } = await import("../tts-playback")
+    setupTTSPlaybackMessageHandlers()
+    const startHandler = getRegisteredMessageHandler<{ ok: boolean }>("ttsPlaybackStart")
+
+    const result = await startHandler({
+      data: {
+        requestId: "req-closed-stop",
+        audioBase64: "ZmFrZQ==",
+        contentType: "audio/mpeg",
+      },
+    })
+
+    expect(result).toEqual({ ok: true })
+    expect(createDocumentMock).not.toHaveBeenCalled()
+  })
+
+  it("recreates the offscreen document and plays again when its message channel closes", async () => {
+    // The document exists when play starts, then Chrome closes it.
+    const getContextsMock = vi
+      .fn<(...args: any[]) => any>()
+      .mockResolvedValueOnce([{ contextType: "OFFSCREEN_DOCUMENT" }])
+      .mockResolvedValue([])
+    const createDocumentMock = vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined)
+    ;(globalThis as { chrome?: unknown }).chrome = {
+      runtime: {
+        getContexts: getContextsMock,
+      },
+      offscreen: {
+        createDocument: createDocumentMock,
+      },
+    }
+
+    let playAttempts = 0
+    sendMessageMock.mockImplementation(async (type: string) => {
+      if (type === "ttsOffscreenStop") {
+        return { ok: true as const }
+      }
+
+      if (type === "ttsOffscreenPlay") {
+        playAttempts += 1
+        if (playAttempts === 1) {
+          throw new Error(
+            "A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received",
+          )
+        }
+        return { ok: true as const }
+      }
+
+      throw new Error(`Unexpected message: ${type}`)
+    })
+
+    const { setupTTSPlaybackMessageHandlers } = await import("../tts-playback")
+    setupTTSPlaybackMessageHandlers()
+    const startHandler = getRegisteredMessageHandler<{ ok: boolean }>("ttsPlaybackStart")
+
+    const result = await startHandler({
+      data: {
+        requestId: "req-closed-play",
+        audioBase64: "ZmFrZQ==",
+        contentType: "audio/mpeg",
+      },
+    })
+
+    expect(result).toEqual({ ok: true })
+    expect(createDocumentMock).toHaveBeenCalledTimes(1)
+    expect(
+      sendMessageMock.mock.calls.filter((call) => call[0] === "ttsOffscreenPlay"),
+    ).toHaveLength(2)
+  })
+
+  it("fails after one retry when the recreated document closes too", async () => {
+    const getContextsMock = vi
+      .fn<(...args: any[]) => any>()
+      .mockResolvedValueOnce([{ contextType: "OFFSCREEN_DOCUMENT" }])
+      .mockResolvedValue([])
+    const createDocumentMock = vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined)
+    ;(globalThis as { chrome?: unknown }).chrome = {
+      runtime: {
+        getContexts: getContextsMock,
+      },
+      offscreen: {
+        createDocument: createDocumentMock,
+      },
+    }
+
+    sendMessageMock.mockImplementation(async (type: string) => {
+      if (type === "ttsOffscreenStop") {
+        return { ok: true as const }
+      }
+
+      if (type === "ttsOffscreenPlay") {
+        throw new Error(
+          "A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received",
+        )
+      }
+
+      throw new Error(`Unexpected message: ${type}`)
+    })
+
+    const { setupTTSPlaybackMessageHandlers } = await import("../tts-playback")
+    setupTTSPlaybackMessageHandlers()
+    const startHandler = getRegisteredMessageHandler<{ ok: boolean }>("ttsPlaybackStart")
+
+    await expect(
+      startHandler({
+        data: {
+          requestId: "req-closed-twice",
+          audioBase64: "ZmFrZQ==",
+          contentType: "audio/mpeg",
+        },
+      }),
+    ).rejects.toThrow("message channel closed")
+
+    expect(createDocumentMock).toHaveBeenCalledTimes(1)
+    expect(
+      sendMessageMock.mock.calls.filter((call) => call[0] === "ttsOffscreenPlay"),
+    ).toHaveLength(2)
+  })
+
+  it("skips retrying ttsOffscreenPlay if stop arrives while recreating the offscreen document", async () => {
+    const getContextsMock = vi
+      .fn<(...args: any[]) => any>()
+      .mockResolvedValueOnce([{ contextType: "OFFSCREEN_DOCUMENT" }])
+      .mockResolvedValueOnce([])
+
+    let resolveCreateDocument!: () => void
+    const createDocumentDeferred = new Promise<void>((resolve) => {
+      resolveCreateDocument = resolve
+    })
+    const createDocumentMock = vi
+      .fn<(...args: any[]) => any>()
+      .mockReturnValue(createDocumentDeferred)
+    ;(globalThis as { chrome?: unknown }).chrome = {
+      runtime: {
+        getContexts: getContextsMock,
+      },
+      offscreen: {
+        createDocument: createDocumentMock,
+      },
+    }
+
+    sendMessageMock.mockImplementation(async (type: string) => {
+      if (type === "ttsOffscreenStop") {
+        return { ok: true as const }
+      }
+
+      if (type === "ttsOffscreenPlay") {
+        throw new Error("Could not establish connection. Receiving end does not exist.")
+      }
+
+      throw new Error(`Unexpected message: ${type}`)
+    })
+
+    const { setupTTSPlaybackMessageHandlers } = await import("../tts-playback")
+    setupTTSPlaybackMessageHandlers()
+    const startHandler = getRegisteredMessageHandler<{ ok: boolean; reason?: string }>(
+      "ttsPlaybackStart",
+    )
+    const stopHandler = getRegisteredMessageHandler<{ ok: true }>("ttsPlaybackStop")
+
+    const playPromise = startHandler({
+      data: {
+        requestId: "req-stop-during-retry",
+        audioBase64: "ZmFrZQ==",
+        contentType: "audio/mpeg",
+      },
+    })
+
+    await vi.waitFor(() => {
+      expect(createDocumentMock).toHaveBeenCalledTimes(1)
+    })
+
+    await stopHandler({ data: { requestId: "req-stop-during-retry", reason: "stopped" } })
+    resolveCreateDocument()
+
+    await expect(playPromise).resolves.toEqual({ ok: false, reason: "stopped" })
+    expect(
+      sendMessageMock.mock.calls.filter((call) => call[0] === "ttsOffscreenPlay"),
+    ).toHaveLength(1)
+  })
+
+  it("skips retrying ttsOffscreenPlay if a newer play request supersedes it during recovery", async () => {
+    const getContextsMock = vi
+      .fn<(...args: any[]) => any>()
+      .mockResolvedValueOnce([{ contextType: "OFFSCREEN_DOCUMENT" }])
+      .mockResolvedValueOnce([])
+      .mockResolvedValue([{ contextType: "OFFSCREEN_DOCUMENT" }])
+
+    let resolveCreateDocument!: () => void
+    const createDocumentDeferred = new Promise<void>((resolve) => {
+      resolveCreateDocument = resolve
+    })
+    const createDocumentMock = vi
+      .fn<(...args: any[]) => any>()
+      .mockReturnValue(createDocumentDeferred)
+    ;(globalThis as { chrome?: unknown }).chrome = {
+      runtime: {
+        getContexts: getContextsMock,
+      },
+      offscreen: {
+        createDocument: createDocumentMock,
+      },
+    }
+
+    sendMessageMock.mockImplementation(async (type: string, data?: { requestId?: string }) => {
+      if (type === "ttsOffscreenStop") {
+        return { ok: true as const }
+      }
+
+      if (type === "ttsOffscreenPlay") {
+        if (data?.requestId === "req-old") {
+          throw new Error("Could not establish connection. Receiving end does not exist.")
+        }
+        return { ok: true as const }
+      }
+
+      throw new Error(`Unexpected message: ${type}`)
+    })
+
+    const { setupTTSPlaybackMessageHandlers } = await import("../tts-playback")
+    setupTTSPlaybackMessageHandlers()
+    const startHandler = getRegisteredMessageHandler<{ ok: boolean; reason?: string }>(
+      "ttsPlaybackStart",
+    )
+
+    const oldPlayPromise = startHandler({
+      data: {
+        requestId: "req-old",
+        audioBase64: "ZmFrZQ==",
+        contentType: "audio/mpeg",
+      },
+    })
+
+    await vi.waitFor(() => {
+      expect(createDocumentMock).toHaveBeenCalledTimes(1)
+    })
+
+    const newPlayResult = await startHandler({
+      data: {
+        requestId: "req-new",
+        audioBase64: "bmV3",
+        contentType: "audio/mpeg",
+      },
+    })
+    expect(newPlayResult).toEqual({ ok: true })
+
+    resolveCreateDocument()
+    await expect(oldPlayPromise).resolves.toEqual({ ok: false, reason: "interrupted" })
+
+    const playCalls = sendMessageMock.mock.calls.filter((call) => call[0] === "ttsOffscreenPlay")
+    expect(playCalls.map((call) => (call[1] as { requestId?: string })?.requestId)).toEqual([
+      "req-old",
+      "req-new",
+    ])
+  })
+
+  it("reports a stopped request as stopped even when newer speech starts before it resumes", async () => {
+    const getContextsMock = vi
+      .fn<(...args: any[]) => any>()
+      .mockResolvedValueOnce([{ contextType: "OFFSCREEN_DOCUMENT" }])
+      .mockResolvedValueOnce([])
+      .mockResolvedValue([{ contextType: "OFFSCREEN_DOCUMENT" }])
+
+    let resolveCreateDocument!: () => void
+    const createDocumentDeferred = new Promise<void>((resolve) => {
+      resolveCreateDocument = resolve
+    })
+    const createDocumentMock = vi
+      .fn<(...args: any[]) => any>()
+      .mockReturnValue(createDocumentDeferred)
+    ;(globalThis as { chrome?: unknown }).chrome = {
+      runtime: {
+        getContexts: getContextsMock,
+      },
+      offscreen: {
+        createDocument: createDocumentMock,
+      },
+    }
+
+    sendMessageMock.mockImplementation(async (type: string, data?: { requestId?: string }) => {
+      if (type === "ttsOffscreenStop") {
+        return { ok: true as const }
+      }
+
+      if (type === "ttsOffscreenPlay") {
+        if (data?.requestId === "req-old") {
+          throw new Error("Could not establish connection. Receiving end does not exist.")
+        }
+        return { ok: true as const }
+      }
+
+      throw new Error(`Unexpected message: ${type}`)
+    })
+
+    const { setupTTSPlaybackMessageHandlers } = await import("../tts-playback")
+    setupTTSPlaybackMessageHandlers()
+    const startHandler = getRegisteredMessageHandler<{ ok: boolean; reason?: string }>(
+      "ttsPlaybackStart",
+    )
+
+    const stopHandler = getRegisteredMessageHandler<{ ok: true }>("ttsPlaybackStop")
+
+    const oldPlayPromise = startHandler({
+      data: {
+        requestId: "req-old",
+        audioBase64: "ZmFrZQ==",
+        contentType: "audio/mpeg",
+      },
+    })
+
+    await vi.waitFor(() => {
+      expect(createDocumentMock).toHaveBeenCalledTimes(1)
+    })
+
+    await stopHandler({ data: { requestId: "req-old", reason: "stopped" } })
+
+    const newPlayResult = await startHandler({
+      data: {
+        requestId: "req-new",
+        audioBase64: "bmV3",
+        contentType: "audio/mpeg",
+      },
+    })
+    expect(newPlayResult).toEqual({ ok: true })
+
+    resolveCreateDocument()
+    await expect(oldPlayPromise).resolves.toEqual({ ok: false, reason: "stopped" })
+
+    const playCalls = sendMessageMock.mock.calls.filter((call) => call[0] === "ttsOffscreenPlay")
+    expect(playCalls.map((call) => (call[1] as { requestId?: string })?.requestId)).toEqual([
+      "req-old",
+      "req-new",
+    ])
+  })
 })

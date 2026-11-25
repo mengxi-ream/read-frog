@@ -75,7 +75,7 @@ export function LanguageVoiceItem() {
             onClick={() => {
               void play(i18n.t("options.tts.voice.language.previewSample"), ttsConfig, {
                 forcedVoice: selectedLanguageVoice,
-              })
+              }).catch(() => {})
             }}
             disabled={isFetchingOrPlaying}
           >

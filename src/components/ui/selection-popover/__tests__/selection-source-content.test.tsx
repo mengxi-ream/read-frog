@@ -10,7 +10,7 @@ import { SelectionSourceContent } from "../selection-source-content"
 vi.mock("@/hooks/use-text-to-speech", () => ({
   selectTTSVoice: (_config: unknown, language: string) => `voice:${language}`,
   useTextToSpeech: () => ({
-    play: vi.fn<(...args: any[]) => any>(),
+    play: vi.fn<(...args: any[]) => any>(async () => {}),
     stop: vi.fn<(...args: any[]) => any>(),
     isFetching: false,
     isPlaying: false,
