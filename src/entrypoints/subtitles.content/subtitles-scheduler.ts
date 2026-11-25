@@ -16,6 +16,13 @@ function cueIdentityKey(fragment: Pick<SubtitlesFragment, "start" | "end" | "tex
   return `${fragment.start}\0${fragment.end}\0${fragment.text}`
 }
 
+/** The provider's own translation outranks a machine one. */
+function translationRank(fragment: SubtitlesFragment): number {
+  if (fragment.translation === undefined) return 0
+  if (fragment.placeholder === "machine") return 1
+  return 2
+}
+
 /**
  * Holds only *translated* cues. Originals live on sourceTrackAtom; the UI falls back there.
  */
@@ -43,7 +50,8 @@ export class SubtitlesScheduler {
   }
 
   /**
-   * Upsert translated cues by start. New cues are inserted; existing cues get translation updates.
+   * Upsert translated cues by start. New cues are inserted; an existing cue takes the new
+   * translation unless it already has a better one (`translationRank`).
    */
   supplementSubtitles(subtitles: SubtitlesFragment[]) {
     if (subtitles.length === 0) {
@@ -64,22 +72,18 @@ export class SubtitlesScheduler {
         continue
       }
 
-      if (newSub.translation !== undefined) {
-        const updatedSub = {
-          ...existing,
-          text: newSub.text,
-          end: newSub.end,
-          translation: newSub.translation,
-        }
-        const idx = this.subtitles.findIndex((s) => s.start === existing.start)
-        if (idx >= 0) {
-          this.subtitles[idx] = updatedSub
-          existingMap.set(existing.start, updatedSub)
-        }
+      if (newSub.translation === undefined || translationRank(newSub) < translationRank(existing)) {
+        continue
+      }
 
-        if (previousCurrentStart !== null && existing.start === previousCurrentStart) {
-          currentSubtitleUpdated = true
-        }
+      const idx = this.subtitles.findIndex((s) => s.start === existing.start)
+      if (idx >= 0) {
+        this.subtitles[idx] = newSub
+        existingMap.set(existing.start, newSub)
+      }
+
+      if (previousCurrentStart !== null && existing.start === previousCurrentStart) {
+        currentSubtitleUpdated = true
       }
     }
 
@@ -117,7 +121,13 @@ export class SubtitlesScheduler {
       if (previous?.translation === undefined) {
         return []
       }
-      return [{ ...fragment, translation: previous.translation }]
+      return [
+        {
+          ...fragment,
+          translation: previous.translation,
+          ...(previous.placeholder && { placeholder: previous.placeholder }),
+        },
+      ]
     })
 
     const next = [...outside, ...preserved].sort((a, b) => a.start - b.start)
@@ -130,7 +140,8 @@ export class SubtitlesScheduler {
           prev.start === fragment.start &&
           prev.end === fragment.end &&
           prev.text === fragment.text &&
-          prev.translation === fragment.translation
+          prev.translation === fragment.translation &&
+          prev.placeholder === fragment.placeholder
         )
       })
     if (unchanged) {
@@ -140,6 +151,20 @@ export class SubtitlesScheduler {
     this.subtitles = next
     this.publishTranslatedTrack()
     // Force re-resolve: index alone may stay stale while the atom still holds a removed cue.
+    this.currentIndex = -1
+    this.updateSubtitles(this.videoElement.currentTime)
+    this.updateCurrentSubtitle()
+  }
+
+  /** Translation holds: every machine translation goes, the one on screen included. */
+  removeMachineTranslations() {
+    const kept = this.subtitles.filter((fragment) => fragment.placeholder !== "machine")
+    if (kept.length === this.subtitles.length) {
+      return
+    }
+
+    this.subtitles = kept
+    this.publishTranslatedTrack()
     this.currentIndex = -1
     this.updateSubtitles(this.videoElement.currentTime)
     this.updateCurrentSubtitle()
@@ -181,15 +206,12 @@ export class SubtitlesScheduler {
     this.updateSubtitles(this.videoElement.currentTime)
   }
 
-  setState(state: SubtitlesState, data?: Partial<Omit<StateData, "state">>) {
+  setState(state: SubtitlesState, data?: Omit<StateData, "state">) {
     this.clearErrorAutoHide()
-    this.currentState = {
-      state,
-      message: data?.message,
-    }
+    this.currentState = { state, ...data }
     this.updateState()
 
-    if (state === "error") {
+    if (state === "error" && !data?.persistent) {
       this.errorAutoHideTimeoutId = setTimeout(() => {
         if (this.currentState.state === "error") {
           this.setState("idle")
@@ -262,8 +284,19 @@ export class SubtitlesScheduler {
   }
 
   private updateCurrentSubtitle() {
-    const currentSubtitle = this.currentIndex >= 0 ? this.subtitles[this.currentIndex] : null
-    subtitlesStore.set(currentSubtitleAtom, currentSubtitle!)
+    const next = this.currentIndex >= 0 ? (this.subtitles[this.currentIndex] ?? null) : null
+    const shown = subtitlesStore.get(currentSubtitleAtom)
+    // A cue on screen does not switch from its machine translation to the AI's: it plays
+    // out as it is, and shows the AI's the next time. A recut cue is another cue.
+    if (
+      next &&
+      shown?.placeholder === "machine" &&
+      next.placeholder === undefined &&
+      cueIdentityKey(shown) === cueIdentityKey(next)
+    ) {
+      return
+    }
+    subtitlesStore.set(currentSubtitleAtom, next)
   }
 
   private updateState() {

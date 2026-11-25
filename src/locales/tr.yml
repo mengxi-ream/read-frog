@@ -51,12 +51,10 @@ popup:
         action: İki dilli moda geçmek için tıklayın
   hub:
     tooltip: Birden fazla çeviri modeliyle aynı anda metin çevirin
-  discord:
-    tooltip: Geliştiricilerle bağlantı kurmak ve yeni özelliklere erken erişim sağlamak için Discord'a katılın
   blog:
     notification: Read Frog'da yenilikler
   aiSmartContext: AI Akıllı Bağlam
-  aiSmartContextDescription: Çeviri kalitesini artırmak için web sayfası bağlamını kullanır. LLM çeviri sağlayıcısı gerektirir.
+  aiSmartContextDescription: Çeviri kalitesini artırmak için web sayfası bağlamını kullanır. LLM sağlayıcısı gerektirir.
   storeReview:
     title: Read Frog'u beğendiniz mi?
     description: Mağazaya bırakacağınız kısa bir değerlendirme, diğer okurların onu bulmasına yardımcı olur.
@@ -152,13 +150,24 @@ options:
       title: WeChat grubu
       description: WeChat tartışma grubuna katılmak için QR kodu tarayın
       qrCodeAlt: WeChat QR kodu
+  usage:
+    title: Kullanım
+    pageDescription: Planın ve kalan yapay zekâ kotan.
+    notSignedIn: Giriş yapılmadı
+    guest: Misafir
+    manageSubscription: Aboneliği yönet
+    logInToView: Görmek için giriş yap
+    footer:
+      logIn: Giriş yap, her hafta ücretsiz yapay zekâ kotası kazan
+      upgrade: Yapay zekâ altyazılarının kilidini açmak ve daha fazla yerleşik AI kotası için Pro'ya geç
+      upgradeAction: Yükselt
   apiProviders:
     title: API Sağlayıcıları
-    pageDescription: Read Frog'un çağırdığı yapay zekâ servislerini bağlayın ve her özelliğin hangisini kullanacağını seçin.
-    description: Read Frog'un çağırabileceği sağlayıcıları ekleyin. 20'den fazlası yerleşik gelir; ayrıca Chat Completions uyumlu ve Open Responses API'lerini özel olarak ekleyebilirsiniz.
+    pageDescription: Read Frog'un yerleşik modellerini kullanın veya üçüncü taraf yapay zekâ servislerini bağlayın, ardından her özellik için hangisinin kullanılacağını seçin.
+    description: Read Frog'un yerleşik modellerini kullanın veya üçüncü taraf sağlayıcılar ekleyin. 20'den fazla sağlayıcı önceden yapılandırılmıştır; ayrıca Chat Completions uyumlu ve Open Responses API'lerini özel olarak ekleyebilirsiniz.
     configTitle: Sağlayıcı yapılandırması
     addProvider: Sağlayıcı ekle
-    builtInProvider: Yerleşik sağlayıcı
+    builtInProvider: Yerleşik modeller
     thirdPartyProviders: Üçüncü taraf sağlayıcılar
     builtInModel:
       reasoningDescription: "$1 modelinin yanıt vermeden önce ne kadar düşüneceği. Yüksek seviyeler zor metinlerde daha iyi sonuç verir, ancak daha yavaş yanıt verir ve kotanızdan daha fazlasını kullanır."
@@ -207,8 +216,8 @@ options:
       title: Yeni sağlayıcı ekle
       groups:
         builtInProviders:
-          title: Yerleşik LLM sağlayıcıları
-          description: Yerleşik büyük dil modeli sağlayıcıları, Base URL gibi çoğu yapılandırmayı doldurmaya gerek yok
+          title: Ön ayarlı LLM sağlayıcıları
+          description: Önceden yapılandırılmış büyük dil modeli sağlayıcıları — Base URL gibi çoğu ayarı doldurmanız gerekmez
         compatibleProviders:
           title: Uyumlu API sağlayıcıları
           description: Chat Completions uyumlu API'ler için Özel Chat Complete, Open Responses API'leri için Özel Responses kullanın.
@@ -276,15 +285,13 @@ options:
       invalidJson: Geçersiz JSON formatı
     providers:
       name:
-        builtInAi: Yerleşik AI
-        builtInAiAdvance: Gelişmiş yerleşik AI
         customChatComplete: Özel Chat Complete
         customResponses: Özel Responses
       attribution:
-        builtInAi: Read Frog tarafından barındırılan standart model. Pro ve Ultra kullanıcıları haftalık kotayla tüm özelliklerde kullanabilir; ücretsiz planda yalnızca özel AI eylemlerinde kullanılabilir.
-        builtInAiAdvance: Read Frog tarafından barındırılan gelişmiş model, yalnızca Ultra üyelerine özeldir. Sayfa çevirisi, özel AI eylemleri ve diğer tüm yerleşik AI özelliklerinde çalışır; haftalık kota ortaktır. Kotayı standart modelden daha hızlı tüketir.
+        builtInAi: Read Frog tarafından barındırılan standart model. Giriş yaptığınızda haftalık kotayla ücretsiz kullanabilirsiniz.
+        builtInAiAdvance: Read Frog tarafından barındırılan gelişmiş model, yalnızca Ultra üyelerine özeldir. Kotayı standart modellerden daha hızlı tüketir.
       description:
-        openai: GPT-4o gibi modeller sağlar
+        openai: GPT modelleri için OpenAI'ın resmi API'si
         azure: Azure dağıtımlarınız üzerinden OpenAI modelleri
         deepseek: Çin'de kullanım için önerilir
         openrouter: Kullandıkça öde fiyatlandırmasıyla birden fazla LLM sağlayıcısı için birleşik arayüz
@@ -596,9 +603,7 @@ options:
     pageDescription: Giriş kutularına yazdıklarınızı göndermeden önce çevirin.
     trigger:
       title: Tetikleme
-      enable:
-        title: Etkinleştir
-        description: Herhangi bir giriş alanında boşluk tuşuna hızlıca üç kez basarak yazdıklarınızı çevirin.
+      description: Herhangi bir giriş alanında boşluk tuşuna hızlıca üç kez basarak yazdıklarınızı çevirin.
       threshold:
         title: Tetikleme eşiği
         description: Basışlar arasında izin verilen süre, milisaniye cinsinden. Çeviri tetiklenmiyorsa artırın, yazarken kendiliğinden tetikleniyorsa azaltın.
@@ -617,9 +622,6 @@ options:
     title: Yüzen Buton
     pageDescription: Yüzen düğmenin hangi tarafta duracağını, tıklamanın ne yapacağını ve nerede gizleneceğini ayarlayın.
     demoImageAlt: Yüzen buton demosu
-    enable:
-      title: Yüzen butonu etkinleştir
-      description: Read Frog özelliklerine hızlı erişim için web sayfalarında yüzen butonu görüntüle
     display:
       title: Görünüm
       side:
@@ -639,6 +641,7 @@ options:
       translate: Sayfa çevirisini aç/kapat
     closeMenu:
       title: Yüzen butonu gizle
+    pageTranslationOff: "Sayfa Çevirisi sade modda kapalı"
     tooltips:
       togglePageTranslation: Sayfa çevirisini aç/kapat
       floatingButtonOptions: Kayan düğme seçenekleri
@@ -649,9 +652,6 @@ options:
     title: Seçim Araç Çubuğu
     pageDescription: Metin seçtiğinizde hangi eylemlerin görüneceğini ve araç çubuğunun nerede çıkacağını belirleyin.
     demoImageAlt: Seçim araç çubuğu demosu
-    enable:
-      title: Seçim araç çubuğunu etkinleştir
-      description: Web sayfalarında metin seçtiğinizde araç çubuğunu göstererek hızlı çeviri, seslendirme ve AI eylemleri sunar
     annotation:
       title: "Sözcük notları"
       enable:
@@ -663,13 +663,10 @@ options:
     actions:
       title: Eylemler
       translate:
-        title: Çeviri
         description: Araç çubuğunda çeviri düğmesini göster
       speak:
-        title: Sesli okuma
         description: Seçili metni sesli okuyan seslendirme düğmesini araç çubuğunda göster
       noteSuggestion:
-        title: Not önerileri
         description: Bir yapay zekâ sağlayıcısıyla seçim çevirisinden sonra Notebase'inize kaydedilecek kelimeler önerilir
         action: Eylem
         actionDescription: Öneriyi üreten eylem
@@ -1095,8 +1092,8 @@ options:
       pageDescription: Sizin için önemli olan sözcüklere sabit bir çeviri verin ve her listenin nerede geçerli olacağını seçin.
       untitled: Adsız terim sözlüğü
       noGlossaries: Henüz terim sözlüğü yok.
-      enable:
-        title: Etkinleştir
+      appliesTo:
+        title: Geçerli olduğu yerler
         description: Eşleşen terimleri LLM'ye gönderir, böylece onları istediğiniz gibi çevirir. Terim sözlüğü istemin içinde gönderilir, bu yüzden yalnızca LLM sağlayıcısı üzerinde çalışan özellikler için geçerlidir.
       library:
         title: Terim sözlükleriniz
@@ -1200,9 +1197,6 @@ options:
     title: Bağlam Menüsü
     pageDescription: Tarayıcının sağ tık menüsündeki Read Frog seçeneklerini yönetin.
     demoImageAlt: Bağlam menüsü demosu
-    enable:
-      title: Bağlam menüsü çevirisini etkinleştir
-      description: Sayfa veya seçili metni hızlıca çevirmek için tarayıcı sağ tıklama menüsüne çeviri seçenekleri ekle
   translation:
     title: Sayfa Çevirisi
     pageDescription: Sayfaların nasıl çevrileceğini belirleyin — mod, kapsam, istemler ve istek limitleri.
@@ -1464,8 +1458,6 @@ options:
     aiQuota:
       title: Yapay zekâ altyazı kotası
       description: Yapay zeka konuşma tanıma ile her video için doğru altyazı üretir
-      launchBonusPromo: $1 tarihinden önce abone olun, 300 dakika ek deşifre hediyesi kazanın
-      loginRequired: Yapay zeka altyazı kotanızı görmek için giriş yapın
       upgradeRequired: Yapay zeka altyazıları için Pro veya Ultra aboneliği gerekir
       pools:
         subscription: Aylık kota
@@ -1571,6 +1563,53 @@ options:
           confirm: Onayla
           cancel: İptal
           description: Tüm önbelleğe alınmış AI bölümlendirme sonuçları silinecektir. AI bölümlendirme etkinleştirilmiş bir video oynatıldığında altyazılar yeniden işlenecektir.
+  simpleMode:
+    title: "Sade mod"
+    pageDescription: "Kapattığınız bir özellik hiç yüklenmemiş gibi olur: web sayfalarında görünmez ve kısayolları çalışmaz. Ayarları korunur; yeniden açtığınızda her şey eskisi gibi olur."
+    drawerDescription: "Kapattığınız özellikler hiçbir yerde görünmez. Ayarları korunur"
+    features:
+      customActions:
+        title: "Özel AI Eylemleri"
+        description: "Seçim araç çubuğundaki ve sağ tık menüsündeki AI eylemleri; yerleşik Sözlük ve Cümle Analizi dahil"
+      pageTranslation:
+        title: "Sayfa Çevirisi"
+        description: "Web sayfalarının tamamını çevirir"
+        hover:
+          title: "Üzerine gelme çevirisi"
+          description: "Bir paragrafın üzerine gelin veya uzun basın; yalnızca o paragraf çevrilir"
+      videoSubtitles:
+        title: "Video Altyazıları"
+        description: "Video oynatıcılara çevrilmiş altyazı düğmesi ekler"
+      inputTranslation:
+        title: "Giriş Çevirisi"
+        description: "Herhangi bir giriş alanında boşluk tuşuna hızlıca üç kez basarak yazdıklarınızı çevirin"
+      floatingButton:
+        title: "Yüzen Buton"
+        description: "Read Frog özelliklerine hızlı erişim için web sayfalarında yüzen butonu görüntüle"
+      selectionToolbar:
+        title: "Seçim Araç Çubuğu"
+        description: "Web sayfalarında metin seçtiğinizde araç çubuğunu göstererek hızlı çeviri, seslendirme ve AI eylemleri sunar"
+        annotation:
+          title: "Sözcük notları"
+          description: "Seçili sözcüğün veya ifadenin altını çizer ve anlamını satırların arasına yazar"
+        translate:
+          title: "Seçim çevirisi"
+          description: "Araç çubuğunda çeviri düğmesini göster"
+          noteSuggestion:
+            title: "Not önerileri"
+            description: "Bir yapay zekâ sağlayıcısıyla seçim çevirisinden sonra Notebase'inize kaydedilecek kelimeler önerilir"
+        speak:
+          title: "Sesli okuma"
+          description: "Seçili metni sesli okuyan seslendirme düğmesini araç çubuğunda göster"
+      contextMenu:
+        title: "Bağlam Menüsü"
+        description: "Tarayıcının sağ tık menüsündeki Read Frog seçenekleri"
+      translationHub:
+        title: "Çeviri Merkezi"
+        description: "Birden fazla çeviri modeliyle aynı anda metin çevirin"
+      glossary:
+        title: "Terim sözlüğü"
+        description: "Sizin için önemli sözcükleri belirlediğiniz şekilde çevirir"
   whatsNew:
     title: Yenilikler
     postType:
@@ -1588,8 +1627,8 @@ side:
 translateService:
   title: Çeviri Servisi
   description: Yalnızca web sayfası çevirisi için
-  builtInModels: Built-in Models
-  llmModels: LLM Models
+  builtInModels: Yerleşik modeller
+  llmModels: Üçüncü taraf modeller
   normalTranslator: Normal Çevirmen
   selectServices: Hizmet seçin
   translationProviders: Çeviri Hizmetleri
@@ -1603,7 +1642,7 @@ languageLevels:
   intermediate: Orta
   advanced: İleri
 noAPIKeyConfig:
-  warning: AI modelleri kullanmak istiyorsanız, lütfen önce seçenekler sayfasında API anahtarını ayarlayın
+  warning: Lütfen önce seçenekler sayfasında bu sağlayıcı için API anahtarını ayarlayın
   warningWithLink:
     youMust: Önce
     setTheAPIKey: API anahtarını ayarlamalısınız
@@ -1660,7 +1699,7 @@ hideMenu:
   untilReload: Sayfayı yenileyene kadar
   onSite: $1 sitesinde
   onAllSites: Tüm sitelerde
-  restoreHint: $1 bölümünden yeniden açabilirsiniz.
+  restoreHint: "$1 veya $2 bölümünden yeniden açabilirsiniz."
 action:
   copy: Kopyala
   copied: Kopyalandı
@@ -1790,7 +1829,9 @@ subtitles:
     aiSubscriptionRequired: Yapay zeka altyazıları için Pro veya Ultra aboneliği gerekir
     aiPaymentRequired: Yapay zeka altyazıları oluşturmaya devam etmek için ödeme yönteminizi güncelleyin
     aiVideoTooLong: Bu video yapay zeka altyazıları için çok uzun
-    aiLiveReplayUnsupported: Canlı yayın tekrarları için yapay zeka altyazıları henüz kullanılamıyor
+    aiVideoMismatch: Bu video geldiği gönderiyle eşleşmiyor. Gönderinin sayfasını açıp tekrar deneyin
+    aiLiveReplayUnsupported: Canlı yayınlar ve tekrarları için yapay zeka altyazıları henüz kullanılamıyor
+    aiLiveStreamUnsupported: Yayın canlıyken yapay zeka altyazıları kullanılamıyor. Tekrarı yayınlandığında isteyin
     aiStillProcessing: Yazıya dökme hâlâ sürüyor — birkaç dakika sonra tekrar tıklayın
     aiRequestFailed: Yapay zeka altyazı isteği başarısız oldu, lütfen daha sonra tekrar deneyin
     aiNoResponse: AI hizmeti yanıt vermedi, orijinal metin gösteriliyor

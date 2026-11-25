@@ -16,7 +16,9 @@ import {
   MENU_ID_SELECTION_READ_ALOUD,
   MENU_ID_SELECTION_TRANSLATE,
   MENU_ID_TRANSLATE,
+  PAGE_CONTEXT_MENU_ITEM_FEATURES,
 } from "@/utils/context-menu"
+import { isFeatureOn, isShown } from "@/utils/features"
 import { i18n } from "@/utils/i18n"
 import { createLogger } from "@/utils/logging/logger"
 import { sendMessage } from "@/utils/message"
@@ -100,14 +102,16 @@ async function updateContextMenuItems(config: Config) {
   // Remove all existing menu items first
   await browser.contextMenus.removeAll()
 
-  if (config.contextMenu.enabled) {
-    browser.contextMenus.create({
-      id: MENU_ID_TRANSLATE,
-      title: i18n.t("contextMenu.translate"),
-      contexts: ["page"],
-    })
+  if (isFeatureOn(config, "contextMenu")) {
+    if (isShown(config, PAGE_CONTEXT_MENU_ITEM_FEATURES)) {
+      browser.contextMenus.create({
+        id: MENU_ID_TRANSLATE,
+        title: i18n.t("contextMenu.translate"),
+        contexts: ["page"],
+      })
+    }
 
-    for (const item of getSelectionContextMenuItems(config.selectionToolbar)) {
+    for (const item of getSelectionContextMenuItems(config)) {
       browser.contextMenus.create({ ...item, contexts: ["selection"] })
     }
   }
@@ -126,7 +130,7 @@ async function updateContextMenuItems(config: Config) {
  */
 async function updateTranslateMenuTitle(tabId: number, enabled?: boolean) {
   const config = await ensureInitializedConfig()
-  if (!config?.contextMenu.enabled) {
+  if (!config || !isShown(config, PAGE_CONTEXT_MENU_ITEM_FEATURES)) {
     return
   }
 

@@ -1,8 +1,10 @@
 import type { ComponentProps } from "react"
 import type { FeatureKey } from "@/utils/constants/feature-providers"
+import { useAtomValue } from "jotai"
 import ProviderSelector from "@/components/llm-providers/provider-selector"
 import { Field, FieldGroup, FieldTitle } from "@/components/ui/base-ui/field"
-import { FEATURE_KEYS, getFeatureLabelI18nKey } from "@/utils/constants/feature-providers"
+import { configAtom } from "@/utils/atoms/config"
+import { getFeatureLabelI18nKey, getShownFeatureKeys } from "@/utils/constants/feature-providers"
 import { i18n } from "@/utils/i18n"
 import { cn } from "@/utils/styles/utils"
 import { SetApiKeyWarning } from "./set-api-key-warning"
@@ -89,9 +91,11 @@ export function FeatureProviderSelectorList({
   providerSelectorTriggerSize,
   includeCustomActions = true,
 }: FeatureProviderSelectorListProps) {
+  const config = useAtomValue(configAtom)
+
   return (
     <FieldGroup className={cn("gap-4", className)}>
-      {FEATURE_KEYS.map((featureKey) => (
+      {getShownFeatureKeys(config).map((featureKey) => (
         <FeatureProviderField
           key={featureKey}
           featureKey={featureKey}

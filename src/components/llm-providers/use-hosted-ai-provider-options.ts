@@ -3,7 +3,7 @@ import type { ProviderCapability } from "@/utils/providers/provider-registry"
 import { getHostedAiTierStatus } from "@/utils/hosted-ai/status"
 import {
   getHostedFeatureForCapability,
-  isDurablyUnusableTier,
+  isPlanWalledTier,
 } from "@/utils/providers/provider-availability"
 import { isSystemProviderSelectorItem } from "@/utils/providers/provider-display"
 import { useHostedAiStatus } from "./use-hosted-ai-status"
@@ -26,10 +26,11 @@ export function useHostedAiProviderOptions(
       return provider
     }
 
-    // Gray out only on durable account facts — sign-in and plan — which is what
-    // `isDurablyUnusableTier` reads off `unavailableReason`. Transient service
+    // Gray out only behind a plan the account lacks (`isPlanWalledTier`).
+    // Anything signing in or waiting fixes keeps the option selectable and
+    // surfaces at run time: a guest is asked to log in, and transient service
     // state (exhausted quota, open circuit, a model out of budget, a billing
-    // lookup that threw) keeps the option selectable and surfaces at run time.
+    // lookup that threw) is reported when the feature runs.
     //
     // The previous `!accessAllowed || !hasFunding` test inverted that for the
     // transient half: a billing failure drops the plan's pools just as genuine
@@ -37,7 +38,7 @@ export function useHostedAiProviderOptions(
     const tierStatus = getHostedAiTierStatus(status, feature, provider.tier)
     return {
       ...provider,
-      disabled: isDurablyUnusableTier(tierStatus),
+      disabled: isPlanWalledTier(tierStatus),
       upgradeTo: tierStatus?.upgradeTo ?? undefined,
     }
   })

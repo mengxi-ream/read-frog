@@ -135,6 +135,8 @@ const sideContentSchema = z.object({
 // and writing that over the user's settings.
 const translationHubSchema = z
   .object({
+    // Simple mode's translation hub switch (src/utils/features.ts).
+    enabled: z.boolean().default(true),
     shortcut: shortcutSchema,
     selectedProviderIds: storedProviderIdListSchema.nullable().default(null),
     sourceCode: storedLanguageTagSchema.or(z.literal("auto")).nullable().default(null),
@@ -144,6 +146,7 @@ const translationHubSchema = z
     promptId: z.string().min(1).nullable().default(null),
   })
   .default({
+    enabled: true,
     shortcut: DEFAULT_TRANSLATION_HUB_SHORTCUT_KEY,
     selectedProviderIds: null,
     sourceCode: null,
@@ -160,6 +163,17 @@ const betaExperienceSchema = z.object({
 const contextMenuSchema = z.object({
   enabled: z.boolean(),
 })
+
+// Simple mode's switch for the custom AI actions people trigger: the selection
+// toolbar's action buttons, the context menu's action items and the action
+// shortcuts (src/utils/features.ts). The actions themselves live in
+// `selectionToolbar.customActions`. `.default()` lets pre-v130 config parse in
+// UI contexts that load before the migration.
+const customActionsSchema = z
+  .object({
+    enabled: z.boolean(),
+  })
+  .default({ enabled: true })
 
 // input translation language selector: 'sourceCode', 'targetCode', or fixed language code
 const inputTranslationLangSchema = z.union([
@@ -212,6 +226,7 @@ export const configSchema = z
     sideContent: sideContentSchema,
     betaExperience: betaExperienceSchema,
     contextMenu: contextMenuSchema,
+    customActions: customActionsSchema,
     inputTranslation: inputTranslationSchema,
     videoSubtitles: videoSubtitlesSchema,
     siteControl: siteControlSchema,

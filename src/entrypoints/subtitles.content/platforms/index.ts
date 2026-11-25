@@ -49,6 +49,9 @@ export interface PlatformConfig {
 
   isLiveContent?: () => Promise<boolean>
 
+  /** What a refused live request tells the reader, when it is not "live streams and their replays". */
+  liveContentMessage?: () => string
+
   /**
    * When true, the host player is showing an ad. Overlay captions for the main
    * video should be suppressed until the ad ends.

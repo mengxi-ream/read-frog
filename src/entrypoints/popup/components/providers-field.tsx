@@ -14,10 +14,11 @@ import { Avatar, AvatarGroup, AvatarGroupCount, AvatarImage } from "@/components
 import { Button } from "@/components/ui/base-ui/button"
 import { Drawer, DrawerBody, DrawerContent, DrawerTrigger } from "@/components/ui/base-ui/drawer"
 import { configAtom, configFieldsAtomMap } from "@/utils/atoms/config"
-import { FEATURE_KEYS, FEATURE_PROVIDER_DEFS } from "@/utils/constants/feature-providers"
+import { FEATURE_PROVIDER_DEFS, getShownFeatureKeys } from "@/utils/constants/feature-providers"
 import { getSelectionToolbarActions } from "@/utils/custom-actions"
+import { isFeatureOn } from "@/utils/features"
 import { i18n } from "@/utils/i18n"
-import { isProviderIdDurablyUnusable } from "@/utils/providers/provider-availability"
+import { isProviderIdPlanWalled } from "@/utils/providers/provider-availability"
 import {
   getProviderLogo,
   getProviderName,
@@ -58,11 +59,15 @@ function getSelectedProviderOptions(
     selectedProviders.push({ provider: selectedProvider, capability })
   }
 
-  for (const featureKey of FEATURE_KEYS) {
+  // Same rows as the drawer this summarizes: none for a feature simple mode turned off.
+  for (const featureKey of getShownFeatureKeys(config)) {
     addProvider(featureKey, FEATURE_PROVIDER_DEFS[featureKey].getProviderId(config))
   }
 
-  for (const action of getSelectionToolbarActions(config.selectionToolbar)) {
+  const actions = isFeatureOn(config, "customActions")
+    ? getSelectionToolbarActions(config.selectionToolbar)
+    : []
+  for (const action of actions) {
     if (action.enabled === false) {
       continue
     }
@@ -86,11 +91,11 @@ function ProviderAvatarSummary({ slots }: { slots: SelectedProviderSlot[] }) {
         const providerKeyCount = providerKeyCounts.get(provider.id) ?? 0
         providerKeyCounts.set(provider.id, providerKeyCount + 1)
         // Same treatment and the same predicate as the dropdowns this button
-        // opens: dimmed on durable account facts only, so a row the user could
-        // fix by signing in or upgrading reads differently from one that is
-        // merely out of quota. Otherwise these logos say "five features
-        // configured" to an account that can run none of them.
-        const unusable = isProviderIdDurablyUnusable(provider.id, capability, status)
+        // opens: dimmed only behind a plan the account lacks, so a row the user
+        // has to upgrade for reads differently from one that is merely out of
+        // quota or waiting for a guest to sign in. Otherwise these logos say
+        // "five features configured" to an account that can run none of them.
+        const unusable = isProviderIdPlanWalled(provider.id, capability, status)
         // A Built-in AI model shows its vendor's logo, as in the menus, but
         // without the frog badge: the next avatar would cover it. A model whose
         // vendor is unknown keeps the frog.

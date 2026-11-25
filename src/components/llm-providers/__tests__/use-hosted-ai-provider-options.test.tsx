@@ -131,6 +131,44 @@ describe("useHostedAiProviderOptions", () => {
     expect(getDisabled(result.current)).toEqual([false, true])
   })
 
+  it("lets a guest pick what signing in unlocks, keeping plan-gated tiers grayed", () => {
+    // As the server answers a guest: sign-in on both tiers, and the plan the
+    // tier needs once signed in. The run asks a guest to log in; only a model
+    // that would still need a plan stays locked, as it is for a free account.
+    hostedAiState.value = {
+      isSignedIn: false,
+      isPending: false,
+      isError: false,
+      status: {
+        pools: [customActionDailyCredit()],
+        models: testHostedAiModels(),
+        features: allFeatures({
+          pageTranslation: {
+            normal: tier({
+              accessAllowed: false,
+              available: false,
+              unavailableReason: "authentication_required",
+            }),
+            advance: tier({
+              accessAllowed: false,
+              available: false,
+              unavailableReason: "authentication_required",
+              upgradeTo: "ultra",
+            }),
+          },
+        }),
+      },
+    }
+
+    const { result } = renderHook(() => useHostedAiProviderOptions("pageTranslation", PROVIDERS))
+
+    expect(getDisabled(result.current)).toEqual([false, true])
+    expect(result.current.map((p) => ("upgradeTo" in p ? p.upgradeTo : "absent"))).toEqual([
+      undefined,
+      "ultra",
+    ])
+  })
+
   it("badges each option with the plan the server says this account lacks", () => {
     hostedAiState.value = {
       isSignedIn: true,

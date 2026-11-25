@@ -189,6 +189,114 @@ describe("subtitles translator", () => {
     expect(edited).not.toBe(original)
   })
 
+  /** The error a batch fails with when the background relays `error` for it. */
+  async function failedBatchError(error: unknown): Promise<Error & { cause?: unknown }> {
+    sendMessageMock.mockImplementation(async (type: string) => {
+      if (type === "enqueueSubtitlesTranslateRequest") throw error
+      return undefined
+    })
+    const { translateSubtitles } = await import("../translator")
+    return translateSubtitles([{ text: "hello", start: 0, end: 1_000 }], {
+      videoTitle: "V",
+      subtitlesTextContent: "hello",
+    }).then(
+      () => {
+        throw new Error("the batch did not fail")
+      },
+      (caught: Error) => caught,
+    )
+  }
+
+  /** An API error as the content script gets it: messaging keeps its fields, not its class. */
+  function relayedApiError(statusCode: number, message: string, responseBody?: string) {
+    return Object.assign(new Error(message), { name: "AI_APICallError", statusCode, responseBody })
+  }
+
+  it("names the provider a batch failed with, as the user named it", async () => {
+    const quota = relayedApiError(
+      429,
+      "You exceeded your current quota, please check your plan and billing details.",
+      JSON.stringify({ error: { type: "insufficient_quota", code: "insufficient_quota" } }),
+    )
+
+    const error = await failedBatchError(quota)
+
+    expect(error).toBeInstanceOf(Error)
+    // An empty balance is a 429 too, but keeps the provider's words: no wait refills it.
+    expect(error.message).toBe(
+      "OpenAI: You exceeded your current quota, please check your plan and billing details.",
+    )
+    expect(error.cause).toBe(quota)
+
+    // A message of our own for the error gets the name too.
+    const noResponse = await failedBatchError(new Error("No Response from model"))
+    expect(noResponse.message).toBe("OpenAI: subtitles.errors.aiNoResponse")
+  })
+
+  it.each([
+    [401, "subtitles.errors.aiAuthFailed"],
+    [403, "subtitles.errors.aiAuthFailed"],
+    [429, "subtitles.errors.aiRateLimited"],
+    [500, "subtitles.errors.aiServiceUnavailable"],
+    [502, "subtitles.errors.aiServiceUnavailable"],
+    [503, "subtitles.errors.aiServiceUnavailable"],
+  ])("says what a %i from the provider means, in our words", async (statusCode, key) => {
+    const error = await failedBatchError(
+      relayedApiError(statusCode, "Incorrect API key provided: sk-…. You can find your API key…"),
+    )
+
+    expect(error.message).toBe(`OpenAI: ${key}`)
+  })
+
+  it("keeps the provider's words for a status we have none for", async () => {
+    const error = await failedBatchError(
+      relayedApiError(404, "The model `gpt-9` does not exist or you do not have access to it."),
+    )
+
+    expect(error.message).toBe(
+      "OpenAI: The model `gpt-9` does not exist or you do not have access to it.",
+    )
+  })
+
+  it("finds the status of an error the background wrapped", async () => {
+    const error = await failedBatchError(
+      new Error("Request failed", { cause: relayedApiError(401, "Incorrect API key provided") }),
+    )
+
+    expect(error.message).toBe("OpenAI: subtitles.errors.aiAuthFailed")
+  })
+
+  it("says which lines failed while the rest came back, and still gives them back blank", async () => {
+    const serverError = relayedApiError(503, "Service unavailable")
+    sendMessageMock.mockImplementation(async (type: string, request: { text: string }) => {
+      if (type !== "enqueueSubtitlesTranslateRequest") return undefined
+      if (request.text === "world") throw serverError
+      return `t:${request.text}`
+    })
+    const { translateSubtitles } = await import("../translator")
+    const onLinesFailed = vi.fn<(lines: unknown[], error: Error & { cause?: unknown }) => void>()
+    const fragments = [
+      { text: "hello", start: 0, end: 1_000 },
+      { text: "world", start: 1_000, end: 2_000 },
+    ]
+
+    const translated = await translateSubtitles(
+      fragments,
+      { videoTitle: "V", subtitlesTextContent: "hello world" },
+      undefined,
+      onLinesFailed,
+    )
+
+    // Unchanged for a caller that passes nothing, such as the download: blank.
+    expect(translated.map((fragment) => fragment.translation)).toEqual(["t:hello", ""])
+    expect(onLinesFailed).toHaveBeenCalledOnce()
+    const [lines, error] = onLinesFailed.mock.calls[0]!
+    expect(lines).toEqual([fragments[1]])
+    // The error a batch every line of which failed is thrown with.
+    expect(error.message).toBe("OpenAI: subtitles.errors.aiServiceUnavailable")
+    expect(error.cause).toBe(serverError)
+  })
+
   it("requests subtitle summary through a dedicated background message", async () => {
     sendMessageMock.mockResolvedValue("Generated summary")
 
@@ -403,5 +511,52 @@ describe("subtitles translator", () => {
 
     expect(first).toBe(second)
     expect(first).not.toBe(differentWithinLimit)
+  })
+})
+
+describe("Microsoft stand-ins for subtitles", () => {
+  const aiSubtitles = {
+    ...DEFAULT_CONFIG,
+    videoSubtitles: { ...DEFAULT_CONFIG.videoSubtitles, providerId: "openai-default" },
+  }
+
+  function withMicrosoft(state: "on" | "off" | "deleted") {
+    return {
+      ...aiSubtitles,
+      providersConfig: aiSubtitles.providersConfig
+        .filter((provider) => state !== "deleted" || provider.provider !== "microsoft-translate")
+        .map((provider) =>
+          provider.provider === "microsoft-translate"
+            ? { ...provider, enabled: state === "on" }
+            : provider,
+        ),
+    }
+  }
+
+  it("are on for an AI provider while the config has Microsoft Translator enabled", async () => {
+    const { shouldUseMachinePlaceholder } = await import("../translator")
+
+    expect(shouldUseMachinePlaceholder(withMicrosoft("on"))).toBe(true)
+  })
+
+  it("are off while the config has Microsoft Translator off, or no Microsoft Translator", async () => {
+    const { shouldUseMachinePlaceholder } = await import("../translator")
+
+    expect(shouldUseMachinePlaceholder(withMicrosoft("off"))).toBe(false)
+    expect(shouldUseMachinePlaceholder(withMicrosoft("deleted"))).toBe(false)
+  })
+
+  it("are off for a translation service, which is fast on its own", async () => {
+    const { shouldUseMachinePlaceholder } = await import("../translator")
+
+    expect(
+      shouldUseMachinePlaceholder({
+        ...DEFAULT_CONFIG,
+        videoSubtitles: {
+          ...DEFAULT_CONFIG.videoSubtitles,
+          providerId: "google-translate-default",
+        },
+      }),
+    ).toBe(false)
   })
 })

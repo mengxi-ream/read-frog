@@ -5,6 +5,7 @@ import type { Point } from "@/types/dom"
 import { matchesKeyboardEvent } from "@tanstack/hotkeys"
 import { HOTKEY_EVENT_KEYS, isSingleKeyHotkey } from "@/utils/constants/hotkeys"
 import { SELECTION_SHORTCUT_CLAIMED_EVENT } from "@/utils/constants/selection"
+import { isFeatureOn } from "@/utils/features"
 import { findNearestAncestorBlockNodeAt } from "@/utils/host/dom/find"
 import { isShortcutEmpty, isValidShortcut } from "@/utils/shortcut"
 
@@ -50,7 +51,7 @@ function isDocumentSurfaceTarget(target: EventTarget | null): boolean {
 
 /** The key a single-key hotkey listens for; null while the feature is off or uses another trigger. */
 function getHotkeyEventKey(config: Config | null): string | null {
-  if (!config?.pageTranslation.node.enabled) return null
+  if (!config || !isFeatureOn(config, "pageTranslation.hover")) return null
 
   const { hotkey } = config.pageTranslation.node
   return isSingleKeyHotkey(hotkey) ? HOTKEY_EVENT_KEYS[hotkey] : null
@@ -58,7 +59,7 @@ function getHotkeyEventKey(config: Config | null): string | null {
 
 /** Whether the event presses the recorded combination of the `custom` hotkey. */
 function matchesCustomShortcut(event: KeyboardEvent, config: Config | null): boolean {
-  if (!config?.pageTranslation.node.enabled) return false
+  if (!config || !isFeatureOn(config, "pageTranslation.hover")) return false
 
   const { hotkey, shortcut } = config.pageTranslation.node
   if (hotkey !== "custom" || isShortcutEmpty(shortcut) || !isValidShortcut(shortcut)) return false
@@ -75,8 +76,9 @@ function matchesCustomShortcut(event: KeyboardEvent, config: Config | null): boo
  * is released after being pressed alone. Held past the hold delay, it first
  * rings the block under the pointer and follows the pointer, so the release
  * translates what the ring shows. Another key, a click or a lost focus in
- * between cancels it. The custom combination is kept from the page, as Read
- * Frog's other shortcuts are.
+ * between cancels it. Keys and clicks are heard on the window before the page
+ * gets them, since a page can keep one to itself. The custom combination is
+ * kept from the page, as Read Frog's other shortcuts are.
  */
 export function registerNodeTranslationTriggerListeners({
   getConfig,
@@ -227,7 +229,8 @@ export function registerNodeTranslationTriggerListeners({
   // Whether `config` still has the hotkey that started the press.
   const isActiveHotkey = (config: Config): boolean =>
     activeShortcutCode
-      ? config.pageTranslation.node.enabled && config.pageTranslation.node.hotkey === "custom"
+      ? isFeatureOn(config, "pageTranslation.hover") &&
+        config.pageTranslation.node.hotkey === "custom"
       : getHotkeyEventKey(config) === activeHotkeyEventKey
 
   // Whether letting go of this key ends the press: its own key, or any key of the combination.
@@ -268,6 +271,10 @@ export function registerNodeTranslationTriggerListeners({
     resetHotkeySession()
   }
 
+  // How often a mouse button went down. A press that starts while its config is read
+  // came with a click, as when a tool sends Ctrl+click all at once.
+  let pointerPresses = 0
+
   // Another key or a click made the press part of something else: it translates nothing.
   // A key held before the hotkey does too, until it is released.
   const cancelHotkeySession = () => {
@@ -298,13 +305,22 @@ export function registerNodeTranslationTriggerListeners({
     }, NODE_TRANSLATION_HOLD_TRIGGER_MS)
   }
 
+  // Ctrl+click opens a link and Shift+click extends a selection. A page that cancels
+  // pointerdown gets no mousedown at all, and one can stop mousedown before the document.
+  // A second button pressed while one is held sends mousedown but no pointerdown.
+  const onButtonPress = () => {
+    if (shouldIgnoreEvent()) return
+    pointerPresses++
+    if (isHotkeyPressed) cancelHotkeySession()
+  }
+  window.addEventListener("pointerdown", onButtonPress, { capture: true, signal })
+  window.addEventListener("mousedown", onButtonPress, { capture: true, signal })
+
   document.addEventListener(
     "mousedown",
     (event) => {
       void (async () => {
         if (shouldIgnoreEvent()) return
-        // Ctrl+click opens a link and Shift+click extends a selection.
-        if (isHotkeyPressed) cancelHotkeySession()
         if (event.button !== 0) return
         isPrimaryButtonDown = true
         if (isEditableTarget(event.target)) return
@@ -319,7 +335,7 @@ export function registerNodeTranslationTriggerListeners({
         const config = await getCurrentConfig()
         if (
           !config ||
-          !config.pageTranslation.node.enabled ||
+          !isFeatureOn(config, "pageTranslation.hover") ||
           config.pageTranslation.node.hotkey !== "clickAndHold"
         )
           return
@@ -338,7 +354,7 @@ export function registerNodeTranslationTriggerListeners({
             const currentConfig = await getCurrentConfig()
             if (
               !currentConfig ||
-              !currentConfig.pageTranslation.node.enabled ||
+              !isFeatureOn(currentConfig, "pageTranslation.hover") ||
               currentConfig.pageTranslation.node.hotkey !== "clickAndHold"
             )
               return
@@ -368,7 +384,9 @@ export function registerNodeTranslationTriggerListeners({
     { signal },
   )
 
-  document.addEventListener(
+  // Heard on the window first, so another key counts even when something stops it on
+  // the way, as Read Frog's own select-all does with Ctrl+A.
+  window.addEventListener(
     "keydown",
     (event) => {
       if (shouldIgnoreEvent()) return
@@ -380,12 +398,14 @@ export function registerNodeTranslationTriggerListeners({
       }
 
       const focusLossesAtPress = focusLosses
+      const pointerPressesAtPress = pointerPresses
       void (async () => {
         const config = await getCurrentConfig()
         // The page lost focus while the config was read, as when a tool sends Ctrl+PgDn
         // all at once to switch tabs. The key comes up in the other tab, so a press
         // started now would never end, and its ring would follow the pointer here.
         if (focusLosses !== focusLossesAtPress || document.visibilityState === "hidden") return
+        const clickedMeanwhile = pointerPresses !== pointerPressesAtPress
 
         if (config?.pageTranslation.node.hotkey === "custom") {
           if (!matchesCustomShortcut(event, config)) {
@@ -397,7 +417,7 @@ export function registerNodeTranslationTriggerListeners({
           if (event.repeat || isHotkeyPressed) return
 
           activeShortcutCode = event.code
-          isHotkeySessionPure = true
+          isHotkeySessionPure = !clickedMeanwhile
           startHotkeySession()
           return
         }
@@ -418,10 +438,11 @@ export function registerNodeTranslationTriggerListeners({
         if (isHotkeyPressed) return
 
         activeHotkeyEventKey = hotkeyEventKey
+        if (clickedMeanwhile) isHotkeySessionPure = false
         startHotkeySession()
       })()
     },
-    { signal },
+    { capture: true, signal },
   )
 
   // A selection shortcut took a key this listener never saw: the hotkey's
@@ -445,7 +466,8 @@ export function registerNodeTranslationTriggerListeners({
     { signal },
   )
 
-  document.addEventListener(
+  // Heard where keydown is, so a press the page keeps to itself still ends.
+  window.addEventListener(
     "keyup",
     (event) => {
       void (async () => {
@@ -474,7 +496,7 @@ export function registerNodeTranslationTriggerListeners({
         else translateBlockAt(point, config)
       })()
     },
-    { signal },
+    { capture: true, signal },
   )
 
   return () => {

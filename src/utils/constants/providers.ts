@@ -78,7 +78,7 @@ export const DEFAULT_LLM_PROVIDER_MODELS: LLMProviderModels = {
     customModel: null,
   },
   deepseek: {
-    model: "deepseek-v4-flash",
+    model: "deepseek-flash",
     isCustomModel: false,
     customModel: null,
   },
@@ -178,7 +178,7 @@ export const DEFAULT_LLM_PROVIDER_MODELS: LLMProviderModels = {
     customModel: null,
   },
   moonshotai: {
-    model: "kimi-k2.6",
+    model: "kimi-k3",
     isCustomModel: false,
     customModel: null,
   },

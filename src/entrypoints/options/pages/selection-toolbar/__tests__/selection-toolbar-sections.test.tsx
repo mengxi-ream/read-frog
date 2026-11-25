@@ -1,36 +1,72 @@
 // @vitest-environment jsdom
 
 import type { Config } from "@/types/config/config"
+import type { FeatureId } from "@/utils/features"
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import { MemoryRouter } from "react-router"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import { isFeatureOn, setFeatureOn } from "@/utils/features"
 import { ActionsSection } from "../actions"
 import { AnnotationSection } from "../annotation"
 import { DisplaySection } from "../display"
-import { EnableItem } from "../enable-item"
 
-const { selectionToolbarAtom, setSelectionToolbarMock, testState } = vi.hoisted(() => ({
+const {
+  configAtom,
+  selectionToolbarAtom,
+  writeConfigAtom,
+  setSelectionToolbarMock,
+  writeConfigMock,
+  testState,
+} = vi.hoisted(() => ({
+  configAtom: {},
   selectionToolbarAtom: {},
+  writeConfigAtom: {},
   setSelectionToolbarMock: vi.fn<(value: Partial<Config["selectionToolbar"]>) => Promise<void>>(),
+  writeConfigMock: vi.fn<(patch: Partial<Config>) => Promise<void>>(),
   testState: {
-    selectionToolbar: null as Config["selectionToolbar"] | null,
+    config: null as Config | null,
   },
 }))
 
+function currentConfig() {
+  if (!testState.config) {
+    throw new Error("No config")
+  }
+  return testState.config
+}
+
 vi.mock("jotai", () => ({
   useAtom: (atom: object) => {
-    if (atom !== selectionToolbarAtom || !testState.selectionToolbar) {
+    if (atom !== selectionToolbarAtom) {
       throw new Error("Unexpected atom")
     }
-    return [testState.selectionToolbar, setSelectionToolbarMock]
+    return [currentConfig().selectionToolbar, setSelectionToolbarMock]
+  },
+  useAtomValue: (atom: object) => {
+    if (atom !== configAtom) {
+      throw new Error("Unexpected atom")
+    }
+    return currentConfig()
+  },
+  useSetAtom: (atom: object) => {
+    if (atom !== writeConfigAtom) {
+      throw new Error("Unexpected atom")
+    }
+    return writeConfigMock
   },
 }))
 
 vi.mock("@/utils/atoms/config", () => ({
+  configAtom,
+  writeConfigAtom,
   configFieldsAtomMap: {
     selectionToolbar: selectionToolbarAtom,
   },
+}))
+
+vi.mock("@/hooks/use-feature-on", () => ({
+  useFeatureOn: (id: FeatureId) => isFeatureOn(currentConfig(), id),
 }))
 
 // The note-suggestion provider row pulls in the full provider stack (jotai
@@ -70,49 +106,50 @@ async function pick(trigger: HTMLElement, optionText: string) {
 
 describe("selection toolbar page sections", () => {
   beforeEach(() => {
-    testState.selectionToolbar = structuredClone(DEFAULT_CONFIG.selectionToolbar)
+    testState.config = structuredClone(DEFAULT_CONFIG)
     setSelectionToolbarMock.mockReset()
     setSelectionToolbarMock.mockResolvedValue()
+    writeConfigMock.mockReset()
+    writeConfigMock.mockResolvedValue()
   })
 
-  it("writes the page-wide switch without touching the rest of the config", () => {
-    const selectionToolbar = testState.selectionToolbar!
-
-    render(<EnableItem />)
-    fireEvent.click(screen.getByRole("switch"))
-
-    expect(setSelectionToolbarMock).toHaveBeenCalledWith({
-      ...selectionToolbar,
-      enabled: !selectionToolbar.enabled,
-    })
-  })
-
-  it("switches one built-in action at a time, leaving the other enabled", () => {
-    const selectionToolbar = testState.selectionToolbar!
-
+  it("switches one built-in action at a time, leaving the other on", () => {
     // Its rows link to their keys on the Shortcuts page.
     render(
       <MemoryRouter>
         <ActionsSection />
       </MemoryRouter>,
     )
-    const [translate, speak] = screen.getAllByRole("switch")
+    // Save suggestions sit under translate, between the two.
+    const [translate, noteSuggestion, speak] = screen.getAllByRole("switch")
 
     fireEvent.click(speak!)
 
-    expect(setSelectionToolbarMock).toHaveBeenCalledWith({
-      ...selectionToolbar,
-      features: {
-        ...selectionToolbar.features,
-        speak: { ...selectionToolbar.features.speak, enabled: false },
-      },
-    })
+    expect(writeConfigMock).toHaveBeenCalledExactlyOnceWith(
+      setFeatureOn("selectionToolbar.speak", false),
+    )
     expect(translate).toBeChecked()
+    expect(noteSuggestion).toBeChecked()
+  })
+
+  it("keeps save suggestions' own switch, disabled, while translate is off", () => {
+    const { features } = currentConfig().selectionToolbar
+    features.translate = { ...features.translate, enabled: false }
+
+    render(
+      <MemoryRouter>
+        <ActionsSection />
+      </MemoryRouter>,
+    )
+    const [translate, noteSuggestion, speak] = screen.getAllByRole("switch")
+
+    expect(translate).not.toBeChecked()
+    expect(noteSuggestion).toBeChecked()
+    expect(noteSuggestion).toHaveAttribute("aria-disabled", "true")
+    expect(speak).not.toHaveAttribute("aria-disabled", "true")
   })
 
   it("switches the annotation slot, leaving the toolbar's other settings alone", () => {
-    const selectionToolbar = testState.selectionToolbar!
-
     // Its row links to its key on the Shortcuts page.
     render(
       <MemoryRouter>
@@ -121,9 +158,8 @@ describe("selection toolbar page sections", () => {
     )
     fireEvent.click(screen.getByRole("switch"))
 
-    expect(setSelectionToolbarMock).toHaveBeenCalledWith({
-      ...selectionToolbar,
-      annotation: { ...selectionToolbar.annotation, enabled: false },
+    expect(writeConfigMock).toHaveBeenCalledExactlyOnceWith({
+      selectionToolbar: { annotation: { enabled: false } },
     })
     // The provider row is the translate feature's own setting, shown here too.
     expect(screen.getByText("ProviderSelector")).toBeInTheDocument()
@@ -143,7 +179,7 @@ describe("selection toolbar page sections", () => {
   })
 
   it("adds a disabled site without dropping the rest of the toolbar config", () => {
-    const selectionToolbar = testState.selectionToolbar!
+    const { selectionToolbar } = currentConfig()
 
     render(<DisplaySection />)
 

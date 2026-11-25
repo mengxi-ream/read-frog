@@ -224,9 +224,38 @@ describe("translation queue helpers", () => {
       "getOrGenerateWebPageSummary",
       "cancelPageTranslationRequests",
       "enqueueSubtitlesTranslateRequest",
+      "translateSubtitleWithMachine",
       "getSubtitlesSummary",
     ])
     resolveConfig(DEFAULT_CONFIG)
+  })
+
+  it("machine-translates a subtitle line with Microsoft in one attempt, and caches it", async () => {
+    const { setupSubtitlesTranslationHandlers } = await import("../subtitles-translation")
+    setupSubtitlesTranslationHandlers()
+    const handler = getRegisteredMessageHandler("translateSubtitleWithMachine")
+    const request = (hash: string) =>
+      handler({ data: { text: "hello", langConfig: DEFAULT_CONFIG.language, hash } })
+
+    // A late stand-in is worthless: no retry, and no rate-limit pause holding the next.
+    executeTranslateMock.mockRejectedValueOnce(
+      Object.assign(new Error("Too Many Requests"), { statusCode: 429 }),
+    )
+    await expect(request("machine-failed")).rejects.toThrow("Too Many Requests")
+    expect(executeTranslateMock).toHaveBeenCalledOnce()
+
+    executeTranslateMock.mockResolvedValueOnce("你好")
+    await expect(request("machine-hash")).resolves.toBe("你好")
+    expect(executeTranslateMock).toHaveBeenLastCalledWith(
+      "hello",
+      expect.anything(),
+      expect.objectContaining({ provider: "microsoft-translate" }),
+      expect.any(Function),
+      expect.objectContaining({ signal: expect.any(AbortSignal) }),
+    )
+    expect(translationCachePutMock).toHaveBeenCalledWith(
+      expect.objectContaining({ key: "machine-hash", translation: "你好" }),
+    )
   })
 
   it("reuses the hosted requestId when RequestQueue retries the same model call", async () => {

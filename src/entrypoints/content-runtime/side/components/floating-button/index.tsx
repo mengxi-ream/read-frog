@@ -14,10 +14,12 @@ import { anchoredToastManager } from "@/components/ui/base-ui/toast"
 import { useIsFullscreen } from "@/hooks/use-is-fullscreen"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext } from "@/utils/analytics"
-import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { configAtom, configFieldsAtomMap } from "@/utils/atoms/config"
 import { APP_NAME } from "@/utils/constants/app"
+import { isFeatureOn } from "@/utils/features"
 import { i18n } from "@/utils/i18n"
 import { sendMessage } from "@/utils/message"
+import { buildSimpleModeRowRoute } from "@/utils/navigation"
 import { cn } from "@/utils/styles/utils"
 import { urlMatchesPattern } from "@/utils/url-pattern"
 import {
@@ -35,6 +37,7 @@ const DRAG_START_DISTANCE_PX = 6
 const MIN_FLOATING_CONTAINER_TOP_PX = 30
 const FLOATING_CONTAINER_BOTTOM_CLEARANCE_PX = 200
 const FIREFOX_SIDEBAR_USER_ACTION_TOAST_ID = "firefox-sidebar-user-action"
+const PAGE_TRANSLATION_OFF_TOAST_ID = "page-translation-off"
 
 interface DragPoint {
   x: number
@@ -126,6 +129,7 @@ function getNormalizedFloatingContainerTop(mainButtonTop: number, mainOffsetY: n
 }
 
 export default function FloatingButton() {
+  const config = useAtomValue(configAtom)
   const [floatingButton, setFloatingButton] = useAtom(configFieldsAtomMap.floatingButton)
   const translationState = useAtomValue(enablePageTranslationAtom)
   const [isDraggingButton, setIsDraggingButton] = useAtom(isDraggingButtonAtom)
@@ -185,8 +189,37 @@ export default function FloatingButton() {
     setIsDropdownOpen(false)
   }, [isFullscreen, setIsDraggingButton])
 
+  // A click set to translate the page, while simple mode has page translation off, says so
+  // beside the button and offers the switch, instead of quietly doing something else.
+  const showPageTranslationOffToast = () => {
+    if (!mainButtonRef.current) return
+
+    anchoredToastManager.add({
+      id: PAGE_TRANSLATION_OFF_TOAST_ID,
+      positionerProps: {
+        anchor: mainButtonRef.current,
+        side: floatingButtonSide === "right" ? "left" : "right",
+        sideOffset: 8,
+      },
+      type: "info",
+      title: i18n.t("options.floatingButton.pageTranslationOff"),
+      actionProps: {
+        children: i18n.t("options.shortcuts.turnOn"),
+        onClick: () => {
+          anchoredToastManager.close(PAGE_TRANSLATION_OFF_TOAST_ID)
+          void sendMessage("openOptionsPage", { route: buildSimpleModeRowRoute("pageTranslation") })
+        },
+      },
+    })
+  }
+
   const handleFloatingButtonClick = () => {
     if (floatingButton.clickAction === "translate") {
+      if (!isFeatureOn(config, "pageTranslation")) {
+        showPageTranslationOffToast()
+        return
+      }
+
       const nextEnabled = !translationState.enabled
       void sendMessage("tryToSetEnablePageTranslationOnContentScript", {
         enabled: nextEnabled,
@@ -348,7 +381,7 @@ export default function FloatingButton() {
   if (
     isFullscreen ||
     isHiddenUntilReload ||
-    !floatingButton.enabled ||
+    !isFeatureOn(config, "floatingButton") ||
     floatingButton.disabledFloatingButtonPatterns.some((pattern) =>
       urlMatchesPattern(window.location.href, pattern),
     )
@@ -389,7 +422,8 @@ export default function FloatingButton() {
       style={containerStyle}
       onMouseLeave={handleMouseLeave}
     >
-      {!isDraggingButton && (
+      {/* Translating the page goes with page translation when simple mode turns it off. */}
+      {!isDraggingButton && isFeatureOn(config, "pageTranslation") && (
         <TranslateButton side={floatingButtonSide} expanded={isFloatingButtonExpanded} />
       )}
       <div className="relative">

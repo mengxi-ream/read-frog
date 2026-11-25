@@ -204,9 +204,9 @@ export function getHostedFeatureForRoute(route: HostedAiTextStreamRoute): Hosted
  * serialized ahead of the work it gates.
  *
  * Coalescing and caching solve different halves of that: this collapses callers
- * that overlap, and the background's short-TTL entry collapses the serialized
- * ones that do not (a subtitle run resolves one batch at a time, so it never
- * overlaps itself). Both are needed.
+ * that overlap, such as the batches a subtitle run sends at once at the start or
+ * after a seek, and the background's short-TTL entry collapses the ones that do
+ * not, such as the batches that follow during playback. Both are needed.
  */
 let inflightStatus: Promise<HostedAiStatus | undefined> | null = null
 

@@ -1,61 +1,18 @@
 // @vitest-environment jsdom
 import type { ReactNode } from "react"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { render, waitFor } from "@testing-library/react"
-import * as React from "react"
+import { act, renderHook, waitFor } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
-import BlogNotification from "../blog-notification"
+import { useLatestBlogPost } from "../use-latest-blog-post"
 
 const getBlogLocaleFromUILanguageMock = vi.fn<(...args: any[]) => any>(() => "zh")
 const getLastViewedBlogDateMock = vi.fn<(...args: any[]) => any>()
 const getLatestBlogDateMock = vi.fn<(...args: any[]) => any>()
 const saveLastViewedBlogDateMock = vi.fn<(...args: any[]) => any>()
 
-vi.mock("#imports", () => ({
-  i18n: {
-    t: (key: string) => key,
-  },
-}))
-
 vi.mock("jotai", async (importOriginal) => ({
   ...(await importOriginal<typeof import("jotai")>()),
   useAtomValue: () => "zh-CN",
-}))
-
-vi.mock("@/components/ui/base-ui/button", () => ({
-  Button: ({ children, ...props }: React.ComponentProps<"button">) => (
-    <button type="button" {...props}>
-      {children}
-    </button>
-  ),
-}))
-
-vi.mock("@/components/ui/base-ui/tooltip", async () => {
-  function Tooltip({ children }: { children: ReactNode }) {
-    return <div>{children}</div>
-  }
-
-  function TooltipTrigger({
-    render: renderElement,
-  }: {
-    render?: React.ReactElement<React.ComponentProps<"button">>
-  }) {
-    return renderElement ?? null
-  }
-
-  function TooltipContent({ children }: { children: ReactNode }) {
-    return <div>{children}</div>
-  }
-
-  return {
-    Tooltip,
-    TooltipContent,
-    TooltipTrigger,
-  }
-})
-
-vi.mock("@iconify/react/dist/iconify.js", () => ({
-  Icon: ({ icon }: { icon: string }) => <span data-icon={icon} />,
 }))
 
 vi.mock("@/utils/blog", async () => {
@@ -78,8 +35,8 @@ vi.mock("@/utils/blog", async () => {
   }
 })
 
-function createQueryClient() {
-  return new QueryClient({
+function renderLatestBlogPost() {
+  const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
         gcTime: 0,
@@ -87,28 +44,25 @@ function createQueryClient() {
       },
     },
   })
-}
 
-function renderBlogNotification() {
-  const queryClient = createQueryClient()
-
-  return render(
-    <QueryClientProvider client={queryClient}>
-      <BlogNotification />
-    </QueryClientProvider>,
-  )
+  return renderHook(() => useLatestBlogPost(), {
+    wrapper: ({ children }: { children: ReactNode }) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    ),
+  })
 }
 
 afterEach(() => {
   vi.clearAllMocks()
+  vi.restoreAllMocks()
 })
 
-describe("blogNotification", () => {
+describe("useLatestBlogPost", () => {
   it("requests the latest blog post using the resolved blog locale", async () => {
     getLastViewedBlogDateMock.mockResolvedValue(null)
     getLatestBlogDateMock.mockResolvedValue(null)
 
-    renderBlogNotification()
+    const { result } = renderLatestBlogPost()
 
     await waitFor(() => {
       expect(getBlogLocaleFromUILanguageMock).toHaveBeenCalledWith("zh-CN")
@@ -118,5 +72,28 @@ describe("blogNotification", () => {
         expect.stringMatching(/^\d+\.\d+\.\d+$/),
       )
     })
+    expect(result.current.hasNewPost).toBe(false)
+  })
+
+  it("reports a post the user has not opened, and marks it read when opened", async () => {
+    const date = new Date("2026-11-20T00:00:00Z")
+    getLastViewedBlogDateMock.mockResolvedValue(new Date("2026-11-01T00:00:00Z"))
+    getLatestBlogDateMock.mockResolvedValue({ date, url: "/blog/simple-mode" })
+    saveLastViewedBlogDateMock.mockResolvedValue(undefined)
+    const openSpy = vi.spyOn(window, "open").mockReturnValue(null)
+
+    const { result } = renderLatestBlogPost()
+    await waitFor(() => expect(result.current.hasNewPost).toBe(true))
+
+    getLastViewedBlogDateMock.mockResolvedValue(date)
+    await act(() => result.current.open())
+
+    expect(saveLastViewedBlogDateMock).toHaveBeenCalledWith(date)
+    expect(openSpy).toHaveBeenCalledWith(
+      "https://www.readfrog.app/blog/simple-mode",
+      "_blank",
+      "noopener,noreferrer",
+    )
+    await waitFor(() => expect(result.current.hasNewPost).toBe(false))
   })
 })

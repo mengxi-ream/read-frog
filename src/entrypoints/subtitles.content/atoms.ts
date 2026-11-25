@@ -141,6 +141,8 @@ export const subtitlesShowContentAtom = atom((get): boolean => {
 
   if (!isVisible) return false
 
+  // An error shows alone: with lines still playing under it, stopped translation
+  // would read as still going.
   if (stateData?.state === "error") return false
 
   return hasRenderableSubtitleByMode(subtitle, style.displayMode)

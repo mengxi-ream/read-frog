@@ -51,12 +51,10 @@ popup:
         action: Click to switch to bilingual
   hub:
     tooltip: Translate text with multiple models simultaneously
-  discord:
-    tooltip: Join Discord to connect with developers and get early access to new features
   blog:
     notification: What's new in Read Frog
   aiSmartContext: AI Smart Context
-  aiSmartContextDescription: Uses webpage context to improve translation quality. Requires LLM translation provider.
+  aiSmartContextDescription: Uses webpage context to improve translation quality. Requires an LLM provider.
   storeReview:
     title: Enjoying Read Frog?
     description: A quick store review helps other readers find it.
@@ -152,13 +150,24 @@ options:
       title: WeChat group
       description: Scan the QR code to join the WeChat discussion group
       qrCodeAlt: WeChat QR code
+  usage:
+    title: Usage
+    pageDescription: Your plan and how much AI quota you have left.
+    notSignedIn: Not signed in
+    guest: Guest
+    manageSubscription: Manage subscription
+    logInToView: Log in to view
+    footer:
+      logIn: Log in to get free AI quota every week
+      upgrade: Upgrade to Pro to unlock AI subtitles and more Built-in AI quota
+      upgradeAction: Upgrade
   apiProviders:
     title: API Providers
-    pageDescription: Connect the AI services Read Frog calls, then choose which one runs each feature.
-    description: Add the providers Read Frog can call. Over 20 are built in, with custom support for Chat Completions-compatible and Open Responses APIs.
+    pageDescription: Use Read Frog's built-in models or connect third-party AI services, then choose which one runs each feature.
+    description: Use Read Frog's built-in models or add third-party providers. Over 20 providers are preconfigured, plus custom Chat Completions-compatible and Open Responses APIs.
     configTitle: Provider config
     addProvider: Add provider
-    builtInProvider: Built-in provider
+    builtInProvider: Built-in models
     thirdPartyProviders: Third-party providers
     builtInModel:
       reasoningDescription: "How much $1 thinks before it answers. Higher levels handle hard text better, but answer more slowly and use more of your quota."
@@ -207,8 +216,8 @@ options:
       title: Add new provider
       groups:
         builtInProviders:
-          title: Built-in LLM providers
-          description: Built-in large language model providers, no need to fill in most configurations like Base URL
+          title: Preset LLM providers
+          description: Preconfigured large language model providers — no need to fill in most settings like Base URL
         compatibleProviders:
           title: Compatible API providers
           description: Use Custom Chat Complete for Chat Completions-compatible APIs, or Custom Responses for Open Responses APIs.
@@ -277,15 +286,13 @@ options:
       invalidJson: Invalid JSON format
     providers:
       name:
-        builtInAi: Built-in AI
-        builtInAiAdvance: Advanced Built-in AI
         customChatComplete: Custom Chat Complete
         customResponses: Custom Responses
       attribution:
-        builtInAi: Read Frog's hosted standard model. Pro and Ultra members can use it on every feature, on a weekly quota; on the free plan it runs Custom AI Actions only.
-        builtInAiAdvance: Read Frog's hosted advanced model, exclusive to Ultra members. Runs page translation, Custom AI Actions, and every other Built-in AI feature on a shared weekly quota. Uses up the quota faster than the standard model.
+        builtInAi: Read Frog's hosted standard model. Free to use once you log in, on a weekly quota.
+        builtInAiAdvance: Read Frog's hosted advanced model, exclusive to Ultra members. Uses quota faster than standard models.
       description:
-        openai: Provides models like GPT-4o
+        openai: OpenAI's official API for GPT models
         azure: Azure-hosted OpenAI models through your deployments
         deepseek: Recommend to use in China
         openrouter: Unified interface for multiple LLM providers with pay-per-use pricing
@@ -597,9 +604,7 @@ options:
     pageDescription: Translate what you type in input boxes before you send it.
     trigger:
       title: Trigger
-      enable:
-        title: Enable
-        description: Press the space bar three times quickly in any input box to translate what you typed there.
+      description: Press the space bar three times quickly in any input box to translate what you typed there.
       threshold:
         title: Trigger threshold
         description: How long the presses may be apart, in milliseconds. Raise it if the trigger keeps missing, lower it if it fires while you are still typing.
@@ -618,9 +623,6 @@ options:
     title: Floating Button
     pageDescription: Set which side the floating button sits on, what a click does, and where it stays hidden.
     demoImageAlt: Floating button demo
-    enable:
-      title: Enable floating button
-      description: Display the floating button on web pages for quick access to Read Frog features
     display:
       title: Display
       side:
@@ -640,6 +642,7 @@ options:
       translate: Toggle page translation
     closeMenu:
       title: Hide floating button
+    pageTranslationOff: "Page Translation is turned off in Simple mode"
     tooltips:
       togglePageTranslation: Toggle page translation
       floatingButtonOptions: Floating button options
@@ -650,9 +653,6 @@ options:
     title: Selection Toolbar
     pageDescription: Set which actions appear when you select text, and where the toolbar shows up.
     demoImageAlt: Selection toolbar demo
-    enable:
-      title: Enable selection toolbar
-      description: Display the toolbar when selecting text on web pages for quick translation, speech, and AI actions
     annotation:
       title: "Word annotation"
       enable:
@@ -664,13 +664,10 @@ options:
     actions:
       title: Actions
       translate:
-        title: Translate
         description: Show the translate button in the toolbar
       speak:
-        title: Speak
         description: Show the speak button, which reads the selected text aloud
       noteSuggestion:
-        title: Note suggestions
         description: After selection translation with an AI provider, suggest words to save to your Notebase
         action: Action
         actionDescription: The action that produces the suggestion
@@ -1242,8 +1239,8 @@ options:
       pageDescription: Give the words that matter to you a fixed translation, and choose where each list applies.
       untitled: Untitled glossary
       noGlossaries: No glossaries yet.
-      enable:
-        title: Enable
+      appliesTo:
+        title: Applies to
         description: Send matching terms to the LLM so it renders them your way. The glossary travels in the prompt, so it only applies to features running on an LLM provider.
       library:
         title: Your glossaries
@@ -1347,9 +1344,6 @@ options:
     title: Context Menu
     pageDescription: Control the Read Frog entries in the browser's right-click menu.
     demoImageAlt: Context menu demo
-    enable:
-      title: Enable context menu translate
-      description: Add translate options to the browser right-click menu for quick page and selection translation
   translation:
     title: Page Translation
     pageDescription: Control how pages get translated — mode, range, prompts, and request limits.
@@ -1611,8 +1605,6 @@ options:
     aiQuota:
       title: AI subtitles quota
       description: AI speech recognition gets you accurate subtitles for any video
-      launchBonusPromo: Subscribe before $1 for an extra 300 transcription minutes
-      loginRequired: Log in to view your AI subtitles quota
       upgradeRequired: AI subtitles require a Pro or Ultra subscription
       pools:
         subscription: Monthly quota
@@ -1718,6 +1710,53 @@ options:
           confirm: Confirm
           cancel: Cancel
           description: This will delete all cached AI segmentation results. The next time you play a video with AI segmentation enabled, it will re-process the subtitles.
+  simpleMode:
+    title: "Simple mode"
+    pageDescription: "A feature you turn off is as if it weren't installed: it no longer shows on web pages, and its shortcuts do nothing. Its settings are kept, so turning it back on brings everything back as it was."
+    drawerDescription: "Features you turn off disappear everywhere. Their settings are kept"
+    features:
+      customActions:
+        title: "Custom AI Actions"
+        description: "AI actions in the selection toolbar and the context menu, including the built-in Dictionary and Sentence Analysis"
+      pageTranslation:
+        title: "Page Translation"
+        description: "Translate whole web pages"
+        hover:
+          title: "Hover translation"
+          description: "Hover or long-press a paragraph to translate just that one"
+      videoSubtitles:
+        title: "Video Subtitles"
+        description: "Add a translated subtitles button to video players"
+      inputTranslation:
+        title: "Input Translation"
+        description: "Press the space bar three times quickly in any input box to translate what you typed there"
+      floatingButton:
+        title: "Floating Button"
+        description: "Display the floating button on web pages for quick access to Read Frog features"
+      selectionToolbar:
+        title: "Selection Toolbar"
+        description: "Display the toolbar when selecting text on web pages for quick translation, speech, and AI actions"
+        annotation:
+          title: "Word annotation"
+          description: "Underline the selected word or phrase and write its meaning between the lines"
+        translate:
+          title: "Selection translation"
+          description: "Show the translate button in the toolbar"
+          noteSuggestion:
+            title: "Note suggestions"
+            description: "After selection translation with an AI provider, suggest words to save to your Notebase"
+        speak:
+          title: "Speak"
+          description: "Show the speak button, which reads the selected text aloud"
+      contextMenu:
+        title: "Context Menu"
+        description: "Read Frog's items in the browser's right-click menu"
+      translationHub:
+        title: "Translation Hub"
+        description: "Translate text with multiple models simultaneously"
+      glossary:
+        title: "Glossary"
+        description: "Translate the words you care about the way you decided"
   whatsNew:
     title: What's New
     postType:
@@ -1736,7 +1775,7 @@ translateService:
   title: Translation Service
   description: For translate the webpage only
   builtInModels: Built-in Models
-  llmModels: LLM Models
+  llmModels: Third-party Models
   normalTranslator: Normal Translators
   selectServices: Select services
   translationProviders: Translation Providers
@@ -1750,7 +1789,7 @@ languageLevels:
   intermediate: Intermediate
   advanced: Advanced
 noAPIKeyConfig:
-  warning: If you want to use AI models, please set API key on the options page first
+  warning: Please set an API key for this provider on the options page first
   warningWithLink:
     youMust: You must
     setTheAPIKey: set the API key
@@ -1807,7 +1846,7 @@ hideMenu:
   untilReload: Until I reload this page
   onSite: On $1
   onAllSites: On all sites
-  restoreHint: Turn it back on in $1.
+  restoreHint: "Turn it back on in $1 or $2."
 action:
   copy: Copy
   copied: Copied
@@ -1937,7 +1976,9 @@ subtitles:
     aiSubscriptionRequired: AI subtitles require a Pro or Ultra subscription
     aiPaymentRequired: Update your payment method to keep generating AI subtitles
     aiVideoTooLong: This video is too long for AI subtitles
-    aiLiveReplayUnsupported: AI subtitles aren't available for live stream replays yet
+    aiVideoMismatch: This video doesn't match the post it came from. Open the post's own page and try again
+    aiLiveReplayUnsupported: AI subtitles aren't available for live streams or their replays yet
+    aiLiveStreamUnsupported: AI subtitles aren't available while a stream is live. Request them once its replay is up
     aiStillProcessing: Transcription is still running — click again in a few minutes to pick it up
     aiRequestFailed: AI subtitle request failed, please try again later
     aiNoResponse: AI service did not respond, using original text

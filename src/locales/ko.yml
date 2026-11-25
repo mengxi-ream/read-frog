@@ -51,12 +51,10 @@ popup:
         action: 클릭하여 이중 언어로 전환
   hub:
     tooltip: 여러 번역 모델로 동시에 텍스트 번역
-  discord:
-    tooltip: Discord에 참여하여 개발자와 소통하고 새 기능을 먼저 체험하세요
   blog:
     notification: Read Frog의 새로운 소식
   aiSmartContext: AI 스마트 컨텍스트
-  aiSmartContextDescription: 웹페이지 컨텍스트를 사용하여 번역 품질을 향상시킵니다. LLM 번역 제공자가 필요합니다.
+  aiSmartContextDescription: 웹페이지 컨텍스트를 사용하여 번역 품질을 향상시킵니다. LLM 제공업체가 필요합니다.
   storeReview:
     title: Read Frog 잘 쓰고 계신가요?
     description: 스토어에 리뷰를 남기면 더 많은 사람이 찾을 수 있어요.
@@ -152,13 +150,24 @@ options:
       title: WeChat 그룹
       description: QR 코드를 스캔해 WeChat 토론 그룹에 참여하세요
       qrCodeAlt: WeChat QR 코드
+  usage:
+    title: 사용량
+    pageDescription: 내 플랜과 남은 AI 할당량을 확인하세요.
+    notSignedIn: 로그인하지 않음
+    guest: 게스트
+    manageSubscription: 구독 관리
+    logInToView: 로그인 후 확인할 수 있습니다
+    footer:
+      logIn: 로그인하면 매주 무료 AI 할당량을 드려요
+      upgrade: Pro로 업그레이드하고 AI 자막과 더 많은 내장 AI 할당량을 받으세요
+      upgradeAction: 업그레이드
   apiProviders:
     title: API 제공업체
-    pageDescription: Read Frog가 호출하는 AI 서비스를 연결하고, 각 기능에 사용할 서비스를 선택하세요.
-    description: Read Frog가 호출할 수 있는 제공업체를 추가합니다. 20개 이상이 내장되어 있으며, Chat Completions 호환 API와 Open Responses API를 사용자 정의로 추가할 수 있습니다.
+    pageDescription: Read Frog의 내장 모델을 사용하거나 타사 AI 서비스를 연결하고, 각 기능에 사용할 항목을 선택하세요.
+    description: Read Frog의 내장 모델을 사용하거나 타사 제공업체를 추가합니다. 20개 이상의 제공업체가 사전 설정되어 있으며, Chat Completions 호환 API와 Open Responses API도 사용자 정의로 추가할 수 있습니다.
     configTitle: 제공업체 구성
     addProvider: 제공업체 추가
-    builtInProvider: 내장 제공업체
+    builtInProvider: 내장 모델
     thirdPartyProviders: 타사 제공업체
     builtInModel:
       reasoningDescription: "$1 모델이 답하기 전에 얼마나 생각할지 정합니다. 수준이 높을수록 어려운 텍스트를 더 잘 다루지만, 응답이 느려지고 할당량을 더 많이 사용합니다."
@@ -207,8 +216,8 @@ options:
       title: 새 제공업체 추가
       groups:
         builtInProviders:
-          title: 내장 LLM 제공업체
-          description: 내장된 대규모 언어 모델 제공업체, Base URL과 같은 대부분의 설정이 필요 없음
+          title: 사전 설정 LLM 제공업체
+          description: 미리 설정된 대규모 언어 모델 제공업체로, Base URL 같은 대부분의 설정을 입력할 필요가 없습니다
         compatibleProviders:
           title: 호환 API 제공업체
           description: Chat Completions 호환 API에는 사용자 정의 Chat Complete를, Open Responses API에는 사용자 정의 Responses를 사용합니다.
@@ -276,15 +285,13 @@ options:
       invalidJson: 잘못된 JSON 형식
     providers:
       name:
-        builtInAi: 내장 AI
-        builtInAiAdvance: 고급 내장 AI
         customChatComplete: 사용자 정의 Chat Complete
         customResponses: 사용자 정의 Responses
       attribution:
-        builtInAi: Read Frog가 호스팅하는 일반 모델입니다. Pro 및 Ultra 사용자는 주간 할당량 안에서 모든 기능에 사용할 수 있으며, 무료 플랜에서는 사용자 지정 AI 작업에서만 사용할 수 있습니다.
-        builtInAiAdvance: Read Frog가 호스팅하는 고급 모델로, Ultra 멤버 전용입니다. 페이지 번역, 사용자 지정 AI 작업 등 모든 내장 AI 기능에서 사용할 수 있으며 주간 할당량을 공유합니다. 표준 모델보다 할당량이 더 빨리 소모됩니다.
+        builtInAi: Read Frog가 호스팅하는 표준 모델입니다. 로그인하면 주간 할당량 안에서 무료로 사용할 수 있습니다.
+        builtInAiAdvance: Read Frog가 호스팅하는 고급 모델로, Ultra 멤버 전용입니다. 표준 모델보다 할당량이 더 빨리 소모됩니다.
       description:
-        openai: GPT-4o 같은 모델을 제공합니다
+        openai: GPT 모델을 제공하는 OpenAI 공식 API
         azure: Azure 배포를 통해 OpenAI 모델 사용
         deepseek: 중국에서 사용을 권장합니다
         openrouter: 여러 LLM 제공업체를 위한 통합 인터페이스, 사용량 기반 과금
@@ -596,9 +603,7 @@ options:
     pageDescription: 입력창에 쓴 내용을 보내기 전에 번역합니다.
     trigger:
       title: 트리거
-      enable:
-        title: 활성화
-        description: 입력 필드에서 스페이스바를 빠르게 3번 누르면 입력한 내용을 번역합니다.
+      description: 입력 필드에서 스페이스바를 빠르게 3번 누르면 입력한 내용을 번역합니다.
       threshold:
         title: 트리거 임계값
         description: 연속된 누름 사이에 허용되는 간격(밀리초)입니다. 잘 실행되지 않으면 늘리고, 입력하는 중에 실행되면 줄이세요.
@@ -617,9 +622,6 @@ options:
     title: 플로팅 버튼
     pageDescription: 플로팅 버튼이 놓일 위치와 클릭 동작, 숨길 사이트를 설정하세요.
     demoImageAlt: 플로팅 버튼 데모
-    enable:
-      title: 플로팅 버튼 활성화
-      description: 웹 페이지에 플로팅 버튼을 표시하여 Read Frog 기능에 빠르게 액세스
     display:
       title: 표시
       side:
@@ -639,6 +641,7 @@ options:
       translate: 페이지 번역 전환
     closeMenu:
       title: 플로팅 버튼 숨기기
+    pageTranslationOff: "페이지 번역이 심플 모드에서 꺼져 있습니다"
     tooltips:
       togglePageTranslation: 페이지 번역 전환
       floatingButtonOptions: 플로팅 버튼 옵션
@@ -649,9 +652,6 @@ options:
     title: 선택 툴바
     pageDescription: 텍스트를 선택했을 때 나타날 동작과 도구 모음을 표시할 사이트를 설정하세요.
     demoImageAlt: 선택 툴바 데모
-    enable:
-      title: 선택 툴바 활성화
-      description: 웹 페이지에서 텍스트를 선택할 때 도구 모음을 표시하여 빠르게 번역, 읽기, AI 액션을 사용할 수 있습니다
     annotation:
       title: "단어 주석"
       enable:
@@ -663,13 +663,10 @@ options:
     actions:
       title: 작업
       translate:
-        title: 번역
         description: 툴바에 번역 버튼을 표시합니다
       speak:
-        title: 읽기
         description: 선택한 텍스트를 읽어 주는 읽기 버튼을 툴바에 표시합니다
       noteSuggestion:
-        title: 노트 제안
         description: AI 제공자로 선택 번역 후 Notebase에 저장할 단어를 추천합니다
         action: 작업
         actionDescription: 저장 제안을 만드는 작업
@@ -1095,8 +1092,8 @@ options:
       pageDescription: 중요한 단어에 고정된 번역을 지정하고, 각 목록이 적용될 곳을 선택하세요.
       untitled: 제목 없는 용어집
       noGlossaries: 아직 용어집이 없습니다.
-      enable:
-        title: 사용
+      appliesTo:
+        title: 적용 범위
         description: 일치하는 용어를 LLM에 함께 전달해 원하는 표현으로 번역하게 합니다. 용어집은 프롬프트에 담겨 전달되므로, LLM 제공업체로 실행되는 기능에만 적용됩니다.
       library:
         title: 내 용어집
@@ -1200,9 +1197,6 @@ options:
     title: 컨텍스트 메뉴
     pageDescription: 브라우저 우클릭 메뉴에 표시되는 Read Frog 항목을 설정하세요.
     demoImageAlt: 컨텍스트 메뉴 데모
-    enable:
-      title: 우클릭 번역 활성화
-      description: 브라우저 우클릭 메뉴에 번역 옵션을 추가하여 페이지나 선택한 텍스트를 빠르게 번역
   translation:
     title: 페이지 번역
     pageDescription: 페이지 번역 방식을 설정하세요 — 모드, 범위, 프롬프트, 요청 제한.
@@ -1464,8 +1458,6 @@ options:
     aiQuota:
       title: AI 자막 사용량
       description: AI 음성 인식으로 모든 동영상에 정확한 자막을 만들어 줍니다
-      launchBonusPromo: $1 이전에 구독하면 전사 300분을 추가로 드립니다
-      loginRequired: 로그인하여 AI 자막 사용량 확인
       upgradeRequired: AI 자막은 Pro 또는 Ultra 구독이 필요합니다
       pools:
         subscription: 월간 할당량
@@ -1571,6 +1563,53 @@ options:
           confirm: 확인
           cancel: 취소
           description: 모든 캐시된 AI 분할 결과가 삭제됩니다. 다음에 AI 분할이 활성화된 비디오를 재생하면 자막이 다시 처리됩니다.
+  simpleMode:
+    title: "심플 모드"
+    pageDescription: "끈 기능은 설치하지 않은 것처럼 됩니다. 웹 페이지에 나타나지 않고, 단축키도 반응하지 않습니다. 설정은 그대로 남아 있어 다시 켜면 이전과 똑같이 돌아옵니다."
+    drawerDescription: "끈 기능은 어디에도 나타나지 않습니다. 설정은 유지됩니다"
+    features:
+      customActions:
+        title: "커스텀 AI 액션"
+        description: "선택 툴바와 우클릭 메뉴의 AI 액션. 기본 제공되는 사전과 문장 구조 분석도 포함됩니다"
+      pageTranslation:
+        title: "페이지 번역"
+        description: "웹 페이지 전체를 번역합니다"
+        hover:
+          title: "호버 번역"
+          description: "단락에 마우스를 올리거나 길게 누르면 그 단락만 번역합니다"
+      videoSubtitles:
+        title: "비디오 자막"
+        description: "동영상 플레이어에 번역 자막 버튼을 추가합니다"
+      inputTranslation:
+        title: "입력 번역"
+        description: "입력 필드에서 스페이스바를 빠르게 3번 누르면 입력한 내용을 번역합니다"
+      floatingButton:
+        title: "플로팅 버튼"
+        description: "웹 페이지에 플로팅 버튼을 표시하여 Read Frog 기능에 빠르게 액세스"
+      selectionToolbar:
+        title: "선택 툴바"
+        description: "웹 페이지에서 텍스트를 선택할 때 도구 모음을 표시하여 빠르게 번역, 읽기, AI 액션을 사용할 수 있습니다"
+        annotation:
+          title: "단어 주석"
+          description: "선택한 단어나 구에 밑줄을 긋고 줄 사이에 뜻을 적습니다"
+        translate:
+          title: "선택 영역 번역"
+          description: "툴바에 번역 버튼을 표시합니다"
+          noteSuggestion:
+            title: "노트 제안"
+            description: "AI 제공자로 선택 번역 후 Notebase에 저장할 단어를 추천합니다"
+        speak:
+          title: "읽기"
+          description: "선택한 텍스트를 읽어 주는 읽기 버튼을 툴바에 표시합니다"
+      contextMenu:
+        title: "컨텍스트 메뉴"
+        description: "브라우저 우클릭 메뉴에 표시되는 Read Frog 항목"
+      translationHub:
+        title: "번역 허브"
+        description: "여러 번역 모델로 동시에 텍스트 번역"
+      glossary:
+        title: "용어집"
+        description: "중요한 단어를 정해 둔 번역으로 옮깁니다"
   whatsNew:
     title: 새로운 기능
     postType:
@@ -1588,8 +1627,8 @@ side:
 translateService:
   title: 번역 서비스
   description: 웹페이지 번역 전용
-  builtInModels: Built-in Models
-  llmModels: LLM Models
+  builtInModels: 내장 모델
+  llmModels: 서드파티 모델
   normalTranslator: 일반 번역기
   selectServices: 서비스 선택
   translationProviders: 번역 서비스
@@ -1603,7 +1642,7 @@ languageLevels:
   intermediate: 중급
   advanced: 고급
 noAPIKeyConfig:
-  warning: AI 모델을 사용하려면 먼저 옵션 페이지에서 API 키를 설정해 주세요
+  warning: 먼저 옵션 페이지에서 이 제공업체의 API 키를 설정해 주세요
   warningWithLink:
     youMust: 반드시
     setTheAPIKey: API 키를 설정해야 합니다
@@ -1660,7 +1699,7 @@ hideMenu:
   untilReload: 페이지를 새로고침할 때까지
   onSite: $1에서
   onAllSites: 모든 사이트에서
-  restoreHint: "'$1'에서 다시 켤 수 있습니다."
+  restoreHint: "'$1' 또는 '$2'에서 다시 켤 수 있습니다."
 action:
   copy: 복사
   copied: 복사됨
@@ -1790,7 +1829,9 @@ subtitles:
     aiSubscriptionRequired: AI 자막은 Pro 또는 Ultra 구독이 필요합니다
     aiPaymentRequired: AI 자막을 계속 생성하려면 결제 수단을 업데이트하세요
     aiVideoTooLong: 이 영상은 너무 길어 AI 자막을 만들 수 없습니다
-    aiLiveReplayUnsupported: 라이브 스트리밍 다시보기는 아직 AI 자막을 지원하지 않습니다
+    aiVideoMismatch: 이 영상이 원래 게시물과 일치하지 않습니다. 게시물 페이지를 열고 다시 시도하세요
+    aiLiveReplayUnsupported: 라이브 스트리밍과 다시보기는 아직 AI 자막을 지원하지 않습니다
+    aiLiveStreamUnsupported: 진행 중인 라이브 스트리밍은 아직 AI 자막을 지원하지 않습니다. 다시보기가 올라온 뒤 요청하세요
     aiStillProcessing: 아직 전사가 진행 중입니다. 몇 분 후 다시 클릭해 주세요
     aiRequestFailed: AI 자막 요청에 실패했습니다. 잠시 후 다시 시도해 주세요
     aiNoResponse: AI 서비스가 응답하지 않았습니다. 원문을 표시합니다

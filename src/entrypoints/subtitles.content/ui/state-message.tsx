@@ -31,8 +31,10 @@ export function StateMessage({ state, message }: StateMessageProps) {
   if (!text) return null
 
   return (
+    // One line that ends at the player's right edge, as far from it as from the left: a
+    // provider's error can be longer than the player is wide. The whole text is the tooltip.
     <div
-      className={`${STATE_MESSAGE_CLASS} pointer-events-auto absolute bottom-18 left-4`}
+      className={`${STATE_MESSAGE_CLASS} pointer-events-auto absolute bottom-18 left-4 max-w-[calc(100%-2rem)]`}
       style={{
         fontFamily:
           'Roboto, "Arial Unicode Ms", Arial, Helvetica, Verdana, "PT Sans Caption", sans-serif',
@@ -41,10 +43,11 @@ export function StateMessage({ state, message }: StateMessageProps) {
       <div
         className="flex items-center justify-center rounded-md bg-black/50 px-3 py-2 text-base leading-tight font-medium whitespace-nowrap shadow-[0_4px_16px_rgba(0,0,0,0.35)] backdrop-blur-sm"
         style={{ color }}
+        title={text}
       >
         {/* AI subtitles can take minutes; a static label reads as stuck. The box is
             always dark over the video, so the sweep brightens toward white. */}
-        <span className={state === "loading" ? "shimmer shimmer-color-white" : undefined}>
+        <span className={state === "loading" ? "shimmer truncate shimmer-color-white" : "truncate"}>
           {text}
         </span>
       </div>

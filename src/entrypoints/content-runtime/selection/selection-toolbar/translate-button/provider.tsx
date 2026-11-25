@@ -30,6 +30,7 @@ import { ReviewDueTab } from "@/components/ui/selection-popover/review-due-tab"
 import { SelectionToolbarErrorAlert } from "@/components/ui/selection-popover/selection-toolbar-error-alert"
 import { SelectionToolbarFooterContent } from "@/components/ui/selection-popover/selection-toolbar-footer-content"
 import { SelectionToolbarTitleContent } from "@/components/ui/selection-popover/selection-toolbar-title-content"
+import { useFeatureOn } from "@/hooks/use-feature-on"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
@@ -125,6 +126,7 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
   const noteSuggestionProvider = useAtomValue(noteSuggestionProviderAtom)
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
   const selectionToolbar = useAtomValue(configFieldsAtomMap.selectionToolbar)
+  const translateOn = useFeatureOn("selectionToolbar.translate")
   const setIsSelectionToolbarOpen = useSetAtom(isSelectionToolbarOpenAtom)
   const setConfig = useSetAtom(writeConfigAtom)
   const abortControllerRef = useRef<AbortController | null>(null)
@@ -537,14 +539,11 @@ export function SelectionTranslationProvider({ children }: { children: ReactNode
     [openSelectionTranslationRequest, resolveContextMenuRequest],
   )
 
-  // Turned off, the button and its key go together, as Speak's and the actions' do. Hiding the
-  // whole toolbar does not stop the key.
+  // Turned off, the button and its key go together, as Speak's and the actions' do, also with
+  // the whole toolbar switched off. Hidden from its × menu until the page reloads or on one
+  // site, the toolbar only stops showing, and the key stays.
   useSelectionShortcuts(
-    {
-      translate: selectionToolbar.features.translate.enabled
-        ? selectionToolbar.features.translate.shortcut
-        : undefined,
-    },
+    { translate: translateOn ? selectionToolbar.features.translate.shortcut : undefined },
     (_, session) => {
       const request = resolveShortcutRequest(session)
       if (!request) {

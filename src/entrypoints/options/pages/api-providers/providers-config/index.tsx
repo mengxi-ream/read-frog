@@ -45,7 +45,7 @@ import {
   PROVIDER_CONFIG_SECTION_ID,
   shouldHighlightApiKey,
 } from "@/utils/navigation"
-import { isDurablyUnusableTier } from "@/utils/providers/provider-availability"
+import { isPlanWalledTier } from "@/utils/providers/provider-availability"
 import { getBuiltInAiUnavailability } from "@/utils/providers/provider-display"
 import {
   getBuiltInAiProviderName,
@@ -187,7 +187,7 @@ function getAlternativeModelNames(
         model.id !== exceptModelId &&
         model.available &&
         BUILT_IN_HOSTED_FEATURES.some(
-          (feature) => !isDurablyUnusableTier(getHostedAiTierStatus(status, feature, model.tier)),
+          (feature) => !isPlanWalledTier(getHostedAiTierStatus(status, feature, model.tier)),
         ),
     )
     .map((model) => model.name)
@@ -504,15 +504,15 @@ function BuiltInProviderPanel({ providerId }: { providerId: BuiltInAiProviderId 
 
   // Both cards list every hosted-capable feature. Same policy as the provider
   // dropdowns, and now literally the same predicate: the plan badge is the
-  // plan this account lacks (`upgradeTo`); rows lock only on durable
-  // account facts (sign-in, plan), never on transient service state (exhausted
-  // quota, open circuit, unconfigured model) — those surface at run time. Fail
+  // plan this account lacks (`upgradeTo`); rows lock only behind that plan,
+  // never on what signing in or waiting fixes (a guest, exhausted quota, open
+  // circuit, unconfigured model) — those surface at run time. Fail
   // open while status is unknown so one failed fetch never locks the UI.
   const getAssignmentStatus = (feature: HostedAiFeature) => {
     const tierStatus =
       modelTier === undefined ? undefined : getHostedAiTierStatus(status, feature, modelTier)
     return {
-      disabled: isDurablyUnusableTier(tierStatus),
+      disabled: isPlanWalledTier(tierStatus),
       upgradeTo: tierStatus?.upgradeTo ?? undefined,
     }
   }

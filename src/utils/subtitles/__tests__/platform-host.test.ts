@@ -44,6 +44,12 @@ describe("isSubtitlesOffOnHost", () => {
     expect(isSubtitlesOffOnHost({ enabled: true }, "www.youtube.com")).toBe(false)
   })
 
+  it("is off on every host while simple mode has video subtitles switched off", () => {
+    expect(isSubtitlesOffOnHost({ enabled: false, platforms }, "www.youtube.com")).toBe(true)
+    expect(isSubtitlesOffOnHost({ enabled: false, platforms }, "blog.example")).toBe(true)
+    expect(isSubtitlesOffOnHost({ enabled: true, platforms }, "www.youtube.com")).toBe(false)
+  })
+
   it("is never off for a host no platform plays on, or without a config", () => {
     expect(isSubtitlesOffOnHost({ platforms }, "blog.example")).toBe(false)
     expect(isSubtitlesOffOnHost(undefined, "www.netflix.com")).toBe(false)

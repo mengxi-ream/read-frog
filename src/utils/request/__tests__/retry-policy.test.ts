@@ -3,6 +3,8 @@ import {
   attachRequestErrorMeta,
   defaultRequestRetryPolicy,
   getRequestErrorMeta,
+  getRequestErrorMetaChain,
+  isPermanentRequestError,
   isRateLimitRequestError,
   MAX_CONSECUTIVE_RATE_LIMIT_PAUSES,
   MAX_RATE_LIMIT_RETRIES_PER_TASK,
@@ -83,6 +85,100 @@ describe("request retry policy", () => {
       failQueue: true,
     })
     expect(isRateLimitRequestError(error)).toBe(false)
+  })
+
+  describe("OpenAI insufficient_quota", () => {
+    // What the AI SDK's APICallError carries for an empty OpenAI balance.
+    function openAiError(code: string, message: string) {
+      return Object.assign(new Error(message), {
+        statusCode: 429,
+        responseBody: JSON.stringify({ error: { message, type: code, param: null, code } }),
+      })
+    }
+
+    it("drains the queue at once instead of pausing as a rate limit", () => {
+      const error = openAiError("insufficient_quota", "You exceeded your current quota.")
+
+      expect(getRequestErrorMeta(error)).toEqual({ kind: "access-denied", isRetryable: false })
+      expect(isRateLimitRequestError(error)).toBe(false)
+      expect(defaultRequestRetryPolicy.decide(error, retryContext)).toEqual({
+        action: "fail",
+        failQueue: true,
+      })
+    })
+
+    it("stays a denial after the provider call attaches its metadata", () => {
+      const error = openAiError("insufficient_quota", "You exceeded your current quota.")
+      attachRequestErrorMeta(error, getRequestErrorMeta(error))
+
+      expect(defaultRequestRetryPolicy.decide(error, retryContext)).toEqual({
+        action: "fail",
+        failQueue: true,
+      })
+    })
+
+    it("still pauses on an ordinary OpenAI rate limit", () => {
+      const error = openAiError("rate_limit_exceeded", "Rate limit reached for gpt-4o.")
+
+      expect(defaultRequestRetryPolicy.decide(error, retryContext).action).toBe("pause-and-retry")
+    })
+  })
+
+  describe("isPermanentRequestError", () => {
+    /** How the content script sees an error the background relayed: the cause of its own. */
+    function relayed(cause: object) {
+      return new Error("Translation failed", { cause: Object.assign(new Error("x"), cause) })
+    }
+
+    it("finds an error every later request repeats down the cause chain", () => {
+      expect(
+        isPermanentRequestError(
+          relayed({
+            statusCode: 429,
+            responseBody: JSON.stringify({ error: { code: "insufficient_quota" } }),
+          }),
+        ),
+      ).toBe(true)
+      // A hosted denial keeps its kind as a plain field: messaging drops the symbol.
+      expect(isPermanentRequestError(relayed({ kind: "access-denied" }))).toBe(true)
+      // A wrong key, an empty balance, no permission, a wrong model or endpoint.
+      for (const statusCode of [401, 402, 403, 404]) {
+        expect(isPermanentRequestError(relayed({ statusCode }))).toBe(true)
+      }
+    })
+
+    it("leaves out errors a later request may get past", () => {
+      for (const statusCode of [400, 408, 429, 500, 503]) {
+        expect(isPermanentRequestError(relayed({ statusCode }))).toBe(false)
+      }
+      expect(isPermanentRequestError(new Error("timed out"))).toBe(false)
+      expect(isPermanentRequestError("access-denied")).toBe(false)
+    })
+  })
+
+  describe("getRequestErrorMetaChain", () => {
+    it("reads the meta of each error down the cause chain, the error itself first", () => {
+      const error = new Error("Translation failed", {
+        cause: Object.assign(new Error("Unauthorized"), { statusCode: 401 }),
+      })
+
+      expect(getRequestErrorMetaChain(error).map(({ statusCode }) => statusCode)).toEqual([
+        undefined,
+        401,
+      ])
+      expect(getRequestErrorMetaChain("not an error")).toEqual([])
+    })
+
+    it("gives OpenAI's empty balance no status, so nothing reads it as a rate limit", () => {
+      const quota = Object.assign(new Error("You exceeded your current quota"), {
+        statusCode: 429,
+        responseBody: JSON.stringify({ error: { code: "insufficient_quota" } }),
+      })
+
+      expect(getRequestErrorMetaChain(quota)).toEqual([
+        { kind: "access-denied", isRetryable: false },
+      ])
+    })
   })
 
   it("preserves explicit bad-request metadata precedence", () => {

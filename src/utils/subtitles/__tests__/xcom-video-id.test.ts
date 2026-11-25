@@ -17,6 +17,17 @@ describe("getXcomStatusIdFromUrl", () => {
     expect(getXcomStatusIdFromUrl("https://x.com/i/status/1234567890/video/1")).toBe("1234567890")
   })
 
+  it("extracts the status id from any item of the media view, whatever item it names", () => {
+    expect(getXcomStatusIdFromUrl("https://x.com/someone/status/1234567890/video/2")).toBe(
+      "1234567890",
+    )
+    expect(getXcomStatusIdFromUrl("https://x.com/someone/status/1234567890/photo/1")).toBe(
+      "1234567890",
+    )
+    expect(getXcomStatusIdFromUrl("https://x.com/i/status/1234567890/photo/3")).toBe("1234567890")
+    expect(getXcomStatusIdFromUrl("https://x.com/someone/status/1234567890/photo/")).toBeNull()
+  })
+
   it("tolerates a trailing slash and a query string", () => {
     expect(getXcomStatusIdFromUrl("https://x.com/someone/status/1234567890/")).toBe("1234567890")
     expect(getXcomStatusIdFromUrl("https://x.com/someone/status/1234567890?s=20")).toBe(

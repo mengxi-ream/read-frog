@@ -3,7 +3,7 @@ import type { ReactNode } from "react"
 import type { HostedAiStatusResult } from "@/components/llm-providers/use-hosted-ai-status"
 import { render, screen } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { BuiltInAiUsageConfig } from "@/entrypoints/options/pages/api-providers/built-in-ai-usage"
+import { BuiltInAiUsage } from "@/entrypoints/options/pages/usage/built-in-ai-usage"
 import { formatHostedAiResetAtLocal } from "@/utils/hosted-ai/status"
 
 const { hostedAiState } = vi.hoisted(() => {
@@ -31,7 +31,7 @@ vi.mock("@/utils/i18n", () => ({
   },
 }))
 
-describe("BuiltInAiUsageConfig", () => {
+describe("BuiltInAiUsage", () => {
   beforeEach(() => {
     hostedAiState.value = { status: undefined, isSignedIn: true, isPending: true, isError: false }
   })
@@ -55,7 +55,7 @@ describe("BuiltInAiUsageConfig", () => {
       },
     }
 
-    render(<BuiltInAiUsageConfig />)
+    render(<BuiltInAiUsage />)
 
     // The track is the full quota; the indicator holds what is left (100 - 37.6 → 62).
     expect(screen.getByRole("progressbar")).toHaveAttribute("aria-valuenow", "62")
@@ -100,7 +100,7 @@ describe("BuiltInAiUsageConfig", () => {
       },
     }
 
-    render(<BuiltInAiUsageConfig />)
+    render(<BuiltInAiUsage />)
 
     expect(screen.getByRole("progressbar")).toHaveAttribute("aria-valuenow", "0")
     expect(screen.getByText("options.apiProviders.builtInAiUsage.remaining:0")).toBeInTheDocument()
@@ -109,20 +109,21 @@ describe("BuiltInAiUsageConfig", () => {
   it("falls back to the unavailability line when the status request fails", () => {
     hostedAiState.value = { status: undefined, isSignedIn: true, isPending: false, isError: true }
 
-    render(<BuiltInAiUsageConfig />)
+    render(<BuiltInAiUsage />)
 
     expect(screen.getByText("hostedAi.availability.serviceUnavailable")).toBeInTheDocument()
     expect(screen.queryByRole("progressbar")).not.toBeInTheDocument()
   })
 
-  it("shows a skeleton while the status is loading", () => {
-    render(<BuiltInAiUsageConfig />)
+  it("shows the shared pool-row skeleton while the status is loading", () => {
+    render(<BuiltInAiUsage />)
 
-    expect(document.querySelector('[data-slot="skeleton"]')).not.toBeNull()
+    // UsagePoolRowSkeleton: name and amount, bar, meta and date — the same as AI subtitles.
+    expect(document.querySelectorAll('[data-slot="skeleton"]')).toHaveLength(5)
     expect(screen.queryByRole("progressbar")).not.toBeInTheDocument()
   })
 
-  it("renders nothing at all for guests", () => {
+  it("asks guests to log in instead of showing their trial pool", () => {
     hostedAiState.value = {
       isSignedIn: false,
       isPending: false,
@@ -134,9 +135,10 @@ describe("BuiltInAiUsageConfig", () => {
       },
     }
 
-    const { container } = render(<BuiltInAiUsageConfig />)
+    render(<BuiltInAiUsage />)
 
-    expect(container).toBeEmptyDOMElement()
+    expect(screen.getByText("options.usage.logInToView")).toBeInTheDocument()
+    expect(screen.queryByRole("progressbar")).not.toBeInTheDocument()
   })
 
   it("treats an empty pool list like an unavailable status", () => {
@@ -147,7 +149,7 @@ describe("BuiltInAiUsageConfig", () => {
       status: { pools: [], models: [], features: {} as never },
     }
 
-    render(<BuiltInAiUsageConfig />)
+    render(<BuiltInAiUsage />)
 
     expect(screen.getByText("hostedAi.availability.serviceUnavailable")).toBeInTheDocument()
   })
@@ -167,7 +169,7 @@ describe("BuiltInAiUsageConfig", () => {
       },
     }
 
-    render(<BuiltInAiUsageConfig />)
+    render(<BuiltInAiUsage />)
 
     const bars = screen.getAllByRole("progressbar")
     expect(bars).toHaveLength(2)
@@ -194,7 +196,7 @@ describe("BuiltInAiUsageConfig", () => {
       },
     }
 
-    render(<BuiltInAiUsageConfig />)
+    render(<BuiltInAiUsage />)
 
     expect(
       screen.getByText("options.apiProviders.builtInAiUsage.features.pdfTranslation"),
@@ -221,7 +223,7 @@ describe("BuiltInAiUsageConfig", () => {
       },
     }
 
-    render(<BuiltInAiUsageConfig />)
+    render(<BuiltInAiUsage />)
 
     const bars = screen.getAllByRole("progressbar")
     expect(bars).toHaveLength(2)
@@ -258,7 +260,7 @@ describe("BuiltInAiUsageConfig", () => {
       },
     }
 
-    render(<BuiltInAiUsageConfig />)
+    render(<BuiltInAiUsage />)
 
     // A spent one-time pool is still listed until it expires.
     expect(screen.getByRole("progressbar")).toHaveAttribute("aria-valuenow", "0")
@@ -284,7 +286,7 @@ describe("BuiltInAiUsageConfig", () => {
       },
     }
 
-    render(<BuiltInAiUsageConfig />)
+    render(<BuiltInAiUsage />)
 
     expect(screen.getByText("options.apiProviders.builtInAiUsage.oneTime")).toBeInTheDocument()
     expect(screen.queryByText(/builtInAiUsage\.expiresAt/)).not.toBeInTheDocument()

@@ -1,5 +1,39 @@
 # @read-frog/extension
 
+## 1.61.2
+
+### Patch Changes
+
+- [#2561](https://github.com/mengxi-ream/read-frog/pull/2561) [`7f51190`](https://github.com/mengxi-ream/read-frog/commit/7f5119082a54ed199f987fac0d575cc48129557c) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - style(providers): show the colored Claude logo for the Anthropic provider and Claude models
+
+- [#2562](https://github.com/mengxi-ream/read-frog/pull/2562) [`b671615`](https://github.com/mengxi-ream/read-frog/commit/b6716150ad51ab77ffe80aa4a1f8a664bce12a8c) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(context-menu): make the right-click actions on a selection work in the readfrog.app ebook reader
+
+- [#2572](https://github.com/mengxi-ream/read-frog/pull/2572) [`0fe2a30`](https://github.com/mengxi-ream/read-frog/commit/0fe2a3080ddcae9d83dbacdd4f4c917fc4c0235e) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(providers): let guests pick the Built-in AI models signing in unlocks
+  
+  Logged-out users can now choose Built-in AI models in the provider menus, the popup and the options page instead of seeing them grayed out. Only models that need a plan the account would still lack after signing in, such as the Ultra models, stay locked, the same as for a free account. The menus' "LLM Models" group is now called "Third-party Models".
+
+- [#2536](https://github.com/mengxi-ream/read-frog/pull/2536) [`38ed1d0`](https://github.com/mengxi-ream/read-frog/commit/38ed1d0498ab7e0159b6841df51dfe051aa73599) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(subtitles): keep the subtitles a reader picks before an embedded video first plays. With subtitles set to start automatically, the first play of an X or embedded YouTube video replaced AI subtitles asked for beforehand with the video's own captions and turned back on subtitles the reader had switched off
+
+- [#2565](https://github.com/mengxi-ream/read-frog/pull/2565) [`8f83fb6`](https://github.com/mengxi-ream/read-frog/commit/8f83fb6867ae844090b2efe83ab381d27444d8e4) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(providers): add GPT-6.2, Fable 5.2 and Gemini 4 models and drop retired ones
+  
+  Add GPT-6.2 Sol and Astra, Claude Fable 5.2, Gemini 4 Carbon, Hydrogen and Neon, Nova 2 Lite and Fable 5.2 on Bedrock, GLM 5.3 on Mistral, and DeepSeek V4.1 Flash on OpenRouter, DeepInfra, Hugging Face, AtlasCloud and Alibaba, with thinking turned off like V4 Flash. Drop the models OpenAI, Anthropic, Google, Moonshot, Groq, Cerebras and Mistral have shut down, and move providers that used them to the recommended replacement. Moonshot now defaults to Kimi K3, because Kimi K2.6 is closed to new Kimi accounts. DeepSeek now defaults to `deepseek-flash`, which serves V4.1 Flash, and providers on the retired `deepseek-v4-flash` move to it.
+
+- [#2564](https://github.com/mengxi-ream/read-frog/pull/2564) [`c8f922c`](https://github.com/mengxi-ream/read-frog/commit/c8f922c5b26dc6c015f22c19cc7457109ffb1d15) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(selection): keep page content added after Read Frog's UI in Cmd/Ctrl+A on Chrome
+
+- [#2573](https://github.com/mengxi-ream/read-frog/pull/2573) [`b3f0ad0`](https://github.com/mengxi-ream/read-frog/commit/b3f0ad0a0c64ba235b5dac0216ee500314a5864c) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(subtitles): show translations right away at the start of a video and after a seek
+  
+  AI subtitles now send every line of the next 30 seconds at once, instead of one batch at a time. A line about to show before its AI translation arrives gets a Microsoft machine translation in the meantime. A line already on screen keeps that translation until it ends, and the transcript shows the AI translation at once. A batch that fails is now sent again 10 seconds later, or as soon as another batch comes back, instead of leaving its lines untranslated. While the line on screen has failed and no batch has come back since, the error shows in place of the subtitles, and it goes away by itself once a batch comes back. When the error is one every later batch would get too, such as a wrong key (401), an empty balance (402, or an OpenAI account with no balance), no permission (403), a wrong model (404), or Built-in AI refusing, translation stops at the first failure: the machine translations are removed, and the error stays on screen in place of the subtitles until you come back to the tab or change the subtitles provider. A subtitle error from a provider with your own key now starts with that provider's name, such as "OpenAI: You exceeded your current quota…", so it does not read as Read Frog's own. For a wrong key or no permission (401, 403), a rate limit (429) or a server error (500, 502, 503), the error now says so in Read Frog's words, as it was meant to; other errors, and an empty balance, keep the provider's own message. A long error is now cut short at the player's edge, with the whole text on hover. An OpenAI account with no balance is no longer retried as a rate limit for several minutes. Looking up a word in a subtitle now uses only the original line as context.
+
+- [#2575](https://github.com/mengxi-ream/read-frog/pull/2575) [`b5a29b9`](https://github.com/mengxi-ream/read-frog/commit/b5a29b9de19f80904320c8a3d7fb411ff5bfb946) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(i18n): update outdated Built-in AI and provider copy across locales
+  
+  Updates Built-in AI standard and Ultra model descriptions, reserves "Built-in" wording for Read Frog's hosted models instead of preset third-party providers, unifies Built-in model labels across all 10 locales, and updates outdated OpenAI and API key warning copy.
+
+- [#2559](https://github.com/mengxi-ream/read-frog/pull/2559) [`2554145`](https://github.com/mengxi-ream/read-frog/commit/2554145419941c7561f450bca3834818ba6113d2) Thanks [@taiiiyang](https://github.com/taiiiyang)! - feat(subtitles): request AI subtitles on X videos whose player shows no media id, such as uploads with a custom cover and live broadcast replays in a post. The server transcribes the post's only video. A replay's own captions arrive only a few seconds ahead of playback, so it now gets AI subtitles instead of a translation of its first seconds; GIFs and broadcasts still live get none
+
+- [#2539](https://github.com/mengxi-ream/read-frog/pull/2539) [`85008c1`](https://github.com/mengxi-ream/read-frog/commit/85008c1b7e92834878fb963245cdbf61dc037993) Thanks [@taiiiyang](https://github.com/taiiiyang)! - feat(subtitles): request AI subtitles on X (Twitter) videos. A post with several videos transcribes the one being played, live broadcasts are turned away, a transcript of another video shows its own message instead of the wrong subtitles, and moving the pointer over another video while AI subtitles load no longer drops them
+
+- [#2569](https://github.com/mengxi-ream/read-frog/pull/2569) [`a5d61fb`](https://github.com/mengxi-ream/read-frog/commit/a5d61fb69629fb981eba04df1bb6829e7b489ccd) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(subtitles): show the Read Frog subtitles button on videos in X's media view, the full-screen viewer that opens over a post, so their captions can be translated and AI subtitles requested there too
+
 ## 1.61.1
 
 ### Patch Changes
