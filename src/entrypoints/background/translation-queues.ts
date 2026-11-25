@@ -24,7 +24,7 @@ import { getSubtitlesTranslatePrompt } from "@/utils/prompts/subtitles"
 import { getTranslatePrompt } from "@/utils/prompts/translate"
 import { BatchQueue } from "@/utils/request/batch-queue"
 import { CancelledScopeRegistry, isTranslationCancelledError } from "@/utils/request/cancellation"
-import { RequestQueue } from "@/utils/request/request-queue"
+import { RequestQueue, RequestQueueTimeoutError } from "@/utils/request/request-queue"
 import { runStreamTextInBackground } from "./background-stream"
 import { ensureInitializedConfig } from "./config"
 
@@ -124,16 +124,17 @@ async function executeQueuedTranslation<TContext>(
 }
 
 /**
- * Rethrows a queued Built-in AI request's failure tagged with the id its attempts shared.
- * The call tags its own failures; this covers the ones the queue raises itself, such as a
- * timeout, which reach the user just the same. A cancellation is never shown, so stays as
- * it is.
+ * Rethrows a queued Built-in AI request's timeout tagged with the id its attempts shared.
+ * The call tags its own failures; a timeout is the one the queue raises for the request
+ * itself. Nothing else is tagged here: an error the queue fails its whole backlog with is
+ * one object handed to every task, raised by whichever provider's task failed, so it is
+ * not this request's to name.
  */
 function rethrowWithHostedRequestId(hostedRequestId: string | undefined) {
   return (error: unknown): never => {
-    throw hostedRequestId === undefined || isTranslationCancelledError(error)
-      ? error
-      : withBuiltInAiRequestId(error, hostedRequestId)
+    throw hostedRequestId !== undefined && error instanceof RequestQueueTimeoutError
+      ? withBuiltInAiRequestId(error, hostedRequestId)
+      : error
   }
 }
 

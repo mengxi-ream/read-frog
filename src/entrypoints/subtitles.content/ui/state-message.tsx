@@ -55,6 +55,9 @@ export function StateMessage({ state, message, requestId }: StateMessageProps) {
         </span>
         {requestId && (
           <CopyBuiltInAiRequestIdButton
+            // The id changes as playback reaches another failed batch: "Copied" stays with
+            // the one copied.
+            key={requestId}
             requestId={requestId}
             className="-my-1 -mr-1.5 ml-1.5 shrink-0 text-white/70 hover:bg-white/15 hover:text-white dark:hover:bg-white/15"
           />

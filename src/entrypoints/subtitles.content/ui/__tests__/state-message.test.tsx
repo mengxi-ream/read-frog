@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { fireEvent, render, screen } from "@testing-library/react"
+import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { StateMessage } from "../state-message"
 
@@ -36,5 +36,32 @@ describe("StateMessage", () => {
     )
     fireEvent.click(screen.getByRole("button", { name: "hostedAi.requestId.copy" }))
     expect(writeText).toHaveBeenCalledWith(requestId)
+  })
+
+  it("does not say Copied for the next batch's id", async () => {
+    const writeText = vi.fn<(text: string) => Promise<void>>().mockResolvedValue()
+    Object.defineProperty(navigator, "clipboard", { configurable: true, value: { writeText } })
+    const message = "Built-in AI: Internal server error"
+    const { rerender } = render(
+      <StateMessage
+        state="error"
+        message={message}
+        requestId="123e4567-e89b-42d3-a456-426614174000"
+      />,
+    )
+    const button = () => screen.getByRole("button", { name: "hostedAi.requestId.copy" })
+    fireEvent.click(button())
+    await waitFor(() => expect(button()).toHaveAttribute("title", "action.copied"))
+
+    // Playback reaches a cue of another failed batch, with the same message.
+    rerender(
+      <StateMessage
+        state="error"
+        message={message}
+        requestId="0b9a1c52-6f1e-4d1f-9a54-1f7e9c2d3b4a"
+      />,
+    )
+
+    expect(button()).toHaveAttribute("title", "hostedAi.requestId.copy")
   })
 })

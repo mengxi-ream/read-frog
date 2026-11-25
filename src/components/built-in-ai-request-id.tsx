@@ -57,6 +57,7 @@ export function CopyBuiltInAiRequestIdButton({
 /**
  * The id that finds a failed Built-in AI call on the server, for the user to quote in a
  * report: shown whole, so that a screenshot carries it, with a button that copies it.
+ * Spans only, since a toast's description is a paragraph.
  */
 export function BuiltInAiRequestId({
   requestId,
@@ -66,7 +67,7 @@ export function BuiltInAiRequestId({
   className?: string
 }) {
   return (
-    <div
+    <span
       className={cn(
         // Not the surrounding text's break-anywhere: the id moves under the label rather
         // than break, and breaks only where no line is wide enough for it.
@@ -78,9 +79,14 @@ export function BuiltInAiRequestId({
       {/* About 260px at this size, to fit on one line in a toast's 284px. */}
       <span className="flex max-w-full items-center gap-0.5">
         <span className="min-w-0 font-mono text-[11px] break-words select-text">{requestId}</span>
-        <CopyBuiltInAiRequestIdButton requestId={requestId} className="-my-1 -mr-1 shrink-0" />
+        {/* Keyed so that "Copied" never carries over to another id. */}
+        <CopyBuiltInAiRequestIdButton
+          key={requestId}
+          requestId={requestId}
+          className="-my-1 -mr-1 shrink-0"
+        />
       </span>
-    </div>
+    </span>
   )
 }
 

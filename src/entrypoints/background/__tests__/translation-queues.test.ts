@@ -373,6 +373,61 @@ describe("translation queue helpers", () => {
     expect(caught).not.toHaveProperty("builtInAiRequestId")
   }, 10_000)
 
+  it("names no Built-in AI call for another provider's error the queue fails it with", async () => {
+    vi.useFakeTimers()
+    ensureInitializedConfigMock.mockResolvedValue({
+      ...DEFAULT_CONFIG,
+      pageTranslation: {
+        ...DEFAULT_CONFIG.pageTranslation,
+        requestQueueConfig: { rate: 10, capacity: 10, timeoutMs: 20_000 },
+        batchQueueConfig: { maxCharactersPerBatch: 1000, maxItemsPerBatch: 1 },
+      },
+    })
+    // The Built-in AI request is still out when the user's own key is refused, which fails
+    // every queued task with that one error.
+    runStreamTextInBackgroundMock.mockImplementation(() => new Promise(() => {}))
+    const refused = Object.assign(new Error("Invalid API key"), { statusCode: 401 })
+    executeTranslateMock.mockRejectedValue(refused)
+
+    const { setupPageTranslationHandlers } = await import("../page-translation")
+    setupPageTranslationHandlers()
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+    const hosted = handler({
+      data: {
+        text: "hello",
+        langConfig: DEFAULT_CONFIG.language,
+        providerRef: {
+          kind: "system",
+          providerId: "read-frog-ai:gpt-6-luna",
+          model: "gpt-6-luna",
+          modelTier: "normal",
+          modelRevision: "normal-r1",
+          reasoning: null,
+        },
+        scheduleAt: Date.now(),
+        hash: "hosted-drained-hash",
+        hostedFeature: "pageTranslation",
+      },
+    }).catch((error: unknown) => error)
+    await vi.advanceTimersByTimeAsync(250)
+    expect(runStreamTextInBackgroundMock).toHaveBeenCalled()
+    const byok = handler({
+      data: {
+        text: "world",
+        langConfig: DEFAULT_CONFIG.language,
+        providerRef: localProviderRef(llmProvider),
+        scheduleAt: Date.now(),
+        hash: "byok-drain-hash",
+      },
+    }).catch((error: unknown) => error)
+
+    const [hostedError, byokError] = await fastForward(Promise.all([hosted, byok]))
+
+    expect(byokError).toBe(refused)
+    expect(hostedError).toBe(refused)
+    expect(refused).not.toHaveProperty("builtInAiRequestId")
+  }, 10_000)
+
   it("routes hosted tasks through the shared user-configured request queue", async () => {
     ensureInitializedConfigMock.mockResolvedValue({
       ...DEFAULT_CONFIG,
