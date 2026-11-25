@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { act, cleanup, fireEvent, renderHook } from "@testing-library/react"
+import { act, cleanup, fireEvent, render, renderHook, screen } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import {
   closeBuiltInAiPrompt,
@@ -321,6 +321,28 @@ describe("input translation when Built-in AI refuses", () => {
         id: "input-translation-hosted-unavailable",
       }),
     )
+    expect(dialog.current).toBeNull()
+  })
+
+  it("says a Built-in AI call failed, with its request id for a report", async () => {
+    const requestId = "123e4567-e89b-42d3-a456-426614174000"
+    // As the background relays a failed call: tagged with the id it went out with.
+    translate.mockRejectedValue(
+      Object.assign(new Error("Internal server error"), { builtInAiRequestId: requestId }),
+    )
+
+    const dialog = await translateWithSpaces()
+
+    await vi.waitFor(() => expect(toastAddMock).toHaveBeenCalledOnce())
+    const toast = toastAddMock.mock.calls[0]![0]
+    expect(toast).toMatchObject({
+      type: "error",
+      title: "translation.inputTranslationFailed",
+      id: "input-translation-failed",
+    })
+    render(toast.description)
+    expect(screen.getByText("Internal server error")).toBeInTheDocument()
+    expect(screen.getByText(requestId)).toBeInTheDocument()
     expect(dialog.current).toBeNull()
   })
 

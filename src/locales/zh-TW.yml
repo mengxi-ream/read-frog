@@ -1665,6 +1665,7 @@ translation:
   sameLanguage: 來源語言和目標語言必須不同
   autoModeSameLanguage: 偵測到的語言「$1」與目標語言相同
   extensionContextInvalidated: 擴充功能已更新，請重新整理此頁面後再試一次。
+  inputTranslationFailed: "輸入翻譯失敗"
 pageDiagnosis:
   title: "頁面診斷"
   summary: "已翻譯 $1 段，未翻譯 $2 段"
@@ -1860,6 +1861,9 @@ hostedAi:
     serviceUnavailable: 暫時無法使用
     usedPercent: "額度已使用 $1%"
     resetsAt: "$1 重置"
+  requestId:
+    label: "請求 ID："
+    copy: "複製請求 ID"
   errors:
     rateLimited: 請求過於頻繁，請稍後再試
     guestRateLimited: 訪客請求過於頻繁，請稍後再試

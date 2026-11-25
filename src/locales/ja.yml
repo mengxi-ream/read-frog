@@ -1655,6 +1655,7 @@ translation:
   sameLanguage: ソース言語とターゲット言語は異なる必要があります
   autoModeSameLanguage: 検出された言語 '$1' はターゲット言語と同じです
   extensionContextInvalidated: 拡張機能が更新されました。このページを再読み込みしてからもう一度お試しください。
+  inputTranslationFailed: "入力翻訳に失敗しました"
 pageDiagnosis:
   title: "ページ診断"
   summary: "翻訳済み $1 段落、未翻訳 $2 段落"
@@ -1850,6 +1851,9 @@ hostedAi:
     serviceUnavailable: 一時的に利用できません
     usedPercent: "利用枠: $1% 使用済み"
     resetsAt: "$1 にリセット"
+  requestId:
+    label: "リクエスト ID:"
+    copy: "リクエスト ID をコピー"
   errors:
     rateLimited: リクエストが多すぎます。後でもう一度お試しください。
     guestRateLimited: ゲストからのリクエストが多すぎます。後でもう一度お試しください。

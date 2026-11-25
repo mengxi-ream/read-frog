@@ -2,6 +2,7 @@ import type { ErrorAction } from "@/utils/error-action"
 import { StreamPortError } from "@/utils/content-script/port-streaming"
 import { isExtensionContextInvalidatedError } from "@/utils/error/extension-context"
 import { extractAISDKErrorMessage } from "@/utils/error/extract-message"
+import { getBuiltInAiRequestId } from "@/utils/hosted-ai/request-id"
 import { i18n } from "@/utils/i18n"
 import { HostedAiProviderUnavailableError } from "@/utils/providers/provider-ref"
 
@@ -9,6 +10,8 @@ export interface SelectionToolbarInlineError {
   title: string
   description: string
   action?: ErrorAction
+  /** A failed Built-in AI call's id, for the user to quote in a report. */
+  requestId?: string
 }
 
 type SelectionToolbarErrorKind = "translate" | "customAction"
@@ -78,5 +81,6 @@ export function createSelectionToolbarRuntimeError(
       error instanceof StreamPortError || error instanceof HostedAiProviderUnavailableError
         ? error.action
         : undefined,
+    requestId: getBuiltInAiRequestId(error),
   }
 }

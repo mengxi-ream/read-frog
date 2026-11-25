@@ -30,7 +30,11 @@ export function SubtitlesContainer() {
         {isVisible && (
           <>
             <SubtitlesView showContent={showContent} />
-            <StateMessage state={showState} message={stateData?.message} />
+            <StateMessage
+              state={showState}
+              message={stateData?.message}
+              requestId={stateData?.requestId}
+            />
           </>
         )}
       </div>

@@ -4,6 +4,7 @@ import { LANGUAGE_ENGLISH_NAMES } from "@read-frog/definitions"
 import { useMutation } from "@tanstack/react-query"
 import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { useEffect, useEffectEvent, useRef } from "react"
+import { BuiltInAiRequestId } from "@/components/built-in-ai-request-id"
 import { ModelIcon } from "@/components/llm-providers/model-icon"
 import { useBuiltInAiModels } from "@/components/llm-providers/use-built-in-ai-models"
 import ProviderIcon from "@/components/provider-icon"
@@ -25,6 +26,7 @@ import { executeTranslate } from "@/utils/host/translate/execute-translate"
 import { prepareTranslationText } from "@/utils/host/translate/text-preparation"
 import { findHostedAiModel } from "@/utils/hosted-ai/models"
 import { getBuiltInAiRefusalKind } from "@/utils/hosted-ai/refusal"
+import { getBuiltInAiRequestId } from "@/utils/hosted-ai/request-id"
 import { i18n } from "@/utils/i18n"
 import { getTranslatePromptFromConfig } from "@/utils/prompts/translate"
 import { resolveProviderRefForCapability } from "@/utils/providers/provider-registry"
@@ -229,6 +231,7 @@ export function TranslationCard({
 
   const hasContent = mutation.isError || (mutation.data !== undefined && mutation.data !== "")
   const errorAction = mutation.isError ? getTranslationHubErrorAction(mutation.error) : undefined
+  const errorRequestId = mutation.isError ? getBuiltInAiRequestId(mutation.error) : undefined
   const speechAction = isFetching
     ? "speak.fetchingAudio"
     : isPlaying
@@ -368,6 +371,7 @@ export function TranslationCard({
                   ? mutation.error.message
                   : i18n.t("translationHub.translationFailedFallback")}
               </p>
+              {errorRequestId && <BuiltInAiRequestId requestId={errorRequestId} className="mt-1" />}
               {errorAction && (
                 <Button
                   size="sm"

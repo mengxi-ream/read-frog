@@ -1,17 +1,21 @@
 import type { APICallError } from "ai"
 import { IconAlertCircle } from "@tabler/icons-react"
 import { use } from "react"
+import { BuiltInAiRequestId } from "@/components/built-in-ai-request-id"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/base-ui/alert"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/base-ui/hover-card"
 import { isExtensionContextInvalidatedError } from "@/utils/error/extension-context"
+import { getBuiltInAiRequestId } from "@/utils/hosted-ai/request-id"
 import { i18n } from "@/utils/i18n"
 import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-host"
+import { cn } from "@/utils/styles/utils"
 
 export function ErrorButton({ error }: { error: APICallError }) {
   const shadowWrapper = use(ShadowWrapperContext)
   // A stale content script left behind by an extension update has no HTTP
   // exchange to report, so the status-code row would be a fabricated 500.
   const isContextInvalidated = isExtensionContextInvalidatedError(error)
+  const requestId = getBuiltInAiRequestId(error)
 
   return (
     <HoverCard>
@@ -22,7 +26,12 @@ export function ErrorButton({ error }: { error: APICallError }) {
           <IconAlertCircle className="size-4 cursor-pointer text-destructive hover:text-destructive/90" />
         }
       />
-      <HoverCardContent container={shadowWrapper} className="notranslate w-64" render={<Alert />}>
+      <HoverCardContent
+        container={shadowWrapper}
+        // Wide enough for a request id to sit on one line.
+        className={cn("notranslate", requestId ? "w-[21rem]" : "w-64")}
+        render={<Alert />}
+      >
         <IconAlertCircle className="size-4 text-destructive!" />
         <AlertTitle>Translation Error</AlertTitle>
         <AlertDescription className="break-all">
@@ -32,6 +41,7 @@ export function ErrorButton({ error }: { error: APICallError }) {
               ? i18n.t("translation.extensionContextInvalidated")
               : error.message || "Something went wrong"}
           </p>
+          {requestId && <BuiltInAiRequestId requestId={requestId} className="mt-2" />}
         </AlertDescription>
       </HoverCardContent>
     </HoverCard>

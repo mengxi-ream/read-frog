@@ -59,6 +59,13 @@ describe("getBuiltInAiRequestId", () => {
     expect(getBuiltInAiRequestId(new StreamPortError({ message: "boom" }))).toBeUndefined()
   })
 
+  it("reads it off the error a failure was wrapped in, as subtitles word a batch's", () => {
+    const tagged = Object.assign(new Error("Internal server error"), {
+      [BUILT_IN_AI_REQUEST_ID_FIELD]: SENT_ID,
+    })
+    expect(getBuiltInAiRequestId(new Error("Built-in AI: busy", { cause: tagged }))).toBe(SENT_ID)
+  })
+
   it("ignores anything that is not a UUID, and errors no Built-in AI call tagged", () => {
     expect(
       getBuiltInAiRequestId(Object.assign(new Error("x"), { builtInAiRequestId: "<b>hi</b>" })),

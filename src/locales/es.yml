@@ -1660,6 +1660,7 @@ translation:
   sameLanguage: Los idiomas de origen y destino deben ser diferentes
   autoModeSameLanguage: El idioma detectado '$1' es el mismo que el idioma de destino
   extensionContextInvalidated: La extensión se actualizó. Actualiza esta página e inténtalo de nuevo.
+  inputTranslationFailed: "Falló la traducción de entrada"
 pageDiagnosis:
   title: "Diagnóstico de la página"
   summary: "$1 traducidos, $2 sin traducir"
@@ -1855,6 +1856,9 @@ hostedAi:
     serviceUnavailable: No disponible temporalmente
     usedPercent: "Cuota utilizada: $1%"
     resetsAt: "Se restablece a las $1"
+  requestId:
+    label: "ID de solicitud:"
+    copy: "Copiar ID de solicitud"
   errors:
     rateLimited: Demasiadas solicitudes, inténtalo de nuevo más tarde.
     guestRateLimited: Demasiadas solicitudes de invitado. Inténtalo de nuevo más tarde.

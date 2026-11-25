@@ -63,6 +63,21 @@ describe("createSelectionToolbarRuntimeError", () => {
     })
   })
 
+  it("keeps the request id of a Built-in AI call that failed over the port", async () => {
+    const requestId = "123e4567-e89b-42d3-a456-426614174000"
+    connectPortFailingWith({ message: "Internal server error", builtInAiRequestId: requestId })
+
+    const error = await catchRejection(createPortStreamPromise("stream-structured-object", {}))
+
+    expect(createSelectionToolbarRuntimeError("customAction", error).requestId).toBe(requestId)
+  })
+
+  it("has no request id for a failure no Built-in AI call tagged", () => {
+    const providerError = Object.assign(new Error("Rate limited"), { requestId: "req_123" })
+
+    expect(createSelectionToolbarRuntimeError("translate", providerError).requestId).toBeUndefined()
+  })
+
   it("never turns an `action` found on a foreign error into a button", () => {
     const providerError = Object.assign(new Error("Rate limited"), { action: UPGRADE })
 

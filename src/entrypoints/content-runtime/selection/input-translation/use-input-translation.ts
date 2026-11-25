@@ -1,6 +1,7 @@
 import type { LanguageTag } from "@read-frog/definitions"
 import { useAtomValue } from "jotai"
-import { useCallback, useEffect, useRef } from "react"
+import { createElement, useCallback, useEffect, useRef } from "react"
+import { BuiltInAiErrorToastDescription } from "@/components/built-in-ai-request-id"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
@@ -12,6 +13,8 @@ import { promptForBuiltInAiRefusal } from "@/utils/content-runtime/built-in-ai-p
 import { getDeepActiveElement } from "@/utils/dom/active-element"
 import { translateTextForInput } from "@/utils/host/translate/translate-variants"
 import { getBuiltInAiRefusalKind } from "@/utils/hosted-ai/refusal"
+import { getBuiltInAiRequestId } from "@/utils/hosted-ai/request-id"
+import { i18n } from "@/utils/i18n"
 import { createLogger } from "@/utils/logging/logger"
 import { HostedAiProviderUnavailableError } from "@/utils/providers/provider-ref"
 import { resolveProviderRefForCapability } from "@/utils/providers/provider-registry"
@@ -24,6 +27,7 @@ const LAST_CYCLE_SWAPPED_KEY = "read-frog-input-translation-last-cycle-swapped"
 const SPINNER_ID = "read-frog-input-translation-spinner"
 /** Hammering the hotkey must stack one toast, not one per attempt. */
 const HOSTED_UNAVAILABLE_TOAST_ID = "input-translation-hosted-unavailable"
+const FAILED_TOAST_ID = "input-translation-failed"
 
 function getLastCycleSwapped(): boolean {
   try {
@@ -138,7 +142,8 @@ function setTextWithUndo(
  * spinner just appears and disappears and the feature reads as broken. A guest is asked to
  * log in and a spent pool to upgrade, whether the status check refused before the request
  * or the server during it; either can instead switch to machine translation and type the
- * spaces again. Any other hosted denial, and Ultra's spent pool, says so in a toast.
+ * spaces again. Any other hosted denial, and Ultra's spent pool, says so in a toast. So
+ * does a Built-in AI call that failed, with its request id for the user to report it by.
  */
 async function reportInputTranslationFailure(error: unknown): Promise<void> {
   const prompted = await promptForBuiltInAiRefusal(error, {
@@ -149,11 +154,18 @@ async function reportInputTranslationFailure(error: unknown): Promise<void> {
   if (prompted) {
     return
   }
+  const message = error instanceof Error ? error.message : String(error)
   if (error instanceof HostedAiProviderUnavailableError || getBuiltInAiRefusalKind(error)) {
+    toastManager.add({ type: "error", title: message, id: HOSTED_UNAVAILABLE_TOAST_ID })
+    return
+  }
+  const requestId = getBuiltInAiRequestId(error)
+  if (requestId) {
     toastManager.add({
       type: "error",
-      title: error instanceof Error ? error.message : String(error),
-      id: HOSTED_UNAVAILABLE_TOAST_ID,
+      title: i18n.t("translation.inputTranslationFailed"),
+      description: createElement(BuiltInAiErrorToastDescription, { message, requestId }),
+      id: FAILED_TOAST_ID,
     })
   }
 }

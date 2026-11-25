@@ -14,6 +14,7 @@ import {
 } from "@/utils/constants/subtitles"
 import { DEFAULT_BATCH_CONFIG } from "@/utils/constants/translate"
 import { getBuiltInAiRefusalKind } from "@/utils/hosted-ai/refusal"
+import { getBuiltInAiRequestId } from "@/utils/hosted-ai/request-id"
 import { createLogger } from "@/utils/logging/logger"
 import { isPermanentRequestError } from "@/utils/request/retry-policy"
 import { effectiveLookAheadMs } from "@/utils/subtitles/lookahead"
@@ -99,6 +100,7 @@ export class TranslationCoordinator {
   private lastEmittedState: SubtitlesState = "idle"
   /** The error last shown for a failed cue: another cue's error replaces it. */
   private lastEmittedMessage: string | undefined
+  private lastEmittedRequestId: string | undefined
   private videoContext: SubtitlesVideoContext = { videoTitle: "", subtitlesTextContent: "" }
   private listenersAttached = false
   /** Pending while a seek settles: see `handleSeeking`. */
@@ -460,7 +462,12 @@ export class TranslationCoordinator {
     this.onMachineTranslationsDropped?.()
     this.lastEmittedState = "error"
     this.lastEmittedMessage = errorMessage(error)
-    this.onStateChange("error", { message: this.lastEmittedMessage, persistent: true })
+    this.lastEmittedRequestId = getBuiltInAiRequestId(error)
+    this.onStateChange("error", {
+      message: this.lastEmittedMessage,
+      requestId: this.lastEmittedRequestId,
+      persistent: true,
+    })
     if (getBuiltInAiRefusalKind(error)) {
       this.onBuiltInAiRefused?.(error)
     }
@@ -549,10 +556,19 @@ export class TranslationCoordinator {
       cue && !this.isCueResolved(cue.start) ? this.failedCues.get(cue.start) : undefined
     if (failure) {
       const message = errorMessage(failure.error)
-      if (this.lastEmittedState === "error" && this.lastEmittedMessage === message) return
+      // Each batch has an id of its own: the cue on screen shows its batch's.
+      const requestId = getBuiltInAiRequestId(failure.error)
+      if (
+        this.lastEmittedState === "error" &&
+        this.lastEmittedMessage === message &&
+        this.lastEmittedRequestId === requestId
+      ) {
+        return
+      }
       this.lastEmittedState = "error"
       this.lastEmittedMessage = message
-      this.onStateChange("error", { message, persistent: true })
+      this.lastEmittedRequestId = requestId
+      this.onStateChange("error", { message, requestId, persistent: true })
       return
     }
 

@@ -47,9 +47,21 @@ export function resolveBuiltInAiRequestId(
   return readRequestId(sentRequestId)
 }
 
-/** The request id the background tagged a failed Built-in AI call with, if any. */
+/**
+ * The request id the background tagged a failed Built-in AI call with, if any: on the
+ * error, or on the one it wraps, as when subtitles report a batch's failure in their own
+ * words.
+ */
 export function getBuiltInAiRequestId(error: unknown): string | undefined {
-  return isRecord(error) ? readRequestId(error[BUILT_IN_AI_REQUEST_ID_FIELD]) : undefined
+  let current = error
+  for (let depth = 0; depth < MAX_CAUSE_DEPTH && isRecord(current); depth++) {
+    const requestId = readRequestId(current[BUILT_IN_AI_REQUEST_ID_FIELD])
+    if (requestId) {
+      return requestId
+    }
+    current = current.cause
+  }
+  return undefined
 }
 
 /**
@@ -77,7 +89,8 @@ export function withBuiltInAiRequestId(error: unknown, sentRequestId: string | u
     !isRecord(error) ||
     !Object.isExtensible(error) ||
     error.name === "AbortError" ||
-    getBuiltInAiRequestId(error) !== undefined ||
+    // On the error itself: what crosses to the content side is the error, not its causes.
+    readRequestId(error[BUILT_IN_AI_REQUEST_ID_FIELD]) !== undefined ||
     (typeof error.code === "string" && CODES_WITHOUT_REQUEST_ID.has(error.code))
   ) {
     return error

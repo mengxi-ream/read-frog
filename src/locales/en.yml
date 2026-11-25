@@ -1802,6 +1802,7 @@ translation:
   sameLanguage: Source and target languages must be different
   autoModeSameLanguage: Detected language '$1' is the same as target language
   extensionContextInvalidated: The extension was updated. Refresh this page and try again.
+  inputTranslationFailed: "Input translation failed"
 pageDiagnosis:
   title: "Page diagnosis"
   summary: "$1 translated, $2 not translated"
@@ -1997,6 +1998,9 @@ hostedAi:
     serviceUnavailable: Temporarily unavailable
     usedPercent: "Quota used: $1%"
     resetsAt: "Resets at $1"
+  requestId:
+    label: "Request ID:"
+    copy: "Copy request ID"
   errors:
     rateLimited: Too many requests, please try again later.
     guestRateLimited: Too many guest requests. Please try again later.

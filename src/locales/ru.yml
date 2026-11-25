@@ -1655,6 +1655,7 @@ translation:
   sameLanguage: Исходный и целевой языки должны различаться
   autoModeSameLanguage: Обнаруженный язык '$1' совпадает с целевым языком
   extensionContextInvalidated: Расширение обновлено. Обновите эту страницу и повторите попытку.
+  inputTranslationFailed: "Ошибка перевода ввода"
 pageDiagnosis:
   title: "Диагностика страницы"
   summary: "Переведено: $1, не переведено: $2"
@@ -1850,6 +1851,9 @@ hostedAi:
     serviceUnavailable: Временно недоступно
     usedPercent: "Использовано квоты: $1%"
     resetsAt: "Сброс в $1"
+  requestId:
+    label: "ID запроса:"
+    copy: "Копировать ID запроса"
   errors:
     rateLimited: Слишком много запросов, пожалуйста, повторите позже.
     guestRateLimited: Слишком много гостевых запросов. Повторите позже.

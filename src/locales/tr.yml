@@ -1655,6 +1655,7 @@ translation:
   sameLanguage: Kaynak ve hedef diller farklı olmalıdır
   autoModeSameLanguage: Algılanan dil '$1' hedef dille aynı
   extensionContextInvalidated: Uzantı güncellendi. Bu sayfayı yenileyip tekrar deneyin.
+  inputTranslationFailed: "Giriş çevirisi başarısız"
 pageDiagnosis:
   title: "Sayfa tanılaması"
   summary: "$1 çevrildi, $2 çevrilmedi"
@@ -1850,6 +1851,9 @@ hostedAi:
     serviceUnavailable: Geçici olarak kullanılamıyor
     usedPercent: "Kota kullanımı: %$1"
     resetsAt: "$1'de sıfırlanır"
+  requestId:
+    label: "İstek kimliği:"
+    copy: "İstek kimliğini kopyala"
   errors:
     rateLimited: Çok fazla istek, lütfen daha sonra tekrar deneyin.
     guestRateLimited: Çok fazla misafir isteği. Lütfen daha sonra tekrar deneyin.
