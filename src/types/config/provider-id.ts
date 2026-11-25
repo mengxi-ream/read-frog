@@ -9,8 +9,8 @@ import { resolveLegacyProviderId } from "@/utils/constants/provider-ids"
  * the background's v126 → v127 migration runs. UI contexts can load ahead of
  * it, and a config that fails to parse there falls back to DEFAULT_CONFIG,
  * which the next write then saves over the user's settings. Read as the model
- * the migration moves it to, a tier id keeps such a config parseable, as
- * `storedLanguageTagSchema` does for language codes.
+ * the migrations end on for it (v127, then v131), a tier id keeps such a config
+ * parseable, as `storedLanguageTagSchema` does for language codes.
  *
  * The input type stays the schema's own: code writes model ids, and only
  * storage holds a tier id.

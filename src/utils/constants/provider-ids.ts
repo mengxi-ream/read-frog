@@ -19,18 +19,26 @@ export type BuiltInAiProviderId = `${typeof BUILT_IN_AI_PROVIDER_ID_PREFIX}${str
 export const DEFAULT_BUILT_IN_AI_PROVIDER_ID: BuiltInAiProviderId = `${BUILT_IN_AI_PROVIDER_ID_PREFIX}${DEFAULT_BUILT_IN_AI_MODEL_ID}`
 
 /**
- * The model both old Built-in AI tiers ran on before models could be chosen,
- * and so the one the v127 migration moves them to. Fixed, unlike the default
- * model: configs from before that migration are existing users, who keep the
- * model they were on.
+ * The model the migrations leave an existing user on when their config named
+ * the old Built-in AI tiers: v127 moves both tiers to GPT-6 Luna, and v131
+ * moves Luna to Claude Haiku 5.5. Configs that old can still be read in UI
+ * contexts before the migrations run, through the legacy tier ids below and
+ * the pre-v104 `.default()` values in `selection-toolbar.ts`, and must read as
+ * the model the migrations end on, or a write from that context would put the
+ * user back on a model v131 moved them off.
+ *
+ * Fixed rather than derived from the default model: changing the model new
+ * installs start on must move nobody already installed. Moving existing users
+ * takes a migration, and then this follows it.
  */
-export const LEGACY_BUILT_IN_AI_PROVIDER_ID: BuiltInAiProviderId = `${BUILT_IN_AI_PROVIDER_ID_PREFIX}gpt-6-luna`
+export const LEGACY_BUILT_IN_AI_PROVIDER_ID: BuiltInAiProviderId = "read-frog-ai:claude-haiku-5-5"
 
 /**
  * Built-in AI's ids from before each model was a provider of its own, one per
- * tier, and the provider each now reads as: the model the v127 migration moves
- * it to. Configs keep holding them until that migration runs, so the config
- * schema reads them through this (see `storedProviderIdSchema`).
+ * tier, and the provider each now reads as: the model the migrations end on
+ * for it (v127 to GPT-6 Luna, then v131 to Claude Haiku 5.5). Configs keep
+ * holding them until those migrations run, so the config schema reads them
+ * through this (see `storedProviderIdSchema`).
  */
 const LEGACY_BUILT_IN_AI_PROVIDER_IDS: Readonly<Record<string, BuiltInAiProviderId>> = {
   "read-frog-free-ai": LEGACY_BUILT_IN_AI_PROVIDER_ID,

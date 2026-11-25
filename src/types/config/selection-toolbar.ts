@@ -92,8 +92,9 @@ export const selectionToolbarBuiltInActionsSchema = z.object({
   // `.default()` is load-bearing: a config stored before v104 still parses in
   // UI contexts that load ahead of the background migration, instead of
   // falling back to DEFAULT_CONFIG and writing that over the user's settings.
-  // Such a config predates model choice, so it fills in the model the old
-  // tiers ran on, not the one new installs start on.
+  // Such a config predates model choice, so it fills in the model the
+  // migrations move the old tiers to (LEGACY_BUILT_IN_AI_PROVIDER_ID), not the
+  // one new installs start on.
   sentenceAnalysis: selectionToolbarBuiltInActionStateSchema.default(() => ({
     enabled: true,
     providerId: LEGACY_BUILT_IN_AI_PROVIDER_ID,
