@@ -149,7 +149,11 @@ class ChromeOffscreenPlaybackAdapter implements TTSPlaybackAdapter {
       try {
         return await sendMessage("ttsOffscreenPlay", request)
       } catch (error) {
-        if (!isMissingReceiverError(error)) {
+        // The document was gone before the message arrived, or closed while it
+        // was waiting. Chrome closes an AUDIO_PLAYBACK document after 30 s
+        // without sound, and sound cancels that timer, so a speech chunk that
+        // was cut off by it had not been heard yet: playing it again is safe.
+        if (!isMissingReceiverError(error) && !isClosedMessageChannelError(error)) {
           throw error
         }
 
@@ -157,9 +161,8 @@ class ChromeOffscreenPlaybackAdapter implements TTSPlaybackAdapter {
           return { ok: false, reason: run.cancelled }
         }
 
-        log.warn("[TTSPlayback] offscreen receiver missing, retrying once", { error })
+        log.warn("[TTSPlayback] offscreen document missing or closed, retrying once", { error })
 
-        // Offscreen documents can be reclaimed by the browser and briefly lose handlers.
         await this.prepare()
         if (run.cancelled) {
           return { ok: false, reason: run.cancelled }

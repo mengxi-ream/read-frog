@@ -310,10 +310,65 @@ describe("setupTTSPlaybackMessageHandlers", () => {
     expect(createDocumentMock).not.toHaveBeenCalled()
   })
 
-  it("does not retry ttsOffscreenPlay when the message channel closes mid-playback", async () => {
+  it("recreates the offscreen document and plays again when its message channel closes", async () => {
+    // The document exists when play starts, then Chrome closes it.
     const getContextsMock = vi
       .fn<(...args: any[]) => any>()
-      .mockResolvedValue([{ contextType: "OFFSCREEN_DOCUMENT" }])
+      .mockResolvedValueOnce([{ contextType: "OFFSCREEN_DOCUMENT" }])
+      .mockResolvedValue([])
+    const createDocumentMock = vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined)
+    ;(globalThis as { chrome?: unknown }).chrome = {
+      runtime: {
+        getContexts: getContextsMock,
+      },
+      offscreen: {
+        createDocument: createDocumentMock,
+      },
+    }
+
+    let playAttempts = 0
+    sendMessageMock.mockImplementation(async (type: string) => {
+      if (type === "ttsOffscreenStop") {
+        return { ok: true as const }
+      }
+
+      if (type === "ttsOffscreenPlay") {
+        playAttempts += 1
+        if (playAttempts === 1) {
+          throw new Error(
+            "A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received",
+          )
+        }
+        return { ok: true as const }
+      }
+
+      throw new Error(`Unexpected message: ${type}`)
+    })
+
+    const { setupTTSPlaybackMessageHandlers } = await import("../tts-playback")
+    setupTTSPlaybackMessageHandlers()
+    const startHandler = getRegisteredMessageHandler<{ ok: boolean }>("ttsPlaybackStart")
+
+    const result = await startHandler({
+      data: {
+        requestId: "req-closed-play",
+        audioBase64: "ZmFrZQ==",
+        contentType: "audio/mpeg",
+      },
+    })
+
+    expect(result).toEqual({ ok: true })
+    expect(createDocumentMock).toHaveBeenCalledTimes(1)
+    expect(
+      sendMessageMock.mock.calls.filter((call) => call[0] === "ttsOffscreenPlay"),
+    ).toHaveLength(2)
+  })
+
+  it("fails after one retry when the recreated document closes too", async () => {
+    const getContextsMock = vi
+      .fn<(...args: any[]) => any>()
+      .mockResolvedValueOnce([{ contextType: "OFFSCREEN_DOCUMENT" }])
+      .mockResolvedValue([])
     const createDocumentMock = vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined)
     ;(globalThis as { chrome?: unknown }).chrome = {
       runtime: {
@@ -345,17 +400,17 @@ describe("setupTTSPlaybackMessageHandlers", () => {
     await expect(
       startHandler({
         data: {
-          requestId: "req-closed-play",
+          requestId: "req-closed-twice",
           audioBase64: "ZmFrZQ==",
           contentType: "audio/mpeg",
         },
       }),
     ).rejects.toThrow("message channel closed")
 
+    expect(createDocumentMock).toHaveBeenCalledTimes(1)
     expect(
       sendMessageMock.mock.calls.filter((call) => call[0] === "ttsOffscreenPlay"),
-    ).toHaveLength(1)
-    expect(createDocumentMock).not.toHaveBeenCalled()
+    ).toHaveLength(2)
   })
 
   it("skips retrying ttsOffscreenPlay if stop arrives while recreating the offscreen document", async () => {
