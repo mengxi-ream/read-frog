@@ -44,6 +44,16 @@ describe("word lookup atoms", () => {
     })
   })
 
+  it("sends the line once when its translation is the same text", () => {
+    showCue("I'm running out of patience.", "I'm running out of patience.")
+
+    subtitlesStore.set(lookUpAtom, indexOf("patience"))
+
+    expect(subtitlesStore.get(customActionRequestAtom)).toMatchObject({
+      contextText: "I'm running out of patience.",
+    })
+  })
+
   it("closes the lookup on null, and on a place that holds no word", () => {
     showCue("I'm running out of patience.")
     subtitlesStore.set(lookUpAtom, indexOf("out"))
