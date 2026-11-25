@@ -11,7 +11,7 @@ import { ContextDetailsButton, RegenerateButton } from "../selection-toolbar-foo
 import { SpeakButton } from "../speak-button"
 
 const { ttsPlayMock } = vi.hoisted(() => ({
-  ttsPlayMock: vi.fn<(...args: any[]) => any>(),
+  ttsPlayMock: vi.fn<(...args: any[]) => any>(async () => {}),
 }))
 
 vi.mock("@/hooks/use-text-to-speech", () => ({

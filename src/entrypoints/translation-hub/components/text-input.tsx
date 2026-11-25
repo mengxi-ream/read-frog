@@ -36,7 +36,7 @@ export function TextInput() {
     if (isFetching || isPlaying) {
       stop()
     } else if (value.trim()) {
-      void play(value, ttsConfig)
+      void play(value, ttsConfig).catch(() => {})
     }
   }
 

@@ -37,7 +37,7 @@ function useSelectionSpeechController() {
     if (!text) {
       return false
     }
-    void play(text, ttsConfig, { surface: ANALYTICS_SURFACE.SHORTCUT })
+    void play(text, ttsConfig, { surface: ANALYTICS_SURFACE.SHORTCUT }).catch(() => {})
     return true
   })
 
@@ -54,7 +54,7 @@ function useSelectionSpeechController() {
       return false
     }
 
-    void play(selectionContent, ttsConfig)
+    void play(selectionContent, ttsConfig).catch(() => {})
     return true
   }, [isBusy, play, selectionContent, stop, ttsConfig])
 

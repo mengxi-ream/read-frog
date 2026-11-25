@@ -249,7 +249,7 @@ export function TranslationCard({
         mutation.data,
         ttsConfig,
         targetLanguage ? { forcedVoice: selectTTSVoice(ttsConfig, targetLanguage) } : undefined,
-      )
+      ).catch(() => {})
     }
   }
 

@@ -109,6 +109,10 @@ function getTTSFriendlyErrorDescription(error: Error): string | undefined {
     return "Edge TTS is temporarily unavailable. Please check your network and retry."
   }
 
+  if (error.message.includes("message channel closed")) {
+    return "Audio playback was interrupted. Please try again."
+  }
+
   return error.message || undefined
 }
 
@@ -188,10 +192,14 @@ export function useTextToSpeech(
       } catch (error) {
         // A run the user already stopped or replaced reports nothing.
         if (isSuperseded()) return
+        // The failed run may have left its audio playing.
+        activeRequestIdRef.current = null
+        void sendMessage("ttsPlaybackStop", { requestId }).catch(() => {})
         throw error
       }
     },
     onError: (error, variables) => {
+      log.warn("Text-to-speech playback failed", { error })
       void trackFeatureUsed({
         ...variables.analyticsContext,
         outcome: "failure",
@@ -205,7 +213,6 @@ export function useTextToSpeech(
           description: getTTSFriendlyErrorDescription(error),
         })
       }
-      activeRequestIdRef.current = null
       setIsPlaying(false)
       setCurrentChunk(0)
       setTotalChunks(0)
@@ -290,6 +297,8 @@ export function useTextToSpeech(
       const currentAudioPromise = fetchChunkAudio(chunks[index]!)
       const nextAudioPromise =
         index + 1 < chunks.length ? fetchChunkAudio(chunks[index + 1]!) : null
+      // The loop may exit before awaiting this; the await below still rethrows.
+      void nextAudioPromise?.catch(() => {})
       const audioChunk = await currentAudioPromise
 
       if (isSuperseded()) {

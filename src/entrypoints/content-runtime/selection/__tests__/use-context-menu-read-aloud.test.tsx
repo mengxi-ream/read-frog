@@ -6,7 +6,7 @@ import { useContextMenuReadAloud } from "../use-context-menu-read-aloud"
 
 const { onMessageMock, playMock, TTS_CONFIG } = vi.hoisted(() => ({
   onMessageMock: vi.fn<(...args: any[]) => any>(() => () => {}),
-  playMock: vi.fn<(...args: any[]) => any>(),
+  playMock: vi.fn<(...args: any[]) => Promise<void>>(async () => {}),
   TTS_CONFIG: { provider: "test" },
 }))
 
@@ -67,5 +67,30 @@ describe("useContextMenuReadAloud", () => {
     readAloudFromContextMenu({ selectionText: "punched", fromEbookSection: true })
 
     expect(playMock).toHaveBeenCalledWith("punched", TTS_CONFIG)
+  })
+
+  it("absorbs rejected playback promises without emitting unhandledRejection", async () => {
+    const unhandledRejections: unknown[] = []
+    const onUnhandledRejection = (reason: unknown) => {
+      unhandledRejections.push(reason)
+    }
+    process.on("unhandledRejection", onUnhandledRejection)
+
+    try {
+      playMock.mockRejectedValueOnce(
+        new Error(
+          "A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received",
+        ),
+      )
+      render(<Harness />)
+
+      readAloudFromContextMenu({ selectionText: "Reader page header" })
+      await new Promise((resolve) => setTimeout(resolve, 0))
+
+      expect(playMock).toHaveBeenCalledWith("Reader page header", TTS_CONFIG)
+      expect(unhandledRejections).toEqual([])
+    } finally {
+      process.off("unhandledRejection", onUnhandledRejection)
+    }
   })
 })
