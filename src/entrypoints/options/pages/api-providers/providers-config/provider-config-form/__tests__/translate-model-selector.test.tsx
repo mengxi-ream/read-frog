@@ -1,10 +1,12 @@
 // @vitest-environment jsdom
 import type { APIProviderConfig } from "@/types/config/provider"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { useSelector } from "@tanstack/react-store"
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import { useEffect, useState } from "react"
 import { describe, expect, it, vi } from "vitest"
 import { AutosaveContext, toAutosaveSession } from "@/components/form/use-autosave"
+import { DEFAULT_PROVIDER_CONFIG } from "@/utils/constants/providers"
 import { useProviderForm } from "../../provider-editor"
 import { TranslateModelSelector } from "../translate-model-selector"
 
@@ -109,6 +111,33 @@ function TranslateModelSelectorHarness({
 }
 
 describe("translateModelSelector", () => {
+  const volcengine = DEFAULT_PROVIDER_CONFIG.volcengine
+
+  it.each([
+    volcengine,
+    { ...volcengine, name: "Renamed", id: "custom-instance", baseURL: `${volcengine.baseURL}/` },
+  ])("allows manual entry without model discovery for $name", ({ model, ...config }) => {
+    render(<TranslateModelSelectorHarness initialConfig={{ ...config, model: { ...model, isCustomModel: true } }} />)
+
+    expect(screen.queryByRole("button", { name: "options.apiProviders.form.models.fetchModels" })).toBeNull()
+    const input = screen.getByLabelText("options.apiProviders.form.models.label")
+    fireEvent.change(input, { target: { value: "ep-custom" } })
+    expect(input).toHaveValue("ep-custom")
+  })
+
+  it.each([
+    { ...volcengine, baseURL: "https://custom.example/v1" },
+    DEFAULT_PROVIDER_CONFIG["openai-compatible"],
+  ])("offers model discovery for $provider on $baseURL", ({ model, ...config }) => {
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <TranslateModelSelectorHarness initialConfig={{ ...config, model: { ...model, isCustomModel: true } }} />
+      </QueryClientProvider>,
+    )
+
+    expect(screen.getByRole("button", { name: "options.apiProviders.form.models.fetchModels" })).toBeInTheDocument()
+  })
+
   it("keeps invalid form values while staging recommended provider options", async () => {
     render(<TranslateModelSelectorHarness />)
 

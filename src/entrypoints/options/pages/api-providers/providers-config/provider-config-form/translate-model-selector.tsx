@@ -15,7 +15,9 @@ import {
   isProtocolCompatibleLLMProviderConfig,
   LLM_PROVIDER_MODELS,
 } from "@/types/config/provider"
+import { DEFAULT_PROVIDER_CONFIG } from "@/utils/constants/providers"
 import { i18n } from "@/utils/i18n"
+import { getProviderConnectionURL } from "@/utils/providers/connection-url"
 import { resolveModelId } from "@/utils/providers/model-id"
 import { ModelSuggestionButton } from "./components/model-suggestion-button"
 import { ProviderOptionsRecommendationTrigger } from "./components/provider-options-recommendation-trigger"
@@ -28,6 +30,10 @@ export const TranslateModelSelector = withForm({
     const autosave = useAutosaveContext()
     if (!isLLMProviderConfig(providerConfig)) return null
 
+    const connectionURL = getProviderConnectionURL(providerConfig)
+    const defaultURL = DEFAULT_PROVIDER_CONFIG.volcengine.baseURL
+    const isDefaultVolcengineEndpoint = providerConfig.provider === "volcengine"
+      && (connectionURL === defaultURL || connectionURL === `${defaultURL}/`)
     const modelId = resolveModelId(providerConfig.model)
     const { isCustomModel, customModel, model } = providerConfig.model
 
@@ -54,7 +60,7 @@ export const TranslateModelSelector = withForm({
                 labelExtra={
                   <div className="flex items-center gap-2">
                     {recommendationTrigger}
-                    {isProtocolCompatibleLLMProviderConfig(providerConfig) && (
+                    {isProtocolCompatibleLLMProviderConfig(providerConfig) && !isDefaultVolcengineEndpoint && (
                       <ModelSuggestionButton
                         providerConfig={providerConfig}
                         onSelect={(selectedModel) => {
