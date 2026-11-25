@@ -5,6 +5,7 @@ import { lintLayout } from "@read-frog/layout-engine/editor"
 import { DEFAULT_LAYOUT } from "@read-frog/layout-engine/presets"
 import { describe, expect, it } from "vitest"
 import { selectionToolbarCustomActionsSchema } from "@/types/config/selection-toolbar"
+import { DEFAULT_BUILT_IN_AI_PROVIDER_ID } from "@/utils/constants/provider-ids"
 import {
   buildSelectionToolbarCustomActionSystemPrompt,
   replaceSelectionToolbarCustomActionPromptTokens,
@@ -206,7 +207,7 @@ describe("custom action template layouts", () => {
       const builtIn = createBuiltIn()
 
       expect(builtIn.id).toBe(actionId)
-      expect(builtIn.providerId).toBe("read-frog-ai:gpt-6-luna")
+      expect(builtIn.providerId).toBe(DEFAULT_BUILT_IN_AI_PROVIDER_ID)
       expect(builtIn.systemPrompt).toBe(preset.systemPrompt)
       expect(builtIn.outputSchema.map((field) => field.id)).toEqual(
         preset.outputSchema.map((field) => `default-${field.id}`),

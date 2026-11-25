@@ -1952,7 +1952,7 @@ describe("selection toolbar requests", () => {
       expect(streamBackgroundStructuredObjectMock).toHaveBeenCalledTimes(1)
     })
     expect(streamBackgroundStructuredObjectMock.mock.calls[0]?.[0]).toMatchObject({
-      providerId: "read-frog-ai:gpt-6-luna",
+      providerId: "read-frog-ai:claude-haiku-5-5",
       requestId: expect.stringMatching(/^[0-9a-f-]{36}$/i),
     })
 

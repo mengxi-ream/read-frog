@@ -369,8 +369,8 @@ describe("ProvidersConfig", () => {
       card.getAttribute("data-provider-id"),
     )
     expect(cardIds).toEqual([
-      "read-frog-ai:claude-haiku-5-5",
       DEFAULT_BUILT_IN_AI_PROVIDER_ID,
+      LUNA_PROVIDER_ID,
       "read-frog-ai:deepseek-v4.1-flash",
       SOL_PROVIDER_ID,
       "read-frog-ai:claude-sonnet-5-5",

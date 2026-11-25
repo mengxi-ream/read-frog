@@ -158,7 +158,7 @@ describe("dEFAULT_CONFIG", () => {
     )
     expect(config.selectionToolbar.builtInActions.dictionary).toEqual({
       enabled: true,
-      providerId: "read-frog-ai:gpt-6-luna",
+      providerId: "read-frog-ai:claude-haiku-5-5",
     })
     expect(config.selectionToolbar.customActions).toEqual([])
     // Translation runs on Built-in AI; note suggestions keep their own default.
@@ -167,7 +167,7 @@ describe("dEFAULT_CONFIG", () => {
       config.selectionToolbar.features.translate.providerId,
       config.inputTranslation.providerId,
       config.videoSubtitles.providerId,
-    ]).toEqual(Array.from({ length: 4 }, () => "read-frog-ai:gpt-6-luna"))
+    ]).toEqual(Array.from({ length: 4 }, () => "read-frog-ai:claude-haiku-5-5"))
     expect(config.selectionToolbar.noteSuggestion.providerId).toBe(
       DEFAULT_CONFIG.selectionToolbar.noteSuggestion.providerId,
     )
