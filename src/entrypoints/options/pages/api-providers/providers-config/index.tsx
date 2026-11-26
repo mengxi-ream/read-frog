@@ -299,23 +299,12 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
   const { theme } = useTheme()
   const [selectedProviderId, setSelectedProviderId] = useAtom(selectedProviderIdAtom)
   const patchProviderConfig = useSetAtom(patchProviderConfigAtom)
-  const config = useAtomValue(configAtom)
+  const assignments = useProviderAssignments(id)
   const sponsor = API_PROVIDER_ITEMS[provider].sponsor
   const switchRef = useRef<HTMLButtonElement>(null)
 
-  const assignedFeatures = FEATURE_KEYS.filter(
-    (key) => FEATURE_PROVIDER_DEFS[key].getProviderId(config) === id,
-  )
-  const assignedCustomActions = getSelectionToolbarActions(config.selectionToolbar).filter(
-    (action) => action.providerId === id,
-  )
-  const isLanguageDetectionProvider =
-    config.languageDetection.mode === "llm" && config.languageDetection.providerId === id
-  const totalAssigned =
-    assignedFeatures.length + assignedCustomActions.length + (isLanguageDetectionProvider ? 1 : 0)
-
   const handleProviderEnabledChange = (checked: boolean) => {
-    if (!checked && enabled && totalAssigned > 0) {
+    if (!checked && enabled && assignments.length > 0) {
       if (!switchRef.current) return
 
       anchoredToastManager.add({
@@ -327,7 +316,7 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
         type: "error",
         title: i18n.t("options.apiProviders.form.providerInUseCannotDisable", [
           name,
-          totalAssigned,
+          assignments.length,
         ]),
       })
       return
@@ -350,17 +339,7 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
               className="absolute -top-2 left-2 text-[10px]"
             />
           )}
-          <FeatureCountBadge count={totalAssigned}>
-            {assignedFeatures.map((key) => (
-              <li key={key}>{i18n.t(getFeatureLabelI18nKey(key))}</li>
-            ))}
-            {isLanguageDetectionProvider && (
-              <li>{i18n.t("options.apiProviders.languageDetection.title")}</li>
-            )}
-            {assignedCustomActions.map((action) => (
-              <li key={action.id}>{action.name}</li>
-            ))}
-          </FeatureCountBadge>
+          <FeatureCountBadge assignments={assignments} />
         </>
       </EntityListItem.Badges>
       <EntityListItem.Content>
@@ -381,8 +360,39 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
   )
 }
 
-function FeatureCountBadge({ count, children }: { count: number; children: React.ReactNode }) {
-  if (count === 0) {
+interface ProviderAssignment {
+  key: string
+  label: string
+}
+
+/**
+ * What the config runs on a provider, labelled for display: its features, then
+ * language detection, then its selection-toolbar actions.
+ */
+function useProviderAssignments(providerId: string): ProviderAssignment[] {
+  const config = useAtomValue(configAtom)
+  const { languageDetection } = config
+
+  return [
+    ...FEATURE_KEYS.filter(
+      (key) => FEATURE_PROVIDER_DEFS[key].getProviderId(config) === providerId,
+    ).map((key) => ({ key: `feature:${key}`, label: i18n.t(getFeatureLabelI18nKey(key)) })),
+    ...(languageDetection.mode === "llm" && languageDetection.providerId === providerId
+      ? [
+          {
+            key: "languageDetection",
+            label: i18n.t("options.apiProviders.languageDetection.title"),
+          },
+        ]
+      : []),
+    ...getSelectionToolbarActions(config.selectionToolbar)
+      .filter((action) => action.providerId === providerId)
+      .map((action) => ({ key: `action:${action.id}`, label: action.name })),
+  ]
+}
+
+function FeatureCountBadge({ assignments }: { assignments: ProviderAssignment[] }) {
+  if (assignments.length === 0) {
     return null
   }
 
@@ -390,10 +400,14 @@ function FeatureCountBadge({ count, children }: { count: number; children: React
     <div className="absolute -top-2 right-2 flex items-center justify-center gap-1">
       <Tooltip>
         <TooltipTrigger render={<Badge variant="accent" className="cursor-default" size="sm" />}>
-          {i18n.t("options.apiProviders.badges.featureCount", [count])}
+          {i18n.t("options.apiProviders.badges.featureCount", [assignments.length])}
         </TooltipTrigger>
         <TooltipContent>
-          <ul className="list-inside list-disc marker:text-green-500">{children}</ul>
+          <ul className="list-inside list-disc marker:text-green-500">
+            {assignments.map(({ key, label }) => (
+              <li key={key}>{label}</li>
+            ))}
+          </ul>
         </TooltipContent>
       </Tooltip>
     </div>
@@ -411,17 +425,7 @@ function BuiltInProviderCard({
   const providerId = item.id
   const { theme } = useTheme()
   const [selectedProviderId, setSelectedProviderId] = useAtom(selectedProviderIdAtom)
-  const config = useAtomValue(configAtom)
-  const assignedFeatures = FEATURE_KEYS.filter(
-    (key) => FEATURE_PROVIDER_DEFS[key].getProviderId(config) === providerId,
-  )
-  const assignedCustomActions = getSelectionToolbarActions(config.selectionToolbar).filter(
-    (action) => action.providerId === providerId,
-  )
-  const isLanguageDetectionProvider =
-    config.languageDetection.mode === "llm" && config.languageDetection.providerId === providerId
-  const totalAssigned =
-    assignedFeatures.length + assignedCustomActions.length + (isLanguageDetectionProvider ? 1 : 0)
+  const assignments = useProviderAssignments(providerId)
 
   return (
     <EntityListItem.Root
@@ -438,17 +442,7 @@ function BuiltInProviderCard({
               className="absolute -top-2 left-2 rounded-sm bg-card px-0.5"
             />
           )}
-          <FeatureCountBadge count={totalAssigned}>
-            {assignedFeatures.map((key) => (
-              <li key={key}>{i18n.t(getFeatureLabelI18nKey(key))}</li>
-            ))}
-            {isLanguageDetectionProvider && (
-              <li>{i18n.t("options.apiProviders.languageDetection.title")}</li>
-            )}
-            {assignedCustomActions.map((action) => (
-              <li key={action.id}>{action.name}</li>
-            ))}
-          </FeatureCountBadge>
+          <FeatureCountBadge assignments={assignments} />
         </>
       </EntityListItem.Badges>
       <EntityListItem.Content>
@@ -459,7 +453,6 @@ function BuiltInProviderCard({
           size="base"
           textClassName="text-sm"
         />
-        <EntityListItem.Toggle aria-label={item.name} checked disabled />
       </EntityListItem.Content>
     </EntityListItem.Root>
   )
