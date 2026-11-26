@@ -1,3 +1,4 @@
+import type { BatchFormat } from "./batch-format"
 import type { Config } from "@/types/config/config"
 import type { WebPagePromptContext } from "@/types/content"
 import type { MatchedTerm } from "@/utils/glossary/types"
@@ -18,7 +19,6 @@ import { DEFAULT_CONFIG } from "../constants/config"
 import {
   BATCH_SEPARATOR,
   BUILT_IN_PAGE_TRANSLATE_PROMPTS,
-  DEFAULT_BATCH_TRANSLATE_PROMPT,
   DEFAULT_SENTINEL_TRANSLATE_PROMPT,
   DEFAULT_TRANSLATE_PROMPT_ID,
   getTokenCellText,
@@ -29,6 +29,14 @@ import {
   WEB_SUMMARY,
   WEB_TITLE,
 } from "../constants/prompt"
+import { SEPARATED_BATCH_FORMAT } from "./batch-format"
+
+/**
+ * Page batches keep `%%` lines between paragraphs; subtitles number theirs
+ * (see NUMBERED_BATCH_TRANSLATE_PROMPT). The page queue joins and splits with
+ * the same format, and the protected marker rules below name its separator.
+ */
+export const PAGE_BATCH_FORMAT: BatchFormat = SEPARATED_BATCH_FORMAT
 
 const HTML_ATTRIBUTE_MARKER_SYSTEM_PROMPT = `## Protected HTML Marker Rules
 These mandatory rules override any conflicting instructions above:
@@ -90,8 +98,9 @@ export function getTranslatePromptFromConfig(
   let { systemPrompt, prompt } = selectedPrompt
 
   // For batch mode, append batch rules to system prompt. The batch block is the
-  // same one subtitles use — the marker appears only in the sentinel rule that
-  // follows, never inside the format example (see DEFAULT_SENTINEL_TRANSLATE_PROMPT).
+  // `%%` one (subtitles use the numbered block instead) — the marker appears only
+  // in the sentinel rule that follows, never inside the format example (see
+  // DEFAULT_SENTINEL_TRANSLATE_PROMPT).
   // The sentinel rule is appended ONLY here: batch prompts are built exclusively
   // for the background translation pipeline, whose results all return through
   // translateTextCore where the sentinel is mapped — the selection-toolbar
@@ -99,7 +108,7 @@ export function getTranslatePromptFromConfig(
   if (options?.isBatch) {
     systemPrompt = `${systemPrompt}
 
-${DEFAULT_BATCH_TRANSLATE_PROMPT}
+${PAGE_BATCH_FORMAT.prompt}
 
 ${DEFAULT_SENTINEL_TRANSLATE_PROMPT}`
   }
