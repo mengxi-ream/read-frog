@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
-import { parseBatchResult } from "@/entrypoints/background/translation-queues"
 import { BATCH_SEPARATOR } from "@/utils/constants/prompt"
+import { parseBatchResult } from "@/utils/prompts/batch-format"
 
 describe("batch separator parsing edge cases", () => {
   it("should handle standard format", () => {
