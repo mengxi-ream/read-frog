@@ -1214,9 +1214,6 @@ options:
       description: 在彈出視窗和懸浮按鈕上顯示「掃描難詞」，並啟用它的快速鍵
     usage:
       title: 使用
-    shortcut:
-      title: 快速鍵
-      description: 在目前頁面掃描難詞，再按一次清除
     lookupAction:
       title: 點開難詞時執行
       description: 點開標出的詞時開啟的 AI 指令，預設是內建的字典

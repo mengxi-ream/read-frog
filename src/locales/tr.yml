@@ -1204,9 +1204,6 @@ options:
       description: Tarama butonunu açılır pencerede ve yüzen butonda gösterir, kısayolunu açar
     usage:
       title: Kullanım
-    shortcut:
-      title: Kısayol
-      description: Sayfadaki zor kelimeleri tarar. Temizlemek için yeniden basın.
     lookupAction:
       title: Bir kelimeye tıklayınca çalışır
       description: Vurgulanan bir kelimeye tıkladığınızda açılan AI eylemi. Başkasını seçmediğiniz sürece yerleşik Sözlük.

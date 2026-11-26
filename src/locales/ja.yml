@@ -1204,9 +1204,6 @@ options:
       description: ポップアップとフローティングボタンにスキャンボタンを表示し、ショートカットを有効にします
     usage:
       title: 使い方
-    shortcut:
-      title: ショートカット
-      description: ページの難しい単語をスキャンします。もう一度押すとクリアします。
     lookupAction:
       title: 単語をクリックしたときに実行
       description: ハイライトされた単語をクリックしたときに開く AI アクション。ほかを選ばない限り、内蔵の辞書です。

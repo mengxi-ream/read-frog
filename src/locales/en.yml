@@ -1351,9 +1351,6 @@ options:
       description: Shows the scan button in the popup and on the floating button, and turns on its shortcut
     usage:
       title: Using it
-    shortcut:
-      title: Shortcut
-      description: Scans the page for difficult words. Press it again to clear them.
     lookupAction:
       title: Clicking a word runs
       description: The AI action that opens when you click a highlighted word. The built-in Dictionary unless you pick another.

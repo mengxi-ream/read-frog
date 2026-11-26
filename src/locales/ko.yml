@@ -1204,9 +1204,6 @@ options:
       description: 팝업과 플로팅 버튼에 스캔 버튼을 표시하고 단축키를 켭니다
     usage:
       title: 사용
-    shortcut:
-      title: 단축키
-      description: 페이지에서 어려운 단어를 스캔합니다. 다시 누르면 지웁니다.
     lookupAction:
       title: 단어를 클릭하면 실행
       description: 강조 표시된 단어를 클릭할 때 열리는 AI 액션입니다. 다른 것을 고르지 않으면 기본 제공 사전입니다.

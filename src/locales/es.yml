@@ -1209,9 +1209,6 @@ options:
       description: Muestra el botón de búsqueda en la ventana emergente y en el botón flotante, y activa su atajo
     usage:
       title: Uso
-    shortcut:
-      title: Atajo
-      description: Busca palabras difíciles en la página. Púlsalo otra vez para borrarlas.
     lookupAction:
       title: Al hacer clic en una palabra se ejecuta
       description: La acción AI que se abre al hacer clic en una palabra resaltada. El Diccionario integrado, salvo que elijas otra.

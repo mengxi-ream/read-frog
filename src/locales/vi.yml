@@ -1204,9 +1204,6 @@ options:
       description: Hiện nút quét trong cửa sổ bật lên và trên nút nổi, đồng thời bật phím tắt của nó
     usage:
       title: Cách dùng
-    shortcut:
-      title: Phím tắt
-      description: Quét từ khó trên trang. Nhấn lần nữa để xóa.
     lookupAction:
       title: Khi bấm vào một từ sẽ chạy
       description: Hành động AI mở ra khi bạn bấm vào một từ được tô sáng. Mặc định là Từ điển có sẵn, trừ khi bạn chọn cái khác.

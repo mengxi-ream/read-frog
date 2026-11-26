@@ -1214,9 +1214,6 @@ options:
       description: 在 popup 和悬浮球上显示「扫描难词」，并启用它的快捷键
     usage:
       title: 使用
-    shortcut:
-      title: 快捷键
-      description: 在当前页面扫描难词，再按一次清除
     lookupAction:
       title: 点开难词时运行
       description: 点开标出的词时打开的 AI 指令，默认是内置的词典

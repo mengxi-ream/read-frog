@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/base-ui/button"
 import { Switch } from "@/components/ui/base-ui/switch"
 import { openLogIn } from "@/components/user-account-menu/shared"
 import { configAtom, configFieldsAtomMap } from "@/utils/atoms/config"
-import { getDifficultWordsShortcut } from "@/utils/constants/difficult-words"
 import {
   getSelectionToolbarActions,
   resolveDifficultWordLookupAction,
@@ -14,7 +13,7 @@ import { ActionSelect } from "../../components/action-select"
 import { ConfigItem } from "../../components/config-item"
 import { ConfigSection } from "../../components/config-section"
 import { PageLayout } from "../../components/page-layout"
-import { ShortcutConfigItem } from "../shortcuts/shortcut-config-item"
+import { ShortcutLink } from "../../components/shortcut-link"
 import { LevelsSection } from "./levels-section"
 
 export function DifficultWordsPage() {
@@ -27,7 +26,6 @@ export function DifficultWordsPage() {
       <AccessNotice />
       <EnableItem />
       <ConfigSection title={i18n.t("options.difficultWords.usage.title")}>
-        <ShortcutItem />
         <LookupActionItem />
       </ConfigSection>
       <LevelsSection />
@@ -63,7 +61,12 @@ function EnableItem() {
     <ConfigItem
       id="difficult-words-enable"
       title={i18n.t("options.difficultWords.enable.title")}
-      description={i18n.t("options.difficultWords.enable.description")}
+      description={
+        <>
+          {i18n.t("options.difficultWords.enable.description")}
+          <ShortcutLink sectionId="difficult-words-shortcut" />
+        </>
+      }
     >
       <Switch
         checked={difficultWords.enabled}
@@ -72,22 +75,6 @@ function EnableItem() {
         }}
       />
     </ConfigItem>
-  )
-}
-
-function ShortcutItem() {
-  const [difficultWords, setDifficultWords] = useAtom(configFieldsAtomMap.difficultWords)
-
-  return (
-    <ShortcutConfigItem
-      id="difficult-words-shortcut"
-      title={i18n.t("options.difficultWords.shortcut.title")}
-      description={i18n.t("options.difficultWords.shortcut.description")}
-      shortcut={getDifficultWordsShortcut(difficultWords)}
-      onChange={(shortcut) => {
-        void setDifficultWords({ shortcut })
-      }}
-    />
   )
 }
 

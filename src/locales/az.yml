@@ -1209,9 +1209,6 @@ options:
       description: Axtarış düyməsini açılan pəncərədə və üzən düymədə göstərir, qısayolunu aktiv edir
     usage:
       title: İstifadə
-    shortcut:
-      title: Qısayol
-      description: Səhifədə çətin sözləri axtarır. Təmizləmək üçün yenidən basın.
     lookupAction:
       title: Sözə kliklədikdə işə düşür
       description: İşarələnmiş sözə kliklədikdə açılan AI əməliyyatı. Başqasını seçməsəniz, daxili Lüğətdir.
