@@ -13,7 +13,6 @@ import { ActionSelect } from "../../components/action-select"
 import { ConfigItem } from "../../components/config-item"
 import { ConfigSection } from "../../components/config-section"
 import { PageLayout } from "../../components/page-layout"
-import { ShortcutLink } from "../../components/shortcut-link"
 import { LevelsSection } from "./levels-section"
 
 export function DifficultWordsPage() {
@@ -61,12 +60,7 @@ function EnableItem() {
     <ConfigItem
       id="difficult-words-enable"
       title={i18n.t("options.difficultWords.enable.title")}
-      description={
-        <>
-          {i18n.t("options.difficultWords.enable.description")}
-          <ShortcutLink sectionId="difficult-words-shortcut" />
-        </>
-      }
+      description={i18n.t("options.difficultWords.enable.description")}
     >
       <Switch
         checked={difficultWords.enabled}
