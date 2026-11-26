@@ -210,7 +210,7 @@ options:
     badges:
       featureCount: $1 件の機能
       sponsor: スポンサー
-      sponsorJalapenoCloud: $$1 無料
+      sponsorJalapenoCloud: 最大 60% ボーナス
       sponsorIfapi: モデル 90% オフ
     dialog:
       title: 新しいプロバイダーを追加

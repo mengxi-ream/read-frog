@@ -210,7 +210,7 @@ options:
     badges:
       featureCount: $1 개 기능
       sponsor: 스폰서
-      sponsorJalapenoCloud: $$1 무료
+      sponsorJalapenoCloud: 최대 60% 보너스
       sponsorIfapi: 모델 90% 할인
     dialog:
       title: 새 제공업체 추가

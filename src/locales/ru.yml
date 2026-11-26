@@ -210,7 +210,7 @@ options:
     badges:
       featureCount: $1 функций
       sponsor: Спонсор
-      sponsorJalapenoCloud: $$1 бесплатно
+      sponsorJalapenoCloud: Бонус до 60%
       sponsorIfapi: Модели -90%
     dialog:
       title: Добавить нового провайдера

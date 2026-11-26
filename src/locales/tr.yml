@@ -210,7 +210,7 @@ options:
     badges:
       featureCount: $1 özellik
       sponsor: Sponsor
-      sponsorJalapenoCloud: $$1 ücretsiz
+      sponsorJalapenoCloud: %60ʼa kadar bonus
       sponsorIfapi: Modeller -%90
     dialog:
       title: Yeni sağlayıcı ekle

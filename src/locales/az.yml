@@ -210,7 +210,7 @@ options:
     badges:
       featureCount: $1 funksiya
       sponsor: Dəstəkçi
-      sponsorJalapenoCloud: $$1 hədiyyə
+      sponsorJalapenoCloud: 60%-dək bonus
       sponsorIfapi: Modellər -90%
     dialog:
       title: Yeni provayder əlavə et
