@@ -233,11 +233,11 @@ export class SubtitlesStarter {
       if (error instanceof DOMException && error.name === "AbortError") {
         return false
       }
+      // A newer start, a navigation reset or a leave owns what the reader sees and the retry slot.
+      if (this.lifecycle.isSuperseded(operationId)) return false
 
-      // A superseded load failing late must not take the retry slot from the current one.
       if (
         loadingSource &&
-        this.lifecycle.switchGeneration.isCurrent(operationId) &&
         this.subtitlesSwitch.source === SUBTITLES_SOURCE.NATIVE &&
         this.adOverlappedLoad
       ) {
@@ -252,20 +252,15 @@ export class SubtitlesStarter {
       const errorMessage = error instanceof Error ? error.message : String(error)
       const action = error instanceof ToastSubtitlesError ? error.action : undefined
       // The source is still AI here: the revert to native after this hides the player, so a failed
-      // AI request is told in a toast, never on the player.
-      const isAiRequest = this.subtitlesSwitch.source === SUBTITLES_SOURCE.AI
+      // AI start is told in a toast over its control, never on the player.
+      const isAiSource = this.subtitlesSwitch.source === SUBTITLES_SOURCE.AI
 
-      if (error instanceof ToastSubtitlesError || isAiRequest) {
-        // The loading state has no auto-hide of its own (unlike "error"), so
-        // the toast branch has to clear it — otherwise the "Loading AI
-        // subtitles" pill stays on the player forever after a wall.
+      if (error instanceof ToastSubtitlesError || isAiSource) {
+        // The loading state has no auto-hide of its own (unlike "error"), so a toast has to clear
+        // it, or the "Loading AI subtitles" pill stays on the player forever.
         this.getScheduler()?.setState("idle")
-        // Only the AI request has a control on screen to point at.
-        if (isAiRequest) {
-          showAiSubtitlesWallToast(errorMessage, action)
-        } else {
-          showSubtitlesErrorToast(errorMessage, action)
-        }
+        const showToast = isAiSource ? showAiSubtitlesWallToast : showSubtitlesErrorToast
+        showToast(errorMessage, action)
       } else {
         this.getScheduler()?.setState("error", {
           message: this.config.silentErrors ? "" : errorMessage,

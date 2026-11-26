@@ -449,6 +449,7 @@ describe("universalVideoAdapter", () => {
       expect(scheduler.hide).toHaveBeenCalled()
       expect(mocks.showAiSubtitlesWallToast).toHaveBeenCalledOnce()
       expect(mocks.showAiSubtitlesWallToast).toHaveBeenCalledWith(error.message, undefined)
+      expect(scheduler.setState).toHaveBeenLastCalledWith("idle")
       expect(scheduler.setState).not.toHaveBeenCalledWith("error", expect.anything())
       expect((adapter as any).subtitlesSwitch.source).toBe(SUBTITLES_SOURCE.NATIVE)
       expect(subtitlesStore.get(subtitlesSourceAtom)).toBe(SUBTITLES_SOURCE.NATIVE)
@@ -1016,23 +1017,29 @@ describe("universalVideoAdapter", () => {
     )
   })
 
-  // The revert to native after a failed AI request hides the player, so an error painted there is never seen.
-  it("tells a failed AI request in a toast, not on the player", async () => {
+  // A toast is page-wide, so a start that a newer one, a navigation or a leave took over says nothing.
+  it.each([
+    new ToastSubtitlesError("subtitles.errors.aiSubscriptionRequired"),
+    new OverlaySubtitlesError("subtitles.errors.aiRequestFailed"),
+  ])("says nothing when a superseded AI start fails with %s", async (error) => {
     const { adapter, subtitlesFetcher } = createAdapter([])
     ;(adapter as any).subtitlesSwitch.source = SUBTITLES_SOURCE.AI
-    subtitlesFetcher.fetch.mockRejectedValue(
-      new OverlaySubtitlesError("subtitles.errors.aiRequestFailed"),
+    let failFetch: (reason: Error) => void = () => {}
+    subtitlesFetcher.fetch.mockReturnValue(
+      new Promise((_, reject) => {
+        failFetch = reject
+      }),
     )
     const scheduler = attachScheduler(adapter, true)
 
-    await expect((adapter as any).starter.startTranslation()).resolves.toBe(false)
+    const start = (adapter as any).starter.startTranslation()
+    ;(adapter as any).lifecycle.switchGeneration.next()
+    failFetch(error)
 
-    expect(scheduler.setState).toHaveBeenLastCalledWith("idle")
+    await expect(start).resolves.toBe(false)
+    expect(mocks.showAiSubtitlesWallToast).not.toHaveBeenCalled()
+    expect(scheduler.setState).not.toHaveBeenCalledWith("idle")
     expect(scheduler.setState).not.toHaveBeenCalledWith("error", expect.anything())
-    expect(mocks.showAiSubtitlesWallToast).toHaveBeenCalledWith(
-      "subtitles.errors.aiRequestFailed",
-      undefined,
-    )
   })
 
   // Only the AI request has a control on screen to point at. Anything else has
