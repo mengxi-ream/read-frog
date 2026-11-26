@@ -203,14 +203,14 @@ options:
         languageDetection: Dil algılama
         pdfTranslation: PDF çevirisi
     sponsorCta: Hızlı ve uygun maliyetli yapay zekâ al
-    sponsorCtaJalapenoCloud: "$$1+Up to 60% bonus"
+    sponsorCtaJalapenoCloud: "$$1 + Up to 60% bonus"
     sponsorCtaIfapi: READFROG koduyla +%10 bakiye
     setApiKeyWarning:
       message: API anahtarınızı $1 sayfasında ayarlayın
     badges:
       featureCount: $1 özellik
       sponsor: Sponsor
-      sponsorJalapenoCloud: %60ʼa kadar bonus
+      sponsorJalapenoCloud: "%60ʼa kadar bonus"
       sponsorIfapi: Modeller -%90
     dialog:
       title: Yeni sağlayıcı ekle

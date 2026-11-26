@@ -203,7 +203,7 @@ options:
         languageDetection: Dilin aşkarlanması
         pdfTranslation: PDF tərcüməsi
     sponsorCta: Sürətli və sərfəli süni intellekt əldə et
-    sponsorCtaJalapenoCloud: "$$1+Up to 60% bonus"
+    sponsorCtaJalapenoCloud: "$$1 + Up to 60% bonus"
     sponsorCtaIfapi: READFROG kodu ilə +10% balans
     setApiKeyWarning:
       message: API açarını $1 səhifəsində təyin edin

@@ -203,7 +203,7 @@ options:
         languageDetection: Определение языка
         pdfTranslation: Перевод PDF
     sponsorCta: Получить быстрый и выгодный ИИ
-    sponsorCtaJalapenoCloud: "$$1+Up to 60% bonus"
+    sponsorCtaJalapenoCloud: "$$1 + Up to 60% bonus"
     sponsorCtaIfapi: "+10% к балансу с кодом READFROG"
     setApiKeyWarning:
       message: Укажите API-ключ на странице $1

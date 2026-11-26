@@ -203,7 +203,7 @@ options:
         languageDetection: 언어 감지
         pdfTranslation: PDF 번역
     sponsorCta: 빠르고 가성비 좋은 AI 받기
-    sponsorCtaJalapenoCloud: "$$1+Up to 60% bonus"
+    sponsorCtaJalapenoCloud: "$$1 + Up to 60% bonus"
     sponsorCtaIfapi: 첫 충전 +10% · 코드 READFROG
     setApiKeyWarning:
       message: API 키는 $1 페이지에서 설정하세요

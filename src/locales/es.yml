@@ -203,7 +203,7 @@ options:
         languageDetection: Detección de idioma
         pdfTranslation: Traducción de PDF
     sponsorCta: Obtén IA rápida y rentable
-    sponsorCtaJalapenoCloud: "$$1+Up to 60% bonus"
+    sponsorCtaJalapenoCloud: "$$1 + Up to 60% bonus"
     sponsorCtaIfapi: "+10 % de saldo con el código READFROG"
     setApiKeyWarning:
       message: Configura tu clave de API en la página $1
