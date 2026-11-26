@@ -141,6 +141,9 @@ function isRecordable(word: string) {
  * the reader does with the words, recorded for the server.
  */
 export class DifficultWordsSession {
+  /** The session marking this page now: an Undo outlives the session it was offered in. */
+  private static live: DifficultWordsSession | null = null
+
   private view: DifficultWordsView = { card: null, check: null, levelLang: null }
   private readonly listeners = new Set<() => void>()
   private readonly scanner: DifficultWordsScanner
@@ -208,6 +211,7 @@ export class DifficultWordsSession {
   }
 
   start() {
+    DifficultWordsSession.live = this
     this.scanner.start()
     window.addEventListener("pointermove", this.onPointerMove, { capture: true, passive: true })
     window.addEventListener("pointerdown", this.onPointerDown, { capture: true, passive: true })
@@ -238,6 +242,7 @@ export class DifficultWordsSession {
     this.scanner.dispose()
     toastManager.close(OFFLINE_TOAST_ID)
     this.listeners.clear()
+    if (DifficultWordsSession.live === this) DifficultWordsSession.live = null
   }
 
   // ---- what the UI calls
@@ -313,7 +318,7 @@ export class DifficultWordsSession {
 
   /** Another tab unmarked a word, or brought it back. */
   applyLemmaChange(change: DifficultWordLemmaChange) {
-    if (change.known) this.scanner.hideLemma(change.lang, change.lemma)
+    if (change.known) this.hideLemma(change.lang, change.lemma)
     else this.scanner.showLemma(change.lang, change.lemma)
   }
 
@@ -347,10 +352,23 @@ export class DifficultWordsSession {
 
   // ---- marking a word known
 
+  /**
+   * Unmarks a word known, and closes its card if one is open, a pinned one
+   * included: the reader said it already, so its closing is no "open".
+   */
+  private hideLemma(lang: VocabLang, lemma: string) {
+    this.scanner.hideLemma(lang, lemma)
+    const card = this.view.card
+    if (card?.mark.lang === lang && card.mark.lemma === lemma) {
+      this.options.setRequest(null)
+      this.setView({ card: null })
+    }
+  }
+
   private markKnown(mark: DifficultWordMark, withVisible: boolean) {
     this.scanner.noteSeen(mark)
     const event = this.event(mark, "known")
-    this.scanner.hideLemma(mark.lang, mark.lemma)
+    this.hideLemma(mark.lang, mark.lemma)
     void sendMessage("broadcastDifficultWordLemma", {
       lang: mark.lang,
       lemma: mark.lemma,
@@ -381,17 +399,27 @@ export class DifficultWordsSession {
             target: event.id,
             at: new Date().toISOString(),
           }
-          if (this.disposed) {
+          // Marking switched off and on since: the session now never had the word.
+          const live = this.disposed ? DifficultWordsSession.live : this
+          if (!live) {
             if (undo) void sendMessage("recordDifficultWordEvents", { events: [undo] })
             return
           }
-          this.scanner.showLemma(mark.lang, mark.lemma)
-          // What the card judged again without the word is judged again with it back.
-          if (undo && withVisible) this.scanner.refreshVisible([undo])
-          else if (undo) void sendMessage("recordDifficultWordEvents", { events: [undo] })
+          live.takeBack(mark, undo, withVisible || live !== this)
         },
       },
     })
+  }
+
+  /**
+   * Marks a word again after an undone "I know it". `judgeAgain`: what is on
+   * screen was judged without it (the card's closing did that, or this is a
+   * session that never had it), so it is judged again with the undo.
+   */
+  private takeBack(mark: DifficultWordMark, undo: VocabEvent | null, judgeAgain: boolean) {
+    this.scanner.showLemma(mark.lang, mark.lemma)
+    if (undo && judgeAgain) this.scanner.refreshVisible([undo])
+    else if (undo) void sendMessage("recordDifficultWordEvents", { events: [undo] })
   }
 
   // ---- records

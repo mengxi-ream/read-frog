@@ -326,6 +326,44 @@ describe("DifficultWordsSession", () => {
     expect(mocks.scanner!.refreshVisible).not.toHaveBeenCalled()
   })
 
+  it("closes a card left open, pinned, once its word is said known elsewhere, with no record of it", async () => {
+    document.body.innerHTML = "<p id='a'>The ubiquitous cat.</p><p id='b'>So ubiquitous.</p>"
+    session = createSession()
+    await openCard(markIn(document.querySelector("#a")!))
+    // The ✓ on the same word in another paragraph.
+    await hover(markIn(document.querySelector("#b")!))
+    await vi.advanceTimersByTimeAsync(300)
+    session.markCheckKnown()
+
+    expect(session.getView().card).toBeNull()
+    expect(recorded().map((event) => event.kind)).toEqual(["known"])
+
+    // Or in another tab.
+    await openCard(markIn(document.querySelector("#a")!))
+    session.applyLemmaChange({ lang: "en", lemma: "ubiquitous", known: true })
+    expect(session.getView().card).toBeNull()
+    expect(recorded().map((event) => event.kind)).toEqual(["known"])
+  })
+
+  it("hands an Undo to the session marking the page now, which judges the screen again with it", async () => {
+    const first = createSession()
+    const mark = markIn(document.querySelector("#a")!)
+    await hover(mark)
+    await vi.advanceTimersByTimeAsync(300)
+    first.markCheckKnown()
+    const [known] = recorded()
+
+    // Switched off and on again within the Undo's time.
+    first.dispose()
+    session = createSession()
+    undoLast()
+
+    expect(mocks.scanner!.refreshVisible).toHaveBeenCalledWith([
+      expect.objectContaining({ kind: "undo", lang: "en", target: known!.id }),
+    ])
+    expect(recorded()).toEqual([known])
+  })
+
   it("still hides the next word's ✓ when the pointer leaves it, after a ✓ was pressed", async () => {
     session = createSession()
     const block = document.querySelector("#a")!
