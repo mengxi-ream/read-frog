@@ -210,7 +210,7 @@ options:
     badges:
       featureCount: $1 个功能
       sponsor: 赞助
-      sponsorJalapenoCloud: 最高加赠 60%
+      sponsorJalapenoCloud: "加赠 60%"
       sponsorIfapi: 1 折模型
     dialog:
       title: 添加新提供商

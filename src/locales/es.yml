@@ -210,7 +210,7 @@ options:
     badges:
       featureCount: $1 funciones
       sponsor: Patrocinador
-      sponsorJalapenoCloud: Hasta 60 % de bono
+      sponsorJalapenoCloud: "Bono del 60 %"
       sponsorIfapi: Modelos -90 %
     dialog:
       title: Añadir nuevo proveedor

@@ -210,7 +210,7 @@ options:
     badges:
       featureCount: $1 tính năng
       sponsor: Tài trợ
-      sponsorJalapenoCloud: Thưởng đến 60%
+      sponsorJalapenoCloud: "Thưởng 60%"
       sponsorIfapi: Mô hình -90%
     dialog:
       title: Thêm nhà cung cấp mới

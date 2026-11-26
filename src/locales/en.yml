@@ -210,7 +210,7 @@ options:
     badges:
       featureCount: $1 features
       sponsor: Sponsor
-      sponsorJalapenoCloud: Up to 60% bonus
+      sponsorJalapenoCloud: "60% bonus"
       sponsorIfapi: 90% Off Models
     dialog:
       title: Add new provider
