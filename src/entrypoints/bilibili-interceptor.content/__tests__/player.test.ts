@@ -7,7 +7,8 @@ import {
   BILIBILI_SUBTITLES_REQUEST_TYPE,
   BILIBILI_SUBTITLES_RESPONSE_TYPE,
 } from "@/utils/constants/subtitles"
-import { listenForSubtitlesRequests } from "../player"
+import { requestBilibiliPlayingPart } from "@/utils/subtitles/fetchers/bilibili/playing-part"
+import { listenForPlayingPartRequests, listenForSubtitlesRequests } from "../player"
 import { findCapturedSubtitles, recordPlayerInfo } from "../player-info-capture"
 
 const SUBTITLES = [{ lan: "ai-zh", subtitle_url: "//aisubtitle.hdslb.com/bfs/ai_subtitle/zh.json" }]
@@ -23,6 +24,7 @@ function playerInfo(subtitles: object[] = SUBTITLES) {
 beforeAll(() => {
   ;(window as any).player = { getManifest: () => manifest() }
   listenForSubtitlesRequests()
+  listenForPlayingPartRequests()
 })
 
 beforeEach(() => {
@@ -172,5 +174,34 @@ describe("Bilibili subtitle requests", () => {
     await vi.advanceTimersByTimeAsync(PAST_PAGE_WAIT)
 
     await expect(response).resolves.toMatchObject({ cid: null, subtitles: null })
+  })
+})
+
+describe("requestBilibiliPlayingPart", () => {
+  it("names the part the url names once the player plays it, also from an av link", async () => {
+    vi.useFakeTimers()
+    let switched = false
+    manifest = () => ({
+      cid: switched ? cid : cid - 1,
+      bvid: "BV1XZn26rE8x",
+      aid: 170001,
+      p: switched ? 3 : 1,
+    })
+
+    const part = requestBilibiliPlayingPart("av170001:3")
+    await vi.advanceTimersByTimeAsync(BILIBILI_PAGE_POLL_INTERVAL_MS * 2)
+    switched = true
+    await vi.advanceTimersByTimeAsync(BILIBILI_PAGE_POLL_INTERVAL_MS * 2)
+
+    await expect(part).resolves.toEqual({ bvid: "BV1XZn26rE8x", cid, p: 3 })
+  })
+
+  it("names no part when the player never reaches it", async () => {
+    vi.useFakeTimers()
+
+    const part = requestBilibiliPlayingPart("BV1XZn26rE8x:9")
+    await vi.advanceTimersByTimeAsync(PAST_PAGE_WAIT)
+
+    await expect(part).resolves.toBeNull()
   })
 })

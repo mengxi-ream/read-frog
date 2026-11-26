@@ -148,13 +148,22 @@ export const BILIBILI_PLAYER_INFO_URL_PATTERN =
   /^(?:https:)?\/\/api\.bilibili\.com\/x\/player\/wbi\/v2\?/
 export const BILIBILI_SUBTITLES_REQUEST_TYPE = "READ_FROG_BILIBILI_SUBTITLES"
 export const BILIBILI_SUBTITLES_RESPONSE_TYPE = "READ_FROG_BILIBILI_SUBTITLES_DONE"
+export const BILIBILI_PLAYING_PART_REQUEST_TYPE = "READ_FROG_BILIBILI_PLAYING_PART"
+export const BILIBILI_PLAYING_PART_RESPONSE_TYPE = "READ_FROG_BILIBILI_PLAYING_PART_DONE"
 // The page script waits this long for the player to reach the part and report its subtitle list.
 export const BILIBILI_PAGE_WAIT_TIMEOUT_MS = 5000
 // A page script injected after the player asked repeats the player's request once, within this.
 export const BILIBILI_PLAYER_INFO_REFETCH_TIMEOUT_MS = 3000
-// Outwaits the page's wait and its one repeated request, with room for a throttled background tab.
+// Room for the page script's answer to arrive in a throttled background tab.
+const BILIBILI_THROTTLED_TAB_MARGIN_MS = 2000
+// Outwaits the page's wait and its one repeated request.
 export const BILIBILI_POST_MESSAGE_TIMEOUT_MS =
-  BILIBILI_PAGE_WAIT_TIMEOUT_MS + BILIBILI_PLAYER_INFO_REFETCH_TIMEOUT_MS + 2000
+  BILIBILI_PAGE_WAIT_TIMEOUT_MS +
+  BILIBILI_PLAYER_INFO_REFETCH_TIMEOUT_MS +
+  BILIBILI_THROTTLED_TAB_MARGIN_MS
+// Outwaits the page's wait for the player to reach the part.
+export const BILIBILI_PLAYING_PART_TIMEOUT_MS =
+  BILIBILI_PAGE_WAIT_TIMEOUT_MS + BILIBILI_THROTTLED_TAB_MARGIN_MS
 export const BILIBILI_PAGE_POLL_INTERVAL_MS = 100
 
 // YouTube player wait constants

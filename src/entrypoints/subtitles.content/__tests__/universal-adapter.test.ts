@@ -415,6 +415,48 @@ describe("universalVideoAdapter", () => {
     expect(startTranslationSpy).toHaveBeenCalledTimes(1)
   })
 
+  it.each([
+    {
+      reason: "a refusal",
+      error: new ToastSubtitlesError("subtitles.errors.aiSubscriptionRequired"),
+    },
+    {
+      reason: "a failure",
+      error: new OverlaySubtitlesError("subtitles.errors.aiServiceUnavailable"),
+    },
+  ])(
+    "returns to the site's subtitles when an AI track fails to reload with $reason, and tells why once",
+    async ({ error }) => {
+      const { adapter, subtitlesFetcher } = createAdapter([])
+      ;(adapter as any).subtitlesSwitch.source = SUBTITLES_SOURCE.AI
+      subtitlesFetcher.fetch.mockRejectedValue(error)
+      let active = true
+      const scheduler = Object.assign(attachScheduler(adapter, true), {
+        hide: vi.fn<() => void>(() => {
+          active = false
+        }),
+      })
+      scheduler.isActive.mockImplementation(() => active)
+      const showNativeSubtitles = vi
+        .spyOn((adapter as any).nativeCaptions, "showNativeSubtitles")
+        .mockImplementation(() => {})
+
+      // Bilibili checks the track every second.
+      await adapter.handleSourceTrackChanged()
+      await adapter.handleSourceTrackChanged()
+
+      expect(subtitlesFetcher.fetch).toHaveBeenCalledOnce()
+      expect(scheduler.hide).toHaveBeenCalled()
+      expect(mocks.showAiSubtitlesWallToast).toHaveBeenCalledOnce()
+      expect(mocks.showAiSubtitlesWallToast).toHaveBeenCalledWith(error.message, undefined)
+      expect(scheduler.setState).toHaveBeenLastCalledWith("idle")
+      expect(scheduler.setState).not.toHaveBeenCalledWith("error", expect.anything())
+      expect((adapter as any).subtitlesSwitch.source).toBe(SUBTITLES_SOURCE.NATIVE)
+      expect(subtitlesStore.get(subtitlesSourceAtom)).toBe(SUBTITLES_SOURCE.NATIVE)
+      expect(showNativeSubtitles).toHaveBeenCalled()
+    },
+  )
+
   it("ignores source track changes when translation is disabled", async () => {
     const { adapter, subtitlesFetcher } = createAdapter([{ text: "hello", start: 0, end: 500 }])
 
@@ -973,6 +1015,31 @@ describe("universalVideoAdapter", () => {
       "subtitles.errors.aiVideoTooLong",
       undefined,
     )
+  })
+
+  // A toast is page-wide, so a start that a newer one, a navigation or a leave took over says nothing.
+  it.each([
+    new ToastSubtitlesError("subtitles.errors.aiSubscriptionRequired"),
+    new OverlaySubtitlesError("subtitles.errors.aiRequestFailed"),
+  ])("says nothing when a superseded AI start fails with %s", async (error) => {
+    const { adapter, subtitlesFetcher } = createAdapter([])
+    ;(adapter as any).subtitlesSwitch.source = SUBTITLES_SOURCE.AI
+    let failFetch: (reason: Error) => void = () => {}
+    subtitlesFetcher.fetch.mockReturnValue(
+      new Promise((_, reject) => {
+        failFetch = reject
+      }),
+    )
+    const scheduler = attachScheduler(adapter, true)
+
+    const start = (adapter as any).starter.startTranslation()
+    ;(adapter as any).lifecycle.switchGeneration.next()
+    failFetch(error)
+
+    await expect(start).resolves.toBe(false)
+    expect(mocks.showAiSubtitlesWallToast).not.toHaveBeenCalled()
+    expect(scheduler.setState).not.toHaveBeenCalledWith("idle")
+    expect(scheduler.setState).not.toHaveBeenCalledWith("error", expect.anything())
   })
 
   // Only the AI request has a control on screen to point at. Anything else has

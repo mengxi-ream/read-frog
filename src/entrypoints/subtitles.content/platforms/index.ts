@@ -45,7 +45,7 @@ export interface PlatformConfig {
    */
   getVideoPageUrl?: () => string | null
 
-  createAiSubtitlesContext?: () => AiSubtitlesContext | null
+  createAiSubtitlesContext?: () => Promise<AiSubtitlesContext | null>
 
   isLiveContent?: () => Promise<boolean>
 

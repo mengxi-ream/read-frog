@@ -5,17 +5,24 @@ import { i18n } from "@/utils/i18n"
 import { OverlaySubtitlesError } from "@/utils/subtitles/errors"
 import { requestAiSubtitles } from "../../ai/request-ai-subtitles"
 
+const abortError = () => new DOMException("Aborted", "AbortError")
+
 export class AiSubtitlesFetcher implements SubtitlesFetcher {
   private subtitles: SubtitlesFragment[] = []
   private sourceLanguage: string = ""
   private cachedVideoId: string | null = null
-  private abortController: AbortController | null = null
+  // Cleanup aborts every request of the session, also one still resolving its context.
+  private session = new AbortController()
   private inFlight: { videoId: string; promise: Promise<SubtitlesFragment[]> } | null = null
 
-  constructor(private createAiSubtitlesContext: () => AiSubtitlesContext | null) {}
+  constructor(private createAiSubtitlesContext: () => Promise<AiSubtitlesContext | null>) {}
 
   async fetch(): Promise<SubtitlesFragment[]> {
-    const ctx = this.createAiSubtitlesContext()
+    const { signal } = this.session
+    const ctx = await this.createAiSubtitlesContext()
+    if (signal.aborted) {
+      throw abortError()
+    }
     if (!ctx) {
       throw new OverlaySubtitlesError(i18n.t("subtitles.errors.noSubtitlesFound"))
     }
@@ -28,22 +35,23 @@ export class AiSubtitlesFetcher implements SubtitlesFetcher {
       return this.inFlight.promise
     }
 
-    const controller = new AbortController()
-    this.abortController = controller
-    const promise = this.runRequest(ctx, controller.signal)
+    const promise = this.runRequest({ ctx, signal })
     this.inFlight = { videoId: ctx.videoId, promise }
     return promise
   }
 
-  private async runRequest(
-    ctx: AiSubtitlesContext,
-    signal: AbortSignal,
-  ): Promise<SubtitlesFragment[]> {
+  private async runRequest({
+    ctx,
+    signal,
+  }: {
+    ctx: AiSubtitlesContext
+    signal: AbortSignal
+  }): Promise<SubtitlesFragment[]> {
     try {
       const { segments, detectedLanguage } = await requestAiSubtitles(ctx, { signal })
 
-      if (this.createAiSubtitlesContext()?.videoId !== ctx.videoId) {
-        throw new DOMException("Aborted", "AbortError")
+      if (signal.aborted || (await this.playsOtherVideo(ctx.videoId))) {
+        throw abortError()
       }
 
       this.subtitles = segments
@@ -58,6 +66,12 @@ export class AiSubtitlesFetcher implements SubtitlesFetcher {
     }
   }
 
+  // A context missing for a moment names no other video: a change of video resets the session.
+  private async playsOtherVideo(videoId: string): Promise<boolean> {
+    const ctx = await this.createAiSubtitlesContext()
+    return ctx !== null && ctx.videoId !== videoId
+  }
+
   getSourceLanguage(): string {
     return this.sourceLanguage
   }
@@ -67,22 +81,23 @@ export class AiSubtitlesFetcher implements SubtitlesFetcher {
   }
 
   async hasAvailableSubtitles(): Promise<boolean> {
-    return this.createAiSubtitlesContext() !== null
+    return (await this.createAiSubtitlesContext()) !== null
   }
 
   async shouldUseSameTrack(): Promise<boolean> {
-    if (this.subtitles.length === 0 || this.cachedVideoId === null) {
-      return false
-    }
-    return this.createAiSubtitlesContext()?.videoId === this.cachedVideoId
+    return (
+      this.subtitles.length > 0 &&
+      this.cachedVideoId !== null &&
+      !(await this.playsOtherVideo(this.cachedVideoId))
+    )
   }
 
   cleanup(): void {
     this.subtitles = []
     this.sourceLanguage = ""
     this.cachedVideoId = null
-    this.abortController?.abort()
-    this.abortController = null
+    this.session.abort()
+    this.session = new AbortController()
     this.inFlight = null
   }
 }

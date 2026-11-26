@@ -21,7 +21,7 @@ describe("aiSubtitlesFetcher", () => {
   })
 
   it("throws when no context is available", async () => {
-    const fetcher = new AiSubtitlesFetcher(() => null)
+    const fetcher = new AiSubtitlesFetcher(async () => null)
     await expect(fetcher.fetch()).rejects.toThrow("subtitles.errors.noSubtitlesFound")
     expect(requestAiSubtitles).not.toHaveBeenCalled()
   })
@@ -31,7 +31,7 @@ describe("aiSubtitlesFetcher", () => {
       segments: [{ text: "hi", start: 0, end: 100 }],
       detectedLanguage: "en",
     })
-    const fetcher = new AiSubtitlesFetcher(() => contextFor("abc"))
+    const fetcher = new AiSubtitlesFetcher(async () => contextFor("abc"))
 
     const first = await fetcher.fetch()
     const second = await fetcher.fetch()
@@ -52,10 +52,11 @@ describe("aiSubtitlesFetcher", () => {
           resolveRequest = resolve
         }),
     )
-    const fetcher = new AiSubtitlesFetcher(() => contextFor("abc"))
+    const fetcher = new AiSubtitlesFetcher(async () => contextFor("abc"))
 
     const first = fetcher.fetch()
     const second = fetcher.fetch()
+    await vi.waitFor(() => expect(requestAiSubtitles).toHaveBeenCalled())
     resolveRequest({ segments: [{ text: "hi", start: 0, end: 100 }], detectedLanguage: "en" })
     const [r1, r2] = await Promise.all([first, second])
 
@@ -70,7 +71,7 @@ describe("aiSubtitlesFetcher", () => {
       segments: [{ text: videoId, start: 0, end: 100 }],
       detectedLanguage: "en",
     }))
-    const fetcher = new AiSubtitlesFetcher(() => contextFor(videoId))
+    const fetcher = new AiSubtitlesFetcher(async () => contextFor(videoId))
 
     await fetcher.fetch()
     videoId = "def"
@@ -87,7 +88,7 @@ describe("aiSubtitlesFetcher", () => {
       videoId = "def"
       return { segments: [{ text: "stale", start: 0, end: 100 }], detectedLanguage: "en" }
     })
-    const fetcher = new AiSubtitlesFetcher(() => contextFor(videoId))
+    const fetcher = new AiSubtitlesFetcher(async () => contextFor(videoId))
 
     await expect(fetcher.fetch()).rejects.toThrow("Aborted")
   })
@@ -100,7 +101,7 @@ describe("aiSubtitlesFetcher", () => {
         return new Promise(() => {})
       },
     )
-    const fetcher = new AiSubtitlesFetcher(() => contextFor("abc"))
+    const fetcher = new AiSubtitlesFetcher(async () => contextFor("abc"))
 
     void fetcher.fetch()
     await Promise.resolve()
@@ -110,9 +111,52 @@ describe("aiSubtitlesFetcher", () => {
     expect(capturedSignal?.aborted).toBe(true)
   })
 
+  it("starts no request when cleaned up while its context resolves", async () => {
+    let resolveContext: (ctx: AiSubtitlesContext) => void = () => {}
+    const fetcher = new AiSubtitlesFetcher(
+      () =>
+        new Promise((resolve) => {
+          resolveContext = resolve
+        }),
+    )
+
+    const fetching = fetcher.fetch()
+    fetcher.cleanup()
+    resolveContext(contextFor("abc"))
+
+    await expect(fetching).rejects.toMatchObject({ name: "AbortError" })
+    expect(requestAiSubtitles).not.toHaveBeenCalled()
+  })
+
+  it("keeps a transcript that lands while the context is missing for a moment", async () => {
+    let ctx: AiSubtitlesContext | null = contextFor("abc")
+    requestAiSubtitles.mockImplementation(async () => {
+      ctx = null
+      return { segments: [{ text: "hi", start: 0, end: 100 }], detectedLanguage: "en" }
+    })
+    const fetcher = new AiSubtitlesFetcher(async () => ctx)
+
+    await expect(fetcher.fetch()).resolves.toEqual([{ text: "hi", start: 0, end: 100 }])
+  })
+
+  it("keeps a loaded track while the context is missing for a moment, and drops it for another video", async () => {
+    requestAiSubtitles.mockResolvedValue({
+      segments: [{ text: "hi", start: 0, end: 100 }],
+      detectedLanguage: "en",
+    })
+    let ctx: AiSubtitlesContext | null = contextFor("abc")
+    const fetcher = new AiSubtitlesFetcher(async () => ctx)
+    await fetcher.fetch()
+
+    ctx = null
+    await expect(fetcher.shouldUseSameTrack()).resolves.toBe(true)
+    ctx = contextFor("def")
+    await expect(fetcher.shouldUseSameTrack()).resolves.toBe(false)
+  })
+
   it("reflects context availability", async () => {
-    const withCtx = new AiSubtitlesFetcher(() => contextFor("abc"))
-    const withoutCtx = new AiSubtitlesFetcher(() => null)
+    const withCtx = new AiSubtitlesFetcher(async () => contextFor("abc"))
+    const withoutCtx = new AiSubtitlesFetcher(async () => null)
 
     await expect(withCtx.hasAvailableSubtitles()).resolves.toBe(true)
     await expect(withoutCtx.hasAvailableSubtitles()).resolves.toBe(false)

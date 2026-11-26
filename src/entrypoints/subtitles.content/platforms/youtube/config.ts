@@ -24,7 +24,7 @@ const SHORTS_ACTIVE_PLAYER = "#reel-overlay-container .html5-video-player"
 const WATCH_PLAYER = "#movie_player.html5-video-player"
 const ABOVE_PLAYER_CHROME_BELOW_PLAYER_MENUS = 60
 
-function createYoutubeAiSubtitlesContext() {
+async function createYoutubeAiSubtitlesContext() {
   // YouTube's claim is never checked against the transcript, so an ad's length here is harmless.
   return resolveAiSubtitlesContext({
     url: location.href,

@@ -25,7 +25,7 @@ function isXcomLiveVideo(video: Pick<HTMLVideoElement, "duration" | "poster">): 
 }
 
 // A poster without a media id, as a custom cover's or a replay's, keys the post's only video.
-function createXcomAiSubtitlesContext(): AiSubtitlesContext | null {
+async function createXcomAiSubtitlesContext(): Promise<AiSubtitlesContext | null> {
   const video = getCurrentXcomSubtitlesVideo()
   if (!video || XCOM_GIF_POSTER_PATTERN.test(video.poster) || isXcomLiveVideo(video)) {
     return null
