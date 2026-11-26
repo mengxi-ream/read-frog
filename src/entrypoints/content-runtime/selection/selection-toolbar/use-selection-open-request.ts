@@ -1,7 +1,7 @@
 import type { SelectionRangeSnapshot } from "../utils"
 import type { SelectionSession } from "./atoms"
 import { useCallback, useEffect, useRef } from "react"
-import { normalizeSelectedText, readRangeClientRects } from "../utils"
+import { normalizeSelectedText, readRangeClientRects, toComparableSelectionText } from "../utils"
 import { createSelectionSession } from "./atoms"
 
 interface SelectionAnchor {
@@ -68,14 +68,6 @@ function getViewportCenterAnchor(): SelectionAnchor {
   }
 }
 
-// The menu's text and the reader's can differ in whitespace and in the
-// zero-width characters the reader strips.
-const EBOOK_ZERO_WIDTH_CHAR_REGEX = /[\u200B-\u200D\uFEFF]/g
-
-function toComparableText(text: string) {
-  return text.replace(EBOOK_ZERO_WIDTH_CHAR_REGEX, "").replace(/\s+/g, " ").trim()
-}
-
 /**
  * A menu opened in a book section of the ebook reader was right-clicked there,
  * not here, so neither a right-click this frame recorded nor a selection made
@@ -90,7 +82,11 @@ function resolveEbookSectionOpenRequest(
   menuText: string,
 ): SelectionOpenRequest | null {
   const relayed = session?.selectionSnapshot.anchor ? session : null
-  if (relayed && toComparableText(relayed.selectionSnapshot.text) === toComparableText(menuText)) {
+  if (
+    relayed &&
+    toComparableSelectionText(relayed.selectionSnapshot.text) ===
+      toComparableSelectionText(menuText)
+  ) {
     return { anchor: getSelectionAnchor(relayed) ?? getViewportCenterAnchor(), session: relayed }
   }
 

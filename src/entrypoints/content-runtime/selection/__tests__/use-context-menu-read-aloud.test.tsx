@@ -61,6 +61,40 @@ describe("useContextMenuReadAloud", () => {
     expect(playMock).toHaveBeenCalledWith("Reader page header", TTS_CONFIG)
   })
 
+  it("reads the menu's text when this frame's selection changed after the menu opened", () => {
+    render(<Harness />)
+
+    // The menu was opened on "Earlier selection"; the header was selected since.
+    readAloudFromContextMenu({ selectionText: "Earlier selection" })
+
+    expect(playMock).toHaveBeenCalledWith("Earlier selection", TTS_CONFIG)
+  })
+
+  it("reads this frame's selection without the furigana the menu's text keeps", () => {
+    const paragraph = document.createElement("p")
+    paragraph.innerHTML = "<ruby>漢字<rt>かんじ</rt></ruby>を読む"
+    document.body.replaceChildren(paragraph)
+    window.getSelection()?.selectAllChildren(paragraph)
+    render(<Harness />)
+
+    readAloudFromContextMenu({ selectionText: "漢字かんじを読む" })
+
+    expect(playMock).toHaveBeenCalledWith("漢字を読む", TTS_CONFIG)
+  })
+
+  it("reads this frame's selection, line breaks and all, when the menu's text differs only in whitespace", () => {
+    const poem = document.createElement("p")
+    poem.style.whiteSpace = "pre-line"
+    poem.textContent = "First line\nSecond line"
+    document.body.replaceChildren(poem)
+    window.getSelection()?.selectAllChildren(poem)
+    render(<Harness />)
+
+    readAloudFromContextMenu({ selectionText: "First line Second line" })
+
+    expect(playMock).toHaveBeenCalledWith("First line\nSecond line", TTS_CONFIG)
+  })
+
   it("reads the menu's text, not this frame's selection, for a menu opened in an ebook section", () => {
     render(<Harness />)
 
