@@ -203,14 +203,14 @@ options:
         languageDetection: Dil algılama
         pdfTranslation: PDF çevirisi
     sponsorCta: Hızlı ve uygun maliyetli yapay zekâ al
-    sponsorCtaJalapenoCloud: GLM 5.3ʼte %50 indirim al
+    sponsorCtaJalapenoCloud: "Black Friday, DS4.1 Flash %50 indirimli"
     sponsorCtaIfapi: READFROG koduyla +%10 bakiye
     setApiKeyWarning:
       message: API anahtarınızı $1 sayfasında ayarlayın
     badges:
       featureCount: $1 özellik
       sponsor: Sponsor
-      sponsorJalapenoCloud: $$1 ücretsiz
+      sponsorJalapenoCloud: "1$$ + %60 ek"
       sponsorIfapi: Modeller -%90
     dialog:
       title: Yeni sağlayıcı ekle
@@ -300,7 +300,7 @@ options:
         anthropic: Güvenlik ve akıl yürütme mükemmelliğiyle tanınan Claude modelleri
         xai: Gerçek zamanlı veri erişimli Grok modelleri sunan Elon Musk'ın AI şirketi
         atlascloud: DeepSeek, Kimi, Qwen, Doubao ve GLM gibi yeni modellere OpenAI uyumlu birleşik erişim platformu
-        jalapenocloud: En iyi ekiplerin kullandığı kurumsal düzeyde yapay zekâ, şimdi sizin için!
+        jalapenocloud: "Flash her hafta sabit %50~30 indirimli"
         ifapi: GPT, Claude, Gemini ve daha fazlası, resmi fiyatın %10'undan başlayan fiyatlarla
         siliconflow: Çin ve uluslararası modeller için yüksek performanslı çıkarım platformu
         tensdaq: Yüksek maliyetli sabit fiyatlandırmayı ortadan kaldıran pazar odaklı fiyatlandırma ile devrimci açık artırma AI MaaS platformu
