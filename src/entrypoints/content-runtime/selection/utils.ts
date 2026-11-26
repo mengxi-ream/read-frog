@@ -131,7 +131,7 @@ export function normalizeSelectedText(value: string | null | undefined) {
 // A context menu's selection text and the same selection read here can differ
 // in whitespace, such as line breaks, and in zero-width characters, which the
 // ebook reader strips.
-const COMPARABLE_ZERO_WIDTH_CHAR_REGEX = /[​-‍﻿]/g
+const COMPARABLE_ZERO_WIDTH_CHAR_REGEX = /[\u200B-\u200D\uFEFF]/g
 
 /** Text to compare two readings of a selection by. */
 export function toComparableSelectionText(text: string) {
