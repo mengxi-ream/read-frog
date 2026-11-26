@@ -1,5 +1,11 @@
 # @read-frog/extension
 
+## 1.62.1
+
+### Patch Changes
+
+- [#2590](https://github.com/mengxi-ream/read-frog/pull/2590) [`98cc951`](https://github.com/mengxi-ream/read-frog/commit/98cc9518a8ac58a1a8f29af2218a17028537b732) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - chore(firefox): republish the Firefox build under a new version number. The extension itself has not changed
+
 ## 1.62.0
 
 ### Minor Changes
