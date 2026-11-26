@@ -3,6 +3,7 @@ import type { VocabEvent, VocabJudgeBlock, VocabJudgeOutput } from "@read-frog/a
 import type { DifficultWordsScannerHost } from "../scanner"
 import type { DifficultWordsJudgeResponse } from "../types"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import { BlockDiscovery } from "../blocks"
 import { DifficultWordsScanner } from "../scanner"
 
 // The sheet is adopted into the document, which jsdom cannot do.
@@ -926,6 +927,64 @@ describe("DifficultWordsScanner", () => {
       scanner.noteSeen(mark!)
       expect(host.seen).toHaveBeenCalledTimes(2)
     })
+  })
+
+  it("finds a mark again where a newer answer painted the same word, until it is unmarked", async () => {
+    document.body.innerHTML = `<p id="a">${PARAGRAPH}</p>`
+    const host = createHost(judgeHard(["ubiquitous"]))
+    const started = await startScanner(host)
+    scanner = started.scanner
+    started.observer.fire([$("#a")])
+    await flush()
+    const mark = scanner.markForSelection(rangeIn($("#a"), 30, 40), "ubiquitous")!
+    expect(scanner.currentMark(mark)).toBe(mark)
+
+    onScreen($("#a"))
+    scanner.refreshVisible([KNOWN])
+    await settle()
+
+    expect(host.judge).toHaveBeenCalledTimes(2)
+    expect(scanner.isMarked(mark)).toBe(false)
+    const current = scanner.currentMark(mark)
+    expect(current).not.toBe(mark)
+    expect(current).toMatchObject({ word: "ubiquitous", lemma: "ubiquitous" })
+    expect(current!.range.startOffset).toBe(30)
+
+    scanner.hideLemma("en", "ubiquitous")
+    expect(scanner.currentMark(mark)).toBeNull()
+  })
+
+  it("does not send a paragraph that went out of range before it was sent", async () => {
+    document.body.innerHTML = `<p id="a">${PARAGRAPH}</p>`
+    const host = createHost(judgeHard(["ubiquitous"]))
+    const started = await startScanner(host)
+    scanner = started.scanner
+
+    started.observer.fire([$("#a")])
+    started.observer.fire([$("#a")], false)
+    await flush()
+    expect(host.judge).not.toHaveBeenCalled()
+
+    started.observer.fire([$("#a")])
+    await flush()
+    expect(host.judge).toHaveBeenCalledTimes(1)
+  })
+
+  it("stops its first walk of the page when a new body is swapped in, and reads the new one", async () => {
+    document.body.innerHTML = `<p id="a">${PARAGRAPH}</p>`
+    const run = vi.spyOn(BlockDiscovery.prototype, "run")
+    const host = createHost(judgeHard(["ubiquitous"]))
+    scanner = new DifficultWordsScanner(host)
+    scanner.start()
+
+    const next = document.createElement("body")
+    next.innerHTML = `<p id="b">${PARAGRAPH}</p>`
+    document.documentElement.replaceChild(next, document.body)
+    await vi.advanceTimersByTimeAsync(100)
+
+    expect(run).not.toHaveBeenCalled()
+    expect(FakeIntersectionObserver.latest!.observed.has($("#b"))).toBe(true)
+    expect(host.onEmpty).not.toHaveBeenCalled()
   })
 
   it("takes its marks and highlights away when disposed", async () => {

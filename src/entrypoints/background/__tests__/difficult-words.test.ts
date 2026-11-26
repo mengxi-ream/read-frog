@@ -573,11 +573,15 @@ describe("difficult words handlers", () => {
     })
   })
 
-  it("tells the other open pages about a word the reader knows", async () => {
-    vi.spyOn(browser.tabs, "query").mockResolvedValue([{ id: 1 }, { id: 2 }, {}] as any)
+  it("tells the other open pages about a word the reader knows, local files included", async () => {
+    const query = vi
+      .spyOn(browser.tabs, "query")
+      .mockResolvedValue([{ id: 1 }, { id: 2 }, {}] as any)
     const change = { lang: "en", lemma: "ubiquitous", known: true }
 
     await ask("broadcastDifficultWordLemma", change, { tab: { id: 1 } })
+
+    expect(query).toHaveBeenCalledWith({ url: ["http://*/*", "https://*/*", "file:///*"] })
 
     expect(sendMessageMock).toHaveBeenCalledTimes(1)
     expect(sendMessageMock).toHaveBeenCalledWith("difficultWordLemmaChanged", change, {

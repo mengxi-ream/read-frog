@@ -469,7 +469,8 @@ export function setupDifficultWordsHandlers() {
   // A word the reader knows is unmarked in every open page, not just this one.
   onMessage("broadcastDifficultWordLemma", async (message) => {
     const senderTabId = message.sender?.tab?.id
-    const tabs = await browser.tabs.query({ url: ["http://*/*", "https://*/*"] })
+    // Every page the content runtime runs in, local files included.
+    const tabs = await browser.tabs.query({ url: ["http://*/*", "https://*/*", "file:///*"] })
     for (const tab of tabs) {
       if (tab.id === undefined || tab.id === senderTabId) continue
       void sendMessage("difficultWordLemmaChanged", message.data, {

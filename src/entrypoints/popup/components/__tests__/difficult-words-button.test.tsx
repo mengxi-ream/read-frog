@@ -10,13 +10,14 @@ import { DifficultWordsButton } from "../difficult-words-button"
 const mocks = vi.hoisted(() => ({
   sendMessage: vi.fn<(...args: any[]) => Promise<unknown>>(),
   toastAdd: vi.fn<(toast: unknown) => string>(() => "toast"),
+  access: "allowed" as string,
 }))
 
 vi.mock("@/utils/message", () => ({ sendMessage: mocks.sendMessage }))
 vi.mock("@/components/ui/base-ui/toast", () => ({ toastManager: { add: mocks.toastAdd } }))
 vi.mock("@/utils/i18n", () => ({ i18n: { t: (key: string) => key } }))
 vi.mock("@/utils/difficult-words/tab-state", () => ({
-  useDifficultWordsAccess: () => ({ data: "allowed" }),
+  useDifficultWordsAccess: () => ({ data: mocks.access }),
 }))
 vi.mock("@/utils/atoms/config", async () => {
   const jotai = await import("jotai")
@@ -49,11 +50,40 @@ function renderButton() {
 }
 
 afterEach(() => {
+  mocks.access = "allowed"
   vi.clearAllMocks()
   vi.restoreAllMocks()
 })
 
 describe("DifficultWordsButton", () => {
+  it("can still clear the marks on a page after the account lost the feature, and only then", async () => {
+    mocks.access = "signedOut"
+    vi.spyOn(browser.tabs, "query").mockResolvedValue([{ id: 7 }] as any)
+    mocks.sendMessage.mockResolvedValue({ enabled: true, count: 3 })
+    const { unmount } = renderButton()
+
+    fireEvent.click(await screen.findByRole("button", { name: "difficultWords.clearCount" }))
+    await waitFor(() => {
+      expect(mocks.sendMessage).toHaveBeenCalledWith(
+        "setDifficultWordsEnabled",
+        { enabled: false },
+        { tabId: 7, frameId: 0 },
+      )
+    })
+    unmount()
+
+    mocks.sendMessage.mockClear()
+    mocks.sendMessage.mockResolvedValue({ enabled: false, count: 0 })
+    renderButton()
+    await waitFor(() => {
+      expect(mocks.sendMessage).toHaveBeenCalledWith("getDifficultWordsState", undefined, {
+        tabId: 7,
+        frameId: 0,
+      })
+    })
+    expect(screen.queryByRole("button")).toBeNull()
+  })
+
   it("says so when the page does not answer, as one open from before Read Frog was", async () => {
     vi.spyOn(browser.tabs, "query").mockResolvedValue([{ id: 7 }] as any)
     mocks.sendMessage.mockRejectedValue(

@@ -35,7 +35,8 @@ const PASS_THROUGH_SELECTOR = [
   "input",
   "label",
   "summary",
-  "[contenteditable]",
+  // An editor; a read-only view of one (contenteditable="false") is prose.
+  '[contenteditable]:not([contenteditable="false"])',
   ...[
     "button",
     "link",
@@ -530,9 +531,13 @@ export class DifficultWordsSession {
 
   private showCheck(mark: DifficultWordMark) {
     this.showCheckTimer = null
-    if (this.hovered !== mark || !this.scanner.isMarked(mark)) return
-    const rect = lastLineRect(mark.range)
-    this.setView({ check: { mark, rect: { right: rect.right, top: rect.top } } })
+    if (this.hovered !== mark) return
+    // An answer may have painted the word again meanwhile.
+    const current = this.scanner.currentMark(mark)
+    if (!current) return
+    if (current !== mark) this.setHovered(current)
+    const rect = lastLineRect(current.range)
+    this.setView({ check: { mark: current, rect: { right: rect.right, top: rect.top } } })
   }
 
   private hideCheckSoon() {
@@ -581,7 +586,9 @@ export class DifficultWordsSession {
     this.clearTimer("openTimer")
     this.openTimer = setTimeout(() => {
       this.openTimer = null
-      if (!this.disposed && this.scanner.isMarked(mark)) this.open(mark)
+      // An answer may have painted the word again meanwhile.
+      const current = this.disposed ? null : this.scanner.currentMark(mark)
+      if (current) this.open(current)
     }, OPEN_DELAY_MS)
   }
 

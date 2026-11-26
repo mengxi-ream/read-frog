@@ -21,6 +21,7 @@ interface FakeScanner {
   noteSeen: Mock<(mark: DifficultWordMark) => void>
   markForSelection: Mock<(range: Range, word: string) => DifficultWordMark | null>
   languageAt: Mock<(node: Node) => VocabLang | null>
+  currentMark: Mock<(mark: DifficultWordMark) => DifficultWordMark | null>
 }
 
 const mocks = vi.hoisted(() => ({
@@ -57,7 +58,7 @@ vi.mock("@/utils/difficult-words/scanner", () => ({
     refreshVisible = vi.fn<(events: VocabEvent[]) => void>()
     retryLevel = vi.fn<(lang: string) => void>()
     markAt = vi.fn<() => unknown>(() => mocks.markAt)
-    isMarked = vi.fn<() => boolean>(() => true)
+    currentMark = vi.fn<(mark: DifficultWordMark) => DifficultWordMark | null>((mark) => mark)
     paragraphOf = vi.fn<() => string>(() => "The ubiquitous cat.")
     languageAt = vi.fn<(node: Node) => VocabLang | null>(() => null)
     noteSeen = vi.fn<(mark: DifficultWordMark) => void>()
@@ -243,11 +244,12 @@ describe("DifficultWordsSession", () => {
       <p id="a">The ubiquitous cat.</p>
       <a href="#" id="link">The ubiquitous cat.</a>
       <div role="tab"><span id="tab">The ubiquitous cat.</span></div>
-      <ul role="listbox"><li role="option" id="option">The ubiquitous cat.</li></ul>`
+      <ul role="listbox"><li role="option" id="option">The ubiquitous cat.</li></ul>
+      <div contenteditable="false"><p id="readOnly">The ubiquitous cat.</p></div>`
     session = createSession()
 
     const results: Record<string, { prevented: boolean; opened: boolean }> = {}
-    for (const id of ["link", "tab", "option", "a"]) {
+    for (const id of ["link", "tab", "option", "a", "readOnly"]) {
       const target = document.querySelector(`#${id}`)!
       mocks.markAt = markIn(target)
       window.dispatchEvent(new MouseEvent("pointerdown", { button: 0, clientX: 20, clientY: 20 }))
@@ -273,7 +275,35 @@ describe("DifficultWordsSession", () => {
       tab: { prevented: false, opened: false },
       option: { prevented: false, opened: false },
       a: { prevented: true, opened: true },
+      // A read-only view of an editor is prose: its words open.
+      readOnly: { prevented: true, opened: true },
     })
+  })
+
+  it("opens the word as painted when the click's wait ends, and none once it is unmarked", async () => {
+    session = createSession()
+    const clicked = markIn(document.querySelector("#a")!)
+    const repainted = markIn(document.querySelector("#a")!)
+    mocks.scanner!.currentMark.mockReturnValueOnce(repainted)
+    await openCard(clicked)
+    expect(mocks.scanner!.currentMark).toHaveBeenCalledWith(clicked)
+    expect(session.getView().card?.mark).toBe(repainted)
+
+    session.closeCard()
+    mocks.scanner!.currentMark.mockReturnValueOnce(null)
+    await openCard(clicked)
+    expect(session.getView().card).toBeNull()
+  })
+
+  it("shows the ✓ on the word as painted when the pointer's wait ends", async () => {
+    session = createSession()
+    const hovered = markIn(document.querySelector("#a")!)
+    const repainted = markIn(document.querySelector("#a")!)
+    mocks.scanner!.currentMark.mockReturnValueOnce(repainted)
+    await hover(hovered)
+    await vi.advanceTimersByTimeAsync(300)
+
+    expect(session.getView().check?.mark).toBe(repainted)
   })
 
   it("undoes the ✓ by recording the undo alone", async () => {

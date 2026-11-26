@@ -24,15 +24,18 @@ import { isCurrentSiteInBlacklistAtom, isCurrentSiteInWhitelistAtom } from "../a
 const STATE_POLL_MS = 1_000
 const NOT_STARTED: DifficultWordsTabState = { enabled: false, count: 0 }
 
-/** Marks the difficult words on the page, or clears them. Shown to the accounts it is open to. */
+/** Marks the difficult words on the page, or clears them. Shown to the accounts it is open to, and wherever it is on. */
 export function DifficultWordsButton() {
   const difficultWords = useAtomValue(configFieldsAtomMap.difficultWords)
   // Asked afresh: opening the popup is where a newly opened feature is looked for.
   const access = useDifficultWordsAccess(difficultWords.enabled, { fresh: true })
-  if (!difficultWords.enabled || (access.data !== "allowed" && access.data !== "unknown")) {
-    return null
-  }
-  return <DifficultWordsToggle shortcut={getDifficultWordsShortcut(difficultWords)} />
+  if (!difficultWords.enabled) return null
+  return (
+    <DifficultWordsToggle
+      shortcut={getDifficultWordsShortcut(difficultWords)}
+      canStart={access.data === "allowed" || access.data === "unknown"}
+    />
+  )
 }
 
 function useActiveTabId() {
@@ -45,7 +48,7 @@ function useActiveTabId() {
   return tabId
 }
 
-function DifficultWordsToggle({ shortcut }: { shortcut: string }) {
+function DifficultWordsToggle({ shortcut, canStart }: { shortcut: string; canStart: boolean }) {
   const queryClient = useQueryClient()
   const tabId = useActiveTabId()
   const isPageTranslated = useAtomValue(isPageTranslatedAtom)
@@ -118,6 +121,9 @@ function DifficultWordsToggle({ shortcut }: { shortcut: string }) {
     if (isBlocked || toggle.isPending) return
     toggle.mutate(!state.enabled)
   }
+
+  // On, it can always be switched off, whatever became of the account.
+  if (!canStart && !state.enabled) return null
 
   const StateIcon = state.enabled ? IconHighlightOff : IconHighlight
 

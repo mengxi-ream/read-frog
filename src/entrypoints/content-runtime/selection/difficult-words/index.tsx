@@ -188,9 +188,11 @@ function DifficultWordsRuntime() {
 
   // The key is taken from the page only for an account that can use it: the
   // verdict is cached for every tab, and the floating button asks it too.
+  // On, it can always be switched off, whatever became of the account.
   const access = useDifficultWordsAccess(difficultWordsConfig.enabled)
+  const canStart = access.data === "allowed" || access.data === "unknown"
   const shortcut =
-    difficultWordsConfig.enabled && (access.data === "allowed" || access.data === "unknown")
+    difficultWordsConfig.enabled && (session !== null || canStart)
       ? getDifficultWordsShortcut(difficultWordsConfig)
       : ""
   useEffect(() => {

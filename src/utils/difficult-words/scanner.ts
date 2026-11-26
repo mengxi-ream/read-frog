@@ -324,6 +324,26 @@ export class DifficultWordsScanner {
     return this.byLemma.get(lemmaKey(mark.lang, mark.lemma))?.has(mark) ?? false
   }
 
+  /**
+   * `mark` as painted now: itself, or the mark a newer answer painted for the
+   * same word at the same place. `null` once that word is unmarked there.
+   */
+  currentMark(mark: DifficultWordMark): DifficultWordMark | null {
+    if (this.isMarked(mark)) return mark
+    const { startContainer, startOffset } = mark.range
+    return (
+      this.blocks
+        .get(mark.block)
+        ?.marks.find(
+          (other) =>
+            other.lang === mark.lang &&
+            other.lemma === mark.lemma &&
+            other.range.startContainer === startContainer &&
+            other.range.startOffset === startOffset,
+        ) ?? null
+    )
+  }
+
   /** Unmarks a word in every paragraph, and keeps it unmarked. */
   hideLemma(lang: VocabLang, lemma: string) {
     const key = lemmaKey(lang, lemma)
@@ -429,6 +449,12 @@ export class DifficultWordsScanner {
     })
   }
 
+  private stopDiscovery() {
+    this.cancelDiscovery?.()
+    this.cancelDiscovery = null
+    this.discovery = null
+  }
+
   private addBlock(element: Element) {
     if (this.blocks.has(element)) return
     this.nextBlockId += 1
@@ -472,7 +498,9 @@ export class DifficultWordsScanner {
       const block = this.blocks.get(entry.target)
       if (!block) continue
       if (!entry.isIntersecting) {
+        // Passed by before it went: judged if it comes near again.
         this.near.delete(block)
+        this.pending.delete(block)
         continue
       }
       this.near.add(block)
@@ -836,6 +864,8 @@ export class DifficultWordsScanner {
           if (!(node instanceof Element) || node.localName !== "body") continue
           this.resolver.forget(node)
           this.added.push(node)
+          // A first walk not done yet was of the old body: the new one is read whole instead.
+          this.stopDiscovery()
         }
         if (record.removedNodes.length > 0) this.sawRemovals = true
         continue
