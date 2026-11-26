@@ -1362,6 +1362,90 @@ describe("pageTranslationManager mutation re-walk", () => {
     }
   })
 
+  it("does not walk a revealed translate-as-child blocker inside a registered bilingual source (#2212)", async () => {
+    mockIsDontWalkIntoButTranslateAsChildElement.mockImplementation((element: HTMLElement) =>
+      element.classList.contains("np"),
+    )
+    document.body.innerHTML = `<p id="summary">Original <span id="brand" class="np">Acme Corp</span> summary</p>`
+
+    const manager = new PageTranslationManager()
+    await manager.start()
+    await flushDomUpdates()
+
+    const observer = intersectionObservers[0]!
+    const summary = document.getElementById("summary") as HTMLElement
+    const brand = document.getElementById("brand") as HTMLElement
+    const wrapper = document.createElement("span")
+    wrapper.className = "notranslate read-frog-translated-content-wrapper"
+    wrapper.setAttribute("data-read-frog-translation-mode", "bilingual")
+    wrapper.append("译文")
+    summary.append(wrapper)
+    const state: BilingualTranslationState = {
+      layoutSource: summary,
+      sourceTextContent: "Original Acme Corp summary",
+      status: "active",
+      walkId: "walk-id",
+      wrapper,
+      wrapperTextContent: "译文",
+    }
+    registerBilingualTranslationState(state)
+    await flushDomUpdates()
+    observer.observe.mockClear()
+    mockWalkAndLabelElement.mockClear()
+    mockTranslateNodesBilingualMode.mockClear()
+
+    try {
+      brand.classList.remove("np")
+      await flushDomUpdates()
+
+      expect(observer.observe).not.toHaveBeenCalledWith(brand)
+      expect(mockWalkAndLabelElement.mock.calls.some(([element]) => element === brand)).toBe(false)
+      expect(mockTranslateNodesBilingualMode).not.toHaveBeenCalled()
+    } finally {
+      unregisterBilingualTranslationState(state)
+      manager.stop()
+    }
+  })
+
+  it("still walks a revealed hidden-family blocker inside a registered bilingual source (#2212)", async () => {
+    document.body.innerHTML = `<p id="summary">Original <span id="detail" class="closed">Hidden detail</span> summary</p>`
+
+    const manager = new PageTranslationManager()
+    await manager.start()
+    await flushDomUpdates()
+
+    const observer = intersectionObservers[0]!
+    const summary = document.getElementById("summary") as HTMLElement
+    const detail = document.getElementById("detail") as HTMLElement
+    const wrapper = document.createElement("span")
+    wrapper.className = "notranslate read-frog-translated-content-wrapper"
+    wrapper.setAttribute("data-read-frog-translation-mode", "bilingual")
+    wrapper.append("译文")
+    summary.append(wrapper)
+    const state: BilingualTranslationState = {
+      layoutSource: summary,
+      sourceTextContent: "Original Hidden detail summary",
+      status: "active",
+      walkId: "walk-id",
+      wrapper,
+      wrapperTextContent: "译文",
+    }
+    registerBilingualTranslationState(state)
+    await flushDomUpdates()
+    observer.observe.mockClear()
+    mockWalkAndLabelElement.mockClear()
+
+    try {
+      detail.classList.remove("closed")
+      await flushDomUpdates()
+
+      expect(observer.observe).toHaveBeenCalledWith(detail)
+    } finally {
+      unregisterBilingualTranslationState(state)
+      manager.stop()
+    }
+  })
+
   it("still walks additions that are not inside any registered source", async () => {
     // Anti-dead-zone guard: the currency-independent skip must not swallow
     // ordinary infinite-scroll content appended beside a translated paragraph.

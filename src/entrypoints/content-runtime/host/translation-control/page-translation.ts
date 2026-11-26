@@ -31,6 +31,8 @@ import { isFeatureOn } from "@/utils/features"
 import { isGuideStepUrl } from "@/utils/guide/guide-url"
 import {
   hasNoWalkAncestor,
+  isDontWalkIntoAndDontTranslateAsChildElement,
+  isDontWalkIntoButTranslateAsChildElement,
   isHTMLElement,
   isWalkBlockedElement as isWalkBlockedElementFilter,
 } from "@/utils/host/dom/filter"
@@ -332,6 +334,9 @@ export class PageTranslationManager implements IPageTranslationManager {
   private walkId: string | null = null
   private intersectionOptions: IntersectionObserverInit
   private walkBlockedElementsCache = new WeakSet<HTMLElement>()
+  // Subset of walkBlockedElementsCache blocked solely as translate-as-child
+  // (e.g. notranslate), whose text was already folded into an enclosing source (#2212).
+  private translateAsChildBlockedElements = new WeakSet<HTMLElement>()
   private ancestorsWithWalkBlockedElements = new WeakSet<HTMLElement>()
   private refreshingTranslatedSources = new WeakSet<HTMLElement>()
   private translatedSourceMutationVersions = new WeakMap<HTMLElement, number>()
@@ -768,6 +773,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     this.translationSessionVersion += 1
     this.walkId = null
     this.walkBlockedElementsCache = new WeakSet()
+    this.translateAsChildBlockedElements = new WeakSet()
     this.ancestorsWithWalkBlockedElements = new WeakSet()
     this.refreshingTranslatedSources = new WeakSet()
     this.translatedSourceMutationVersions = new WeakMap()
@@ -1003,7 +1009,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     if (hasNoWalkAncestor(container, config)) return
 
     const onBlockedElement = (element: HTMLElement) => {
-      this.cacheWalkBlockedElement(element)
+      this.cacheWalkBlockedElement(element, config)
     }
     if (options.chunked) {
       const result = await walkAndLabelElementChunked(container, walkId, config, {
@@ -1295,8 +1301,16 @@ export class PageTranslationManager implements IPageTranslationManager {
     return isWalkBlockedElementFilter(element, config)
   }
 
-  private cacheWalkBlockedElement(element: HTMLElement): void {
+  private cacheWalkBlockedElement(element: HTMLElement, config: Config): void {
     this.walkBlockedElementsCache.add(element)
+    if (
+      isDontWalkIntoButTranslateAsChildElement(element, config) &&
+      !isDontWalkIntoAndDontTranslateAsChildElement(element, config)
+    ) {
+      this.translateAsChildBlockedElements.add(element)
+    } else {
+      this.translateAsChildBlockedElements.delete(element)
+    }
     let current: HTMLElement | null = element
     while (current) {
       const root = current.getRootNode()
@@ -1306,8 +1320,12 @@ export class PageTranslationManager implements IPageTranslationManager {
     }
   }
 
-  private collectNewlyWalkableSubtrees(element: HTMLElement, config: Config): HTMLElement[] {
-    if (this.didChangeToWalkable(element, config)) return [element]
+  private collectNewlyWalkableSubtrees(
+    element: HTMLElement,
+    config: Config,
+  ): Array<{ element: HTMLElement; wasTranslateAsChild: boolean }> {
+    const transition = this.didChangeToWalkable(element, config)
+    if (transition) return [transition]
     if (
       this.walkBlockedElementsCache.has(element) ||
       !this.ancestorsWithWalkBlockedElements.has(element)
@@ -1318,7 +1336,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     // ancestor's own walkability. Only follow branches leading to cached
     // blockers; ordinary class/style churn must not scan the entire subtree.
     // Weak membership avoids retaining detached nodes through their ancestors.
-    const result: HTMLElement[] = []
+    const result: Array<{ element: HTMLElement; wasTranslateAsChild: boolean }> = []
     const children = [...element.children, ...(element.shadowRoot?.children ?? [])]
     for (const child of children) {
       if (
@@ -1336,18 +1354,24 @@ export class PageTranslationManager implements IPageTranslationManager {
    * Handle attribute changes and only trigger observation
    * when element transitions from blocked to walkable.
    */
-  private didChangeToWalkable(element: HTMLElement, config: Config): boolean {
+  private didChangeToWalkable(
+    element: HTMLElement,
+    config: Config,
+  ): { element: HTMLElement; wasTranslateAsChild: boolean } | null {
     const wasWalkBlocked = this.walkBlockedElementsCache.has(element)
     const isWalkBlockedNow = this.isWalkBlockedElement(element, config)
 
     // Update cache with current state
     if (isWalkBlockedNow) {
-      this.cacheWalkBlockedElement(element)
-    } else {
-      this.walkBlockedElementsCache.delete(element)
+      this.cacheWalkBlockedElement(element, config)
+      return null
     }
 
-    return wasWalkBlocked && !isWalkBlockedNow
+    const wasTranslateAsChild = this.translateAsChildBlockedElements.has(element)
+    this.walkBlockedElementsCache.delete(element)
+    this.translateAsChildBlockedElements.delete(element)
+
+    return wasWalkBlocked ? { element, wasTranslateAsChild } : null
   }
 
   /**
@@ -1357,7 +1381,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     const walkBlockedElements = deepQueryTopLevelSelector(element, (el) =>
       this.isWalkBlockedElement(el, config),
     )
-    walkBlockedElements.forEach((el) => this.cacheWalkBlockedElement(el))
+    walkBlockedElements.forEach((el) => this.cacheWalkBlockedElement(el, config))
   }
 
   /**
@@ -1513,7 +1537,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     let revealedRoot: HTMLElement | undefined
     for (const host of shadowWalkRoots) {
       if (hasNoWalkAncestor(host, config) || this.isWalkBlockedElement(host, config)) {
-        this.cacheWalkBlockedElement(host)
+        this.cacheWalkBlockedElement(host, config)
         staleTranslatedSources.forEach((source) => this.blockedStaleSources.add(source))
         // A hidden tree may itself receive more isolated roots. Register
         // them too, without labeling or translating any of their content.
@@ -1531,7 +1555,10 @@ export class PageTranslationManager implements IPageTranslationManager {
     }
 
     if (revealedRoot) {
-      shadowWalkRoots.forEach((host) => this.walkBlockedElementsCache.delete(host))
+      shadowWalkRoots.forEach((host) => {
+        this.walkBlockedElementsCache.delete(host)
+        this.translateAsChildBlockedElements.delete(host)
+      })
       // Also recover on a characterData-only first update, before the
       // ordinary fast path rejects text with no registered translation.
       void this.observeTopLevelParagraphs(revealedRoot, config)
@@ -1649,12 +1676,24 @@ export class PageTranslationManager implements IPageTranslationManager {
       } else if (this.isWalkabilityAttributeMutation(rec)) {
         const el = rec.target
         if (!isHTMLElement(el)) continue
-        for (const unblocked of this.collectNewlyWalkableSubtrees(el, config)) {
-          void this.observeTopLevelParagraphs(unblocked, config)
+        for (const { element: unblocked, wasTranslateAsChild } of this.collectNewlyWalkableSubtrees(
+          el,
+          config,
+        )) {
+          // A translate-as-child blocker (e.g. notranslate) was already folded verbatim into
+          // an enclosing bilingual source; walking it as its own root would duplicate it (#2212).
+          // Hidden/display:none blockers are excluded from the enclosing source, so walking them rescues content.
+          const insideBilingualSource =
+            wasTranslateAsChild && Boolean(findEnclosingBilingualLayoutSource(unblocked))
+          if (!insideBilingualSource) {
+            void this.observeTopLevelParagraphs(unblocked, config)
+          }
           // A blocked addition under a current source can skip isolated-tree
           // registration. Observe future shadow mutations when it unblocks.
           // Descendant hosts may still be blocked after this ancestor opens.
-          this.observeIsolatedDescendantsMutations(unblocked, config)
+          this.observeIsolatedDescendantsMutations(unblocked, config, {
+            scanIsolatedTrees: insideBilingualSource,
+          })
         }
       }
     }
@@ -1814,7 +1853,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     const visit = (current: HTMLElement, ancestorsWalkable: boolean): void => {
       let walkable = ancestorsWalkable
       if (config && ancestorsWalkable && this.isWalkBlockedElement(current, config)) {
-        this.cacheWalkBlockedElement(current)
+        this.cacheWalkBlockedElement(current, config)
         walkable = false
       }
 
