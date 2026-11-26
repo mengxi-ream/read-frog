@@ -1,13 +1,15 @@
-import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { LanguageTag, LangLevel } from "@read-frog/definitions"
+import type { ParagraphDiagnosis } from "./paragraph-diagnosis"
 import type { HostedAiTextStreamRoute } from "@/types/background-stream"
 import type { Config } from "@/types/config/config"
 import type { LLMProviderConfig, TranslateProviderConfig } from "@/types/config/provider"
 import type { TranslationTextFormat } from "@/types/config/translate"
 import type { WebPagePromptContext } from "@/types/content"
 import type { MatchedTerm } from "@/utils/glossary/types"
+import type { HostedAiReasoning } from "@/utils/hosted-ai/types"
 import type { PromptableProviderRef, SerializableProviderRef } from "@/utils/providers/provider-ref"
-import type { ResolvedProviderRef } from "@/utils/providers/provider-registry"
-import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
+import type { ResolvedProviderRef, SystemProviderRef } from "@/utils/providers/provider-registry"
+import { isSameLanguage, LANGUAGE_ENGLISH_NAMES } from "@read-frog/definitions"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { isAPIProviderConfig, isLLMProviderConfig } from "@/types/config/provider"
 import { classifyResolvedProvider } from "@/utils/analytics-provider"
@@ -15,10 +17,11 @@ import { isNoTranslationSentinel } from "@/utils/constants/prompt"
 import { detectLanguage } from "@/utils/content/language"
 import { resolveGlossaryTerms } from "@/utils/glossary/active-matcher"
 import { trackGlossaryUsed } from "@/utils/glossary/analytics"
+import { readHostedAiReasoningChoice } from "@/utils/hosted-ai/models"
 import { i18n } from "@/utils/i18n"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
 import { getTranslatePrompt } from "@/utils/prompts/translate"
-import { serializeProviderRef } from "@/utils/providers/provider-ref"
+import { getProviderCacheIdentity, serializeProviderRef } from "@/utils/providers/provider-ref"
 import { resolveProviderRefForCapability } from "@/utils/providers/provider-registry"
 import { TranslationCancelledError } from "@/utils/request/cancellation"
 import { Sha256Hex } from "../../hash"
@@ -30,6 +33,8 @@ import {
   getPageTranslationSessionProviderRef,
   setPageTranslationSessionProviderRef,
 } from "./translation-session"
+
+const log = createLogger("host/translate/translate-text")
 
 /**
  * Minimum text length before a skip decision is attempted at all. Deliberately
@@ -61,7 +66,7 @@ export const MIN_LENGTH_FOR_SKIP_LANGUAGE_DETECTION = 10
  */
 export async function shouldSkipByLanguage(
   text: string,
-  skipLanguages: LangCodeISO6393[],
+  skipLanguages: LanguageTag[],
 ): Promise<boolean> {
   const detectedLang = await detectLanguage(text, {
     minLength: MIN_LENGTH_FOR_SKIP_LANGUAGE_DETECTION,
@@ -72,7 +77,7 @@ export async function shouldSkipByLanguage(
     return false
   }
 
-  return skipLanguages.includes(detectedLang)
+  return skipLanguages.some((language) => isSameLanguage(language, detectedLang))
 }
 
 export function normalizePromptContextValue(
@@ -102,7 +107,7 @@ function normalizeWebPagePromptContext(
 async function buildWebPageHashComponents(
   text: string,
   providerRef: SerializableProviderRef,
-  partialLangConfig: { sourceCode: LangCodeISO6393 | "auto"; targetCode: LangCodeISO6393 },
+  partialLangConfig: { sourceCode: LanguageTag | "auto"; targetCode: LanguageTag },
   enableAIContentAware: boolean,
   textFormat: TranslationTextFormat,
   preserveLineBreaks: boolean,
@@ -112,16 +117,9 @@ async function buildWebPageHashComponents(
   const preparedText = prepareTranslationText(text)
   const normalizedWebPageContext = normalizeWebPagePromptContext(webPageContext)
   const providerConfig = providerRef.kind === "local" ? providerRef.config : null
-  const providerHashIdentity =
-    providerRef.kind === "local"
-      ? providerRef.config
-      : {
-          providerId: providerRef.providerId,
-          modelRevision: providerRef.modelRevision,
-        }
   const hashComponents = [
     preparedText,
-    JSON.stringify(providerHashIdentity),
+    getProviderCacheIdentity(providerRef),
     partialLangConfig.sourceCode,
     partialLangConfig.targetCode,
   ]
@@ -143,7 +141,7 @@ async function buildWebPageHashComponents(
     return hashComponents
   }
 
-  const targetLangName = LANG_CODE_TO_EN_NAME[partialLangConfig.targetCode]
+  const targetLangName = LANGUAGE_ENGLISH_NAMES[partialLangConfig.targetCode]
   // The terms are passed in rather than resolved here, so the prompt this hash
   // is taken over is built from exactly the terms the request will carry.
   const { systemPrompt, prompt } = await getTranslatePrompt(targetLangName, preparedText, {
@@ -182,20 +180,24 @@ async function buildWebPageHashComponents(
  * status blip cannot fail in-flight paragraphs.
  */
 function getSessionProviderRefFor(
-  provider: ResolvedProviderRef<TranslateProviderConfig>,
+  provider: SystemProviderRef,
+  reasoningChoice: HostedAiReasoning | undefined,
 ): SerializableProviderRef | null {
-  if (provider.kind !== "system") {
+  const session = getPageTranslationSessionProviderRef()
+  if (!session) {
     return null
   }
-  const sessionRef = getPageTranslationSessionProviderRef()
+  const { providerRef } = session
+  // The provider id names the model, so a switch to another model misses. So
+  // does another reasoning level: it is a user setting, not status.
   if (
-    sessionRef?.kind !== "system" ||
-    sessionRef.providerId !== provider.id ||
-    sessionRef.modelTier !== provider.modelTier
+    providerRef.kind !== "system" ||
+    providerRef.providerId !== provider.id ||
+    session.reasoningChoice !== reasoningChoice
   ) {
     return null
   }
-  return sessionRef
+  return providerRef
 }
 
 const pendingSystemSerializes = new Map<string, Promise<SerializableProviderRef>>()
@@ -210,10 +212,10 @@ let lastRequestedSystemKey: string | null = null
 
 /**
  * Resolve the transport ref for the requested provider. Snapshot misses do
- * happen off the happy path — a mid-session provider/tier switch, node
- * translation without an active session — and each translation unit resolves
- * independently, so without coalescing a dense batch would fan out one
- * hosted-status fetch per paragraph. Concurrent misses for the same system
+ * happen off the happy path — a mid-session switch of model or reasoning
+ * level, node translation without an active session — and each translation
+ * unit resolves independently, so without coalescing a dense batch would fan
+ * out one hosted-status fetch per paragraph. Concurrent misses for the same system
  * provider share one serialization (per-key, so interleaved keys cannot evict
  * each other's in-flight fetch), and an active session adopts the result so
  * later paragraphs skip the network entirely.
@@ -237,14 +239,23 @@ export async function resolvePageProviderRef(
     return serializeProviderRef(provider, feature)
   }
 
-  // The feature is part of the key: two features on the same provider and tier
-  // gate on different tier statuses, so they must not share an in-flight fetch.
-  const key = `${provider.id}:${provider.modelTier}:${feature}`
+  // Page translation compares the stored reasoning choice with the one its
+  // session snapshot was made from. Read here, before any ref is made below;
+  // see setPageTranslationSessionProviderRef.
+  const reasoningChoice =
+    feature === "pageTranslation" ? await readHostedAiReasoningChoice(provider.model) : undefined
+
+  // The feature is part of the key: two features on the same model gate on
+  // different tier statuses, so they must not share an in-flight fetch. The
+  // reasoning choice is too: a ref made for the old level must not be shared
+  // with, or adopted for, a paragraph that read the new one.
+  const key = `${provider.id}:${feature}:${reasoningChoice ?? ""}`
   lastRequestedSystemKey = key
 
   // The session snapshot belongs to the page-translation run; other features
   // must not adopt it, and must not overwrite it below.
-  const sessionRef = feature === "pageTranslation" ? getSessionProviderRefFor(provider) : null
+  const sessionRef =
+    feature === "pageTranslation" ? getSessionProviderRefFor(provider, reasoningChoice) : null
   if (sessionRef) {
     return sessionRef
   }
@@ -270,7 +281,7 @@ export async function resolvePageProviderRef(
     getPageTranslationSessionId() === sessionId &&
     key === lastRequestedSystemKey
   ) {
-    setPageTranslationSessionProviderRef(providerRef)
+    setPageTranslationSessionProviderRef(providerRef, reasoningChoice)
   }
   return providerRef
 }
@@ -278,8 +289,9 @@ export async function resolvePageProviderRef(
 export interface TranslateTextOptions {
   text: string
   langConfig: {
-    sourceCode: LangCodeISO6393 | "auto"
-    targetCode: LangCodeISO6393
+    sourceCode: LanguageTag | "auto"
+    targetCode: LanguageTag
+    level: LangLevel
   }
   providerConfig: ResolvedProviderRef<TranslateProviderConfig>
   enableAIContentAware?: boolean
@@ -305,6 +317,8 @@ export interface TranslateTextOptions {
    * and bill against the wrong quota.
    */
   hostedFeature: HostedAiTextStreamRoute
+  /** Page translation: told when the answer is empty, and why. */
+  diagnosis?: ParagraphDiagnosis
 }
 
 /**
@@ -325,10 +339,12 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
     forceRetranslation = false,
     glossaryEnabled = false,
     hostedFeature,
+    diagnosis,
   } = options
 
   const preparedText = prepareTranslationText(text)
   if (preparedText === "") {
+    diagnosis?.untranslated("noProse")
     return ""
   }
 
@@ -406,7 +422,7 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
   if (sessionId !== undefined && !forceRetranslation) {
     const memoryHit = getInMemoryTranslation(hash)
     if (memoryHit !== undefined) {
-      return isNoTranslationSentinel(memoryHit) ? "" : memoryHit
+      return toDisplayedResult(memoryHit, diagnosis)
     }
   }
 
@@ -438,7 +454,17 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
   // toolbar standard path) routes through this function and already handles
   // "" gracefully. Mapping earlier — in the background — would fall out of
   // the truthy-only cache write and re-hit the provider on every request.
-  return isNoTranslationSentinel(result) ? "" : result
+  return toDisplayedResult(result, diagnosis)
+}
+
+/** The one place the "no translation needed" sentinel becomes "" (see above). */
+function toDisplayedResult(result: string, diagnosis: ParagraphDiagnosis | undefined): string {
+  if (isNoTranslationSentinel(result)) {
+    diagnosis?.untranslated("noTranslationNeeded")
+    return ""
+  }
+  if (!result.trim()) diagnosis?.untranslated("emptyResult")
+  return result
 }
 
 export function validateTranslationConfigAndToast(
@@ -454,9 +480,12 @@ export function validateTranslationConfigAndToast(
     return false
   }
 
-  if (languageConfig.sourceCode === languageConfig.targetCode) {
+  if (
+    languageConfig.sourceCode !== "auto" &&
+    isSameLanguage(languageConfig.sourceCode, languageConfig.targetCode)
+  ) {
     toastManager.add({ type: "error", title: i18n.t("translation.sameLanguage") })
-    logger.info("validateTranslationConfig: returning false (same language)")
+    log.info("Page translation not started: source and target language are the same")
     return false
   }
 
@@ -468,7 +497,7 @@ export function validateTranslationConfigAndToast(
     !["deeplx", "ollama"].includes(provider.config.provider)
   ) {
     toastManager.add({ type: "error", title: i18n.t("noAPIKeyConfig.warning") })
-    logger.info("validateTranslationConfig: returning false (no API key)")
+    log.info("Page translation not started: the provider has no API key")
     return false
   }
 

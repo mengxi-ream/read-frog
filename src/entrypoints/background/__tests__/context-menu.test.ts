@@ -1,15 +1,15 @@
 import type { Config } from "@/types/config/config"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { browser, storage } from "#imports"
-import { i18n } from "@/utils/i18n"
 import {
-  initializeContextMenu,
   MENU_ID_SELECTION_CUSTOM_ACTION_PREFIX,
   MENU_ID_SELECTION_READ_ALOUD,
   MENU_ID_SELECTION_TRANSLATE,
   MENU_ID_TRANSLATE,
-  registerContextMenuListeners,
-} from "../context-menu"
+} from "@/utils/context-menu"
+import { i18n } from "@/utils/i18n"
+import { captureLogs, loggedError, logRecord } from "@/utils/logging/testing"
+import { initializeContextMenu, registerContextMenuListeners } from "../context-menu"
 
 // vi.mock factories run during the static imports above, before this module's
 // own top-level code, so the mocks they return must be hoisted with them.
@@ -28,6 +28,13 @@ vi.mock("../config", () => ({
   ensureInitializedConfig: ensureInitializedConfigMock,
 }))
 
+vi.mock("@/env", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/env")>()
+  return {
+    env: { ...actual.env, WXT_OFFICIAL_SITE_ORIGINS: ["https://readfrog.app"] },
+  }
+})
+
 function createConfig(enabled: boolean): Config {
   return {
     contextMenu: {
@@ -37,11 +44,11 @@ function createConfig(enabled: boolean): Config {
       builtInActions: {
         dictionary: {
           enabled: false,
-          providerId: "read-frog-free-ai",
+          providerId: "read-frog-ai:gpt-6-luna",
         },
         sentenceAnalysis: {
           enabled: false,
-          providerId: "read-frog-free-ai",
+          providerId: "read-frog-ai:gpt-6-luna",
         },
       },
       customActions: [],
@@ -53,6 +60,7 @@ describe("background context menu", () => {
   beforeEach(() => {
     contextMenuClickListeners.length = 0
     vi.clearAllMocks()
+    sendMessageMock.mockResolvedValue(undefined)
 
     browser.contextMenus.create = vi.fn<(...args: any[]) => any>()
     browser.contextMenus.removeAll = vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined)
@@ -173,8 +181,63 @@ describe("background context menu", () => {
     expect(browser.contextMenus.update).not.toHaveBeenCalled()
   })
 
+  it("leaves the page item out while simple mode has page translation off", async () => {
+    const config = createConfig(true)
+    Object.assign(config, { pageTranslation: { enabled: false } })
+    ensureInitializedConfigMock.mockResolvedValue(config)
+
+    await initializeContextMenu()
+
+    const createdIds = vi.mocked(browser.contextMenus.create).mock.calls.map(([item]) => item.id)
+    expect(createdIds).toEqual([MENU_ID_SELECTION_TRANSLATE, MENU_ID_SELECTION_READ_ALOUD])
+    expect(browser.contextMenus.update).not.toHaveBeenCalled()
+  })
+
+  it("leaves the actions out while simple mode has custom AI actions off", async () => {
+    const config = createConfig(true)
+    config.selectionToolbar.builtInActions.dictionary.enabled = true
+    config.selectionToolbar.customActions = [
+      { id: "rewrite", name: "Rewrite", enabled: true },
+    ] as Config["selectionToolbar"]["customActions"]
+    config.customActions = { enabled: false }
+    ensureInitializedConfigMock.mockResolvedValue(config)
+
+    await initializeContextMenu()
+
+    const createdIds = vi.mocked(browser.contextMenus.create).mock.calls.map(([item]) => item.id)
+    expect(createdIds).toEqual([
+      MENU_ID_TRANSLATE,
+      MENU_ID_SELECTION_TRANSLATE,
+      MENU_ID_SELECTION_READ_ALOUD,
+    ])
+  })
+
+  it("waits until the background is ready before rebuilding the menu on a config change", async () => {
+    let configWatcher: ((config: Config) => Promise<void>) | undefined
+    storage.watch = vi.fn<(...args: any[]) => any>((_key, callback) => {
+      configWatcher = callback
+    })
+    const { promise: ready, resolve: markReady } = Promise.withResolvers<void>()
+    registerContextMenuListeners(() => ready)
+    if (!configWatcher) {
+      throw new Error("Config watcher was not registered")
+    }
+
+    const rebuilt = configWatcher(createConfig(true))
+    await Promise.resolve()
+    expect(browser.contextMenus.removeAll).not.toHaveBeenCalled()
+
+    markReady()
+    await rebuilt
+    expect(browser.contextMenus.create).toHaveBeenCalledWith({
+      id: MENU_ID_TRANSLATE,
+      title: "Translate",
+      contexts: ["page"],
+    })
+  })
+
   it("records a scoped user refusal when the translate menu disables translation", async () => {
-    registerContextMenuListeners()
+    registerContextMenuListeners(async () => {})
 
     const clickHandler = contextMenuClickListeners[0]
     if (!clickHandler) {
@@ -195,7 +258,7 @@ describe("background context menu", () => {
   })
 
   it("routes selection menu clicks to the matching tab and frame", async () => {
-    registerContextMenuListeners()
+    registerContextMenuListeners(async () => {})
 
     const clickHandler = contextMenuClickListeners[0]
     if (!clickHandler) {
@@ -221,7 +284,7 @@ describe("background context menu", () => {
   })
 
   it("routes read aloud menu clicks to the matching tab and frame", async () => {
-    registerContextMenuListeners()
+    registerContextMenuListeners(async () => {})
 
     const clickHandler = contextMenuClickListeners[0]
     if (!clickHandler) {
@@ -247,7 +310,7 @@ describe("background context menu", () => {
   })
 
   it("routes custom action menu clicks to the matching tab and frame", async () => {
-    registerContextMenuListeners()
+    registerContextMenuListeners(async () => {})
 
     const clickHandler = contextMenuClickListeners[0]
     if (!clickHandler) {
@@ -269,6 +332,102 @@ describe("background context menu", () => {
       "openSelectionCustomActionFromContextMenu",
       { actionId: "dictionary", selectionText: "Selected text" },
       { tabId: 5, frameId: 7 },
+    )
+  })
+
+  it.each([
+    [MENU_ID_SELECTION_TRANSLATE, "openSelectionTranslationFromContextMenu"],
+    [MENU_ID_SELECTION_READ_ALOUD, "readAloudSelectionFromContextMenu"],
+    [
+      `${MENU_ID_SELECTION_CUSTOM_ACTION_PREFIX}dictionary`,
+      "openSelectionCustomActionFromContextMenu",
+    ],
+  ])(
+    "routes %s clicks in an ebook reader book section to the top frame",
+    async (menuItemId, messageType) => {
+      registerContextMenuListeners(async () => {})
+
+      const clickHandler = contextMenuClickListeners[0]
+      if (!clickHandler) {
+        throw new Error("Context menu click listener was not registered")
+      }
+
+      // The reader relays the section's selections to the top frame's toolbar,
+      // and the top frame is told so: it never saw this right-click.
+      await clickHandler(
+        {
+          menuItemId,
+          selectionText: "punched",
+          frameId: 7,
+          frameUrl: "blob:https://readfrog.app/0f8e0c55-3c3c-4a6c-9a51-7d5a3b0b6c11",
+          pageUrl: "https://readfrog.app/ebooks/book-1",
+        },
+        { id: 5 },
+      )
+
+      expect(sendMessageMock).toHaveBeenCalledWith(
+        messageType,
+        expect.objectContaining({ selectionText: "punched", fromEbookSection: true }),
+        { tabId: 5, frameId: 0 },
+      )
+    },
+  )
+
+  it("keeps selection menu clicks in another site's blob: frame in that frame", async () => {
+    registerContextMenuListeners(async () => {})
+
+    const clickHandler = contextMenuClickListeners[0]
+    if (!clickHandler) {
+      throw new Error("Context menu click listener was not registered")
+    }
+
+    await clickHandler(
+      {
+        menuItemId: MENU_ID_SELECTION_TRANSLATE,
+        selectionText: "Selected text",
+        frameId: 7,
+        frameUrl: "blob:https://example.com/0f8e0c55-3c3c-4a6c-9a51-7d5a3b0b6c11",
+      },
+      { id: 5 },
+    )
+
+    expect(sendMessageMock).toHaveBeenCalledWith(
+      "openSelectionTranslationFromContextMenu",
+      { selectionText: "Selected text" },
+      { tabId: 5, frameId: 7 },
+    )
+  })
+
+  it("logs a warning when the clicked tab has no content script to receive the action", async () => {
+    const noReceiver = new Error("Could not establish connection. Receiving end does not exist.")
+    sendMessageMock.mockRejectedValue(noReceiver)
+    const logs = captureLogs()
+    registerContextMenuListeners(async () => {})
+
+    const clickHandler = contextMenuClickListeners[0]
+    if (!clickHandler) {
+      throw new Error("Context menu click listener was not registered")
+    }
+
+    const tab = { id: 5, url: "chrome://version/" }
+    // storage.getItem defaults to { enabled: true }, so this click toggles off
+    // and sends both the state change and the toggle request.
+    await clickHandler({ menuItemId: MENU_ID_TRANSLATE }, tab)
+    await clickHandler({ menuItemId: MENU_ID_SELECTION_TRANSLATE, selectionText: "Text" }, tab)
+    await clickHandler({ menuItemId: MENU_ID_SELECTION_READ_ALOUD, selectionText: "Text" }, tab)
+    await clickHandler(
+      { menuItemId: `${MENU_ID_SELECTION_CUSTOM_ACTION_PREFIX}action-1`, selectionText: "Text" },
+      tab,
+    )
+    // The sends are not awaited, so let their rejections reach the handlers.
+    await Promise.resolve()
+
+    expect(sendMessageMock).toHaveBeenCalledTimes(5)
+    expect(logs).toHaveLength(5)
+    expect(logs).toContainEqual(
+      logRecord("warn", "Failed to deliver context menu action to the tab", {
+        error: loggedError(noReceiver.message),
+      }),
     )
   })
 })

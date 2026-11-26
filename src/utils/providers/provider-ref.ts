@@ -2,30 +2,65 @@ import type { ResolvedProviderRef, SystemProviderRef } from "./provider-registry
 import type { HostedAiTextStreamRoute } from "@/types/background-stream"
 import type { Config } from "@/types/config/config"
 import type { LLMProviderConfig, TranslateProviderConfig } from "@/types/config/provider"
-import type { HostedAiFeature, HostedAiStatus } from "@/utils/hosted-ai/types"
+import type { ErrorAction } from "@/utils/error-action"
+import type { HostedAiModel } from "@/utils/hosted-ai/models"
+import type { HostedAiModelVerdict } from "@/utils/hosted-ai/status"
+import type {
+  HostedAiFeature,
+  HostedAiModelTier,
+  HostedAiReasoning,
+  HostedAiStatus,
+  HostedAiUnavailableReason,
+} from "@/utils/hosted-ai/types"
 import { isLLMProviderConfig } from "@/types/config/provider"
+import { logInAction, upgradeAction } from "@/utils/error-action"
+import { getAnalyticsFeatureForHostedFeature } from "@/utils/hosted-ai/analytics-feature"
+import {
+  chooseHostedAiModelAction,
+  getHostedAiModelUnavailableMessage,
+} from "@/utils/hosted-ai/model-errors"
+import {
+  findHostedAiModel,
+  getRequestedHostedAiReasoning,
+  readHostedAiReasoningChoice,
+  readStoredHostedAiModels,
+} from "@/utils/hosted-ai/models"
 import {
   getHostedAiCreditForFeature,
+  getHostedAiModelVerdict,
   getHostedAiTierDescription,
-  getHostedAiTierStatus,
 } from "@/utils/hosted-ai/status"
+import { getBuiltInAiUpgradePlan } from "@/utils/hosted-ai/upgrade-plan"
+import { i18n } from "@/utils/i18n"
 import { sendMessage } from "@/utils/message"
 import { resolveProviderRefForCapability } from "./provider-registry"
 
 /**
  * A provider flattened for structured-clone transport to the background. Local
- * providers carry their whole config; system providers carry only what the
- * hosted call and the cache key need — the tier to bill and the model revision
- * that identifies the output.
+ * providers carry their whole config; Built-in AI models carry what the hosted
+ * call and the cache key need, resolved together so a cache entry is filed
+ * under exactly what produced it.
  */
 export type SerializableProviderRef =
   | { kind: "local"; config: TranslateProviderConfig }
-  | {
-      kind: "system"
-      providerId: SystemProviderRef["id"]
-      modelTier: SystemProviderRef["modelTier"]
-      modelRevision: string
-    }
+  | SystemSerializableProviderRef
+
+export interface SystemSerializableProviderRef {
+  kind: "system"
+  providerId: SystemProviderRef["id"]
+  /** The model's id in the server's catalog. */
+  model: string
+  /** The model's tier, for older servers; one that knows models goes by `model`. */
+  modelTier: HostedAiModelTier
+  /** Changes when the model's output would. */
+  modelRevision: string
+  /**
+   * The reasoning level the request asks for (see
+   * `getRequestedHostedAiReasoning`). Null asks for none: language detection,
+   * or a model this client knows nothing about with no level picked.
+   */
+  reasoning: HostedAiReasoning | null
+}
 
 /**
  * A ref that can be prompted for free-form text. Structural, not branded:
@@ -40,28 +75,48 @@ export type SerializableProviderRef =
  */
 export type PromptableProviderRef =
   | { kind: "local"; config: LLMProviderConfig }
-  | Extract<SerializableProviderRef, { kind: "system" }>
+  | SystemSerializableProviderRef
 
 export class HostedAiProviderUnavailableError extends Error {
   constructor(
     readonly provider: SystemProviderRef,
     message: string,
+    /** What the user can do about it, such as choosing another model. */
+    readonly action?: ErrorAction,
+    /** Why the server refused, when its status said so. */
+    readonly reason?: HostedAiUnavailableReason,
   ) {
     super(message)
     this.name = "HostedAiProviderUnavailableError"
   }
 }
 
+/**
+ * The provider page translation runs on in this document instead of the configured one, or
+ * null to follow the config. Set for each page-translation run; see `PageTranslationManager`.
+ */
+let pageTranslationProviderIdOverride: string | null = null
+
+export function setPageTranslationProviderIdOverride(providerId: string | null): void {
+  pageTranslationProviderIdOverride = providerId
+}
+
+/** The provider page translation runs on: the override, or the configured one. */
+export function getPageTranslationProviderId(config: Config): string {
+  return pageTranslationProviderIdOverride ?? config.pageTranslation.providerId
+}
+
 export function resolvePageTranslationProvider(
   config: Config,
 ): ResolvedProviderRef<TranslateProviderConfig> {
+  const providerId = getPageTranslationProviderId(config)
   const resolved = resolveProviderRefForCapability(
     "pageTranslation",
     config.providersConfig,
-    config.pageTranslation.providerId,
+    providerId,
   )
   if (!resolved) {
-    throw new Error(`No page translation provider for id "${config.pageTranslation.providerId}"`)
+    throw new Error(`No page translation provider for id "${providerId}"`)
   }
   return resolved
 }
@@ -86,16 +141,21 @@ const UNKNOWN_MODEL_REVISION = "unknown"
 
 /**
  * Cache identity for a provider. Local providers hash their whole config, so a
- * changed key or temperature invalidates; system providers hash the tier's
- * model revision, which is exactly what the server bumps when output changes.
- * One helper so every cache (page, subtitles, summaries, segmentation) keys
- * the same way — a local ref still stringifies byte-identically to what those
- * caches used before, so existing BYOK entries survive.
+ * changed key or temperature invalidates; a Built-in AI model hashes its id
+ * (inside the provider id), its revision, which the server bumps when its
+ * output changes, and the reasoning level the request runs at. One helper so
+ * every cache (page, subtitles, summaries, segmentation) keys the same way — a
+ * local ref still stringifies byte-identically to what those caches used
+ * before, so existing BYOK entries survive.
  */
 export function getProviderCacheIdentity(ref: SerializableProviderRef): string {
   return ref.kind === "local"
     ? JSON.stringify(ref.config)
-    : JSON.stringify({ providerId: ref.providerId, modelRevision: ref.modelRevision })
+    : JSON.stringify({
+        providerId: ref.providerId,
+        modelRevision: ref.modelRevision,
+        reasoning: ref.reasoning,
+      })
 }
 
 /**
@@ -144,9 +204,9 @@ export function getHostedFeatureForRoute(route: HostedAiTextStreamRoute): Hosted
  * serialized ahead of the work it gates.
  *
  * Coalescing and caching solve different halves of that: this collapses callers
- * that overlap, and the background's short-TTL entry collapses the serialized
- * ones that do not (a subtitle run resolves one batch at a time, so it never
- * overlaps itself). Both are needed.
+ * that overlap, such as the batches a subtitle run sends at once at the start or
+ * after a seek, and the background's short-TTL entry collapses the ones that do
+ * not, such as the batches that follow during playback. Both are needed.
  */
 let inflightStatus: Promise<HostedAiStatus | undefined> | null = null
 
@@ -180,6 +240,61 @@ export function fetchHostedAiStatus(): Promise<HostedAiStatus | undefined> {
 }
 
 /**
+ * The error for a model the server will not run: it is missing from the list
+ * or cannot run now. Names the models this account can run instead, with a
+ * button to the settings for the first of them. It never switches by itself:
+ * another model's output and price are the user's call.
+ */
+function createModelUnavailableError(
+  provider: SystemProviderRef,
+  verdict: Extract<HostedAiModelVerdict, { kind: "unavailable" }>,
+): HostedAiProviderUnavailableError {
+  const alternatives = verdict.alternatives
+  return new HostedAiProviderUnavailableError(
+    provider,
+    getHostedAiModelUnavailableMessage(
+      verdict.model?.name ?? provider.name,
+      alternatives.map((model) => model.name),
+    ),
+    chooseHostedAiModelAction(alternatives[0]?.id ?? provider.model),
+  )
+}
+
+/**
+ * What someone refused by the server's status can do about it: a guest can log in, and an
+ * account whose pool is spent can upgrade, unless it is on Ultra, which has nothing above
+ * it. The upgrade link names the feature that ran dry.
+ */
+async function getHostedAiRefusalAction(
+  reason: HostedAiUnavailableReason | undefined,
+  feature: HostedAiFeature,
+): Promise<ErrorAction | undefined> {
+  switch (reason) {
+    case "authentication_required":
+      return logInAction()
+    case "quota_exhausted":
+      return (await getBuiltInAiUpgradePlan()) === null
+        ? undefined
+        : upgradeAction("extension_quota_exhausted", getAnalyticsFeatureForHostedFeature(feature))
+    default:
+      return undefined
+  }
+}
+
+/**
+ * The model as the extension last knew it, when status could not say: the
+ * stored list keeps cache identities stable through a status outage.
+ */
+async function findKnownHostedAiModel(
+  verdict: HostedAiModelVerdict,
+  modelId: string,
+): Promise<HostedAiModel | undefined> {
+  return verdict.kind === "usable"
+    ? verdict.model
+    : findHostedAiModel(await readStoredHostedAiModels(), modelId)
+}
+
+/**
  * `feature` is the hosted feature this provider will be billed against. It
  * decides which tier status gates the call, so it must be the feature the
  * caller actually runs — passing `pageTranslation` for a subtitle run would
@@ -207,28 +322,49 @@ export async function serializeProviderRef(
   }
 
   const status = await fetchHostedAiStatus()
+  const verdict = getHostedAiModelVerdict(status, feature, provider.model)
 
-  const tierStatus = getHostedAiTierStatus(status, feature, provider.modelTier)
-  if (tierStatus && !tierStatus.available) {
+  if (verdict.kind === "blocked") {
+    const reason = verdict.tierStatus.unavailableReason ?? undefined
     throw new HostedAiProviderUnavailableError(
       provider,
-      getHostedAiTierDescription(tierStatus, {
+      getHostedAiTierDescription(verdict.tierStatus, {
         credit: getHostedAiCreditForFeature(status, feature),
-      }) ?? "Built-in AI is unavailable",
+      }) ?? i18n.t("hostedAi.availability.serviceUnavailable"),
+      await getHostedAiRefusalAction(reason, feature),
+      reason,
     )
   }
+  if (verdict.kind === "unavailable") {
+    throw createModelUnavailableError(provider, verdict)
+  }
+
+  const languageDetection = feature === "languageDetection"
+  const [model, choice] = await Promise.all([
+    findKnownHostedAiModel(verdict, provider.model),
+    languageDetection ? undefined : readHostedAiReasoningChoice(provider.model),
+  ])
 
   return {
     kind: "system",
     providerId: provider.id,
-    modelTier: provider.modelTier,
-    modelRevision: tierStatus?.modelRevision ?? UNKNOWN_MODEL_REVISION,
+    model: provider.model,
+    modelTier: model?.tier ?? "normal",
+    modelRevision: model?.modelRevision ?? UNKNOWN_MODEL_REVISION,
+    reasoning: getRequestedHostedAiReasoning(model, choice, { languageDetection }) ?? null,
   }
 }
 
 export type ProviderAvailability<Ref extends SerializableProviderRef = SerializableProviderRef> =
   | { available: true; providerRef: Ref }
-  | { available: false; message: string }
+  | {
+      available: false
+      message: string
+      action?: ErrorAction
+      reason?: HostedAiUnavailableReason
+      /** The refusal itself, for a caller that hands it on, as to the Built-in AI prompt. */
+      error: HostedAiProviderUnavailableError
+    }
 
 export async function checkProviderAvailability(
   provider: ResolvedProviderRef<LLMProviderConfig>,
@@ -246,7 +382,13 @@ export async function checkProviderAvailability(
     return { available: true, providerRef: await serializeProviderRef(provider, route) }
   } catch (error) {
     if (error instanceof HostedAiProviderUnavailableError) {
-      return { available: false, message: error.message }
+      return {
+        available: false,
+        message: error.message,
+        action: error.action,
+        reason: error.reason,
+        error,
+      }
     }
     throw error
   }

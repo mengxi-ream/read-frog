@@ -1,4 +1,4 @@
-import { LANG_CODE_ISO6391_OPTIONS } from "@read-frog/definitions"
+import { LANGUAGE_TAGS } from "@read-frog/definitions"
 import { Field, FieldLabel } from "@/components/ui/base-ui/field"
 import {
   Select,
@@ -22,7 +22,8 @@ export interface PreviewControlsProps {
 
 /**
  * The knobs only custom CSS needs: rules can key off language and direction, so the writer has to
- * be able to point the sample at either one. They hold no state — the preview they drive sits at
+ * be able to point the sample at either one. The languages are the tags translations carry in
+ * their `lang` attribute (`zh-Hans`, `pt-PT`). They hold no state — the preview they drive sits at
  * the top of the page, above the editor, so the page owns it.
  */
 export function PreviewControls({
@@ -51,7 +52,7 @@ export function PreviewControls({
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                {LANG_CODE_ISO6391_OPTIONS.map((lang) => (
+                {LANGUAGE_TAGS.map((lang) => (
                   <SelectItem key={lang} value={lang}>
                     {lang}
                   </SelectItem>

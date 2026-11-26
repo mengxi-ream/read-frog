@@ -1,8 +1,8 @@
-import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { LanguageTag } from "@read-frog/definitions"
 import type { LayoutStatus } from "@read-frog/layout-engine/contract"
 import type { LayoutScope } from "@read-frog/layout-engine/core"
 import type { SelectionToolbarCustomActionOutputField } from "@/types/config/selection-toolbar"
-import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
+import { LANGUAGE_ENGLISH_NAMES } from "@read-frog/definitions"
 import { defineLayoutHost } from "@read-frog/layout-engine/contract"
 import { buildLayoutScope } from "@read-frog/layout-engine/core"
 import { MAX_CUSTOM_ACTION_LAYOUT_LENGTH } from "@/types/config/selection-toolbar"
@@ -45,7 +45,7 @@ export interface CustomActionLayoutScopeInput {
   // The language the answer was asked in (`language.targetCode` of the run):
   // `ctx.targetLanguage` names it as the prompt did, and the card's own words
   // follow it (see contentLocaleFor).
-  targetCode: LangCodeISO6393
+  targetCode: LanguageTag
   status: LayoutStatus
 }
 
@@ -66,7 +66,7 @@ export function buildCustomActionLayoutScope({
     values: value === null && status !== "streaming" ? null : { ...value, ...selectionValues },
     ctx: {
       selection,
-      targetLanguage: LANG_CODE_TO_EN_NAME[targetCode],
+      targetLanguage: LANGUAGE_ENGLISH_NAMES[targetCode],
       [SENTENCE_ANALYSIS_LABELS_CTX_KEY]: getSentenceAnalysisLabels(contentLocaleFor(targetCode)),
       [IMPROVE_WRITING_LABELS_CTX_KEY]: getImproveWritingLabels(contentLocaleFor(targetCode)),
     },

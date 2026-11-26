@@ -1,8 +1,9 @@
 import type { SubtitlesFragment } from "./types"
 import type { BackgroundStreamTextSerializablePayload } from "@/types/background-stream"
+import type { BuiltInAiConfig } from "@/types/config/built-in-ai"
 import type { Config } from "@/types/config/config"
 import type { ProviderRefForCapability } from "@/utils/providers/provider-registry"
-import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
+import { LANGUAGE_ENGLISH_NAMES } from "@read-frog/definitions"
 import { getLocalConfig } from "@/utils/config/storage"
 import { VIDEO_SUMMARY_TRANSCRIPT_CHAR_BUDGET } from "@/utils/constants/subtitles"
 import { streamBackgroundText } from "@/utils/content-script/background-stream-client"
@@ -45,16 +46,28 @@ export type VideoSummaryProviderRef = ProviderRefForCapability<"videoSubtitles">
 
 export const VIDEO_SUMMARY_QUERY_SCOPE = ["subtitles", "video-summary"] as const
 
+/**
+ * The summary on screen for a video, language and provider. A local provider
+ * keys on its whole config, so an edit under the same id asks again. A
+ * Built-in AI model keys on its id and the reasoning level picked for it,
+ * which every request sends: picking another level asks again too. A pick
+ * that ends at the same level is served from the background's cache, which
+ * keys on the level the request runs at.
+ */
 export function videoSummaryQueryKey(
   videoId: string | null,
   targetCode: string,
   resolved: VideoSummaryProviderRef,
+  builtInAi: BuiltInAiConfig,
 ) {
   const providerIdentity = !resolved
     ? null
     : resolved.kind === "local"
       ? resolved.config
-      : { providerId: resolved.id, modelTier: resolved.modelTier }
+      : {
+          providerId: resolved.id,
+          reasoning: builtInAi.models[resolved.model]?.reasoning ?? null,
+        }
 
   return [...VIDEO_SUMMARY_QUERY_SCOPE, videoId, targetCode, providerIdentity] as const
 }
@@ -141,7 +154,7 @@ export async function requestVideoSummary(
     return null
   }
 
-  const targetLanguage = LANG_CODE_TO_EN_NAME[config.language.targetCode]
+  const targetLanguage = LANGUAGE_ENGLISH_NAMES[config.language.targetCode]
 
   const cached = await sendMessage("getCachedVideoSummary", {
     transcript,
@@ -162,7 +175,7 @@ export async function requestVideoSummary(
       ? {
           providerKind: "system",
           providerId: providerRef.providerId,
-          modelTier: providerRef.modelTier,
+          builtInAiReasoning: providerRef.reasoning,
           requestId: getRandomUUID(),
           hostedFeature: "videoSubtitles" as const,
           instructions: systemPrompt,

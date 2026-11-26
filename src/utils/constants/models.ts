@@ -1,19 +1,17 @@
-import type { OpenAIResponsesProviderOptions } from "@ai-sdk/openai"
 import type { JSONValue } from "ai"
 
-type OpenAIReasoningEffort = Exclude<OpenAIResponsesProviderOptions["reasoningEffort"], undefined>
-
-interface OpenAIGPT5ReasoningEffortPolicy {
-  pattern: RegExp
-  supportedValues: readonly OpenAIReasoningEffort[]
-  recommendedValue?: OpenAIReasoningEffort
-}
-
-// Reviewed against provider catalogs and AI SDK docs on 2026-09-26.
-// Keep existing IDs: persisted provider configs validate against these enums.
+// Reviewed against provider catalogs, provider deprecation pages and AI SDK docs on 2026-11-21.
+// Persisted provider configs validate against these enums: only drop an ID together with a
+// config migration that moves saved configs off it (the latest is v128-to-v129).
 export const LLM_PROVIDER_MODELS = {
+  // Shut down by OpenAI and moved off in v128-to-v129: gpt-4.1-nano and the gpt-5*-chat-latest
+  // and gpt-5*-codex ids. https://developers.openai.com/api/docs/deprecations
   openai: [
     "gpt-6-luna",
+    "gpt-6.2-sol",
+    "gpt-6.2-astra",
+    "gpt-6.1-sol",
+    "gpt-6.1-terra",
     "gpt-6-sol",
     "gpt-6-astra",
     "gpt-5.6-luna",
@@ -25,23 +23,15 @@ export const LLM_PROVIDER_MODELS = {
     "gpt-5.4",
     "gpt-5.4-mini",
     "gpt-5.4-nano",
-    "gpt-5.3-chat-latest",
     "gpt-5.2-pro",
-    "gpt-5.2-chat-latest",
     "gpt-5.2",
-    "gpt-5.1-codex-mini",
-    "gpt-5.1-codex",
-    "gpt-5.1-chat-latest",
     "gpt-5.1",
     "gpt-5-pro",
     "gpt-5",
     "gpt-5-mini",
     "gpt-5-nano",
-    "gpt-5-codex",
-    "gpt-5-chat-latest",
     "gpt-4.1",
     "gpt-4.1-mini",
-    "gpt-4.1-nano",
     "gpt-4o",
     "gpt-4o-mini",
   ],
@@ -75,9 +65,23 @@ export const LLM_PROVIDER_MODELS = {
     "grok-4",
     "grok-code-fast-1",
   ],
-  deepseek: ["deepseek-v4-flash", "deepseek-v4-pro", "deepseek-chat", "deepseek-reasoner"],
+  // deepseek-chat and deepseek-reasoner were retired on 2026-07-24; v119-to-v120 moves them off.
+  // deepseek-flash is DeepSeek's alias for whichever V4.x Flash release is current (V4.1 Flash
+  // 1017 as of 2026-11-21). V4 Flash is retired and the deepseek-v4-flash name only temporarily
+  // routes to V4.1 Flash, so v128-to-v129 moves configs to deepseek-flash. deepseek-v4-flash
+  // stays listed for now because it was the default: a UI context that reads storage before the
+  // background runs v128-to-v129 must still parse those configs. Drop it in a later update.
+  // https://api-docs.deepseek.com/updates (reviewed 2026-11-21)
+  deepseek: ["deepseek-flash", "deepseek-v4-flash", "deepseek-v4-pro"],
+  // Shut down by Google and moved off in v128-to-v129: gemini-3-pro-preview,
+  // gemini-3.1-flash-lite-preview, gemini-2.0-flash and the two image previews.
+  // https://ai.google.dev/gemini-api/docs/deprecations
   google: [
     "gemini-3.5-flash-lite",
+    "gemini-4-neon",
+    "gemini-4-hydrogen",
+    "gemini-4-carbon",
+    "gemini-4-argon",
     "gemini-3.8-flash",
     "gemini-3.7-flash",
     "gemini-3.1-flash-lite",
@@ -87,25 +91,24 @@ export const LLM_PROVIDER_MODELS = {
     "gemini-3.6-flash",
     "gemini-3.5-flash",
     "gemini-3.1-pro-preview",
-    "gemini-3.1-flash-image-preview",
-    "gemini-3.1-flash-lite-preview",
-    "gemini-3-pro-preview",
-    "gemini-3-pro-image-preview",
     "gemini-3-flash-preview",
     "gemini-2.5-pro",
     "gemini-2.5-flash",
     "gemini-2.5-flash-lite",
     "gemini-2.5-flash-lite-preview-06-17",
-    "gemini-2.0-flash",
   ],
   anthropic: [
-    // https://platform.claude.com/docs/en/models/overview (reviewed 2026-10-08)
+    // https://platform.claude.com/docs/en/models/overview (reviewed 2026-11-21)
+    // claude-opus-4-0, claude-sonnet-4-0 and claude-opus-4-1 are retired and claude-sonnet-4-5
+    // retires on 2026-11-30; v128-to-v129 moves them off.
+    // https://platform.claude.com/docs/en/about-claude/model-deprecations
     "claude-haiku-5-5",
     "claude-sonnet-5-5",
     "claude-opus-5-5",
     "claude-haiku-4-5",
     "claude-sonnet-5",
     "claude-opus-5",
+    "claude-fable-5-2",
     "claude-fable-5-1",
     "claude-fable-5",
     "claude-opus-4-8",
@@ -113,15 +116,13 @@ export const LLM_PROVIDER_MODELS = {
     "claude-opus-4-6",
     "claude-sonnet-4-6",
     "claude-opus-4-5",
-    "claude-sonnet-4-5",
-    "claude-opus-4-1",
-    "claude-opus-4-0",
-    "claude-sonnet-4-0",
   ],
   siliconflow: ["Qwen/Qwen3-Next-80B-A3B-Instruct"],
   tensdaq: ["Qwen3-30B-A3B-Instruct-2507", "deepseek-v3.1"],
   atlascloud: [
     "deepseek-ai/deepseek-v4-flash",
+    "deepseek-ai/deepseek-v4.1-flash",
+    "deepseek-ai/deepseek-v4.1-flash-1017",
     "deepseek-ai/deepseek-v4-pro",
     "moonshotai/Kimi-K2-Instruct",
     "moonshotai/Kimi-K2-Instruct-0905",
@@ -140,28 +141,49 @@ export const LLM_PROVIDER_MODELS = {
     "google/gemini-3.1-flash-lite",
   ],
   // Jalapeno Cloud addresses models by their catalog name verbatim — the id in an API
-  // call is the same string shown on the models page. Narrowed to what suits translation:
-  // the code-specialised (Kimi-K2.7-Code), vision-first (Qwen3-VL-*) and thinking-only
-  // variants are left out, since neither buys anything here and both cost more per call.
+  // call is the same string shown on the models page (catalog JSON:
+  // https://www.jalapeno-cloud.ai/token-api/v1/models). Narrowed to what suits translation:
+  // the code-specialised (Kimi-K2.7-Code) and video-generation (Doubao-Seedance-*) entries
+  // are left out, since neither buys anything here.
+  // Hy3 and Qwen3-Next-80B-A3B-Instruct were delisted. GLM-5.2 is still in the catalog but is
+  // dropped because GLM-5.3 supersedes it. v119-to-v120 moves all three off.
   jalapenocloud: [
-    "GLM-5.2",
+    "GLM-5.3",
+    "GLM-5.3-Flash",
     "GLM-5.1",
+    "DeepSeek-V4.1-Flash",
+    "DeepSeek-V4.1-Flash-1017",
+    "DeepSeek-V4-Flash-0731",
     "DeepSeek-V4-Flash",
     "DeepSeek-V4-Pro",
-    "Hy3",
+    "Hy4-preview",
+    "Kimi-K3.1-Pro",
     "Kimi-K3",
     "Kimi-K2.5",
+    "MiniMax-M3.1-Flash",
     "MiniMax-M3",
+    "Step-5-preview",
     "Qwen3.5-27B",
     "Qwen3.5-35B-A3B",
     "Qwen3.5-122B-A10B",
     "Qwen3.5-397B-A17B",
-    "Qwen3-Next-80B-A3B-Instruct",
+  ],
+  // IF API is a relay in front of many vendors, so its catalog runs to dozens of models. These
+  // are the six it recommends for translation, each confirmed by IF API on 2026-11-11 to answer
+  // through cn.ifapi.org with reasoning turned off; any other id goes in as a custom model.
+  ifapi: [
+    "gpt-6-luna",
+    "claude-haiku-5-5",
+    "gpt-6.1-terra",
+    "deepseek-v4.1-flash",
+    "glm-5.3-flash",
+    "minimax-m3.1-flash",
   ],
   "openai-compatible": ["use-custom-model"],
   "open-responses": ["use-custom-model"],
   xai: [
     "grok-4.3",
+    "grok-4.7",
     "grok-4.6",
     "grok-4.5",
     "grok-4.20-non-reasoning",
@@ -170,6 +192,10 @@ export const LLM_PROVIDER_MODELS = {
     "grok-4.20-0309-reasoning",
   ],
   bedrock: [
+    "us.anthropic.claude-haiku-5-5",
+    "us.anthropic.claude-sonnet-5-5",
+    "us.anthropic.claude-fable-5-2",
+    "us.anthropic.claude-fable-5-1",
     "anthropic.claude-haiku-5-5",
     "anthropic.claude-sonnet-5-5",
     "anthropic.claude-opus-5-5",
@@ -177,6 +203,7 @@ export const LLM_PROVIDER_MODELS = {
     "amazon.titan-tg1-large",
     "amazon.titan-text-express-v1",
     "amazon.titan-text-lite-v1",
+    "us.amazon.nova-2-lite-v1:0",
     "us.amazon.nova-premier-v1:0",
     "us.amazon.nova-pro-v1:0",
     "us.amazon.nova-lite-v1:0",
@@ -242,29 +269,15 @@ export const LLM_PROVIDER_MODELS = {
     "openai.gpt-oss-20b",
     "openai.gpt-oss-120b",
   ],
-  groq: [
-    "openai/gpt-oss-20b",
-    "openai/gpt-oss-120b",
-    "qwen/qwen3.8-27b",
-    "qwen/qwen3.6-27b",
-    "gemma2-9b-it",
-    "llama-3.1-8b-instant",
-    "llama-3.3-70b-versatile",
-    "deepseek-r1-distill-llama-70b",
-    "meta-llama/llama-4-maverick-17b-128e-instruct",
-    "meta-llama/llama-4-scout-17b-16e-instruct",
-    "moonshotai/kimi-k2-instruct-0905",
-    "qwen/qwen3-32b",
-    "llama3-70b-8192",
-    "llama3-8b-8192",
-    "mixtral-8x7b-32768",
-    "qwen-qwq-32b",
-    "qwen-2.5-32b",
-    "deepseek-r1-distill-qwen-32b",
-  ],
+  // GroqCloud's on-demand chat catalog. Every other chat model it had is shut down (the Llama 3.x
+  // ones stay for Enterprise only), and v128-to-v129 moves saved configs off them.
+  // https://console.groq.com/docs/deprecations
+  groq: ["openai/gpt-oss-20b", "openai/gpt-oss-120b", "qwen/qwen3.8-27b"],
   deepinfra: [
     "Qwen/Qwen3.5-9B",
     "Qwen/Qwen3.8-27B",
+    "deepseek-ai/DeepSeek-V4.1-Flash",
+    "deepseek-ai/DeepSeek-V4.1-Flash-1017",
     "deepseek-ai/DeepSeek-V4-Flash",
     "deepseek-ai/DeepSeek-V4-Pro",
     "moonshotai/Kimi-K2.6",
@@ -294,26 +307,22 @@ export const LLM_PROVIDER_MODELS = {
     "google/gemma-2-9b-it",
     "microsoft/WizardLM-2-8x22B",
   ],
+  // zai-glm-5-2, the Magistral and Mistral Medium snapshots, Pixtral and the open-* models are
+  // retired; v128-to-v129 moves them to their successors. https://docs.mistral.ai/models
   mistral: [
     "mistral-small-latest",
+    "zai-glm-5-3",
+    "zai-glm-5-3-flash",
+    "magistral-medium-latest",
+    "magistral-small-latest",
+    "ministral-14b-latest",
     "mistral-small-2603",
-    "pixtral-large-latest",
     "mistral-large-latest",
     "mistral-medium-latest",
     "mistral-medium-3",
-    "mistral-medium-2508",
-    "mistral-medium-2505",
     "mistral-medium-3.5",
-    "magistral-small-2507",
-    "magistral-medium-2507",
-    "magistral-small-2506",
-    "magistral-medium-2506",
     "ministral-3b-latest",
     "ministral-8b-latest",
-    "pixtral-12b-2409",
-    "open-mistral-7b",
-    "open-mixtral-8x7b",
-    "open-mixtral-8x22b",
   ],
   togetherai: [
     "Qwen/Qwen3.5-9B",
@@ -370,23 +379,18 @@ export const LLM_PROVIDER_MODELS = {
     "accounts/fireworks/models/kimi-k2p5",
     "accounts/fireworks/models/minimax-m2",
   ],
-  cerebras: [
-    "gpt-oss-120b",
-    "gemma-4-31b",
-    "llama3.1-8b",
-    "llama-3.3-70b",
-    "qwen-3-32b",
-    "qwen-3-235b-a22b-instruct-2507",
-    "qwen-3-235b-a22b-thinking-2507",
-    "zai-glm-4.6",
-    "zai-glm-4.7",
-  ],
+  // Cerebras Shared Inference deprecated every other model it served (gemma-4-31b moved to
+  // Dedicated Inference only); v128-to-v129 moves them to gpt-oss-120b.
+  // https://inference-docs.cerebras.ai/support/deprecation
+  cerebras: ["gpt-oss-120b"],
   replicate: ["meta/meta-llama-3.1-70b-instruct", "meta/meta-llama-3.1-8b-instruct"],
   perplexity: ["perplexity/sonar", "fast", "low", "medium", "high", "xhigh"],
   openrouter: [
     "google/gemma-4-31b-it:free",
     "openai/gpt-5.6-luna",
     "google/gemini-3.5-flash-lite",
+    "deepseek/deepseek-v4.1-flash",
+    "deepseek/deepseek-v4.1-flash-1017",
     "deepseek/deepseek-v4-flash",
     "x-ai/grok-4-fast:free",
     "openai/gpt-4.1-mini",
@@ -398,6 +402,7 @@ export const LLM_PROVIDER_MODELS = {
     "doubao-seed-1-6-251015",
   ],
   minimax: [
+    "MiniMax-M3.1-Flash",
     "MiniMax-M3",
     "MiniMax-M2.7",
     "MiniMax-M2.7-highspeed",
@@ -413,6 +418,8 @@ export const LLM_PROVIDER_MODELS = {
     "qwen3.8-max",
     "qwen3.7-flash",
     "qwen3.7-plus",
+    "deepseek-v4.1-flash",
+    "deepseek-v4.1-flash-1017",
     "deepseek-v4-flash",
     "deepseek-v4-pro",
     "kimi-k2.6",
@@ -433,21 +440,16 @@ export const LLM_PROVIDER_MODELS = {
     "MiniMax-M2.5",
     "glm-5",
   ],
-  moonshotai: [
-    "kimi-k2.6",
-    "kimi-k3",
-    "moonshot-v1-8k",
-    "moonshot-v1-32k",
-    "moonshot-v1-128k",
-    "kimi-k2",
-    "kimi-k2.5",
-    "kimi-k2-thinking",
-    "kimi-k2-thinking-turbo",
-    "kimi-k2-turbo",
-  ],
+  // https://platform.kimi.ai/docs/models (reviewed 2026-11-21). The Moonshot V1 series and the K2
+  // models other than kimi-k2.6 are deprecated; v128-to-v129 moves them to kimi-k3. kimi-k2.6 is
+  // closed to accounts registered since 2026-11-01 and retires in late December 2026, so it is
+  // no longer the default; drop it with a migration once Kimi turns it off.
+  moonshotai: ["kimi-k3", "kimi-k3.1-pro", "kimi-k3.1-pro-highspeed", "kimi-k2.6"],
   huggingface: [
     "Qwen/Qwen3.5-9B",
     "Qwen/Qwen3.8-27B",
+    "deepseek-ai/DeepSeek-V4.1-Flash",
+    "deepseek-ai/DeepSeek-V4.1-Flash-1017",
     "deepseek-ai/DeepSeek-V4-Flash",
     "deepseek-ai/DeepSeek-V4-Pro",
     "moonshotai/Kimi-K2.6",
@@ -484,91 +486,6 @@ export const PURE_TRANSLATE_PROVIDERS = [
   "deepl",
 ] as const
 
-const OPENAI_GPT5_REASONING_EFFORT_POLICIES: OpenAIGPT5ReasoningEffortPolicy[] = [
-  {
-    pattern: /^(?:openai\/)?gpt-6-astra$/i,
-    supportedValues: ["low", "medium", "high", "xhigh", "max"],
-    recommendedValue: "low",
-  },
-  {
-    pattern: /^(?:openai\/)?gpt-6-sol$/i,
-    supportedValues: ["none", "low", "medium", "high", "xhigh", "max"],
-    recommendedValue: "medium",
-  },
-  {
-    pattern: /^(?:openai\/)?gpt-6-luna$/i,
-    supportedValues: ["none", "low", "medium", "high", "xhigh", "max"],
-    recommendedValue: "medium",
-  },
-  {
-    pattern: /^(?:openai\/)?gpt-5\.6(?:-(?:luna|terra|sol))?$/i,
-    supportedValues: ["none", "low", "medium", "high", "xhigh", "max"],
-    recommendedValue: "none",
-  },
-  {
-    pattern: /^gpt-5\.4-pro$/i,
-    supportedValues: ["medium", "high", "xhigh"],
-    recommendedValue: "medium",
-  },
-  {
-    pattern: /^gpt-5\.2-pro$/i,
-    supportedValues: ["medium", "high", "xhigh"],
-    recommendedValue: "medium",
-  },
-  {
-    pattern: /^gpt-5-pro$/i,
-    supportedValues: ["high"],
-    recommendedValue: "high",
-  },
-  {
-    pattern: /^(?:gpt-5\.5|gpt-5\.4|gpt-5\.4-mini|gpt-5\.4-nano)$/i,
-    supportedValues: ["none", "low", "medium", "high", "xhigh"],
-    recommendedValue: "none",
-  },
-  {
-    pattern: /^gpt-5\.2$/i,
-    supportedValues: ["none", "low", "medium", "high", "xhigh"],
-    recommendedValue: "none",
-  },
-  {
-    pattern: /^(?:gpt-5\.1|gpt-5\.1-codex|gpt-5\.1-codex-mini)$/i,
-    supportedValues: ["none", "low", "medium", "high"],
-    recommendedValue: "none",
-  },
-  {
-    pattern: /^(?:gpt-5|gpt-5-mini|gpt-5-nano|gpt-5-codex)$/i,
-    supportedValues: ["minimal", "low", "medium", "high"],
-    recommendedValue: "minimal",
-  },
-  {
-    pattern:
-      /^(?:gpt-5-chat-latest|gpt-5\.1-chat-latest|gpt-5\.2-chat-latest|gpt-5\.3-chat-latest)$/i,
-    supportedValues: [],
-  },
-]
-
-const OPENAI_GPT5_RECOMMENDED_MODEL_OPTIONS: Array<{
-  pattern: RegExp
-  options: Record<string, JSONValue>
-}> = OPENAI_GPT5_REASONING_EFFORT_POLICIES.flatMap(({ pattern, recommendedValue }) => {
-  if (recommendedValue === undefined) {
-    return []
-  }
-
-  return [
-    {
-      pattern,
-      options: { reasoningEffort: recommendedValue },
-    },
-  ]
-})
-
-export function getOpenAIGPT5ReasoningEffortPolicy(
-  model: string,
-): OpenAIGPT5ReasoningEffortPolicy | undefined {
-  return OPENAI_GPT5_REASONING_EFFORT_POLICIES.find(({ pattern }) => pattern.test(model))
-}
-
 /**
  * Model options configuration.
  * Flat list design: first match wins, more specific patterns should be placed first.
@@ -595,6 +512,13 @@ export const LLM_MODEL_OPTIONS: Array<{
     pattern: /^gemini-3(?:\.\d+)?-.*?(?:-preview(?:-customtools)?)?$/i,
     options: { thinkingConfig: { thinkingLevel: "minimal", includeThoughts: false } },
   },
+  // Gemini 4 rejects thinkingBudget, so it must not fall through to the default below.
+  // Its docs do not list "minimal", so use "low" as for the Pro models.
+  // https://ai-sdk.dev/providers/ai-sdk-providers/google#long-decode
+  {
+    pattern: /^gemini-4(?:\.\d+)?-/i,
+    options: { thinkingConfig: { thinkingLevel: "low", includeThoughts: false } },
+  },
   {
     pattern: /^gemini-2\.5-/i,
     options: { thinkingConfig: { thinkingBudget: 0, includeThoughts: false } },
@@ -608,7 +532,8 @@ export const LLM_MODEL_OPTIONS: Array<{
   // Claude - use the lowest supported thinking setting.
   // https://platform.claude.com/docs/en/build-with-claude/thinking
   {
-    pattern: /^claude-(?:opus-5-5|fable-5(?:-1)?)$/i,
+    // Adaptive-only: these reject `thinking: disabled`, so lower the effort instead.
+    pattern: /^claude-(?:opus-5-5|fable-5(?:-[12])?)$/i,
     options: { effort: "low" },
   },
   {
@@ -626,17 +551,73 @@ export const LLM_MODEL_OPTIONS: Array<{
     options: { reasoningEffort: "minimal" },
   },
 
-  // OpenAI GPT-5 defaults use the lowest supported reasoning effort per model.
-  // GPT-5 chat-latest variants are intentionally omitted because their docs do not advertise reasoning.effort.
-  ...OPENAI_GPT5_RECOMMENDED_MODEL_OPTIONS,
+  // OpenAI GPT-5 and GPT-6 - the lowest reasoning effort each model accepts, unless noted.
+  // The accepted range is noted on each entry. The chat-latest variants are left out on
+  // purpose: their docs do not advertise reasoning.effort.
+  // https://ai-sdk.dev/providers/ai-sdk-providers/openai (reviewed 2026-11-21)
+  {
+    // Accepts low to max: cannot turn reasoning off.
+    pattern: /^(?:openai\/)?gpt-6\.(?:1-sol|2-(?:sol|astra))$/i,
+    options: { reasoningEffort: "low" },
+  },
+  {
+    // Accepts none to max.
+    pattern: /^(?:openai\/)?gpt-6\.1-terra$/i,
+    options: { reasoningEffort: "none" },
+  },
+  {
+    // Accepts low to max.
+    pattern: /^(?:openai\/)?gpt-6-astra$/i,
+    options: { reasoningEffort: "low" },
+  },
+  {
+    // Accepts none to max, but recommends medium rather than the floor (since #2241).
+    pattern: /^(?:openai\/)?gpt-6-sol$/i,
+    options: { reasoningEffort: "medium" },
+  },
+  {
+    // Accepts none to max, but recommends medium rather than the floor (since #2241).
+    pattern: /^(?:openai\/)?gpt-6-luna$/i,
+    options: { reasoningEffort: "medium" },
+  },
+  {
+    // Accepts none to max.
+    pattern: /^(?:openai\/)?gpt-5\.6(?:-(?:luna|terra|sol))?$/i,
+    options: { reasoningEffort: "none" },
+  },
+  {
+    // Accepts medium to xhigh.
+    pattern: /^gpt-5\.[24]-pro$/i,
+    options: { reasoningEffort: "medium" },
+  },
+  {
+    // Accepts high only.
+    pattern: /^gpt-5-pro$/i,
+    options: { reasoningEffort: "high" },
+  },
+  {
+    // Accepts none to xhigh.
+    pattern: /^(?:gpt-5\.5|gpt-5\.4|gpt-5\.4-mini|gpt-5\.4-nano|gpt-5\.2)$/i,
+    options: { reasoningEffort: "none" },
+  },
+  {
+    // Accepts none to high.
+    pattern: /^(?:gpt-5\.1|gpt-5\.1-codex|gpt-5\.1-codex-mini)$/i,
+    options: { reasoningEffort: "none" },
+  },
+  {
+    // Accepts minimal to high.
+    pattern: /^(?:gpt-5|gpt-5-mini|gpt-5-nano|gpt-5-codex)$/i,
+    options: { reasoningEffort: "minimal" },
+  },
 
-  // Grok 4.3 can disable thinking; 4.5 and 4.6 cannot.
+  // Grok 4.3 can disable thinking; 4.5, 4.6 and 4.7 cannot.
   {
     pattern: /^grok-4\.3$/i,
     options: { reasoningEffort: "none" },
   },
   {
-    pattern: /^grok-4\.[56]$/i,
+    pattern: /^grok-4\.[567]$/i,
     options: { reasoningEffort: "low" },
   },
   {
@@ -658,9 +639,12 @@ export const LLM_MODEL_OPTIONS: Array<{
     options: { thinking: { type: "disabled" } },
   },
 
-  // DeepSeek reasoning models - disable thinking by default
+  // DeepSeek reasoning models - disable thinking by default.
+  // `deepseek-flash` is the alias for the current V4.x Flash release. Hosts serving the open
+  // weights use the point release and an optional MMDD snapshot suffix (V4.1-Flash-1017,
+  // V4-Flash-0731, V4-Pro-0813).
   {
-    pattern: /(?:^|\/)deepseek-(?:reasoner|v4-(?:flash|pro))$/i,
+    pattern: /(?:^|\/)deepseek-(?:reasoner|flash|v4(?:\.\d+)?-(?:flash|pro)(?:-\d{4})?)$/i,
     options: { thinking: { type: "disabled" } },
   },
 
@@ -672,6 +656,7 @@ export const LLM_MODEL_OPTIONS: Array<{
 
   // MiniMax reasoning-capable models - disable thinking/history by default.
   // Keep this provider-agnostic because recommendation matching is model-name based.
+  // MiniMax-M3.1-Flash must not match: it always thinks and errors on `thinking: disabled`.
   {
     pattern: /(?:^|\/)minimax-m(?:2(?:[.-].*)?|3)$/i,
     options: { thinking: { type: "disabled" }, reasoningHistory: "disabled" },
@@ -690,9 +675,9 @@ export const LLM_MODEL_OPTIONS: Array<{
     pattern: /(?:^|\/)kimi-k2(?!-instruct(?:[a-z0-9.-].*)?$)(?:[a-z0-9.-].*)?$/i,
     options: { thinking: { type: "disabled" }, reasoningHistory: "disabled" },
   },
-  // Kimi K3 always reasons and does not accept the K2 thinking options.
+  // Kimi K3 and K3.1 Pro always reason and do not accept the K2 thinking options.
   {
-    pattern: /^kimi-k3$/i,
+    pattern: /^kimi-k3(?:\.1-pro(?:-highspeed)?)?$/i,
     options: { reasoningEffort: "low" },
   },
 

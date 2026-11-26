@@ -9,8 +9,10 @@ import { ThemeProvider } from "@/components/providers/theme-provider"
 import { SelectionPopover } from "@/components/ui/selection-popover"
 import { ReviewDueTab } from "@/components/ui/selection-popover/review-due-tab"
 import { SUBTITLES_BOX_CLASS } from "@/utils/constants/subtitles"
+import { getVideoNoteOrigin } from "@/utils/note-origin"
 import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-host"
 import { subtitlesPositionAtom } from "../atoms"
+import { useSubtitlesUI } from "../ui/subtitles-ui-context"
 import { lookUpAtom, wordLookupAtom } from "./atoms"
 import { useHoldPlayback } from "./use-hold-playback"
 import { useTopLayerPortalContainer } from "./use-top-layer-portal-container"
@@ -51,6 +53,7 @@ export function WordLookupCard() {
   const subtitlesAtBottom = useAtomValue(subtitlesPositionAtom).anchor === "bottom"
   // The subtitles' own shadow root, read before this card provides its own container.
   const subtitlesRoot = use(ShadowWrapperContext)
+  const { getVideoElement, getVideoPageUrl } = useSubtitlesUI()
   const [pinned, setPinned] = useState(false)
   // Owned here, so a lookup closed from outside the card (navigation, subtitles
   // turned off) also drops the pin.
@@ -108,7 +111,14 @@ export function WordLookupCard() {
               <CustomActionPanel.Header />
               <CustomActionPanel.Body />
               <ReviewDueTab source="extension_custom_ai_action" />
-              <CustomActionPanel.Footer>
+              <CustomActionPanel.Footer
+                getNoteOrigin={() =>
+                  getVideoNoteOrigin({
+                    seconds: getVideoElement()?.currentTime,
+                    videoPageUrl: getVideoPageUrl(),
+                  })
+                }
+              >
                 <CustomActionPanel.ProviderSelect />
               </CustomActionPanel.Footer>
             </CustomActionPanel.Root>

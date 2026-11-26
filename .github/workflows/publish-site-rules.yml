@@ -1,0 +1,124 @@
+name: Publish Site Rules
+
+# Publishes the built-in site rules to installed extensions, which check for
+# them every six hours (src/utils/site-rules/remote). Skips until the SITE_RULES_SIGNING_KEY,
+# R2_ACCESS_KEY_ID and R2_SECRET_ACCESS_KEY secrets and the R2_ACCOUNT_ID and
+# SITE_RULES_R2_BUCKET variables are set.
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - src/utils/site-rules/built-in/rules.json
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One publish at a time, so an older run never lands after a newer one.
+concurrency:
+  group: publish-site-rules
+  cancel-in-progress: false
+
+# Served at https://rules.readfrog.app/v1/site-rules.json.
+env:
+  SITE_RULES_OBJECT_KEY: v1/site-rules.json
+  SITE_RULES_FILE: .output/site-rules/site-rules.json
+  SITE_RULES_LIVE_FILE: .output/site-rules/live.json
+
+jobs:
+  publish:
+    name: Publish Site Rules
+    runs-on: ubuntu-latest
+    env:
+      HUSKY: 0
+      WXT_SKIP_ENV_VALIDATION: true
+      SKIP_FREE_API: true
+
+    steps:
+      - name: Check configuration
+        id: config
+        env:
+          SITE_RULES_SIGNING_KEY: ${{ secrets.SITE_RULES_SIGNING_KEY }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ACCOUNT_ID: ${{ vars.R2_ACCOUNT_ID }}
+          SITE_RULES_R2_BUCKET: ${{ vars.SITE_RULES_R2_BUCKET }}
+        run: |
+          if [ -n "$SITE_RULES_SIGNING_KEY" ] && [ -n "$R2_ACCESS_KEY_ID" ] && [ -n "$R2_SECRET_ACCESS_KEY" ] && [ -n "$R2_ACCOUNT_ID" ] && [ -n "$SITE_RULES_R2_BUCKET" ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::Site rules publishing is not set up yet; skipping."
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout Repo
+        if: steps.config.outputs.configured == 'true'
+        uses: actions/checkout@v7
+
+      - name: Setup pnpm and Node.js
+        if: steps.config.outputs.configured == 'true'
+        uses: pnpm/setup@v3
+        with:
+          cache: true
+          install: false
+
+      - name: Install Dependencies
+        if: steps.config.outputs.configured == 'true'
+        run: pnpm install --frozen-lockfile
+
+      # The rule checks PRs run, against the exact commit being published.
+      - name: Test site rules
+        if: steps.config.outputs.configured == 'true'
+        run: pnpm vitest run src/utils/site-rules src/entrypoints/background/__tests__/site-rules-update.test.ts
+
+      # Straight from R2 rather than through the CDN, so neither a cached copy
+      # nor a bot challenge stands in for what the bucket holds now. Secrets
+      # only reach the steps that use them, never dependency installs.
+      - name: Read the published document
+        if: steps.config.outputs.configured == 'true'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          AWS_REQUEST_CHECKSUM_CALCULATION: WHEN_REQUIRED
+          AWS_RESPONSE_CHECKSUM_VALIDATION: WHEN_REQUIRED
+          R2_ACCOUNT_ID: ${{ vars.R2_ACCOUNT_ID }}
+          SITE_RULES_R2_BUCKET: ${{ vars.SITE_RULES_R2_BUCKET }}
+        run: |
+          mkdir -p "$(dirname "$SITE_RULES_LIVE_FILE")"
+          if aws s3 cp "s3://$SITE_RULES_R2_BUCKET/$SITE_RULES_OBJECT_KEY" "$SITE_RULES_LIVE_FILE" \
+            --endpoint-url "https://$R2_ACCOUNT_ID.r2.cloudflarestorage.com" 2> s3-error.log; then
+            echo "Read the published document"
+          elif grep -qE "404|NoSuchKey|Not Found" s3-error.log; then
+            echo "Nothing is published yet"
+          else
+            cat s3-error.log
+            exit 1
+          fi
+
+      - name: Sign
+        id: sign
+        if: steps.config.outputs.configured == 'true'
+        env:
+          SITE_RULES_SIGNING_KEY: ${{ secrets.SITE_RULES_SIGNING_KEY }}
+        run: pnpm exec node scripts/site-rules/sign.mjs --out "$SITE_RULES_FILE" --live-file "$SITE_RULES_LIVE_FILE"
+
+      # Extensions revalidate every six hours, and the edge copy can be up to
+      # five minutes behind on top of that.
+      - name: Upload to R2
+        if: steps.sign.outputs.publish == 'true'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          AWS_REQUEST_CHECKSUM_CALCULATION: WHEN_REQUIRED
+          AWS_RESPONSE_CHECKSUM_VALIDATION: WHEN_REQUIRED
+          R2_ACCOUNT_ID: ${{ vars.R2_ACCOUNT_ID }}
+          SITE_RULES_R2_BUCKET: ${{ vars.SITE_RULES_R2_BUCKET }}
+        run: >-
+          aws s3 cp "$SITE_RULES_FILE" "s3://$SITE_RULES_R2_BUCKET/$SITE_RULES_OBJECT_KEY"
+          --endpoint-url "https://$R2_ACCOUNT_ID.r2.cloudflarestorage.com"
+          --content-type "application/json; charset=utf-8"
+          --cache-control "public, max-age=300"

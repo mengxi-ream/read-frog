@@ -1,8 +1,8 @@
-import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { LanguageTag } from "@read-frog/definitions"
 import type { LanguageItem } from "@/components/language-combobox-options"
 import { Combobox as ComboboxPrimitive } from "@base-ui/react"
 import { Icon } from "@iconify/react"
-import { langCodeISO6393Schema } from "@read-frog/definitions"
+import { languageTagSchema } from "@read-frog/definitions"
 import { IconChevronDown } from "@tabler/icons-react"
 import { useAtom, useAtomValue } from "jotai"
 import { useMemo } from "react"
@@ -21,7 +21,7 @@ import { detectedCodeAtom } from "@/utils/atoms/detected-code"
 import { i18n } from "@/utils/i18n"
 import { getLanguageLabel, getLanguageName } from "@/utils/language-labels"
 
-function createLanguageItem(code: LangCodeISO6393): LanguageItem<LangCodeISO6393> {
+function createLanguageItem(code: LanguageTag): LanguageItem<LanguageTag> {
   return {
     value: code,
     label: getLanguageLabel(code),
@@ -66,10 +66,7 @@ function LanguageComboboxTrigger({
 export default function LanguageOptionsSelector() {
   const [language, setLanguage] = useAtom(configFieldsAtomMap.language)
   const detectedCode = useAtomValue(detectedCodeAtom)
-  const targetLanguageItems = useMemo(
-    () => langCodeISO6393Schema.options.map(createLanguageItem),
-    [],
-  )
+  const targetLanguageItems = useMemo(() => languageTagSchema.options.map(createLanguageItem), [])
   const sourceLanguageItems = useMemo<LanguageItem[]>(
     () => [
       {
@@ -161,7 +158,7 @@ export default function LanguageOptionsSelector() {
             placeholder={i18n.t("translationHub.searchLanguages")}
           />
           <ComboboxList>
-            {(item: LanguageItem<LangCodeISO6393>) => (
+            {(item: LanguageItem<LanguageTag>) => (
               <ComboboxItem key={item.value} value={item}>
                 {item.label}
               </ComboboxItem>

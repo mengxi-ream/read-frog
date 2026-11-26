@@ -1,6 +1,6 @@
-import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { LanguageTag } from "@read-frog/definitions"
 import type { GlossaryTargetLang } from "@/utils/glossary/target-language"
-import { langCodeISO6393Schema } from "@read-frog/definitions"
+import { languageTagSchema } from "@read-frog/definitions"
 import { ALL_LANGUAGES } from "@/utils/glossary/target-language"
 import { getLanguageLabel, getLanguageName } from "@/utils/language-labels"
 
@@ -9,14 +9,14 @@ import { getLanguageLabel, getLanguageName } from "@/utils/language-labels"
  * language — `auto` below, `all` for the glossary. Every such row is pinned
  * ahead of the languages and named by its caller.
  */
-export interface LanguageItem<T extends string = LangCodeISO6393 | "auto"> {
+export interface LanguageItem<T extends string = LanguageTag | "auto"> {
   value: T
   label: string
   name?: string
 }
 
-export function getTargetLanguageItems(): LanguageItem<LangCodeISO6393>[] {
-  return langCodeISO6393Schema.options.map((code) => ({
+export function getTargetLanguageItems(): LanguageItem<LanguageTag>[] {
+  return languageTagSchema.options.map((code) => ({
     value: code,
     label: getLanguageLabel(code),
     name: getLanguageName(code),
@@ -29,7 +29,7 @@ export function getTargetLanguageItems(): LanguageItem<LangCodeISO6393>[] {
  * (the settings page), where auto can only be described.
  */
 export function getLanguageItems(
-  detectedLangCode?: LangCodeISO6393,
+  detectedLangCode?: LanguageTag,
   autoLabel?: string,
 ): LanguageItem[] {
   const items: LanguageItem[] = getTargetLanguageItems()

@@ -1,4 +1,4 @@
-import type { SubtitlesProvidersAdapter } from "../universal-adapter"
+import type { SubtitlesProvidersAdapter } from "../adapter/subtitles-providers-adapter"
 import { TRANSLATE_BUTTON_CONTAINER_ID } from "@/utils/constants/subtitles"
 import { waitForElement } from "@/utils/dom/wait-for-element"
 import { removeReactShadowHost } from "@/utils/react-shadow-host/create-shadow-host"

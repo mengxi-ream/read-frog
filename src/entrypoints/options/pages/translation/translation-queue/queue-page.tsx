@@ -3,11 +3,11 @@ import { ConfigDetailSection } from "../../../components/config-detail-section"
 import { PageLayout } from "../../../components/page-layout"
 import { BatchTranslationItems } from "./batch-items"
 import { PreloadItems } from "./preload-items"
-import { RequestRateItems } from "./request-rate-items"
+import { RequestRateItems, RequestTimeoutItem } from "./request-rate-items"
 
 /**
  * Drilled into from the Translation page: how fast requests go out, how much text each carries,
- * and how far ahead of the reader they run. Every one of them trades speed against API cost.
+ * how long each may take, and how far ahead of the reader they run.
  */
 export function TranslationQueuePage() {
   return (
@@ -23,6 +23,7 @@ export function TranslationQueuePage() {
       >
         <RequestRateItems />
         <BatchTranslationItems />
+        <RequestTimeoutItem />
         <PreloadItems />
       </ConfigDetailSection>
     </PageLayout>

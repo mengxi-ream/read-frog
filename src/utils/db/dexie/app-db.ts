@@ -8,7 +8,9 @@ import BatchRequestRecord from "./tables/batch-request-record"
 import Glossary from "./tables/glossary"
 import GlossarySyncSnapshot from "./tables/glossary-sync-snapshot"
 import GlossaryTerm from "./tables/glossary-term"
+import LogRecordEntry from "./tables/log-record"
 import TranslationCache from "./tables/translation-cache"
+import { moveGlossaryTermsToTags } from "./upgrades/v7-glossary-term-tags"
 
 export default class AppDB extends Dexie {
   translationCache!: EntityTable<TranslationCache, "key">
@@ -24,6 +26,8 @@ export default class AppDB extends Dexie {
   glossaryTerm!: EntityTable<GlossaryTerm, "id">
 
   glossarySyncSnapshot!: EntityTable<GlossarySyncSnapshot, "id">
+
+  logRecord!: EntityTable<LogRecordEntry, "id">
 
   constructor() {
     super(`${upperCamelCase(APP_NAME)}DB`)
@@ -154,6 +158,81 @@ export default class AppDB extends Dexie {
       glossarySyncSnapshot: `
         id`,
     })
+    // v7 changes no store: glossary terms move from ISO 639-3 codes to BCP 47
+    // tags (./upgrades/v7-glossary-term-tags.ts). The sync snapshots keep their
+    // codes; the sync reads every side in the stored form
+    // (`withStoredTargetLangs`).
+    this.version(7)
+      .stores({
+        translationCache: `
+          key,
+          translation,
+          createdAt`,
+        batchRequestRecord: `
+          key,
+          createdAt,
+          originalRequestCount,
+          provider,
+          model`,
+        articleSummaryCache: `
+          key,
+          createdAt`,
+        aiSegmentationCache: `
+          key,
+          createdAt`,
+        glossary: `
+          id,
+          enabled,
+          createdAt`,
+        glossaryTerm: `
+          id,
+          glossaryId,
+          &[glossaryId+targetLang+matchKey],
+          enabled,
+          updatedAt`,
+        glossarySyncSnapshot: `
+          id`,
+      })
+      .upgrade(async (tx) => {
+        const table = tx.table("glossaryTerm")
+        const { kept, droppedIds } = moveGlossaryTermsToTags(await table.toArray())
+        await table.bulkDelete(droppedIds)
+        await table.bulkPut(kept)
+      })
+    // v8 adds the local log (utils/logging). Ordered and trimmed by its
+    // auto-increment id alone, so nothing else is indexed.
+    this.version(8).stores({
+      translationCache: `
+        key,
+        translation,
+        createdAt`,
+      batchRequestRecord: `
+        key,
+        createdAt,
+        originalRequestCount,
+        provider,
+        model`,
+      articleSummaryCache: `
+        key,
+        createdAt`,
+      aiSegmentationCache: `
+        key,
+        createdAt`,
+      glossary: `
+        id,
+        enabled,
+        createdAt`,
+      glossaryTerm: `
+        id,
+        glossaryId,
+        &[glossaryId+targetLang+matchKey],
+        enabled,
+        updatedAt`,
+      glossarySyncSnapshot: `
+        id`,
+      logRecord: `
+        ++id`,
+    })
     this.translationCache.mapToClass(TranslationCache)
     this.batchRequestRecord.mapToClass(BatchRequestRecord)
     this.articleSummaryCache.mapToClass(ArticleSummaryCache)
@@ -161,5 +240,6 @@ export default class AppDB extends Dexie {
     this.glossary.mapToClass(Glossary)
     this.glossaryTerm.mapToClass(GlossaryTerm)
     this.glossarySyncSnapshot.mapToClass(GlossarySyncSnapshot)
+    this.logRecord.mapToClass(LogRecordEntry)
   }
 }

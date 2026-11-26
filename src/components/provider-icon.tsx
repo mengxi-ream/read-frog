@@ -1,4 +1,5 @@
 import type { VariantProps } from "class-variance-authority"
+import type * as React from "react"
 import { cva } from "class-variance-authority"
 import { useEffect, useReducer, useRef } from "react"
 import { browser } from "#imports"
@@ -44,7 +45,7 @@ const iconContainerVariants = cva(
 const iconVariants = cva("", {
   variants: {
     size: {
-      sm: "size-[11px]",
+      sm: "size-3",
       base: "size-3.5",
       md: "size-5",
       lg: "size-6",
@@ -76,6 +77,8 @@ interface ProviderIconProps extends VariantProps<typeof providerIconVariants> {
   name?: string
   className?: string
   textClassName?: string
+  /** Drawn over the logo's circle, placed by its own classes against the circle. */
+  badge?: React.ReactNode
 }
 
 type ResolvedLogo = { kind: "src"; src: string } | { kind: "bitmap"; bitmap: ImageBitmap } | null
@@ -84,14 +87,15 @@ const PROTOCOL_RELATIVE_URL_RE = /^(?:[a-z][a-z\d+\-.]*:)?\/\//i
 const SCHEME_URL_RE = /^[a-z][a-z\d+\-.]*:/i
 
 const iconPixelSizeMap = {
-  sm: 11,
+  sm: 12,
   base: 14,
   md: 20,
   lg: 24,
   xl: 28,
 } as const
 
-function normalizeLogoUrl(logo: string) {
+/** A logo path relative to the extension made absolute, so it loads from any page. */
+export function normalizeLogoUrl(logo: string) {
   if (PROTOCOL_RELATIVE_URL_RE.test(logo) || SCHEME_URL_RE.test(logo)) {
     return logo
   }
@@ -113,6 +117,7 @@ export default function ProviderIcon({
   size,
   className,
   textClassName,
+  badge,
 }: ProviderIconProps) {
   const normalizedLogo = normalizeLogoUrl(logo)
   const [resolvedLogo, setResolvedLogo] = useReducer(
@@ -209,7 +214,7 @@ export default function ProviderIcon({
 
   return (
     <div className={cn(providerIconVariants({ size }), className)}>
-      <div className={iconContainerVariants({ size })}>
+      <div className={cn(iconContainerVariants({ size }), badge !== undefined && "relative")}>
         {resolvedLogo?.kind === "src" && (
           <img
             src={resolvedLogo.src}
@@ -227,6 +232,7 @@ export default function ProviderIcon({
             aria-hidden={imgAlt ? undefined : true}
           />
         )}
+        {badge}
       </div>
       {name && <span className={cn(textVariants({ size }), textClassName)}>{name}</span>}
     </div>

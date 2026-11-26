@@ -121,4 +121,20 @@ describe("bindTranslationShortcutKey", () => {
     cleanup()
     expect(mockUnregister).not.toHaveBeenCalled()
   })
+
+  it("leaves the key to the page while simple mode has page translation switched off", async () => {
+    mockGetLocalConfig.mockResolvedValue({
+      pageTranslation: {
+        enabled: false,
+        page: {
+          shortcut: "Mod+E",
+        },
+      },
+    })
+
+    const { manager } = createManager(false)
+    await bindTranslationShortcutKey(manager)
+
+    expect(mockRegister).not.toHaveBeenCalled()
+  })
 })

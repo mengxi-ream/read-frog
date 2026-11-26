@@ -10,7 +10,14 @@
  */
 
 /** Origins whose pages may ask the extension to open a provider's config. */
-export const PARTNER_BRIDGE_ORIGINS = ["https://www.jalapeno-cloud.ai"] as const
+export const PARTNER_BRIDGE_ORIGINS = [
+  "https://www.jalapeno-cloud.ai",
+  // IF API serves the same site on all four.
+  "https://ifapi.org",
+  "https://cn.ifapi.org",
+  "https://ifapi.dev",
+  "https://cn.ifapi.dev",
+] as const
 
 /** Marks a message as coming from a partner page rather than from the extension. */
 export const PARTNER_BRIDGE_REQUEST_SOURCE = "read-frog-partner-page"

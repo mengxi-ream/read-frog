@@ -1,9 +1,10 @@
 import { useAtom } from "jotai"
+import { FeatureSwitch } from "@/components/feature-switch"
 import ProviderSelector from "@/components/llm-providers/provider-selector"
 import { useFeatureProvider } from "@/components/llm-providers/use-feature-providers"
-import { Switch } from "@/components/ui/base-ui/switch"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { getSelectionToolbarActions, resolveNoteSuggestionAction } from "@/utils/custom-actions"
+import { getFeatureTitle } from "@/utils/feature-text"
 import { i18n } from "@/utils/i18n"
 import { ActionSelect } from "../../../components/action-select"
 import { ConfigItem } from "../../../components/config-item"
@@ -23,18 +24,10 @@ export function NoteSuggestionItems() {
     <>
       <ConfigItem
         id="selection-toolbar-note-suggestion"
-        title={i18n.t("options.selectionToolbar.actions.noteSuggestion.title")}
+        title={getFeatureTitle("selectionToolbar.translate.noteSuggestion")}
         description={i18n.t("options.selectionToolbar.actions.noteSuggestion.description")}
       >
-        <Switch
-          checked={selectionToolbar.noteSuggestion.enabled}
-          onCheckedChange={(checked) =>
-            void setSelectionToolbar({
-              ...selectionToolbar,
-              noteSuggestion: { ...selectionToolbar.noteSuggestion, enabled: checked },
-            })
-          }
-        />
+        <FeatureSwitch id="selectionToolbar.translate.noteSuggestion" />
       </ConfigItem>
       <ConfigItem
         description={i18n.t("options.selectionToolbar.actions.noteSuggestion.actionDescription")}

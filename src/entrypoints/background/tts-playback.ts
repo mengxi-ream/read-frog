@@ -1,12 +1,15 @@
 import type {
   TTSPlaybackStartRequest,
   TTSPlaybackStartResponse,
+  TTSPlaybackStopReason,
   TTSPlaybackStopRequest,
 } from "@/types/tts-playback"
 import { browser } from "#imports"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
 import { onMessage, sendMessage } from "@/utils/message"
 import { DOMAudioPlaybackController } from "@/utils/tts-playback/dom-audio-controller"
+
+const log = createLogger("background/tts-playback")
 
 const OFFSCREEN_DOCUMENT_PATH = "/offscreen.html" as const
 const OFFSCREEN_DOCUMENT_URL = browser.runtime.getURL(OFFSCREEN_DOCUMENT_PATH)
@@ -36,6 +39,11 @@ interface ChromeOffscreenApi {
 interface ChromeLike {
   runtime?: ChromeRuntimeApi
   offscreen?: ChromeOffscreenApi
+}
+
+interface OffscreenPlaybackRun {
+  requestId: string
+  cancelled?: TTSPlaybackStopReason
 }
 
 interface TTSPlaybackAdapter {
@@ -77,8 +85,14 @@ function isMissingReceiverError(error: unknown): boolean {
   )
 }
 
+function isClosedMessageChannelError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error)
+  return message.includes("message channel closed")
+}
+
 class ChromeOffscreenPlaybackAdapter implements TTSPlaybackAdapter {
   private ensureOffscreenPromise: Promise<void> | null = null
+  private activeRun: OffscreenPlaybackRun | null = null
 
   async prepare(): Promise<void> {
     if (await this.hasOffscreenDocument()) {
@@ -114,31 +128,71 @@ class ChromeOffscreenPlaybackAdapter implements TTSPlaybackAdapter {
   }
 
   async play(request: TTSPlaybackStartRequest): Promise<TTSPlaybackStartResponse> {
-    await this.prepare()
-
-    // Latest request wins: always stop any in-progress playback first.
-    await this.stop({ reason: "interrupted" })
+    if (this.activeRun) {
+      this.activeRun.cancelled = "interrupted"
+    }
+    const run: OffscreenPlaybackRun = { requestId: request.requestId }
+    this.activeRun = run
 
     try {
-      return await sendMessage("ttsOffscreenPlay", request)
-    } catch (error) {
-      if (!isMissingReceiverError(error)) {
-        throw error
+      await this.prepare()
+      if (run.cancelled) {
+        return { ok: false, reason: run.cancelled }
       }
 
-      logger.warn("[Background][TTSPlayback] offscreen receiver missing, retrying once", error)
+      // Latest request wins: always stop any in-progress playback first.
+      await this.stopOffscreen({ reason: "interrupted" })
+      if (run.cancelled) {
+        return { ok: false, reason: run.cancelled }
+      }
 
-      // Offscreen documents can be reclaimed by the browser and briefly lose handlers.
-      await this.prepare()
-      return sendMessage("ttsOffscreenPlay", request)
+      try {
+        return await sendMessage("ttsOffscreenPlay", request)
+      } catch (error) {
+        // The document was gone before the message arrived, or closed while it
+        // was waiting. Chrome closes an AUDIO_PLAYBACK document after 30 s
+        // without sound, and sound cancels that timer, so a speech chunk that
+        // was cut off by it had not been heard yet: playing it again is safe.
+        if (!isMissingReceiverError(error) && !isClosedMessageChannelError(error)) {
+          throw error
+        }
+
+        if (run.cancelled) {
+          return { ok: false, reason: run.cancelled }
+        }
+
+        log.warn("[TTSPlayback] offscreen document missing or closed, retrying once", { error })
+
+        await this.prepare()
+        if (run.cancelled) {
+          return { ok: false, reason: run.cancelled }
+        }
+
+        // Awaited so the cleanup below runs when the retry ends, not when it starts.
+        return await sendMessage("ttsOffscreenPlay", request)
+      }
+    } finally {
+      if (this.activeRun === run) {
+        this.activeRun = null
+      }
     }
   }
 
   async stop(request: TTSPlaybackStopRequest): Promise<void> {
+    const run = this.activeRun
+    if (run && (!request.requestId || request.requestId === run.requestId)) {
+      run.cancelled = request.reason ?? "stopped"
+      this.activeRun = null
+    }
+
+    await this.stopOffscreen(request)
+  }
+
+  private async stopOffscreen(request: TTSPlaybackStopRequest): Promise<void> {
     try {
       await sendMessage("ttsOffscreenStop", request)
     } catch (error) {
-      if (!isMissingReceiverError(error)) {
+      if (!isMissingReceiverError(error) && !isClosedMessageChannelError(error)) {
         throw error
       }
     }
@@ -226,7 +280,7 @@ export function setupTTSPlaybackMessageHandlers() {
         reason: message.data.reason ?? "stopped",
       })
     } catch (error) {
-      logger.warn("[Background][TTSPlayback] stop failed", error)
+      log.warn("[TTSPlayback] stop failed", { error })
       throw error
     }
 

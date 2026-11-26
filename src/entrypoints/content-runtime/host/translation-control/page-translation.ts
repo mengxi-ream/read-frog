@@ -1,6 +1,7 @@
-import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { LanguageTag } from "@read-frog/definitions"
 import type { FeatureUsageContext } from "@/types/analytics"
 import type { Config } from "@/types/config/config"
+import type { BuiltInAiRefusalPromptOptions } from "@/utils/content-runtime/built-in-ai-prompt"
 import debounce from "debounce"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
@@ -13,17 +14,21 @@ import {
   REACT_SHADOW_HOST_CLASS,
   SPINNER_CLASS,
 } from "@/utils/constants/dom-labels"
+import { MICROSOFT_TRANSLATE_PROVIDER_ID } from "@/utils/constants/providers"
 import {
   GIANT_PARAGRAPH_MAX_SPLIT_DEPTH,
   GIANT_PARAGRAPH_SPLIT_MIN_VIEWPORT_PX,
   GIANT_PARAGRAPH_SPLIT_VIEWPORT_MULTIPLIER,
   GIANT_SPLIT_STRANDED_TEXT_MAX_UNITS,
 } from "@/utils/constants/translate"
+import { promptForBuiltInAiRefusal } from "@/utils/content-runtime/built-in-ai-prompt"
 import {
   clearAppliedDocumentTitleTranslation,
   setAppliedDocumentTitleTranslation,
 } from "@/utils/content/document-title"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
+import { isFeatureOn } from "@/utils/features"
+import { isGuideStepUrl } from "@/utils/guide/guide-url"
 import {
   hasNoWalkAncestor,
   isHTMLElement,
@@ -52,35 +57,76 @@ import {
   translateNodesBilingualMode,
   translateWalkedElement,
 } from "@/utils/host/translate/node-manipulation"
+import { endParagraphDiagnosisSession } from "@/utils/host/translate/paragraph-diagnosis"
 import { validateTranslationConfigAndToast } from "@/utils/host/translate/translate-text"
 import { translateTextForPageTitle } from "@/utils/host/translate/translate-variants"
 import {
   beginPageTranslationSession,
+  claimPageTranslationRequestFailure,
   endPageTranslationSession,
+  onPageTranslationRequestFailed,
   setPageTranslationSessionProviderRef,
 } from "@/utils/host/translate/translation-session"
 import { cleanupNodeSiteRuleCSSIfUnused } from "@/utils/host/translate/ui/node-site-rule-css"
 import { cancelSpinnerAnimation } from "@/utils/host/translate/ui/spinner"
 import { ensureSiteRuleCSS, removeSiteRuleCSS } from "@/utils/host/translate/ui/style-injector"
 import { getOrCreateWebPageContext } from "@/utils/host/translate/webpage-context"
-import { logger } from "@/utils/logger"
+import { readHostedAiReasoningChoice } from "@/utils/hosted-ai/models"
+import { getBuiltInAiRefusalKind } from "@/utils/hosted-ai/refusal"
+import { createLogger } from "@/utils/logging/logger"
 import { sendMessage } from "@/utils/message"
 import {
   canResolvedProviderRefGenerateText,
   checkProviderAvailability,
+  getPageTranslationProviderId,
   resolvePageTranslationProvider,
   resolvePageTranslationProviderOrNull,
+  setPageTranslationProviderIdOverride,
 } from "@/utils/providers/provider-ref"
 import { removeReactShadowHost } from "@/utils/react-shadow-host/create-shadow-host"
 import { isTranslationCancelledError } from "@/utils/request/cancellation"
 import { createWorkPacer } from "@/utils/scheduler"
-import { getEffectiveSiteRule } from "@/utils/site-rules/effective"
+import { getDocumentSiteRule } from "@/utils/site-rules/effective"
+
+const log = createLogger("content-runtime/host/translation-control/page-translation")
 
 type SimpleIntersectionOptions = Omit<IntersectionObserverInit, "threshold"> & {
   threshold?: number
 }
 
 type DebouncedRetry = (() => void) & { clear: () => void }
+
+/** Automatic translation starts on its own; any other start is someone asking for it. */
+function isUserStarted(
+  analyticsContext: FeatureUsageContext<"page_translation"> | undefined,
+): boolean {
+  return analyticsContext?.surface !== ANALYTICS_SURFACE.PAGE_AUTO
+}
+
+/**
+ * How page translation asks someone Built-in AI refused to log in or upgrade. A start
+ * someone made gets the dialog. Automatic translation runs on every page someone opens,
+ * so it gets the dialog only for the first spent pool of a browser session, which the
+ * background keeps track of, and a toast with the same button after that; a guest's
+ * automatic translation keeps to the toast with its log-in button.
+ */
+function getPagePromptOptions(
+  analyticsContext: FeatureUsageContext<"page_translation"> | undefined,
+): Pick<
+  BuiltInAiRefusalPromptOptions,
+  "feature" | "analyticsFeature" | "trigger" | "mayOpenDialog"
+> {
+  const userStarted = isUserStarted(analyticsContext)
+  return {
+    feature: "pageTranslation",
+    analyticsFeature: ANALYTICS_FEATURE.PAGE_TRANSLATION,
+    trigger: userStarted ? "user" : "auto",
+    ...(!userStarted && {
+      mayOpenDialog: async (kind) =>
+        kind === "upgrade" && (await sendMessage("claimBuiltInAiAutoPrompt")),
+    }),
+  }
+}
 
 interface RetranslationBudget {
   windowStart: number
@@ -310,12 +356,14 @@ export class PageTranslationManager implements IPageTranslationManager {
   // The "translate tab title" switch: read when a session starts, then kept
   // current by setTitleTranslationEnabled.
   private titleTranslationEnabled = true
+  /** Stops this session listening for its pool running dry; see `listenForSpentPool`. */
+  private stopListeningForSpentPool: (() => void) | null = null
 
   constructor(
     intersectionOptions: SimpleIntersectionOptions = {},
     private readonly getDetectedPageLanguage: (
       url: string,
-    ) => LangCodeISO6393 | "und" | undefined = () => undefined,
+    ) => LanguageTag | "und" | undefined = () => undefined,
   ) {
     if (intersectionOptions.threshold !== undefined) {
       if (intersectionOptions.threshold < 0 || intersectionOptions.threshold > 1) {
@@ -335,11 +383,11 @@ export class PageTranslationManager implements IPageTranslationManager {
 
   async start(analyticsContext?: FeatureUsageContext<"page_translation">): Promise<void> {
     if (this.isPageTranslating) {
-      console.warn("PageTranslationManager is already active")
+      log.debug("Ignored a start: page translation is already on")
       return
     }
     if (this.pendingStart) {
-      console.warn("PageTranslationManager start is already pending")
+      log.info("Ignored a start: another one is already pending")
       return
     }
 
@@ -369,10 +417,29 @@ export class PageTranslationManager implements IPageTranslationManager {
       return
     }
     if (!config) {
-      console.warn("Config is not initialized")
+      log.error("Global config is not initialized")
+      return
+    }
+    // Every way of starting comes through here: the shortcut, the popup, the floating button,
+    // the context menu, auto-translation, a frame following the top frame. With page
+    // translation switched off in simple mode, none of them translates.
+    if (!isFeatureOn(config, "pageTranslation")) {
+      log.debug("Ignored a start: page translation is switched off")
       return
     }
     this.titleTranslationEnabled = config.pageTranslation.page.translateTitle
+
+    // The website's guide is read before anyone has logged in, while a fresh install
+    // translates pages with Built-in AI, which needs an account. There, page translation
+    // runs on the machine translator this network reaches instead, without touching the
+    // config.
+    const guideProviderId = isGuideStepUrl(window.location.href)
+      ? await sendMessage("getFreeTranslateProviderId").catch(() => MICROSOFT_TRANSLATE_PROVIDER_ID)
+      : null
+    if (this.pendingStart !== startToken) {
+      return
+    }
+    setPageTranslationProviderIdOverride(guideProviderId)
 
     const requestedProviderConfig = resolvePageTranslationProviderOrNull(config)
     const providerAnalytics = classifyResolvedProvider(requestedProviderConfig)
@@ -393,7 +460,10 @@ export class PageTranslationManager implements IPageTranslationManager {
     if (
       !validateTranslationConfigAndToast({
         providersConfig: config.providersConfig,
-        pageTranslation: config.pageTranslation,
+        pageTranslation: {
+          ...config.pageTranslation,
+          providerId: getPageTranslationProviderId(config),
+        },
         language: config.language,
       })
     ) {
@@ -413,12 +483,17 @@ export class PageTranslationManager implements IPageTranslationManager {
     // explicit guard for type-safety and for malformed storage snapshots.
     if (!requestedProviderConfig) return
 
+    // Read before the check below makes the session's ref; see
+    // setPageTranslationSessionProviderRef.
+    const reasoningChoice =
+      requestedProviderConfig.kind === "system"
+        ? await readHostedAiReasoningChoice(requestedProviderConfig.model)
+        : undefined
     const availability = await checkProviderAvailability(requestedProviderConfig, "pageTranslation")
     if (this.pendingStart !== startToken) {
       return
     }
     if (!availability.available) {
-      toastManager.add({ type: "error", title: availability.message })
       if (trackedContext) {
         void trackFeatureUsed({
           ...trackedContext,
@@ -427,6 +502,25 @@ export class PageTranslationManager implements IPageTranslationManager {
           outcome: "failure",
           failure_reason: "precheck",
         })
+      }
+
+      // Someone Built-in AI refused is asked to log in (a guest) or to upgrade (a spent
+      // pool), or to switch to machine translation and go on; see getPagePromptOptions.
+      // Frames leave that to the top frame: one page, one prompt. Anything else, and
+      // Ultra, which has no plan above it, keeps to a toast.
+      if (window !== window.top) {
+        if (!isUserStarted(analyticsContext) || !getBuiltInAiRefusalKind(availability.error)) {
+          toastManager.add({ type: "error", title: availability.message })
+        }
+        return
+      }
+      const prompted = await promptForBuiltInAiRefusal(availability.error, {
+        ...getPagePromptOptions(analyticsContext),
+        retry: () => void this.start(analyticsContext),
+        isCurrent: () => this.pendingStart === startToken,
+      })
+      if (!prompted) {
+        toastManager.add({ type: "error", title: availability.message })
       }
       return
     }
@@ -444,7 +538,10 @@ export class PageTranslationManager implements IPageTranslationManager {
       const sessionVersion = this.translationSessionVersion
 
       beginPageTranslationSession()
-      setPageTranslationSessionProviderRef(availability.providerRef)
+      setPageTranslationSessionProviderRef(availability.providerRef, reasoningChoice)
+      if (window === window.top) {
+        this.listenForSpentPool(sessionVersion, analyticsContext)
+      }
 
       try {
         await sendMessage("setAndNotifyPageTranslationStateChangedByManager", {
@@ -464,7 +561,7 @@ export class PageTranslationManager implements IPageTranslationManager {
         return
       }
 
-      const siteRule = getEffectiveSiteRule(config, window.location.href)
+      const siteRule = getDocumentSiteRule(config)
       if (siteRule.injectedCss) {
         void ensureSiteRuleCSS(document, siteRule.injectedCss)
       }
@@ -560,6 +657,40 @@ export class PageTranslationManager implements IPageTranslationManager {
     this.stopInternal({ notify: true, userInitiated: options?.userInitiated })
   }
 
+  /**
+   * Asks to upgrade, once a session, when Built-in AI's pool runs dry partway down a page;
+   * see getPagePromptOptions for how an automatic session asks. Each paragraph after that
+   * shows its own inline error, but a page of them doesn't say what to do. The session
+   * answers for every spent-pool failure in its frame, hover translation's included, so
+   * nothing else asks again. Switching to machine translation starts the page over: the
+   * session's provider is fixed when it starts. Ultra keeps to the inline errors.
+   */
+  private listenForSpentPool(
+    sessionVersion: number,
+    analyticsContext: FeatureUsageContext<"page_translation"> | undefined,
+  ): void {
+    let asked = false
+    this.stopListeningForSpentPool = onPageTranslationRequestFailed((error) => {
+      if (getBuiltInAiRefusalKind(error) !== "upgrade") {
+        return
+      }
+      claimPageTranslationRequestFailure(error)
+      if (asked) {
+        return
+      }
+      asked = true
+      void promptForBuiltInAiRefusal(error, {
+        ...getPagePromptOptions(analyticsContext),
+        kinds: ["upgrade"],
+        retry: () => {
+          this.stop()
+          void this.start(analyticsContext)
+        },
+        isCurrent: () => this.translationSessionVersion === sessionVersion,
+      })
+    })
+  }
+
   setTitleTranslationEnabled(enabled: boolean): void {
     this.titleTranslationEnabled = enabled
     if (!this.isPageTranslating) {
@@ -583,7 +714,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     const config = await getLocalConfig()
     if (!config || !this.isPageTranslating) return
 
-    const siteRule = getEffectiveSiteRule(config, window.location.href)
+    const siteRule = getDocumentSiteRule(config)
     if (siteRule.injectedCss) {
       // ensureSiteRuleCSS replaces the existing sheet's contents in place —
       // no remove-first, which would leave a gap with no site CSS applied
@@ -607,7 +738,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     this.pendingStart = null
 
     if (!this.isPageTranslating) {
-      console.warn("PageTranslationManager is already inactive")
+      log.debug("Ignored a stop: page translation is already off")
       return
     }
 
@@ -623,12 +754,15 @@ export class PageTranslationManager implements IPageTranslationManager {
     // without this, a long page keeps burning network/CPU/quota for minutes
     // after the user cancels (#1881). Fire-and-forget: the synchronous DOM
     // cleanup below finishes long before any rejection lands.
+    this.stopListeningForSpentPool?.()
+    this.stopListeningForSpentPool = null
     const endedSessionId = endPageTranslationSession()
     if (endedSessionId) {
       void sendMessage("cancelPageTranslationRequests", { sessionId: endedSessionId }).catch(
-        (error) => logger.warn("Failed to cancel pending translation requests", error),
+        (error) => log.warn("Failed to cancel pending translation requests", { error }),
       )
     }
+    endParagraphDiagnosisSession()
 
     this.isPageTranslating = false
     this.translationSessionVersion += 1
@@ -734,7 +868,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     try {
       await getOrCreateWebPageContext()
     } catch (error) {
-      logger.warn("Failed to prime webpage context before translating document title:", error)
+      log.warn("Failed to prime webpage context before translating document title", { error })
     }
   }
 
@@ -842,7 +976,7 @@ export class PageTranslationManager implements IPageTranslationManager {
       // A cancelled session's title request rejecting is expected, not noise.
       if (isTranslationCancelledError(error)) return
       if (requestVersion === this.titleRequestVersion) {
-        logger.warn("Failed to translate document title:", error)
+        log.warn("Failed to translate document title", { error })
       }
     }
   }
@@ -860,7 +994,7 @@ export class PageTranslationManager implements IPageTranslationManager {
 
     const config = existingConfig ?? (await getLocalConfig())
     if (!config) {
-      logger.error("Global config is not initialized")
+      log.error("Global config is not initialized")
       return
     }
     if (this.walkId !== walkId) return
@@ -1102,7 +1236,7 @@ export class PageTranslationManager implements IPageTranslationManager {
       // can deliver hundreds of entries at once (#1881).
       const currentConfig = await getLocalConfig()
       if (!currentConfig) {
-        logger.error("Global config is not initialized")
+        log.error("Global config is not initialized")
         return
       }
       if (this.walkId !== walkId) return
@@ -1371,7 +1505,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     shadowWalkRoots.push(observationRoot)
     const config = await getLocalConfig()
     if (!config) {
-      logger.error("Global config is not initialized")
+      log.error("Global config is not initialized")
       return null
     }
     if (!this.isPageTranslating || this.translationSessionVersion !== sessionVersion) return null
@@ -1466,7 +1600,7 @@ export class PageTranslationManager implements IPageTranslationManager {
 
     const config = mutationConfig ?? (await getLocalConfig())
     if (!config) {
-      logger.error("Global config is not initialized")
+      log.error("Global config is not initialized")
       return
     }
     if (!this.isPageTranslating || this.translationSessionVersion !== sessionVersion) return

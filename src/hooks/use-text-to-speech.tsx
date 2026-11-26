@@ -16,9 +16,11 @@ import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { detectLanguage } from "@/utils/content/language"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { i18n } from "@/utils/i18n"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
 import { sendMessage } from "@/utils/message"
 import { splitTextByUtf8Bytes } from "@/utils/server/edge-tts/chunk"
+
+const log = createLogger("use-text-to-speech")
 
 interface PlayAudioParams {
   text: string
@@ -67,7 +69,7 @@ async function resolveVoiceForText(
   forcedVoice?: string,
 ): Promise<string> {
   if (forcedVoice) {
-    logger.info("[TextToSpeech] Using forced voice for text", {
+    log.debug("Using forced voice for text", {
       text,
       forcedVoice,
     })
@@ -81,7 +83,7 @@ async function resolveVoiceForText(
     // what happened and how to choose a working detection mode.
     llmFallbackToastContext: "speak",
   })
-  logger.info("[TextToSpeech] Resolving voice for text", {
+  log.debug("Resolving voice for text", {
     text,
     detectedLanguage,
     enableLLM,
@@ -105,6 +107,10 @@ function getTTSFriendlyErrorDescription(error: Error): string | undefined {
     error.message.includes("[TOKEN_INVALID]")
   ) {
     return "Edge TTS is temporarily unavailable. Please check your network and retry."
+  }
+
+  if (error.message.includes("message channel closed")) {
+    return "Audio playback was interrupted. Please try again."
   }
 
   return error.message || undefined
@@ -186,10 +192,14 @@ export function useTextToSpeech(
       } catch (error) {
         // A run the user already stopped or replaced reports nothing.
         if (isSuperseded()) return
+        // The failed run may have left its audio playing.
+        activeRequestIdRef.current = null
+        void sendMessage("ttsPlaybackStop", { requestId }).catch(() => {})
         throw error
       }
     },
     onError: (error, variables) => {
+      log.warn("Text-to-speech playback failed", { error })
       void trackFeatureUsed({
         ...variables.analyticsContext,
         outcome: "failure",
@@ -203,7 +213,6 @@ export function useTextToSpeech(
           description: getTTSFriendlyErrorDescription(error),
         })
       }
-      activeRequestIdRef.current = null
       setIsPlaying(false)
       setCurrentChunk(0)
       setTotalChunks(0)
@@ -234,7 +243,7 @@ export function useTextToSpeech(
     }
 
     const fetchChunkAudio = async (chunk: string) => {
-      logger.info("[TextToSpeech] Fetching chunk audio", {
+      log.debug("Fetching chunk audio", {
         text: chunk,
         voice: selectedVoice,
         rate: ttsConfig.rate,
@@ -288,6 +297,8 @@ export function useTextToSpeech(
       const currentAudioPromise = fetchChunkAudio(chunks[index]!)
       const nextAudioPromise =
         index + 1 < chunks.length ? fetchChunkAudio(chunks[index + 1]!) : null
+      // The loop may exit before awaiting this; the await below still rethrows.
+      void nextAudioPromise?.catch(() => {})
       const audioChunk = await currentAudioPromise
 
       if (isSuperseded()) {

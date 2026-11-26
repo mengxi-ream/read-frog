@@ -1,6 +1,6 @@
 import type { Config } from "@/types/config/config"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
-import { getEffectiveSiteRule } from "@/utils/site-rules/effective"
+import { getDocumentSiteRule } from "@/utils/site-rules/effective"
 import { isHTMLElement } from "../dom/filter"
 import { walkAndLabelElement } from "../dom/traversal"
 import { translateWalkedElement } from "./core/translation-walker"
@@ -34,7 +34,7 @@ export async function removeOrShowNodeTranslation(node: Element, config: Config)
 
   const rootNode = node.getRootNode()
   const styleRoot = rootNode instanceof ShadowRoot ? rootNode : document
-  const siteRule = getEffectiveSiteRule(config, window.location.href)
+  const siteRule = getDocumentSiteRule(config)
   const releaseSiteRuleCSS = await beginNodeSiteRuleCSSOperation(styleRoot, siteRule.injectedCss)
 
   try {

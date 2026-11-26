@@ -1,3 +1,4 @@
+import type { NoteOriginInput } from "@read-frog/definitions"
 import type { PrimitiveAtom } from "jotai"
 import type { ReactNode } from "react"
 import type { CustomActionRequest } from "./atoms"
@@ -5,6 +6,7 @@ import type { SaveToNotebaseOutcome } from "./use-save-to-notebase"
 import type { ProviderSelectorOption } from "@/utils/providers/provider-display"
 import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { createContext, use, useEffect, useMemo, useRef } from "react"
+import { useBuiltInAiModels } from "@/components/llm-providers/use-built-in-ai-models"
 import { useHostedAiProviderOptions } from "@/components/llm-providers/use-hosted-ai-provider-options"
 import { SelectionPopover } from "@/components/ui/selection-popover"
 import { SelectionToolbarErrorAlert } from "@/components/ui/selection-popover/selection-toolbar-error-alert"
@@ -64,14 +66,27 @@ function useCustomActionPanelState(requestAtom: PrimitiveAtom<CustomActionReques
     const found = actionId && findSelectionToolbarAction(selectionToolbarConfig, actionId)
     return found && found.enabled !== false ? found : null
   }, [actionId, selectionToolbarConfig])
+  const { models: builtInAiModels } = useBuiltInAiModels()
   const provider = useMemo(
     () =>
-      action && resolveProviderRefForCapability("customAction", providersConfig, action.providerId),
-    [action, providersConfig],
+      action &&
+      resolveProviderRefForCapability(
+        "customAction",
+        providersConfig,
+        action.providerId,
+        builtInAiModels,
+      ),
+    [action, providersConfig, builtInAiModels],
   )
   const providers = useMemo(
-    () => getSelectableProvidersForCapability("customAction", providersConfig),
-    [providersConfig],
+    () =>
+      getSelectableProvidersForCapability(
+        "customAction",
+        providersConfig,
+        builtInAiModels,
+        action ? [action.providerId] : [],
+      ),
+    [providersConfig, builtInAiModels, action],
   )
 
   const webPageContext = useCustomActionWebPageContext(open, request?.sessionKey ?? 0)
@@ -220,9 +235,15 @@ function Body() {
 /** The footer: `children` on the left, the card's own buttons on the right. */
 function Footer({
   children,
+  getNoteOrigin,
   onSave,
 }: {
   children?: ReactNode
+  /**
+   * Where a note saved from the card comes from, read when the save starts, in
+   * place of the request's. The card on video subtitles reads the video here.
+   */
+  getNoteOrigin?: () => NoteOriginInput | null
   onSave?: (outcome: SaveToNotebaseOutcome) => void
 }) {
   const { action, cardSurface, error, isRunning, regenerate, request, result, titleText } =
@@ -242,6 +263,7 @@ function Footer({
             isRunning={isRunning}
             result={result}
             surface={cardSurface}
+            getNoteOrigin={getNoteOrigin ?? (() => request.noteOrigin)}
             onSave={onSave}
           />
           <CustomActionToolButton action={action} />

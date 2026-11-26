@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="10 10 44 44" width="512" height="512">
+  <title>IF API</title>
+  <defs>
+    <mask id="ifapi-gap-light" maskUnits="userSpaceOnUse" x="0" y="0" width="64" height="64">
+      <rect width="64" height="64" fill="#fff"/>
+      <circle cx="32" cy="32" r="6.83" fill="#000"/>
+    </mask>
+  </defs>
+  <g mask="url(#ifapi-gap-light)" fill="none" stroke="#0A0A0A" stroke-linecap="round" stroke-width="4.0">
+    <path d="M13 18h8.5c7 0 9.5 5.8 9.5 14s2.5 14 9.5 14H51"/>
+    <path d="M13 32h38M13 46h8.5c7 0 9.5-5.8 9.5-14s2.5-14 9.5-14H51" opacity=".46"/>
+  </g>
+  <circle cx="32" cy="32" r="4.00" fill="#0A0A0A"/>
+</svg>

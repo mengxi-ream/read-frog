@@ -1,8 +1,9 @@
 import { HostedAiOutputFieldTypeSchema } from "@read-frog/api-contract"
-import { langCodeISO6393Schema } from "@read-frog/definitions"
 import { z } from "zod"
 import { isBuiltInActionId } from "@/utils/constants/custom-action"
-import { BUILT_IN_AI_PROVIDER_ID } from "@/utils/constants/provider-ids"
+import { LEGACY_BUILT_IN_AI_PROVIDER_ID } from "@/utils/constants/provider-ids"
+import { storedLanguageTagSchema } from "./language-tag"
+import { storedProviderIdSchema } from "./provider-id"
 import { shortcutSchema } from "./shortcut"
 
 // Upper bound (UTF-16 code units) of a custom action's HTML layout. NEVER lower
@@ -15,6 +16,14 @@ export const MAX_CUSTOM_ACTION_LAYOUT_LENGTH = 32768
 // Upper bound (UTF-16 code units) of each text in a custom action's sample
 // data. NEVER lower it, for the reason given above.
 export const MAX_CUSTOM_ACTION_SAMPLE_TEXT_LENGTH = 32768
+
+// Which side of the selection the toolbar opens on. "followDirection" is the
+// side the drag ended on: below for a drag downward or along one line, above
+// for one upward. "above" and "below" pin it to that side of the selection,
+// and move it to the other side only when the chosen one has no room.
+export const selectionToolbarPlacements = ["followDirection", "above", "below"] as const
+export type SelectionToolbarPlacement = (typeof selectionToolbarPlacements)[number]
+export const selectionToolbarPlacementSchema = z.enum(selectionToolbarPlacements)
 
 // The contract's field-type enum is the source of truth: these values ride the
 // wire to hostedAi.customAction unchanged. Only the enum is shared — length
@@ -41,7 +50,7 @@ export const selectionToolbarCustomActionOutputFieldSchema = z.object({
 // way a model answers; the layout scope converts a number field's text.
 export const selectionToolbarCustomActionSampleDataSchema = z.object({
   selection: z.string().max(MAX_CUSTOM_ACTION_SAMPLE_TEXT_LENGTH),
-  targetCode: langCodeISO6393Schema,
+  targetCode: storedLanguageTagSchema,
   values: z.record(z.string(), z.string().max(MAX_CUSTOM_ACTION_SAMPLE_TEXT_LENGTH)),
 })
 
@@ -71,7 +80,7 @@ export const selectionToolbarCustomActionNotebaseConnectionSchema = z.object({
 
 export const selectionToolbarBuiltInActionStateSchema = z.object({
   enabled: z.boolean(),
-  providerId: z.string().nonempty(),
+  providerId: storedProviderIdSchema,
   notebaseConnection: selectionToolbarCustomActionNotebaseConnectionSchema.optional(),
   // Missing means the action's default key (BUILT_IN_ACTION_DEFAULT_SHORTCUTS);
   // empty means the user cleared it.
@@ -83,16 +92,19 @@ export const selectionToolbarBuiltInActionsSchema = z.object({
   // `.default()` is load-bearing: a config stored before v104 still parses in
   // UI contexts that load ahead of the background migration, instead of
   // falling back to DEFAULT_CONFIG and writing that over the user's settings.
+  // Such a config predates model choice, so it fills in the model the
+  // migrations move the old tiers to (LEGACY_BUILT_IN_AI_PROVIDER_ID), not the
+  // one new installs start on.
   sentenceAnalysis: selectionToolbarBuiltInActionStateSchema.default(() => ({
     enabled: true,
-    providerId: BUILT_IN_AI_PROVIDER_ID,
+    providerId: LEGACY_BUILT_IN_AI_PROVIDER_ID,
   })),
   // For the same reason as above. Off: a config stored before v105 has not
   // been through v106 either, which turns it on and unpins it, so it must not
   // land on the toolbar in the meantime.
   improveWriting: selectionToolbarBuiltInActionStateSchema.default(() => ({
     enabled: false,
-    providerId: BUILT_IN_AI_PROVIDER_ID,
+    providerId: LEGACY_BUILT_IN_AI_PROVIDER_ID,
   })),
 })
 
@@ -102,7 +114,7 @@ export const selectionToolbarCustomActionSchema = z
     name: z.string().nonempty(),
     enabled: z.boolean().optional(),
     icon: z.string(),
-    providerId: z.string().nonempty(),
+    providerId: storedProviderIdSchema,
     systemPrompt: z.string(),
     prompt: z.string(),
     outputSchema: z.array(selectionToolbarCustomActionOutputFieldSchema).min(1),

@@ -7,29 +7,28 @@ import type { ProviderRequestRouting } from "@/types/hosted-request"
 import type { MatchedTerm } from "@/utils/glossary/types"
 import type { PromptResolver } from "@/utils/host/translate/api/ai"
 import type { SerializableProviderRef } from "@/utils/providers/provider-ref"
-import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
+import { LANGUAGE_ENGLISH_NAMES } from "@read-frog/definitions"
 import { storage } from "#imports"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { putBatchRequestRecord } from "@/utils/batch-request-record"
 import { CONFIG_STORAGE_KEY, DEFAULT_CONFIG } from "@/utils/constants/config"
 import { BATCH_SEPARATOR, BATCH_SEPARATOR_LINE_PATTERN } from "@/utils/constants/prompt"
-import {
-  BATCH_TIMEOUT_BASE_MS,
-  BATCH_TIMEOUT_PER_CHAR_MS,
-  MAX_BATCH_TIMEOUT_MS,
-} from "@/utils/constants/translate"
+import { BATCH_TIMEOUT_PER_CHAR_MS, MAX_BATCH_EXTRA_TIMEOUT_MS } from "@/utils/constants/translate"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { Sha256Hex } from "@/utils/hash"
 import { executeTranslate } from "@/utils/host/translate/execute-translate"
+import { withBuiltInAiRequestId } from "@/utils/hosted-ai/request-id"
 import { requireHostedFeature } from "@/utils/hosted-ai/routing"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
 import { getSubtitlesTranslatePrompt } from "@/utils/prompts/subtitles"
 import { getTranslatePrompt } from "@/utils/prompts/translate"
 import { BatchQueue } from "@/utils/request/batch-queue"
-import { CancelledScopeRegistry } from "@/utils/request/cancellation"
-import { RequestQueue } from "@/utils/request/request-queue"
+import { CancelledScopeRegistry, isTranslationCancelledError } from "@/utils/request/cancellation"
+import { RequestQueue, RequestQueueTimeoutError } from "@/utils/request/request-queue"
 import { runStreamTextInBackground } from "./background-stream"
 import { ensureInitializedConfig } from "./config"
+
+const log = createLogger("background/translation-queues")
 
 type QueuedTranslationProvider = ProviderConfig | SerializableProviderRef
 
@@ -63,9 +62,19 @@ export function getLocalProviderConfig(provider: QueuedTranslationProvider): Pro
   return provider.kind === "local" ? provider.config : null
 }
 
-function getQueuedProviderId(provider: QueuedTranslationProvider): string {
+/**
+ * The provider part of a batch key. A batch goes out as one request, sent with
+ * its first item's provider, so two items share one only when that request is
+ * right for both: the same provider and, for a Built-in AI model, the same
+ * reasoning level, which each request carries on its own.
+ */
+function getQueuedProviderBatchKey(provider: QueuedTranslationProvider): string {
   const local = getLocalProviderConfig(provider)
-  return local?.id ?? (provider as Extract<SerializableProviderRef, { kind: "system" }>).providerId
+  if (local) {
+    return local.id
+  }
+  const system = provider as Extract<SerializableProviderRef, { kind: "system" }>
+  return `${system.providerId}:${system.reasoning ?? ""}`
 }
 
 async function executeQueuedTranslation<TContext>(
@@ -93,7 +102,7 @@ async function executeQueuedTranslation<TContext>(
   if (!options.hostedRequestId) {
     throw new Error("Hosted page translation requires a stable requestId")
   }
-  const targetLangName = LANG_CODE_TO_EN_NAME[langConfig.targetCode]
+  const targetLangName = LANGUAGE_ENGLISH_NAMES[langConfig.targetCode]
   const { systemPrompt, prompt } = await promptResolver(targetLangName, text, {
     isBatch: options.isBatch,
     context: options.context,
@@ -103,7 +112,7 @@ async function executeQueuedTranslation<TContext>(
     {
       providerKind: "system",
       providerId: system.providerId,
-      modelTier: system.modelTier,
+      builtInAiReasoning: system.reasoning,
       requestId: options.hostedRequestId,
       hostedFeature: requireHostedFeature(hostedFeature),
       instructions: systemPrompt,
@@ -114,11 +123,36 @@ async function executeQueuedTranslation<TContext>(
   return result.output.trim()
 }
 
+/**
+ * Rethrows a queued Built-in AI request's timeout tagged with the id its attempts shared.
+ * The call tags its own failures; a timeout is the one the queue raises for the request
+ * itself. Nothing else is tagged here: an error the queue fails its whole backlog with is
+ * one object handed to every task, raised by whichever provider's task failed, so it is
+ * not this request's to name.
+ */
+function rethrowWithHostedRequestId(hostedRequestId: string | undefined) {
+  return (error: unknown): never => {
+    throw hostedRequestId !== undefined && error instanceof RequestQueueTimeoutError
+      ? withBuiltInAiRequestId(error, hostedRequestId)
+      : error
+  }
+}
+
 export function parseBatchResult(result: string): string[] {
   return result
     .trim()
     .split(BATCH_SEPARATOR_LINE_PATTERN)
     .map((t) => t.trim())
+}
+
+/**
+ * The time a batch gets on top of the user's request timeout, for its size.
+ * The cap is on this extra only, so raising the request timeout lengthens every
+ * batch by the same amount: a model slow to start answering is slow for a large
+ * batch as much as for a small one.
+ */
+export function getBatchExtraTimeoutMs(totalCharacters: number): number {
+  return Math.min(totalCharacters * BATCH_TIMEOUT_PER_CHAR_MS, MAX_BATCH_EXTRA_TIMEOUT_MS)
 }
 
 export function shouldUseBatchQueue(provider: QueuedTranslationProvider): boolean {
@@ -285,27 +319,29 @@ interface TranslationQueueSetupConfig<TContext = unknown> {
 }
 
 async function createTranslationQueues<TContext>(config: TranslationQueueSetupConfig<TContext>) {
-  const { rate, capacity } = config.requestQueueConfig
+  const { rate, capacity, timeoutMs } = config.requestQueueConfig
   const { maxCharactersPerBatch, maxItemsPerBatch } = config.batchQueueConfig
   const { promptResolver, isScopeCancelled, queueName, configSource } = config
+  const queueLog = log.with({ queue: queueName })
 
-  logger.info(`[translation-queues] ${queueName} queue init`, {
+  queueLog.debug("Queue initialized", {
     rate,
     capacity,
+    timeoutMs,
     maxCharactersPerBatch,
     maxItemsPerBatch,
     configSource,
   })
   if (configSource === "default") {
-    logger.error(
-      `[translation-queues] ${queueName} queue running on DEFAULT config (rate ${rate}, capacity ${capacity}) — user config unavailable at init`,
-    )
+    queueLog.error("Queue running on the default config: the user config was unavailable at init")
   }
 
   const requestQueue = new RequestQueue({
     rate,
     capacity,
-    timeoutMs: 20_000,
+    // The user's request timeout. watchQueueConfig re-applies it on every
+    // change, and each attempt reads it when it starts, batches included.
+    timeoutMs,
     maxRetries: 2,
     baseRetryDelayMs: 1_000,
   })
@@ -321,7 +357,7 @@ async function createTranslationQueues<TContext>(config: TranslationQueueSetupCo
     dispatchGate: { nextDispatchEtaMs: () => requestQueue.nextDispatchEtaMs() },
     getBatchKey: (data) => {
       return Sha256Hex(
-        `${data.langConfig.sourceCode}-${data.langConfig.targetCode}-${getQueuedProviderId(data.provider)}`,
+        `${data.langConfig.sourceCode}-${data.langConfig.targetCode}-${getQueuedProviderBatchKey(data.provider)}`,
         data.context ? JSON.stringify(data.context) : "",
         data.hostedFeature ?? "",
         // Not the terms — the REVISION. The terms differ per paragraph and
@@ -347,10 +383,6 @@ async function createTranslationQueues<TContext>(config: TranslationQueueSetupCo
       const hash = Sha256Hex(...dataList.map((d) => d.hash))
       const earliestScheduleAt = Math.min(...dataList.map((d) => d.scheduleAt))
       const totalCharacters = dataList.reduce((sum, d) => sum + d.text.length, 0)
-      const timeoutMs = Math.min(
-        BATCH_TIMEOUT_BASE_MS + totalCharacters * BATCH_TIMEOUT_PER_CHAR_MS,
-        MAX_BATCH_TIMEOUT_MS,
-      )
 
       const batchThunk = async (signal?: AbortSignal): Promise<string[]> => {
         const localProvider = getLocalProviderConfig(provider)
@@ -364,7 +396,11 @@ async function createTranslationQueues<TContext>(config: TranslationQueueSetupCo
         return await executeBatchTranslation(dataList, promptResolver, signal, hostedRequestId)
       }
 
-      return requestQueue.enqueue(batchThunk, earliestScheduleAt, hash, meta.scopes, { timeoutMs })
+      return requestQueue
+        .enqueue(batchThunk, earliestScheduleAt, hash, meta.scopes, {
+          extraTimeoutMs: getBatchExtraTimeoutMs(totalCharacters),
+        })
+        .catch(rethrowWithHostedRequestId(hostedRequestId))
     },
     executeIndividual: async (data) => {
       const { text, langConfig, provider, hash, scheduleAt, context, scope, glossaryTerms } = data
@@ -388,14 +424,18 @@ async function createTranslationQueues<TContext>(config: TranslationQueueSetupCo
           glossaryTerms,
         })
       }
-      return requestQueue.enqueue(thunk, scheduleAt, hash, scope ? [scope] : undefined)
+      return requestQueue
+        .enqueue(thunk, scheduleAt, hash, scope ? [scope] : undefined)
+        .catch(rethrowWithHostedRequestId(hostedRequestId))
     },
     onError: (error, context) => {
-      const errorType = context.isFallback ? "Individual request" : "Batch request"
-      logger.error(
-        `${errorType} failed (batchKey: ${context.batchKey}, retry: ${context.retryCount}):`,
-        error.message,
-      )
+      // Turning page translation off cancels its batches on purpose: no failure to keep.
+      if (isTranslationCancelledError(error)) return
+      queueLog.error(context.isFallback ? "Individual request failed" : "Batch request failed", {
+        error,
+        batchKey: context.batchKey.slice(0, 12),
+        retry: context.retryCount,
+      })
     },
   })
 
@@ -422,7 +462,7 @@ async function loadQueueSetupConfig(
   try {
     config = await ensureInitializedConfig()
   } catch (error) {
-    logger.error(`[translation-queues] failed to load config for ${queueName} queue`, error)
+    log.error("Failed to load the config for a queue", { queue: queueName, error })
   }
   return {
     ...selectConfig(config ?? DEFAULT_CONFIG),
@@ -458,9 +498,9 @@ function watchQueueConfig(
         requestQueue.setQueueOptions(selected.requestQueueConfig)
         batchQueue.setBatchConfig(selected.batchQueueConfig)
         lastAppliedJson = json
-        logger.info(`[translation-queues] ${queueName} queue config updated`, selected)
+        log.debug("Queue config updated", { queue: queueName, selected })
       } catch (error) {
-        logger.error(`[translation-queues] failed to apply ${queueName} queue config change`, error)
+        log.error("Failed to apply a queue config change", { queue: queueName, error })
       }
     })
   })

@@ -3,6 +3,7 @@ import type { TranslationMode } from "@/types/config/translate"
 import { HotkeyManager } from "@tanstack/hotkeys"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { getLocalConfig, setLocalConfig } from "@/utils/config/storage"
+import { isFeatureOn } from "@/utils/features"
 import { i18n } from "@/utils/i18n"
 import { getTranslationOnlyBlockedReason } from "@/utils/providers/translation-only-gate"
 import { isShortcutEmpty, isValidShortcut } from "@/utils/shortcut"
@@ -12,9 +13,17 @@ const NEXT_MODE: Record<TranslationMode, TranslationMode> = {
   translationOnly: "bilingual",
 }
 
+/**
+ * Switches page translation between its two modes. Like the page translation shortcut, it is
+ * not bound while simple mode has page translation switched off, and does nothing once it is.
+ */
 export async function bindTranslationModeShortcutKey() {
   const config = await getLocalConfig()
-  if (!config || isShortcutEmpty(config.pageTranslation.modeShortcut)) {
+  if (
+    !config ||
+    !isFeatureOn(config, "pageTranslation") ||
+    isShortcutEmpty(config.pageTranslation.modeShortcut)
+  ) {
     return () => {}
   }
 
@@ -27,7 +36,7 @@ export async function bindTranslationModeShortcutKey() {
     shortcut as HotkeyChord,
     async () => {
       const currentConfig = await getLocalConfig()
-      if (!currentConfig) return
+      if (!currentConfig || !isFeatureOn(currentConfig, "pageTranslation")) return
 
       const currentMode = currentConfig.pageTranslation.mode
       const nextMode = NEXT_MODE[currentMode]

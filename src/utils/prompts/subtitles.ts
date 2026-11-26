@@ -70,7 +70,7 @@ ${DEFAULT_BATCH_TRANSLATE_PROMPT}`
   // Same contract as the page-translation builder: appended AFTER token
   // replacement so a term cannot rewrite the prompt around it, and omitted
   // entirely when nothing matched so the prompt — which subtitles also fold into
-  // their cache key (subtitles/processor/translator.ts:143) — stays identical
+  // their cache key (`buildSubtitleHashComponents`) — stays identical
   // for a user whose glossary missed this cue.
   const resolvedSystemPrompt = replaceTokens(systemPrompt)
   const glossaryTerms =

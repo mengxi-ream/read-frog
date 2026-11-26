@@ -51,12 +51,10 @@ popup:
         action: Click to switch to bilingual
   hub:
     tooltip: Translate text with multiple models simultaneously
-  discord:
-    tooltip: Join Discord to connect with developers and get early access to new features
   blog:
     notification: What's new in Read Frog
   aiSmartContext: AI Smart Context
-  aiSmartContextDescription: Uses webpage context to improve translation quality. Requires LLM translation provider.
+  aiSmartContextDescription: Uses webpage context to improve translation quality. Requires an LLM provider.
   storeReview:
     title: Enjoying Read Frog?
     description: A quick store review helps other readers find it.
@@ -69,6 +67,7 @@ popup:
     emailUs: Email us
     featureRequest: Feature request
     bugReport: Report a bug
+    diagnosePage: "Diagnose this page"
     community: Community
     joinDiscord: Join Discord
     joinWechat: Join WeChat Group
@@ -135,6 +134,13 @@ options:
     bugReport:
       title: Report a bug
       description: Open a support ticket and follow it until it is fixed
+    troubleshooting:
+      title: "Troubleshooting"
+    diagnostics:
+      title: "Export diagnostics"
+      description: "Save recent logs and settings, with API keys removed, to attach to a bug report"
+      exportSuccess: "Diagnostics saved"
+      exportFailed: "Couldn't export diagnostics"
     community:
       title: Community
     discord:
@@ -144,13 +150,40 @@ options:
       title: WeChat group
       description: Scan the QR code to join the WeChat discussion group
       qrCodeAlt: WeChat QR code
+  usage:
+    title: Usage
+    pageDescription: Your plan and how much AI quota you have left.
+    notSignedIn: Not signed in
+    guest: Guest
+    manageSubscription: Manage subscription
+    logInToView: Log in to view
+    footer:
+      logIn: Log in to get free AI quota every week
+      upgrade: Upgrade to Pro to unlock AI subtitles and more Built-in AI quota
+      upgradeAction: Upgrade
   apiProviders:
     title: API Providers
-    pageDescription: Connect the AI services Read Frog calls, then choose which one runs each feature.
-    description: Add the providers Read Frog can call. Over 20 are built in, with custom support for Chat Completions-compatible and Open Responses APIs.
+    pageDescription: Use Read Frog's built-in models or connect third-party AI services, then choose which one runs each feature.
+    description: Use Read Frog's built-in models or add third-party providers. Over 20 providers are preconfigured, plus custom Chat Completions-compatible and Open Responses APIs.
     configTitle: Provider config
     addProvider: Add provider
-    builtInProvider: Built-in provider
+    builtInProvider: Built-in models
+    thirdPartyProviders: Third-party providers
+    builtInModel:
+      reasoningDescription: "How much $1 thinks before it answers. Higher levels handle hard text better, but answer more slowly and use more of your quota."
+      reasoningDefault: "Default"
+      reasoningLevels:
+        none: "Off"
+        minimal: "Minimal"
+        low: "Low"
+        medium: "Medium"
+        high: "High"
+        xhigh: "Extra high"
+      unavailableTitle:
+        temporary: "$1 is temporarily unavailable"
+        removed: "$1 is no longer offered"
+      unavailableDescription: "Features set to it show an error while it can't run. To keep going, switch them to $1."
+      unavailableDescriptionNoAlternatives: "Features set to it show an error while it can't run. To keep going, switch them to another provider."
     builtInAiUsage:
       title: Built-in AI quota
       remaining: "$1% left"
@@ -168,20 +201,23 @@ options:
         videoSubtitles: Video subtitles
         inputTranslation: Input translation
         languageDetection: Language detection
+        pdfTranslation: PDF translation
     sponsorCta: Get fast, cost-effective AI
     sponsorCtaJalapenoCloud: Get 50% Off GLM 5.3
+    sponsorCtaIfapi: "+10% credit, use code READFROG"
     setApiKeyWarning:
       message: Please set your API key on the $1 page
     badges:
       featureCount: $1 features
       sponsor: Sponsor
       sponsorJalapenoCloud: $$1 Free
+      sponsorIfapi: 90% Off Models
     dialog:
       title: Add new provider
       groups:
         builtInProviders:
-          title: Built-in LLM providers
-          description: Built-in large language model providers, no need to fill in most configurations like Base URL
+          title: Preset LLM providers
+          description: Preconfigured large language model providers — no need to fill in most settings like Base URL
         compatibleProviders:
           title: Compatible API providers
           description: Use Custom Chat Complete for Chat Completions-compatible APIs, or Custom Responses for Open Responses APIs.
@@ -250,15 +286,13 @@ options:
       invalidJson: Invalid JSON format
     providers:
       name:
-        builtInAi: Built-in AI
-        builtInAiAdvance: Advanced Built-in AI
         customChatComplete: Custom Chat Complete
         customResponses: Custom Responses
       attribution:
-        builtInAi: Read Frog's hosted standard model. Pro and Ultra members can use it on every feature, on a weekly quota; on the free plan it runs Custom AI Actions only.
-        builtInAiAdvance: Read Frog's hosted advanced model, exclusive to Ultra members. Runs page translation, Custom AI Actions, and every other Built-in AI feature on a shared weekly quota. Uses up the quota faster than the standard model.
+        builtInAi: Read Frog's hosted standard model. Free to use once you log in, on a weekly quota.
+        builtInAiAdvance: Read Frog's hosted advanced model, exclusive to Ultra members. Uses quota faster than standard models.
       description:
-        openai: Provides models like GPT-4o
+        openai: OpenAI's official API for GPT models
         azure: Azure-hosted OpenAI models through your deployments
         deepseek: Recommend to use in China
         openrouter: Unified interface for multiple LLM providers with pay-per-use pricing
@@ -268,6 +302,7 @@ options:
         xai: Elon Musk's AI company offering Grok models with real-time data access
         atlascloud: Unified OpenAI-compatible access to newer DeepSeek, Kimi, Qwen, Doubao, GLM, and other models
         jalapenocloud: Enterprise-grade AI used by top teams — now made for you!
+        ifapi: GPT, Claude, Gemini and more, from 10% of list price
         siliconflow: High-performance inference platform for Chinese and international models
         tensdaq: Revolutionary bidding AI MaaS platform with market-driven pricing, eliminating high-cost fixed pricing
         openaiCompatible: Connect to a custom endpoint compatible with the OpenAI Chat Completions API
@@ -555,6 +590,9 @@ options:
     selectionAnnotation:
       title: "Annotate"
       description: "Underline the text you selected and write its meaning between the lines."
+    selectionAnnotationMode:
+      title: "Annotation mode"
+      description: "Turn annotation mode on or off without opening the toolbar. While it's on, any text you select is annotated."
     actions:
       title: "AI actions"
       description: "Run an AI action on the text you selected. Custom actions have no key until you set one here."
@@ -569,9 +607,7 @@ options:
     pageDescription: Translate what you type in input boxes before you send it.
     trigger:
       title: Trigger
-      enable:
-        title: Enable
-        description: Press the space bar three times quickly in any input box to translate what you typed there.
+      description: Press the space bar three times quickly in any input box to translate what you typed there.
       threshold:
         title: Trigger threshold
         description: How long the presses may be apart, in milliseconds. Raise it if the trigger keeps missing, lower it if it fires while you are still typing.
@@ -590,9 +626,6 @@ options:
     title: Floating Button
     pageDescription: Set which side the floating button sits on, what a click does, and where it stays hidden.
     demoImageAlt: Floating button demo
-    enable:
-      title: Enable floating button
-      description: Display the floating button on web pages for quick access to Read Frog features
     display:
       title: Display
       side:
@@ -611,8 +644,8 @@ options:
       panel: Open side panel
       translate: Toggle page translation
     closeMenu:
-      disableForSite: Disable for this site
-      disableGlobally: Disable globally
+      title: Hide floating button
+    pageTranslationOff: "Page Translation is turned off in Simple mode"
     tooltips:
       togglePageTranslation: Toggle page translation
       floatingButtonOptions: Floating button options
@@ -623,9 +656,6 @@ options:
     title: Selection Toolbar
     pageDescription: Set which actions appear when you select text, and where the toolbar shows up.
     demoImageAlt: Selection toolbar demo
-    enable:
-      title: Enable selection toolbar
-      description: Display the toolbar when selecting text on web pages for quick translation, speech, and AI actions
     annotation:
       title: "Word annotation"
       enable:
@@ -637,13 +667,10 @@ options:
     actions:
       title: Actions
       translate:
-        title: Translate
         description: Show the translate button in the toolbar
       speak:
-        title: Speak
         description: Show the speak button, which reads the selected text aloud
       noteSuggestion:
-        title: Note suggestions
         description: After selection translation with an AI provider, suggest words to save to your Notebase
         action: Action
         actionDescription: The action that produces the suggestion
@@ -651,6 +678,12 @@ options:
         providerDescription: The AI provider that generates the suggestion
     display:
       title: Display
+      placement:
+        title: Position
+        description: Which side of the selected text the toolbar appears on. If the chosen side has no room, it appears on the other side.
+        followDirection: Follow selection direction
+        above: Always above
+        below: Always below
       opacity:
         title: Opacity
         description: Adjust the opacity of the selection toolbar and the expanded window opened from it
@@ -660,8 +693,7 @@ options:
         enterUrlPattern: Enter URL pattern
         urlPattern: URL pattern
     closeMenu:
-      disableForSite: Disable for this site
-      disableGlobally: Disable globally
+      title: Hide selection toolbar
     errors:
       customActionFailed: Custom action failed
       customActionFailedFallback: Custom action request failed
@@ -802,6 +834,8 @@ options:
             unquotedAttributeOutput: Quote this attribute value, or the value can break out of it.
             filterIgnored: Filters are ignored in a “$1” tag. Assign the filtered value first.
             newlineToBrNotLast: newline_to_br only works as the last filter of an output.
+            mathFilterNotLast: $1 only works as the last filter of an output.
+            mathFilterInAttribute: Leave $1 out of an attribute value. The formulas it draws contain quotes, which end the attribute.
             tooLong: This layout is longer than $1 characters and can't be saved.
             fieldNotShown: “$1” isn't shown in this layout.
             reservedFieldName: The field name “$1” is reserved in layouts. Rename the field.
@@ -1208,8 +1242,8 @@ options:
       pageDescription: Give the words that matter to you a fixed translation, and choose where each list applies.
       untitled: Untitled glossary
       noGlossaries: No glossaries yet.
-      enable:
-        title: Enable
+      appliesTo:
+        title: Applies to
         description: Send matching terms to the LLM so it renders them your way. The glossary travels in the prompt, so it only applies to features running on an LLM provider.
       library:
         title: Your glossaries
@@ -1339,9 +1373,6 @@ options:
     title: Context Menu
     pageDescription: Control the Read Frog entries in the browser's right-click menu.
     demoImageAlt: Context menu demo
-    enable:
-      title: Enable context menu translate
-      description: Add translate options to the browser right-click menu for quick page and selection translation
   translation:
     title: Page Translation
     pageDescription: Control how pages get translated — mode, range, prompts, and request limits.
@@ -1490,7 +1521,7 @@ options:
         error: Value must be between $1 and $2
     translationQueue:
       title: Translation queue
-      description: How fast requests go out, how much text each carries, and how far ahead of the reader they run
+      description: How fast requests go out, how much text each carries, how long each may take, and how far ahead of the reader they run
       manageQueue: Manage queue
       requestQueueConfig:
         title: Translation rate
@@ -1505,6 +1536,9 @@ options:
           description: "Maximum characters: how much text one AI request carries"
         maxItemsPerBatch:
           description: "Maximum paragraphs: how many paragraphs share one request. Providers that are not AI ignore both"
+      requestTimeout:
+        title: Request timeout
+        description: "Seconds to wait for a reply before giving up and retrying. AI batch requests get extra time for their length, up to 100 seconds more. Raise it if a slow model keeps timing out"
       preloadConfig:
         title: Pre-translate range
         description: Control how much content below the viewport gets pre-translated to save API costs
@@ -1583,10 +1617,11 @@ options:
       title: Basics
       enable:
         title: Enable video subtitles
-        description: Puts a translate button in the video player's controls on YouTube, X and Netflix.
-      autoStart:
-        title: Translate on open
-        description: Start translating as soon as a video loads, without pressing the button.
+        description: "For each site: Off, Manual (start from the translate button in the player), or Automatic (start as each video opens)."
+        mode:
+          off: "Off"
+          manual: "Manual"
+          auto: "Automatic"
       aiSegmentation:
         title: AI smart segmentation
         description: Lets AI re-cut the subtitles into sentences. Translations take longer. Needs a strong LLM; weaker models may drop or misalign lines.
@@ -1599,8 +1634,6 @@ options:
     aiQuota:
       title: AI subtitles quota
       description: AI speech recognition gets you accurate subtitles for any video
-      launchBonusPromo: Subscribe before $1 for an extra 300 transcription minutes
-      loginRequired: Log in to view your AI subtitles quota
       upgradeRequired: AI subtitles require a Pro or Ultra subscription
       pools:
         subscription: Monthly quota
@@ -1676,7 +1709,7 @@ options:
           videoSummary: Video summary (requires AI smart context)
     subtitlesQueue:
       title: Subtitle queue
-      description: How fast subtitle requests go out and how many lines each carries
+      description: How fast subtitle requests go out, how many lines each carries, and how long each may take
       manageQueue: Manage queue
       requestQueueConfig:
         title: Translation rate
@@ -1691,6 +1724,9 @@ options:
           description: "Maximum characters: how much text one AI request carries"
         maxItemsPerBatch:
           description: "Maximum subtitle lines: how many lines share one request. Providers that are not AI ignore both"
+      requestTimeout:
+        title: Request timeout
+        description: "Seconds to wait for a reply before giving up and retrying. AI batch requests get extra time for their length, up to 100 seconds more. Raise it if a slow model keeps timing out"
     cache:
       title: Cache
       clearCache:
@@ -1703,6 +1739,53 @@ options:
           confirm: Confirm
           cancel: Cancel
           description: This will delete all cached AI segmentation results. The next time you play a video with AI segmentation enabled, it will re-process the subtitles.
+  simpleMode:
+    title: "Simple mode"
+    pageDescription: "A feature you turn off is as if it weren't installed: it no longer shows on web pages, and its shortcuts do nothing. Its settings are kept, so turning it back on brings everything back as it was."
+    drawerDescription: "Features you turn off disappear everywhere. Their settings are kept"
+    features:
+      customActions:
+        title: "Custom AI Actions"
+        description: "AI actions in the selection toolbar and the context menu, including the built-in Dictionary and Sentence Analysis"
+      pageTranslation:
+        title: "Page Translation"
+        description: "Translate whole web pages"
+        hover:
+          title: "Hover translation"
+          description: "Hover or long-press a paragraph to translate just that one"
+      videoSubtitles:
+        title: "Video Subtitles"
+        description: "Add a translated subtitles button to video players"
+      inputTranslation:
+        title: "Input Translation"
+        description: "Press the space bar three times quickly in any input box to translate what you typed there"
+      floatingButton:
+        title: "Floating Button"
+        description: "Display the floating button on web pages for quick access to Read Frog features"
+      selectionToolbar:
+        title: "Selection Toolbar"
+        description: "Display the toolbar when selecting text on web pages for quick translation, speech, and AI actions"
+        annotation:
+          title: "Word annotation"
+          description: "Underline the selected word or phrase and write its meaning between the lines"
+        translate:
+          title: "Selection translation"
+          description: "Show the translate button in the toolbar"
+          noteSuggestion:
+            title: "Note suggestions"
+            description: "After selection translation with an AI provider, suggest words to save to your Notebase"
+        speak:
+          title: "Speak"
+          description: "Show the speak button, which reads the selected text aloud"
+      contextMenu:
+        title: "Context Menu"
+        description: "Read Frog's items in the browser's right-click menu"
+      translationHub:
+        title: "Translation Hub"
+        description: "Translate text with multiple models simultaneously"
+      glossary:
+        title: "Glossary"
+        description: "Translate the words you care about the way you decided"
   whatsNew:
     title: What's New
     postType:
@@ -1721,7 +1804,7 @@ translateService:
   title: Translation Service
   description: For translate the webpage only
   builtInModels: Built-in Models
-  llmModels: LLM Models
+  llmModels: Third-party Models
   normalTranslator: Normal Translators
   selectServices: Select services
   translationProviders: Translation Providers
@@ -1735,7 +1818,7 @@ languageLevels:
   intermediate: Intermediate
   advanced: Advanced
 noAPIKeyConfig:
-  warning: If you want to use AI models, please set API key on the options page first
+  warning: Please set an API key for this provider on the options page first
   warningWithLink:
     youMust: You must
     setTheAPIKey: set the API key
@@ -1748,6 +1831,25 @@ translation:
   sameLanguage: Source and target languages must be different
   autoModeSameLanguage: Detected language '$1' is the same as target language
   extensionContextInvalidated: The extension was updated. Refresh this page and try again.
+  inputTranslationFailed: "Input translation failed"
+pageDiagnosis:
+  title: "Page diagnosis"
+  summary: "$1 translated, $2 not translated"
+  empty: "Nothing to show yet. Turn on page translation, then open this again."
+  emptyWhileTranslating: "Nothing to show yet. Paragraphs show up here as page translation reaches them."
+  framesNotIncluded: "Text inside embedded frames isn't included here."
+  hint: "Click a reason to outline its paragraphs on the page."
+  close: "Close"
+  unavailable: "Read Frog isn't running on this page"
+  reasons:
+    noProse: "No words to translate"
+    tooShort: "Too short to translate"
+    targetLanguage: "Already in your target language"
+    skipLanguage: "In a language you skip"
+    noTranslationNeeded: "The AI said no translation is needed"
+    sameAsSource: "The translation matched the original"
+    emptyResult: "The service returned nothing"
+    error: "Translation failed"
 annotation:
   annotate: "Annotate"
   enterMode: "Annotation mode"
@@ -1770,6 +1872,11 @@ speak:
   noTextSelected: No text selected
   openaiNotConfigured: OpenAI provider is not configured or enabled
   openaiApiKeyNotConfigured: OpenAI API key is not configured
+hideMenu:
+  untilReload: Until I reload this page
+  onSite: On $1
+  onAllSites: On all sites
+  restoreHint: "Turn it back on in $1 or $2."
 action:
   copy: Copy
   copied: Copied
@@ -1861,6 +1968,7 @@ subtitles:
   requestAiSubtitles: Request AI subtitles
   usingAiSubtitles: Using AI subtitles
   settings: Subtitle settings
+  autoStartOnPlatform: "Auto-start on $1"
   toggle:
     enabled: Subtitle translation on
     disabled: Subtitle translation off
@@ -1898,7 +2006,9 @@ subtitles:
     aiSubscriptionRequired: AI subtitles require a Pro or Ultra subscription
     aiPaymentRequired: Update your payment method to keep generating AI subtitles
     aiVideoTooLong: This video is too long for AI subtitles
-    aiLiveReplayUnsupported: AI subtitles aren't available for live stream replays yet
+    aiVideoMismatch: This video doesn't match the post it came from. Open the post's own page and try again
+    aiLiveReplayUnsupported: AI subtitles aren't available for live streams or their replays yet
+    aiLiveStreamUnsupported: AI subtitles aren't available while a stream is live. Request them once its replay is up
     aiStillProcessing: Transcription is still running — click again in a few minutes to pick it up
     aiRequestFailed: AI subtitle request failed, please try again later
     aiNoResponse: AI service did not respond, using original text
@@ -1917,10 +2027,33 @@ hostedAi:
     serviceUnavailable: Temporarily unavailable
     usedPercent: "Quota used: $1%"
     resetsAt: "Resets at $1"
+  requestId:
+    label: "Request ID:"
+    copy: "Copy request ID"
   errors:
     rateLimited: Too many requests, please try again later.
     guestRateLimited: Too many guest requests. Please try again later.
     userRateLimited: Too many requests. Please try again later.
+    modelUnavailable: "$1 can't run right now. Try $2 instead."
+    modelUnavailableNoAlternatives: "$1 can't run right now, and no other Built-in AI model is available to you. Try again later."
+    modelBusy: "$1 is busy right now. Try again in a moment, or switch to $2."
+    modelBusyNoAlternatives: "$1 is busy right now. Try again in a moment."
+  unavailable:
+    temporary: "$1 is temporarily unavailable. Try $2 instead."
+    temporaryNoAlternatives: "$1 is temporarily unavailable. Try again later."
+    removed: "$1 is no longer offered. Try $2 instead."
+    removedNoAlternatives: "$1 is no longer offered. Choose another provider."
+  actions:
+    chooseModel: "Choose a model"
+  builtInAiPrompt:
+    logInTitle: "Log in to use Built-in AI"
+    logInDescription: "Built-in AI is free once you log in, with about 120,000 tokens a week."
+    upgradeTitle: "You've used this week's Built-in AI"
+    upgradeDescription: "Pro translates about 3,000 web pages a month, Ultra about 10,000."
+    upgradeDescriptionPro: "Ultra translates about 10,000 web pages a month."
+    useMachineTranslation: "Use machine translation"
+    switched: "$1 now uses $2."
+    switchFailed: "Couldn't switch to machine translation. Please try again."
 hotkey:
   control: Ctrl
   alt: Option
@@ -1984,183 +2117,3 @@ difficultWords:
       C1: Long, complex factual and literary texts, telling styles apart; specialised articles and longer technical instructions outside your field
       C2: Virtually every kind of written language, including abstract texts complex in structure and language, such as manuals, specialised articles and literary works
       unsure: Counted as A2. Better to start low; too many highlights are quickly fixed by marking words you know, while too few leave nothing to click.
-languages:
-  eng: English
-  cmn: Simplified Chinese
-  cmnHant: Traditional Chinese
-  yue: Cantonese
-  spa: Spanish
-  rus: Russian
-  arb: Arabic
-  ben: Bengali
-  hin: Hindi
-  por: Portuguese
-  ind: Indonesian
-  jpn: Japanese
-  fra: French
-  deu: German
-  jav: Javanese
-  kor: Korean
-  tel: Telugu
-  vie: Vietnamese
-  mar: Marathi
-  ita: Italian
-  tam: Tamil
-  tur: Turkish
-  urd: Urdu
-  guj: Gujarati
-  pol: Polish
-  ukr: Ukrainian
-  kan: Kannada
-  mai: Maithili
-  mal: Malayalam
-  pes: Persian
-  mya: Burmese
-  swh: Swahili
-  sun: Sundanese
-  ron: Romanian
-  pan: Punjabi
-  bho: Bhojpuri
-  amh: Amharic
-  hau: Hausa
-  fuv: Fulani
-  bos: Bosnian
-  hrv: Croatian
-  nld: Dutch
-  srp: Serbian
-  tha: Thai
-  ckb: Central Kurdish
-  yor: Yoruba
-  uzn: Uzbek
-  zlm: Malay
-  ibo: Igbo
-  npi: Nepali
-  ceb: Cebuano
-  skr: Saraiki
-  tgl: Tagalog
-  hun: Hungarian
-  azj: Azerbaijani
-  sin: Sinhala
-  koi: Komi-Permyak
-  ell: Greek
-  ces: Czech
-  mag: Magahi
-  run: Rundi
-  bel: Belarusian
-  plt: Malagasy
-  qug: Chimborazo Highland Quichua
-  mad: Madurese
-  nya: Chewa
-  zyb: Zhuang
-  pbu: Pashto
-  kin: Kinyarwanda
-  zul: Zulu
-  bul: Bulgarian
-  swe: Swedish
-  lin: Lingala
-  som: Somali
-  hms: Qiandong Miao
-  hnj: Hmong Njua
-  ilo: Ilocano
-  kaz: Kazakh
-  heb: Hebrew
-  nob: Norwegian Bokmål
-  nno: Norwegian Nynorsk
-  afr: Afrikaans
-  sqi: Albanian
-  asm: Assamese
-  eus: Basque
-  bre: Breton
-  cat: Catalan
-  cos: Corsican
-  cym: Welsh
-  dan: Danish
-  div: Divehi
-  epo: Esperanto
-  ekk: Estonian
-  fao: Faroese
-  fij: Fijian
-  fin: Finnish
-  fry: Western Frisian
-  gla: Scottish Gaelic
-  gle: Irish
-  glg: Galician
-  grn: Guarani
-  hat: Haitian Creole
-  haw: Hawaiian
-  hye: Armenian
-  ido: Ido
-  ina: Interlingua
-  isl: Icelandic
-  kat: Georgian
-  khm: Khmer
-  kir: Kyrgyz
-  lao: Lao
-  lat: Latin
-  lvs: Latvian
-  lit: Lithuanian
-  ltz: Luxembourgish
-  mkd: Macedonian
-  mlt: Maltese
-  mon: Mongolian
-  mri: Maori
-  nso: Northern Sotho
-  oci: Occitan
-  ori: Odia
-  orm: Oromo
-  prs: Dari
-  san: Sanskrit
-  slk: Slovak
-  slv: Slovenian
-  smo: Samoan
-  sna: Shona
-  snd: Sindhi
-  sot: Southern Sotho
-  tah: Tahitian
-  tat: Tatar
-  tgk: Tajik
-  tir: Tigrinya
-  ton: Tongan
-  tsn: Tswana
-  tuk: Turkmen
-  uig: Uyghur
-  vol: Volapük
-  wol: Wolof
-  xho: Xhosa
-  ydd: Yiddish
-  aka: Akan
-  bam: Bambara
-  bis: Bislama
-  bod: Tibetan
-  che: Chechen
-  chv: Chuvash
-  dzo: Dzongkha
-  ewe: Ewe
-  kab: Kabyle
-  lug: Luganda
-  oss: Ossetian
-  ssw: Swati
-  ven: Venda
-  war: Waray
-  nde: Northern Ndebele
-  nbl: Southern Ndebele
-  pam: Pampanga
-  hil: Hiligaynon
-  bcl: Central Bicolano
-  min: Minangkabau
-  ace: Acehnese
-  bug: Buginese
-  ban: Balinese
-  bjn: Banjar
-  mak: Makasar
-  sas: Sasak
-  tet: Tetum
-  cha: Chamorro
-  niu: Niuean
-  tvl: Tuvaluan
-  gil: Gilbertese
-  mah: Marshallese
-  pau: Palauan
-  wls: Wallisian
-  rar: Rarotongan
-  hif: Fiji Hindi

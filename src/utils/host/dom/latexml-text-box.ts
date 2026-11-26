@@ -1,5 +1,5 @@
 import type { Config } from "@/types/config/config"
-import { getEffectiveSiteRule } from "@/utils/site-rules/effective"
+import { getDocumentSiteRule } from "@/utils/site-rules/effective"
 import {
   hasNoWalkAncestor,
   isDontWalkIntoButTranslateAsChildElement,
@@ -32,7 +32,7 @@ export function isLatexmlTextBoxReflowRecord(record: MutationRecord): boolean {
  * in the dont-walk set, so every other SVG on the page is still skipped.
  */
 export function prepareLatexmlTextBoxes(root: HTMLElement, config: Config): void {
-  if (getEffectiveSiteRule(config, window.location.href).reflowLatexmlTextBoxes !== true) return
+  if (getDocumentSiteRule(config).reflowLatexmlTextBoxes !== true) return
 
   for (const svg of root.querySelectorAll("svg.ltx_picture")) {
     const objects = svg.querySelectorAll("foreignObject")

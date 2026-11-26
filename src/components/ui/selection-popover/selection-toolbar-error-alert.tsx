@@ -1,5 +1,6 @@
 import type { SelectionToolbarInlineError } from "./inline-error"
 import { IconAlertCircle } from "@tabler/icons-react"
+import { BuiltInAiRequestId } from "@/components/built-in-ai-request-id"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/base-ui/alert"
 import { Button } from "@/components/ui/base-ui/button"
 import { sendMessage } from "@/utils/message"
@@ -16,7 +17,7 @@ export function SelectionToolbarErrorAlert({
     return null
   }
 
-  const { action } = error
+  const { action, requestId } = error
 
   return (
     <div className={cn("px-4 pb-4", className)}>
@@ -29,7 +30,10 @@ export function SelectionToolbarErrorAlert({
       >
         <IconAlertCircle className="size-4" />
         <AlertTitle>{error.title}</AlertTitle>
-        <AlertDescription className="col-start-2">{error.description}</AlertDescription>
+        <AlertDescription className="col-start-2">
+          {error.description}
+          {requestId && <BuiltInAiRequestId requestId={requestId} className="mt-1.5" />}
+        </AlertDescription>
         {action && (
           <Button
             size="sm"

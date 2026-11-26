@@ -5,12 +5,12 @@ import { filterLanguage } from "../language-combobox-options"
 describe("filterLanguage", () => {
   it("does not throw when a legacy language item has no name", () => {
     const item = {
-      value: "eng",
+      value: "en",
       label: "English (English)",
     } as LanguageItem
 
-    expect(() => filterLanguage(item, "eng")).not.toThrow()
-    expect(filterLanguage(item, "eng")).toBe(true)
+    expect(() => filterLanguage(item, "en")).not.toThrow()
+    expect(filterLanguage(item, "en")).toBe(true)
     expect(filterLanguage(item, "English")).toBe(true)
     expect(filterLanguage(item, "zzz")).toBe(false)
   })

@@ -1,19 +1,16 @@
-import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { LanguageTag } from "@read-frog/definitions"
 import type { Config } from "@/types/config/config"
-import { ISO6393_TO_6391 } from "@read-frog/definitions"
 import { getDetectedCodeFromStorage, getFinalSourceCode } from "@/utils/config/languages"
-import { getEffectiveSiteRule } from "@/utils/site-rules/effective"
+import { getDocumentSiteRule } from "@/utils/site-rules/effective"
 
 const PURE_HANDLE_RE = /^@\S+$/u
 
-function countWords(text: string, sourceCode: LangCodeISO6393): number {
-  // Convert ISO 639-3 (e.g., 'eng') to ISO 639-1 (e.g., 'en') for Intl.Segmenter
-  const locale = ISO6393_TO_6391[sourceCode] ?? "en"
-  const segmenter = new Intl.Segmenter(locale, { granularity: "word" })
+function countWords(text: string, sourceCode: LanguageTag): number {
+  const segmenter = new Intl.Segmenter(sourceCode, { granularity: "word" })
   return [...segmenter.segment(text)].filter((s) => s.isWordLike).length
 }
 
-async function getSourceCode(configSourceCode: LangCodeISO6393 | "auto"): Promise<LangCodeISO6393> {
+async function getSourceCode(configSourceCode: LanguageTag | "auto"): Promise<LanguageTag> {
   const detectedCode = await getDetectedCodeFromStorage()
   return getFinalSourceCode(configSourceCode, detectedCode)
 }
@@ -21,7 +18,7 @@ async function getSourceCode(configSourceCode: LangCodeISO6393 | "auto"): Promis
 export async function shouldFilterSmallParagraph(text: string, config: Config): Promise<boolean> {
   if (PURE_HANDLE_RE.test(text.trim())) return true
 
-  const siteRule = getEffectiveSiteRule(config, window.location.href)
+  const siteRule = getDocumentSiteRule(config)
   const minCharactersPerNode =
     siteRule.minCharacters ?? config.pageTranslation.page.minCharactersPerNode
   const minWordsPerNode = siteRule.minWords ?? config.pageTranslation.page.minWordsPerNode

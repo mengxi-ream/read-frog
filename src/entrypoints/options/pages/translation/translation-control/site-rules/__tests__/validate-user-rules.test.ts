@@ -20,6 +20,26 @@ describe("validateUserRulesDocument", () => {
     ).toMatchObject({ ok: false, kind: "schema" })
   })
 
+  it("accepts contentTypes and <all_urls> in user rules", () => {
+    const rules = [
+      {
+        id: "no-markdown",
+        matches: "<all_urls>",
+        contentTypes: ["text/markdown"],
+        "dontWalkTags.add": ["PRE"],
+      },
+    ]
+    expect(validateUserRulesDocument(JSON.stringify(rules))).toEqual({ ok: true, rules })
+  })
+
+  it("rejects non-string content types", () => {
+    expect(
+      validateUserRulesDocument(
+        JSON.stringify([{ id: "bad", matches: "example.com", contentTypes: [42] }]),
+      ),
+    ).toMatchObject({ ok: false, kind: "schema" })
+  })
+
   it("accepts reflowLatexmlTextBoxes in user rules", () => {
     const rules = [
       { id: "latexml-docs", matches: "docs.example.org", reflowLatexmlTextBoxes: true },

@@ -51,12 +51,10 @@ popup:
         action: 클릭하여 이중 언어로 전환
   hub:
     tooltip: 여러 번역 모델로 동시에 텍스트 번역
-  discord:
-    tooltip: Discord에 참여하여 개발자와 소통하고 새 기능을 먼저 체험하세요
   blog:
     notification: Read Frog의 새로운 소식
   aiSmartContext: AI 스마트 컨텍스트
-  aiSmartContextDescription: 웹페이지 컨텍스트를 사용하여 번역 품질을 향상시킵니다. LLM 번역 제공자가 필요합니다.
+  aiSmartContextDescription: 웹페이지 컨텍스트를 사용하여 번역 품질을 향상시킵니다. LLM 제공업체가 필요합니다.
   storeReview:
     title: Read Frog 잘 쓰고 계신가요?
     description: 스토어에 리뷰를 남기면 더 많은 사람이 찾을 수 있어요.
@@ -69,6 +67,7 @@ popup:
     emailUs: 이메일 문의
     featureRequest: 기능 제안
     bugReport: 버그 신고
+    diagnosePage: "이 페이지 진단"
     community: 커뮤니티
     joinDiscord: Discord 참여
     joinWechat: WeChat 그룹 참여
@@ -135,6 +134,13 @@ options:
     bugReport:
       title: 버그 신고
       description: 지원 티켓을 열고 해결될 때까지 진행 상황을 확인하세요
+    troubleshooting:
+      title: "문제 해결"
+    diagnostics:
+      title: "진단 정보 내보내기"
+      description: "최근 로그와 설정(API 키 제외)을 저장해 버그 신고에 첨부하세요"
+      exportSuccess: "진단 정보를 저장했습니다"
+      exportFailed: "진단 정보를 내보내지 못했습니다"
     community:
       title: 커뮤니티
     discord:
@@ -144,13 +150,40 @@ options:
       title: WeChat 그룹
       description: QR 코드를 스캔해 WeChat 토론 그룹에 참여하세요
       qrCodeAlt: WeChat QR 코드
+  usage:
+    title: 사용량
+    pageDescription: 내 플랜과 남은 AI 할당량을 확인하세요.
+    notSignedIn: 로그인하지 않음
+    guest: 게스트
+    manageSubscription: 구독 관리
+    logInToView: 로그인 후 확인할 수 있습니다
+    footer:
+      logIn: 로그인하면 매주 무료 AI 할당량을 드려요
+      upgrade: Pro로 업그레이드하고 AI 자막과 더 많은 내장 AI 할당량을 받으세요
+      upgradeAction: 업그레이드
   apiProviders:
     title: API 제공업체
-    pageDescription: Read Frog가 호출하는 AI 서비스를 연결하고, 각 기능에 사용할 서비스를 선택하세요.
-    description: Read Frog가 호출할 수 있는 제공업체를 추가합니다. 20개 이상이 내장되어 있으며, Chat Completions 호환 API와 Open Responses API를 사용자 정의로 추가할 수 있습니다.
+    pageDescription: Read Frog의 내장 모델을 사용하거나 타사 AI 서비스를 연결하고, 각 기능에 사용할 항목을 선택하세요.
+    description: Read Frog의 내장 모델을 사용하거나 타사 제공업체를 추가합니다. 20개 이상의 제공업체가 사전 설정되어 있으며, Chat Completions 호환 API와 Open Responses API도 사용자 정의로 추가할 수 있습니다.
     configTitle: 제공업체 구성
     addProvider: 제공업체 추가
-    builtInProvider: 내장 제공업체
+    builtInProvider: 내장 모델
+    thirdPartyProviders: 타사 제공업체
+    builtInModel:
+      reasoningDescription: "$1 모델이 답하기 전에 얼마나 생각할지 정합니다. 수준이 높을수록 어려운 텍스트를 더 잘 다루지만, 응답이 느려지고 할당량을 더 많이 사용합니다."
+      reasoningDefault: "기본값"
+      reasoningLevels:
+        none: "끄기"
+        minimal: "최소"
+        low: "낮음"
+        medium: "중간"
+        high: "높음"
+        xhigh: "매우 높음"
+      unavailableTitle:
+        temporary: "$1 모델을 일시적으로 사용할 수 없음"
+        removed: "$1 모델은 더 이상 제공되지 않음"
+      unavailableDescription: "이 모델을 사용할 수 없는 동안 이 모델을 쓰는 기능은 오류가 납니다. 계속 사용하려면 해당 기능을 $1 모델로 바꾸세요."
+      unavailableDescriptionNoAlternatives: "이 모델을 사용할 수 없는 동안 이 모델을 쓰는 기능은 오류가 납니다. 계속 사용하려면 해당 기능을 다른 제공업체로 바꾸세요."
     builtInAiUsage:
       title: 내장 AI 할당량
       remaining: "$1% 남음"
@@ -168,20 +201,23 @@ options:
         videoSubtitles: 비디오 자막
         inputTranslation: 입력 번역
         languageDetection: 언어 감지
+        pdfTranslation: PDF 번역
     sponsorCta: 빠르고 가성비 좋은 AI 받기
     sponsorCtaJalapenoCloud: GLM 5.3 50% 할인 받기
+    sponsorCtaIfapi: 첫 충전 +10% · 코드 READFROG
     setApiKeyWarning:
       message: API 키는 $1 페이지에서 설정하세요
     badges:
       featureCount: $1 개 기능
       sponsor: 스폰서
       sponsorJalapenoCloud: $$1 무료
+      sponsorIfapi: 모델 90% 할인
     dialog:
       title: 새 제공업체 추가
       groups:
         builtInProviders:
-          title: 내장 LLM 제공업체
-          description: 내장된 대규모 언어 모델 제공업체, Base URL과 같은 대부분의 설정이 필요 없음
+          title: 사전 설정 LLM 제공업체
+          description: 미리 설정된 대규모 언어 모델 제공업체로, Base URL 같은 대부분의 설정을 입력할 필요가 없습니다
         compatibleProviders:
           title: 호환 API 제공업체
           description: Chat Completions 호환 API에는 사용자 정의 Chat Complete를, Open Responses API에는 사용자 정의 Responses를 사용합니다.
@@ -249,15 +285,13 @@ options:
       invalidJson: 잘못된 JSON 형식
     providers:
       name:
-        builtInAi: 내장 AI
-        builtInAiAdvance: 고급 내장 AI
         customChatComplete: 사용자 정의 Chat Complete
         customResponses: 사용자 정의 Responses
       attribution:
-        builtInAi: Read Frog가 호스팅하는 일반 모델입니다. Pro 및 Ultra 사용자는 주간 할당량 안에서 모든 기능에 사용할 수 있으며, 무료 플랜에서는 사용자 지정 AI 작업에서만 사용할 수 있습니다.
-        builtInAiAdvance: Read Frog가 호스팅하는 고급 모델로, Ultra 멤버 전용입니다. 페이지 번역, 사용자 지정 AI 작업 등 모든 내장 AI 기능에서 사용할 수 있으며 주간 할당량을 공유합니다. 표준 모델보다 할당량이 더 빨리 소모됩니다.
+        builtInAi: Read Frog가 호스팅하는 표준 모델입니다. 로그인하면 주간 할당량 안에서 무료로 사용할 수 있습니다.
+        builtInAiAdvance: Read Frog가 호스팅하는 고급 모델로, Ultra 멤버 전용입니다. 표준 모델보다 할당량이 더 빨리 소모됩니다.
       description:
-        openai: GPT-4o 같은 모델을 제공합니다
+        openai: GPT 모델을 제공하는 OpenAI 공식 API
         azure: Azure 배포를 통해 OpenAI 모델 사용
         deepseek: 중국에서 사용을 권장합니다
         openrouter: 여러 LLM 제공업체를 위한 통합 인터페이스, 사용량 기반 과금
@@ -267,6 +301,7 @@ options:
         xai: 실시간 데이터 접근이 가능한 Grok 모델을 제공하는 일론 머스크의 AI 회사
         atlascloud: DeepSeek, Kimi, Qwen, Doubao, GLM 등 최신 모델에 OpenAI 호환 방식으로 접근하는 통합 플랫폼
         jalapenocloud: 최고의 팀들이 사용하는 엔터프라이즈급 AI, 이제 당신을 위해 찾아왔습니다!
+        ifapi: GPT, Claude, Gemini 등 주요 모델을 공식가 대비 최대 90% 할인
         siliconflow: 중국 및 국제 모델을 위한 고성능 추론 플랫폼
         tensdaq: 혁신적인 경매 AI MaaS 플랫폼으로 시장 수요와 공급에 따라 가격이 결정되어 고비용 고정 요금제를 없앰
         openaiCompatible: OpenAI Chat Completions API와 호환되는 사용자 지정 엔드포인트에 연결
@@ -554,6 +589,9 @@ options:
     selectionAnnotation:
       title: "주석"
       description: "선택한 텍스트에 밑줄을 긋고 줄 사이에 뜻을 표시합니다."
+    selectionAnnotationMode:
+      title: "주석 모드"
+      description: "툴바를 열지 않고 주석 모드를 켜거나 끕니다. 켜져 있는 동안 선택한 텍스트에 자동으로 주석이 달립니다."
     actions:
       title: "AI 액션"
       description: "선택한 텍스트에 AI 액션을 실행합니다. 커스텀 액션은 처음에 단축키가 없으니 여기서 설정하세요."
@@ -568,9 +606,7 @@ options:
     pageDescription: 입력창에 쓴 내용을 보내기 전에 번역합니다.
     trigger:
       title: 트리거
-      enable:
-        title: 활성화
-        description: 입력 필드에서 스페이스바를 빠르게 3번 누르면 입력한 내용을 번역합니다.
+      description: 입력 필드에서 스페이스바를 빠르게 3번 누르면 입력한 내용을 번역합니다.
       threshold:
         title: 트리거 임계값
         description: 연속된 누름 사이에 허용되는 간격(밀리초)입니다. 잘 실행되지 않으면 늘리고, 입력하는 중에 실행되면 줄이세요.
@@ -589,9 +625,6 @@ options:
     title: 플로팅 버튼
     pageDescription: 플로팅 버튼이 놓일 위치와 클릭 동작, 숨길 사이트를 설정하세요.
     demoImageAlt: 플로팅 버튼 데모
-    enable:
-      title: 플로팅 버튼 활성화
-      description: 웹 페이지에 플로팅 버튼을 표시하여 Read Frog 기능에 빠르게 액세스
     display:
       title: 표시
       side:
@@ -610,8 +643,8 @@ options:
       panel: 사이드 패널 열기
       translate: 페이지 번역 전환
     closeMenu:
-      disableForSite: 이 사이트에서 비활성화
-      disableGlobally: 전역 비활성화
+      title: 플로팅 버튼 숨기기
+    pageTranslationOff: "페이지 번역이 심플 모드에서 꺼져 있습니다"
     tooltips:
       togglePageTranslation: 페이지 번역 전환
       floatingButtonOptions: 플로팅 버튼 옵션
@@ -622,9 +655,6 @@ options:
     title: 선택 툴바
     pageDescription: 텍스트를 선택했을 때 나타날 동작과 도구 모음을 표시할 사이트를 설정하세요.
     demoImageAlt: 선택 툴바 데모
-    enable:
-      title: 선택 툴바 활성화
-      description: 웹 페이지에서 텍스트를 선택할 때 도구 모음을 표시하여 빠르게 번역, 읽기, AI 액션을 사용할 수 있습니다
     annotation:
       title: "단어 주석"
       enable:
@@ -636,13 +666,10 @@ options:
     actions:
       title: 작업
       translate:
-        title: 번역
         description: 툴바에 번역 버튼을 표시합니다
       speak:
-        title: 읽기
         description: 선택한 텍스트를 읽어 주는 읽기 버튼을 툴바에 표시합니다
       noteSuggestion:
-        title: 노트 제안
         description: AI 제공자로 선택 번역 후 Notebase에 저장할 단어를 추천합니다
         action: 작업
         actionDescription: 저장 제안을 만드는 작업
@@ -650,6 +677,12 @@ options:
         providerDescription: 저장 제안을 만드는 AI 제공업체
     display:
       title: 표시
+      placement:
+        title: 위치
+        description: 선택한 텍스트의 어느 쪽에 툴바를 표시할지 선택합니다. 선택한 쪽에 공간이 없으면 반대쪽에 표시합니다
+        followDirection: 선택 방향 따르기
+        above: 항상 위
+        below: 항상 아래
       opacity:
         title: 투명도
         description: 선택 툴바와 여기서 열리는 확장 창의 투명도를 조절합니다
@@ -659,8 +692,7 @@ options:
         enterUrlPattern: URL 패턴 입력
         urlPattern: URL 패턴
     closeMenu:
-      disableForSite: 이 사이트에서 비활성화
-      disableGlobally: 전역 비활성화
+      title: 선택 툴바 숨기기
     errors:
       customActionFailed: 사용자 지정 작업 실패
       customActionFailedFallback: 사용자 지정 작업 요청에 실패했습니다
@@ -796,6 +828,8 @@ options:
             unquotedAttributeOutput: 이 속성 값을 따옴표로 감싸세요. 그렇지 않으면 값이 속성 밖으로 벗어날 수 있습니다.
             filterIgnored: "'$1' 태그에서는 필터가 무시됩니다. 먼저 필터를 적용한 값을 할당하세요."
             newlineToBrNotLast: newline_to_br는 출력의 마지막 필터일 때만 동작합니다.
+            mathFilterNotLast: $1 필터는 출력의 마지막 필터일 때만 동작합니다.
+            mathFilterInAttribute: 속성 값 안에서는 $1 필터를 쓰지 마세요. 그려진 수식에 들어 있는 따옴표가 속성을 끝내 버립니다.
             tooLong: 이 레이아웃은 $1자를 넘어 저장할 수 없습니다.
             fieldNotShown: "'$1'은(는) 이 레이아웃에 표시되지 않습니다."
             reservedFieldName: 필드 이름 '$1'은(는) 레이아웃 예약어입니다. 필드 이름을 바꾸세요.
@@ -1061,8 +1095,8 @@ options:
       pageDescription: 중요한 단어에 고정된 번역을 지정하고, 각 목록이 적용될 곳을 선택하세요.
       untitled: 제목 없는 용어집
       noGlossaries: 아직 용어집이 없습니다.
-      enable:
-        title: 사용
+      appliesTo:
+        title: 적용 범위
         description: 일치하는 용어를 LLM에 함께 전달해 원하는 표현으로 번역하게 합니다. 용어집은 프롬프트에 담겨 전달되므로, LLM 제공업체로 실행되는 기능에만 적용됩니다.
       library:
         title: 내 용어집
@@ -1192,9 +1226,6 @@ options:
     title: 컨텍스트 메뉴
     pageDescription: 브라우저 우클릭 메뉴에 표시되는 Read Frog 항목을 설정하세요.
     demoImageAlt: 컨텍스트 메뉴 데모
-    enable:
-      title: 우클릭 번역 활성화
-      description: 브라우저 우클릭 메뉴에 번역 옵션을 추가하여 페이지나 선택한 텍스트를 빠르게 번역
   translation:
     title: 페이지 번역
     pageDescription: 페이지 번역 방식을 설정하세요 — 모드, 범위, 프롬프트, 요청 제한.
@@ -1343,7 +1374,7 @@ options:
         error: 값은 $1에서 $2 사이여야 합니다
     translationQueue:
       title: 번역 대기열
-      description: 요청을 보내는 속도, 요청당 텍스트 양, 독자보다 얼마나 앞서 번역할지
+      description: 요청을 보내는 속도, 요청당 텍스트 양, 요청당 최대 대기 시간, 독자보다 얼마나 앞서 번역할지
       manageQueue: 대기열 관리
       requestQueueConfig:
         title: 번역 속도
@@ -1358,6 +1389,9 @@ options:
           description: "최대 문자 수: 한 번의 AI 요청에 담는 텍스트 양"
         maxItemsPerBatch:
           description: "최대 단락 수: 한 요청에 묶는 단락 수. AI가 아닌 번역 서비스에는 적용되지 않습니다"
+      requestTimeout:
+        title: 요청 시간 제한
+        description: "응답을 기다리는 초 수. 넘으면 포기하고 다시 시도합니다. AI 일괄 요청은 텍스트 길이에 따라 최대 100초까지 더 기다립니다. 느린 모델에서 시간 초과가 계속되면 늘리세요"
       preloadConfig:
         title: 사전 번역 범위
         description: API 비용을 절약하기 위해 뷰포트 아래 콘텐츠를 얼마나 사전 번역할지 제어합니다
@@ -1436,10 +1470,11 @@ options:
       title: 기본 설정
       enable:
         title: 비디오 자막 켜기
-        description: YouTube, X, Netflix의 동영상 플레이어 컨트롤 바에 번역 버튼을 추가합니다.
-      autoStart:
-        title: 영상을 열면 바로 번역
-        description: 영상이 로드되면 버튼을 누르지 않아도 자막 번역을 시작합니다.
+        description: "사이트마다 선택하세요: 끄기, 수동(플레이어의 번역 버튼으로 시작), 자동(영상을 열면 바로 시작)."
+        mode:
+          off: "끄기"
+          manual: "수동"
+          auto: "자동"
       aiSegmentation:
         title: AI 스마트 분할
         description: AI가 자막을 문장 단위로 다시 나눕니다. 번역 응답이 느려집니다. 성능 좋은 LLM이 필요하며, 약한 모델은 줄이 빠지거나 어긋날 수 있습니다.
@@ -1452,8 +1487,6 @@ options:
     aiQuota:
       title: AI 자막 사용량
       description: AI 음성 인식으로 모든 동영상에 정확한 자막을 만들어 줍니다
-      launchBonusPromo: $1 이전에 구독하면 전사 300분을 추가로 드립니다
-      loginRequired: 로그인하여 AI 자막 사용량 확인
       upgradeRequired: AI 자막은 Pro 또는 Ultra 구독이 필요합니다
       pools:
         subscription: 월간 할당량
@@ -1529,7 +1562,7 @@ options:
           videoSummary: 동영상 요약 (AI 스마트 컨텍스트 필요)
     subtitlesQueue:
       title: 자막 대기열
-      description: 자막 요청을 보내는 속도와 요청당 자막 줄 수
+      description: 자막 요청을 보내는 속도, 요청당 자막 줄 수, 요청당 최대 대기 시간
       manageQueue: 대기열 관리
       requestQueueConfig:
         title: 번역 속도
@@ -1544,6 +1577,9 @@ options:
           description: "최대 문자 수: 한 번의 AI 요청에 담는 텍스트 양"
         maxItemsPerBatch:
           description: "최대 자막 줄 수: 한 요청에 묶는 자막 수. AI가 아닌 번역 서비스에는 적용되지 않습니다"
+      requestTimeout:
+        title: 요청 시간 제한
+        description: "응답을 기다리는 초 수. 넘으면 포기하고 다시 시도합니다. AI 일괄 요청은 텍스트 길이에 따라 최대 100초까지 더 기다립니다. 느린 모델에서 시간 초과가 계속되면 늘리세요"
     cache:
       title: 캐시
       clearCache:
@@ -1556,6 +1592,53 @@ options:
           confirm: 확인
           cancel: 취소
           description: 모든 캐시된 AI 분할 결과가 삭제됩니다. 다음에 AI 분할이 활성화된 비디오를 재생하면 자막이 다시 처리됩니다.
+  simpleMode:
+    title: "심플 모드"
+    pageDescription: "끈 기능은 설치하지 않은 것처럼 됩니다. 웹 페이지에 나타나지 않고, 단축키도 반응하지 않습니다. 설정은 그대로 남아 있어 다시 켜면 이전과 똑같이 돌아옵니다."
+    drawerDescription: "끈 기능은 어디에도 나타나지 않습니다. 설정은 유지됩니다"
+    features:
+      customActions:
+        title: "커스텀 AI 액션"
+        description: "선택 툴바와 우클릭 메뉴의 AI 액션. 기본 제공되는 사전과 문장 구조 분석도 포함됩니다"
+      pageTranslation:
+        title: "페이지 번역"
+        description: "웹 페이지 전체를 번역합니다"
+        hover:
+          title: "호버 번역"
+          description: "단락에 마우스를 올리거나 길게 누르면 그 단락만 번역합니다"
+      videoSubtitles:
+        title: "비디오 자막"
+        description: "동영상 플레이어에 번역 자막 버튼을 추가합니다"
+      inputTranslation:
+        title: "입력 번역"
+        description: "입력 필드에서 스페이스바를 빠르게 3번 누르면 입력한 내용을 번역합니다"
+      floatingButton:
+        title: "플로팅 버튼"
+        description: "웹 페이지에 플로팅 버튼을 표시하여 Read Frog 기능에 빠르게 액세스"
+      selectionToolbar:
+        title: "선택 툴바"
+        description: "웹 페이지에서 텍스트를 선택할 때 도구 모음을 표시하여 빠르게 번역, 읽기, AI 액션을 사용할 수 있습니다"
+        annotation:
+          title: "단어 주석"
+          description: "선택한 단어나 구에 밑줄을 긋고 줄 사이에 뜻을 적습니다"
+        translate:
+          title: "선택 영역 번역"
+          description: "툴바에 번역 버튼을 표시합니다"
+          noteSuggestion:
+            title: "노트 제안"
+            description: "AI 제공자로 선택 번역 후 Notebase에 저장할 단어를 추천합니다"
+        speak:
+          title: "읽기"
+          description: "선택한 텍스트를 읽어 주는 읽기 버튼을 툴바에 표시합니다"
+      contextMenu:
+        title: "컨텍스트 메뉴"
+        description: "브라우저 우클릭 메뉴에 표시되는 Read Frog 항목"
+      translationHub:
+        title: "번역 허브"
+        description: "여러 번역 모델로 동시에 텍스트 번역"
+      glossary:
+        title: "용어집"
+        description: "중요한 단어를 정해 둔 번역으로 옮깁니다"
   whatsNew:
     title: 새로운 기능
     postType:
@@ -1573,8 +1656,8 @@ side:
 translateService:
   title: 번역 서비스
   description: 웹페이지 번역 전용
-  builtInModels: Built-in Models
-  llmModels: LLM Models
+  builtInModels: 내장 모델
+  llmModels: 서드파티 모델
   normalTranslator: 일반 번역기
   selectServices: 서비스 선택
   translationProviders: 번역 서비스
@@ -1588,7 +1671,7 @@ languageLevels:
   intermediate: 중급
   advanced: 고급
 noAPIKeyConfig:
-  warning: AI 모델을 사용하려면 먼저 옵션 페이지에서 API 키를 설정해 주세요
+  warning: 먼저 옵션 페이지에서 이 제공업체의 API 키를 설정해 주세요
   warningWithLink:
     youMust: 반드시
     setTheAPIKey: API 키를 설정해야 합니다
@@ -1601,6 +1684,25 @@ translation:
   sameLanguage: 원본 언어와 대상 언어는 달라야 합니다
   autoModeSameLanguage: 감지된 언어 '$1'은(는) 대상 언어와 같습니다
   extensionContextInvalidated: 확장 프로그램이 업데이트되었습니다. 이 페이지를 새로고침한 후 다시 시도하세요.
+  inputTranslationFailed: "입력 번역 실패"
+pageDiagnosis:
+  title: "페이지 진단"
+  summary: "번역됨 $1개, 번역 안 됨 $2개"
+  empty: "아직 표시할 내용이 없습니다. 페이지 번역을 켠 다음 다시 열어 주세요."
+  emptyWhileTranslating: "아직 표시할 내용이 없습니다. 페이지 번역이 문단에 도달하면 여기에 표시됩니다."
+  framesNotIncluded: "삽입된 프레임 안의 텍스트는 여기에 포함되지 않습니다."
+  hint: "이유를 클릭하면 해당 문단을 페이지에 표시합니다."
+  close: "닫기"
+  unavailable: "이 페이지에서는 Read Frog를 실행할 수 없습니다"
+  reasons:
+    noProse: "번역할 텍스트가 없음"
+    tooShort: "너무 짧아 번역하지 않음"
+    targetLanguage: "이미 대상 언어임"
+    skipLanguage: "건너뛰도록 설정한 언어임"
+    noTranslationNeeded: "AI가 번역이 필요 없다고 판단함"
+    sameAsSource: "번역이 원문과 같음"
+    emptyResult: "번역 서비스가 아무것도 반환하지 않음"
+    error: "번역 실패"
 annotation:
   annotate: "주석 달기"
   enterMode: "주석 모드"
@@ -1623,6 +1725,11 @@ speak:
   noTextSelected: 텍스트가 선택되지 않았습니다
   openaiNotConfigured: OpenAI 공급자가 구성되지 않았거나 활성화되지 않았습니다
   openaiApiKeyNotConfigured: OpenAI API 키가 구성되지 않았습니다
+hideMenu:
+  untilReload: 페이지를 새로고침할 때까지
+  onSite: $1에서
+  onAllSites: 모든 사이트에서
+  restoreHint: "'$1' 또는 '$2'에서 다시 켤 수 있습니다."
 action:
   copy: 복사
   copied: 복사됨
@@ -1714,6 +1821,7 @@ subtitles:
   requestAiSubtitles: AI 자막 요청
   usingAiSubtitles: AI 자막 사용 중
   settings: 자막 설정
+  autoStartOnPlatform: "$1에서 자동 시작"
   toggle:
     enabled: 자막 번역을 켰습니다
     disabled: 자막 번역을 껐습니다
@@ -1751,7 +1859,9 @@ subtitles:
     aiSubscriptionRequired: AI 자막은 Pro 또는 Ultra 구독이 필요합니다
     aiPaymentRequired: AI 자막을 계속 생성하려면 결제 수단을 업데이트하세요
     aiVideoTooLong: 이 영상은 너무 길어 AI 자막을 만들 수 없습니다
-    aiLiveReplayUnsupported: 라이브 스트리밍 다시보기는 아직 AI 자막을 지원하지 않습니다
+    aiVideoMismatch: 이 영상이 원래 게시물과 일치하지 않습니다. 게시물 페이지를 열고 다시 시도하세요
+    aiLiveReplayUnsupported: 라이브 스트리밍과 다시보기는 아직 AI 자막을 지원하지 않습니다
+    aiLiveStreamUnsupported: 진행 중인 라이브 스트리밍은 아직 AI 자막을 지원하지 않습니다. 다시보기가 올라온 뒤 요청하세요
     aiStillProcessing: 아직 전사가 진행 중입니다. 몇 분 후 다시 클릭해 주세요
     aiRequestFailed: AI 자막 요청에 실패했습니다. 잠시 후 다시 시도해 주세요
     aiNoResponse: AI 서비스가 응답하지 않았습니다. 원문을 표시합니다
@@ -1770,10 +1880,33 @@ hostedAi:
     serviceUnavailable: 일시적으로 사용할 수 없습니다
     usedPercent: "할당량 사용: $1%"
     resetsAt: "$1에 초기화"
+  requestId:
+    label: "요청 ID:"
+    copy: "요청 ID 복사"
   errors:
     rateLimited: 요청이 너무 많습니다. 나중에 다시 시도해 주세요.
     guestRateLimited: 게스트 요청이 너무 많습니다. 나중에 다시 시도해 주세요.
     userRateLimited: 요청이 너무 많습니다. 나중에 다시 시도해 주세요.
+    modelUnavailable: "지금은 $1 모델을 사용할 수 없습니다. 대신 $2 모델을 사용해 보세요."
+    modelUnavailableNoAlternatives: "지금은 $1 모델을 사용할 수 없으며, 사용할 수 있는 다른 내장 AI 모델도 없습니다. 나중에 다시 시도해 주세요."
+    modelBusy: "지금은 $1 모델의 요청이 많습니다. 잠시 후 다시 시도하거나 $2 모델로 전환해 주세요."
+    modelBusyNoAlternatives: "지금은 $1 모델의 요청이 많습니다. 잠시 후 다시 시도해 주세요."
+  unavailable:
+    temporary: "$1 모델을 일시적으로 사용할 수 없습니다. 대신 $2 모델을 사용해 보세요."
+    temporaryNoAlternatives: "$1 모델을 일시적으로 사용할 수 없습니다. 나중에 다시 시도해 주세요."
+    removed: "$1 모델은 더 이상 제공되지 않습니다. 대신 $2 모델을 사용해 보세요."
+    removedNoAlternatives: "$1 모델은 더 이상 제공되지 않습니다. 다른 제공업체를 선택해 주세요."
+  actions:
+    chooseModel: "모델 선택"
+  builtInAiPrompt:
+    logInTitle: "로그인하고 내장 AI 사용하기"
+    logInDescription: "로그인하면 내장 AI를 매주 약 12만 토큰까지 무료로 쓸 수 있습니다."
+    upgradeTitle: "이번 주 내장 AI를 모두 사용했습니다"
+    upgradeDescription: "Pro는 매달 웹페이지 약 3,000개, Ultra는 약 10,000개를 번역할 수 있습니다."
+    upgradeDescriptionPro: "Ultra는 매달 웹페이지 약 10,000개를 번역할 수 있습니다."
+    useMachineTranslation: "기계 번역 사용"
+    switched: "이제 $1에 $2을(를) 사용합니다."
+    switchFailed: "기계 번역으로 바꾸지 못했습니다. 다시 시도해 주세요."
 hotkey:
   control: Ctrl
   alt: Option
@@ -1837,183 +1970,3 @@ difficultWords:
       C1: 길고 복잡한 사실적인 글과 문학 작품을 문체의 차이를 느끼며 읽기. 내 분야가 아닌 전문 기사와 긴 기술 설명서
       C2: 구조와 언어가 복잡한 추상적인 글을 포함한 거의 모든 형태의 글. 설명서, 전문 기사, 문학 작품 등
       unsure: A2로 계산합니다. 낮게 시작하는 편이 낫습니다. 강조 표시가 너무 많으면 아는 단어를 표시해 금방 고칠 수 있지만, 너무 적으면 클릭할 것이 없습니다.
-languages:
-  eng: 영어
-  cmn: 중국어 간체
-  cmnHant: 중국어 번체
-  yue: 광둥어
-  spa: 스페인어
-  rus: 러시아어
-  arb: 아랍어
-  ben: 벵골어
-  hin: 힌디어
-  por: 포르투갈어
-  ind: 인도네시아어
-  jpn: 일본어
-  fra: 프랑스어
-  deu: 독일어
-  jav: 자바어
-  kor: 한국어
-  tel: 텔루구어
-  vie: 베트남어
-  mar: 마라티어
-  ita: 이탈리아어
-  tam: 타밀어
-  tur: 터키어
-  urd: 우르두어
-  guj: 구자라트어
-  pol: 폴란드어
-  ukr: 우크라이나어
-  kan: 칸나다어
-  mai: 마이틸리어
-  mal: 말라얄람어
-  pes: 페르시아어
-  mya: 미얀마어
-  swh: 스와힐리어
-  sun: 순다어
-  ron: 루마니아어
-  pan: 펀자브어
-  bho: 보즈푸리어
-  amh: 암하라어
-  hau: 하우사어
-  fuv: 풀라어
-  bos: 보스니아어
-  hrv: 크로아티아어
-  nld: 네덜란드어
-  srp: 세르비아어
-  tha: 태국어
-  ckb: 중앙 쿠르드어
-  yor: 요루바어
-  uzn: 우즈베크어
-  zlm: 말레이어
-  ibo: 이그보어
-  npi: 네팔어
-  ceb: 세부아노어
-  skr: 사라이키어
-  tgl: 타갈로그어
-  hun: 헝가리어
-  azj: 아제르바이잔어
-  sin: 싱할라어
-  koi: 코미페르먀크어
-  ell: 그리스어
-  ces: 체코어
-  mag: 마가히어
-  run: 룬디어
-  bel: 벨라루스어
-  plt: 마다가스카르어
-  qug: 침보라소 고원 키추아어
-  mad: 마두라어
-  nya: 체와어
-  zyb: 좡어
-  pbu: 파슈토어
-  kin: 르완다어
-  zul: 줄루어
-  bul: 불가리아어
-  swe: 스웨덴어
-  lin: 링갈라어
-  som: 소말리어
-  hms: 첸동 먀오어
-  hnj: 몽어
-  ilo: 일로카노어
-  kaz: 카자흐어
-  heb: 히브리어
-  nob: 노르웨이어(보크몰)
-  nno: 노르웨이어(뉘노르스크)
-  afr: 아프리칸스어
-  sqi: 알바니아어
-  asm: 아삼어
-  eus: 바스크어
-  bre: 브르타뉴어
-  cat: 카탈루냐어
-  cos: 코르시카어
-  cym: 웨일스어
-  dan: 덴마크어
-  div: 디베히어
-  epo: 에스페란토
-  ekk: 에스토니아어
-  fao: 페로어
-  fij: 피지어
-  fin: 핀란드어
-  fry: 서프리슬란트어
-  gla: 스코틀랜드 게일어
-  gle: 아일랜드어
-  glg: 갈리시아어
-  grn: 과라니어
-  hat: 아이티 크리올어
-  haw: 하와이어
-  hye: 아르메니아어
-  ido: 이도어
-  ina: 인터링구아
-  isl: 아이슬란드어
-  kat: 조지아어
-  khm: 크메르어
-  kir: 키르기스어
-  lao: 라오어
-  lat: 라틴어
-  lvs: 라트비아어
-  lit: 리투아니아어
-  ltz: 룩셈부르크어
-  mkd: 마케도니아어
-  mlt: 몰타어
-  mon: 몽골어
-  mri: 마오리어
-  nso: 북소토어
-  oci: 오크어
-  ori: 오리야어
-  orm: 오로모어
-  prs: 다리어
-  san: 산스크리트어
-  slk: 슬로바키아어
-  slv: 슬로베니아어
-  smo: 사모아어
-  sna: 쇼나어
-  snd: 신디어
-  sot: 남소토어
-  tah: 타히티어
-  tat: 타타르어
-  tgk: 타지크어
-  tir: 티그리냐어
-  ton: 통가어
-  tsn: 츠와나어
-  tuk: 투르크멘어
-  uig: 위구르어
-  vol: 볼라퓌크
-  wol: 월로프어
-  xho: 코사어
-  ydd: 이디시어
-  aka: 아칸어
-  bam: 밤바라어
-  bis: 비슬라마어
-  bod: 티베트어
-  che: 체첸어
-  chv: 추바시어
-  dzo: 종카어
-  ewe: 에웨어
-  kab: 카빌어
-  lug: 루간다어
-  oss: 오세트어
-  ssw: 스와티어
-  ven: 벤다어
-  war: 와라이어
-  nde: 북은데벨레어
-  nbl: 남은데벨레어
-  pam: 팜팡가어
-  hil: 힐리가이논어
-  bcl: 중앙비콜어
-  min: 미낭카바우어
-  ace: 아체어
-  bug: 부기어
-  ban: 발리어
-  bjn: 반자르어
-  mak: 마카사르어
-  sas: 사삭어
-  tet: 테툼어
-  cha: 차모로어
-  niu: 니우에어
-  tvl: 투발루어
-  gil: 키리바시어
-  mah: 마셜어
-  pau: 팔라우어
-  wls: 월리스어
-  rar: 라로통가어
-  hif: 피지 힌디어

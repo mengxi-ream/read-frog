@@ -1,5 +1,8 @@
 import type { browser } from "#imports"
 import type { onMessage } from "@/utils/message"
+import { createLogger } from "@/utils/logging/logger"
+
+const log = createLogger("background/side-panel")
 
 interface ChromiumSidePanelApi {
   close?: (options: { windowId: number }) => Promise<void> | void
@@ -44,11 +47,6 @@ type ToggleSidePanelResult =
       ok: false
       reason: "missing-window" | "unsupported" | "toggle-failed" | "requires-extension-user-action"
     }
-
-interface SidePanelLogger {
-  error: (...args: any[]) => void
-  warn: (...args: any[]) => void
-}
 
 export function createSidePanelWindowState() {
   const activeWindowIds = new Set<number>()
@@ -134,15 +132,13 @@ export function getSidePanelApi(extensionBrowser: typeof browser): BrowserSidePa
 
 function toggleFirefoxSidebarAction({
   api,
-  logger,
   source,
 }: {
   api: FirefoxSidebarActionApi
-  logger: SidePanelLogger
   source: ReturnType<typeof getToggleSource>
 }): Promise<ToggleSidePanelResult> {
   if (source !== "extension-user-action") {
-    logger.warn("Firefox sidebar requires an extension user action")
+    log.warn("Firefox sidebar requires an extension user action")
     return Promise.resolve({ ok: false, reason: "requires-extension-user-action" } as const)
   }
 
@@ -153,7 +149,7 @@ function toggleFirefoxSidebarAction({
         ? () => api.toggle?.()
         : null
   if (!openSidebar) {
-    logger.warn("Firefox sidebar open API is unavailable in this browser")
+    log.warn("Firefox sidebar open API is unavailable in this browser")
     return Promise.resolve({ ok: false, reason: "unsupported" } as const)
   }
 
@@ -162,42 +158,39 @@ function toggleFirefoxSidebarAction({
     return Promise.resolve(openResult)
       .then(() => ({ ok: true, action: "opened" }) as const)
       .catch((error) => {
-        logger.error("Failed to open Firefox sidebar", error)
+        log.error("Failed to open Firefox sidebar", { error })
         return { ok: false, reason: "toggle-failed" } as const
       })
   } catch (error) {
-    logger.error("Failed to open Firefox sidebar", error)
+    log.error("Failed to open Firefox sidebar", { error })
     return Promise.resolve({ ok: false, reason: "toggle-failed" } as const)
   }
 }
 
 export function createToggleSidePanelHandler({
   getApi,
-  logger,
   windowState = createSidePanelWindowState(),
 }: {
   getApi: () => BrowserSidePanelApi | null
-  logger: SidePanelLogger
   windowState?: ReturnType<typeof createSidePanelWindowState>
 }) {
   return (message: ToggleSidePanelMessage): Promise<ToggleSidePanelResult> => {
     const browserSidePanel = getApi()
     if (!browserSidePanel) {
-      logger.warn("Side panel API is unavailable in this browser")
+      log.warn("Side panel API is unavailable in this browser")
       return Promise.resolve({ ok: false, reason: "unsupported" } as const)
     }
 
     if (browserSidePanel.kind === "firefox-sidebar-action") {
       return toggleFirefoxSidebarAction({
         api: browserSidePanel.api,
-        logger,
         source: getToggleSource(message),
       })
     }
 
     const windowId = message.sender?.tab?.windowId
     if (typeof windowId !== "number") {
-      logger.warn("Cannot toggle side panel without a sender window", message)
+      log.warn("Cannot toggle side panel without a sender window", { sender: message.sender })
       return Promise.resolve({ ok: false, reason: "missing-window" } as const)
     }
 
@@ -205,7 +198,7 @@ export function createToggleSidePanelHandler({
 
     if (windowState.isOpen(windowId)) {
       if (typeof sidePanel.close !== "function") {
-        logger.warn("Side panel close API is unavailable in this browser")
+        log.warn("Side panel close API is unavailable in this browser")
         return Promise.resolve({ ok: false, reason: "unsupported" } as const)
       }
 
@@ -218,12 +211,12 @@ export function createToggleSidePanelHandler({
           })
           .catch((error) => {
             windowState.markClosed({ windowId })
-            logger.error("Failed to close side panel", error)
+            log.error("Failed to close side panel", { error })
             return { ok: false, reason: "toggle-failed" } as const
           })
       } catch (error) {
         windowState.markClosed({ windowId })
-        logger.error("Failed to close side panel", error)
+        log.error("Failed to close side panel", { error })
         return Promise.resolve({ ok: false, reason: "toggle-failed" } as const)
       }
     }
@@ -238,11 +231,11 @@ export function createToggleSidePanelHandler({
           return { ok: true, action: "opened" } as const
         })
         .catch((error) => {
-          logger.error("Failed to open side panel", error)
+          log.error("Failed to open side panel", { error })
           return { ok: false, reason: "toggle-failed" } as const
         })
     } catch (error) {
-      logger.error("Failed to open side panel", error)
+      log.error("Failed to open side panel", { error })
       return Promise.resolve({ ok: false, reason: "toggle-failed" } as const)
     }
   }
@@ -250,11 +243,9 @@ export function createToggleSidePanelHandler({
 
 export function setupSidePanelMessageHandler({
   extensionBrowser,
-  logger,
   registerMessageHandler,
 }: {
   extensionBrowser: typeof browser
-  logger: SidePanelLogger
   registerMessageHandler: typeof onMessage
 }) {
   const windowState = createSidePanelWindowState()
@@ -264,7 +255,6 @@ export function setupSidePanelMessageHandler({
       "toggleSidePanel",
       createToggleSidePanelHandler({
         getApi: () => getSidePanelApi(extensionBrowser),
-        logger,
         windowState,
       }),
     )
@@ -282,7 +272,6 @@ export function setupSidePanelMessageHandler({
     "toggleSidePanel",
     createToggleSidePanelHandler({
       getApi: () => getSidePanelApi(extensionBrowser),
-      logger,
       windowState,
     }),
   )

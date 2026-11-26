@@ -1,7 +1,6 @@
 import { useAtom } from "jotai"
 import { useState } from "react"
 import { Input } from "@/components/ui/base-ui/input"
-import { Switch } from "@/components/ui/base-ui/switch"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
@@ -12,8 +11,9 @@ const MIN_THRESHOLD = 100
 const MAX_THRESHOLD = 1000
 
 /**
- * Whether the feature runs, and how quickly the three space presses have to land. The keys
- * themselves are fixed — the only thing to set is how close together they count as a trigger.
+ * How quickly the three space presses have to land. The keys themselves are fixed — the only
+ * thing to set is how close together they count as a trigger. Whether the feature runs at all is
+ * simple mode's switch.
  */
 export function TriggerSection() {
   const [inputTranslation, setInputTranslation] = useAtom(configFieldsAtomMap.inputTranslation)
@@ -24,20 +24,18 @@ export function TriggerSection() {
       title={i18n.t("options.inputTranslation.trigger.title")}
     >
       <ConfigItem
-        title={i18n.t("options.inputTranslation.trigger.enable.title")}
-        description={i18n.t("options.inputTranslation.trigger.enable.description")}
-      >
-        <Switch
-          checked={inputTranslation.enabled}
-          onCheckedChange={(checked) => {
-            void setInputTranslation({ ...inputTranslation, enabled: checked })
-          }}
-        />
-      </ConfigItem>
-      <ConfigItem
         id="input-translation-threshold"
         title={i18n.t("options.inputTranslation.trigger.threshold.title")}
-        description={i18n.t("options.inputTranslation.trigger.threshold.description")}
+        description={
+          // What the presses are, then how far apart they may be: on two lines, so neither
+          // sentence has to be joined to the other in every language.
+          <>
+            <span className="block">{i18n.t("options.inputTranslation.trigger.description")}</span>
+            <span className="block">
+              {i18n.t("options.inputTranslation.trigger.threshold.description")}
+            </span>
+          </>
+        }
       >
         <ThresholdInput
           value={inputTranslation.timeThreshold}

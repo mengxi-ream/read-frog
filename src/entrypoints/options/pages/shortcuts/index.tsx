@@ -4,6 +4,7 @@ import { ActionShortcuts } from "./action-shortcuts"
 import { DifficultWordsShortcut } from "./difficult-words-shortcut"
 import { NodeTranslationHotkey } from "./node-translation-hotkey"
 import { PageTranslationShortcut } from "./page-translation-shortcut"
+import { SelectionAnnotationModeShortcut } from "./selection-annotation-mode-shortcut"
 import { SelectionAnnotationShortcut } from "./selection-annotation-shortcut"
 import { SelectionSpeakShortcut } from "./selection-speak-shortcut"
 import { SelectionTranslationShortcut } from "./selection-translation-shortcut"
@@ -31,6 +32,7 @@ export function ShortcutsPage() {
       <SelectionTranslationShortcut />
       <SelectionSpeakShortcut />
       <SelectionAnnotationShortcut />
+      <SelectionAnnotationModeShortcut />
       <SubtitlesToggleShortcut />
       <NodeTranslationHotkey />
       <TranslationHubShortcut />

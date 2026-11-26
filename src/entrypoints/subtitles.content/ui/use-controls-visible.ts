@@ -18,10 +18,14 @@ export function useControlsInfo(
     if (!controlsConfig) return
 
     const maxHeight = container.getBoundingClientRect().height * MAX_CONTROLS_HEIGHT_RATIO
-    setInfo({
-      controlsVisible: controlsConfig.checkVisibility(container),
-      controlsHeight: Math.min(controlsConfig.measureHeight(container), maxHeight),
-    })
+    const controlsVisible = controlsConfig.checkVisibility(container)
+    const controlsHeight = Math.min(controlsConfig.measureHeight(container), maxHeight)
+    // Most rechecks change nothing; keeping the same object spares the panel a render.
+    setInfo((previous) =>
+      previous.controlsVisible === controlsVisible && previous.controlsHeight === controlsHeight
+        ? previous
+        : { controlsVisible, controlsHeight },
+    )
   })
 
   const setupObserver = useEffectEvent(() => {
@@ -42,12 +46,15 @@ export function useControlsInfo(
       updateInfo(videoContainer)
     })
 
-    observer.observe(videoContainer, {
-      attributes: true,
-      attributeFilter: ["class"],
-      childList: true,
-      subtree: true,
-    })
+    observer.observe(
+      videoContainer,
+      controlsConfig.observe ?? {
+        attributes: true,
+        attributeFilter: ["class"],
+        childList: true,
+        subtree: true,
+      },
+    )
     resizeObserver.observe(videoContainer)
 
     return () => {

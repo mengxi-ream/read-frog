@@ -1,5 +1,5 @@
 import type { NotebaseCreateInput, NotebaseGetSchemaOutput } from "@read-frog/api-contract"
-import type { NoteSaveSurface } from "@read-frog/definitions"
+import type { NoteOriginInput, NoteSaveSurface } from "@read-frog/definitions"
 import type { z } from "zod"
 import type { SurfaceByFeature } from "@/types/analytics"
 import type { Config } from "@/types/config/config"
@@ -9,7 +9,11 @@ import type {
   SelectionToolbarCustomActionNotebaseConnection,
   SelectionToolbarCustomActionOutputField,
 } from "@/types/config/selection-toolbar"
-import { NOTE_SAVE_SURFACES, NOTEBASE_COLUMN_TYPE_INFO } from "@read-frog/definitions"
+import {
+  NOTE_SAVE_SURFACES,
+  NOTEBASE_COLUMN_TYPE_INFO,
+  noteOriginInputSchema,
+} from "@read-frog/definitions"
 import { z as zod } from "zod"
 import { storage } from "#imports"
 import { env } from "@/env"
@@ -44,6 +48,11 @@ const pendingNotebaseSaveBaseSchema = zod.object({
   analyticsSurface: zod
     .enum([ANALYTICS_SURFACE.SELECTION_TOOLBAR, ANALYTICS_SURFACE.VIDEO_SUBTITLES])
     .optional(),
+  /**
+   * Where the notes came from, read when the save started, for every note it
+   * creates. One that no longer parses is dropped rather than losing the save.
+   */
+  origin: noteOriginInputSchema.optional().catch(undefined),
 })
 
 const pendingNotebaseSaveRowSchema = zod.object({
@@ -114,6 +123,7 @@ interface PendingNotebaseSaveOptions {
   guideDictionaryNotebaseTracking?: PendingNotebaseSave["guideDictionaryNotebaseTracking"]
   saveSource?: NoteSaveSurface
   analyticsSurface?: SurfaceByFeature["note_save"]
+  origin?: NoteOriginInput
 }
 
 export type PendingNotebaseSaveActionStatus =
@@ -168,6 +178,7 @@ export function createPendingNotebaseSave(
       : {}),
     ...(options?.saveSource ? { saveSource: options.saveSource } : {}),
     ...(options?.analyticsSurface ? { analyticsSurface: options.analyticsSurface } : {}),
+    ...(options?.origin ? { origin: options.origin } : {}),
     notebaseId: getRandomUUID(),
     columns,
     rows: results.map((result) => ({
@@ -199,6 +210,7 @@ export function createPendingConnectedNotebaseSave(
       : {}),
     ...(options?.saveSource ? { saveSource: options.saveSource } : {}),
     ...(options?.analyticsSurface ? { analyticsSurface: options.analyticsSurface } : {}),
+    ...(options?.origin ? { origin: options.origin } : {}),
     connectionSnapshot: connection,
     results,
   }
@@ -207,7 +219,9 @@ export function createPendingConnectedNotebaseSave(
 export function buildNotebaseCreateInputFromPending(
   pending: PendingCreateNotebaseSave,
 ): NotebaseCreateInput {
-  const [firstRow] = pending.rows
+  const originField = pending.origin ? { origin: pending.origin } : {}
+  const rows = pending.rows.map((row) => ({ ...row, ...originField }))
+  const [firstRow] = rows
 
   return {
     id: pending.notebaseId,
@@ -223,9 +237,7 @@ export function buildNotebaseCreateInputFromPending(
       })),
       // Keep the single-row shape while only one row is saved so the request
       // stays compatible with backends that predate `initialRows`.
-      ...(pending.rows.length === 1 && firstRow
-        ? { initialRow: firstRow }
-        : { initialRows: pending.rows }),
+      ...(rows.length === 1 && firstRow ? { initialRow: firstRow } : { initialRows: rows }),
     },
   }
 }

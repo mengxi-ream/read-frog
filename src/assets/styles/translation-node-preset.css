@@ -34,8 +34,8 @@
 }
 
 /* Simplified Chinese - macOS > Windows > Cross-platform > Fallback */
-.read-frog-translated-content-wrapper[lang="zh"],
-.read-frog-translated-content-wrapper[lang="zh"]
+.read-frog-translated-content-wrapper[lang="zh-Hans"],
+.read-frog-translated-content-wrapper[lang="zh-Hans"]
   *:not(:where(.read-frog-inline-atom, .read-frog-inline-atom *)) {
   font-family:
     "PingFang SC", "Microsoft YaHei", "Source Han Sans SC", "Noto Sans SC", "Heiti SC",
@@ -43,9 +43,12 @@
     sans-serif;
 }
 
-/* Traditional Chinese - macOS > Windows > Cross-platform > Fallback */
-.read-frog-translated-content-wrapper[lang="zh-TW"],
-.read-frog-translated-content-wrapper[lang="zh-TW"]
+/* Traditional Chinese, and Cantonese, which is written in it - macOS > Windows > Cross-platform > Fallback */
+.read-frog-translated-content-wrapper[lang="zh-Hant"],
+.read-frog-translated-content-wrapper[lang="zh-Hant"]
+  *:not(:where(.read-frog-inline-atom, .read-frog-inline-atom *)),
+.read-frog-translated-content-wrapper[lang="yue"],
+.read-frog-translated-content-wrapper[lang="yue"]
   *:not(:where(.read-frog-inline-atom, .read-frog-inline-atom *)) {
   font-family:
     "PingFang TC", "Microsoft JhengHei", "Source Han Sans TC", "Noto Sans TC", "Heiti TC",

@@ -1,14 +1,17 @@
 // @vitest-environment jsdom
+import type { Config } from "@/types/config/config"
 import type { FloatingButtonConfig } from "@/types/config/floating-button"
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { atom, createStore, Provider } from "jotai"
-import { afterEach, beforeAll, describe, expect, it, vi } from "vitest"
-import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { afterEach, beforeAll, describe, expect, it, onTestFinished, vi } from "vitest"
+import { configAtom, configFieldsAtomMap } from "@/utils/atoms/config"
 import { difficultWordsTab } from "@/utils/difficult-words/tab-state"
+import { i18n } from "@/utils/i18n"
 import { sendMessage } from "@/utils/message"
 import FloatingButton from ".."
 
 const toastAddMock = vi.fn<(...args: any[]) => any>()
+const toastCloseMock = vi.fn<(...args: any[]) => any>()
 const difficultWordsAccessMock = vi.hoisted(() => ({
   data: "denied" as "allowed" | "denied" | "signedOut" | "unknown" | undefined,
 }))
@@ -25,26 +28,29 @@ vi.mock("#imports", () => ({
   },
 }))
 
-vi.mock("@/utils/atoms/config", () => {
-  const floatingButtonBaseAtom = atom<FloatingButtonConfig>({
-    enabled: true,
-    position: 0.66,
-    side: "right",
-    clickAction: "panel",
-    disabledFloatingButtonPatterns: [],
-    locked: false,
+vi.mock("@/utils/atoms/config", async () => {
+  const { DEFAULT_CONFIG } = await import("@/utils/constants/config")
+  const mockConfigAtom = atom<Config>({
+    ...DEFAULT_CONFIG,
+    floatingButton: {
+      enabled: true,
+      position: 0.66,
+      side: "right",
+      clickAction: "panel",
+      disabledFloatingButtonPatterns: [],
+      locked: false,
+    },
   })
   const floatingButtonAtom = atom(
-    (get) => get(floatingButtonBaseAtom),
+    (get) => get(mockConfigAtom).floatingButton,
     (get, set, patch: Partial<FloatingButtonConfig>) => {
-      set(floatingButtonBaseAtom, {
-        ...get(floatingButtonBaseAtom),
-        ...patch,
-      })
+      const config = get(mockConfigAtom)
+      set(mockConfigAtom, { ...config, floatingButton: { ...config.floatingButton, ...patch } })
     },
   )
 
   return {
+    configAtom: mockConfigAtom,
     configFieldsAtomMap: {
       floatingButton: floatingButtonAtom,
       sideContent: atom({ width: 360 }),
@@ -62,6 +68,7 @@ vi.mock("@/utils/difficult-words/tab-state", async (importOriginal) => ({
 vi.mock("../../../atoms", () => ({
   enablePageTranslationAtom: atom({ enabled: false }),
   isDraggingButtonAtom: atom(false),
+  isFloatingButtonHiddenUntilReloadAtom: atom(false),
   isSideOpenAtom: atom(false),
 }))
 
@@ -80,6 +87,7 @@ vi.mock("@/utils/i18n/locale-map", () => ({
 vi.mock("@/components/ui/base-ui/toast", () => ({
   anchoredToastManager: {
     add: (...args: unknown[]) => toastAddMock(...args),
+    close: (...args: unknown[]) => toastCloseMock(...args),
   },
 }))
 
@@ -102,9 +110,22 @@ afterEach(() => {
   difficultWordsTab.update({ enabled: false, count: 0 })
   vi.mocked(sendMessage).mockReset()
   toastAddMock.mockReset()
+  toastCloseMock.mockReset()
   window.history.replaceState({}, "", "/")
   setViewport(1024, 768)
 })
+
+/** The test setup's `t` returns the bare key; this spells out the two places in the hint. */
+function spellOutRestoreHint() {
+  const spy = vi
+    .spyOn(i18n, "t")
+    .mockImplementation((key: string, substitutions?: unknown[]) =>
+      key === "hideMenu.restoreHint" && substitutions
+        ? `${key}: ${substitutions.join(" | ")}`
+        : key,
+    )
+  onTestFinished(() => spy.mockRestore())
+}
 
 function setViewport(width: number, height: number) {
   Object.defineProperty(window, "innerWidth", {
@@ -273,7 +294,77 @@ describe("floatingButton controls", () => {
     expect(closeTrigger).toHaveClass("visible")
     expect(closeTrigger).toHaveClass("pointer-events-auto")
     expect(document.querySelector('[data-slot="tooltip-content"][data-open]')).toBeNull()
-    expect(screen.getByText("options.floatingButton.closeMenu.disableForSite")).toBeInTheDocument()
+    expect(screen.getByText("options.floatingButton.closeMenu.title")).toBeInTheDocument()
+  })
+
+  describe("close menu", () => {
+    function chooseHideOption(name: string) {
+      fireEvent.mouseEnter(getMainButton())
+      fireEvent.click(
+        screen.getByRole("button", {
+          name: "options.floatingButton.tooltips.floatingButtonOptions",
+        }),
+      )
+      fireEvent.click(screen.getByRole("menuitem", { name }))
+    }
+
+    it("names what it hides, offers three scopes, and says where to turn it back on", () => {
+      spellOutRestoreHint()
+      renderFloatingButton()
+      fireEvent.mouseEnter(getMainButton())
+      fireEvent.click(
+        screen.getByRole("button", {
+          name: "options.floatingButton.tooltips.floatingButtonOptions",
+        }),
+      )
+
+      expect(screen.getByText("options.floatingButton.closeMenu.title")).toBeInTheDocument()
+      expect(screen.getAllByRole("menuitem").map((item) => item.textContent)).toEqual([
+        "hideMenu.untilReload",
+        "hideMenu.onSite",
+        "hideMenu.onAllSites",
+      ])
+      expect(screen.getByRole("menuitem", { name: "hideMenu.onSite" })).toHaveAttribute(
+        "title",
+        window.location.hostname,
+      )
+      // On one site: the button's page, which lists the sites. On all sites: simple mode, which
+      // switches it back on, as the button's page is gone while it is off.
+      expect(screen.getByText(/^hideMenu\.restoreHint/)).toHaveTextContent(
+        "hideMenu.restoreHint: popup.options → options.floatingButton.title | popup.options → options.simpleMode.title",
+      )
+    })
+
+    it("hides the button until reload without changing a setting", () => {
+      const { store } = renderFloatingButton()
+      const before = getFloatingButtonConfig(store)
+
+      chooseHideOption("hideMenu.untilReload")
+
+      expect(screen.queryByTestId("floating-button-container")).toBeNull()
+      expect(getFloatingButtonConfig(store)).toEqual(before)
+    })
+
+    it("hides the button on this site with the same pattern the popup stores", () => {
+      const { store } = renderFloatingButton({ disabledFloatingButtonPatterns: ["github.com"] })
+
+      chooseHideOption("hideMenu.onSite")
+
+      expect(getFloatingButtonConfig(store).disabledFloatingButtonPatterns).toEqual([
+        "github.com",
+        `*.${window.location.hostname}`,
+      ])
+      expect(screen.queryByTestId("floating-button-container")).toBeNull()
+    })
+
+    it("turns the button off on all sites", () => {
+      const { store } = renderFloatingButton()
+
+      chooseHideOption("hideMenu.onAllSites")
+
+      expect(getFloatingButtonConfig(store).enabled).toBe(false)
+      expect(screen.queryByTestId("floating-button-container")).toBeNull()
+    })
   })
 
   it("does not show a tooltip for the lock control", () => {
@@ -483,6 +574,63 @@ describe("floatingButton controls", () => {
       "tryToSetEnablePageTranslationOnContentScript",
       expect.objectContaining({ enabled: true }),
     )
+  })
+
+  it("says page translation is off, with a way to its switch, when a click is set to translate the page", () => {
+    vi.useFakeTimers()
+    const { store } = renderFloatingButton({ clickAction: "translate" })
+    const translateLabel = "options.floatingButton.tooltips.togglePageTranslation"
+    expect(screen.getByRole("button", { name: translateLabel })).toBeInTheDocument()
+
+    act(() => {
+      const config = store.get(configAtom)
+      store.set(configAtom, {
+        ...config,
+        pageTranslation: { ...config.pageTranslation, enabled: false },
+      })
+    })
+    // Its own translate control goes with page translation.
+    expect(screen.queryByRole("button", { name: translateLabel })).toBeNull()
+
+    const mainButton = getMainButton()
+    fireEvent.pointerDown(mainButton, {
+      pointerId: 1,
+      pointerType: "mouse",
+      button: 0,
+      clientX: 900,
+      clientY: 500,
+    })
+    vi.advanceTimersByTime(349)
+    fireEvent.pointerUp(mainButton, {
+      pointerId: 1,
+      pointerType: "mouse",
+      button: 0,
+      clientX: 900,
+      clientY: 500,
+    })
+
+    // Neither translates nor opens the panel instead.
+    expect(sendMessage).not.toHaveBeenCalled()
+    expect(toastAddMock).toHaveBeenCalledExactlyOnceWith({
+      id: "page-translation-off",
+      positionerProps: {
+        anchor: mainButton,
+        side: "left",
+        sideOffset: 8,
+      },
+      type: "info",
+      title: "options.floatingButton.pageTranslationOff",
+      actionProps: { children: "options.shortcuts.turnOn", onClick: expect.any(Function) },
+    })
+
+    toastAddMock.mock.calls[0]?.[0]?.actionProps.onClick()
+
+    expect(toastCloseMock).toHaveBeenCalledExactlyOnceWith("page-translation-off")
+    expect(sendMessage).toHaveBeenCalledExactlyOnceWith("openOptionsPage", {
+      route: "/advanced/simple-mode?section=simple-mode-pageTranslation",
+    })
+    // The choice stays saved for when page translation comes back.
+    expect(getFloatingButtonConfig(store).clickAction).toBe("translate")
   })
 
   it("turns the frog into the only visible control after a long press", () => {

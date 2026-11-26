@@ -8,7 +8,7 @@ import type {
   SelectionTranslationProviderRef,
   SystemProviderRef,
 } from "@/utils/providers/provider-registry"
-import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
+import { LANGUAGE_ENGLISH_NAMES } from "@read-frog/definitions"
 import { isLLMProviderConfig, isTranslateProviderConfig } from "@/types/config/provider"
 import { classifyProviderConfig, classifyResolvedProvider } from "@/utils/analytics-provider"
 import { streamBackgroundText } from "@/utils/content-script/background-stream-client"
@@ -79,7 +79,7 @@ export async function translateWithTextStream({
   onChunk: (data: BackgroundTextStreamSnapshot) => void
   registerAbortController: (abortController: AbortController) => void
 }) {
-  const targetLangName = LANG_CODE_TO_EN_NAME[translateRequest.language.targetCode]
+  const targetLangName = LANGUAGE_ENGLISH_NAMES[translateRequest.language.targetCode]
   const modelName = resolveModelId(providerConfig.model)
   const reasoning = getTopLevelReasoning(providerConfig)
   const providerOptions = getProviderOptionsWithOverride(
@@ -173,7 +173,7 @@ export async function translateWithHostedTextStream({
   onChunk: (data: BackgroundTextStreamSnapshot) => void
   registerAbortController: (abortController: AbortController) => void
 }) {
-  const targetLangName = LANG_CODE_TO_EN_NAME[translateRequest.language.targetCode]
+  const targetLangName = LANGUAGE_ENGLISH_NAMES[translateRequest.language.targetCode]
   const abortController = new AbortController()
   registerAbortController(abortController)
 
@@ -230,7 +230,6 @@ export async function translateWithHostedTextStream({
     {
       providerKind: "system",
       providerId: provider.id,
-      modelTier: provider.modelTier,
       requestId: getRandomUUID(),
       hostedFeature: "selectionTranslation",
       instructions: systemPrompt,
@@ -269,6 +268,11 @@ export async function translateWithStandardProvider({
     glossaryEnabled: translateRequest.glossaryEnabled,
     extraHashTags: ["selectionTranslation"],
     webPageContext,
+    // Selection.toString() only puts a newline where the page shows a line
+    // break (a <br>, a new block, a pre-wrap newline), so every one is
+    // structure. Google's transport collapses unprotected newlines, and on
+    // the resulting run-on text its zh-TW model can stop mid-text (#2466).
+    preserveLineBreaks: true,
   })
 
   return translatedText

@@ -4,6 +4,9 @@ import type { PromptableProviderRef } from "@/utils/providers/provider-ref"
 import type { SubtitlesFetcher } from "@/utils/subtitles/fetchers/types"
 import type { SubtitlesVideoContext } from "@/utils/subtitles/processor/translator"
 import type { SubtitlesFragment } from "@/utils/subtitles/types"
+import { isSameLanguage } from "@read-frog/definitions"
+import { createElement } from "react"
+import { BuiltInAiRequestId } from "@/components/built-in-ai-request-id"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { getLocalConfig } from "@/utils/config/storage"
 import {
@@ -13,6 +16,7 @@ import {
 } from "@/utils/constants/subtitles"
 import { getSourceDocumentTitle } from "@/utils/content/document-title"
 import { resolveLanguageCodeFromLocale } from "@/utils/content/page-language"
+import { getBuiltInAiRequestId } from "@/utils/hosted-ai/request-id"
 import { i18n } from "@/utils/i18n"
 import { canProviderRefGenerateText } from "@/utils/providers/provider-ref"
 import { aiSegmentBlock } from "@/utils/subtitles/processor/ai-segmentation"
@@ -113,9 +117,11 @@ export class TranslatedSubtitlesDownloader {
       if (!this.isActive(operationId)) {
         return
       }
+      const requestId = getBuiltInAiRequestId(error)
       toastManager.add({
         type: "error",
         title: error instanceof Error ? error.message : String(error),
+        ...(requestId && { description: createElement(BuiltInAiRequestId, { requestId }) }),
       })
       this.setStatus(TranslatedDownloadPhase.Idle, null)
     } finally {
@@ -159,7 +165,7 @@ export class TranslatedSubtitlesDownloader {
     const targetLanguage = config.language.targetCode
     const sourceLanguage = resolveLanguageCodeFromLocale(this.fetcher.getSourceLanguage())
 
-    if (targetLanguage && sourceLanguage && sourceLanguage === targetLanguage) {
+    if (targetLanguage && sourceLanguage && isSameLanguage(sourceLanguage, targetLanguage)) {
       throw new Error(i18n.t("subtitles.errors.translatedExportSameLanguage"))
     }
   }

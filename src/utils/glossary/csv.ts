@@ -1,6 +1,5 @@
-import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type { GlossaryTargetLang } from "./target-language"
-import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
+import { resolveLanguage } from "@read-frog/definitions"
 import { MAX_GLOSSARY_SOURCE_LENGTH, MAX_GLOSSARY_TARGET_LENGTH } from "../constants/glossary"
 import { ALL_LANGUAGES } from "./target-language"
 
@@ -267,10 +266,6 @@ export function decodeGlossaryCsv(buffer: ArrayBuffer): string {
   }
 }
 
-/** Whether a string names a language the extension can translate into. */
-export function isKnownLanguageCode(code: string): code is LangCodeISO6393 {
-  return Object.hasOwn(LANG_CODE_TO_EN_NAME, code)
-}
 /**
  * The `targetLanguage` cell as a value a term can be stored under, or null when
  * it names nothing we can file the row by.
@@ -282,5 +277,6 @@ export function isKnownLanguageCode(code: string): code is LangCodeISO6393 {
  */
 export function parseTargetLanguageCell(declared: string): GlossaryTargetLang | null {
   if (declared.toLowerCase() === ALL_LANGUAGES) return ALL_LANGUAGES
-  return isKnownLanguageCode(declared) ? declared : null
+  // A tag, or the ISO 639-3 code a file exported before tags still carries.
+  return resolveLanguage(declared)
 }

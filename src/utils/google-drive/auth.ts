@@ -1,8 +1,10 @@
 import { z } from "zod"
 import { browser, storage } from "#imports"
 import { env } from "@/env"
+import { createLogger } from "@/utils/logging/logger"
 import { GOOGLE_DRIVE_TOKEN_STORAGE_KEY } from "../constants/config"
-import { logger } from "../logger"
+
+const log = createLogger("google-drive/auth")
 
 const GOOGLE_CLIENT_ID = env.WXT_GOOGLE_CLIENT_ID ?? "YOUR_CLIENT_ID"
 const GOOGLE_REDIRECT_URI = browser.identity.getRedirectURL()
@@ -60,13 +62,13 @@ async function getTokenFromStorage(): Promise<GoogleAuthToken | null> {
 
     const parsed = googleAuthTokenSchema.safeParse(tokenData)
     if (!parsed.success) {
-      logger.warn("Invalid token data in storage", parsed.error)
+      log.warn("Invalid token data in storage", { error: parsed.error })
       return null
     }
 
     return parsed.data
   } catch (error) {
-    logger.error("Failed to get token from storage", error)
+    log.error("Failed to get token from storage", { error })
     return null
   }
 }
@@ -115,7 +117,7 @@ export async function authenticateGoogleDriveAndSaveTokenToStorage(): Promise<st
 
     return accessToken
   } catch (error) {
-    logger.error("Google OAuth authentication failed", error)
+    log.error("Google OAuth authentication failed", { error })
     throw error
   }
 }
@@ -135,7 +137,7 @@ export async function getValidAccessToken(): Promise<string> {
     // Trust local expiry check - validate only on API 401 errors
     return tokenData.access_token
   } catch (error) {
-    logger.error("Failed to get valid access token", error)
+    log.error("Failed to get valid access token", { error })
     throw error
   }
 }
@@ -144,7 +146,7 @@ export async function clearAccessToken(): Promise<void> {
   try {
     await storage.removeItem(`local:${GOOGLE_DRIVE_TOKEN_STORAGE_KEY}`)
   } catch (error) {
-    logger.error("Failed to clear access token", error)
+    log.error("Failed to clear access token", { error })
     throw error
   }
 }
@@ -162,7 +164,7 @@ export async function getIsAuthenticated(): Promise<boolean> {
 
     return Date.now() < tokenData.expires_at - TOKEN_EXPIRY_BUFFER_MS
   } catch (error) {
-    logger.error("Failed to check authentication status", error)
+    log.error("Failed to check authentication status", { error })
     return false
   }
 }
@@ -183,7 +185,7 @@ export async function getGoogleUserInfo(accessToken: string): Promise<GoogleUser
   const parsed = googleUserInfoSchema.safeParse(data)
 
   if (!parsed.success) {
-    logger.error("Invalid user info response", parsed.error)
+    log.error("Invalid user info response", { error: parsed.error })
     throw new Error("Invalid user info response")
   }
 

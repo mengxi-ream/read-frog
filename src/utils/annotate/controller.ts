@@ -7,6 +7,7 @@ import {
   findLineHeightOwner,
   isLeadingClipped,
   isLeadingUnsafe,
+  isTooSmallForGloss,
   leadingRungFor,
   measureLeading,
 } from "./leading"
@@ -41,6 +42,8 @@ interface BlockState {
   glossFits: boolean
   /** The elements carrying a line-height rung one of the block's annotations needed. */
   leadingOwners: Set<Element>
+  /** The shadow root the block sits in, which has the styles adopted for it. */
+  shadowRoot: ShadowRoot | null
 }
 
 const BLOCK_OBSERVE_OPTIONS: MutationObserverInit = {
@@ -105,6 +108,11 @@ export class AnnotationController {
     if (!offsets) return { ok: false, reason: "noBlock" }
     const surface = getBlockText(block).slice(offsets.start, offsets.end)
     if (surface.trim() === "") return { ok: false, reason: "empty" }
+    // Rebuilt from the offsets, it starts in the text holding the first
+    // character. The selection may start at the end of the text before it
+    // (a small @mention, a timestamp), whose size is not the word's.
+    const liveRange = offsetsToRange(block, offsets.start, offsets.end)
+    if (!liveRange) return { ok: false, reason: "noBlock" }
 
     const replaced = this.registry
       .overlapping(block, offsets.start, offsets.end)
@@ -112,7 +120,7 @@ export class AnnotationController {
     for (const id of replaced) this.remove(id)
 
     ensureAnnotationDocumentStyles()
-    const probe = range.startContainer instanceof Text ? range.startContainer : null
+    const probe = liveRange.startContainer instanceof Text ? liveRange.startContainer : null
     const state = this.ensureBlock(block)
     const glossFits = this.makeRoom(block, state, probe)
 
@@ -128,9 +136,6 @@ export class AnnotationController {
       glossFits,
       createdAt: Date.now(),
     }
-    const liveRange = offsetsToRange(block, offsets.start, offsets.end)
-    if (!liveRange) return { ok: false, reason: "noBlock" }
-
     this.registry.add(record)
     this.ranges.set(record.id, liveRange)
     this.marks.add(liveRange)
@@ -161,7 +166,10 @@ export class AnnotationController {
     this.mutations.disconnect()
     this.removals.disconnect()
     this.resizes?.disconnect()
-    for (const block of this.blocks.keys()) this.clearLeading(block)
+    for (const [block, state] of this.blocks) {
+      this.clearLeading(block)
+      if (state.shadowRoot) removeAnnotationDocumentStyles(state.shadowRoot)
+    }
     this.blocks.clear()
     this.ranges.clear()
     this.registry.clear()
@@ -174,7 +182,12 @@ export class AnnotationController {
   private ensureBlock(block: Element): BlockState {
     let state = this.blocks.get(block)
     if (state) return state
-    state = { glossFits: !isLeadingUnsafe(block), leadingOwners: new Set() }
+    // Kept, not looked up again on release: a block taken off the page is
+    // no longer in its shadow root.
+    const root = block.getRootNode()
+    const shadowRoot = root instanceof ShadowRoot ? root : null
+    if (shadowRoot) ensureAnnotationDocumentStyles(shadowRoot)
+    state = { glossFits: !isLeadingUnsafe(block), leadingOwners: new Set(), shadowRoot }
     if (this.blocks.size === 0) {
       this.removals.observe(document.documentElement, { childList: true, subtree: true })
     }
@@ -187,12 +200,12 @@ export class AnnotationController {
   /**
    * Makes room under the line the probe's text sits on, and says whether a
    * gloss fits there. Per annotation, not per block: the line-height owner of
-   * one word (a `<code>` with its own) is not that of the next.
+   * one word (a `<code>` with its own) is not that of the next, nor is its size.
    */
   private makeRoom(block: Element, state: BlockState, probe: Text | null): boolean {
     if (!state.glossFits) return false
     const measurement = measureLeading(block, probe)
-    if (!measurement) return false
+    if (!measurement || isTooSmallForGloss(measurement)) return false
     const rung = leadingRungFor(measurement)
     if (rung !== null) {
       const owner = findLineHeightOwner(block, probe)
@@ -214,7 +227,12 @@ export class AnnotationController {
     // Records already queued for the other blocks would go with the disconnect.
     this.onMutations(this.mutations.takeRecords())
     this.clearLeading(block)
+    const shadowRoot = this.blocks.get(block)?.shadowRoot
     this.blocks.delete(block)
+    // The last block in a shadow root takes the styles out of it.
+    if (shadowRoot && ![...this.blocks.values()].some((state) => state.shadowRoot === shadowRoot)) {
+      removeAnnotationDocumentStyles(shadowRoot)
+    }
     this.resizes?.unobserve(block)
     // A MutationObserver has no unobserve: start over with the blocks left.
     this.mutations.disconnect()

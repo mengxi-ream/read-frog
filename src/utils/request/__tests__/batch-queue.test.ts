@@ -41,8 +41,9 @@ function mockTranslateError(error: Error) {
 
 // Test configurations
 const sampleLangConfig: Config["language"] = {
-  sourceCode: "eng",
-  targetCode: "cmn",
+  sourceCode: "en",
+  targetCode: "zh-Hans",
+  level: "beginner",
 }
 
 const sampleProviderConfig: ProviderConfig = {
@@ -267,8 +268,8 @@ describe("batchQueue – batching logic", () => {
     const requestQueue = new RequestQueue(baseRequestQueueConfig)
     const batchQueue = createBatchQueue(requestQueue)
 
-    const config1 = { ...sampleLangConfig, targetCode: "eng" as const }
-    const config2 = { ...sampleLangConfig, targetCode: "cmn" as const }
+    const config1 = { ...sampleLangConfig, targetCode: "en" as const }
+    const config2 = { ...sampleLangConfig, targetCode: "zh-Hans" as const }
 
     const promises = [
       batchQueue.enqueue({
@@ -384,7 +385,10 @@ describe("batchQueue – error handling", () => {
     vi.advanceTimersByTime(baseBatchConfig.batchDelay)
     vi.advanceTimersByTime(0)
 
-    await expect(Promise.all(promises)).rejects.toThrow("Batch result count mismatch")
+    // Counts only: the error goes to the local log, and the results are the user's page.
+    await expect(Promise.all(promises)).rejects.toThrow(
+      /^Batch result count mismatch: expected 2, got 1$/,
+    )
   })
 
   it("retries BatchCountMismatchError with exponential backoff", async () => {

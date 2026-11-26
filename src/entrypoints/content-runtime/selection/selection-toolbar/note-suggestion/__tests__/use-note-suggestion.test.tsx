@@ -9,6 +9,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { configAtom } from "@/utils/atoms/config"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import { testHostedAiModels } from "@/utils/hosted-ai/__tests__/test-models"
 
 const streamBackgroundNoteSuggestionMock = vi.fn<(...args: any[]) => any>()
 const validateNoteSuggestionMock = vi.fn<(...args: any[]) => any>()
@@ -52,9 +53,9 @@ const LOCAL_PROVIDER_REF = {
 
 const SYSTEM_PROVIDER_REF = {
   kind: "system",
-  id: "read-frog-free-ai",
-  name: "Built-in AI",
-  modelTier: "normal",
+  id: "read-frog-ai:gpt-6-luna",
+  name: "GPT-6 Luna",
+  model: "gpt-6-luna",
 } satisfies NoteSuggestionFireInput["provider"]
 
 const VALID_ENVELOPE = {
@@ -78,7 +79,7 @@ const VALIDATED_SUGGESTION = {
   summaryFieldName: null,
 }
 
-function createHostedStatus(available: boolean) {
+function createHostedStatus(available: boolean, models = testHostedAiModels()) {
   return {
     features: {
       noteSuggestion: {
@@ -87,7 +88,8 @@ function createHostedStatus(available: boolean) {
           : { available: false, unavailableReason: "quota_exhausted" },
       },
     },
-    credits: [],
+    pools: [],
+    models,
   }
 }
 
@@ -190,7 +192,6 @@ describe("useNoteSuggestion", () => {
     // hosted payload — the server owns those knobs.
     expect(request).toEqual({
       providerId: SYSTEM_PROVIDER_REF.id,
-      modelTier: SYSTEM_PROVIDER_REF.modelTier,
       requestId: expect.any(String),
       instructions: expect.any(String),
       prompt: expect.any(String),
@@ -214,6 +215,7 @@ describe("useNoteSuggestion", () => {
     expect(result.current.suggestion?.analyticsProvider).toEqual({
       provider: "read-frog-built-in-ai",
       backend_kind: "llm",
+      built_in_ai_model: "gpt-6-luna",
     })
   })
 
@@ -236,6 +238,23 @@ describe("useNoteSuggestion", () => {
     await flushRun()
     expect(hostedStatusMock).toHaveBeenCalledTimes(1)
     expect(streamBackgroundNoteSuggestionMock).not.toHaveBeenCalled()
+  })
+
+  it("skips silently when the server says the model cannot run now", async () => {
+    hostedStatusMock.mockResolvedValue(
+      createHostedStatus(true, testHostedAiModels({ "gpt-6-luna": { available: false } })),
+    )
+    const store = createStore()
+    store.set(configAtom, DEFAULT_CONFIG)
+    const { result } = renderHook(() => useNoteSuggestion(), { wrapper: wrapper(store) })
+
+    act(() => result.current.maybeFire(fireInput("1:lang:0", SYSTEM_PROVIDER_REF)))
+    await waitFor(() => expect(hostedStatusMock).toHaveBeenCalledTimes(1))
+    await flushRun()
+
+    // A suggestion nobody asked for never raises an error about the model.
+    expect(streamBackgroundNoteSuggestionMock).not.toHaveBeenCalled()
+    expect(result.current.suggestion).toBeNull()
   })
 
   it("fails open and fires when the hosted status check itself fails", async () => {

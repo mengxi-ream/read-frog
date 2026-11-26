@@ -1,17 +1,11 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
+import { captureLogs } from "@/utils/logging/testing"
 import {
   createSidePanelWindowState,
   createToggleSidePanelHandler,
   getSidePanelApi,
   setupSidePanelMessageHandler,
 } from "../side-panel"
-
-function createLogger() {
-  return {
-    error: vi.fn<(...args: any[]) => any>(),
-    warn: vi.fn<(...args: any[]) => any>(),
-  }
-}
 
 const senderWindowMessage = {
   sender: {
@@ -42,7 +36,6 @@ describe("background side panel", () => {
   })
 
   it("opens the global side panel synchronously so Chrome keeps the user gesture", async () => {
-    const logger = createLogger()
     const calls: string[] = []
     const sidePanel = {
       setOptions: vi.fn<(...args: any[]) => any>(() => {
@@ -56,7 +49,6 @@ describe("background side panel", () => {
 
     const handler = createToggleSidePanelHandler({
       getApi: () => chromiumSidePanel(sidePanel),
-      logger,
     })
 
     const result = handler(senderWindowMessage)
@@ -69,7 +61,6 @@ describe("background side panel", () => {
   })
 
   it("closes the global side panel when the sender window is already open", async () => {
-    const logger = createLogger()
     const windowState = createSidePanelWindowState()
     const calls: string[] = []
     const sidePanel = {
@@ -86,7 +77,6 @@ describe("background side panel", () => {
 
     const handler = createToggleSidePanelHandler({
       getApi: () => chromiumSidePanel(sidePanel),
-      logger,
       windowState,
     })
 
@@ -99,7 +89,6 @@ describe("background side panel", () => {
   })
 
   it("tracks browser side panel open and close events for toggle state", async () => {
-    const logger = createLogger()
     const onOpenedListeners: Array<(info: { windowId?: number }) => void> = []
     const onClosedListeners: Array<(info: { windowId?: number }) => void> = []
     const registeredMessageHandlers = new Map<
@@ -123,7 +112,6 @@ describe("background side panel", () => {
 
     setupSidePanelMessageHandler({
       extensionBrowser: { sidePanel } as any,
-      logger,
       registerMessageHandler: ((
         type: string,
         handler: (
@@ -150,7 +138,7 @@ describe("background side panel", () => {
   })
 
   it("returns an unsupported result when closing is unavailable", async () => {
-    const logger = createLogger()
+    const logs = captureLogs()
     const windowState = createSidePanelWindowState()
     const sidePanel = {
       open: vi.fn<(...args: any[]) => any>(),
@@ -159,7 +147,6 @@ describe("background side panel", () => {
 
     const handler = createToggleSidePanelHandler({
       getApi: () => chromiumSidePanel(sidePanel),
-      logger,
       windowState,
     })
 
@@ -167,12 +154,17 @@ describe("background side panel", () => {
       ok: false,
       reason: "unsupported",
     })
-    expect(logger.warn).toHaveBeenCalledWith("Side panel close API is unavailable in this browser")
+    expect(logs).toContainEqual(
+      expect.objectContaining({
+        level: "warn",
+        message: "Side panel close API is unavailable in this browser",
+      }),
+    )
     expect(sidePanel.open).not.toHaveBeenCalled()
   })
 
   it("clears stale open state when Chrome rejects close", async () => {
-    const logger = createLogger()
+    const logs = captureLogs()
     const windowState = createSidePanelWindowState()
     const error = new Error("No active global side panel")
     const sidePanel = {
@@ -183,7 +175,6 @@ describe("background side panel", () => {
 
     const handler = createToggleSidePanelHandler({
       getApi: () => chromiumSidePanel(sidePanel),
-      logger,
       windowState,
     })
 
@@ -191,7 +182,13 @@ describe("background side panel", () => {
       ok: false,
       reason: "toggle-failed",
     })
-    expect(logger.error).toHaveBeenCalledWith("Failed to close side panel", error)
+    expect(logs).toContainEqual(
+      expect.objectContaining({
+        level: "error",
+        message: "Failed to close side panel",
+        fields: { error: expect.objectContaining({ message: error.message }) },
+      }),
+    )
     expect(windowState.isOpen(456)).toBe(false)
 
     await expect(handler(senderWindowMessage)).resolves.toEqual({ ok: true, action: "opened" })
@@ -199,27 +196,30 @@ describe("background side panel", () => {
   })
 
   it("returns an unsupported result when the side panel API is unavailable", async () => {
-    const logger = createLogger()
+    const logs = captureLogs()
     const handler = createToggleSidePanelHandler({
       getApi: () => null,
-      logger,
     })
 
     await expect(handler(senderWindowMessage)).resolves.toEqual({
       ok: false,
       reason: "unsupported",
     })
-    expect(logger.warn).toHaveBeenCalledWith("Side panel API is unavailable in this browser")
+    expect(logs).toContainEqual(
+      expect.objectContaining({
+        level: "warn",
+        message: "Side panel API is unavailable in this browser",
+      }),
+    )
   })
 
   it("does not open the Firefox sidebar from a content-script message", async () => {
-    const logger = createLogger()
+    const logs = captureLogs()
     const sidebarAction = {
       open: vi.fn<(...args: any[]) => any>(),
     }
     const handler = createToggleSidePanelHandler({
       getApi: () => firefoxSidebarAction(sidebarAction),
-      logger,
     })
 
     await expect(handler(senderWindowMessage)).resolves.toEqual({
@@ -227,17 +227,20 @@ describe("background side panel", () => {
       reason: "requires-extension-user-action",
     })
     expect(sidebarAction.open).not.toHaveBeenCalled()
-    expect(logger.warn).toHaveBeenCalledWith("Firefox sidebar requires an extension user action")
+    expect(logs).toContainEqual(
+      expect.objectContaining({
+        level: "warn",
+        message: "Firefox sidebar requires an extension user action",
+      }),
+    )
   })
 
   it("opens the Firefox sidebar when called from an extension user action", async () => {
-    const logger = createLogger()
     const sidebarAction = {
       open: vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined),
     }
     const handler = createToggleSidePanelHandler({
       getApi: () => firefoxSidebarAction(sidebarAction),
-      logger,
     })
 
     const result = handler({ data: { source: "extension-user-action" } })
@@ -247,37 +250,45 @@ describe("background side panel", () => {
   })
 
   it("returns a missing-window result when the sender window id is unavailable", async () => {
-    const logger = createLogger()
+    const logs = captureLogs()
     const handler = createToggleSidePanelHandler({
       getApi: () => chromiumSidePanel({ open: vi.fn<(...args: any[]) => any>() }),
-      logger,
     })
 
     await expect(handler({ sender: { tab: { id: 123 } } })).resolves.toEqual({
       ok: false,
       reason: "missing-window",
     })
-    expect(logger.warn).toHaveBeenCalledWith("Cannot toggle side panel without a sender window", {
-      sender: { tab: { id: 123 } },
-    })
+    expect(logs).toContainEqual(
+      expect.objectContaining({
+        level: "warn",
+        message: "Cannot toggle side panel without a sender window",
+        fields: { sender: { tab: { id: 123 } } },
+      }),
+    )
   })
 
   it("returns a toggle-failed result when Chrome rejects the open request", async () => {
-    const logger = createLogger()
+    const logs = captureLogs()
     const error = new Error("sidePanel.open() may only be called in response to a user gesture")
     const handler = createToggleSidePanelHandler({
       getApi: () =>
         chromiumSidePanel({
           open: vi.fn<(...args: any[]) => any>().mockRejectedValue(error),
         }),
-      logger,
     })
 
     await expect(handler(senderWindowMessage)).resolves.toEqual({
       ok: false,
       reason: "toggle-failed",
     })
-    expect(logger.error).toHaveBeenCalledWith("Failed to open side panel", error)
+    expect(logs).toContainEqual(
+      expect.objectContaining({
+        level: "error",
+        message: "Failed to open side panel",
+        fields: { error: expect.objectContaining({ message: error.message }) },
+      }),
+    )
   })
 
   it("finds the Chrome sidePanel API when the WXT browser wrapper does not expose it", () => {

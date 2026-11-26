@@ -1,4 +1,4 @@
-import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { LanguageTag } from "@read-frog/definitions"
 import type { ParsedGlossaryRow } from "./csv"
 import type { GlossaryTargetLang } from "./target-language"
 import type { GlossaryEntry } from "./types"
@@ -197,7 +197,7 @@ export async function countGlossaryTermsByGlossary(): Promise<Map<string, number
  * the language in play.
  */
 export async function loadGlossaryEntries(
-  targetLang: LangCodeISO6393,
+  targetLang: LanguageTag,
   url?: string,
 ): Promise<GlossaryEntry[]> {
   const active = (await listGlossaries()).filter((glossary) =>

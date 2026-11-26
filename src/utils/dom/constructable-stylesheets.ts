@@ -1,4 +1,6 @@
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
+
+const log = createLogger("dom/constructable-stylesheets")
 
 // Leaf module on purpose: the selection popup's layout styles need this probe,
 // and importing it from style-injector.ts would drag the page-translation CSS
@@ -78,10 +80,7 @@ export function supportsConstructableStyleSheets(
   } catch (error) {
     // When the browser/runtime only partially exposes constructable
     // stylesheets, fall back to injecting a normal <style> element.
-    logger.warn(
-      "[style-injector] constructable stylesheet assignment failed, falling back to <style>",
-      error,
-    )
+    log.warn("constructable stylesheet assignment failed, falling back to <style>", { error })
     constructableStyleSheetSupportMap.set(root, false)
     return false
   }

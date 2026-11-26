@@ -29,7 +29,7 @@ function createAction(): SelectionToolbarCustomAction {
     id: "mapped-action",
     name: "Vocabulary",
     icon: "tabler:book",
-    providerId: "read-frog-free-ai",
+    providerId: "read-frog-ai:gpt-6-luna",
     systemPrompt: "Explain the selected text.",
     prompt: "{{selection}}",
     outputSchema: ["meaning", "example"].map((id) => ({
@@ -40,7 +40,7 @@ function createAction(): SelectionToolbarCustomAction {
     })),
     sampleData: {
       selection: "A word",
-      targetCode: "eng",
+      targetCode: "en",
       values: { meaning: "Its meaning", example: "An example" },
     },
     notebaseConnection: {

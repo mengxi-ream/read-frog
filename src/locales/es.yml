@@ -51,12 +51,10 @@ popup:
         action: Haz clic para cambiar a bilingüe
   hub:
     tooltip: Traduce texto con varios modelos al mismo tiempo
-  discord:
-    tooltip: Únete a Discord para conectar con desarrolladores y obtener acceso anticipado a nuevas funciones
   blog:
     notification: Novedades de Read Frog
   aiSmartContext: Contexto inteligente de IA
-  aiSmartContextDescription: Usa el contexto de la página web para mejorar la calidad de la traducción. Requiere un proveedor de traducción LLM.
+  aiSmartContextDescription: Usa el contexto de la página web para mejorar la calidad de la traducción. Requiere un proveedor LLM.
   storeReview:
     title: ¿Te gusta Read Frog?
     description: Una reseña en la tienda ayuda a que otros lectores lo descubran.
@@ -69,6 +67,7 @@ popup:
     emailUs: Escríbenos
     featureRequest: Sugerir una función
     bugReport: Informar de un fallo
+    diagnosePage: "Diagnosticar esta página"
     community: Comunidad
     joinDiscord: Unirse a Discord
     joinWechat: Unirse al grupo de WeChat
@@ -135,6 +134,13 @@ options:
     bugReport:
       title: Informar de un fallo
       description: Abre un ticket de soporte y síguelo hasta que se resuelva
+    troubleshooting:
+      title: "Solución de problemas"
+    diagnostics:
+      title: "Exportar diagnóstico"
+      description: "Guarda los registros recientes y tu configuración, sin las claves de API, para adjuntarlos a un informe de error"
+      exportSuccess: "Diagnóstico guardado"
+      exportFailed: "No se pudo exportar el diagnóstico"
     community:
       title: Comunidad
     discord:
@@ -144,13 +150,40 @@ options:
       title: Grupo de WeChat
       description: Escanea el código QR para unirte al grupo de discusión de WeChat
       qrCodeAlt: Código QR de WeChat
+  usage:
+    title: Uso
+    pageDescription: Tu plan y cuánta cuota de IA te queda.
+    notSignedIn: Sin iniciar sesión
+    guest: Invitado
+    manageSubscription: Gestionar suscripción
+    logInToView: Inicia sesión para verlo
+    footer:
+      logIn: Inicia sesión y recibe cuota de IA gratis cada semana
+      upgrade: Pásate a Pro para desbloquear los subtítulos con IA y más cuota de IA integrada
+      upgradeAction: Mejorar plan
   apiProviders:
     title: Proveedores de API
-    pageDescription: Conecta los servicios de IA que usa Read Frog y elige cuál se encarga de cada función.
-    description: Añade los proveedores que Read Frog puede llamar. Más de 20 vienen integrados y puedes añadir API personalizadas compatibles con Chat Completions u Open Responses.
+    pageDescription: Usa los modelos integrados de Read Frog o conecta servicios de IA de terceros y elige cuál se encarga de cada función.
+    description: Usa los modelos integrados de Read Frog o añade proveedores de terceros. Más de 20 proveedores vienen preconfigurados, y puedes añadir API personalizadas compatibles con Chat Completions u Open Responses.
     configTitle: Configuración de proveedores
     addProvider: Añadir proveedor
-    builtInProvider: Proveedor integrado
+    builtInProvider: Modelos integrados
+    thirdPartyProviders: Proveedores de terceros
+    builtInModel:
+      reasoningDescription: "Cuánto piensa $1 antes de responder. Los niveles más altos manejan mejor los textos difíciles, pero responden más despacio y consumen más de tu cuota."
+      reasoningDefault: "Predeterminado"
+      reasoningLevels:
+        none: "Desactivado"
+        minimal: "Mínimo"
+        low: "Bajo"
+        medium: "Medio"
+        high: "Alto"
+        xhigh: "Muy alto"
+      unavailableTitle:
+        temporary: "$1 no está disponible temporalmente"
+        removed: "$1 ya no se ofrece"
+      unavailableDescription: "Las funciones que lo usan muestran un error mientras no pueda ejecutarse. Para continuar, cámbialas a $1."
+      unavailableDescriptionNoAlternatives: "Las funciones que lo usan muestran un error mientras no pueda ejecutarse. Para continuar, cámbialas a otro proveedor."
     builtInAiUsage:
       title: Cuota de IA integrada
       remaining: "$1% restante"
@@ -168,20 +201,23 @@ options:
         videoSubtitles: Subtítulos de video
         inputTranslation: Traducción de entrada
         languageDetection: Detección de idioma
+        pdfTranslation: Traducción de PDF
     sponsorCta: Obtén IA rápida y rentable
     sponsorCtaJalapenoCloud: Obtén un 50 % de descuento en GLM 5.3
+    sponsorCtaIfapi: "+10 % de saldo con el código READFROG"
     setApiKeyWarning:
       message: Configura tu clave de API en la página $1
     badges:
       featureCount: $1 funciones
       sponsor: Patrocinador
       sponsorJalapenoCloud: $$1 gratis
+      sponsorIfapi: Modelos -90 %
     dialog:
       title: Añadir nuevo proveedor
       groups:
         builtInProviders:
-          title: Proveedores LLM integrados
-          description: Proveedores integrados de modelos de lenguaje grandes; no hace falta completar la mayoría de configuraciones, como Base URL
+          title: Proveedores LLM preconfigurados
+          description: Proveedores de modelos de lenguaje preconfigurados; no hace falta completar la mayoría de ajustes, como Base URL
         compatibleProviders:
           title: Proveedores de API compatibles
           description: Usa Personalizado Chat Complete para API compatibles con Chat Completions o Personalizado Responses para API Open Responses.
@@ -250,15 +286,13 @@ options:
       invalidJson: Formato JSON no válido
     providers:
       name:
-        builtInAi: IA integrada
-        builtInAiAdvance: IA integrada avanzada
         customChatComplete: Personalizado Chat Complete
         customResponses: Personalizado Responses
       attribution:
-        builtInAi: Modelo estándar alojado por Read Frog. Los usuarios Pro y Ultra pueden usarlo en todas las funciones con una cuota semanal; en el plan gratuito solo funciona en las acciones de IA personalizadas.
-        builtInAiAdvance: Modelo avanzado alojado por Read Frog, exclusivo para miembros Ultra. Funciona en todas las funciones de IA integrada — traducción de página, acciones de IA personalizadas y más — con una cuota semanal compartida. Consume la cuota más rápido que el modelo estándar.
+        builtInAi: Modelo estándar alojado por Read Frog. Gratis al iniciar sesión, con cuota semanal.
+        builtInAiAdvance: Modelo avanzado alojado por Read Frog, exclusivo para miembros Ultra. Consume la cuota más rápido que los modelos estándar.
       description:
-        openai: Proporciona modelos como GPT-4o
+        openai: API oficial de OpenAI para los modelos GPT
         azure: Modelos OpenAI hospedados en Azure mediante tus implementaciones
         deepseek: Recomendado para usar en China
         openrouter: Interfaz unificada para varios proveedores LLM con precios de pago por uso
@@ -268,6 +302,7 @@ options:
         xai: Empresa de AI de Elon Musk que ofrece modelos Grok con acceso a datos en tiempo real
         atlascloud: Plataforma unificada compatible con OpenAI para modelos recientes como DeepSeek, Kimi, Qwen, Doubao y GLM
         jalapenocloud: IA de nivel empresarial que utilizan los mejores equipos, ¡ahora para ti!
+        ifapi: GPT, Claude, Gemini y más, desde el 10 % del precio oficial
         siliconflow: Plataforma de inferencia de alto rendimiento para modelos chinos e internacionales
         tensdaq: Plataforma revolucionaria de pujas AI MaaS con precios impulsados por el mercado, que elimina los altos precios fijos
         openaiCompatible: Conecta un endpoint personalizado compatible con la API Chat Completions de OpenAI
@@ -555,6 +590,9 @@ options:
     selectionAnnotation:
       title: "Anotar"
       description: "Subraya el texto seleccionado y escribe su significado entre las líneas."
+    selectionAnnotationMode:
+      title: "Modo de anotación"
+      description: "Activa o desactiva el modo de anotación sin abrir la barra. Mientras está activo, se anota cualquier texto que selecciones."
     actions:
       title: "Acciones AI"
       description: "Ejecuta una acción AI sobre el texto seleccionado. Las acciones personalizadas no tienen atajo hasta que les asignes uno aquí."
@@ -569,9 +607,7 @@ options:
     pageDescription: Traduce lo que escribes en los campos de texto antes de enviarlo.
     trigger:
       title: Activación
-      enable:
-        title: Activar
-        description: Pulsa la barra espaciadora tres veces seguidas en cualquier campo de entrada para traducir lo que has escrito.
+      description: Pulsa la barra espaciadora tres veces seguidas en cualquier campo de entrada para traducir lo que has escrito.
       threshold:
         title: Umbral de activación
         description: Cuánto pueden separarse las pulsaciones, en milisegundos. Auméntalo si la traducción no llega a activarse; redúcelo si salta mientras escribes.
@@ -590,9 +626,6 @@ options:
     title: Botón flotante
     pageDescription: Elige en qué lado se coloca el botón flotante, qué hace al pulsarlo y dónde permanece oculto.
     demoImageAlt: Demostración del botón flotante
-    enable:
-      title: Activar botón flotante
-      description: Muestra el botón flotante en páginas web para acceder rápidamente a las funciones de Read Frog
     display:
       title: Visualización
       side:
@@ -611,8 +644,8 @@ options:
       panel: Abrir panel lateral
       translate: Alternar traducción de página
     closeMenu:
-      disableForSite: Desactivar para este sitio
-      disableGlobally: Desactivar globalmente
+      title: Ocultar botón flotante
+    pageTranslationOff: "La traducción de páginas está desactivada en el modo simple"
     tooltips:
       togglePageTranslation: Alternar traducción de página
       floatingButtonOptions: Opciones del botón flotante
@@ -623,9 +656,6 @@ options:
     title: Barra de selección
     pageDescription: Define qué acciones aparecen al seleccionar texto y dónde se muestra la barra.
     demoImageAlt: Demostración de la barra de selección
-    enable:
-      title: Activar barra de selección
-      description: Muestra la barra de herramientas al seleccionar texto en páginas web para traducción rápida, voz y acciones AI
     annotation:
       title: "Anotación de palabras"
       enable:
@@ -637,13 +667,10 @@ options:
     actions:
       title: Acciones
       translate:
-        title: Traducir
         description: Muestra el botón de traducción en la barra de herramientas
       speak:
-        title: Leer en voz alta
         description: Muestra el botón de voz, que lee en voz alta el texto seleccionado
       noteSuggestion:
-        title: Sugerencias de notas
         description: Después de traducir una selección con un proveedor de IA, sugerir palabras para guardar en tu Notebase
         action: Acción
         actionDescription: La acción que genera la sugerencia
@@ -651,6 +678,12 @@ options:
         providerDescription: El proveedor de IA que genera la sugerencia
     display:
       title: Visualización
+      placement:
+        title: Posición
+        description: Elige en qué lado del texto seleccionado aparece la barra de selección. Si el lado elegido no tiene espacio, aparece en el otro
+        followDirection: Seguir la dirección de la selección
+        above: Siempre encima
+        below: Siempre debajo
       opacity:
         title: Opacidad
         description: Ajusta la opacidad de la barra de selección y de la ventana expandida que se abre desde ella
@@ -660,8 +693,7 @@ options:
         enterUrlPattern: Introduce patrón de URL
         urlPattern: Patrón de URL
     closeMenu:
-      disableForSite: Desactivar para este sitio
-      disableGlobally: Desactivar globalmente
+      title: Ocultar barra de selección
     errors:
       customActionFailed: Falló la acción personalizada
       customActionFailedFallback: Falló la solicitud de acción personalizada
@@ -797,6 +829,8 @@ options:
             unquotedAttributeOutput: Pon comillas alrededor de este valor de atributo, o el valor podría salirse de él.
             filterIgnored: Los filtros se ignoran en una etiqueta «$1». Asigna primero el valor filtrado.
             newlineToBrNotLast: newline_to_br solo funciona como último filtro de una salida.
+            mathFilterNotLast: $1 solo funciona como último filtro de una salida.
+            mathFilterInAttribute: No uses $1 dentro de un valor de atributo. Las fórmulas que dibuja llevan comillas, que cierran el atributo.
             tooLong: Este diseño supera los $1 caracteres y no se puede guardar.
             fieldNotShown: «$1» no aparece en este diseño.
             reservedFieldName: El nombre de campo «$1» está reservado en los diseños. Cambia el nombre del campo.
@@ -1066,8 +1100,8 @@ options:
       pageDescription: Da una traducción fija a las palabras que te importan y elige dónde se aplica cada lista.
       untitled: Glosario sin título
       noGlossaries: Aún no hay glosarios.
-      enable:
-        title: Activar
+      appliesTo:
+        title: Se aplica a
         description: Envía los términos coincidentes al LLM para que los traduzca a tu manera. El glosario viaja dentro del prompt, así que solo se aplica a las funciones que usan un proveedor LLM.
       library:
         title: Tus glosarios
@@ -1197,9 +1231,6 @@ options:
     title: Menú contextual
     pageDescription: Controla las opciones de Read Frog en el menú contextual del navegador.
     demoImageAlt: Demostración del menú contextual
-    enable:
-      title: Activar traducción en menú contextual
-      description: Añade opciones de traducción al menú contextual del navegador para traducir rápidamente páginas y selecciones
   translation:
     title: Traducción de páginas
     pageDescription: Controla cómo se traducen las páginas — modo, alcance, prompts y límites de solicitudes.
@@ -1348,7 +1379,7 @@ options:
         error: El valor debe estar entre $1 y $2
     translationQueue:
       title: Cola de traducción
-      description: Con qué rapidez salen las solicitudes, cuánto texto lleva cada una y cuánto se adelantan al lector
+      description: Con qué rapidez salen las solicitudes, cuánto texto lleva cada una, cuánto puede tardar cada una y cuánto se adelantan al lector
       manageQueue: Gestionar cola
       requestQueueConfig:
         title: Tasa de traducción
@@ -1363,6 +1394,9 @@ options:
           description: "Caracteres máximos: cuánto texto lleva cada solicitud a la IA"
         maxItemsPerBatch:
           description: "Párrafos máximos: cuántos párrafos comparten una solicitud. Los proveedores que no son de IA ignoran ambos"
+      requestTimeout:
+        title: Tiempo de espera de la solicitud
+        description: "Segundos que se espera una respuesta antes de abandonar y reintentar. Las solicitudes por lotes de IA reciben tiempo extra según su longitud, hasta 100 segundos más. Auméntalo si un modelo lento agota el tiempo una y otra vez"
       preloadConfig:
         title: Rango de pretraducción
         description: Controla cuánto contenido por debajo de la ventana visible se pretraduce para ahorrar costes de API
@@ -1441,10 +1475,11 @@ options:
       title: Aspectos básicos
       enable:
         title: Activar subtítulos de video
-        description: Añade un botón de traducción a los controles del reproductor en YouTube, X y Netflix.
-      autoStart:
-        title: Traducir al abrir el video
-        description: Empieza a traducir en cuanto se carga el video, sin pulsar el botón.
+        description: "Elige para cada sitio: desactivado, manual (se inicia con el botón de traducción del reproductor) o automático (se inicia al abrir el video)."
+        mode:
+          off: "Desactivado"
+          manual: "Manual"
+          auto: "Automático"
       aiSegmentation:
         title: Segmentación inteligente de IA
         description: La IA vuelve a cortar los subtítulos en frases. Las traducciones tardan más. Requiere un LLM potente; los modelos más débiles pueden omitir o desalinear líneas.
@@ -1457,8 +1492,6 @@ options:
     aiQuota:
       title: Cuota de subtítulos con IA
       description: El reconocimiento de voz con IA te da subtítulos precisos para cualquier vídeo
-      launchBonusPromo: Suscríbete antes del $1 y obtén 300 minutos de transcripción adicionales
-      loginRequired: Inicia sesión para ver tu cuota de subtítulos con IA
       upgradeRequired: Los subtítulos con IA requieren una suscripción Pro o Ultra
       pools:
         subscription: Cuota mensual
@@ -1534,7 +1567,7 @@ options:
           videoSummary: Resumen del video (requiere contexto inteligente de IA)
     subtitlesQueue:
       title: Cola de subtítulos
-      description: Con qué rapidez salen las solicitudes de subtítulos y cuántas líneas lleva cada una
+      description: Con qué rapidez salen las solicitudes de subtítulos, cuántas líneas lleva cada una y cuánto puede tardar cada una
       manageQueue: Gestionar cola
       requestQueueConfig:
         title: Tasa de traducción
@@ -1549,6 +1582,9 @@ options:
           description: "Caracteres máximos: cuánto texto lleva cada solicitud a la IA"
         maxItemsPerBatch:
           description: "Líneas máximas: cuántas líneas de subtítulos comparten una solicitud. Los proveedores que no son de IA ignoran ambos"
+      requestTimeout:
+        title: Tiempo de espera de la solicitud
+        description: "Segundos que se espera una respuesta antes de abandonar y reintentar. Las solicitudes por lotes de IA reciben tiempo extra según su longitud, hasta 100 segundos más. Auméntalo si un modelo lento agota el tiempo una y otra vez"
     cache:
       title: Caché
       clearCache:
@@ -1561,6 +1597,53 @@ options:
           confirm: Confirmar
           cancel: Cancelar
           description: Esto eliminará todos los resultados de segmentación AI en caché. La próxima vez que reproduzcas un video con segmentación AI activada, se volverán a procesar los subtítulos.
+  simpleMode:
+    title: "Modo simple"
+    pageDescription: "Una función que desactivas es como si no estuviera instalada: deja de aparecer en las páginas web y sus atajos no hacen nada. Su configuración se conserva, así que al volver a activarla todo queda como estaba."
+    drawerDescription: "Las funciones que desactives desaparecen en todas partes. Su configuración se conserva"
+    features:
+      customActions:
+        title: "Acciones AI personalizadas"
+        description: "Las acciones AI de la barra de selección y del menú contextual, incluidos el Diccionario y el Análisis de oraciones integrados"
+      pageTranslation:
+        title: "Traducción de páginas"
+        description: "Traduce páginas web completas"
+        hover:
+          title: "Traducción al pasar el cursor"
+          description: "Pasa el cursor o mantén pulsado un párrafo para traducir solo ese"
+      videoSubtitles:
+        title: "Subtítulos de video"
+        description: "Añade a los reproductores de video un botón de subtítulos traducidos"
+      inputTranslation:
+        title: "Traducción de entrada"
+        description: "Pulsa la barra espaciadora tres veces seguidas en cualquier campo de entrada para traducir lo que has escrito"
+      floatingButton:
+        title: "Botón flotante"
+        description: "Muestra el botón flotante en páginas web para acceder rápidamente a las funciones de Read Frog"
+      selectionToolbar:
+        title: "Barra de selección"
+        description: "Muestra la barra de herramientas al seleccionar texto en páginas web para traducción rápida, voz y acciones AI"
+        annotation:
+          title: "Anotación de palabras"
+          description: "Subraya la palabra o frase seleccionada y escribe su significado entre las líneas"
+        translate:
+          title: "Traducción de la selección"
+          description: "Muestra el botón de traducción en la barra de herramientas"
+          noteSuggestion:
+            title: "Sugerencias de notas"
+            description: "Después de traducir una selección con un proveedor de IA, sugerir palabras para guardar en tu Notebase"
+        speak:
+          title: "Leer en voz alta"
+          description: "Muestra el botón de voz, que lee en voz alta el texto seleccionado"
+      contextMenu:
+        title: "Menú contextual"
+        description: "Las opciones de Read Frog en el menú contextual del navegador"
+      translationHub:
+        title: "Centro de traducción"
+        description: "Traduce texto con varios modelos al mismo tiempo"
+      glossary:
+        title: "Glosario"
+        description: "Traduce las palabras que te importan como tú decidiste"
   whatsNew:
     title: Novedades
     postType:
@@ -1578,8 +1661,8 @@ side:
 translateService:
   title: Servicio de traducción
   description: Solo para traducir la página web
-  builtInModels: Built-in Models
-  llmModels: LLM Models
+  builtInModels: Modelos integrados
+  llmModels: Modelos de terceros
   normalTranslator: Traductor normal
   selectServices: Seleccionar servicios
   translationProviders: Proveedores de traducción
@@ -1593,7 +1676,7 @@ languageLevels:
   intermediate: Intermedio
   advanced: Avanzado
 noAPIKeyConfig:
-  warning: Si quieres usar modelos AI, primero configura la clave API en la página de opciones
+  warning: Primero configura la clave API de este proveedor en la página de opciones
   warningWithLink:
     youMust: Debes
     setTheAPIKey: configurar la clave API
@@ -1606,6 +1689,25 @@ translation:
   sameLanguage: Los idiomas de origen y destino deben ser diferentes
   autoModeSameLanguage: El idioma detectado '$1' es el mismo que el idioma de destino
   extensionContextInvalidated: La extensión se actualizó. Actualiza esta página e inténtalo de nuevo.
+  inputTranslationFailed: "Falló la traducción de entrada"
+pageDiagnosis:
+  title: "Diagnóstico de la página"
+  summary: "$1 traducidos, $2 sin traducir"
+  empty: "Aún no hay nada que mostrar. Activa la traducción de la página y vuelve a abrir esto."
+  emptyWhileTranslating: "Aún no hay nada que mostrar. Los párrafos aparecerán aquí a medida que la traducción de la página llegue a ellos."
+  framesNotIncluded: "El texto dentro de marcos incrustados no se incluye aquí."
+  hint: "Haz clic en un motivo para resaltar sus párrafos en la página."
+  close: "Cerrar"
+  unavailable: "Read Frog no puede ejecutarse en esta página"
+  reasons:
+    noProse: "No hay palabras que traducir"
+    tooShort: "Demasiado corto para traducir"
+    targetLanguage: "Ya está en tu idioma de destino"
+    skipLanguage: "En un idioma que omites"
+    noTranslationNeeded: "La IA indicó que no necesita traducción"
+    sameAsSource: "La traducción es igual al original"
+    emptyResult: "El servicio no devolvió nada"
+    error: "Error de traducción"
 annotation:
   annotate: "Anotar"
   enterMode: "Modo de anotación"
@@ -1628,6 +1730,11 @@ speak:
   noTextSelected: No hay texto seleccionado
   openaiNotConfigured: El proveedor OpenAI no está configurado o activado
   openaiApiKeyNotConfigured: La clave API de OpenAI no está configurada
+hideMenu:
+  untilReload: Hasta que recargue la página
+  onSite: En $1
+  onAllSites: En todos los sitios
+  restoreHint: "Se puede volver a activar en $1 o en $2."
 action:
   copy: Copiar
   copied: Copiado
@@ -1719,6 +1826,7 @@ subtitles:
   requestAiSubtitles: Solicitar subtítulos con IA
   usingAiSubtitles: Usando subtítulos con IA
   settings: Ajustes de subtítulos
+  autoStartOnPlatform: "Inicio automático en $1"
   toggle:
     enabled: Traducción de subtítulos activada
     disabled: Traducción de subtítulos desactivada
@@ -1756,7 +1864,9 @@ subtitles:
     aiSubscriptionRequired: Los subtítulos con IA requieren una suscripción Pro o Ultra
     aiPaymentRequired: Actualiza tu método de pago para seguir generando subtítulos con IA
     aiVideoTooLong: Este video es demasiado largo para los subtítulos con IA
-    aiLiveReplayUnsupported: Los subtítulos con IA aún no están disponibles para repeticiones de transmisiones en vivo
+    aiVideoMismatch: Este video no coincide con la publicación de la que proviene. Abre la publicación y vuelve a intentarlo
+    aiLiveReplayUnsupported: Los subtítulos con IA aún no están disponibles para transmisiones en vivo ni sus repeticiones
+    aiLiveStreamUnsupported: Los subtítulos con IA no están disponibles mientras la transmisión está en vivo. Solicítalos cuando se publique su repetición
     aiStillProcessing: La transcripción sigue en curso — vuelve a hacer clic en unos minutos para retomarla
     aiRequestFailed: Error al solicitar subtítulos con IA, inténtalo de nuevo más tarde
     aiNoResponse: El servicio AI no respondió; se usa el texto original
@@ -1775,10 +1885,33 @@ hostedAi:
     serviceUnavailable: No disponible temporalmente
     usedPercent: "Cuota utilizada: $1%"
     resetsAt: "Se restablece a las $1"
+  requestId:
+    label: "ID de solicitud:"
+    copy: "Copiar ID de solicitud"
   errors:
     rateLimited: Demasiadas solicitudes, inténtalo de nuevo más tarde.
     guestRateLimited: Demasiadas solicitudes de invitado. Inténtalo de nuevo más tarde.
     userRateLimited: Demasiadas solicitudes. Inténtalo de nuevo más tarde.
+    modelUnavailable: "$1 no está disponible en este momento. Prueba con $2."
+    modelUnavailableNoAlternatives: "$1 no está disponible en este momento y no tienes ningún otro modelo de IA integrada disponible. Inténtalo de nuevo más tarde."
+    modelBusy: "$1 está saturado en este momento. Inténtalo de nuevo en un momento o cambia a $2."
+    modelBusyNoAlternatives: "$1 está saturado en este momento. Inténtalo de nuevo en un momento."
+  unavailable:
+    temporary: "$1 no está disponible temporalmente. Prueba con $2."
+    temporaryNoAlternatives: "$1 no está disponible temporalmente. Inténtalo de nuevo más tarde."
+    removed: "$1 ya no se ofrece. Prueba con $2."
+    removedNoAlternatives: "$1 ya no se ofrece. Elige otro proveedor."
+  actions:
+    chooseModel: "Elegir un modelo"
+  builtInAiPrompt:
+    logInTitle: "Inicia sesión para usar la IA integrada"
+    logInDescription: "La IA integrada es gratis al iniciar sesión, con unos 120.000 tokens por semana."
+    upgradeTitle: "Has usado la IA integrada de esta semana"
+    upgradeDescription: "Pro traduce unas 3000 páginas web al mes, y Ultra unas 10.000."
+    upgradeDescriptionPro: "Ultra traduce unas 10.000 páginas web al mes."
+    useMachineTranslation: "Usar traducción automática"
+    switched: "$1 ahora usa $2."
+    switchFailed: "No se pudo cambiar a la traducción automática. Inténtalo de nuevo."
 hotkey:
   control: Ctrl
   alt: Opción
@@ -1842,183 +1975,3 @@ difficultWords:
       C1: Textos largos y complejos, literarios o basados en hechos, distinguiendo estilos; artículos especializados e instrucciones técnicas largas fuera de tu campo
       C2: Prácticamente cualquier texto escrito, incluidos textos abstractos de estructura y lenguaje complejos, como manuales, artículos especializados y obras literarias
       unsure: Se cuenta como A2. Mejor empezar bajo; el exceso de resaltados se corrige rápido marcando las palabras que conoces, y si hay muy pocos no queda nada en qué hacer clic.
-languages:
-  eng: Inglés
-  cmn: Chino simplificado
-  cmnHant: Chino tradicional
-  yue: Cantonés
-  spa: Español
-  rus: Ruso
-  arb: Árabe
-  ben: Bengalí
-  hin: Hindi
-  por: Portugués
-  ind: Indonesio
-  jpn: Japonés
-  fra: Francés
-  deu: Alemán
-  jav: Javanés
-  kor: Coreano
-  tel: Telugu
-  vie: Vietnamita
-  mar: Maratí
-  ita: Italiano
-  tam: Tamil
-  tur: Turco
-  urd: Urdu
-  guj: Guyaratí
-  pol: Polaco
-  ukr: Ucraniano
-  kan: Canarés
-  mai: Maithili
-  mal: Malayalam
-  pes: Persa
-  mya: Birmano
-  swh: Suajili
-  sun: Sundanés
-  ron: Rumano
-  pan: Panyabí
-  bho: Bhojpuri
-  amh: Amárico
-  hau: Hausa
-  fuv: Fula
-  bos: Bosnio
-  hrv: Croata
-  nld: Neerlandés
-  srp: Serbio
-  tha: Tailandés
-  ckb: Kurdo central
-  yor: Yoruba
-  uzn: Uzbeko
-  zlm: Malayo
-  ibo: Igbo
-  npi: Nepalí
-  ceb: Cebuano
-  skr: Saraiki
-  tgl: Tagalo
-  hun: Húngaro
-  azj: Azerbaiyano
-  sin: Cingalés
-  koi: Komi permio
-  ell: Griego
-  ces: Checo
-  mag: Magahi
-  run: Kirundi
-  bel: Bielorruso
-  plt: Malgache
-  qug: Quichua de Chimborazo
-  mad: Madurés
-  nya: Chichewa
-  zyb: Zhuang
-  pbu: Pastún
-  kin: Kiñaruanda
-  zul: Zulú
-  bul: Búlgaro
-  swe: Sueco
-  lin: Lingala
-  som: Somalí
-  hms: Miao qiandong
-  hnj: Hmong njua
-  ilo: Ilocano
-  kaz: Kazajo
-  heb: Hebreo
-  nob: Noruego bokmål
-  nno: Noruego nynorsk
-  afr: Afrikáans
-  sqi: Albanés
-  asm: Asamés
-  eus: Vasco
-  bre: Bretón
-  cat: Catalán
-  cos: Corso
-  cym: Galés
-  dan: Danés
-  div: Dhivehi
-  epo: Esperanto
-  ekk: Estonio
-  fao: Feroés
-  fij: Fiyiano
-  fin: Finés
-  fry: Frisón occidental
-  gla: Gaélico escocés
-  gle: Irlandés
-  glg: Gallego
-  grn: Guaraní
-  hat: Criollo haitiano
-  haw: Hawaiano
-  hye: Armenio
-  ido: Ido
-  ina: Interlingua
-  isl: Islandés
-  kat: Georgiano
-  khm: Jemer
-  kir: Kirguís
-  lao: Lao
-  lat: Latín
-  lvs: Letón
-  lit: Lituano
-  ltz: Luxemburgués
-  mkd: Macedonio
-  mlt: Maltés
-  mon: Mongol
-  mri: Maorí
-  nso: Sotho del norte
-  oci: Occitano
-  ori: Odia
-  orm: Oromo
-  prs: Dari
-  san: Sánscrito
-  slk: Eslovaco
-  slv: Esloveno
-  smo: Samoano
-  sna: Shona
-  snd: Sindhi
-  sot: Sotho del sur
-  tah: Tahitiano
-  tat: Tártaro
-  tgk: Tayiko
-  tir: Tigriña
-  ton: Tongano
-  tsn: Setsuana
-  tuk: Turcomano
-  uig: Uigur
-  vol: Volapük
-  wol: Wólof
-  xho: Xhosa
-  ydd: Yidis
-  aka: Akan
-  bam: Bambara
-  bis: Bislama
-  bod: Tibetano
-  che: Checheno
-  chv: Chuvasio
-  dzo: Dzongkha
-  ewe: Ewe
-  kab: Cabilio
-  lug: Luganda
-  oss: Osetio
-  ssw: Suazi
-  ven: Venda
-  war: Samareño
-  nde: Ndebele del norte
-  nbl: Ndebele del sur
-  pam: Pampango
-  hil: Hiligainón
-  bcl: Bikol central
-  min: Minangkabau
-  ace: Acehnés
-  bug: Buginés
-  ban: Balinés
-  bjn: Banjar
-  mak: Macasar
-  sas: Sasak
-  tet: Tetun
-  cha: Chamorro
-  niu: Niueano
-  tvl: Tuvaluano
-  gil: Gilbertés
-  mah: Marshalés
-  pau: Palauano
-  wls: Wallisiano
-  rar: Rarotongano
-  hif: Hindi de Fiyi

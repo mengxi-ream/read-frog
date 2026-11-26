@@ -1,4 +1,4 @@
-import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { LanguageTag } from "@read-frog/definitions"
 import type { GlossarySnapshot } from "../active-matcher"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { fakeBrowser } from "wxt/testing/fake-browser"
@@ -21,7 +21,7 @@ interface Gate {
 
 interface LoaderCall extends Gate {
   url: string | undefined
-  targetLang: LangCodeISO6393
+  targetLang: LanguageTag
 }
 
 /**
@@ -33,7 +33,7 @@ interface LoaderCall extends Gate {
  */
 function gatedLoader() {
   const calls: LoaderCall[] = []
-  const load = (url: string | undefined, targetLang: LangCodeISO6393) => {
+  const load = (url: string | undefined, targetLang: LanguageTag) => {
     let resolve!: (snapshot: GlossarySnapshot) => void
     let reject!: (error: unknown) => void
     const promise = new Promise<GlossarySnapshot>((res, rej) => {
@@ -76,7 +76,7 @@ describe("getActiveGlossary — invalidation during an outstanding load", () => 
     module.setGlossarySnapshotLoader(load)
 
     // Caller asks before the edit...
-    const pending = module.resolveGlossaryTerms(TEXT, true, "cmn")
+    const pending = module.resolveGlossaryTerms(TEXT, true, "zh-Hans")
     expect(calls).toHaveLength(1)
 
     // ...the options page writes, `storage.watch` fires, and only THEN do the
@@ -95,7 +95,7 @@ describe("getActiveGlossary — invalidation during an outstanding load", () => 
 
     // (b) But it was never installed: the next call re-asks instead of serving
     // the wording the user just replaced.
-    const afterEdit = module.resolveGlossaryTerms(TEXT, true, "cmn")
+    const afterEdit = module.resolveGlossaryTerms(TEXT, true, "zh-Hans")
     expect(calls).toHaveLength(2)
     calls[1]!.resolve(snapshot(8, { "Chort Bay": "乔特湾" }))
     await expect(afterEdit).resolves.toMatchObject({
@@ -111,14 +111,14 @@ describe("getActiveGlossary — invalidation during an outstanding load", () => 
 
     // A load is outstanding when the edit lands — the window the generation
     // guard covers for the caller that started it.
-    const before = module.resolveGlossaryTerms(TEXT, true, "cmn")
+    const before = module.resolveGlossaryTerms(TEXT, true, "zh-Hans")
     expect(calls).toHaveLength(1)
     module.invalidateActiveGlossaryMatcher()
 
     // A SECOND caller now arrives, still inside that window (the snapshot can
     // hang for up to SNAPSHOT_TIMEOUT_MS). It must not be handed the in-flight
     // pre-edit load: it asked after the edit, so it is entitled to see it.
-    const after = module.resolveGlossaryTerms(TEXT, true, "cmn")
+    const after = module.resolveGlossaryTerms(TEXT, true, "zh-Hans")
     expect(calls).toHaveLength(2)
 
     calls[0]!.resolve(snapshot(7, { "Chort Bay": "雀特湾" }))
@@ -139,12 +139,12 @@ describe("getActiveGlossary — invalidation during an outstanding load", () => 
     const module = await loadModule()
     module.setGlossarySnapshotLoader(load)
 
-    const pending = module.resolveGlossaryTerms(TEXT, true, "cmn")
+    const pending = module.resolveGlossaryTerms(TEXT, true, "zh-Hans")
     calls[0]!.resolve(snapshot(7, { "Chort Bay": "雀特湾" }))
     await expect(pending).resolves.toMatchObject({ revision: 7 })
 
     // The whole point of the cache: a second paragraph costs no round trip.
-    await expect(module.resolveGlossaryTerms(TEXT, true, "cmn")).resolves.toMatchObject({
+    await expect(module.resolveGlossaryTerms(TEXT, true, "zh-Hans")).resolves.toMatchObject({
       revision: 7,
       terms: [expect.objectContaining({ target: "雀特湾" })],
     })
@@ -156,14 +156,14 @@ describe("getActiveGlossary — invalidation during an outstanding load", () => 
     const module = await loadModule()
     module.setGlossarySnapshotLoader(load)
 
-    const pending = module.resolveGlossaryTerms(TEXT, true, "cmn")
+    const pending = module.resolveGlossaryTerms(TEXT, true, "zh-Hans")
     calls[0]!.resolve(snapshot(7, { "Chort Bay": "雀特湾" }))
     await pending
 
     // Benign ordering — resolve first, invalidate after — behaves exactly as it
     // did before the generation counter existed.
     module.invalidateActiveGlossaryMatcher()
-    const afterEdit = module.resolveGlossaryTerms(TEXT, true, "cmn")
+    const afterEdit = module.resolveGlossaryTerms(TEXT, true, "zh-Hans")
     expect(calls).toHaveLength(2)
     calls[1]!.resolve(snapshot(8, { "Chort Bay": "乔特湾" }))
     await expect(afterEdit).resolves.toMatchObject({
@@ -181,11 +181,11 @@ describe("getActiveGlossary — concurrent loads", () => {
 
     // Input translation resolves its own target language while the page is
     // being warmed for another; both loads are outstanding at once.
-    const cmn = module.resolveGlossaryTerms(TEXT, true, "cmn")
-    const jpn = module.resolveGlossaryTerms(TEXT, true, "jpn")
+    const cmn = module.resolveGlossaryTerms(TEXT, true, "zh-Hans")
+    const jpn = module.resolveGlossaryTerms(TEXT, true, "ja")
 
     expect(calls).toHaveLength(2)
-    expect(calls.map((call) => call.targetLang)).toEqual(["cmn", "jpn"])
+    expect(calls.map((call) => call.targetLang)).toEqual(["zh-Hans", "ja"])
     expect(calls.map((call) => call.url)).toEqual([undefined, undefined])
 
     calls[0]!.resolve(snapshot(7, { "Chort Bay": "雀特湾" }))
@@ -204,8 +204,8 @@ describe("getActiveGlossary — concurrent loads", () => {
     const module = await loadModule()
     module.setGlossarySnapshotLoader(load)
 
-    const first = module.getActiveGlossaryMatcher("cmn")
-    const second = module.getActiveGlossaryMatcher("cmn")
+    const first = module.getActiveGlossaryMatcher("zh-Hans")
+    const second = module.getActiveGlossaryMatcher("zh-Hans")
     expect(calls).toHaveLength(1)
 
     calls[0]!.resolve(snapshot(7, { "Chort Bay": "雀特湾" }))
@@ -222,7 +222,7 @@ describe("getActiveGlossary — a loader that throws synchronously", () => {
       throw new Error("loader exploded synchronously")
     })
 
-    await expect(module.resolveGlossaryTerms(TEXT, true, "cmn")).resolves.toEqual({
+    await expect(module.resolveGlossaryTerms(TEXT, true, "zh-Hans")).resolves.toEqual({
       terms: [],
       revision: 0,
     })
@@ -231,7 +231,7 @@ describe("getActiveGlossary — a loader that throws synchronously", () => {
     // re-serving the failure forever.
     const { calls, load } = gatedLoader()
     module.setGlossarySnapshotLoader(load)
-    const retry = module.resolveGlossaryTerms(TEXT, true, "cmn")
+    const retry = module.resolveGlossaryTerms(TEXT, true, "zh-Hans")
     expect(calls).toHaveLength(1)
     calls[0]!.resolve(snapshot(7, { "Chort Bay": "雀特湾" }))
     await expect(retry).resolves.toMatchObject({

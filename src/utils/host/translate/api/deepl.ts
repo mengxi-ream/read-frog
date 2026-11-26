@@ -1,6 +1,7 @@
-import type { LangCodeISO6391 } from "@read-frog/definitions"
+import type { LanguageTag } from "@read-frog/definitions"
 import type { ProviderConfig } from "@/types/config/provider"
 import type { TranslationTextFormat } from "@/types/config/translate"
+import { toDeepLSourceCode, toDeepLTargetCode } from "./language-codes"
 
 type DeepLProviderConfig = Extract<ProviderConfig, { provider: "deepl" }>
 
@@ -11,8 +12,8 @@ interface DeepLLanguagePair {
 
 export async function deeplTranslate(
   sourceText: string,
-  fromLang: LangCodeISO6391 | "auto",
-  toLang: LangCodeISO6391,
+  fromLang: LanguageTag | "auto",
+  toLang: LanguageTag,
   providerConfig: DeepLProviderConfig,
   options?: { textFormat?: TranslationTextFormat; signal?: AbortSignal },
 ): Promise<string> {
@@ -33,8 +34,8 @@ export async function deeplTranslate(
 
 async function requestDeepLTranslations(
   sourceTexts: string[],
-  fromLang: LangCodeISO6391 | "auto",
-  toLang: LangCodeISO6391,
+  fromLang: LanguageTag | "auto",
+  toLang: LanguageTag,
   providerConfig: DeepLProviderConfig,
   options?: { textFormat?: TranslationTextFormat; signal?: AbortSignal },
 ): Promise<string[]> {
@@ -119,25 +120,11 @@ export function getDeepLBaseURL(apiKey: string): string {
 }
 
 export function normalizeDeepLLanguages(
-  fromLang: LangCodeISO6391 | "auto",
-  toLang: LangCodeISO6391,
+  fromLang: LanguageTag | "auto",
+  toLang: LanguageTag,
 ): DeepLLanguagePair {
   return {
-    source: fromLang === "auto" ? undefined : formatDeepLLanguageCode(fromLang, "source"),
-    target: formatDeepLLanguageCode(toLang, "target"),
+    source: toDeepLSourceCode(fromLang),
+    target: toDeepLTargetCode(toLang),
   }
-}
-
-function formatDeepLLanguageCode(lang: LangCodeISO6391, direction: "source" | "target"): string {
-  const formattedLang = lang.toUpperCase()
-
-  if (formattedLang === "ZH") {
-    return direction === "target" ? "ZH-HANS" : "ZH"
-  }
-
-  if (formattedLang === "ZH-TW") {
-    return direction === "target" ? "ZH-HANT" : "ZH"
-  }
-
-  return formattedLang
 }

@@ -10,12 +10,22 @@ const toggleSubtitlesManually = vi.fn<(enabled: boolean) => void>()
 
 describe("subtitles toggle across navigation", () => {
   beforeEach(() => {
+    vi.stubGlobal(
+      "ResizeObserver",
+      class {
+        observe() {}
+        disconnect() {}
+      },
+    )
     subtitlesStore.set(subtitlesVisibleAtom, true)
     subtitlesStore.set(subtitlesSettingsPanelOpenAtom, true)
     toggleSubtitlesManually.mockClear()
   })
 
-  afterEach(cleanup)
+  afterEach(() => {
+    cleanup()
+    vi.unstubAllGlobals()
+  })
 
   it("reflects the next video's off state after the hidden panel opens", () => {
     render(

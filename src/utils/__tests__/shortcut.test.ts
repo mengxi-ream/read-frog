@@ -5,8 +5,23 @@ import {
   formatShortcutParts,
   isSameShortcut,
   isValidShortcut,
+  keyboardEventToShortcut,
   normalizeShortcut,
 } from "../shortcut"
+
+// The recorder reads only these fields from a keydown.
+function keydown(
+  init: Pick<KeyboardEvent, "key" | "code"> &
+    Partial<Pick<KeyboardEvent, "ctrlKey" | "altKey" | "shiftKey" | "metaKey">>,
+): KeyboardEvent {
+  return {
+    ctrlKey: false,
+    altKey: false,
+    shiftKey: false,
+    metaKey: false,
+    ...init,
+  } as KeyboardEvent
+}
 
 describe("shortcut helpers", () => {
   it("normalizes shortcuts to a portable Mod-based format", () => {
@@ -43,6 +58,23 @@ describe("shortcut helpers", () => {
     expect(isSameShortcut("Alt+D", "Alt+Shift+D", "mac")).toBe(false)
     expect(isSameShortcut("", "", "mac")).toBe(false)
     expect(isSameShortcut("Alt+D", undefined, "mac")).toBe(false)
+  })
+
+  // The Turkish Q layout types a dotless "ı" on the I key. The hotkeys library
+  // fires an I shortcut on that key, so it has to be recorded and compared as I.
+  it("records and compares the Turkish dotless i as I", () => {
+    expect(
+      keyboardEventToShortcut(keydown({ key: "ı", code: "KeyI", ctrlKey: true }), "windows"),
+    ).toBe("Mod+I")
+    expect(keyboardEventToShortcut(keydown({ key: "ı", code: "KeyI", metaKey: true }), "mac")).toBe(
+      "Mod+I",
+    )
+    expect(keyboardEventToShortcut(keydown({ key: "ı", code: "KeyI", ctrlKey: true }), "mac")).toBe(
+      "Control+I",
+    )
+    expect(normalizeShortcut("Control+ı", "windows")).toBe("Mod+I")
+    expect(isSameShortcut("Mod+ı", "Mod+I", "windows")).toBe(true)
+    expect(isSameShortcut("Mod+ı", "Mod+I", "mac")).toBe(true)
   })
 
   it("accepts valid shortcuts in the schema and rejects incomplete ones", () => {

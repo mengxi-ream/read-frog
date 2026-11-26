@@ -1,19 +1,22 @@
 import type { HostedAiStatus } from "@/utils/hosted-ai/types"
 import { storage } from "#imports"
-import { logger } from "@/utils/logger"
+import { getHostedAiModelsFromStatus, storeHostedAiModels } from "@/utils/hosted-ai/models"
+import { createLogger } from "@/utils/logging/logger"
 import { onMessage } from "@/utils/message"
 import { backgroundOrpcClient } from "@/utils/orpc/background-client"
+
+const log = createLogger("background/hosted-ai-status")
 
 /**
  * Long enough to collapse the serialized per-batch resolves that dominate
  * subtitle playback, short enough that a quota exhausted mid-session surfaces
  * within seconds.
  *
- * A stale `available: true` cannot cost credit: nothing derived from this
- * response rides the wire (the generation schema carries only modelTier,
- * requestId, instructions, prompt, temperature), and the server refuses an
- * over-quota request before it reaches the model, releasing the reservation at
- * zero. The verdict is also boolean, not a budget — a fresh response says
+ * A stale `available: true` cannot cost credit: the server refuses an
+ * over-quota request, or a model it cannot run, before it reaches the model,
+ * releasing the reservation at zero. What rides the wire from here is the
+ * model's tier and reasoning level, which the server checks against its own
+ * catalog. The verdict is also boolean, not a budget — a fresh response says
  * `available: true` at 5% remaining exactly as a cached one does. What a stale
  * entry does cost is a delayed error message, which is what bounds the TTL.
  */
@@ -45,7 +48,7 @@ export async function clearHostedAiStatusCache(): Promise<void> {
   try {
     await storage.removeItem(CACHE_KEY)
   } catch (error) {
-    logger.warn("[HostedAiStatus] Failed to clear cache:", error)
+    log.warn("Failed to clear cache", { error })
   }
 }
 
@@ -57,7 +60,7 @@ async function readCachedStatus(): Promise<HostedAiStatus | null> {
     }
     return cached.status
   } catch (error) {
-    logger.warn("[HostedAiStatus] Failed to read cache:", error)
+    log.warn("Failed to read cache", { error })
     return null
   }
 }
@@ -74,14 +77,20 @@ function fetchAndCache(): Promise<HostedAiStatus | null> {
       try {
         await storage.setItem<CachedStatus>(CACHE_KEY, { status, cachedAt: Date.now() })
       } catch (error) {
-        logger.warn("[HostedAiStatus] Failed to write cache:", error)
+        log.warn("Failed to write cache", { error })
+      }
+      // The model list outlives this entry: names, tiers and revisions are
+      // what a status outage would otherwise take with it.
+      const models = getHostedAiModelsFromStatus(status)
+      if (models) {
+        await storeHostedAiModels(models)
       }
       return status
     })
     .catch((error) => {
       // Fail open: the caller treats null as "no verdict", and the generation
       // endpoints enforce access on their own.
-      logger.warn("[HostedAiStatus] Status fetch failed:", error)
+      log.warn("Status fetch failed", { error })
       return null
     })
     .finally(() => {

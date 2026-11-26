@@ -196,16 +196,10 @@ ReadFrog는 GPLv3와 상업 라이선스의 듀얼 라이선스를 사용합니�
 기여자 라이선스 조건은 [CONTRIBUTING.md](../CONTRIBUTING.md)를 참조하세요.
 
 <a href="https://github.com/mengxi-ream/read-frog/graphs/contributors">
-  <table>
-    <tr>
-      <th colspan="2">
-        <br>
-        <img src="https://contrib.rocks/image?repo=mengxi-ream/read-frog" alt="Read Frog contributors"><br>
-        <br>
-      </th>
-    </tr>
-  </table>
+  <img src="https://contrib.rocks/image?repo=mengxi-ream/read-frog" alt="Read Frog contributors" />
 </a>
+
+Made with [contrib.rocks](https://contrib.rocks).
 
 ## 📜 상업 라이선스 부여
 
@@ -216,6 +210,10 @@ ReadFrog는 GPLv3와 상업 라이선스의 듀얼 라이선스를 사용합니�
 모든 후원은 더 나은 언어 학습 경험을 만드는 데 도움이 됩니다. 우리의 미션을 지원해 주셔서 감사합니다.
 
 [![Sponsors][sponsor-image]][sponsor-link]
+
+<a href="https://ifapi.org/?aff=readfrog&utm_source=readfrog&utm_medium=readme">
+  <img src="../assets/promotion/ifapi.png" alt="IF API: GPT, Claude, Gemini and more from one key. Read Frog users get +10% credit with code READFROG">
+</a>
 
 <div align="right">
 

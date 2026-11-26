@@ -6,6 +6,12 @@ import { TranslationCancelledError } from "./cancellation"
 import { BinaryHeapPQ } from "./priority-queue"
 import { defaultRequestRetryPolicy } from "./retry-policy"
 
+/**
+ * A task's attempt that ran out of time: raised by the queue for that task alone, never
+ * one it fails the whole backlog with.
+ */
+export class RequestQueueTimeoutError extends Error {}
+
 export interface RequestTask {
   id: string
   thunk: (signal?: AbortSignal) => Promise<any>
@@ -19,9 +25,10 @@ export interface RequestTask {
   // RequestRetryContext.rateLimitRetryCount).
   rateLimitRetryCount: number
   drained: boolean
-  // Per-task timeout override; falls back to QueueOptions.timeoutMs. Large
-  // LLM batches need proportionally more time than single requests.
-  timeoutMs?: number
+  // Time this task gets on top of QueueOptions.timeoutMs: large LLM batches
+  // need proportionally more than single requests. Added when each attempt
+  // starts, so a timeout change also reaches tasks already queued or retrying.
+  extraTimeoutMs?: number
 }
 
 type QueuedRequestTask = RequestTask & {
@@ -74,7 +81,7 @@ export class RequestQueue {
     scheduleAt: number,
     hash: string,
     scopes?: readonly string[],
-    taskOptions?: { timeoutMs?: number },
+    taskOptions?: { extraTimeoutMs?: number },
   ): Promise<T> {
     const duplicateTask = this.duplicateTask(hash)
     if (duplicateTask) {
@@ -106,7 +113,7 @@ export class RequestQueue {
       retryCount: 0,
       rateLimitRetryCount: 0,
       drained: false,
-      timeoutMs: taskOptions?.timeoutMs,
+      extraTimeoutMs: taskOptions?.extraTimeoutMs,
       cancelScopes: scopes?.length ? new Set(scopes) : null,
     }
 
@@ -276,14 +283,16 @@ export class RequestQueue {
     let timeoutId: NodeJS.Timeout | null = null
     const abortController = new AbortController()
     task.abortController = abortController
-    const timeoutMs = task.timeoutMs ?? this.options.timeoutMs
+    const timeoutMs = this.options.timeoutMs + (task.extraTimeoutMs ?? 0)
 
     try {
       // Create a timeout promise
       const timeoutPromise = new Promise((_, reject) => {
         timeoutId = setTimeout(() => {
           // console.info(`⏰ Task ${task.id} timed out after ${timeoutMs}ms`)
-          const timeoutError = new Error(`Task ${task.id} timed out after ${timeoutMs}ms`)
+          const timeoutError = new RequestQueueTimeoutError(
+            `Task ${task.id} timed out after ${timeoutMs}ms`,
+          )
           // Reject before aborting: the race must settle with the timeout error
           // (which the retry policy treats as retryable), not with whatever abort
           // error the cancelled thunk rejects with.

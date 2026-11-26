@@ -9,6 +9,7 @@ import {
   MIN_FONT_SCALE,
   MIN_FONT_WEIGHT,
 } from "@/utils/constants/subtitles"
+import { storedProviderIdSchema } from "./provider-id"
 import { shortcutSchema } from "./shortcut"
 import {
   batchQueueConfigSchema,
@@ -47,10 +48,27 @@ export const subtitlesStyleSchema = z.object({
 })
 
 /** The players subtitles get translated on. */
-export const subtitlesPlatformSchema = z.enum(["youtube", "xcom", "netflix"])
+export const subtitlesPlatformSchema = z.enum([
+  "youtube",
+  "xcom",
+  "netflix",
+  "bilibili",
+  "udemy",
+  "edx",
+])
 
-/** Per platform, whether subtitles start translating as soon as a video loads. */
-export const subtitlesAutoStartSchema = z.record(subtitlesPlatformSchema, z.boolean())
+/**
+ * How subtitles run on one platform: not at all (no button in the player), from the button, or
+ * on their own as each video loads.
+ */
+export const subtitlesPlatformModeSchema = z.enum(["off", "manual", "auto"])
+
+// One mode per platform. `.default()` lets a config stored before a platform was added parse
+// until its migration adds it.
+export const subtitlesPlatformModesSchema = z.record(
+  subtitlesPlatformSchema,
+  subtitlesPlatformModeSchema.default("manual"),
+)
 
 export const subtitlePositionSchema = z.object({
   percent: z.number().min(0).max(100),
@@ -58,10 +76,16 @@ export const subtitlePositionSchema = z.object({
 })
 
 export const videoSubtitlesSchema = z.object({
-  enabled: z.boolean(),
-  autoStart: subtitlesAutoStartSchema,
+  // Simple mode's video subtitles switch (src/utils/features.ts). A config stored
+  // before v126 had an `enabled` that meant the same thing; v126 folded it into
+  // `platforms` and v130 adds this one. `.default()` lets pre-v130 config parse
+  // until the migration runs.
+  enabled: z.boolean().default(true),
+  // `.prefault()` is load-bearing: a config stored before v126 has `enabled` and `autoStart`
+  // instead, and still has to parse until the v126 migration turns them into this.
+  platforms: subtitlesPlatformModesSchema.prefault({}),
   toggleShortcut: shortcutSchema,
-  providerId: z.string().nonempty(),
+  providerId: storedProviderIdSchema,
   style: subtitlesStyleSchema,
   aiSegmentation: z.boolean(),
   // `.default()` is load-bearing: it lets configs stored before this field existed still
@@ -83,6 +107,7 @@ export type SubtitleTextStyle = z.infer<typeof subtitleTextStyleSchema>
 export type SubtitleContainerStyle = z.infer<typeof subtitleContainerStyleSchema>
 export type SubtitlesStyle = z.infer<typeof subtitlesStyleSchema>
 export type SubtitlesPlatform = z.infer<typeof subtitlesPlatformSchema>
-export type SubtitlesAutoStart = z.infer<typeof subtitlesAutoStartSchema>
+export type SubtitlesPlatformMode = z.infer<typeof subtitlesPlatformModeSchema>
+export type SubtitlesPlatformModes = z.infer<typeof subtitlesPlatformModesSchema>
 export type SubtitlePosition = z.infer<typeof subtitlePositionSchema>
 export type VideoSubtitles = z.infer<typeof videoSubtitlesSchema>

@@ -88,13 +88,13 @@ function renderPanel(open = true) {
 function startNavigation(next: string | null) {
   act(() => {
     videoId = next
-    ;(adapter as any).handleNavigationStart()
+    ;(adapter as any).navigation.handleNavigationStart()
   })
 }
 
 async function finishNavigation() {
   await act(async () => {
-    await (adapter as any).handleNavigation()
+    await (adapter as any).navigation.handleNavigation()
   })
 }
 
@@ -131,14 +131,14 @@ describe("summary panel navigation", () => {
         },
       },
     })
-    vi.spyOn(adapter as any, "initializeScheduler").mockResolvedValue(undefined)
-    vi.spyOn(adapter as any, "renderTranslateButton").mockResolvedValue(undefined)
-    vi.spyOn(adapter as any, "tryAutoStartSubtitles").mockResolvedValue(undefined)
+    vi.spyOn((adapter as any).player, "initializeScheduler").mockResolvedValue(undefined)
+    vi.spyOn((adapter as any).player, "renderTranslateButton").mockResolvedValue(undefined)
+    vi.spyOn((adapter as any).startRequests, "tryAutoStartSubtitles").mockResolvedValue(undefined)
   })
 
   afterEach(() => {
     cleanup()
-    ;(adapter as any).cancelVideoSummary()
+    ;(adapter as any).videoSummary.cancelVideoSummary()
     queryClient.clear()
     vi.restoreAllMocks()
   })
@@ -310,9 +310,9 @@ describe("summary panel navigation", () => {
     clickOpen()
     await act(async () => {
       videoId = "B"
-      ;(adapter as any).handleNavigationStart()
+      ;(adapter as any).navigation.handleNavigationStart()
       videoId = "A"
-      await (adapter as any).handleNavigation()
+      await (adapter as any).navigation.handleNavigation()
       oldCheck.resolve(true)
     })
     expect(subtitlesStore.get(subtitlesSidebarOpenAtom)).toBe(false)

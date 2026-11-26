@@ -97,4 +97,38 @@ describe("provider icon", () => {
     view.unmount()
     expect(bitmap.close).toHaveBeenCalledTimes(1)
   })
+
+  it("draws every provider's small logo at 12px", async () => {
+    const bitmap = { width: 24, height: 24, close: vi.fn<(...args: any[]) => any>() }
+    shouldProxyAssetUrlMock.mockReturnValue(true)
+    resolveContentScriptAssetBlobMock.mockResolvedValue(
+      new Blob([Uint8Array.from([1, 2, 3])], { type: "image/webp" }),
+    )
+    createImageBitmapMock.mockResolvedValue(bitmap)
+
+    render(<ProviderIcon logo="https://cdn.example.com/logo.webp" name="DeepL" size="sm" />)
+
+    await waitFor(() => {
+      expect(drawImageMock).toHaveBeenCalledWith(bitmap, 0, 0, 12, 12)
+    })
+    expect(screen.getByRole("img", { name: "DeepL" })).toHaveClass("size-3")
+  })
+
+  it("draws a badge over the logo's circle, which positions it", () => {
+    shouldProxyAssetUrlMock.mockReturnValue(false)
+
+    const { container } = render(
+      <ProviderIcon
+        logo="https://cdn.example.com/logo.webp"
+        name="GPT-6 Luna"
+        size="sm"
+        badge={<span data-testid="badge" className="absolute" />}
+      />,
+    )
+
+    expect(screen.getByTestId("badge").parentElement).toHaveClass("relative", "size-5")
+    expect(container.querySelector(".relative")).toContainElement(
+      screen.getByRole("img", { name: "GPT-6 Luna" }),
+    )
+  })
 })

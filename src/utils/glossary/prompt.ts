@@ -64,9 +64,10 @@ ${lines.join("\n")}`
  * these two strings identically, because the join carries an invariant: when
  * nothing matched the prompt must come back BYTE-IDENTICAL. The finished prompt
  * is part of the translation cache key (`host/translate/translate-text.ts:146`,
- * and `subtitles/processor/translator.ts:143` for subtitles), so a path that
- * appended an empty block — or used one newline instead of two — would quietly
- * orphan every cache entry belonging to users who merely OWN a glossary.
+ * and `buildSubtitleHashComponents` in `subtitles/processor/translator.ts`),
+ * so a path that appended an empty block — or used one newline instead of two —
+ * would quietly orphan every cache entry belonging to users who merely OWN a
+ * glossary.
  *
  * Two copies of that rule is one copy too many, which is why this exists rather
  * than the three-line join living at each call site.

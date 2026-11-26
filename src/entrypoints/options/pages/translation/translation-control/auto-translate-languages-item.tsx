@@ -1,4 +1,4 @@
-import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { LanguageTag } from "@read-frog/definitions"
 import { useAtom } from "jotai"
 import { MultiLanguageCombobox } from "@/components/multi-language-combobox"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
@@ -10,7 +10,7 @@ export function AutoTranslateLanguagesItem() {
   const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.pageTranslation)
   const selectedLanguages = translateConfig.page.autoTranslateLanguages
 
-  const setLanguages = (languages: LangCodeISO6393[]) => {
+  const setLanguages = (languages: LanguageTag[]) => {
     void setTranslateConfig({
       page: { ...translateConfig.page, autoTranslateLanguages: languages },
     })

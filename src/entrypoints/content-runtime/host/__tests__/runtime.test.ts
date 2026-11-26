@@ -48,14 +48,6 @@ vi.mock("@/utils/host/translate/ui/style-injector", () => ({
   ensurePresetStyles: mockEnsurePresetStyles,
 }))
 
-vi.mock("@/utils/logger", () => ({
-  logger: {
-    error: vi.fn<(...args: any[]) => any>(),
-    info: vi.fn<(...args: any[]) => any>(),
-    warn: vi.fn<(...args: any[]) => any>(),
-  },
-}))
-
 vi.mock("@/utils/message", () => ({
   onMessage: mockOnMessage,
   sendMessage: mockSendMessage,
@@ -208,6 +200,57 @@ describe("bootstrapHostContent URL changes", () => {
 
       invalidate()
       expect(unwatch).toHaveBeenCalledOnce()
+    } finally {
+      watch.mockRestore()
+    }
+  })
+
+  it("takes the translations off the page when simple mode switches page translation off", async () => {
+    const watch = vi.spyOn(storage, "watch").mockReturnValue(vi.fn<() => void>())
+    const { ctx, invalidate } = createContentScriptContext()
+    try {
+      await bootstrapHostContent(ctx, null)
+      const manager = managerInstances[0]!
+      const onConfigChange = watch.mock.calls.find(
+        ([key]) => key === `local:${CONFIG_STORAGE_KEY}`,
+      )?.[1]
+
+      const switchedOff = structuredClone(DEFAULT_CONFIG)
+      switchedOff.pageTranslation.enabled = false
+      manager.isActive = true
+      onConfigChange!(DEFAULT_CONFIG, switchedOff)
+      expect(manager.stop).not.toHaveBeenCalled()
+
+      onConfigChange!(switchedOff, DEFAULT_CONFIG)
+      // Not a refusal of this site: auto-translation comes back with the switch.
+      expect(manager.stop).toHaveBeenCalledExactlyOnceWith()
+      expect(manager.isActive).toBe(false)
+
+      invalidate()
+    } finally {
+      watch.mockRestore()
+    }
+  })
+
+  it("cancels a start still awaiting its checks when simple mode switches page translation off", async () => {
+    const watch = vi.spyOn(storage, "watch").mockReturnValue(vi.fn<() => void>())
+    const { ctx, invalidate } = createContentScriptContext()
+    try {
+      await bootstrapHostContent(ctx, null)
+      const manager = managerInstances[0]!
+      const onConfigChange = watch.mock.calls.find(
+        ([key]) => key === `local:${CONFIG_STORAGE_KEY}`,
+      )?.[1]
+
+      // Not active yet: the manager activates only once the start's checks pass, and its
+      // stop() cancels a start still waiting on them.
+      const switchedOff = structuredClone(DEFAULT_CONFIG)
+      switchedOff.pageTranslation.enabled = false
+      onConfigChange!(switchedOff, DEFAULT_CONFIG)
+
+      expect(manager.stop).toHaveBeenCalledExactlyOnceWith()
+
+      invalidate()
     } finally {
       watch.mockRestore()
     }

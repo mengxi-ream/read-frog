@@ -63,48 +63,80 @@ function localRef(model: string) {
   } as unknown as VideoSummaryProviderRef
 }
 
-function systemRef(providerId: string) {
+function systemRef(providerId: string, model = providerId) {
   return {
     kind: "system",
     id: providerId,
     name: providerId,
-    modelTier: "standard",
+    model,
   } as unknown as VideoSummaryProviderRef
 }
+
+const NO_BUILT_IN_AI_CHOICES = { models: {} }
 
 describe("videoSummaryQueryKey", () => {
   it("separates the cache per video, language and provider", () => {
     const ref = systemRef("built-in-ai")
-    const base = videoSummaryQueryKey("video-1", "cmn", ref)
+    const base = videoSummaryQueryKey("video-1", "cmn", ref, NO_BUILT_IN_AI_CHOICES)
 
-    expect(hashKey(base)).not.toBe(hashKey(videoSummaryQueryKey("video-2", "cmn", ref)))
-    expect(hashKey(base)).not.toBe(hashKey(videoSummaryQueryKey("video-1", "eng", ref)))
     expect(hashKey(base)).not.toBe(
-      hashKey(videoSummaryQueryKey("video-1", "cmn", systemRef("other"))),
+      hashKey(videoSummaryQueryKey("video-2", "cmn", ref, NO_BUILT_IN_AI_CHOICES)),
     )
-    expect(hashKey(base)).toBe(hashKey(videoSummaryQueryKey("video-1", "cmn", ref)))
+    expect(hashKey(base)).not.toBe(
+      hashKey(videoSummaryQueryKey("video-1", "eng", ref, NO_BUILT_IN_AI_CHOICES)),
+    )
+    expect(hashKey(base)).not.toBe(
+      hashKey(videoSummaryQueryKey("video-1", "cmn", systemRef("other"), NO_BUILT_IN_AI_CHOICES)),
+    )
+    expect(hashKey(base)).toBe(
+      hashKey(videoSummaryQueryKey("video-1", "cmn", ref, NO_BUILT_IN_AI_CHOICES)),
+    )
   })
 
   it("separates a local provider edited under the same id", () => {
-    const before = videoSummaryQueryKey("video-1", "cmn", localRef("v1"))
-    const after = videoSummaryQueryKey("video-1", "cmn", localRef("v2"))
+    const before = videoSummaryQueryKey("video-1", "cmn", localRef("v1"), NO_BUILT_IN_AI_CHOICES)
+    const after = videoSummaryQueryKey("video-1", "cmn", localRef("v2"), NO_BUILT_IN_AI_CHOICES)
 
     expect(hashKey(before)).not.toBe(hashKey(after))
   })
 
+  it("separates a Built-in AI model's summary per reasoning level picked for it", () => {
+    const ref = systemRef("read-frog-ai:gpt-6-luna", "gpt-6-luna")
+    const keyWith = (models: Record<string, { reasoning?: string }>) =>
+      hashKey(videoSummaryQueryKey("video-1", "cmn", ref, { models }))
+
+    const unset = keyWith({})
+    const low = keyWith({ "gpt-6-luna": { reasoning: "low" } })
+    const high = keyWith({ "gpt-6-luna": { reasoning: "high" } })
+
+    expect(new Set([unset, low, high]).size).toBe(3)
+    // Another model's level leaves this model's summary alone.
+    expect(keyWith({ "gpt-6.2-sol": { reasoning: "high" } })).toBe(unset)
+  })
+
   it("hashes the same regardless of the order fields were written in", () => {
-    const a = videoSummaryQueryKey("video-1", "cmn", {
-      kind: "system",
-      id: "built-in-ai",
-      name: "built-in-ai",
-      modelTier: "standard",
-    } as unknown as VideoSummaryProviderRef)
-    const b = videoSummaryQueryKey("video-1", "cmn", {
-      modelTier: "standard",
-      name: "built-in-ai",
-      id: "built-in-ai",
-      kind: "system",
-    } as unknown as VideoSummaryProviderRef)
+    const a = videoSummaryQueryKey(
+      "video-1",
+      "cmn",
+      {
+        kind: "system",
+        id: "built-in-ai",
+        name: "built-in-ai",
+        modelTier: "standard",
+      } as unknown as VideoSummaryProviderRef,
+      NO_BUILT_IN_AI_CHOICES,
+    )
+    const b = videoSummaryQueryKey(
+      "video-1",
+      "cmn",
+      {
+        modelTier: "standard",
+        name: "built-in-ai",
+        id: "built-in-ai",
+        kind: "system",
+      } as unknown as VideoSummaryProviderRef,
+      NO_BUILT_IN_AI_CHOICES,
+    )
 
     expect(hashKey(a)).toBe(hashKey(b))
   })

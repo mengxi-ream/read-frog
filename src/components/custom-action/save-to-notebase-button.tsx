@@ -1,3 +1,4 @@
+import type { NoteOriginInput } from "@read-frog/definitions"
 import type { SaveToNotebaseOutcome } from "./use-save-to-notebase"
 import type { SurfaceByFeature } from "@/types/analytics"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
@@ -16,6 +17,7 @@ export function SaveToNotebaseButton({
   isRunning,
   result,
   surface,
+  getNoteOrigin,
   onSave,
 }: {
   action: SelectionToolbarCustomAction
@@ -24,6 +26,8 @@ export function SaveToNotebaseButton({
   isRunning: boolean
   result: Record<string, unknown> | null
   surface: SurfaceByFeature["note_save"]
+  /** Where the note came from, read when the save starts. */
+  getNoteOrigin?: () => NoteOriginInput | null
   /** After a press, with what became of it. */
   onSave?: (outcome: SaveToNotebaseOutcome) => void
 }) {
@@ -39,7 +43,9 @@ export function SaveToNotebaseButton({
       return
     }
 
-    void save({ action, results: [result], surface }).then((outcome) => onSave?.(outcome))
+    void save({ action, results: [result], surface, origin: getNoteOrigin?.() ?? null }).then(
+      (outcome) => onSave?.(outcome),
+    )
   }
 
   const isDisabled = connection

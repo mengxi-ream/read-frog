@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from "vitest"
+import { validateUserRulesDocument } from "@/entrypoints/options/pages/translation/translation-control/site-rules/validate-user-rules"
 import { siteRuleSchema } from "@/types/config/site-rules"
 import {
   STATE_MESSAGE_CLASS,
@@ -8,8 +9,9 @@ import {
   YOUTUBE_NATIVE_SUBTITLES_CLASS,
 } from "@/utils/constants/subtitles"
 import { normalizeUrlPattern } from "@/utils/url-pattern"
-import { BUILT_IN_SITE_RULES } from "../built-in"
+import { BUILT_IN_SITE_RULES, toBundledSiteRule } from "../built-in"
 import rawBuiltInRules from "../built-in/rules.json"
+import { parseRemoteSiteRule, remoteSiteRuleSchema } from "../remote/document"
 import { resolveSiteRule } from "../resolve"
 
 const RAW_BUILT_IN_SITE_RULES = rawBuiltInRules as unknown as Array<Record<string, unknown>>
@@ -129,14 +131,55 @@ describe("built-in site rules", () => {
   // stored config never fails to parse), which means a typo'd delta key in a
   // built-in rule — e.g. "dontWalkButTranslateTags.removee" — would pass the
   // schema sweep above and silently no-op at resolve time. Catch it here.
+  // `minExtensionVersion` is the one key beyond the schema (see the remote one).
   it("ships no keys outside the canonical schema", () => {
-    const knownKeys = new Set(Object.keys(siteRuleSchema.shape))
+    const knownKeys = new Set(Object.keys(remoteSiteRuleSchema.shape))
     const unknown = RAW_BUILT_IN_SITE_RULES.flatMap((rule) =>
       Object.keys(rule)
         .filter((key) => !knownKeys.has(key))
         .map((key) => `${String(rule.id)}: ${key}`),
     )
     expect(unknown).toEqual([])
+  })
+
+  // This file is also what installed extensions download. A rule this build
+  // would refuse there (unknown key, CSS that loads something) would silently
+  // fall back to its bundled copy on every install.
+  it("every rule is accepted as a remote rule by this build", () => {
+    const refused = RAW_BUILT_IN_SITE_RULES.filter(
+      (rule) => parseRemoteSiteRule(rule, "999.0.0") === null,
+    ).map((rule) => String(rule.id))
+    expect(refused).toEqual([])
+  })
+
+  // The options page copies a built-in rule as JSON, and the user rules editor
+  // refuses keys it does not know, so the bundled rules drop the version gate
+  // that only the published copy uses, as the remote parse does.
+  it("drops minExtensionVersion from bundled rules, so a copied rule pastes into user rules", () => {
+    const published = {
+      id: "needs-new-code",
+      matches: "example.com",
+      excludeSelectors: [".chrome"],
+      minExtensionVersion: "1.59.0",
+    }
+    expect(validateUserRulesDocument(JSON.stringify([published]))).toMatchObject({
+      ok: false,
+      kind: "schema",
+    })
+
+    const bundled = toBundledSiteRule(published)
+
+    expect(bundled).toEqual({
+      id: "needs-new-code",
+      matches: "example.com",
+      excludeSelectors: [".chrome"],
+    })
+    expect(bundled).toEqual(parseRemoteSiteRule(published, "1.59.0"))
+    expect(validateUserRulesDocument(JSON.stringify([bundled]))).toEqual({
+      ok: true,
+      rules: [bundled],
+    })
+    expect(BUILT_IN_SITE_RULES.filter((rule) => "minExtensionVersion" in rule)).toEqual([])
   })
 
   it("does not ship legacy force selector keys", () => {
@@ -255,6 +298,30 @@ describe("built-in site rules", () => {
     const resolved = resolveSiteRule("https://www.cnbc.com/", BUILT_IN_SITE_RULES, [], [])
     expect(resolved.injectedCss).toContain("-webkit-line-clamp: unset !important")
     expect(resolved.injectedCss).toContain("max-height: unset !important")
+  })
+
+  // Both clamps belong to the page's own design, so they are lifted only once a
+  // translation lands inside the clamped element (issue #2483).
+  it("lifts X web app line clamps and GitHub repo-list truncation only after translation", () => {
+    const x = resolveSiteRule(
+      "https://x.com/superalesha/status/2119911942227959883",
+      BUILT_IN_SITE_RULES,
+      [],
+      [],
+    )
+    expect(x.injectedCss).toContain(
+      "main [dir=auto].whitespace-pre-wrap[class*='line-clamp-']:has(.read-frog-translated-content-wrapper) {-webkit-line-clamp: unset!important;}",
+    )
+
+    const github = resolveSiteRule(
+      "https://github.com/orgs/facebookresearch/repositories",
+      BUILT_IN_SITE_RULES,
+      [],
+      [],
+    )
+    expect(github.injectedCss).toContain(
+      ".repos-list-description:has(.read-frog-translated-content-wrapper) [class*='prc-Truncate-Truncate'] {white-space: normal!important;overflow: visible!important;}",
+    )
   })
 
   it("lets JavDB titles and their inline translations wrap instead of clipping", () => {
@@ -416,6 +483,48 @@ describe("built-in site rules", () => {
     }
   })
 
+  // raea.io draws [data-ink] lines as canvas ink and sets their text to
+  // transparent, so a translation inside them is invisible. While a translation
+  // is on the page the rule restores the text color and hides that canvas.
+  // See https://github.com/mengxi-ream/read-frog/issues/2515
+  it("shows raea.io inked letter lines as plain text while translated (issue #2515)", () => {
+    const resolved = resolveSiteRule("https://raea.io/why/", BUILT_IN_SITE_RULES, [], [])
+
+    expect(resolved.matchedRuleIds).toContain("raea")
+    expect(resolved.injectedCss).toContain("body .letter.ink-on [data-ink]")
+    expect(resolved.injectedCss).toContain(".letter > canvas[aria-hidden='true']")
+
+    const style = document.createElement("style")
+    style.textContent = `
+      :root { --foreground: rgb(245, 245, 245); }
+      .letter.ink-on [data-ink] { color: #0000; }
+      ${resolved.injectedCss}
+    `
+    const fixture = document.createElement("div")
+    fixture.className = "letter ink-on"
+    fixture.innerHTML = `
+      <canvas aria-hidden="true"></canvas>
+      <p data-ink id="bilingual">English<span class="read-frog-translated-content-wrapper">译文</span></p>
+      <p data-ink data-read-frog-translation-only id="only">译文</p>
+    `
+    document.head.append(style)
+    document.body.append(fixture)
+
+    try {
+      expect(window.getComputedStyle(fixture.querySelector("canvas")!).display).toBe("none")
+      for (const id of ["bilingual", "only"]) {
+        const color = window.getComputedStyle(fixture.querySelector(`#${id}`)!).color
+        expect(color).not.toBe("rgba(0, 0, 0, 0)")
+      }
+    } finally {
+      fixture.remove()
+      style.remove()
+    }
+
+    const elsewhere = resolveSiteRule("https://example.com/", BUILT_IN_SITE_RULES, [], [])
+    expect(elsewhere.matchedRuleIds).not.toContain("raea")
+  })
+
   it("keeps visible Ubiquiti Community release virtual-list items walkable", () => {
     const resolved = resolveSiteRule(
       "https://community.ui.com/releases/Community-Update-2026-08-04/a1179dd3-e973-4495-97de-bb992962b49d",
@@ -461,6 +570,34 @@ describe("built-in site rules", () => {
 
     const timeline = resolveSiteRule("https://x.com/home", BUILT_IN_SITE_RULES, [], [])
     expect(timeline.matchedRuleIds).not.toContain("readfrog-x-chat")
+  })
+
+  // `.x6s0dn4.x78zum5` is only Meta's atomic `align-items:center` + `display:flex`.
+  // It is meant for nav items and the like/reply/repost rows, but on the
+  // logged-in "For you" home the wrapper around the composer and the whole feed
+  // carries the same two classes, so excluding it blanked out every post there.
+  it("excludes Threads nav and action rows without excluding the logged-in home feed", () => {
+    const resolved = resolveSiteRule("https://www.threads.com/", BUILT_IN_SITE_RULES, [], [])
+    expect(resolved.matchedRuleIds).toContain("threads")
+    const excludeSelector = resolved.excludeSelector
+    expect(excludeSelector).not.toBeNull()
+
+    document.body.innerHTML = `
+      <div class="x6s0dn4 x78zum5 x2lah0s" id="nav-item"><span>For you</span></div>
+      <div class="x6s0dn4 x78zum5 x1q0g3np" id="feed-wrapper">
+        <div data-pressable-container="true">
+          <span dir="auto" id="post-body">I just found out iPhones show all your duplicate pictures</span>
+          <div class="x6s0dn4 x78zum5" id="action-row"><span>46</span><span>20</span></div>
+        </div>
+      </div>
+    `
+    const byId = (id: string) => document.getElementById(id)!
+
+    expect(byId("feed-wrapper").matches(excludeSelector!)).toBe(false)
+    expect(byId("post-body").closest(excludeSelector!)).toBeNull()
+    expect(byId("nav-item").matches(excludeSelector!)).toBe(true)
+    expect(byId("action-row").matches(excludeSelector!)).toBe(true)
+    document.body.innerHTML = ""
   })
 
   it("does not restrict Steam app pages to an obsolete iframe include (issue #1923)", () => {
@@ -542,6 +679,9 @@ describe("built-in site rules", () => {
         "wandb",
         "https://wandb.ai/stacey/estuary/reports/When-Inception-ResNet-V2-is-too-slow--Vmlldzo3MDcxMA",
       ],
+      ["lowendtalk", "https://lowendtalk.com/categories"],
+      ["lowendtalk", "https://lowendtalk.com/search?Search=ipv6+tunnel"],
+      ["lowendtalk", "https://lowendtalk.com/discussion/222844/example"],
     ] as const
 
     for (const [id, url] of restoredSites) {
@@ -549,6 +689,29 @@ describe("built-in site rules", () => {
       expect(resolved.matchedRuleIds).toContain(id)
       expect(resolved.includeSelector).toBeNull()
     }
+  })
+
+  // The whole page translates, so the excludes are all that keeps LowEndTalk's
+  // names out: usernames come back transliterated, and the Thanked by box gets
+  // an inserted translation wrapped in parentheses by the site's own
+  // `div.ThankedByBox > span.ThankedBy > span::before/::after` rules. `.Author`
+  // goes out whole because translation-only mode serializes a header's run as
+  // HTML, which carried the excluded `.Username` and the avatar's title/alt.
+  it("keeps LowEndTalk usernames and name lists out of the translation", () => {
+    const resolved = resolveSiteRule(
+      "https://lowendtalk.com/discussion/222844/example",
+      BUILT_IN_SITE_RULES,
+      [],
+      [],
+    )
+
+    expect(resolved.excludeSelector?.split(",")).toEqual([
+      ".ClearFix .Count",
+      ".Author",
+      ".Username",
+      ".ThankedByBox",
+      ".PanelInThisDiscussion",
+    ])
   })
 
   it("matches current Microsoft Store URLs without a dead PRE-only scope", () => {
@@ -620,8 +783,8 @@ describe("built-in site rules", () => {
 
   // Alibaba's RFQ detail page renders the buyer's hand-written request body in
   // `<pre class="value">` (Details / 详细描述). PRE sits in
-  // DONT_WALK_AND_TRANSLATE_TAGS and the plain-text exemption in
-  // `utils/host/dom/filter` only fires for `text/plain` documents, so on this
+  // DONT_WALK_AND_TRANSLATE_TAGS and `readfrog-plain-text-document` only
+  // matches plain-text and markdown documents, so on this
   // text/html page the whole body was dropped from the walk while every sibling
   // field (Product Name, Category, Quantity) translated normally.
   it("un-blocks PRE on Alibaba's RFQ sourcing portal", () => {
@@ -636,10 +799,6 @@ describe("built-in site rules", () => {
     expect(resolved.dontWalkTags).not.toBeNull()
     expect(resolved.dontWalkTags!.has("PRE")).toBe(false)
     expect(resolved.dontWalkTags!.has("SCRIPT")).toBe(true)
-    // Removal must not register as an explicit add, or the plain-text `<pre>`
-    // exemption in `utils/host/dom/filter` would read it as an authoring
-    // decision to keep PRE blocked.
-    expect(resolved.dontWalkTagsExplicitAdds?.has("PRE") ?? false).toBe(false)
 
     const elsewhere = resolveSiteRule("https://www.alibaba.com/", BUILT_IN_SITE_RULES, [], [])
     expect(elsewhere.dontWalkTags).toBeNull()
@@ -655,7 +814,8 @@ describe("built-in site rules", () => {
 
   // A GameFAQs text guide is a text/html page whose whole body is a run of
   // `<pre id="faqspan-N">` blocks, so the PRE block left nothing to translate
-  // but the page chrome. The plain-text exemption does not apply to text/html.
+  // but the page chrome. `readfrog-plain-text-document` does not apply to
+  // text/html.
   it("un-blocks PRE on GameFAQs guide pages only", () => {
     for (const url of [
       "https://gamefaqs.gamespot.com/psp/611279-shin-megami-tensei-persona-2-innocent-sin/faqs/63674",
@@ -668,7 +828,6 @@ describe("built-in site rules", () => {
       expect(resolved.dontWalkTags).not.toBeNull()
       expect(resolved.dontWalkTags!.has("PRE")).toBe(false)
       expect(resolved.dontWalkTags!.has("SCRIPT")).toBe(true)
-      expect(resolved.dontWalkTagsExplicitAdds?.has("PRE") ?? false).toBe(false)
     }
 
     for (const url of [
@@ -686,6 +845,152 @@ describe("built-in site rules", () => {
       ["gamefaqs-guides"],
     )
     expect(disabled.dontWalkTags).toBeNull()
+  })
+
+  // A browser shows a .txt or .md file as one generated <pre> holding the whole
+  // file. memu.so serves SKILL.md as text/markdown, which the old hard-coded
+  // text/plain check left untranslated; the rule keys on document type, so it
+  // covers every host, local files, and the data:/blob: frames page
+  // translation injects into (which the hard-coded check also reached).
+  it("un-blocks PRE in documents the browser shows as plain text, on any URL", () => {
+    for (const [url, contentType] of [
+      ["https://memu.so/SKILL.md", "text/markdown"],
+      ["https://raw.githubusercontent.com/psf/requests/main/src/requests/api.py", "text/plain"],
+      ["http://localhost:8000/notes/README.md", "text/x-markdown"],
+      ["file:///Users/someone/notes.txt", "text/plain"],
+      ["data:text/plain;charset=utf-8,First%20paragraph.%0A%0ASecond%20paragraph.", "text/plain"],
+      ["blob:https://example.com/0f2b6a3e-1111-4c2e-9a77-2f6f0a1c9d10", "text/plain"],
+    ] as const) {
+      const resolved = resolveSiteRule(url, BUILT_IN_SITE_RULES, [], [], contentType)
+
+      expect(resolved.matchedRuleIds).toContain("readfrog-plain-text-document")
+      expect(resolved.dontWalkTags).not.toBeNull()
+      expect(resolved.dontWalkTags!.has("PRE")).toBe(false)
+      expect(resolved.dontWalkTags!.has("SCRIPT")).toBe(true)
+    }
+
+    for (const [url, contentType] of [
+      ["https://memu.so/SKILL.md", "text/html"],
+      ["https://example.com/data.json", "application/json"],
+      ["https://example.com/feed.xml", "text/xml"],
+      // Background callers resolve a URL without a document.
+      ["https://memu.so/SKILL.md", undefined],
+    ] as const) {
+      const resolved = resolveSiteRule(url, BUILT_IN_SITE_RULES, [], [], contentType)
+
+      expect(resolved.matchedRuleIds).not.toContain("readfrog-plain-text-document")
+      expect(resolved.dontWalkTags).toBeNull()
+    }
+
+    const disabled = resolveSiteRule(
+      "https://memu.so/SKILL.md",
+      BUILT_IN_SITE_RULES,
+      [],
+      ["readfrog-plain-text-document"],
+      "text/markdown",
+    )
+    expect(disabled.dontWalkTags).toBeNull()
+  })
+
+  it("lets a user rule block PRE again in plain-text documents on one site", () => {
+    const userRule = { id: "user-logs", matches: "logs.example.com", "dontWalkTags.add": ["PRE"] }
+
+    const onSite = resolveSiteRule(
+      "https://logs.example.com/build.txt",
+      BUILT_IN_SITE_RULES,
+      [userRule],
+      [],
+      "text/plain",
+    )
+    expect(onSite.matchedRuleIds).toContain("readfrog-plain-text-document")
+    expect(onSite.dontWalkTags!.has("PRE")).toBe(true)
+
+    const elsewhere = resolveSiteRule(
+      "https://other.example.com/build.txt",
+      BUILT_IN_SITE_RULES,
+      [userRule],
+      [],
+      "text/plain",
+    )
+    expect(elsewhere.dontWalkTags!.has("PRE")).toBe(false)
+  })
+
+  // Tag-set deltas are last-wins in rule order, so a rule that applies
+  // everywhere must come before every site rule or it would silently override
+  // them (e.g. un-block PRE on a site whose rule blocks it).
+  it("keeps every rule that applies everywhere ahead of the site rules", () => {
+    const appliesEverywhere = (rule: (typeof BUILT_IN_SITE_RULES)[number]) => {
+      const patterns = Array.isArray(rule.matches) ? rule.matches : [rule.matches]
+      return patterns.some((pattern) => ["*", "<all_urls>"].includes(pattern.trim()))
+    }
+    const firstSiteRule = BUILT_IN_SITE_RULES.findIndex((rule) => !appliesEverywhere(rule))
+    const lateGlobalRules = BUILT_IN_SITE_RULES.slice(firstSiteRule)
+      .filter(appliesEverywhere)
+      .map((rule) => rule.id)
+
+    expect(firstSiteRule).toBeGreaterThan(0)
+    expect(lateGlobalRules).toEqual([])
+  })
+
+  // A plain-text RFC renders its whole body in <pre>, so the PRE block left
+  // nothing to translate (#2427). v3 RFCs keep code and figures in <pre>,
+  // which must stay out of the walk.
+  it("un-blocks plain-text RFC bodies but keeps v3 RFC code and figures out", () => {
+    for (const url of [
+      "https://www.rfc-editor.org/info/rfc2104/",
+      "https://www.rfc-editor.org/rfc/rfc2104.html",
+      "https://datatracker.ietf.org/doc/html/rfc2104",
+      "https://datatracker.ietf.org/doc/rfc2104/",
+      "https://datatracker.ietf.org/doc/draft-ietf-httpbis-semantics/",
+      "https://www.rfc-editor.org/info/rfc9110/",
+    ]) {
+      const resolved = resolveSiteRule(url, BUILT_IN_SITE_RULES, [], [])
+
+      expect(resolved.matchedRuleIds).toContain("ietf-rfc-plaintext")
+      expect(resolved.dontWalkTags).not.toBeNull()
+      expect(resolved.dontWalkTags!.has("PRE")).toBe(false)
+      expect(resolved.dontWalkTags!.has("SCRIPT")).toBe(true)
+    }
+
+    for (const url of [
+      "https://www.rfc-editor.org/",
+      "https://www.rfc-editor.org/search/rfc_search.php",
+      "https://datatracker.ietf.org/doc/search",
+      "https://datatracker.ietf.org/",
+    ]) {
+      expect(resolveSiteRule(url, BUILT_IN_SITE_RULES, [], []).matchedRuleIds).not.toContain(
+        "ietf-rfc-plaintext",
+      )
+    }
+
+    const { excludeSelector } = resolveSiteRule(
+      "https://www.rfc-editor.org/info/rfc9110/",
+      BUILT_IN_SITE_RULES,
+      [],
+      [],
+    )
+    expect(excludeSelector).not.toBeNull()
+
+    document.body.innerHTML = `
+      <div class="rfc-content rfc-content-type-plaintext">
+        <pre id="title-page">Abstract<span class="grey" id="header">RFC 2104</span></pre>
+        <pre class="newpage" id="page"> body</pre>
+      </div>
+      <div class="rfc-content rfc-content-type-xml2rfc">
+        <div class="bg-gray-100"><pre class="" id="info-figure">UA ==== O</pre></div>
+      </div>
+      <div class="artwork"><pre id="artwork">UA ==== O</pre></div>
+      <pre class="lang-abnf9110 sourcecode" id="abnf">token = 1*tchar</pre>
+    `
+    const matches = (id: string) => document.getElementById(id)!.matches(excludeSelector!)
+
+    expect(matches("title-page")).toBe(false)
+    expect(matches("page")).toBe(false)
+    expect(matches("header")).toBe(true)
+    expect(matches("info-figure")).toBe(true)
+    expect(matches("artwork")).toBe(true)
+    expect(matches("abnf")).toBe(true)
+    document.body.innerHTML = ""
   })
 
   // The header dropdowns open on `li:hover`, so no mutation ever brings the

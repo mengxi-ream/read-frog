@@ -1,23 +1,27 @@
 import type { SubtitlesFragment } from "../types"
 import type { HostedAiTextStreamRoute } from "@/types/background-stream"
 import type { Config } from "@/types/config/config"
+import type { BatchQueueConfig } from "@/types/config/translate"
 import type { SubtitlePromptContext } from "@/types/content"
+import type { ErrorAction } from "@/utils/error-action"
 import type { MatchedTerm } from "@/utils/glossary/types"
 import type { PromptableProviderRef, SerializableProviderRef } from "@/utils/providers/provider-ref"
-import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
-import { APICallError } from "ai"
+import { LANGUAGE_ENGLISH_NAMES } from "@read-frog/definitions"
 import { toastManager } from "@/components/ui/base-ui/toast"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { classifySerializedProvider } from "@/utils/analytics-provider"
 import { getLocalConfig } from "@/utils/config/storage"
+import { DEFAULT_PROVIDER_CONFIG } from "@/utils/constants/providers"
+import { TRANSLATION_BATCH_SIZE } from "@/utils/constants/subtitles"
 import { cleanText } from "@/utils/content/utils"
 import { resolveGlossaryTerms } from "@/utils/glossary/active-matcher"
 import { trackGlossaryUsed } from "@/utils/glossary/analytics"
 import { Sha256Hex } from "@/utils/hash"
 import { prepareTranslationText } from "@/utils/host/translate/text-preparation"
 import { normalizePromptContextValue } from "@/utils/host/translate/translate-text"
+import { getBuiltInAiRefusalKind } from "@/utils/hosted-ai/refusal"
 import { i18n } from "@/utils/i18n"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
 import { sendMessage } from "@/utils/message"
 import { getSubtitlesTranslatePrompt } from "@/utils/prompts/subtitles"
 import {
@@ -27,6 +31,9 @@ import {
   serializeProviderRef,
 } from "@/utils/providers/provider-ref"
 import { resolveProviderRefForCapability } from "@/utils/providers/provider-registry"
+import { getRequestErrorMetaChain } from "@/utils/request/retry-policy"
+
+const log = createLogger("subtitles/processor/translator")
 
 /**
  * One toast for the whole run, not one per batch: the provider is re-resolved
@@ -54,21 +61,36 @@ const SUBTITLES_TASK_ROUTE: Record<SubtitlesTask, HostedAiTextStreamRoute> = {
   segmentation: "videoSubtitlesSegmentation",
 }
 
-function toFriendlyErrorMessage(error: unknown): string {
-  if (error instanceof APICallError) {
-    switch (error.statusCode) {
-      case 429:
-        return i18n.t("subtitles.errors.aiRateLimited")
-      case 401:
-      case 403:
-        return i18n.t("subtitles.errors.aiAuthFailed")
-      case 500:
-      case 502:
-      case 503:
-        return i18n.t("subtitles.errors.aiServiceUnavailable")
-      default:
-        break
-    }
+/**
+ * Our words for the status a provider failed with, which say what to do; its own message is
+ * often long and in English. The status is read down the cause chain, as the retry policy
+ * reads it: messaging turns the AI SDK's `APICallError` into a plain error, but keeps its
+ * `statusCode`. OpenAI's empty balance is a 429 too, but the retry policy gives it no status
+ * (an access denial), so it keeps OpenAI's words rather than "too many requests", which
+ * would send the reader to wait.
+ */
+function getProviderStatusMessage(error: unknown): string | undefined {
+  const chain = getRequestErrorMetaChain(error)
+  switch (chain.find(({ statusCode }) => statusCode !== undefined)?.statusCode) {
+    case 429:
+      return i18n.t("subtitles.errors.aiRateLimited")
+    case 401:
+    case 403:
+      return i18n.t("subtitles.errors.aiAuthFailed")
+    case 500:
+    case 502:
+    case 503:
+      return i18n.t("subtitles.errors.aiServiceUnavailable")
+    default:
+      return undefined
+  }
+}
+
+function toFriendlyErrorMessage(error: unknown, providerRef: SerializableProviderRef): string {
+  // Built-in AI's errors are Read Frog's own, and already say what to do.
+  const statusMessage = providerRef.kind === "local" ? getProviderStatusMessage(error) : undefined
+  if (statusMessage) {
+    return statusMessage
   }
 
   const message = error instanceof Error ? error.message : String(error)
@@ -80,6 +102,15 @@ function toFriendlyErrorMessage(error: unknown): string {
   return message
 }
 
+/**
+ * Names the provider an error came from, as the user named it in settings: "OpenAI: You
+ * exceeded your current quota…" is OpenAI's balance, not Read Frog's. Built-in AI is Read
+ * Frog's own, and its errors already say so.
+ */
+function withProviderName(message: string, providerRef: SerializableProviderRef): string {
+  return providerRef.kind === "local" ? `${providerRef.config.name}: ${message}` : message
+}
+
 export interface SubtitlesVideoContext {
   videoTitle: string
   videoDescription?: string | null
@@ -87,17 +118,27 @@ export interface SubtitlesVideoContext {
   summary?: string | null
 }
 
+/**
+ * Which video a session belongs to, as far as caching is concerned: the
+ * transcript itself, hashed the way the background keys the summary
+ * (`getSubtitlesSummary`). Unlike the page's title and meta description, it
+ * reads the same on every visit.
+ */
+function getSubtitlesTranscriptIdentity(subtitlesTextContent: string): string | undefined {
+  const preparedText = cleanText(subtitlesTextContent)
+  return preparedText ? Sha256Hex(preparedText) : undefined
+}
+
 export function buildSubtitlesSummaryContextHash(
   videoContext: Pick<SubtitlesVideoContext, "subtitlesTextContent">,
   providerRef?: SerializableProviderRef,
 ): string | undefined {
-  const preparedText = cleanText(videoContext.subtitlesTextContent)
-  if (!preparedText) {
+  const transcriptIdentity = getSubtitlesTranscriptIdentity(videoContext.subtitlesTextContent)
+  if (!transcriptIdentity) {
     return undefined
   }
 
-  const textHash = Sha256Hex(preparedText)
-  return Sha256Hex(textHash, providerRef ? getProviderCacheIdentity(providerRef) : "")
+  return Sha256Hex(transcriptIdentity, providerRef ? getProviderCacheIdentity(providerRef) : "")
 }
 
 function normalizeSubtitlePromptContext(
@@ -118,12 +159,10 @@ async function buildSubtitleHashComponents(
     targetCode: Config["language"]["targetCode"]
   },
   enableAIContentAware: boolean,
-  subtitlePromptContext: SubtitlePromptContext,
   subtitlesTextContent: string,
   glossaryTerms: readonly MatchedTerm[],
 ): Promise<string[]> {
   const preparedText = prepareTranslationText(text)
-  const normalizedSubtitlesTextContent = normalizePromptContextValue(subtitlesTextContent)
   const hashComponents = [
     preparedText,
     getProviderCacheIdentity(providerRef),
@@ -137,15 +176,21 @@ async function buildSubtitleHashComponents(
     return hashComponents
   }
 
-  const targetLangName = LANG_CODE_TO_EN_NAME[partialLangConfig.targetCode]
-  const promptContext = enableAIContentAware
-    ? subtitlePromptContext
-    : { ...subtitlePromptContext, videoSummary: undefined }
-  // Passed in rather than resolved here, so the prompt this hash is taken over
-  // is built from exactly the terms the request will carry.
+  const targetLangName = LANGUAGE_ENGLISH_NAMES[partialLangConfig.targetCode]
+  // Hashed for the template and the glossary only, with the video context left
+  // empty. That context is the page title, the meta description and the AI
+  // summary, and none of it is stable across visits: the first two are read
+  // from a DOM that differs between an in-app navigation and a reload (YouTube
+  // keeps the previous page's description until a full load, and its title
+  // trails the navigation), and the summary lands after the first cues are
+  // already in flight. Keyed on them, rewatching after a refresh missed every
+  // cue and paid for the whole video again (#2472). The request still carries
+  // the real context; only the key leaves it out. Glossary terms are passed in
+  // rather than resolved here, so the prompt this hash is taken over is built
+  // from exactly the terms the request will carry.
   const { systemPrompt, prompt } = await getSubtitlesTranslatePrompt(targetLangName, preparedText, {
     isBatch: true,
-    context: promptContext,
+    context: {},
     glossaryTerms,
   })
   hashComponents.push(systemPrompt, prompt)
@@ -153,19 +198,14 @@ async function buildSubtitleHashComponents(
     enableAIContentAware ? "enableAIContentAware=true" : "enableAIContentAware=false",
   )
 
-  if (subtitlePromptContext.webTitle) {
-    hashComponents.push(`webTitle:${subtitlePromptContext.webTitle}`)
-  }
-  if (subtitlePromptContext.webDescription) {
-    hashComponents.push(`webDescription:${subtitlePromptContext.webDescription}`)
-  }
-  if (enableAIContentAware) {
-    if (normalizedSubtitlesTextContent) {
-      hashComponents.push(`subtitlesTextContent:${normalizedSubtitlesTextContent.slice(0, 1000)}`)
-    }
-    if (subtitlePromptContext.videoSummary) {
-      hashComponents.push(`videoSummary:${subtitlePromptContext.videoSummary}`)
-    }
+  // The video, in place of the context above. The summary is a function of
+  // the transcript and the provider, both already in the key, so dropping the
+  // summary loses nothing a rewatch would need — and it also keeps this key
+  // shared with the translated-subtitles download, which builds its context
+  // without a description and only after the summary is ready.
+  const transcriptIdentity = getSubtitlesTranscriptIdentity(subtitlesTextContent)
+  if (transcriptIdentity) {
+    hashComponents.push(`transcript:${transcriptIdentity}`)
   }
 
   return hashComponents
@@ -198,15 +238,9 @@ async function translateSingleSubtitle(
     providerRef,
     { sourceCode: langConfig.sourceCode, targetCode: langConfig.targetCode },
     enableAIContentAware,
-    subtitlePromptContext,
     videoContext.subtitlesTextContent,
     glossaryTerms,
   )
-
-  if (enableAIContentAware) {
-    const summary = subtitlePromptContext.videoSummary
-    hashComponents.push(summary ? "subtitleSummary=ready" : "subtitleSummary=missing")
-  }
 
   return await sendMessage("enqueueSubtitlesTranslateRequest", {
     text,
@@ -226,7 +260,12 @@ export type SubtitlesProviderResolution<
   Ref extends SerializableProviderRef = SerializableProviderRef,
 > =
   | { status: "ok"; ref: Ref }
-  | { status: "hostedUnavailable"; message: string }
+  | {
+      status: "hostedUnavailable"
+      message: string
+      action?: ErrorAction
+      error: HostedAiProviderUnavailableError
+    }
   | { status: "notPromptable" }
   | { status: "none" }
 
@@ -270,12 +309,17 @@ export async function resolveSubtitlesProvider(
     return { status: "ok", ref: await serializeProviderRef(resolved, SUBTITLES_TASK_ROUTE[task]) }
   } catch (error) {
     if (error instanceof HostedAiProviderUnavailableError) {
-      return { status: "hostedUnavailable", message: error.message }
+      return {
+        status: "hostedUnavailable",
+        message: error.message,
+        action: error.action,
+        error,
+      }
     }
     // Nothing else is expected to throw here (serializeProviderRef already
     // fails open on an unreachable status endpoint). Keep degrading rather
     // than introducing a new throw into the render path, but leave a trace.
-    logger.warn("[Subtitles] Provider ref resolution failed", error)
+    log.warn("Provider ref resolution failed", { error })
     return { status: "none" }
   }
 }
@@ -298,19 +342,108 @@ export async function resolveSubtitlesProviderRef(
   config: Config,
   task: SubtitlesTask,
 ): Promise<SerializableProviderRef | null> {
-  const resolution = await resolveSubtitlesProvider(config, task)
+  return announceSubtitlesProviderResolution(await resolveSubtitlesProvider(config, task))
+}
+
+/** The ref a resolution gave, or null after saying why there is none where that matters. */
+function announceSubtitlesProviderResolution(
+  resolution: SubtitlesProviderResolution,
+): SerializableProviderRef | null {
   if (resolution.status === "hostedUnavailable") {
     // Silence here is indistinguishable from "these lines have no translation".
+    const { action } = resolution
     toastManager.add({
       type: "error",
       title: resolution.message,
       id: SUBTITLES_HOSTED_UNAVAILABLE_TOAST_ID,
+      // A guest's refusal carries a log-in button, and a spent pool below Ultra an upgrade.
+      ...(action && {
+        actionProps: {
+          children: action.label,
+          onClick: () => {
+            toastManager.close(SUBTITLES_HOSTED_UNAVAILABLE_TOAST_ID)
+            void sendMessage("openPage", { url: action.url, active: true })
+          },
+        },
+      }),
     })
     return null
   }
   // notPromptable degrades silently: unlike a hosted denial (something the
   // user was refused), it is a configuration state the pre-flight UI explains.
   return resolution.status === "ok" ? resolution.ref : null
+}
+
+/** Whether the subtitles provider is an AI (an LLM or Built-in AI) rather than a translation service. */
+export function isSubtitlesProviderAi(config: Config): boolean {
+  const resolved = resolveProviderRefForCapability(
+    "videoSubtitles",
+    config.providersConfig,
+    config.videoSubtitles.providerId,
+  )
+  return !!resolved && canResolvedProviderRefGenerateText(resolved)
+}
+
+/**
+ * Whether a line about to show without its translation gets a Microsoft one meanwhile: only
+ * an AI provider is slow enough to need it, and only while the config has Microsoft
+ * Translator enabled, as a provider that is off or missing serves no feature. The Options
+ * page has no switch for it, but an imported or synced config can have it off.
+ */
+export function shouldUseMachinePlaceholder(config: Config): boolean {
+  return (
+    isSubtitlesProviderAi(config) &&
+    config.providersConfig.some(
+      (provider) => provider.provider === "microsoft-translate" && provider.enabled,
+    )
+  )
+}
+
+/**
+ * How many cues one translation pass may take. Only a provider on the batch
+ * queue (the same rule as the background's `shouldUseBatchQueue`) packs them
+ * into one request, so the AI batch limits apply to it alone; any other
+ * provider sends one request per cue and keeps the fixed group size.
+ */
+export function getSubtitlesPassLimits(config: Config): BatchQueueConfig {
+  if (isSubtitlesProviderAi(config)) {
+    return config.videoSubtitles.batchQueueConfig
+  }
+  return {
+    maxItemsPerBatch: TRANSLATION_BATCH_SIZE,
+    maxCharactersPerBatch: Number.POSITIVE_INFINITY,
+  }
+}
+
+const MACHINE_PLACEHOLDER_PROVIDER_REF: SerializableProviderRef = {
+  kind: "local",
+  config: DEFAULT_PROVIDER_CONFIG["microsoft-translate"],
+}
+
+/**
+ * A Microsoft translation of one line, shown while the AI's is on its way. It
+ * takes no prompt, so it is cached under the key a Microsoft subtitles provider
+ * would use, apart from the AI's: the key holds the provider.
+ */
+export async function translateSubtitleWithMachine(text: string): Promise<string> {
+  const config = await getLocalConfig()
+  if (!config) {
+    return ""
+  }
+  const langConfig = config.language
+  const hashComponents = await buildSubtitleHashComponents(
+    text,
+    MACHINE_PLACEHOLDER_PROVIDER_REF,
+    { sourceCode: langConfig.sourceCode, targetCode: langConfig.targetCode },
+    false,
+    "",
+    [],
+  )
+  return await sendMessage("translateSubtitleWithMachine", {
+    text,
+    langConfig,
+    hash: Sha256Hex(...hashComponents),
+  })
 }
 
 export async function fetchSubtitlesSummary(
@@ -348,17 +481,29 @@ export async function fetchSubtitlesSummary(
   })
 }
 
+/**
+ * A batch every line of which failed is thrown, as is one Built-in AI refused any line of.
+ * Lines that failed while the rest came back come back with no translation, and
+ * `onLinesFailed` gets them, with the error the first of them failed with.
+ */
 export async function translateSubtitles(
   fragments: SubtitlesFragment[],
   videoContext: SubtitlesVideoContext,
   configOverride?: Config,
+  onLinesFailed?: (lines: SubtitlesFragment[], error: Error) => void,
 ): Promise<SubtitlesFragment[]> {
   const config = configOverride ?? (await getLocalConfig())
   if (!config) {
     return fragments.map((f) => ({ ...f, translation: "" }))
   }
 
-  const providerRef = await resolveSubtitlesProviderRef(config, "lineTranslation")
+  // A guest or a spent pool is thrown rather than blanked: the cues stay untranslated
+  // instead of passing as translated, and the caller asks to log in or upgrade.
+  const resolution = await resolveSubtitlesProvider(config, "lineTranslation")
+  if (resolution.status === "hostedUnavailable" && getBuiltInAiRefusalKind(resolution.error)) {
+    throw resolution.error
+  }
+  const providerRef = announceSubtitlesProviderResolution(resolution)
   if (!providerRef) {
     return fragments.map((f) => ({ ...f, translation: "" }))
   }
@@ -379,10 +524,22 @@ export async function translateSubtitles(
 
   const results = await Promise.allSettled(translationPromises)
 
-  // If all translations failed, throw with friendly error message
-  const allRejected = results.every((r): r is PromiseRejectedResult => r.status === "rejected")
-  if (allRejected && results.length) {
-    throw new Error(toFriendlyErrorMessage(results[0]!.reason))
+  // If all translations failed, throw with friendly error message. So does a batch any
+  // cue of which Built-in AI refused, so it is tried again rather than kept as blank.
+  // The cause keeps the error's code for whoever classifies it.
+  const rejections = results.filter((r): r is PromiseRejectedResult => r.status === "rejected")
+  const batchError = (reason: unknown) =>
+    new Error(withProviderName(toFriendlyErrorMessage(reason, providerRef), providerRef), {
+      cause: reason,
+    })
+  const refusal = rejections.find((r) => getBuiltInAiRefusalKind(r.reason))
+  if (refusal || (rejections.length === results.length && results.length)) {
+    throw batchError((refusal ?? rejections[0]!).reason)
+  }
+  // Lines that failed while the rest came back: the caller may send them again.
+  if (rejections.length > 0) {
+    const failed = fragments.filter((_fragment, index) => results[index]!.status === "rejected")
+    onLinesFailed?.(failed, batchError(rejections[0]!.reason))
   }
 
   return fragments.map((fragment, index) => {

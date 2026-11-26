@@ -6,9 +6,19 @@ import {
   subtitlesSettingsPanelOpenAtom,
   subtitlesSettingsPanelViewAtom,
   subtitlesStore,
+  subtitlesTranslateButtonAtom,
   subtitlesVisibleAtom,
 } from "../atoms"
 import { ROOT_VIEW } from "./subtitles-settings-panel/views"
+
+// The menu opens over whichever button is mounted now; platforms remount it as their controls return.
+function registerButton(button: HTMLButtonElement) {
+  subtitlesStore.set(subtitlesTranslateButtonAtom, button)
+  return () =>
+    subtitlesStore.set(subtitlesTranslateButtonAtom, (current) =>
+      current === button ? null : current,
+    )
+}
 
 export function SubtitlesTranslateButton() {
   const isVisible = useAtomValue(subtitlesVisibleAtom, { store: subtitlesStore })
@@ -18,6 +28,7 @@ export function SubtitlesTranslateButton() {
 
   return (
     <button
+      ref={registerButton}
       type="button"
       aria-label="Subtitle Translation Panel"
       aria-pressed={panelOpen}

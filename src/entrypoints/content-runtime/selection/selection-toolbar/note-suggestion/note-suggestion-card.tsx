@@ -1,3 +1,4 @@
+import type { NoteOriginInput } from "@read-frog/definitions"
 import type { NoteSuggestionSessionResult } from "./use-note-suggestion"
 import type { NoteSuggestionNoteRecord } from "@/utils/note-suggestion/types"
 import { IconBookmarkPlus } from "@tabler/icons-react"
@@ -76,9 +77,12 @@ function NoteRow({
 export function NoteSuggestionCard({
   suggestion,
   markShownOnce,
+  noteOrigin,
 }: {
   suggestion: NoteSuggestionSessionResult
   markShownOnce: (sessionKey: string) => boolean
+  /** Where the translated selection was made. */
+  noteOrigin: NoteOriginInput | null
 }) {
   const { sessionKey, validated, actionSnapshot, firedAt, analyticsProvider } = suggestion
   const [selectionToolbar, setSelectionToolbar] = useAtom(configFieldsAtomMap.selectionToolbar)
@@ -152,6 +156,7 @@ export function NoteSuggestionCard({
       action: liveAction,
       results: selectedNotes,
       analyticsSource: "note_suggestion",
+      origin: noteOrigin,
     })
     if (outcome === "saved") {
       setSaveState("saved")

@@ -18,6 +18,8 @@ import { getLocalConfig } from "@/utils/config/storage"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { initI18n } from "@/utils/i18n"
 import { LocaleBoundary } from "@/utils/i18n/locale-boundary"
+import { registerBundledIcons } from "@/utils/iconify/bundled-icons"
+import { setupExtensionPageLogging } from "@/utils/logging/setup"
 import { renderPersistentReactRoot } from "@/utils/react-root"
 import { queryClient } from "@/utils/tanstack-query"
 import { applyTheme, getLocalThemeMode, isDarkMode } from "@/utils/theme"
@@ -28,6 +30,8 @@ import { ScrollRestoration } from "./navigation/scroll-restoration"
 import "@fontsource-variable/inter/index.css"
 import "@/assets/styles/theme.css"
 import "./style.css"
+
+setupExtensionPageLogging("options")
 
 function HydrateAtoms({
   initialValues,
@@ -48,6 +52,8 @@ async function initApp() {
   const config = configValue ?? DEFAULT_CONFIG
 
   await initI18n(config.uiLanguage)
+  // The selection toolbar's preview draws the annotation button with the icon it ships with.
+  registerBundledIcons()
 
   applyTheme(document.documentElement, isDarkMode(themeMode) ? "dark" : "light")
 

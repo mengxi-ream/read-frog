@@ -3,8 +3,10 @@ import type BatchRequestRecord from "@/utils/db/dexie/tables/batch-request-recor
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { db } from "@/utils/db/dexie/db"
+import { createLogger } from "@/utils/logging/logger"
 import { getDateFromDaysBack } from "@/utils/utils"
-import { logger } from "./logger"
+
+const log = createLogger("batch-request-record")
 
 export async function getRangeBatchRequestRecords(startDay: number, endDay?: number) {
   const startDate = getDateFromDaysBack(startDay)
@@ -37,7 +39,7 @@ export async function putBatchRequestRecord({
       model: modelName ?? "",
     })
   } catch (error) {
-    logger.error("Failed to put batch request record", error)
+    log.error("Failed to put batch request record", { error })
   }
 }
 

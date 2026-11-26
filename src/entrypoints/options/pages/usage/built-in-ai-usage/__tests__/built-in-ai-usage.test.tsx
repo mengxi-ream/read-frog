@@ -1,0 +1,294 @@
+// @vitest-environment jsdom
+import type { ReactNode } from "react"
+import type { HostedAiStatusResult } from "@/components/llm-providers/use-hosted-ai-status"
+import { render, screen } from "@testing-library/react"
+import { beforeEach, describe, expect, it, vi } from "vitest"
+import { BuiltInAiUsage } from "@/entrypoints/options/pages/usage/built-in-ai-usage"
+import { formatHostedAiResetAtLocal } from "@/utils/hosted-ai/status"
+
+const { hostedAiState } = vi.hoisted(() => {
+  const state: { value: HostedAiStatusResult } = {
+    value: { status: undefined, isSignedIn: true, isPending: true, isError: false },
+  }
+  return { hostedAiState: state }
+})
+
+vi.mock("@/components/llm-providers/use-hosted-ai-status", () => ({
+  useHostedAiStatus: () => hostedAiState.value,
+}))
+
+// Inline the hover-only tooltip content so the feature list is assertable.
+vi.mock("@/components/ui/base-ui/tooltip", () => ({
+  Tooltip: ({ children }: { children: ReactNode }) => <>{children}</>,
+  TooltipContent: ({ children }: { children: ReactNode }) => <>{children}</>,
+  TooltipTrigger: ({ children }: { children: ReactNode }) => <>{children}</>,
+}))
+
+vi.mock("@/utils/i18n", () => ({
+  i18n: {
+    t: (key: string, values?: Array<string | number>) =>
+      values?.length ? `${key}:${values.join(",")}` : key,
+  },
+}))
+
+describe("BuiltInAiUsage", () => {
+  beforeEach(() => {
+    hostedAiState.value = { status: undefined, isSignedIn: true, isPending: true, isError: false }
+  })
+
+  it("renders one bar per credit pool whose fill is the remaining share", () => {
+    hostedAiState.value = {
+      isSignedIn: true,
+      isPending: false,
+      isError: false,
+      status: {
+        pools: [
+          {
+            periodKind: "weekly",
+            usedPercent: 37.6,
+            resetAt: "2026-08-16T03:36:00.000Z",
+            features: ["pageTranslation", "customAction", "noteSuggestion"],
+          },
+        ],
+        models: [],
+        features: {} as never,
+      },
+    }
+
+    render(<BuiltInAiUsage />)
+
+    // The track is the full quota; the indicator holds what is left (100 - 37.6 → 62).
+    expect(screen.getByRole("progressbar")).toHaveAttribute("aria-valuenow", "62")
+    expect(screen.getByText("options.apiProviders.builtInAiUsage.remaining:62")).toBeInTheDocument()
+    // The label counts features; the names live in the hover list.
+    expect(
+      screen.getByText("options.apiProviders.builtInAiUsage.supportedFeatures:3"),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText("options.apiProviders.builtInAiUsage.features.pageTranslation"),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText("options.apiProviders.builtInAiUsage.features.customAction"),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText("options.apiProviders.builtInAiUsage.features.noteSuggestion"),
+    ).toBeInTheDocument()
+    expect(screen.getByText("options.apiProviders.builtInAiUsage.weekly")).toBeInTheDocument()
+    // Rendered in the viewer's own timezone, not UTC.
+    const expectedLocalResetAt = formatHostedAiResetAtLocal("2026-08-16T03:36:00.000Z")
+    expect(
+      screen.getByText(`options.apiProviders.builtInAiUsage.resetsAt:${expectedLocalResetAt}`),
+    ).toBeInTheDocument()
+  })
+
+  it("clamps an overspent pool to an empty bar instead of a negative one", () => {
+    hostedAiState.value = {
+      isSignedIn: true,
+      isPending: false,
+      isError: false,
+      status: {
+        pools: [
+          {
+            periodKind: "daily",
+            usedPercent: 120,
+            resetAt: null,
+            features: ["customAction"],
+          },
+        ],
+        models: [],
+        features: {} as never,
+      },
+    }
+
+    render(<BuiltInAiUsage />)
+
+    expect(screen.getByRole("progressbar")).toHaveAttribute("aria-valuenow", "0")
+    expect(screen.getByText("options.apiProviders.builtInAiUsage.remaining:0")).toBeInTheDocument()
+  })
+
+  it("falls back to the unavailability line when the status request fails", () => {
+    hostedAiState.value = { status: undefined, isSignedIn: true, isPending: false, isError: true }
+
+    render(<BuiltInAiUsage />)
+
+    expect(screen.getByText("hostedAi.availability.serviceUnavailable")).toBeInTheDocument()
+    expect(screen.queryByRole("progressbar")).not.toBeInTheDocument()
+  })
+
+  it("shows the shared pool-row skeleton while the status is loading", () => {
+    render(<BuiltInAiUsage />)
+
+    // UsagePoolRowSkeleton: name and amount, bar, meta and date — the same as AI subtitles.
+    expect(document.querySelectorAll('[data-slot="skeleton"]')).toHaveLength(5)
+    expect(screen.queryByRole("progressbar")).not.toBeInTheDocument()
+  })
+
+  it("asks guests to log in instead of showing their trial pool", () => {
+    hostedAiState.value = {
+      isSignedIn: false,
+      isPending: false,
+      isError: false,
+      status: {
+        pools: [{ periodKind: "daily", usedPercent: 0, resetAt: null, features: ["customAction"] }],
+        models: [],
+        features: {} as never,
+      },
+    }
+
+    render(<BuiltInAiUsage />)
+
+    expect(screen.getByText("options.usage.logInToView")).toBeInTheDocument()
+    expect(screen.queryByRole("progressbar")).not.toBeInTheDocument()
+  })
+
+  it("treats an empty pool list like an unavailable status", () => {
+    hostedAiState.value = {
+      isSignedIn: true,
+      isPending: false,
+      isError: false,
+      status: { pools: [], models: [], features: {} as never },
+    }
+
+    render(<BuiltInAiUsage />)
+
+    expect(screen.getByText("hostedAi.availability.serviceUnavailable")).toBeInTheDocument()
+  })
+
+  it("renders one bar per pool when several pools fund different features", () => {
+    hostedAiState.value = {
+      isSignedIn: true,
+      isPending: false,
+      isError: false,
+      status: {
+        pools: [
+          { periodKind: "daily", usedPercent: 10, resetAt: null, features: ["customAction"] },
+          { periodKind: "weekly", usedPercent: 5, resetAt: null, features: ["pageTranslation"] },
+        ],
+        models: [],
+        features: {} as never,
+      },
+    }
+
+    render(<BuiltInAiUsage />)
+
+    const bars = screen.getAllByRole("progressbar")
+    expect(bars).toHaveLength(2)
+    expect(bars[0]).toHaveAttribute("aria-valuenow", "90")
+    expect(bars[1]).toHaveAttribute("aria-valuenow", "95")
+  })
+
+  it("names PDF translation in a pool's feature list", () => {
+    hostedAiState.value = {
+      isSignedIn: true,
+      isPending: false,
+      isError: false,
+      status: {
+        pools: [
+          {
+            periodKind: "weekly",
+            usedPercent: 0,
+            resetAt: null,
+            features: ["pageTranslation", "pdfTranslation"],
+          },
+        ],
+        models: [],
+        features: {} as never,
+      },
+    }
+
+    render(<BuiltInAiUsage />)
+
+    expect(
+      screen.getByText("options.apiProviders.builtInAiUsage.features.pdfTranslation"),
+    ).toBeInTheDocument()
+  })
+
+  it("lists a one-time pool after the recurring ones, with its expiry instead of a reset", () => {
+    hostedAiState.value = {
+      isSignedIn: true,
+      isPending: false,
+      isError: false,
+      status: {
+        pools: [
+          { periodKind: "daily", usedPercent: 40, resetAt: null, features: ["customAction"] },
+          {
+            periodKind: "once",
+            usedPercent: 12.5,
+            expiresAt: "2026-11-25T00:00:00.000Z",
+            features: ["pageTranslation", "customAction", "videoSubtitles"],
+          },
+        ],
+        models: [],
+        features: {} as never,
+      },
+    }
+
+    render(<BuiltInAiUsage />)
+
+    const bars = screen.getAllByRole("progressbar")
+    expect(bars).toHaveLength(2)
+    expect(bars[0]).toHaveAttribute("aria-valuenow", "60")
+    // 100 - 12.5 rounds to 88.
+    expect(bars[1]).toHaveAttribute("aria-valuenow", "88")
+    expect(screen.getByText("options.apiProviders.builtInAiUsage.oneTime")).toBeInTheDocument()
+    expect(
+      screen.getByText("options.apiProviders.builtInAiUsage.supportedFeatures:3"),
+    ).toBeInTheDocument()
+    const expectedLocalExpiresAt = formatHostedAiResetAtLocal("2026-11-25T00:00:00.000Z")
+    expect(
+      screen.getByText(`options.apiProviders.builtInAiUsage.expiresAt:${expectedLocalExpiresAt}`),
+    ).toBeInTheDocument()
+    expect(screen.queryByText(/builtInAiUsage\.resetsAt/)).not.toBeInTheDocument()
+  })
+
+  it("shows a one-time pool even when no recurring pool is reported", () => {
+    hostedAiState.value = {
+      isSignedIn: true,
+      isPending: false,
+      isError: false,
+      status: {
+        pools: [
+          {
+            periodKind: "once",
+            usedPercent: 100,
+            expiresAt: "2026-11-25T00:00:00.000Z",
+            features: ["customAction"],
+          },
+        ],
+        models: [],
+        features: {} as never,
+      },
+    }
+
+    render(<BuiltInAiUsage />)
+
+    // A spent one-time pool is still listed until it expires.
+    expect(screen.getByRole("progressbar")).toHaveAttribute("aria-valuenow", "0")
+    expect(screen.queryByText("hostedAi.availability.serviceUnavailable")).not.toBeInTheDocument()
+  })
+
+  it("leaves out the expiry when the server sends an unreadable one", () => {
+    hostedAiState.value = {
+      isSignedIn: true,
+      isPending: false,
+      isError: false,
+      status: {
+        pools: [
+          {
+            periodKind: "once",
+            usedPercent: 0,
+            expiresAt: "not-a-date",
+            features: ["customAction"],
+          },
+        ],
+        models: [],
+        features: {} as never,
+      },
+    }
+
+    render(<BuiltInAiUsage />)
+
+    expect(screen.getByText("options.apiProviders.builtInAiUsage.oneTime")).toBeInTheDocument()
+    expect(screen.queryByText(/builtInAiUsage\.expiresAt/)).not.toBeInTheDocument()
+  })
+})

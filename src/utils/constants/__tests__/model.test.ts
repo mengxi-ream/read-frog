@@ -128,7 +128,6 @@ describe("getProviderOptions", () => {
           "gpt-5.4",
           "gpt-5.4-mini",
           "gpt-5.4-nano",
-          "gpt-5.3-chat-latest",
         ]),
       )
     })
@@ -150,6 +149,7 @@ describe("getProviderOptions", () => {
     it("should expose the current xAI Grok chat model ids", () => {
       expect(LLM_PROVIDER_MODELS.xai).toEqual([
         "grok-4.3",
+        "grok-4.7",
         "grok-4.6",
         "grok-4.5",
         "grok-4.20-non-reasoning",
@@ -160,7 +160,20 @@ describe("getProviderOptions", () => {
     })
 
     it("should prioritize the Jalapeno Cloud GLM models", () => {
-      expect(LLM_PROVIDER_MODELS.jalapenocloud.slice(0, 2)).toEqual(["GLM-5.2", "GLM-5.1"])
+      expect(LLM_PROVIDER_MODELS.jalapenocloud.slice(0, 3)).toEqual([
+        "GLM-5.3",
+        "GLM-5.3-Flash",
+        "GLM-5.1",
+      ])
+    })
+
+    it("should not list the retired, delisted or superseded models", () => {
+      for (const model of ["GLM-5.2", "Hy3", "Qwen3-Next-80B-A3B-Instruct"]) {
+        expect(LLM_PROVIDER_MODELS.jalapenocloud).not.toContain(model)
+      }
+      for (const model of ["deepseek-chat", "deepseek-reasoner"]) {
+        expect(LLM_PROVIDER_MODELS.deepseek).not.toContain(model)
+      }
     })
 
     it("should expose current Ollama recommended model ids", () => {
@@ -434,6 +447,204 @@ describe("getProviderOptions", () => {
     it("should return empty object for non-matching models", () => {
       const options = getProviderOptions("some-random-model", "openai")
       expect(options).toEqual({})
+    })
+  })
+
+  describe("models added in the 2026-11 catalog refresh", () => {
+    it("should give Gemini 4 a thinking level, never the thinkingBudget it rejects", () => {
+      const options = getProviderOptions("gemini-4-argon", "google")
+      expect(options.google?.thinkingConfig).toEqual({
+        thinkingLevel: "low",
+        includeThoughts: false,
+      })
+    })
+
+    it("should use the lowest reasoning effort each GPT-6.1 model accepts", () => {
+      expect(getProviderOptions("gpt-6.1-sol", "openai").openai?.reasoningEffort).toBe("low")
+      expect(getProviderOptions("gpt-6.1-terra", "openai").openai?.reasoningEffort).toBe("none")
+    })
+
+    it("should use low reasoning effort for Grok 4.7, which cannot disable reasoning", () => {
+      expect(getProviderOptions("grok-4.7", "xai").xai?.reasoningEffort).toBe("low")
+    })
+
+    it("should use low reasoning effort for Kimi K3.1 Pro and its highspeed variant", () => {
+      for (const model of ["kimi-k3.1-pro", "kimi-k3.1-pro-highspeed"]) {
+        expect(getProviderOptions(model, "moonshotai")).toEqual({
+          moonshotai: { reasoningEffort: "low" },
+        })
+      }
+    })
+
+    it("should disable thinking for the deepseek-flash alias", () => {
+      expect(getProviderOptions("deepseek-flash", "deepseek").deepseek?.thinking).toEqual({
+        type: "disabled",
+      })
+    })
+
+    it("should never send thinking: disabled to MiniMax-M3.1-Flash, which errors on it", () => {
+      expect(getProviderOptions("MiniMax-M3.1-Flash", "minimax")).toEqual({})
+    })
+  })
+
+  describe("models added in the 2026-11-21 catalog refresh", () => {
+    it("should use low reasoning effort for GPT-6.2, which cannot turn reasoning off", () => {
+      for (const model of ["gpt-6.2-sol", "gpt-6.2-astra", "openai/gpt-6.2-sol"]) {
+        expect(getProviderOptions(model, "openai").openai?.reasoningEffort).toBe("low")
+      }
+    })
+
+    it("should lower the effort of Claude Fable 5.2, which rejects thinking: disabled", () => {
+      expect(getProviderOptions("claude-fable-5-2", "anthropic")).toEqual({
+        anthropic: { effort: "low" },
+      })
+    })
+
+    it("should give the new Gemini 4 models a thinking level", () => {
+      for (const model of ["gemini-4-carbon", "gemini-4-hydrogen", "gemini-4-neon"]) {
+        expect(getProviderOptions(model, "google").google?.thinkingConfig).toEqual({
+          thinkingLevel: "low",
+          includeThoughts: false,
+        })
+      }
+    })
+
+    it("should list the new models after each provider's default", () => {
+      expect(LLM_PROVIDER_MODELS.openai.slice(0, 3)).toEqual([
+        "gpt-6-luna",
+        "gpt-6.2-sol",
+        "gpt-6.2-astra",
+      ])
+      expect(LLM_PROVIDER_MODELS.google.slice(0, 5)).toEqual([
+        "gemini-3.5-flash-lite",
+        "gemini-4-neon",
+        "gemini-4-hydrogen",
+        "gemini-4-carbon",
+        "gemini-4-argon",
+      ])
+      expect(LLM_PROVIDER_MODELS.anthropic).toContain("claude-fable-5-2")
+      expect(LLM_PROVIDER_MODELS.bedrock).toEqual(
+        expect.arrayContaining(["us.anthropic.claude-fable-5-2", "us.amazon.nova-2-lite-v1:0"]),
+      )
+      expect(LLM_PROVIDER_MODELS.mistral.slice(0, 3)).toEqual([
+        "mistral-small-latest",
+        "zai-glm-5-3",
+        "zai-glm-5-3-flash",
+      ])
+    })
+
+    it("should disable thinking for DeepSeek point releases and dated snapshots", () => {
+      const hosted: Array<[model: string, provider: string]> = [
+        ["deepseek-ai/deepseek-v4.1-flash", "atlascloud"],
+        ["deepseek-ai/deepseek-v4.1-flash-1017", "atlascloud"],
+        ["deepseek-ai/DeepSeek-V4.1-Flash", "deepinfra"],
+        ["deepseek-ai/DeepSeek-V4.1-Flash-1017", "huggingface"],
+        ["deepseek/deepseek-v4.1-flash", "openrouter"],
+        ["deepseek/deepseek-v4.1-flash-1017", "openrouter"],
+        ["deepseek-v4.1-flash", "alibaba"],
+        ["deepseek-v4.1-flash-1017", "alibaba"],
+        ["DeepSeek-V4.1-Flash-1017", "jalapenocloud"],
+        ["DeepSeek-V4-Flash-0731", "jalapenocloud"],
+        ["deepseek-ai/DeepSeek-V4-Pro-0813", "deepinfra"],
+      ]
+      for (const [model, provider] of hosted) {
+        expect(getProviderOptions(model, provider)).toEqual({
+          [provider]: { thinking: { type: "disabled" } },
+        })
+      }
+      // Other DeepSeek-named models keep falling through to their own rules (or none).
+      expect(getProviderOptions("deepseek-v4-flash-vision-exp", "deepseek")).toEqual({})
+      expect(getProviderOptions("deepseek-v4.1-flash-preview", "deepseek")).toEqual({})
+    })
+
+    it("should list DeepSeek V4.1 Flash on the hosts that serve it", () => {
+      // deepseek-v4-flash stays listed until v128-to-v129 has moved configs off it.
+      expect(LLM_PROVIDER_MODELS.deepseek).toEqual([
+        "deepseek-flash",
+        "deepseek-v4-flash",
+        "deepseek-v4-pro",
+      ])
+      expect(LLM_PROVIDER_MODELS.atlascloud.slice(0, 3)).toEqual([
+        "deepseek-ai/deepseek-v4-flash",
+        "deepseek-ai/deepseek-v4.1-flash",
+        "deepseek-ai/deepseek-v4.1-flash-1017",
+      ])
+      for (const provider of ["deepinfra", "huggingface"] as const) {
+        expect(LLM_PROVIDER_MODELS[provider]).toEqual(
+          expect.arrayContaining([
+            "deepseek-ai/DeepSeek-V4.1-Flash",
+            "deepseek-ai/DeepSeek-V4.1-Flash-1017",
+          ]),
+        )
+      }
+      expect(LLM_PROVIDER_MODELS.openrouter).toEqual(
+        expect.arrayContaining([
+          "deepseek/deepseek-v4.1-flash",
+          "deepseek/deepseek-v4.1-flash-1017",
+        ]),
+      )
+      expect(LLM_PROVIDER_MODELS.alibaba).toEqual(
+        expect.arrayContaining(["deepseek-v4.1-flash", "deepseek-v4.1-flash-1017"]),
+      )
+    })
+
+    it("should only list the models GroqCloud, Cerebras and Kimi still serve", () => {
+      expect(LLM_PROVIDER_MODELS.groq).toEqual([
+        "openai/gpt-oss-20b",
+        "openai/gpt-oss-120b",
+        "qwen/qwen3.8-27b",
+      ])
+      expect(LLM_PROVIDER_MODELS.cerebras).toEqual(["gpt-oss-120b"])
+      expect(LLM_PROVIDER_MODELS.moonshotai).toEqual([
+        "kimi-k3",
+        "kimi-k3.1-pro",
+        "kimi-k3.1-pro-highspeed",
+        "kimi-k2.6",
+      ])
+    })
+
+    it("should not list the models v128-to-v129 moves off", () => {
+      const removed: Partial<Record<keyof typeof LLM_PROVIDER_MODELS, string[]>> = {
+        openai: [
+          "gpt-4.1-nano",
+          "gpt-5-chat-latest",
+          "gpt-5.1-chat-latest",
+          "gpt-5.2-chat-latest",
+          "gpt-5.3-chat-latest",
+          "gpt-5-codex",
+          "gpt-5.1-codex",
+          "gpt-5.1-codex-mini",
+        ],
+        anthropic: ["claude-opus-4-0", "claude-opus-4-1", "claude-sonnet-4-0", "claude-sonnet-4-5"],
+        google: [
+          "gemini-3-pro-preview",
+          "gemini-3.1-flash-lite-preview",
+          "gemini-2.0-flash",
+          "gemini-3.1-flash-image-preview",
+          "gemini-3-pro-image-preview",
+        ],
+        mistral: [
+          "zai-glm-5-2",
+          "mistral-medium-2505",
+          "mistral-medium-2508",
+          "magistral-medium-2506",
+          "magistral-medium-2507",
+          "magistral-small-2506",
+          "magistral-small-2507",
+          "pixtral-large-latest",
+          "pixtral-12b-2409",
+          "open-mistral-7b",
+          "open-mixtral-8x7b",
+          "open-mixtral-8x22b",
+        ],
+      }
+
+      for (const [provider, models] of Object.entries(removed)) {
+        const listed: readonly string[] = LLM_PROVIDER_MODELS[provider as keyof typeof removed]
+        for (const model of models) {
+          expect(listed).not.toContain(model)
+        }
+      }
     })
   })
 

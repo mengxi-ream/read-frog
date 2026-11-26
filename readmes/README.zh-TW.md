@@ -202,16 +202,10 @@ ReadFrog 採用 GPLv3 與商業授權雙重授權。
 貢獻者授權條款請參閱 [CONTRIBUTING.md](../CONTRIBUTING.md)。
 
 <a href="https://github.com/mengxi-ream/read-frog/graphs/contributors">
-  <table>
-    <tr>
-      <th colspan="2">
-        <br>
-        <img src="https://contrib.rocks/image?repo=mengxi-ream/read-frog" alt="Read Frog contributors"><br>
-        <br>
-      </th>
-    </tr>
-  </table>
+  <img src="https://contrib.rocks/image?repo=mengxi-ream/read-frog" alt="Read Frog contributors" />
 </a>
+
+Made with [contrib.rocks](https://contrib.rocks).
 
 <div align="right">
 
@@ -234,6 +228,10 @@ ReadFrog 採用 GPLv3 與商業授權雙重授權。
 每一筆贊助都能幫助我們打造更好的語言學習體驗。感謝你支持我們的使命！
 
 [![Sponsors][sponsor-image]][sponsor-link]
+
+<a href="https://ifapi.org/?aff=readfrog&utm_source=readfrog&utm_medium=readme">
+  <img src="../assets/promotion/ifapi.png" alt="IF API: GPT, Claude, Gemini and more from one key. Read Frog users get +10% credit with code READFROG">
+</a>
 
 <div align="right">
 

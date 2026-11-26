@@ -19,9 +19,9 @@ const DEFAULT_FEATURE_PROVIDER = {
 
 const PAGE_EVENT_FIELDS = {
   ...DEFAULT_FEATURE_PROVIDER,
-  target_language: "cmn",
+  target_language: "zh-Hans",
   translation_mode: "bilingual",
-  source_language: "jpn",
+  source_language: "ja",
 } as const
 
 const TTS_EVENT = {
@@ -155,6 +155,46 @@ describe("background analytics", () => {
     expect(storageSetItemMock).not.toHaveBeenCalled()
   })
 
+  it("records which Built-in AI model ran a feature, through the PostHog property filter", async () => {
+    storageGetItemMock.mockResolvedValueOnce(true).mockResolvedValueOnce("install-123")
+
+    const { captureFeatureUsedEventInBackground } = createAnalytics()
+    await captureFeatureUsedEventInBackground({
+      feature: "page_translation",
+      surface: "popup",
+      outcome: "success",
+      latency_ms: 900,
+      ...PAGE_EVENT_FIELDS,
+      provider: "read-frog-built-in-ai",
+      backend_kind: "llm",
+      built_in_ai_model: "gpt-6.2-sol",
+    })
+
+    const expected = {
+      feature: "page_translation",
+      surface: "popup",
+      outcome: "success",
+      latency_ms: 900,
+      ...PAGE_EVENT_FIELDS,
+      provider: "read-frog-built-in-ai",
+      backend_kind: "llm",
+      built_in_ai_model: "gpt-6.2-sol",
+    }
+    expect(posthogCaptureMock).toHaveBeenCalledWith("feature_used", expected)
+
+    // The client runs before_send after capture is called: the model has to
+    // get past the filter there to reach PostHog.
+    const [event, properties] = posthogCaptureMock.mock.calls.at(-1) as [string, object]
+    const filtered = filterAnalyticsCaptureResult({
+      event,
+      properties,
+      timestamp: new Date("2026-03-16T19:02:43.960Z"),
+      uuid: "test-uuid",
+    } as unknown as CaptureResult)?.properties
+
+    expect(filtered).toEqual(expected)
+  })
+
   it("downgrades a legacy TTS message without provider fields to unknown/unknown", async () => {
     storageGetItemMock.mockResolvedValueOnce(true).mockResolvedValueOnce("install-123")
 
@@ -222,7 +262,7 @@ describe("background analytics", () => {
         outcome: "success",
         latency_ms: 100,
         char_count: 42,
-        target_language: "kor",
+        target_language: "ko",
         ...DEFAULT_FEATURE_PROVIDER,
       },
       { id: 42, url: "https://github.com/org/repo/issues/1?q=secret#frag" },
@@ -234,7 +274,7 @@ describe("background analytics", () => {
       outcome: "success",
       latency_ms: 100,
       char_count: 42,
-      target_language: "kor",
+      target_language: "ko",
       ...DEFAULT_FEATURE_PROVIDER,
       site_domain: "github.com",
     })
@@ -306,6 +346,31 @@ describe("background analytics", () => {
     })
   })
 
+  it("reads the ISO 639-3 codes an older content script reports as tags", async () => {
+    storageGetItemMock.mockResolvedValueOnce(true).mockResolvedValueOnce("install-123")
+
+    const { captureFeatureUsedEventInBackground } = createAnalytics()
+    await captureFeatureUsedEventInBackground({
+      feature: "page_translation",
+      surface: "popup",
+      outcome: "success",
+      latency_ms: 100,
+      ...PAGE_EVENT_FIELDS,
+      target_language: "cmn",
+      source_language: "jpn",
+    } as unknown as FeatureUsedEventProperties)
+
+    expect(posthogCaptureMock).toHaveBeenCalledWith("feature_used", {
+      feature: "page_translation",
+      surface: "popup",
+      outcome: "success",
+      latency_ms: 100,
+      ...PAGE_EVENT_FIELDS,
+      target_language: "zh-Hans",
+      source_language: "ja",
+    })
+  })
+
   it("drops properties that the reported feature does not define", async () => {
     storageGetItemMock.mockResolvedValueOnce(true).mockResolvedValueOnce("install-123")
 
@@ -313,8 +378,8 @@ describe("background analytics", () => {
     await captureFeatureUsedEventInBackground({
       ...TTS_EVENT,
       char_count: 7,
-      target_language: "cmn",
-      source_language: "jpn",
+      target_language: "zh-Hans",
+      source_language: "ja",
       translation_mode: "bilingual",
     } as unknown as FeatureUsedEventProperties)
 
@@ -356,6 +421,25 @@ describe("background analytics", () => {
     ).resolves.toBeUndefined()
 
     expect(posthogCaptureMock).not.toHaveBeenCalled()
+  })
+
+  it("keeps only an event's own built_in_ai_model through the filter, and drops every other model key", () => {
+    const filtered = filterAnalyticsCaptureResult({
+      event: "feature_used",
+      properties: {
+        built_in_ai_model: "gpt-6-luna",
+        model: "private-model",
+        modelId: "private-model",
+        custom_model: "private-model",
+        nested: { built_in_ai_model: "private-model" },
+      },
+      $set: { built_in_ai_model: "private-model" },
+      timestamp: new Date("2026-03-16T19:02:43.960Z"),
+      uuid: "test-uuid",
+    } as unknown as CaptureResult) as CaptureResult & { $set?: Record<string, unknown> }
+
+    expect(filtered.properties).toEqual({ built_in_ai_model: "gpt-6-luna", nested: {} })
+    expect(filtered.$set).toEqual({})
   })
 
   it("keeps site_domain and char_count through the PostHog property filter", () => {
@@ -684,10 +768,9 @@ describe("background analytics", () => {
 
     expect(posthogCaptureMock).toHaveBeenCalledOnce()
     expect(featureUsageCache.setLastReportedDay).toHaveBeenCalledOnce()
-    expect(loggerWarnMock).toHaveBeenCalledWith(
-      "[Analytics] Failed to read the daily feature usage cache",
-      expect.any(Error),
-    )
+    expect(loggerWarnMock).toHaveBeenCalledWith("Failed to read the daily feature usage cache", {
+      error: expect.any(Error),
+    })
   })
 
   it("keeps a captured event when the feature cache cannot be written", async () => {
@@ -711,10 +794,9 @@ describe("background analytics", () => {
     })
 
     expect(posthogCaptureMock).toHaveBeenCalledOnce()
-    expect(loggerWarnMock).toHaveBeenCalledWith(
-      "[Analytics] Failed to write the daily feature usage cache",
-      expect.any(Error),
-    )
+    expect(loggerWarnMock).toHaveBeenCalledWith("Failed to write the daily feature usage cache", {
+      error: expect.any(Error),
+    })
   })
 
   it("does not cache a feature when capture fails", async () => {
@@ -751,6 +833,109 @@ describe("background analytics", () => {
       outcome: "success",
       latency_ms: 1_500,
       ...PAGE_EVENT_FIELDS,
+    })
+
+    expect(posthogInitMock).not.toHaveBeenCalled()
+    expect(posthogCaptureMock).not.toHaveBeenCalled()
+  })
+
+  it("records every Built-in AI prompt and what was done about it, without the daily cache", async () => {
+    mockEnabledAnalyticsStorage()
+    const { cache } = createMemoryFeatureUsageCache()
+    const { captureBuiltInAiPromptEventInBackground } = createAnalytics({
+      featureUsageCache: cache,
+    })
+
+    const shown = {
+      event: "built_in_ai_prompt_shown",
+      properties: {
+        feature: "video_subtitles",
+        kind: "upgrade",
+        presentation: "dialog",
+        trigger: "auto",
+      },
+    } as const
+    await captureBuiltInAiPromptEventInBackground(shown)
+    await captureBuiltInAiPromptEventInBackground(shown)
+    const action = {
+      event: "built_in_ai_prompt_action",
+      properties: {
+        feature: "video_subtitles",
+        kind: "upgrade",
+        presentation: "dialog",
+        trigger: "auto",
+        action: "machine_translation",
+      },
+    } as const
+    await captureBuiltInAiPromptEventInBackground(action)
+
+    expect(posthogCaptureMock.mock.calls).toEqual([
+      ["built_in_ai_prompt_shown", shown.properties],
+      ["built_in_ai_prompt_shown", shown.properties],
+      ["built_in_ai_prompt_action", action.properties],
+    ])
+    expect(cache.getLastReportedDay).not.toHaveBeenCalled()
+  })
+
+  it("drops a malformed Built-in AI prompt event and any property it does not define", async () => {
+    mockEnabledAnalyticsStorage()
+    const { captureBuiltInAiPromptEventInBackground } = createAnalytics()
+
+    await captureBuiltInAiPromptEventInBackground({
+      event: "built_in_ai_prompt_shown",
+      properties: {
+        feature: "page_translation",
+        kind: "log_in",
+        presentation: "banner",
+        trigger: "user",
+      },
+    } as never)
+    await captureBuiltInAiPromptEventInBackground({
+      event: "built_in_ai_prompt_action",
+      properties: {
+        feature: "page_translation",
+        kind: "upgrade",
+        presentation: "toast",
+        trigger: "auto",
+        action: "upgrade",
+        url: "x",
+      },
+    } as never)
+    // An action from a content script that predates presentation and trigger.
+    await captureBuiltInAiPromptEventInBackground({
+      event: "built_in_ai_prompt_action",
+      properties: { feature: "page_translation", kind: "upgrade", action: "dismissed" },
+    } as never)
+
+    expect(posthogCaptureMock.mock.calls).toEqual([
+      [
+        "built_in_ai_prompt_action",
+        {
+          feature: "page_translation",
+          kind: "upgrade",
+          presentation: "toast",
+          trigger: "auto",
+          action: "upgrade",
+        },
+      ],
+    ])
+    expect(loggerWarnMock).toHaveBeenCalledTimes(2)
+    expect(loggerWarnMock).toHaveBeenCalledWith("Dropped an incomplete Built-in AI prompt event")
+  })
+
+  it("does not record Built-in AI prompts when analytics is disabled", async () => {
+    storageGetItemMock.mockResolvedValue(false)
+
+    const { captureBuiltInAiPromptEventInBackground } = createAnalytics()
+    await captureBuiltInAiPromptEventInBackground({
+      event: "built_in_ai_prompt_action",
+      properties: {
+        feature: "page_translation",
+        kind: "upgrade",
+        presentation: "dialog",
+        trigger: "user",
+        action: "dismissed",
+      },
     })
 
     expect(posthogInitMock).not.toHaveBeenCalled()
@@ -913,7 +1098,7 @@ describe("background analytics", () => {
         new_safe_business_field: "automatically-kept",
         action_id: "dictionary",
         action_name: "Dictionary",
-        target_language: "cmn",
+        target_language: "zh-Hans",
         $browser: "Chrome",
         $browser_version: "145.0.0.0",
         $os: "Mac OS X",
@@ -944,7 +1129,7 @@ describe("background analytics", () => {
       new_safe_business_field: "automatically-kept",
       action_id: "dictionary",
       action_name: "Dictionary",
-      target_language: "cmn",
+      target_language: "zh-Hans",
       $browser: "Chrome",
       $browser_version: "145.0.0.0",
       $os: "Mac OS X",

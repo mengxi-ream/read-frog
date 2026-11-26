@@ -50,19 +50,19 @@ describe("detectedCodeAtom", () => {
   })
 
   it("falls back when detected language change events carry an unsupported code", async () => {
-    sendMessageMock.mockResolvedValue("jpn")
+    sendMessageMock.mockResolvedValue("ja")
 
     const store = createStore()
     const unsubscribe = store.sub(detectedCodeAtom, () => {})
     await flushPromises()
 
-    expect(store.get(detectedCodeAtom)).toBe("jpn")
+    expect(store.get(detectedCodeAtom)).toBe("ja")
 
     messageHandlers.get("detectedPageLanguageChanged")?.({ data: { detectedCode: "vmw" } })
     expect(store.get(detectedCodeAtom)).toBe(DEFAULT_DETECTED_CODE)
 
-    messageHandlers.get("detectedPageLanguageChanged")?.({ data: { detectedCode: "cmn" } })
-    expect(store.get(detectedCodeAtom)).toBe("cmn")
+    messageHandlers.get("detectedPageLanguageChanged")?.({ data: { detectedCode: "zh-Hans" } })
+    expect(store.get(detectedCodeAtom)).toBe("zh-Hans")
 
     unsubscribe()
   })

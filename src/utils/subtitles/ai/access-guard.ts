@@ -1,3 +1,4 @@
+import { ANALYTICS_FEATURE } from "@/types/analytics"
 import { authClient } from "@/utils/auth/auth-client"
 import { logInAction, upgradeAction } from "@/utils/error-action"
 import { i18n } from "@/utils/i18n"
@@ -13,7 +14,7 @@ function promptLogIn(): void {
 function promptUpgrade(): void {
   showAiSubtitlesWallToast(
     i18n.t("subtitles.errors.aiSubscriptionRequired"),
-    upgradeAction("extension_video_quota"),
+    upgradeAction("extension_video_quota", ANALYTICS_FEATURE.VIDEO_SUBTITLES),
   )
 }
 
@@ -77,7 +78,9 @@ export async function ensureAiSubtitlesEntitled(): Promise<boolean> {
         ? i18n.t("subtitles.errors.aiQuotaExceededWithReset", [resetAt])
         : i18n.t("subtitles.errors.aiQuotaExceeded"),
       // Ultra is the top plan; there is nothing left to sell someone already on it.
-      usage.plan === "ultra" ? undefined : upgradeAction("extension_video_quota"),
+      usage.plan === "ultra"
+        ? undefined
+        : upgradeAction("extension_video_quota", ANALYTICS_FEATURE.VIDEO_SUBTITLES),
     )
     return false
   }

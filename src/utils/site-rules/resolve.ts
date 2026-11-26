@@ -1,7 +1,9 @@
 import type { SiteRule } from "@/types/config/site-rules"
 import { DEFAULT_TAG_SETS } from "@/utils/constants/dom-rules"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
 import { urlMatchesPattern } from "@/utils/url-pattern"
+
+const log = createLogger("site-rules/resolve")
 
 /**
  * Whether one rule claims `url`: any of its `matches` hits, and none of its
@@ -20,6 +22,31 @@ export function urlMatchesRule(
     return false
   }
   return !(rule.excludeMatches ?? []).some((pattern) => urlMatchesPattern(url, pattern))
+}
+
+/** "Text/Markdown; charset=utf-8" → "text/markdown". */
+function bareMimeType(contentType: string): string {
+  return contentType.split(";", 1)[0]!.trim().toLowerCase()
+}
+
+/**
+ * Whether one rule's `contentTypes` admits a document of `contentType`. A rule
+ * without the field admits every document. One with it never matches when the
+ * type is unknown: background callers resolving a tab or frame URL have no
+ * document to read it from.
+ */
+export function contentTypeMatchesRule(
+  contentType: string | undefined,
+  rule: Pick<SiteRule, "contentTypes">,
+): boolean {
+  if (rule.contentTypes === undefined) {
+    return true
+  }
+  if (contentType === undefined) {
+    return false
+  }
+  const documentType = bareMimeType(contentType)
+  return rule.contentTypes.some((type) => bareMimeType(type) === documentType)
 }
 
 /**
@@ -52,14 +79,6 @@ export interface ResolvedSiteRule {
    * code, rule `.add`/`.remove` deltas applied.
    */
   dontWalkTags: ReadonlySet<string> | null
-  /**
-   * The tag names a matched rule named in `dontWalkTags.add` (minus any a later
-   * rule removed), kept apart from the merged set so consumers can tell an
-   * explicit authoring choice from a shipped default. Read by the plain-text
-   * `<pre>` exemption in `utils/host/dom/filter`: the exemption un-blocks a tag
-   * the defaults block, so a rule that names it explicitly must still win.
-   */
-  dontWalkTagsExplicitAdds: ReadonlySet<string> | null
   dontWalkButTranslateTags: ReadonlySet<string> | null
   mainContentIgnoreTags: ReadonlySet<string> | null
   forceBlockTags: ReadonlySet<string> | null
@@ -83,7 +102,6 @@ export const EMPTY_RESOLVED_SITE_RULE: ResolvedSiteRule = {
   atomSelector: null,
   walkHiddenSelector: null,
   dontWalkTags: null,
-  dontWalkTagsExplicitAdds: null,
   dontWalkButTranslateTags: null,
   mainContentIgnoreTags: null,
   forceBlockTags: null,
@@ -129,7 +147,7 @@ function isValidSelector(selector: string): boolean {
       document.createDocumentFragment().querySelector(selector)
       valid = true
     } catch {
-      logger.warn(`[site-rules] Invalid CSS selector dropped: "${selector}"`)
+      log.warn("Invalid CSS selector dropped", { selector })
       valid = false
     }
     selectorValidity.set(selector, valid)
@@ -206,6 +224,11 @@ const TAG_NAME_RE = /^[a-z][a-z0-9-]*$/i
  * for SVG/MathML (e.g. "svg", "foreignObject"), so adds insert the raw,
  * uppercase, and lowercase forms while removes delete all three. camelCase
  * foreign tags therefore need the same casing in `.add` and `.remove`.
+ *
+ * Deltas apply in rule order, so for any one tag the last rule naming it
+ * decides. That is the whole override story: the built-in rule that un-blocks
+ * PRE in plain-text documents sits ahead of every site rule, and user rules
+ * come after all built-in ones, so either can put PRE back.
  */
 function mergeTagSetDelta(
   matched: SiteRule[],
@@ -213,8 +236,6 @@ function mergeTagSetDelta(
   removeKey: keyof SiteRule,
   defaults: ReadonlySet<string>,
   protectedTags?: ReadonlySet<string>,
-  /** Filled with the tag names `addKey` named, in the same three casings. */
-  explicitAddsTarget?: Set<string>,
 ): ReadonlySet<string> | null {
   if (!matched.some((rule) => rule[addKey] !== undefined || rule[removeKey] !== undefined)) {
     return null
@@ -229,7 +250,7 @@ function mergeTagSetDelta(
       if (TAG_NAME_RE.test(trimmed)) {
         tagNames.push(trimmed)
       } else {
-        logger.warn(`[site-rules] Invalid tag name dropped: "${String(entry)}"`)
+        log.warn("Invalid tag name dropped", { entry })
       }
     }
     return tagNames
@@ -240,23 +261,15 @@ function mergeTagSetDelta(
       merged.add(tagName)
       merged.add(tagName.toUpperCase())
       merged.add(tagName.toLowerCase())
-      explicitAddsTarget?.add(tagName)
-      explicitAddsTarget?.add(tagName.toUpperCase())
-      explicitAddsTarget?.add(tagName.toLowerCase())
     }
     for (const tagName of validTagNames(rule[removeKey])) {
       if (protectedTags?.has(tagName.toUpperCase())) {
-        logger.warn(`[site-rules] Protected tag cannot be removed: "${tagName}"`)
+        log.warn("Protected tag cannot be removed", { tagName })
         continue
       }
       merged.delete(tagName)
       merged.delete(tagName.toUpperCase())
       merged.delete(tagName.toLowerCase())
-      // A later rule removing what an earlier one added cancels the explicit
-      // choice too, so the last word decides.
-      explicitAddsTarget?.delete(tagName)
-      explicitAddsTarget?.delete(tagName.toUpperCase())
-      explicitAddsTarget?.delete(tagName.toLowerCase())
     }
   }
 
@@ -264,10 +277,13 @@ function mergeTagSetDelta(
 }
 
 /**
- * Merge all rules matching `url` into one effective rule.
+ * Merge all rules matching `url` into one effective rule. `contentType` is the
+ * document's MIME type when the caller has the document at hand; a rule that
+ * declares `contentTypes` matches only documents of those types.
  *
  * Ordering: built-in rules (array order) first, then user rules (array order).
  * - Selector arrays are unioned across all matching rules.
+ * - Tag-set deltas apply in order: for one tag, the last rule naming it decides.
  * - `injectedCss` is concatenated (later rules append; disabling the built-in
  *   rule is the way to replace its CSS entirely).
  * - Remaining scalars are last-wins, so user rules override built-in ones.
@@ -277,6 +293,7 @@ export function resolveSiteRule(
   builtInRules: SiteRule[],
   userRules: SiteRule[],
   disabledBuiltInRuleIds: string[],
+  contentType?: string,
 ): ResolvedSiteRule {
   const disabled = new Set(disabledBuiltInRuleIds)
   const candidates = [
@@ -284,7 +301,9 @@ export function resolveSiteRule(
     ...userRules.filter((rule) => rule.enabled !== false),
   ]
 
-  const matched = candidates.filter((rule) => urlMatchesRule(url, rule))
+  const matched = candidates.filter(
+    (rule) => urlMatchesRule(url, rule) && contentTypeMatchesRule(contentType, rule),
+  )
   if (matched.length === 0) {
     return EMPTY_RESOLVED_SITE_RULE
   }
@@ -293,7 +312,6 @@ export function resolveSiteRule(
   let minWords: number | null = null
   let injectIntoIframes: boolean | null = null
   let reflowLatexmlTextBoxes: boolean | null = null
-  const dontWalkTagsExplicitAdds = new Set<string>()
   const cssParts: string[] = []
   for (const rule of matched) {
     if (rule.minCharacters !== undefined) {
@@ -381,9 +399,7 @@ export function resolveSiteRule(
       "dontWalkTags.remove",
       DEFAULT_TAG_SETS.dontWalkTags,
       PROTECTED_DONT_WALK_TAGS,
-      dontWalkTagsExplicitAdds,
     ),
-    dontWalkTagsExplicitAdds: dontWalkTagsExplicitAdds.size > 0 ? dontWalkTagsExplicitAdds : null,
     dontWalkButTranslateTags: mergeTagSetDelta(
       matched,
       "dontWalkButTranslateTags.add",

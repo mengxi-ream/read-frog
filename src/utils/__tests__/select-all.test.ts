@@ -150,6 +150,73 @@ describe("protectSelectAllShadowRoot", () => {
     expect(range.intersectsNode(floatingButton.shadowHost)).toBe(false)
   })
 
+  // jsdom keeps only the first range of a selection, as Chrome does.
+  it("selects page content added after the Read Frog UI (#2563)", () => {
+    const toolbar = createHost("read-frog-selection")
+    const floatingButton = createHost("read-frog")
+    protect(toolbar)
+    protect(floatingButton)
+    const banner = document.createElement("div")
+    banner.textContent = "Banner text"
+    document.body.insertBefore(banner, floatingButton.shadowHost)
+    const loginPrompt = document.createElement("div")
+    loginPrompt.textContent = "Login prompt text"
+    document.body.append(loginPrompt)
+
+    const event = pressSelectAll()
+
+    const selection = window.getSelection()!
+    const range = selection.getRangeAt(0)
+    expect(event.defaultPrevented).toBe(true)
+    expect(selection.rangeCount).toBe(1)
+    expect(range.toString()).toBe("Article textBanner textLogin prompt text")
+    expect(range.intersectsNode(toolbar.shadowHost)).toBe(false)
+    expect(range.intersectsNode(floatingButton.shadowHost)).toBe(false)
+    expect([...document.body.children].slice(-2)).toEqual([
+      toolbar.shadowHost,
+      floatingButton.shadowHost,
+    ])
+  })
+
+  // moveBefore keeps a focused button in the card focused; a plain move drops the focus.
+  it("moves the Read Frog UI with moveBefore when the browser has it", () => {
+    const toolbar = createHost("read-frog-selection")
+    const floatingButton = createHost("read-frog")
+    protect(toolbar)
+    protect(floatingButton)
+    const loginPrompt = document.createElement("div")
+    loginPrompt.textContent = "Login prompt text"
+    document.body.append(loginPrompt)
+    // jsdom has no moveBefore.
+    const moveBefore = vi.fn<(node: Node, child: Node | null) => void>((node, child) => {
+      document.body.insertBefore(node, child)
+    })
+    Object.assign(document.body, { moveBefore })
+
+    pressSelectAll()
+    delete (document.body as { moveBefore?: unknown }).moveBefore
+
+    expect(moveBefore.mock.calls).toEqual([
+      [toolbar.shadowHost, null],
+      [floatingButton.shadowHost, null],
+    ])
+    expect(window.getSelection()!.toString()).toBe("Article textLogin prompt text")
+  })
+
+  it("leaves the Read Frog UI in place when nothing follows it", () => {
+    const toolbar = createHost("read-frog-selection")
+    const floatingButton = createHost("read-frog")
+    protect(toolbar)
+    protect(floatingButton)
+    const observer = new MutationObserver(() => {})
+    observer.observe(document.body, { childList: true })
+
+    pressSelectAll()
+
+    expect(observer.takeRecords()).toEqual([])
+    observer.disconnect()
+  })
+
   it("leaves Ctrl+A to a text field in Read Frog UI", () => {
     const toolbar = createHost("read-frog-selection")
     const floatingButton = createHost("read-frog")

@@ -6,4 +6,7 @@ export const subtitlesContentScriptMatches = [
   "*://twitter.com/*",
   "*://*.twitter.com/*",
   "*://www.netflix.com/*",
+  "*://www.bilibili.com/*",
+  "*://*.udemy.com/*",
+  "*://courses.edx.org/*",
 ]

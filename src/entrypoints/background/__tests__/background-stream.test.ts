@@ -3,8 +3,10 @@ import type {
   BackgroundTextStreamSnapshot,
 } from "@/types/background-stream"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import { fakeBrowser } from "wxt/testing/fake-browser"
 import { env } from "@/env"
 import { DEFAULT_PROVIDER_CONFIG } from "@/utils/constants/providers"
+import { testHostedAiModels } from "@/utils/hosted-ai/__tests__/test-models"
 import { ProviderSetupError } from "@/utils/providers/provider-setup-error"
 import { defaultRequestRetryPolicy } from "@/utils/request/retry-policy"
 
@@ -12,7 +14,6 @@ const streamTextMock = vi.fn<(...args: any[]) => any>()
 const outputObjectMock = vi.fn<(...args: any[]) => any>((params: Record<string, unknown>) => params)
 const getModelByIdMock = vi.fn<(...args: any[]) => any>()
 const getLanguageModelForConfigMock = vi.fn<(...args: any[]) => any>()
-const loggerErrorMock = vi.fn<(...args: any[]) => any>()
 const hostedStreamTextMock = vi.fn<(...args: any[]) => any>()
 const hostedSelectionStreamTextMock = vi.fn<(...args: any[]) => any>()
 const hostedStreamStructuredObjectMock = vi.fn<(...args: any[]) => any>()
@@ -72,12 +73,6 @@ vi.mock("@/utils/orpc/background-client", () => ({
   },
 }))
 
-vi.mock("@/utils/logger", () => ({
-  logger: {
-    error: loggerErrorMock,
-  },
-}))
-
 function createMockPort(name: string) {
   let messageListener: ((message: unknown) => void | Promise<void>) | undefined
   let disconnectListener: (() => void) | undefined
@@ -131,10 +126,33 @@ function createMockPort(name: string) {
   }
 }
 
+/** The model list as the background keeps it after a status fetch. */
+async function storeTestModels() {
+  const { sanitizeHostedAiModels, storeHostedAiModels } = await import("@/utils/hosted-ai/models")
+  await storeHostedAiModels(sanitizeHostedAiModels(testHostedAiModels())!)
+}
+
+/** The level the user picked for a model in the API provider settings. */
+async function storeReasoningChoice(modelId: string, reasoning: string) {
+  await fakeBrowser.storage.local.set({
+    config: { builtInAi: { models: { [modelId]: { reasoning } } } },
+  })
+}
+
+const RETRY_CONTEXT = {
+  retryCount: 0,
+  maxRetries: 2,
+  baseRetryDelayMs: 1_000,
+  now: Date.now(),
+  rateLimitRetryCount: 0,
+  consecutiveRateLimits: 0,
+}
+
 describe("background-stream", () => {
   beforeEach(() => {
     vi.resetModules()
     vi.clearAllMocks()
+    fakeBrowser.reset()
   })
 
   it.each([undefined, null, "", "unknownFeature", "toString"])(
@@ -148,7 +166,7 @@ describe("background-stream", () => {
         streamRequestId: "invalid-hosted-route",
         payload: {
           providerKind: "system",
-          providerId: "read-frog-free-ai",
+          providerId: "read-frog-ai:gpt-6-luna",
           hostedFeature,
           instructions: "Translate",
           prompt: "Hello",
@@ -172,7 +190,7 @@ describe("background-stream", () => {
     await mockPort.emitMessage({
       type: "start",
       streamRequestId: "wrong-provider-kind",
-      payload: { providerKind: "local", providerId: "read-frog-free-ai", prompt: "Hello" },
+      payload: { providerKind: "local", providerId: "read-frog-ai:gpt-6-luna", prompt: "Hello" },
     })
     expect(mockPort.postMessage).toHaveBeenCalledWith(expect.objectContaining({ type: "error" }))
     expect(hostedStreamTextMock).not.toHaveBeenCalled()
@@ -271,6 +289,7 @@ describe("background-stream", () => {
   })
 
   it("streams hosted structured object output from background", async () => {
+    await storeTestModels()
     hostedStreamStructuredObjectMock.mockResolvedValue(
       (async function* () {
         yield { type: "start" }
@@ -288,8 +307,7 @@ describe("background-stream", () => {
     const { runStructuredObjectStreamInBackground } = await import("../background-stream")
     const result = await runStructuredObjectStreamInBackground(
       {
-        providerId: "read-frog-advance-ai",
-        modelTier: "advance",
+        providerId: "read-frog-ai:gpt-6.2-sol",
         requestId: "123e4567-e89b-42d3-a456-426614174000",
         instructions: "Return structured data",
         prompt: "Analyze selection",
@@ -315,7 +333,10 @@ describe("background-stream", () => {
           { name: "summary", type: "string" },
         ],
         temperature: undefined,
+        model: "gpt-6.2-sol",
         modelTier: "advance",
+        // No level picked yet, so Sol's default: the level the settings show.
+        reasoning: "low",
         requestId: "123e4567-e89b-42d3-a456-426614174000",
       },
       { signal: undefined },
@@ -350,7 +371,7 @@ describe("background-stream", () => {
     let caught: unknown
     try {
       await runStructuredObjectStreamInBackground({
-        providerId: "read-frog-free-ai",
+        providerId: "read-frog-ai:gpt-6-luna",
         instructions: "Return structured data",
         prompt: "Analyze selection",
         outputSchema: [{ name: "score", type: "number" }],
@@ -390,8 +411,7 @@ describe("background-stream", () => {
     let caught: unknown
     try {
       await runStructuredObjectStreamInBackground({
-        providerId: "read-frog-free-ai",
-        modelTier: "normal",
+        providerId: "read-frog-ai:gpt-6-luna",
         requestId: "123e4567-e89b-42d3-a456-426614174001",
         instructions: "Return structured data",
         prompt: "Analyze selection",
@@ -437,8 +457,7 @@ describe("background-stream", () => {
       type: "start",
       streamRequestId,
       payload: {
-        providerId: "read-frog-free-ai",
-        modelTier: "normal",
+        providerId: "read-frog-ai:gpt-6-luna",
         requestId: "123e4567-e89b-42d3-a456-426614174021",
         instructions: "Return structured data",
         prompt: "Analyze selection",
@@ -460,12 +479,50 @@ describe("background-stream", () => {
         message: "hostedAi.availability.quotaExhausted",
         action: {
           label: "action.upgrade",
-          url: new URL("/pricing?entry=extension_quota_exhausted", env.WXT_WEBSITE_URL).toString(),
+          // Named after the feature that ran dry, for the website's attribution.
+          url: new URL(
+            "/pricing?entry=extension_quota_exhausted&feature=custom_ai_action",
+            env.WXT_WEBSITE_URL,
+          ).toString(),
         },
         // Classified in the background, where the hosted-AI error code still exists.
         reason: "quota_exceeded",
       },
     })
+  })
+
+  it("names the feature a hosted text request bills against in its upgrade link", async () => {
+    const quotaExhausted = () =>
+      Object.assign(new Error("Built-in AI credit exhausted"), {
+        code: "HOSTED_AI_QUOTA_EXHAUSTED",
+        status: 429,
+        data: { modelTier: "normal", policyId: "pro-weekly-v2", usedPercent: 100, resetAt: null },
+      })
+    const { runStreamTextInBackground } = await import("../background-stream")
+    const upgradeUrlFor = async (hostedFeature: "pageTranslation" | "selectionTranslation") => {
+      try {
+        await runStreamTextInBackground({
+          providerKind: "system",
+          hostedFeature,
+          providerId: "read-frog-ai:gpt-6-luna",
+          requestId: "123e4567-e89b-42d3-a456-426614174031",
+          instructions: "Translate text",
+          prompt: "Hello world",
+        })
+      } catch (error) {
+        return new URL((error as { action: { url: string } }).action.url)
+      }
+      throw new Error("expected the request to be refused")
+    }
+
+    hostedStreamTextMock.mockRejectedValueOnce(quotaExhausted())
+    const pageUrl = await upgradeUrlFor("pageTranslation")
+    hostedSelectionStreamTextMock.mockRejectedValueOnce(quotaExhausted())
+    const selectionUrl = await upgradeUrlFor("selectionTranslation")
+
+    expect(pageUrl.searchParams.get("entry")).toBe("extension_quota_exhausted")
+    expect(pageUrl.searchParams.get("feature")).toBe("page_translation")
+    expect(selectionUrl.searchParams.get("feature")).toBe("selection_translation")
   })
 
   it("offers no upgrade when the Ultra pool itself runs dry", async () => {
@@ -502,8 +559,7 @@ describe("background-stream", () => {
       let caught: unknown
       try {
         await runStructuredObjectStreamInBackground({
-          providerId: "read-frog-free-ai",
-          modelTier: "normal",
+          providerId: "read-frog-ai:gpt-6-luna",
           requestId: "123e4567-e89b-42d3-a456-426614174002",
           instructions: "Return structured data",
           prompt: "Analyze selection",
@@ -550,8 +606,7 @@ describe("background-stream", () => {
 
     await expect(
       runStructuredObjectStreamInBackground({
-        providerId: "read-frog-free-ai",
-        modelTier: "normal",
+        providerId: "read-frog-ai:gpt-6-luna",
         requestId: "123e4567-e89b-42d3-a456-426614174003",
         instructions: "Return structured data",
         prompt: "Analyze selection",
@@ -592,8 +647,7 @@ describe("background-stream", () => {
           await runStreamTextInBackground({
             providerKind: "system",
             hostedFeature: "pageTranslation",
-            providerId: "read-frog-free-ai",
-            modelTier: "normal",
+            providerId: "read-frog-ai:gpt-6-luna",
             requestId: "123e4567-e89b-42d3-a456-426614174003",
             instructions: "Translate text",
             prompt: "Hello world",
@@ -852,8 +906,8 @@ describe("background-stream", () => {
     {
       providerKind: "system",
       hostedFeature: "pageTranslation",
-      providerId: "read-frog-free-ai",
-      providerConfig: { ...DEFAULT_PROVIDER_CONFIG.openai, id: "read-frog-free-ai" },
+      providerId: "read-frog-ai:gpt-6-luna",
+      providerConfig: { ...DEFAULT_PROVIDER_CONFIG.openai, id: "read-frog-ai:gpt-6-luna" },
     },
   ])("rejects invalid local snapshots before starting a stream", async (payload) => {
     const { handleStreamTextPort } = await import("../background-stream")
@@ -870,6 +924,7 @@ describe("background-stream", () => {
   })
 
   it("streams hosted text output from background", async () => {
+    await storeTestModels()
     hostedStreamTextMock.mockResolvedValue(
       (async function* () {
         yield { type: "start" }
@@ -888,8 +943,8 @@ describe("background-stream", () => {
       {
         providerKind: "system",
         hostedFeature: "pageTranslation",
-        providerId: "read-frog-free-ai",
-        modelTier: "normal",
+        providerId: "read-frog-ai:gpt-6-luna",
+        builtInAiReasoning: "medium",
         requestId: "123e4567-e89b-42d3-a456-426614174002",
         instructions: "Translate text",
         prompt: "Hello world",
@@ -907,7 +962,9 @@ describe("background-stream", () => {
         instructions: "Translate text",
         prompt: "Hello world",
         temperature: undefined,
+        model: "gpt-6-luna",
         modelTier: "normal",
+        reasoning: "medium",
         requestId: "123e4567-e89b-42d3-a456-426614174002",
       },
       { signal: undefined },
@@ -936,7 +993,7 @@ describe("background-stream", () => {
     const { runStreamTextInBackground } = await import("../background-stream")
     const result = await runStreamTextInBackground({
       providerKind: "system",
-      providerId: "read-frog-free-ai",
+      providerId: "read-frog-ai:gpt-6-luna",
       hostedFeature: "pageTranslation",
       instructions: "Translate text",
       prompt: "Hello world",
@@ -961,9 +1018,8 @@ describe("background-stream", () => {
     const { runStreamTextInBackground } = await import("../background-stream")
     const result = await runStreamTextInBackground({
       providerKind: "system",
-      providerId: "read-frog-free-ai",
+      providerId: "read-frog-ai:gpt-6-luna",
       hostedFeature: "selectionTranslation",
-      modelTier: "normal",
       requestId: "123e4567-e89b-42d3-a456-426614174003",
       instructions: "Translate text",
       prompt: "Hello world",
@@ -977,6 +1033,9 @@ describe("background-stream", () => {
         instructions: "Translate text",
         prompt: "Hello world",
         temperature: undefined,
+        // Nothing stored: the tier a server without models reads, and no
+        // level, so the server uses the model's default.
+        model: "gpt-6-luna",
         modelTier: "normal",
         requestId: "123e4567-e89b-42d3-a456-426614174003",
       },
@@ -1005,7 +1064,7 @@ describe("background-stream", () => {
       {
         providerKind: "system",
         hostedFeature: "pageTranslation",
-        providerId: "read-frog-free-ai",
+        providerId: "read-frog-ai:gpt-6-luna",
         instructions: "Translate text",
         prompt: "Hello world",
       },
@@ -1038,7 +1097,7 @@ describe("background-stream", () => {
     await runStreamTextInBackground(
       {
         providerKind: "system",
-        providerId: "read-frog-free-ai",
+        providerId: "read-frog-ai:gpt-6-luna",
         hostedFeature: "pageTranslation",
         instructions: "Translate text",
         prompt: "Hello world",
@@ -1156,6 +1215,8 @@ describe("background-stream", () => {
       }
     })
 
+    // vi.resetModules() brings a fresh logger with the fresh module; capture that one.
+    const logs = (await import("@/utils/logging/testing")).captureLogs()
     const { handleStreamTextPort } = await import("../background-stream")
     const mockPort = createMockPort("stream-text")
 
@@ -1177,7 +1238,7 @@ describe("background-stream", () => {
     await startPromise
 
     expect(streamSignal?.aborted).toBe(true)
-    expect(loggerErrorMock).not.toHaveBeenCalled()
+    expect(logs.filter((record) => record.level === "error")).toEqual([])
     expect(mockPort.postMessage).not.toHaveBeenCalledWith(
       expect.objectContaining({
         type: "error",
@@ -1346,10 +1407,12 @@ describe("background-stream", () => {
       })(),
     )
 
+    await storeTestModels()
+    await storeReasoningChoice("gpt-6.2-sol", "high")
+
     const { runNoteSuggestionStreamInBackground } = await import("../background-stream")
     const result = await runNoteSuggestionStreamInBackground({
-      providerId: "read-frog-advance-ai",
-      modelTier: "advance",
+      providerId: "read-frog-ai:gpt-6.2-sol",
       requestId: "123e4567-e89b-42d3-a456-426614174010",
       instructions: "Suggest words",
       prompt: "Selection context",
@@ -1363,7 +1426,9 @@ describe("background-stream", () => {
         instructions: "Suggest words",
         prompt: "Selection context",
         temperature: undefined,
+        model: "gpt-6.2-sol",
         modelTier: "advance",
+        reasoning: "high",
         requestId: "123e4567-e89b-42d3-a456-426614174010",
       },
       { signal: undefined },
@@ -1380,7 +1445,7 @@ describe("background-stream", () => {
     expect(result.output).not.toHaveProperty("action")
   })
 
-  it("defaults hosted note suggestion modelTier to normal when absent", async () => {
+  it("sends the normal tier for a model no stored list names", async () => {
     const hostedObject = {
       action: {
         createNewDictionaryAction: false,
@@ -1398,13 +1463,13 @@ describe("background-stream", () => {
 
     const { runNoteSuggestionStreamInBackground } = await import("../background-stream")
     await runNoteSuggestionStreamInBackground({
-      providerId: "read-frog-free-ai",
+      providerId: "read-frog-ai:gpt-6-luna",
       instructions: "Suggest words",
       prompt: "Selection context",
     })
 
     expect(hostedNoteSuggestionStreamMock).toHaveBeenCalledWith(
-      expect.objectContaining({ modelTier: "normal" }),
+      expect.objectContaining({ model: "gpt-6-luna", modelTier: "normal" }),
       { signal: undefined },
     )
   })
@@ -1416,7 +1481,7 @@ describe("background-stream", () => {
     let guardCaught: unknown
     try {
       await runNoteSuggestionStreamInBackground({
-        providerId: "read-frog-free-ai",
+        providerId: "read-frog-ai:gpt-6-luna",
         instructions: "",
         prompt: "Selection context",
       })
@@ -1431,7 +1496,7 @@ describe("background-stream", () => {
     let contractCaught: unknown
     try {
       await runNoteSuggestionStreamInBackground({
-        providerId: "read-frog-free-ai",
+        providerId: "read-frog-ai:gpt-6-luna",
         instructions: "   ",
         prompt: "Selection context",
       })
@@ -1461,8 +1526,7 @@ describe("background-stream", () => {
     let caught: unknown
     try {
       await runNoteSuggestionStreamInBackground({
-        providerId: "read-frog-free-ai",
-        modelTier: "normal",
+        providerId: "read-frog-ai:gpt-6-luna",
         requestId: "123e4567-e89b-42d3-a456-426614174011",
         instructions: "Suggest words",
         prompt: "Selection context",
@@ -1499,5 +1563,421 @@ describe("background-stream", () => {
       }),
     ).rejects.toThrow("Provider missing-provider not found")
     expect(streamTextMock).not.toHaveBeenCalled()
+  })
+
+  describe("Built-in AI model fields", () => {
+    function mockHostedText(mock: typeof hostedStreamTextMock) {
+      mock.mockResolvedValue(
+        (async function* () {
+          yield { type: "start" }
+          yield { type: "text-delta", id: "text-1", text: "fr" }
+          yield { type: "finish", finishReason: "stop" }
+        })(),
+      )
+    }
+
+    it("never asks for a level for language detection, even with one picked", async () => {
+      await storeTestModels()
+      await storeReasoningChoice("gpt-6.2-sol", "high")
+      const hostedLanguageDetectionMock = vi.fn<(...args: any[]) => any>()
+      mockHostedText(hostedLanguageDetectionMock)
+      const { backgroundOrpcClient } = await import("@/utils/orpc/background-client")
+      Object.assign(backgroundOrpcClient.hostedAi, {
+        languageDetection: { streamText: hostedLanguageDetectionMock },
+      })
+
+      const { runStreamTextInBackground } = await import("../background-stream")
+      await runStreamTextInBackground({
+        providerKind: "system",
+        providerId: "read-frog-ai:gpt-6.2-sol",
+        hostedFeature: "languageDetection",
+        builtInAiReasoning: "high",
+        instructions: "Detect the language",
+        prompt: "Bonjour",
+      })
+
+      const input = hostedLanguageDetectionMock.mock.calls[0]![0]
+      expect(input).toMatchObject({ model: "gpt-6.2-sol", modelTier: "advance" })
+      expect(input).not.toHaveProperty("reasoning")
+    })
+
+    it("asks for no level when the provider ref resolved none", async () => {
+      await storeTestModels()
+      await storeReasoningChoice("gpt-6-luna", "high")
+      mockHostedText(hostedStreamTextMock)
+
+      const { runStreamTextInBackground } = await import("../background-stream")
+      await runStreamTextInBackground({
+        providerKind: "system",
+        providerId: "read-frog-ai:gpt-6-luna",
+        hostedFeature: "pageTranslation",
+        // What the cache entry this request fills was filed under.
+        builtInAiReasoning: null,
+        instructions: "Translate text",
+        prompt: "Hello world",
+      })
+
+      expect(hostedStreamTextMock.mock.calls[0]![0]).not.toHaveProperty("reasoning")
+    })
+
+    it("asks for the model's default for a picked level the model does not take", async () => {
+      await storeTestModels()
+      // Haiku stops at high: a level picked before the list changed falls back.
+      await storeReasoningChoice("claude-haiku-5-5", "xhigh")
+      hostedStreamStructuredObjectMock.mockResolvedValue(
+        (async function* () {
+          yield { type: "text-delta", id: "text-1", text: '{"score":1}' }
+          yield { type: "finish", finishReason: "stop" }
+        })(),
+      )
+
+      const { runStructuredObjectStreamInBackground } = await import("../background-stream")
+      await runStructuredObjectStreamInBackground({
+        providerId: "read-frog-ai:claude-haiku-5-5",
+        instructions: "Return structured data",
+        prompt: "Analyze selection",
+        outputSchema: [{ name: "score", type: "number" }],
+      })
+
+      expect(hostedStreamStructuredObjectMock.mock.calls[0]![0]).toMatchObject({
+        model: "claude-haiku-5-5",
+        modelTier: "normal",
+        reasoning: "none",
+      })
+    })
+
+    it("names the alternatives and offers to switch when the model is unavailable, never retrying", async () => {
+      await storeTestModels()
+      hostedStreamTextMock.mockRejectedValue(
+        Object.assign(new Error("This model is unavailable right now. Try another model."), {
+          code: "HOSTED_AI_MODEL_UNAVAILABLE",
+          status: 403,
+          data: { model: "gpt-6.2-sol", alternatives: ["gpt-6-luna", "claude-haiku-5-5"] },
+        }),
+      )
+
+      const { runStreamTextInBackground } = await import("../background-stream")
+      const { formatUiAlternatives } = await import("@/utils/i18n")
+      const caught: unknown = await runStreamTextInBackground({
+        providerKind: "system",
+        providerId: "read-frog-ai:gpt-6.2-sol",
+        hostedFeature: "pageTranslation",
+        instructions: "Translate text",
+        prompt: "Hello world",
+      }).catch((error: unknown) => error)
+
+      expect(caught).toBeInstanceOf(Error)
+      expect((caught as Error).message).toBe("hostedAi.errors.modelUnavailable")
+      expect(formatUiAlternatives).toHaveBeenCalledWith(["GPT-6 Luna", "Claude Haiku 5.5"])
+      expect((caught as Error & { action?: unknown }).action).toEqual({
+        label: "hostedAi.actions.chooseModel",
+        url: expect.stringContaining(
+          "options.html#/api-providers?section=provider-config&provider=read-frog-ai%3Agpt-6-luna",
+        ),
+      })
+      expect((caught as Error & { retryAfterMs?: number }).retryAfterMs).toBeUndefined()
+      expect(defaultRequestRetryPolicy.decide(caught, RETRY_CONTEXT)).toEqual({
+        action: "fail",
+        failQueue: true,
+      })
+    })
+
+    it("logs which model a failed stream ran on", async () => {
+      await storeTestModels()
+      hostedStreamTextMock.mockRejectedValue(
+        Object.assign(new Error("unavailable"), {
+          code: "HOSTED_AI_MODEL_UNAVAILABLE",
+          status: 403,
+          data: { model: "gpt-6.2-sol", alternatives: ["gpt-6-luna"] },
+        }),
+      )
+      const { captureLogs, logRecord } = await import("@/utils/logging/testing")
+      const logs = captureLogs()
+
+      const { handleStreamTextPort } = await import("../background-stream")
+      const mockPort = createMockPort("stream-text")
+      handleStreamTextPort(mockPort.port as never)
+      await mockPort.emitMessage({
+        type: "start",
+        streamRequestId: "req-model-unavailable",
+        payload: {
+          providerKind: "system",
+          providerId: "read-frog-ai:gpt-6.2-sol",
+          hostedFeature: "pageTranslation",
+          instructions: "Translate text",
+          prompt: "Hello world",
+        },
+      })
+
+      expect(logs).toContainEqual(
+        logRecord("error", "Stream Function failed", { model: "gpt-6.2-sol" }),
+      )
+    })
+
+    it("names the model when it is unavailable and nothing else is", async () => {
+      hostedStreamTextMock.mockRejectedValue(
+        Object.assign(new Error("unavailable"), {
+          code: "HOSTED_AI_MODEL_UNAVAILABLE",
+          status: 403,
+          data: { model: "gpt-6-luna", alternatives: [] },
+        }),
+      )
+
+      const { runStreamTextInBackground } = await import("../background-stream")
+      const caught: unknown = await runStreamTextInBackground({
+        providerKind: "system",
+        providerId: "read-frog-ai:gpt-6-luna",
+        hostedFeature: "pageTranslation",
+        instructions: "Translate text",
+        prompt: "Hello world",
+      }).catch((error: unknown) => error)
+
+      expect((caught as Error).message).toBe("hostedAi.errors.modelUnavailableNoAlternatives")
+      // With nothing to switch to, the button opens the model that failed.
+      expect((caught as Error & { action?: { url: string } }).action?.url).toContain(
+        "provider=read-frog-ai%3Agpt-6-luna",
+      )
+    })
+
+    it("waits out a busy model and mentions what could run now", async () => {
+      await storeTestModels()
+      hostedStreamTextMock.mockRejectedValue(
+        Object.assign(new Error("Too Many Requests"), {
+          code: "TOO_MANY_REQUESTS",
+          status: 429,
+          data: {
+            quotaScope: "user",
+            retryAfterMs: 8_000,
+            model: "claude-sonnet-5-5",
+            alternatives: ["gpt-6.2-sol"],
+          },
+        }),
+      )
+
+      const { runStreamTextInBackground } = await import("../background-stream")
+      const { formatUiAlternatives } = await import("@/utils/i18n")
+      const caught: unknown = await runStreamTextInBackground({
+        providerKind: "system",
+        providerId: "read-frog-ai:claude-sonnet-5-5",
+        hostedFeature: "pageTranslation",
+        instructions: "Translate text",
+        prompt: "Hello world",
+      }).catch((error: unknown) => error)
+
+      expect((caught as Error).message).toBe("hostedAi.errors.modelBusy")
+      expect(formatUiAlternatives).toHaveBeenCalledWith(["GPT-6.2 Sol"])
+      expect((caught as Error & { action?: { url: string } }).action?.url).toContain(
+        "provider=read-frog-ai%3Agpt-6.2-sol",
+      )
+      expect(defaultRequestRetryPolicy.decide(caught, RETRY_CONTEXT)).toEqual({
+        action: "pause-and-retry",
+        pauseMs: 8_000,
+      })
+    })
+  })
+
+  describe("Built-in AI request ids", () => {
+    const SENT_ID = "123e4567-e89b-42d3-a456-426614174099"
+    const SERVER_ID = "0b9a1c52-6f1e-4d1f-9a54-1f7e9c2d3b4a"
+    const UUID = /^[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$/i
+
+    function serverError(data?: unknown) {
+      return Object.assign(new Error("Internal server error"), {
+        code: "INTERNAL_SERVER_ERROR",
+        status: 500,
+        data,
+      })
+    }
+
+    async function requestIdOf(error: unknown) {
+      const { getBuiltInAiRequestId } = await import("@/utils/hosted-ai/request-id")
+      return getBuiltInAiRequestId(error)
+    }
+
+    async function runHostedPageTranslation(requestId?: string) {
+      const { runStreamTextInBackground } = await import("../background-stream")
+      return runStreamTextInBackground({
+        providerKind: "system",
+        hostedFeature: "pageTranslation",
+        providerId: "read-frog-ai:gpt-6-luna",
+        ...(requestId && { requestId }),
+        instructions: "Translate text",
+        prompt: "Hello world",
+      }).catch((error: unknown) => error)
+    }
+
+    it("sends the id the server names on an error raised mid-stream across the port", async () => {
+      hostedSelectionStreamTextMock.mockResolvedValue(
+        (async function* () {
+          yield { type: "start" }
+          yield { type: "text-delta", id: "text-1", text: "Hola" }
+          throw serverError({ requestId: SERVER_ID })
+        })(),
+      )
+      const { handleStreamTextPort } = await import("../background-stream")
+      const mockPort = createMockPort("stream-text")
+      handleStreamTextPort(mockPort.port as never)
+      await mockPort.emitMessage({
+        type: "start",
+        streamRequestId: "req-mid-stream-id",
+        payload: {
+          providerKind: "system",
+          hostedFeature: "selectionTranslation",
+          providerId: "read-frog-ai:gpt-6-luna",
+          requestId: SENT_ID,
+          instructions: "Translate text",
+          prompt: "Hello world",
+        },
+      })
+
+      expect(mockPort.postMessage).toHaveBeenLastCalledWith({
+        type: "error",
+        streamRequestId: "req-mid-stream-id",
+        error: expect.objectContaining({
+          message: "Internal server error",
+          builtInAiRequestId: SERVER_ID,
+        }),
+      })
+    })
+
+    it("falls back to the id it sent when the server names none", async () => {
+      hostedStreamTextMock.mockRejectedValue(serverError({}))
+      expect(await requestIdOf(await runHostedPageTranslation(SENT_ID))).toBe(SENT_ID)
+    })
+
+    it("ignores an id from the server that is not a UUID", async () => {
+      hostedStreamTextMock.mockRejectedValue(serverError({ requestId: "<script>" }))
+      expect(await requestIdOf(await runHostedPageTranslation(SENT_ID))).toBe(SENT_ID)
+    })
+
+    it("gives a request sent without an id one of its own, and names it when it fails", async () => {
+      hostedStreamTextMock.mockRejectedValue(serverError())
+
+      const caught = await runHostedPageTranslation()
+
+      const sent = (hostedStreamTextMock.mock.calls[0]![0] as { requestId?: string }).requestId
+      expect(sent).toMatch(UUID)
+      expect(await requestIdOf(caught)).toBe(sent)
+    })
+
+    it("keeps the error otherwise as it was, so retries read it the same", async () => {
+      hostedStreamTextMock.mockRejectedValue(serverError({ requestId: SERVER_ID }))
+
+      const caught = await runHostedPageTranslation(SENT_ID)
+
+      expect(caught).toMatchObject({ code: "INTERNAL_SERVER_ERROR", status: 500 })
+      expect(defaultRequestRetryPolicy.decide(caught, RETRY_CONTEXT).action).toBe(
+        defaultRequestRetryPolicy.decide(serverError(), RETRY_CONTEXT).action,
+      )
+    })
+
+    it("names the call when its stream breaks off without finishing", async () => {
+      hostedStreamTextMock.mockResolvedValue(
+        (async function* () {
+          yield { type: "start" }
+          yield { type: "text-delta", id: "text-1", text: "Hola" }
+        })(),
+      )
+      expect(await requestIdOf(await runHostedPageTranslation(SENT_ID))).toBe(SENT_ID)
+    })
+
+    it("names the call on a custom action's failure across the port", async () => {
+      hostedStreamStructuredObjectMock.mockRejectedValue(serverError({ requestId: SERVER_ID }))
+
+      const message = await runHostedCustomActionOverPort("req-custom-action-id")
+
+      expect(message?.error).toMatchObject({ builtInAiRequestId: SERVER_ID })
+    })
+
+    it("names the call on a hosted note suggestion's failure", async () => {
+      hostedNoteSuggestionStreamMock.mockRejectedValue(serverError())
+      const { runNoteSuggestionStreamInBackground } = await import("../background-stream")
+
+      const caught = await runNoteSuggestionStreamInBackground({
+        providerId: "read-frog-ai:gpt-6-luna",
+        requestId: SENT_ID,
+        instructions: "Suggest notes",
+        prompt: "Selection",
+      }).catch((error: unknown) => error)
+
+      expect(await requestIdOf(caught)).toBe(SENT_ID)
+    })
+
+    it("names the call on a one-shot generation, such as a summary", async () => {
+      hostedStreamTextMock.mockRejectedValue(serverError())
+      const { generateTextForProviderRef } = await import("../background-stream")
+
+      const caught = await generateTextForProviderRef({
+        providerRef: {
+          kind: "system",
+          providerId: "read-frog-ai:gpt-6-luna",
+          model: "gpt-6-luna",
+          modelTier: "normal",
+          modelRevision: "r1",
+          reasoning: null,
+        },
+        hostedFeature: "pageTranslation",
+        instructions: "Summarize",
+        prompt: "Article",
+        requestId: SENT_ID,
+      }).catch((error: unknown) => error)
+
+      expect(await requestIdOf(caught)).toBe(SENT_ID)
+    })
+
+    it.each([
+      { code: "HOSTED_AI_QUOTA_EXHAUSTED", status: 429 },
+      { code: "HOSTED_AI_TIER_RESTRICTED", status: 403 },
+      { code: "HOSTED_AI_MODEL_UNAVAILABLE", status: 403 },
+      { code: "UNAUTHORIZED", status: 401 },
+    ])("leaves $code without an id: its message says what to do", async ({ code, status }) => {
+      hostedStreamTextMock.mockRejectedValue(
+        Object.assign(new Error("refused"), { code, status, data: { requestId: SERVER_ID } }),
+      )
+      expect(await requestIdOf(await runHostedPageTranslation(SENT_ID))).toBeUndefined()
+    })
+
+    it("names the call on a rate limit, which carries no instruction", async () => {
+      hostedStreamTextMock.mockRejectedValue(
+        Object.assign(new Error("Too Many Requests"), {
+          code: "TOO_MANY_REQUESTS",
+          status: 429,
+          data: { quotaScope: "user", retryAfterMs: 1_000, requestId: SERVER_ID },
+        }),
+      )
+      expect(await requestIdOf(await runHostedPageTranslation(SENT_ID))).toBe(SERVER_ID)
+    })
+
+    it("leaves a request that never left the extension without an id", async () => {
+      const caught = await runHostedPageTranslation("not-a-uuid")
+      expect((caught as Error).message).toBe("Invalid hosted AI request")
+      expect(hostedStreamTextMock).not.toHaveBeenCalled()
+      expect(await requestIdOf(caught)).toBeUndefined()
+    })
+
+    it("never tags a failure of the user's own provider", async () => {
+      getModelByIdMock.mockRejectedValue(
+        Object.assign(new Error("Invalid API key"), { data: { requestId: SERVER_ID } }),
+      )
+      const { handleStreamTextPort } = await import("../background-stream")
+      const mockPort = createMockPort("stream-text")
+      handleStreamTextPort(mockPort.port as never)
+      await mockPort.emitMessage({
+        type: "start",
+        streamRequestId: "req-byok-error",
+        payload: {
+          providerKind: "local",
+          providerId: "openai-default",
+          requestId: SENT_ID,
+          prompt: "Say hello",
+        },
+      })
+
+      const errorMessage = mockPort.postMessage.mock.calls
+        .map((call) => call[0] as { type: string; error?: Record<string, unknown> })
+        .find((message) => message.type === "error")
+      expect(errorMessage?.error?.message).toBe("Invalid API key")
+      expect(errorMessage?.error).not.toHaveProperty("builtInAiRequestId")
+    })
   })
 })

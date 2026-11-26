@@ -1,14 +1,16 @@
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
+import { useSelector } from "@tanstack/react-store"
 import { useAtomValue } from "jotai"
 import { useMemo } from "react"
 import { useAutosaveContext } from "@/components/form/use-autosave"
 import ProviderSelector from "@/components/llm-providers/provider-selector"
+import { useBuiltInAiModels } from "@/components/llm-providers/use-built-in-ai-models"
 import { useHostedAiProviderOptions } from "@/components/llm-providers/use-hosted-ai-provider-options"
 import { Field, FieldTitle } from "@/components/ui/base-ui/field"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
 import {
-  getProviderIdsForCapability,
+  doesProviderSupportsCapability,
   getSelectableProvidersForCapability,
 } from "@/utils/providers/provider-registry"
 import { withForm } from "./form"
@@ -19,20 +21,19 @@ export const ProviderField = withForm({
     const autosave = useAutosaveContext()
     const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
 
+    const { models: builtInAiModels } = useBuiltInAiModels()
+    const selectedProviderId = useSelector(form.store, (state) => state.values.providerId)
+
     const baseCustomActionProviders = useMemo(
-      () => getSelectableProvidersForCapability("customAction", providersConfig),
-      [providersConfig],
+      () =>
+        getSelectableProvidersForCapability("customAction", providersConfig, builtInAiModels, [
+          selectedProviderId,
+        ]),
+      [providersConfig, builtInAiModels, selectedProviderId],
     )
     const customActionProviders = useHostedAiProviderOptions(
       "customAction",
       baseCustomActionProviders,
-    )
-    const customActionProviderIds = useMemo(
-      () =>
-        getProviderIdsForCapability("customAction", providersConfig, {
-          requireEnable: true,
-        }),
-      [providersConfig],
     )
 
     return (
@@ -40,7 +41,13 @@ export const ProviderField = withForm({
         name="providerId"
         validators={{
           onChange: ({ value }) => {
-            if (!customActionProviderIds.includes(value)) {
+            // Any Built-in AI model passes, listed or not: whether it can run
+            // is the server's call, and the menu marks one it cannot.
+            if (
+              !doesProviderSupportsCapability("customAction", providersConfig, value, {
+                requireEnable: true,
+              })
+            ) {
               return i18n.t("options.selectionToolbar.customActions.errors.providerRequired")
             }
             return undefined

@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import type { Config } from "@/types/config/config"
-import { describe, expect, it } from "vitest"
+import { afterEach, describe, expect, it } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import {
   BLOCK_CONTENT_CLASS,
@@ -78,9 +78,15 @@ describe("isDontWalkIntoButTranslateAsChildElement", () => {
 })
 
 describe("inline/block display detection", () => {
+  // Like a browser, jsdom computes no style for an element outside the document.
+  afterEach(() => {
+    document.body.replaceChildren()
+  })
+
   it("should treat ruby as inline", () => {
     const ruby = document.createElement("ruby")
     ruby.textContent = "大阪"
+    document.body.appendChild(ruby)
 
     expect(isShallowInlineHTMLElement(ruby)).toBe(true)
     expect(isShallowBlockHTMLElement(ruby)).toBe(false)
@@ -90,6 +96,7 @@ describe("inline/block display detection", () => {
     const element = document.createElement("div")
     element.textContent = "大阪"
     element.style.display = "block ruby"
+    document.body.appendChild(element)
 
     expect(window.getComputedStyle(element).display).toBe("block ruby")
     expect(isShallowInlineHTMLElement(element)).toBe(false)
@@ -100,6 +107,7 @@ describe("inline/block display detection", () => {
     const element = document.createElement("a")
     element.textContent = "Market item"
     element.style.display = "contents"
+    document.body.appendChild(element)
 
     expect(window.getComputedStyle(element).display).toBe("contents")
     expect(isShallowInlineHTMLElement(element)).toBe(false)
@@ -153,6 +161,42 @@ describe("isDontWalkIntoAndDontTranslateAsChildElement", () => {
     element.setAttribute("aria-hidden", "true")
 
     expect(isDontWalkIntoAndDontTranslateAsChildElement(element, DEFAULT_CONFIG)).toBe(true)
+  })
+
+  it("should block an element the hidden attribute actually hides", () => {
+    setHost("non-configured-example.org")
+    const element = document.createElement("div")
+    element.hidden = true
+    element.textContent = "Collapsed menu"
+    document.body.appendChild(element)
+
+    expect(isDontWalkIntoAndDontTranslateAsChildElement(element, DEFAULT_CONFIG)).toBe(true)
+    element.remove()
+  })
+
+  // science.nasa.gov ships its secondary nav inside `<div hidden>` restyled
+  // to `display: block` (#1474).
+  it("should not block a hidden-attribute element that author CSS displays", () => {
+    setHost("non-configured-example.org")
+    const element = document.createElement("div")
+    element.hidden = true
+    element.style.display = "block"
+    element.innerHTML = '<nav><a href="/missions">Science Missions</a></nav>'
+    document.body.appendChild(element)
+
+    expect(isDontWalkIntoAndDontTranslateAsChildElement(element, DEFAULT_CONFIG)).toBe(false)
+    element.remove()
+  })
+
+  it('should block hidden="until-found" content until the browser reveals it', () => {
+    setHost("non-configured-example.org")
+    const element = document.createElement("div")
+    element.setAttribute("hidden", "until-found")
+    element.textContent = "Collapsed section"
+    document.body.appendChild(element)
+
+    expect(isDontWalkIntoAndDontTranslateAsChildElement(element, DEFAULT_CONFIG)).toBe(true)
+    element.remove()
   })
 
   it("should still block Twitch aria-hidden chat decorations through the built-in site rule", () => {
@@ -455,9 +499,11 @@ describe("site-rule tag-set overrides", () => {
     })
     const span = document.createElement("span")
     span.textContent = "text"
+    document.body.appendChild(span)
 
     expect(isShallowBlockHTMLElement(span, undefined, config)).toBe(true)
     expect(isShallowInlineHTMLElement(span, undefined, config)).toBe(false)
     expect(isShallowBlockHTMLElement(span)).toBe(false)
+    span.remove()
   })
 })

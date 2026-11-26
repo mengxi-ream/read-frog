@@ -9,6 +9,8 @@ const FAILURE_REASONS: ReadonlySet<string> = new Set(ANALYTICS_FAILURE_REASONS)
 const REASON_BY_CODE = new Map<string, AnalyticsFailureReason>([
   ["HOSTED_AI_TIER_RESTRICTED", "tier_restricted"],
   ["HOSTED_AI_QUOTA_EXHAUSTED", "quota_exceeded"],
+  // The model is down or out of budget on our side: an outage, not a setup.
+  ["HOSTED_AI_MODEL_UNAVAILABLE", "provider_error"],
   ["output_validation_failed", "invalid_output"],
   ["invalid_request", "precheck"],
   ["UNAUTHORIZED", "auth_required"],

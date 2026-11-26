@@ -6,6 +6,7 @@ import {
   getEffectiveSiteControlUrl,
   isSiteEnabled,
 } from "@/utils/site-control"
+import { ensureRemoteSiteRulesLoaded } from "@/utils/site-rules/active"
 import { bootstrapHostContent } from "./runtime"
 
 declare global {
@@ -30,7 +31,9 @@ export async function runHostContent(ctx: ContentScriptContext) {
     return
   }
 
-  await initI18n(initialConfig?.uiLanguage)
+  // Site rules resolve synchronously during translation, so the remote ones
+  // must be in place before anything can start it.
+  await Promise.all([initI18n(initialConfig?.uiLanguage), ensureRemoteSiteRulesLoaded()])
 
   await bootstrapHostContent(ctx, initialConfig)
 }

@@ -6,11 +6,14 @@ import readFrogLogo from "@/assets/icons/read-frog.png?url&no-inline"
 import { ThemeProvider } from "@/components/providers/theme-provider"
 import { baseThemeModeAtom } from "@/utils/atoms/theme"
 import { APP_NAME } from "@/utils/constants/app"
+import { setupExtensionPageLogging } from "@/utils/logging/setup"
 import { renderPersistentReactRoot } from "@/utils/react-root"
 import { getLocalThemeMode } from "@/utils/theme"
 import "@fontsource-variable/inter/index.css"
 import "@/assets/styles/text-small.css"
 import "@/assets/styles/theme.css"
+
+setupExtensionPageLogging("sidepanel")
 
 function HydrateAtoms({
   initialValues,

@@ -34,7 +34,7 @@ vi.mock("@/utils/subtitles/toast", () => ({
 
 vi.mock("@/utils/subtitles/processor/translator", () => ({
   buildSubtitlesSummaryContextHash: vi.fn<(...args: any[]) => any>(() => null),
-  resolveSubtitlesProviderRef: vi.fn<(...args: any[]) => any>(),
+  resolveSubtitlesProvider: vi.fn<(...args: any[]) => any>(),
   fetchSubtitlesSummary: vi.fn<(...args: any[]) => any>(),
   translateSubtitles: vi.fn<(...args: any[]) => any>(),
 }))
@@ -77,7 +77,7 @@ describe("universalVideoAdapter destroy", () => {
       language: {},
       providersConfig: [],
       videoSubtitles: {
-        autoStart: { youtube: false, xcom: false, netflix: false },
+        platforms: { youtube: "manual", xcom: "manual", netflix: "manual" },
         providerId: null,
       },
     })
@@ -97,8 +97,8 @@ describe("universalVideoAdapter destroy", () => {
       isActive: () => true,
       setState: vi.fn<(...args: any[]) => any>(),
     }
-    ;(adapter as any).subtitlesScheduler = scheduler
-    ;(adapter as any).setupNavigationListeners()
+    ;(adapter as any).player.subtitlesScheduler = scheduler
+    ;(adapter as any).navigation.setupNavigationListeners()
     subtitlesStore.set(subtitlesSourceAtom, SUBTITLES_SOURCE.AI)
     subtitlesStore.set(subtitlesVisibleAtom, true)
     subtitlesStore.set(subtitlesSettingsPanelOpenAtom, true)
@@ -126,7 +126,7 @@ describe("universalVideoAdapter destroy", () => {
     window.dispatchEvent(new Event(NAVIGATE_FINISH))
     vi.advanceTimersByTime(NAVIGATION_HANDLER_DELAY + 1)
     expect(native).toHaveBeenCalledTimes(fetcherBuilds)
-    expect((adapter as any).subtitlesScheduler).toBeNull()
+    expect((adapter as any).player.subtitlesScheduler).toBeNull()
   })
 
   it("backs out of an initialize that resumes after destroy", async () => {
@@ -138,7 +138,7 @@ describe("universalVideoAdapter destroy", () => {
     adapter.destroy()
     await initializing
 
-    expect((adapter as any).subtitlesScheduler).toBeNull()
+    expect((adapter as any).player.subtitlesScheduler).toBeNull()
     expect(addEventListener).not.toHaveBeenCalledWith(NAVIGATE_START, expect.anything())
     expect(addEventListener).not.toHaveBeenCalledWith(NAVIGATE_FINISH, expect.anything())
   })

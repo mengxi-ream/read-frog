@@ -135,6 +135,106 @@ describe("selection toolbar positioning", () => {
     ).toEqual({ x: 975, y: 725 })
   })
 
+  describe("placement", () => {
+    const toolbarSize = { width: 200, height: 50 }
+    // Two lines, 100–124 and 130–154.
+    const twoLines = { top: 100, bottom: 154 }
+    const place = (
+      placement: "followDirection" | "above" | "below",
+      direction: SelectionDirection,
+      anchor: { x: number; y: number },
+      bounds: { top: number; bottom: number } | null,
+    ) => getToolbarViewportPosition(direction, anchor, toolbarSize, viewport, 25, placement, bounds)
+
+    it.each([
+      // Dragged down to the second line: below the cursor, as it always was.
+      ["followDirection", { x: 180, y: 162 }],
+      // Above the first line, not over the selected text.
+      ["above", { x: 180, y: 42 }],
+      ["below", { x: 180, y: 162 }],
+    ] as const)("opens %s a selection dragged downward", (placement, expected) => {
+      expect(
+        place(placement, SelectionDirection.BOTTOM_RIGHT, { x: 180, y: 142 }, twoLines),
+      ).toEqual(expected)
+    })
+
+    it.each([
+      ["followDirection", { x: 25, y: 35 }],
+      ["above", { x: 25, y: 35 }],
+      // Below the last line, though the drag ended on the first.
+      ["below", { x: 25, y: 162 }],
+    ] as const)("opens %s a selection dragged upward", (placement, expected) => {
+      expect(place(placement, SelectionDirection.TOP_LEFT, { x: 110, y: 105 }, twoLines)).toEqual(
+        expected,
+      )
+    })
+
+    it("moves below when there is no room above", () => {
+      expect(
+        place("above", SelectionDirection.BOTTOM_RIGHT, { x: 180, y: 52 }, { top: 10, bottom: 64 }),
+      ).toEqual({ x: 180, y: 72 })
+    })
+
+    it("moves above when there is no room below", () => {
+      expect(
+        place("below", SelectionDirection.TOP_RIGHT, { x: 110, y: 742 }, { top: 730, bottom: 784 }),
+      ).toEqual({ x: 110, y: 672 })
+    })
+
+    it.each([
+      ["above", { x: 300, y: 330 }],
+      ["below", { x: 300, y: 420 }],
+    ] as const)(
+      "opens %s the cursor when the selection is taller than the viewport",
+      (placement, expected) => {
+        expect(
+          place(
+            placement,
+            SelectionDirection.BOTTOM_RIGHT,
+            { x: 300, y: 400 },
+            { top: -500, bottom: 1500 },
+          ),
+        ).toEqual(expected)
+      },
+    )
+
+    it("uses the cursor when the selection's bounds are unknown", () => {
+      expect(place("above", SelectionDirection.BOTTOM_RIGHT, { x: 180, y: 142 }, null)).toEqual({
+        x: 180,
+        y: 72,
+      })
+    })
+
+    it("keeps a selection scrolled out of view at the viewport's edge", () => {
+      expect(
+        place(
+          "above",
+          SelectionDirection.BOTTOM_RIGHT,
+          { x: 200, y: -100 },
+          { top: -200, bottom: -100 },
+        ),
+      ).toEqual({ x: 200, y: 25 })
+    })
+  })
+
+  it("measures how far a selection reaches up and down across its rects", () => {
+    rangeRects = [
+      createRect({ left: 100, top: 100, width: 120, height: 24 }),
+      createRect({ left: 100, top: 130, width: 80, height: 24 }),
+    ]
+    const tracker = createSelectionAnchorTracker([rangeSnapshot], { x: 175, y: 150 })
+
+    rangeRects = [
+      createRect({ left: 100, top: 40, width: 120, height: 24 }),
+      createRect({ left: 100, top: 70, width: 80, height: 24 }),
+    ]
+
+    expect(measureSelectionAnchor(tracker!, viewport)).toMatchObject({
+      status: "visible",
+      bounds: { top: 40, bottom: 94 },
+    })
+  })
+
   it("converts viewport coordinates through a translated and scaled host", () => {
     const host = {
       offsetWidth: 1200,
@@ -246,6 +346,8 @@ describe("selection toolbar positioning", () => {
       status: "offscreen",
       anchor: { x: 210, y: 124 },
       tracker,
+      // Nothing to measure; the toolbar keeps the bounds it last had.
+      bounds: null,
     })
     expect(measurement.status === "invalid" ? null : measurement.tracker).toBe(tracker)
   })

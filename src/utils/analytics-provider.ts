@@ -8,6 +8,7 @@ import type { SerializableProviderRef } from "@/utils/providers/provider-ref"
 import type { ResolvedProviderRef } from "@/utils/providers/provider-registry"
 import { ANALYTICS_PROVIDER } from "@/types/analytics"
 import { ALL_PROVIDER_TYPES, isLLMProvider, isLLMProviderConfig } from "@/types/config/provider"
+import { isBuiltInAiModelId } from "@/utils/constants/provider-ids"
 import { isBuiltInAiProviderId } from "@/utils/providers/provider-registry"
 
 const VALID_BACKEND_KINDS = new Set<AnalyticsBackendKind>(["llm", "non_llm", "unknown"])
@@ -39,12 +40,19 @@ export function classifyProviderConfig(
   }
 }
 
+/** Built-in AI, with the model that ran, so usage and failures can be told apart by model. */
+function classifyBuiltInAiModel(model: string): FeatureProviderAnalytics {
+  return isBuiltInAiModelId(model)
+    ? { ...BUILT_IN_AI_FEATURE_PROVIDER, built_in_ai_model: model }
+    : BUILT_IN_AI_FEATURE_PROVIDER
+}
+
 export function classifyResolvedProvider(
   provider: ResolvedProviderRef | null | undefined,
 ): FeatureProviderAnalytics {
   if (!provider) return UNKNOWN_FEATURE_PROVIDER
   if (provider.kind === "local") return classifyProviderConfig(provider.config)
-  if (isBuiltInAiProviderId(provider.id)) return BUILT_IN_AI_FEATURE_PROVIDER
+  if (isBuiltInAiProviderId(provider.id)) return classifyBuiltInAiModel(provider.model)
   return UNKNOWN_FEATURE_PROVIDER
 }
 
@@ -59,13 +67,14 @@ export function classifySerializedProvider(
 ): FeatureProviderAnalytics {
   if (!provider) return UNKNOWN_FEATURE_PROVIDER
   if (provider.kind === "local") return classifyProviderConfig(provider.config)
-  if (isBuiltInAiProviderId(provider.providerId)) return BUILT_IN_AI_FEATURE_PROVIDER
+  if (isBuiltInAiProviderId(provider.providerId)) return classifyBuiltInAiModel(provider.model)
   return UNKNOWN_FEATURE_PROVIDER
 }
 
 export function normalizeFeatureProviderAnalytics(
   provider: unknown,
   backendKind: unknown,
+  builtInAiModel?: unknown,
 ): FeatureProviderAnalytics {
   if (
     typeof provider !== "string" ||
@@ -78,7 +87,10 @@ export function normalizeFeatureProviderAnalytics(
     return UNKNOWN_FEATURE_PROVIDER
   }
   if (provider === ANALYTICS_PROVIDER.BUILT_IN_AI && backendKind === "llm") {
-    return BUILT_IN_AI_FEATURE_PROVIDER
+    // A content script from before models were picked sends none.
+    return typeof builtInAiModel === "string"
+      ? classifyBuiltInAiModel(builtInAiModel)
+      : BUILT_IN_AI_FEATURE_PROVIDER
   }
   if (provider === ANALYTICS_PROVIDER.EDGE_TTS && backendKind === "non_llm") {
     return EDGE_TTS_FEATURE_PROVIDER

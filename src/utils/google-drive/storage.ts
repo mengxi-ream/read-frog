@@ -1,12 +1,14 @@
 import type { Config } from "@/types/config/config"
 import type { ConfigValueAndMeta } from "@/types/config/meta"
+import { createLogger } from "@/utils/logging/logger"
 import { ConfigVersionTooNewError } from "../config/errors"
 import { migrateConfig } from "../config/migration"
 import { CONFIG_SCHEMA_VERSION } from "../constants/config"
-import { logger } from "../logger"
 import { downloadFile, findFileInAppData, uploadFile } from "./api"
 import { getGoogleUserInfo, getValidAccessToken } from "./auth"
 import { GOOGLE_DRIVE_CONFIG_FILENAME } from "./constants"
+
+const log = createLogger("google-drive/storage")
 
 /**
  * `token` binds every request here to one account. Resolving it per helper
@@ -39,7 +41,7 @@ export async function getRemoteConfigAndMetaWithUserEmail(token?: string): Promi
       if (error instanceof ConfigVersionTooNewError) {
         throw error
       }
-      logger.error("Failed to migrate remote config", error)
+      log.error("Failed to migrate remote config", { error })
       return { configValueAndMeta: null, email: userInfo.email }
     }
 
@@ -54,7 +56,7 @@ export async function getRemoteConfigAndMetaWithUserEmail(token?: string): Promi
       email: userInfo.email,
     }
   } catch (error) {
-    logger.error("Failed to get remote config", error)
+    log.error("Failed to get remote config", { error })
     throw error
   }
 }
@@ -69,7 +71,7 @@ export async function setRemoteConfigAndMeta(
     const content = JSON.stringify(configValueAndMeta, null, 2)
     await uploadFile(GOOGLE_DRIVE_CONFIG_FILENAME, content, existingFile?.id, token)
   } catch (error) {
-    logger.error("Failed to upload local config", error)
+    log.error("Failed to upload local config", { error })
     throw error
   }
 }

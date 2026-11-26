@@ -11,10 +11,13 @@ vi.mock("@/utils/i18n", () => ({
 import {
   formatHostedAiResetAtLocal,
   getHostedAiCreditForFeature,
+  getHostedAiModelVerdict,
   getHostedAiPools,
   getHostedAiTierDescription,
   getHostedAiTierStatus,
+  isHostedAiTierBlocked,
 } from "../status"
+import { testHostedAiModels } from "./test-models"
 
 const ALL_FEATURES: HostedAiFeature[] = ["pageTranslation", "customAction", "noteSuggestion"]
 
@@ -24,7 +27,6 @@ function tier(overrides: Partial<HostedAiTierStatus> = {}): HostedAiTierStatus {
     available: true,
     unavailableReason: null,
     upgradeTo: null,
-    requiresUltra: false,
     modelRevision: "normal-r7",
     ...overrides,
   }
@@ -39,9 +41,21 @@ function featureMap(
 }
 
 describe("hosted AI status presentation", () => {
+  it("reports no tier status for a feature the status has no entry for", () => {
+    // PDF translation draws on the credit pools but has no per-tier status.
+    const status: HostedAiStatus = {
+      pools: [],
+      models: testHostedAiModels(),
+      features: featureMap(() => ({ normal: tier(), advance: tier() })),
+    }
+
+    expect(getHostedAiTierStatus(status, "pdfTranslation", "normal")).toBeUndefined()
+    expect(getHostedAiTierStatus(status, "pageTranslation", "normal")).toEqual(tier())
+  })
+
   it("shows one shared weekly credit for both model tiers", () => {
     const status: HostedAiStatus = {
-      credits: [
+      pools: [
         {
           periodKind: "weekly",
           usedPercent: 37.6,
@@ -49,6 +63,7 @@ describe("hosted AI status presentation", () => {
           features: ALL_FEATURES,
         },
       ],
+      models: testHostedAiModels(),
       features: featureMap(() => ({
         normal: tier(),
         advance: tier({ modelRevision: "advance-r4" }),
@@ -80,7 +95,7 @@ describe("hosted AI status presentation", () => {
 
   it("shows service unavailability without inventing credit for an unfunded page feature", () => {
     const status: HostedAiStatus = {
-      credits: [
+      pools: [
         {
           periodKind: "daily",
           usedPercent: 10,
@@ -88,6 +103,7 @@ describe("hosted AI status presentation", () => {
           features: ["customAction"],
         },
       ],
+      models: testHostedAiModels(),
       features: featureMap((feature) =>
         feature === "customAction"
           ? {
@@ -141,8 +157,8 @@ describe("hosted AI status presentation", () => {
       features: ["customAction" as const],
     }
     const status: HostedAiStatus = {
-      credits: [daily],
       pools: [daily, oneTime],
+      models: testHostedAiModels(),
       features: featureMap(() => ({ normal: tier(), advance: tier() })),
     }
 
@@ -152,14 +168,7 @@ describe("hosted AI status presentation", () => {
     expect(getHostedAiCreditForFeature(status, "pageTranslation")).toBeUndefined()
   })
 
-  // TODO(2026-11-07): delete with the `credits` fallback (mengxi-ream/read-frog-monorepo#710).
-  it("falls back to credits when the server predates pools", () => {
-    const status: HostedAiStatus = {
-      credits: [{ periodKind: "weekly", usedPercent: 5, resetAt: null, features: ALL_FEATURES }],
-      features: featureMap(() => ({ normal: tier(), advance: tier() })),
-    }
-
-    expect(getHostedAiPools(status)).toBe(status.credits)
+  it("reads no pools while there is no status", () => {
     expect(getHostedAiPools(undefined)).toEqual([])
   })
 
@@ -169,5 +178,128 @@ describe("hosted AI status presentation", () => {
         tier({ available: false, unavailableReason: "pro_required", upgradeTo: "pro" }),
       ),
     ).toBe("hostedAi.availability.proRequired")
+  })
+})
+
+describe("hosted AI model verdict", () => {
+  function statusWith(
+    options: {
+      models?: HostedAiStatus["models"]
+      normal?: HostedAiTierStatus
+      advance?: HostedAiTierStatus
+    } = {},
+  ): HostedAiStatus {
+    return {
+      pools: [],
+      models: options.models ?? testHostedAiModels(),
+      features: featureMap(() => ({
+        normal: options.normal ?? tier(),
+        advance: options.advance ?? tier({ modelRevision: "advance-r4" }),
+      })),
+    }
+  }
+
+  const ULTRA_WALL = tier({
+    accessAllowed: false,
+    available: false,
+    unavailableReason: "ultra_required",
+    upgradeTo: "ultra",
+  })
+
+  it("is unknown without a status, or from a server that lists no models", () => {
+    expect(getHostedAiModelVerdict(undefined, "pageTranslation", "gpt-6-luna")).toEqual({
+      kind: "unknown",
+    })
+    const { models: _models, ...withoutModels } = statusWith()
+    expect(
+      getHostedAiModelVerdict(withoutModels as HostedAiStatus, "pageTranslation", "gpt-6-luna"),
+    ).toEqual({ kind: "unknown" })
+  })
+
+  it("is usable for a listed model the account's plan reaches", () => {
+    const verdict = getHostedAiModelVerdict(statusWith(), "pageTranslation", "gpt-6-luna")
+
+    expect(verdict.kind).toBe("usable")
+    expect(verdict.kind === "usable" && verdict.model.name).toBe("GPT-6 Luna")
+  })
+
+  it("blocks a model whose tier the plan does not reach, naming the tier's status", () => {
+    const verdict = getHostedAiModelVerdict(
+      statusWith({ advance: ULTRA_WALL }),
+      "pageTranslation",
+      "gpt-6.2-sol",
+    )
+
+    expect(verdict).toMatchObject({ kind: "blocked", tierStatus: ULTRA_WALL })
+  })
+
+  it("does not block on the tier's service_unavailable, which is about its default model", () => {
+    const verdict = getHostedAiModelVerdict(
+      statusWith({ normal: tier({ available: false, unavailableReason: "service_unavailable" }) }),
+      "pageTranslation",
+      "claude-haiku-5-5",
+    )
+
+    expect(verdict.kind).toBe("usable")
+  })
+
+  it("says a model that cannot run is unavailable, and offers what the account can run instead", () => {
+    const verdict = getHostedAiModelVerdict(
+      statusWith({
+        models: testHostedAiModels({ "gpt-6-luna": { available: false } }),
+        advance: ULTRA_WALL,
+      }),
+      "pageTranslation",
+      "gpt-6-luna",
+    )
+
+    expect(verdict.kind).toBe("unavailable")
+    if (verdict.kind !== "unavailable") return
+    expect(verdict.model?.name).toBe("GPT-6 Luna")
+    // The advance models are walled off for this plan, so only the other
+    // normal ones are offered, in the server's order.
+    expect(verdict.alternatives.map((model) => model.id)).toEqual([
+      "claude-haiku-5-5",
+      "deepseek-v4.1-flash",
+    ])
+  })
+
+  it("says a stored model the list dropped is unavailable", () => {
+    const verdict = getHostedAiModelVerdict(statusWith(), "pageTranslation", "gpt-5-mini")
+
+    expect(verdict.kind).toBe("unavailable")
+    if (verdict.kind !== "unavailable") return
+    expect(verdict.model).toBeUndefined()
+    expect(verdict.alternatives).toHaveLength(5)
+  })
+
+  it("leaves out alternatives that are themselves unavailable or out of credit", () => {
+    const verdict = getHostedAiModelVerdict(
+      statusWith({
+        models: testHostedAiModels({
+          "gpt-6-luna": { available: false },
+          "claude-haiku-5-5": { available: false },
+        }),
+        advance: tier({ available: false, unavailableReason: "quota_exhausted" }),
+      }),
+      "pageTranslation",
+      "gpt-6-luna",
+    )
+
+    expect(verdict.kind === "unavailable" && verdict.alternatives.map((model) => model.id)).toEqual(
+      ["deepseek-v4.1-flash"],
+    )
+  })
+
+  it("treats every reason but service_unavailable as a blocked tier", () => {
+    expect(isHostedAiTierBlocked(undefined)).toBe(false)
+    expect(isHostedAiTierBlocked(tier())).toBe(false)
+    expect(
+      isHostedAiTierBlocked(tier({ available: false, unavailableReason: "service_unavailable" })),
+    ).toBe(false)
+    expect(
+      isHostedAiTierBlocked(tier({ available: false, unavailableReason: "quota_exhausted" })),
+    ).toBe(true)
+    expect(isHostedAiTierBlocked(ULTRA_WALL)).toBe(true)
   })
 })

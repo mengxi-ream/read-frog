@@ -9,9 +9,11 @@ vi.mock("@/utils/message", () => ({ sendMessage: mocks.sendMessage }))
 
 const HOSTED_REF = {
   kind: "system" as const,
-  providerId: "read-frog-advance-ai" as const,
+  providerId: "read-frog-ai:gpt-6.2-sol" as const,
+  model: "gpt-6.2-sol",
   modelTier: "advance" as const,
   modelRevision: "advance-r1",
+  reasoning: null,
 }
 const LOCAL_REF = { kind: "local" as const, config: { id: "openai-default" } as never }
 

@@ -78,14 +78,6 @@ vi.mock("@/utils/host/translate/translate-text", () => ({
   validateTranslationConfigAndToast: mockValidateTranslationConfigAndToast,
 }))
 
-vi.mock("@/utils/logger", () => ({
-  logger: {
-    error: vi.fn<(...args: any[]) => any>(),
-    info: vi.fn<(...args: any[]) => any>(),
-    warn: vi.fn<(...args: any[]) => any>(),
-  },
-}))
-
 vi.mock("@/utils/message", () => ({
   sendMessage: mockSendMessage,
 }))

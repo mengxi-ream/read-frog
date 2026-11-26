@@ -78,13 +78,13 @@ describe("video summary task lifecycle", () => {
     await vi.waitFor(() => expect(fetcher.fetch).toHaveBeenCalledTimes(1))
 
     navigate(next)
-    expect(adapter.videoIdChanged).toBe(true)
-    ;(adapter as any).handleNavigationStart()
+    expect((adapter as any).navigation.videoIdChanged).toBe(true)
+    ;(adapter as any).navigation.handleNavigationStart()
     fetched.resolve(fragments("old video A"))
 
     expect(await pending).toMatchObject({ name: "AbortError" })
     expect(requestVideoSummary).not.toHaveBeenCalled()
-    expect((adapter as any).sourceSubtitles).toEqual([])
+    expect((adapter as any).sourceCache.sourceSubtitles).toEqual([])
     expect(subtitlesStore.get(videoSummaryPartialAtom)).toBe("")
   })
 
@@ -94,12 +94,12 @@ describe("video summary task lifecycle", () => {
     fetcher.fetch.mockReturnValue(fetched.promise)
     const pending = adapter.generateVideoSummary(DEFAULT_CONFIG).catch((error: unknown) => error)
     await vi.waitFor(() => expect(fetcher.fetch).toHaveBeenCalledTimes(1))
-    ;(adapter as any).clearSourceCache()
+    ;(adapter as any).sourceCache.clearSourceCache()
     fetched.resolve(fragments("obsolete source track"))
 
     expect(await pending).toMatchObject({ name: "AbortError" })
     expect(requestVideoSummary).not.toHaveBeenCalled()
-    expect((adapter as any).sourceSubtitles).toEqual([])
+    expect((adapter as any).sourceCache.sourceSubtitles).toEqual([])
   })
 
   it("does not let an older subtitle load cancel or overwrite the newer summary", async () => {
@@ -118,7 +118,7 @@ describe("video summary task lifecycle", () => {
     expect(await oldPending).toMatchObject({ name: "AbortError" })
     expect(options.signal!.aborted).toBe(false)
     expect(requestVideoSummary).toHaveBeenCalledTimes(1)
-    expect((adapter as any).sourceProcessedSubtitles).toEqual(fragments("new load"))
+    expect((adapter as any).sourceCache.sourceProcessedSubtitles).toEqual(fragments("new load"))
     stream.resolve("new summary")
     await expect(newPending).resolves.toBe("new summary")
   })

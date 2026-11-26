@@ -1,5 +1,6 @@
 import type { SelectionRangeSnapshot } from "../utils"
-import { toLiveRange } from "../utils"
+import type { SelectionToolbarPlacement } from "@/types/config/selection-toolbar"
+import { readRangeClientRects } from "../utils"
 
 export interface ViewportPoint {
   x: number
@@ -13,6 +14,12 @@ export interface ViewportRect {
   left: number
   width: number
   height: number
+}
+
+/** How far the selection reaches up and down the viewport. */
+export interface SelectionVerticalBounds {
+  top: number
+  bottom: number
 }
 
 export interface SelectionAnchorTracker {
@@ -31,6 +38,8 @@ export type SelectionAnchorMeasurement =
       status: "visible" | "offscreen"
       anchor: ViewportPoint
       tracker: SelectionAnchorTracker
+      // Null while the selection has no geometry to measure.
+      bounds: SelectionVerticalBounds | null
     }
   | { status: "invalid" }
 
@@ -55,6 +64,9 @@ interface ViewportHost {
 
 const DOWNWARD_TOLERANCE = 8
 const CURSOR_CLEARANCE = 20
+// The gap between a pinned toolbar and the selection's top or bottom edge:
+// what the cursor clearance leaves below a line released at its middle.
+const SELECTION_CLEARANCE = 8
 
 function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(max, value))
@@ -86,6 +98,21 @@ function getNearestRect(rects: IndexedClientRect[], point: ViewportPoint) {
   return nearestRect
 }
 
+function getVerticalBounds(rects: IndexedClientRect[]): SelectionVerticalBounds | null {
+  if (rects.length === 0) {
+    return null
+  }
+
+  let top = Number.POSITIVE_INFINITY
+  let bottom = Number.NEGATIVE_INFINITY
+  for (const { rect } of rects) {
+    top = Math.min(top, rect.top)
+    bottom = Math.max(bottom, rect.bottom)
+  }
+
+  return { top, bottom }
+}
+
 function readIndexedClientRects(ranges: SelectionRangeSnapshot[]) {
   const rects: IndexedClientRect[] = []
 
@@ -94,24 +121,12 @@ function readIndexedClientRects(ranges: SelectionRangeSnapshot[]) {
       return null
     }
 
-    let range: Range
-
-    try {
-      range = toLiveRange(rangeSnapshot)
-    } catch {
-      return null
-    }
-
     let clientRects: DOMRect[]
 
+    // A range's bounding rect is the union of these, so it has no area when
+    // none of them does.
     try {
-      clientRects = Array.from(range.getClientRects()).filter(hasArea)
-      if (clientRects.length === 0) {
-        const boundingRect = range.getBoundingClientRect()
-        if (hasArea(boundingRect)) {
-          clientRects.push(boundingRect)
-        }
-      }
+      clientRects = readRangeClientRects(rangeSnapshot).filter(hasArea)
     } catch {
       return null
     }
@@ -160,39 +175,64 @@ export function getSelectionDirection(startX: number, startY: number, endX: numb
   return SelectionDirection.TOP_LEFT
 }
 
+/**
+ * Where the toolbar's top left corner goes. Horizontally it always starts at the
+ * cursor, on the side the drag went. Vertically, "followDirection" opens it past
+ * the cursor in the direction the drag went: below for a drag downward or along
+ * one line, above for one upward. "above" and "below" pin it past that edge of
+ * the selection (and the cursor); when that side has no room in the viewport it
+ * moves past the other edge, and when neither edge leaves room (a selection
+ * taller than the viewport) it opens by the cursor instead. Whatever is chosen
+ * is kept inside the viewport.
+ */
 export function getToolbarViewportPosition(
   direction: SelectionDirection,
   anchor: ViewportPoint,
   toolbarSize: { width: number; height: number },
   viewport: ViewportRect,
   margin: number,
+  placement: SelectionToolbarPlacement = "followDirection",
+  selectionBounds: SelectionVerticalBounds | null = null,
 ) {
-  let left = anchor.x
-  let top = anchor.y
-
-  switch (direction) {
-    case SelectionDirection.BOTTOM_RIGHT:
-      top += CURSOR_CLEARANCE
-      break
-    case SelectionDirection.BOTTOM_LEFT:
-      left -= toolbarSize.width
-      top += CURSOR_CLEARANCE
-      break
-    case SelectionDirection.TOP_RIGHT:
-      top -= toolbarSize.height + CURSOR_CLEARANCE
-      break
-    case SelectionDirection.TOP_LEFT:
-      left -= toolbarSize.width
-      top -= toolbarSize.height + CURSOR_CLEARANCE
-      break
-    default:
-      break
-  }
+  const isLeftward =
+    direction === SelectionDirection.BOTTOM_LEFT || direction === SelectionDirection.TOP_LEFT
+  const isUpward =
+    direction === SelectionDirection.TOP_LEFT || direction === SelectionDirection.TOP_RIGHT
+  const left = isLeftward ? anchor.x - toolbarSize.width : anchor.x
 
   const minLeft = viewport.left + margin
   const maxLeft = Math.max(minLeft, viewport.right - toolbarSize.width - margin)
   const minTop = viewport.top + margin
   const maxTop = Math.max(minTop, viewport.bottom - toolbarSize.height - margin)
+
+  const topByCursor = {
+    above: anchor.y - toolbarSize.height - CURSOR_CLEARANCE,
+    below: anchor.y + CURSOR_CLEARANCE,
+  }
+
+  let top: number
+  if (placement === "above" || placement === "below") {
+    const otherSide = placement === "above" ? "below" : "above"
+    const topBySelection = selectionBounds
+      ? {
+          above:
+            Math.min(selectionBounds.top - SELECTION_CLEARANCE, anchor.y - CURSOR_CLEARANCE) -
+            toolbarSize.height,
+          below: Math.max(selectionBounds.bottom + SELECTION_CLEARANCE, topByCursor.below),
+        }
+      : topByCursor
+    const candidates = [
+      topBySelection[placement],
+      topBySelection[otherSide],
+      topByCursor[placement],
+      topByCursor[otherSide],
+    ]
+    top =
+      candidates.find((candidate) => candidate >= minTop && candidate <= maxTop) ??
+      topByCursor[placement]
+  } else {
+    top = isUpward ? topByCursor.above : topByCursor.below
+  }
 
   return {
     x: clamp(left, minLeft, maxLeft),
@@ -248,12 +288,14 @@ export function measureSelectionAnchor(
   }
 
   const status = rects.some(({ rect }) => isRectVisible(rect, viewport)) ? "visible" : "offscreen"
+  const bounds = getVerticalBounds(rects)
 
   if (rects.length === 0) {
     return {
       status,
       anchor: tracker.lastAnchor,
       tracker,
+      bounds,
     }
   }
 
@@ -275,6 +317,7 @@ export function measureSelectionAnchor(
         ...tracker,
         lastAnchor: anchor,
       },
+      bounds,
     }
   }
 
@@ -284,6 +327,7 @@ export function measureSelectionAnchor(
       status,
       anchor: tracker.lastAnchor,
       tracker,
+      bounds,
     }
   }
 
@@ -305,6 +349,7 @@ export function measureSelectionAnchor(
       },
       lastAnchor: anchor,
     },
+    bounds,
   }
 }
 

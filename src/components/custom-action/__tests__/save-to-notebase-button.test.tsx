@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import type { NotebaseGetSchemaOutput } from "@read-frog/api-contract"
+import type { NoteOriginInput } from "@read-frog/definitions"
 import type { SurfaceByFeature } from "@/types/analytics"
 import type { Config } from "@/types/config/config"
 import type {
@@ -22,7 +23,9 @@ import { buildCustomActionOptionsRoute } from "@/utils/navigation"
 import { mapNotebaseField } from "@/utils/notebase/mapping"
 import { orpcClient } from "@/utils/orpc/client"
 import { SaveToNotebaseButton } from "../save-to-notebase-button"
+import { saveToNotebaseDialogAtom } from "../save-to-notebase-dialog-atom"
 import { SaveToNotebaseDialogHost } from "../save-to-notebase-dialog-host"
+import { useSaveToNotebase } from "../use-save-to-notebase"
 
 const mockAuthState = vi.hoisted(() => ({
   session: {
@@ -86,10 +89,13 @@ vi.mock("@/utils/orpc/client", () => ({
           ...(options as object),
         }),
       },
+      list: {
+        key: () => ["notebase", "list"],
+      },
     },
     srs: {
-      recentNotebaseScheduleStatusStats: {
-        key: () => ["srs", "recentNotebaseScheduleStatusStats"],
+      scheduleStatusStats: {
+        key: () => ["srs", "scheduleStatusStats"],
       },
     },
   },
@@ -243,7 +249,12 @@ function renderButton(
   {
     failed = false,
     surface = "selection_toolbar",
-  }: { failed?: boolean; surface?: SurfaceByFeature["note_save"] } = {},
+    getNoteOrigin,
+  }: {
+    failed?: boolean
+    surface?: SurfaceByFeature["note_save"]
+    getNoteOrigin?: () => NoteOriginInput | null
+  } = {},
 ) {
   const store = createStore()
   store.set(configAtom, config)
@@ -264,12 +275,27 @@ function renderButton(
           isRunning={false}
           result={{ summary: "A short summary" }}
           surface={surface}
+          getNoteOrigin={getNoteOrigin}
         />
         <SaveToNotebaseDialogHost />
       </Provider>
     </QueryClientProvider>,
   )
-  return { ...rendered, store }
+  return { ...rendered, store, queryClient }
+}
+
+// What the selection popover's review-due count is added up from, cached
+// under the signed-in user: the notebases and their study queue counts.
+const NOTEBASE_LIST_QUERY_KEY = ["notebase", "list", "user-1"]
+const SCHEDULE_STATUS_STATS_QUERY_KEY = ["srs", "scheduleStatusStats", "user-1"]
+
+function seedReviewDueCount(queryClient: QueryClient) {
+  queryClient.setQueryData(NOTEBASE_LIST_QUERY_KEY, [])
+  queryClient.setQueryData(SCHEDULE_STATUS_STATS_QUERY_KEY, {})
+}
+
+function isInvalidated(queryClient: QueryClient, queryKey: unknown[]) {
+  return queryClient.getQueryState(queryKey)?.isInvalidated
 }
 
 function getStoredDictionaryConnection(store: ReturnType<typeof createStore>) {
@@ -312,13 +338,14 @@ describe("saveToNotebaseButton notebase availability", () => {
         srsModelVersion: "FSRS-6" as const,
         srsWeights: null,
         srsSleepingAt: null,
+        srsSleepSource: null,
         createdAt: new Date(0),
         updatedAt: new Date(0),
       },
     }
     vi.mocked(orpcClient.notebase.create).mockResolvedValue(createResult)
     vi.mocked(orpcClient.notebase.list).mockResolvedValue([
-      { id: "notebase-1", name: "Summarize Notes" },
+      { id: "notebase-1", name: "Summarize Notes", srsSleepingAt: null },
     ])
     vi.mocked(orpcClient.notebase.getSchema).mockResolvedValue(createSchema())
     notebaseRowCreateMock.mockResolvedValue({ txid: 1 })
@@ -379,6 +406,23 @@ describe("saveToNotebaseButton notebase availability", () => {
     })
   })
 
+  it("refreshes the notebases and counts the review-due tab adds up after creating a notebase and saving", async () => {
+    const config = cloneConfig(DEFAULT_CONFIG)
+    config.betaExperience.enabled = true
+    const { queryClient } = renderButton(config, createAction())
+    seedReviewDueCount(queryClient)
+
+    fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
+    fireEvent.click(
+      screen.getByRole("button", { name: i18n.t("action.saveToNotebaseCreateAndSaveShort") }),
+    )
+
+    await waitFor(() => {
+      expect(isInvalidated(queryClient, SCHEDULE_STATUS_STATS_QUERY_KEY)).toBe(true)
+    })
+    expect(isInvalidated(queryClient, NOTEBASE_LIST_QUERY_KEY)).toBe(true)
+  })
+
   it("shows an upgrade action when creating a Notebase exceeds the note limit", async () => {
     const config = cloneConfig(DEFAULT_CONFIG)
     config.betaExperience.enabled = true
@@ -412,7 +456,10 @@ describe("saveToNotebaseButton notebase availability", () => {
 
     expect(toastManagerMock.close).toHaveBeenCalledWith("toast-id")
     expect(sendMessage).toHaveBeenCalledWith("openPage", {
-      url: new URL("/pricing?entry=extension_notebase_limit", env.WXT_WEBSITE_URL).toString(),
+      url: new URL(
+        "/pricing?entry=extension_notebase_limit&feature=note_save",
+        env.WXT_WEBSITE_URL,
+      ).toString(),
       active: true,
     })
   })
@@ -565,6 +612,33 @@ describe("saveToNotebaseButton notebase availability", () => {
       url: expect.stringContaining("/notebase/notebase-1"),
       active: true,
     })
+  })
+
+  it("refreshes the notebases and counts the review-due tab adds up after a direct save, not after a failed one", async () => {
+    const config = cloneConfig(DEFAULT_CONFIG)
+    config.betaExperience.enabled = false
+    notebaseRowCreateMock.mockRejectedValueOnce(new ORPCError("FORBIDDEN", { status: 403 }))
+    const { queryClient } = renderButton(config, createConnectedAction())
+    seedReviewDueCount(queryClient)
+    const saveButton = screen.getByRole("button", { name: i18n.t("action.saveToNotebase") })
+
+    fireEvent.click(saveButton)
+    await waitFor(() => {
+      expect(toastManagerMock.add).toHaveBeenCalledWith(expect.objectContaining({ type: "error" }))
+    })
+    expect(isInvalidated(queryClient, SCHEDULE_STATUS_STATS_QUERY_KEY)).toBe(false)
+    expect(isInvalidated(queryClient, NOTEBASE_LIST_QUERY_KEY)).toBe(false)
+
+    fireEvent.click(saveButton)
+    await waitFor(() => {
+      expect(toastManagerMock.add).toHaveBeenCalledWith(
+        expect.objectContaining({ type: "success" }),
+      )
+    })
+    expect(isInvalidated(queryClient, SCHEDULE_STATUS_STATS_QUERY_KEY)).toBe(true)
+    // The page's cached list may predate the connected notebase, and the count
+    // only covers listed notebases.
+    expect(isInvalidated(queryClient, NOTEBASE_LIST_QUERY_KEY)).toBe(true)
   })
 
   it("marks guide Dictionary Notebase complete after direct connected row save with guide tracking", async () => {
@@ -1101,7 +1175,10 @@ describe("saveToNotebaseButton notebase availability", () => {
 
     expect(toastManagerMock.close).toHaveBeenCalledWith("toast-id")
     expect(sendMessage).toHaveBeenCalledWith("openPage", {
-      url: new URL("/pricing?entry=extension_notebase_limit", env.WXT_WEBSITE_URL).toString(),
+      url: new URL(
+        "/pricing?entry=extension_notebase_limit&feature=note_save",
+        env.WXT_WEBSITE_URL,
+      ).toString(),
       active: true,
     })
   })
@@ -1132,6 +1209,121 @@ describe("saveToNotebaseButton notebase availability", () => {
 
     await waitFor(() => {
       expect(screen.queryByText(i18n.t("action.saveToNotebaseCreateTitle"))).not.toBeInTheDocument()
+    })
+  })
+
+  describe("note origin", () => {
+    const origin: NoteOriginInput = {
+      kind: "webpage",
+      url: "https://example.com/article",
+      title: "An article",
+    }
+
+    function SaveManyButton({ getNoteOrigin }: { getNoteOrigin: () => NoteOriginInput | null }) {
+      const { save } = useSaveToNotebase()
+      return (
+        <button
+          type="button"
+          onClick={() =>
+            void save({
+              action: createConnectedAction(),
+              results: [{ summary: "First" }, { summary: "Second" }],
+              analyticsSource: "note_suggestion",
+              origin: getNoteOrigin(),
+            })
+          }
+        >
+          Save many
+        </button>
+      )
+    }
+
+    it("sends the origin with a direct save", async () => {
+      const config = cloneConfig(DEFAULT_CONFIG)
+      config.betaExperience.enabled = true
+      const getNoteOrigin = vi.fn<() => NoteOriginInput | null>(() => origin)
+      renderButton(config, createConnectedAction(), { getNoteOrigin })
+
+      fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
+
+      await waitFor(() => {
+        expect(notebaseRowCreateMock).toHaveBeenCalledWith(
+          {
+            notebaseId: "notebase-1",
+            data: { cells: { "column-summary": "A short summary" }, origin },
+          },
+          expect.anything(),
+        )
+      })
+      // Read once, when the click starts the save.
+      expect(getNoteOrigin).toHaveBeenCalledTimes(1)
+    })
+
+    it("sends no origin when the page has none", async () => {
+      const config = cloneConfig(DEFAULT_CONFIG)
+      config.betaExperience.enabled = true
+      renderButton(config, createConnectedAction(), { getNoteOrigin: () => null })
+
+      fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
+
+      await waitFor(() => expect(notebaseRowCreateMock).toHaveBeenCalledTimes(1))
+      expect(notebaseRowCreateMock.mock.calls[0]?.[0].data).not.toHaveProperty("origin")
+    })
+
+    it("puts the origin on every note of a batch save", async () => {
+      const config = cloneConfig(DEFAULT_CONFIG)
+      config.betaExperience.enabled = true
+      notebaseRowCreateManyMock.mockResolvedValue({ txid: 1 })
+      const store = createStore()
+      store.set(configAtom, config)
+      render(
+        <QueryClientProvider client={new QueryClient()}>
+          <Provider store={store}>
+            <SaveManyButton getNoteOrigin={() => origin} />
+          </Provider>
+        </QueryClientProvider>,
+      )
+
+      fireEvent.click(screen.getByRole("button", { name: "Save many" }))
+
+      await waitFor(() => {
+        expect(notebaseRowCreateManyMock).toHaveBeenCalledWith(
+          {
+            notebaseId: "notebase-1",
+            rows: [
+              { cells: { "column-summary": "First" }, origin },
+              { cells: { "column-summary": "Second" }, origin },
+            ],
+          },
+          expect.anything(),
+        )
+      })
+    })
+
+    it("keeps the origin in the pending save of a create-or-connect dialog", () => {
+      const config = cloneConfig(DEFAULT_CONFIG)
+      config.betaExperience.enabled = true
+      const { store } = renderButton(config, createAction(), { getNoteOrigin: () => origin })
+
+      fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
+
+      const dialog = store.get(saveToNotebaseDialogAtom)
+      expect(dialog.open && dialog.pendingNotebaseSave.origin).toEqual(origin)
+    })
+
+    it("keeps the origin in the pending save of a signed-out connected save", () => {
+      mockAuthState.session = null as unknown as typeof mockAuthState.session
+      const config = cloneConfig(DEFAULT_CONFIG)
+      config.betaExperience.enabled = true
+      const { store } = renderButton(config, createConnectedAction(), {
+        getNoteOrigin: () => origin,
+      })
+
+      fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
+
+      const dialog = store.get(saveToNotebaseDialogAtom)
+      expect(dialog.open && dialog.pendingNotebaseSave.kind).toBe("save_to_connected_notebase")
+      expect(dialog.open && dialog.pendingNotebaseSave.origin).toEqual(origin)
     })
   })
 })

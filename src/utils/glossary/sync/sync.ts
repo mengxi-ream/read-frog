@@ -1,7 +1,7 @@
 import type { SyncedGlossary, SyncedTerm } from "./document"
 import type { GlossaryChangeCounts, GlossaryConflict, GlossaryMerge } from "./merge-document"
 import { getGoogleUserInfo, getValidAccessToken } from "@/utils/google-drive/auth"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
 import { readRemoteGlossary, writeRemoteGlossary } from "./drive-store"
 import {
   applyMergedGlossary,
@@ -11,6 +11,8 @@ import {
   readSyncBase,
 } from "./local-store"
 import { mergeGlossaryDocuments, termIdentity, withDistinctIds } from "./merge-document"
+
+const log = createLogger("glossary/sync/sync")
 
 /**
  * A merge that removes more than this much of what the device holds is not
@@ -131,7 +133,7 @@ export async function planGlossarySync({
   // against them, and `commitGlossarySync`'s own check would pass, because the
   // plan it compares against was built under the wrong account too.
   if (expectedEmail !== undefined && email !== expectedEmail) {
-    logger.warn("Google account changed before the glossary sync could start")
+    log.warn("Google account changed before the glossary sync could start")
     return { status: "blocked", reason: "account-changed" }
   }
 
@@ -291,7 +293,7 @@ export async function commitGlossarySync(
       const accessToken = await getValidAccessToken()
       const { email } = await getGoogleUserInfo(accessToken)
       if (email !== plan.email) {
-        logger.warn("Google account changed between planning and committing the glossary sync")
+        log.warn("Google account changed between planning and committing the glossary sync")
         return { status: "retry", reason: "account-changed" }
       }
 
@@ -317,7 +319,7 @@ export async function commitGlossarySync(
           // The cloud now holds the merge, this device does not, and its base
           // still describes the old agreement — so the next sync merges the two
           // and converges. Nothing is lost; the user just runs it again.
-          logger.warn("Glossary changed during sync; leaving the local rows alone")
+          log.warn("Glossary changed during sync; leaving the local rows alone")
           return { status: "retry", reason: "changed-locally" }
         }
         throw error

@@ -5,6 +5,8 @@ export interface ControlsConfig {
   findVideoContainer?: () => HTMLElement | null
   measureHeight: (container: HTMLElement) => number
   checkVisibility: (container: HTMLElement) => boolean
+  /** The change to recheck the controls on, for a player whose subtree churns, as with danmaku. */
+  observe?: MutationObserverInit
 }
 
 export interface PlatformConfig {
@@ -29,13 +31,26 @@ export interface PlatformConfig {
 
   controls?: ControlsConfig
 
+  /** Height of the translate button's box, for a controls row taller than the buttons it holds. */
+  translateButtonHeight?: number
+
   supportsSidebar?: boolean
 
   getVideoId?: () => string | null
 
+  /**
+   * A link to the video playing now, for a note saved from its subtitles.
+   * Needed where the page URL does not name the video (a timeline, a reply's
+   * video); without it the page URL is used.
+   */
+  getVideoPageUrl?: () => string | null
+
   createAiSubtitlesContext?: () => AiSubtitlesContext | null
 
   isLiveContent?: () => Promise<boolean>
+
+  /** What a refused live request tells the reader, when it is not "live streams and their replays". */
+  liveContentMessage?: () => string
 
   /**
    * When true, the host player is showing an ad. Overlay captions for the main

@@ -1,5 +1,5 @@
 import type { InputTranslationLang } from "@/types/config/config"
-import { langCodeISO6393Schema } from "@read-frog/definitions"
+import { languageTagSchema } from "@read-frog/definitions"
 import {
   Select,
   SelectContent,
@@ -39,7 +39,7 @@ export function LangSelect({
         <SelectGroup>
           <SelectItem value="targetCode">{getDisplayLabel("targetCode")}</SelectItem>
           <SelectItem value="sourceCode">{getDisplayLabel("sourceCode")}</SelectItem>
-          {langCodeISO6393Schema.options.map((code) => (
+          {languageTagSchema.options.map((code) => (
             <SelectItem key={code} value={code}>
               {getLanguageLabel(code)}
             </SelectItem>

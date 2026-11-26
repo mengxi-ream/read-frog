@@ -109,14 +109,6 @@ vi.mock("@/utils/host/translate/webpage-context", () => ({
   getOrCreateWebPageContext: mockGetOrCreateWebPageContext,
 }))
 
-vi.mock("@/utils/logger", () => ({
-  logger: {
-    error: vi.fn<(...args: any[]) => any>(),
-    info: vi.fn<(...args: any[]) => any>(),
-    warn: vi.fn<(...args: any[]) => any>(),
-  },
-}))
-
 vi.mock("@/utils/message", () => ({
   sendMessage: mockSendMessage,
 }))

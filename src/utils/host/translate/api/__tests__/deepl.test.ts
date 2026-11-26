@@ -29,7 +29,7 @@ describe("deepl translate adapter", () => {
       text: vi.fn<(...args: any[]) => any>().mockResolvedValue(""),
     })
 
-    const result = await deeplTranslate("Hello", "auto", "zh", {
+    const result = await deeplTranslate("Hello", "auto", "zh-Hans", {
       id: "deepl-default",
       enabled: true,
       name: "DeepL",
@@ -56,7 +56,7 @@ describe("deepl translate adapter", () => {
     })
   })
 
-  it("normalizes zh-TW source language to ZH", async () => {
+  it("sends Traditional Chinese as the source language ZH", async () => {
     fetchMock.mockResolvedValue({
       ok: true,
       status: 200,
@@ -67,7 +67,7 @@ describe("deepl translate adapter", () => {
       text: vi.fn<(...args: any[]) => any>().mockResolvedValue(""),
     })
 
-    await deeplTranslate("甲", "zh-TW", "en", {
+    await deeplTranslate("甲", "zh-Hant", "en", {
       id: "deepl-default",
       enabled: true,
       name: "DeepL",

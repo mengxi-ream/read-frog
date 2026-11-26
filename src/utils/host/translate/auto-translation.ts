@@ -1,11 +1,12 @@
-import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { LanguageTag } from "@read-frog/definitions"
 import type { Config } from "@/types/config/config"
+import { isSameLanguage } from "@read-frog/definitions"
 import { getFinalSourceCode } from "@/utils/config/languages"
 import { urlMatchesPattern } from "@/utils/url-pattern"
 
 export async function shouldEnableAutoTranslation(
   url: string,
-  detectedCodeOrUnd: LangCodeISO6393 | "und",
+  detectedCodeOrUnd: LanguageTag | "und",
   config: Config,
 ): Promise<boolean> {
   const autoTranslatePatterns = config?.pageTranslation.page.autoTranslatePatterns
@@ -24,9 +25,9 @@ export async function shouldEnableAutoTranslation(
 
   let doesMatchLanguage = false
   if (detectedCodeOrUnd !== "und") {
-    doesMatchLanguage = autoTranslateLanguages?.includes(
-      getFinalSourceCode(sourceCode, detectedCodeOrUnd),
-    )
+    const pageLanguage = getFinalSourceCode(sourceCode, detectedCodeOrUnd)
+    doesMatchLanguage =
+      autoTranslateLanguages?.some((language) => isSameLanguage(language, pageLanguage)) ?? false
   }
 
   return doesMatchPattern || doesMatchLanguage

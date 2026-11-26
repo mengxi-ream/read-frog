@@ -7,13 +7,15 @@ else
   echo "✅ No uncommented eruda imports found."
 fi
 
-echo "🔍 Checking for pnpm-lock.yaml overrides..."
-if grep -r "overrides:" pnpm-lock.yaml; then
-  echo "❌ Found pnpm-lock.yaml overrides!"
-  echo "Please remove pnpm-lock.yaml overrides before pushing. Use pnpm unlink:local"
+echo "🔍 Checking for local link overrides in pnpm-lock.yaml..."
+# `pnpm link` adds `link:` overrides that point at a local checkout. Other
+# overrides, such as a security fix for a transitive package, are allowed.
+if awk '/^overrides:/ { inside = 1; next } /^[^ ]/ { inside = 0 } inside && /: link:/' pnpm-lock.yaml | grep .; then
+  echo "❌ Found local link overrides in pnpm-lock.yaml!"
+  echo "Please remove them before pushing. Use pnpm unlink:local"
   exit 1
 else
-  echo "✅ No pnpm-lock.yaml overrides found."
+  echo "✅ No local link overrides found in pnpm-lock.yaml."
 fi
 
 pnpm exec nx fmt:check

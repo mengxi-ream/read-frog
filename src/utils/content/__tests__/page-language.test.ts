@@ -14,7 +14,7 @@ vi.mock("../language", () => ({
 describe("detectPageLanguageLightweight", () => {
   beforeEach(() => {
     mockDetectLanguageWithSource.mockReset()
-    mockDetectLanguageWithSource.mockResolvedValue({ code: "eng", source: "franc" })
+    mockDetectLanguageWithSource.mockResolvedValue({ code: "en", source: "franc" })
 
     document.documentElement.removeAttribute("lang")
     document.head.innerHTML = ""
@@ -29,7 +29,7 @@ describe("detectPageLanguageLightweight", () => {
     const result = await detectPageLanguageLightweight()
 
     expect(result).toEqual({
-      detectedCodeOrUnd: "jpn",
+      detectedCodeOrUnd: "ja",
       detectionSource: "metadata",
     })
     expect(mockDetectLanguageWithSource).not.toHaveBeenCalled()
@@ -42,14 +42,14 @@ describe("detectPageLanguageLightweight", () => {
     const result = await detectPageLanguageLightweight()
 
     expect(result).toEqual({
-      detectedCodeOrUnd: "cmn-Hant",
+      detectedCodeOrUnd: "zh-Hant",
       detectionSource: "metadata",
     })
     expect(mockDetectLanguageWithSource).not.toHaveBeenCalled()
   })
 
   it("prefers Chinese text detection over conflicting English metadata", async () => {
-    mockDetectLanguageWithSource.mockResolvedValueOnce({ code: "cmn", source: "franc" })
+    mockDetectLanguageWithSource.mockResolvedValueOnce({ code: "zh-Hans", source: "franc" })
     document.documentElement.lang = "en"
     document.title = "阅读 - 源仓库"
     document.body.textContent =
@@ -60,7 +60,7 @@ describe("detectPageLanguageLightweight", () => {
     const result = await detectPageLanguageLightweight()
 
     expect(result).toEqual({
-      detectedCodeOrUnd: "cmn",
+      detectedCodeOrUnd: "zh-Hans",
       detectionSource: "franc",
     })
     expect(mockDetectLanguageWithSource).toHaveBeenCalledWith(
@@ -70,7 +70,7 @@ describe("detectPageLanguageLightweight", () => {
   })
 
   it("prefers text detection over conflicting non-English metadata", async () => {
-    mockDetectLanguageWithSource.mockResolvedValueOnce({ code: "eng", source: "franc" })
+    mockDetectLanguageWithSource.mockResolvedValueOnce({ code: "en", source: "franc" })
     document.documentElement.lang = "ja-JP"
     document.body.textContent =
       "English body text with enough visible content to verify incorrect page metadata. ".repeat(2)
@@ -78,13 +78,13 @@ describe("detectPageLanguageLightweight", () => {
     const result = await detectPageLanguageLightweight()
 
     expect(result).toEqual({
-      detectedCodeOrUnd: "eng",
+      detectedCodeOrUnd: "en",
       detectionSource: "franc",
     })
   })
 
   it("keeps English metadata when text detection agrees", async () => {
-    mockDetectLanguageWithSource.mockResolvedValueOnce({ code: "eng", source: "franc" })
+    mockDetectLanguageWithSource.mockResolvedValueOnce({ code: "en", source: "franc" })
     document.documentElement.lang = "en"
     document.body.textContent =
       "English body text with enough visible content to verify matching page metadata. ".repeat(2)
@@ -92,13 +92,13 @@ describe("detectPageLanguageLightweight", () => {
     const result = await detectPageLanguageLightweight()
 
     expect(result).toEqual({
-      detectedCodeOrUnd: "eng",
+      detectedCodeOrUnd: "en",
       detectionSource: "metadata",
     })
   })
 
   it("keeps traditional Chinese metadata when text detection returns generic Chinese", async () => {
-    mockDetectLanguageWithSource.mockResolvedValueOnce({ code: "cmn", source: "franc" })
+    mockDetectLanguageWithSource.mockResolvedValueOnce({ code: "zh-Hans", source: "franc" })
     document.head.innerHTML = `<meta property="og:locale" content="zh_TW">`
     document.body.textContent =
       "繁體中文內容用來驗證頁面語言中繼資料，這段文字需要足夠長，避免短文本時跳過正文偵測。".repeat(
@@ -108,7 +108,7 @@ describe("detectPageLanguageLightweight", () => {
     const result = await detectPageLanguageLightweight()
 
     expect(result).toEqual({
-      detectedCodeOrUnd: "cmn-Hant",
+      detectedCodeOrUnd: "zh-Hant",
       detectionSource: "metadata",
     })
   })
@@ -125,7 +125,7 @@ describe("detectPageLanguageLightweight", () => {
     const result = await detectPageLanguageLightweight()
 
     expect(result).toEqual({
-      detectedCodeOrUnd: "eng",
+      detectedCodeOrUnd: "en",
       detectionSource: "franc",
     })
     expect(mockDetectLanguageWithSource).toHaveBeenCalledTimes(1)

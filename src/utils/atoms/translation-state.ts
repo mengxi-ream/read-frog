@@ -1,8 +1,10 @@
 import type { TranslationState } from "@/types/translation-state"
 import { atom } from "jotai"
 import { translationStateSchema } from "@/types/translation-state"
-import { logger } from "../logger"
+import { createLogger } from "@/utils/logging/logger"
 import { onMessage, sendMessage } from "../message"
+
+const log = createLogger("atoms/translation-state")
 
 export function createTranslationStateAtomForContentScript(defaultValue: TranslationState) {
   const baseAtom = atom<TranslationState>(defaultValue)
@@ -17,7 +19,7 @@ export function createTranslationStateAtomForContentScript(defaultValue: Transla
         }
       })
       .catch((error) => {
-        logger.error("Error getting initial translation state:", error)
+        log.error("Error getting initial translation state", { error })
       })
 
     // Watch for changes

@@ -4,8 +4,10 @@ import {
   ANALYTICS_ENABLED_STORAGE_KEY,
   DEFAULT_ANALYTICS_ENABLED,
 } from "@/utils/constants/analytics"
-import { logger } from "../logger"
+import { createLogger } from "@/utils/logging/logger"
 import { storageAdapter } from "./storage-adapter"
+
+const log = createLogger("atoms/analytics")
 
 const analyticsEnabledSchema = z.boolean()
 
@@ -20,7 +22,7 @@ export const analyticsEnabledAtom = atom(
     try {
       await storageAdapter.set(ANALYTICS_ENABLED_STORAGE_KEY, nextEnabled, analyticsEnabledSchema)
     } catch (error) {
-      console.error("Failed to persist analytics preference:", error)
+      log.error("Failed to persist analytics preference", { error })
       set(baseAnalyticsEnabledAtom, previousEnabled)
     }
   },
@@ -35,7 +37,7 @@ baseAnalyticsEnabledAtom.onMount = (setAtom) => {
 
   const handleVisibilityChange = () => {
     if (document.visibilityState === "visible") {
-      logger.info("baseAnalyticsEnabledAtom onMount handleVisibilityChange when: ", new Date())
+      log.debug("baseAnalyticsEnabledAtom reloaded on visibility change")
       void storageAdapter
         .get(ANALYTICS_ENABLED_STORAGE_KEY, DEFAULT_ANALYTICS_ENABLED, analyticsEnabledSchema)
         .then(setAtom)

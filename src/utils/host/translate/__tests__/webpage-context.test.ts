@@ -2,19 +2,10 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
-const { mockCreateMarkdownContent, mockDefuddleConstructor, mockParse, mockWarn } = vi.hoisted(
-  () => ({
-    mockCreateMarkdownContent: vi.fn<(...args: any[]) => any>(),
-    mockDefuddleConstructor: vi.fn<(...args: any[]) => any>(),
-    mockParse: vi.fn<(...args: any[]) => any>(),
-    mockWarn: vi.fn<(...args: any[]) => any>(),
-  }),
-)
-
-vi.mock("@/utils/logger", () => ({
-  logger: {
-    warn: mockWarn,
-  },
+const { mockCreateMarkdownContent, mockDefuddleConstructor, mockParse } = vi.hoisted(() => ({
+  mockCreateMarkdownContent: vi.fn<(...args: any[]) => any>(),
+  mockDefuddleConstructor: vi.fn<(...args: any[]) => any>(),
+  mockParse: vi.fn<(...args: any[]) => any>(),
 }))
 
 async function loadModule() {
@@ -40,7 +31,6 @@ describe("getOrCreateWebPageContext", () => {
     mockDefuddleConstructor.mockReset()
     mockCreateMarkdownContent.mockReset()
     mockParse.mockReset()
-    mockWarn.mockReset()
 
     mockParse.mockReturnValue({ content: "<h1>Readable page body</h1>" })
     mockCreateMarkdownContent.mockReturnValue("# Readable page body")
@@ -69,6 +59,39 @@ describe("getOrCreateWebPageContext", () => {
       webContent: first?.webContent,
     })
     expect(mockDefuddleConstructor).toHaveBeenCalledTimes(1)
+  })
+
+  it("builds the context once for callers that arrive while it is being built", async () => {
+    const { getOrCreateWebPageContext } = await loadModule()
+
+    // The first screen of a page starts all of its paragraphs at once.
+    const results = await Promise.all(Array.from({ length: 5 }, () => getOrCreateWebPageContext()))
+
+    expect(mockDefuddleConstructor).toHaveBeenCalledTimes(1)
+    for (const result of results) {
+      expect(result).toBe(results[0])
+    }
+
+    await getOrCreateWebPageContext()
+    expect(mockDefuddleConstructor).toHaveBeenCalledTimes(1)
+  })
+
+  it("does not hand a build for the previous URL to a caller on the new one", async () => {
+    const { getOrCreateWebPageContext } = await loadModule()
+
+    const first = getOrCreateWebPageContext()
+    document.title = "Next Article Title"
+    window.history.replaceState({}, "", "/article-2")
+    const second = getOrCreateWebPageContext()
+
+    expect((await first)?.webTitle).toBe("Original Title")
+    expect((await second)?.webTitle).toBe("Next Article Title")
+    expect((await second)?.url).toBe(window.location.href)
+    expect(mockDefuddleConstructor).toHaveBeenCalledTimes(2)
+
+    // The newer build is the one kept.
+    expect(await getOrCreateWebPageContext()).toBe(await second)
+    expect(mockDefuddleConstructor).toHaveBeenCalledTimes(2)
   })
 
   it("extracts webpage content with Defuddle and converts it to markdown", async () => {
@@ -224,13 +247,17 @@ describe("getOrCreateWebPageContext", () => {
     })
     document.body.innerHTML = "<main>Fallback body text</main>"
     const { getOrCreateWebPageContext } = await loadModule()
+    // loadModule resets modules; capture the logger copy the fresh module uses.
+    const { captureLogs, loggedError, logRecord } = await import("@/utils/logging/testing")
+    const logs = captureLogs()
 
     const result = await getOrCreateWebPageContext()
 
     expect(result?.webContent).toBe("Fallback body text")
-    expect(mockWarn).toHaveBeenCalledWith(
-      "Defuddle parsing failed, falling back to body text:",
-      expect.any(Error),
+    expect(logs).toContainEqual(
+      logRecord("warn", "Defuddle parsing failed, falling back to body text", {
+        error: loggedError("parse failed"),
+      }),
     )
   })
 })

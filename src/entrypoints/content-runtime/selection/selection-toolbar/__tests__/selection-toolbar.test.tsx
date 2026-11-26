@@ -2,10 +2,16 @@
 import { act, cleanup, render, screen, waitFor } from "@testing-library/react"
 import { atom, getDefaultStore, useAtomValue } from "jotai"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { DEFERRED_SELECTION_OPEN_EVENT } from "@/utils/constants/selection"
+// Renamed because the config mock below declares a `configAtom` of its own.
+import { configAtom as mockedConfigAtom, configFieldsAtomMap } from "@/utils/atoms/config"
+import {
+  DEFERRED_SELECTION_OPEN_EVENT,
+  EXTERNAL_SELECTION_OPEN_EVENT,
+} from "@/utils/constants/selection"
 import { SELECTION_CONTENT_OVERLAY_ROOT_ATTRIBUTE } from "@/utils/constants/selection-overlay-layers"
-import { selectionSessionAtom } from "../atoms"
+import { setFeatureOn } from "@/utils/features"
+import { createShadowSelection } from "../../__tests__/composed-selection"
+import { isSelectionToolbarHiddenUntilReloadAtom, selectionSessionAtom } from "../atoms"
 import { SelectionToolbar } from "../index"
 import { MODAL_DIALOG_HOST_SLOT_ATTRIBUTE } from "../modal-dialog-host"
 
@@ -64,28 +70,39 @@ vi.mock("../../annotation/toolbar-slot", () => ({
   }),
 }))
 
-// Mock atoms
+// Mock atoms. The toolbar section is the one the tests set; the toolbar reads it
+// both on its own and as part of the whole config.
 vi.mock("@/utils/atoms/config", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/utils/atoms/config")>()
+  const configAtom = atom({
+    ...actual.configAtom.init,
+    selectionToolbar: {
+      enabled: true,
+      disabledSelectionToolbarPatterns: [],
+      opacity: 100,
+      features: {
+        translate: {
+          enabled: true,
+          providerId: "google-translate-default",
+          shortcut: "Alt+T",
+        },
+        speak: { enabled: true },
+      },
+      annotation: { enabled: true, shortcut: "Alt+Shift+E" },
+      customActions: [],
+    } as any,
+  })
   return {
     ...actual,
+    configAtom,
     configFieldsAtomMap: {
       ...actual.configFieldsAtomMap,
-      selectionToolbar: atom({
-        enabled: true,
-        disabledSelectionToolbarPatterns: [],
-        opacity: 100,
-        features: {
-          translate: {
-            enabled: true,
-            providerId: "google-translate-default",
-            shortcut: "Alt+T",
-          },
-          speak: { enabled: true },
+      selectionToolbar: atom(
+        (get) => get(configAtom).selectionToolbar,
+        (get, set, selectionToolbar: any) => {
+          set(configAtom, { ...get(configAtom), selectionToolbar })
         },
-        annotation: { enabled: true, shortcut: "Alt+Shift+E" },
-        customActions: [],
-      }),
+      ),
     },
   }
 })
@@ -119,6 +136,7 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
 
     // Mock window.getSelection with dynamic text
     window.getSelection = vi.fn<(...args: any[]) => any>(() => ({
+      type: "Range",
       toString: mockSelectionToString,
       getRangeAt: () => ({
         startContainer: document.body,
@@ -139,12 +157,15 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
 
   const setMockSelectionText = (text: string, containsNodeResult = true) => {
     window.getSelection = vi.fn<(...args: any[]) => any>(() => ({
+      type: text ? "Range" : "Caret",
       toString: vi.fn<(...args: any[]) => any>(() => text),
+      // A blank selection covers no text: a caret, or a space, which a
+      // collapsed range stands in for here.
       getRangeAt: () => ({
         startContainer: document.body,
         startOffset: 0,
         endContainer: document.body,
-        endOffset: 1,
+        endOffset: text.trim() ? 1 : 0,
       }),
       containsNode: vi.fn<(...args: any[]) => any>(() => containsNodeResult),
     }))
@@ -193,6 +214,11 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
 
   const getOverlayRoot = () =>
     document.querySelector<HTMLElement>(`[${SELECTION_CONTENT_OVERLAY_ROOT_ATTRIBUTE}]`)
+
+  const getToolbarDividers = () =>
+    [...(document.querySelector("[data-slot='selection-toolbar-buttons']")?.children ?? [])].filter(
+      (element) => element.classList.contains("w-px"),
+    )
 
   const expectOverlayCollapsed = () => {
     expect(getOverlayRoot()).toHaveClass("h-0")
@@ -299,6 +325,25 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     expect(getOverlayRoot()).not.toHaveClass("inset-0")
   })
 
+  it("stays hidden after its close menu hid it until reload", async () => {
+    store.set(isSelectionToolbarHiddenUntilReloadAtom, true)
+    try {
+      render(
+        <div>
+          <SelectionToolbar />
+          <div data-testid="test-element">{MOCK_SELECTED_TEXT}</div>
+        </div>,
+      )
+
+      await triggerMouseUpWithSelection(screen.getByTestId("test-element"))
+
+      expect(getOverlayRoot()).toHaveClass("h-0", "w-0")
+      expect(getOverlayRoot()).not.toHaveClass("inset-0")
+    } finally {
+      store.set(isSelectionToolbarHiddenUntilReloadAtom, false)
+    }
+  })
+
   it("keeps the overlay root collapsed when no toolbar item is enabled", async () => {
     await store.set(configFieldsAtomMap.selectionToolbar, {
       ...DEFAULT_SELECTION_TOOLBAR_CONFIG,
@@ -358,6 +403,51 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     })
     expectToolbarVisible()
     expect(screen.getByTestId("more-menu")).toBeInTheDocument()
+  })
+
+  it("draws the annotation button's divider only when something follows it", async () => {
+    const config = store.get(mockedConfigAtom)
+    const { features } = DEFAULT_SELECTION_TOOLBAR_CONFIG
+    // Word annotation alone: Custom AI Actions, Selection translation and Speak are off.
+    store.set(mockedConfigAtom, { ...config, ...setFeatureOn("customActions", false) })
+    await store.set(configFieldsAtomMap.selectionToolbar, {
+      ...DEFAULT_SELECTION_TOOLBAR_CONFIG,
+      features: {
+        translate: { ...features.translate, enabled: false },
+        speak: { ...features.speak, enabled: false },
+      },
+    })
+    try {
+      render(
+        <div>
+          <SelectionToolbar />
+          <div data-testid="test-element">{MOCK_SELECTED_TEXT}</div>
+        </div>,
+      )
+
+      await triggerMouseUpWithSelection(screen.getByTestId("test-element"))
+
+      await waitFor(() => expectToolbarVisible())
+      expect(screen.queryByTestId("more-menu")).not.toBeInTheDocument()
+      expect(getToolbarDividers()).toHaveLength(0)
+
+      // Speak back on but unpinned: the "more" menu follows the annotation button.
+      await act(async () => {
+        await store.set(configFieldsAtomMap.selectionToolbar, {
+          ...DEFAULT_SELECTION_TOOLBAR_CONFIG,
+          features: {
+            translate: { ...features.translate, enabled: false },
+            speak: { ...features.speak, enabled: true },
+          },
+          unpinned: ["speak"],
+        })
+      })
+
+      expect(screen.getByTestId("more-menu")).toBeInTheDocument()
+      expect(getToolbarDividers()).toHaveLength(1)
+    } finally {
+      store.set(mockedConfigAtom, config)
+    }
   })
 
   it("should show toolbar when selecting text in a normal div element", async () => {
@@ -466,6 +556,107 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     expectToolbarHidden()
   })
 
+  // https://github.com/mengxi-ream/read-frog/issues/2385
+  it("keeps the toolbar for a selection across shadow roots, which the browser stringifies blank", async () => {
+    render(
+      <div>
+        <SelectionToolbar />
+        <div data-testid="test-element">Some text</div>
+      </div>,
+    )
+
+    await clearToolbarState()
+
+    const host = document.createElement("div")
+    const shadowRoot = host.attachShadow({ mode: "open" })
+    shadowRoot.innerHTML = `<p>nested reply</p><span id="date"></span>`
+    const dateShadowRoot = shadowRoot.querySelector("#date")!.attachShadow({ mode: "open" })
+    dateShadowRoot.innerHTML = `<div id="pubdate">5 hours ago</div>`
+    screen.getByTestId("test-element").append(host)
+
+    const { selection } = createShadowSelection(
+      {
+        startContainer: shadowRoot.querySelector("p")!.firstChild!,
+        startOffset: 0,
+        endContainer: dateShadowRoot.querySelector("#pubdate")!,
+        endOffset: 0,
+      },
+      " \n",
+    )
+    window.getSelection = vi.fn<(...args: any[]) => any>(() => selection)
+
+    await triggerMouseUpWithSelection(screen.getByTestId("test-element"))
+    await waitFor(() => expectToolbarVisible())
+    expect(getDefaultStore().get(selectionSessionAtom)?.selectionSnapshot.text).toBe("nested reply")
+
+    await act(async () => {
+      document.dispatchEvent(new Event("selectionchange"))
+    })
+    expectToolbarVisible()
+
+    // A click elsewhere collapses it to a caret.
+    setMockSelectionText("")
+    await act(async () => {
+      document.dispatchEvent(new Event("selectionchange"))
+    })
+    expectToolbarHidden()
+  })
+
+  // Shift+Arrow can shrink a selection down to a space: still a Range, with no text.
+  it("hides the toolbar and forgets the selection once only whitespace is selected", async () => {
+    render(
+      <div>
+        <SelectionToolbar />
+        <div data-testid="test-element">Some text</div>
+      </div>,
+    )
+
+    await clearToolbarState()
+    await triggerMouseUpWithSelection(screen.getByTestId("test-element"))
+    await waitFor(() => expectToolbarVisible())
+    expect(getDefaultStore().get(selectionSessionAtom)?.selectionSnapshot.text).toBe(
+      MOCK_SELECTED_TEXT,
+    )
+
+    setMockSelectionText(" ")
+    await act(async () => {
+      document.dispatchEvent(new Event("selectionchange"))
+    })
+    expectToolbarHidden()
+    expect(getDefaultStore().get(selectionSessionAtom)).toBeNull()
+  })
+
+  it("keeps the toolbar for text Firefox selects in a text control, which it reports as a caret", async () => {
+    render(
+      <div>
+        <SelectionToolbar />
+        <div data-testid="test-element">Some text</div>
+      </div>,
+    )
+
+    await clearToolbarState()
+    await triggerMouseUpWithSelection(screen.getByTestId("test-element"))
+    await waitFor(() => expectToolbarVisible())
+
+    // The page's selection is a caret; the control holds the selected text.
+    window.getSelection = vi.fn<(...args: any[]) => any>(() => ({
+      type: "Caret",
+      isCollapsed: true,
+      toString: () => MOCK_SELECTED_TEXT,
+      getRangeAt: () => ({
+        startContainer: document.body,
+        startOffset: 0,
+        endContainer: document.body,
+        endOffset: 0,
+      }),
+      containsNode: () => true,
+    }))
+    await act(async () => {
+      document.dispatchEvent(new Event("selectionchange"))
+    })
+    expectToolbarVisible()
+  })
+
   it("should show toolbar when valid text is selected", async () => {
     render(
       <div>
@@ -478,6 +669,65 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
 
     await triggerMouseUpWithSelection(screen.getByTestId("test-element"))
     await waitFor(() => expectToolbarVisible())
+  })
+
+  it("records the page the text was selected on as the session's note origin", async () => {
+    window.history.replaceState(null, "", "/articles/frogs?page=2")
+    document.title = "  Frogs  "
+    render(
+      <div>
+        <SelectionToolbar />
+        <div data-testid="test-element">Some text</div>
+      </div>,
+    )
+
+    await clearToolbarState()
+
+    await triggerMouseUpWithSelection(screen.getByTestId("test-element"))
+    await waitFor(() => expectToolbarVisible())
+
+    expect(getDefaultStore().get(selectionSessionAtom)?.noteOrigin).toEqual({
+      kind: "webpage",
+      url: `${window.location.origin}/articles/frogs?page=2`,
+      title: "Frogs",
+    })
+  })
+
+  it("opens and records the page in Firefox content scripts too (#2470)", async () => {
+    // Firefox content scripts see the page's URL objects through Xray wrappers,
+    // where the iterators `searchParams` methods return have no Symbol.iterator.
+    const searchParamsPrototype = Object.getPrototypeOf(
+      new URL("https://example.com/").searchParams,
+    )
+    const iteratorSpies = (["keys", "values", "entries"] as const).map((method) =>
+      vi.spyOn(searchParamsPrototype, method).mockImplementation(() => ({
+        next: () => ({ done: true, value: undefined }),
+      })),
+    )
+    window.history.replaceState(null, "", "/articles/frogs?token=secret&page=2")
+    document.title = "Frogs"
+
+    try {
+      render(
+        <div>
+          <SelectionToolbar />
+          <div data-testid="test-element">Some text</div>
+        </div>,
+      )
+
+      await clearToolbarState()
+
+      await triggerMouseUpWithSelection(screen.getByTestId("test-element"))
+      await waitFor(() => expectToolbarVisible())
+
+      expect(getDefaultStore().get(selectionSessionAtom)?.noteOrigin).toEqual({
+        kind: "webpage",
+        url: `${window.location.origin}/articles/frogs?page=2`,
+        title: "Frogs",
+      })
+    } finally {
+      for (const spy of iteratorSpies) spy.mockRestore()
+    }
   })
 
   it("should keep the toolbar visible on right-click so context menu translation can reuse the selection", async () => {
@@ -878,7 +1128,12 @@ describe("selectionToolbar - positioning logic", () => {
       toJSON: () => ({}),
     }) as DOMRect
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    await store.set(
+      configFieldsAtomMap.selectionToolbar,
+      structuredClone(DEFAULT_SELECTION_TOOLBAR_CONFIG),
+    )
+
     // Mock requestAnimationFrame to execute callbacks synchronously
     rafCallbacks = []
     originalRequestAnimationFrame = window.requestAnimationFrame
@@ -1168,6 +1423,106 @@ describe("selectionToolbar - positioning logic", () => {
 
       expect(topValue - 200).toBeGreaterThanOrEqual(20)
     })
+  })
+
+  it("opens above a selection dragged downward when pinned above", async () => {
+    await store.set(configFieldsAtomMap.selectionToolbar, {
+      ...DEFAULT_SELECTION_TOOLBAR_CONFIG,
+      placement: "above",
+    })
+    render(
+      <div>
+        <SelectionToolbar />
+        <div data-testid="test-element">Test content</div>
+      </div>,
+    )
+
+    const toolbar = getToolbarElement()
+    mockToolbarDimensions(toolbar, 200, 50)
+
+    // The selection spans 100–200; the drag ends at its bottom.
+    await triggerMouseDownAndUp(screen.getByTestId("test-element"), 100, 100, 200, 200)
+
+    // Clear of the selection's top edge, where following the drag would put it below.
+    expect(toolbar.style.left).toBe("200px")
+    expect(toolbar.style.top).toBe("42px")
+  })
+
+  it("opens below a selection dragged upward when pinned below", async () => {
+    await store.set(configFieldsAtomMap.selectionToolbar, {
+      ...DEFAULT_SELECTION_TOOLBAR_CONFIG,
+      placement: "below",
+    })
+    render(
+      <div>
+        <SelectionToolbar />
+        <div data-testid="test-element">Test content</div>
+      </div>,
+    )
+
+    const toolbar = getToolbarElement()
+    mockToolbarDimensions(toolbar, 200, 50)
+
+    await triggerMouseDownAndUp(screen.getByTestId("test-element"), 300, 200, 200, 100)
+
+    expect(toolbar.style.left).toBe("25px")
+    expect(toolbar.style.top).toBe("208px")
+  })
+
+  it("moves a toolbar pinned above below the selection once it scrolls to the top", async () => {
+    await store.set(configFieldsAtomMap.selectionToolbar, {
+      ...DEFAULT_SELECTION_TOOLBAR_CONFIG,
+      placement: "above",
+    })
+    render(
+      <div>
+        <SelectionToolbar />
+        <div data-testid="test-element">Test content</div>
+      </div>,
+    )
+
+    const toolbar = getToolbarElement()
+    mockToolbarDimensions(toolbar, 200, 50)
+    await triggerMouseDownAndUp(screen.getByTestId("test-element"), 100, 100, 200, 200)
+    expect(toolbar.style.top).toBe("42px")
+
+    selectionRects = [createRect({ left: 100, top: 10, width: 100, height: 100 })]
+    await act(async () => {
+      window.dispatchEvent(new Event("scroll"))
+      const callbacks = [...rafCallbacks]
+      rafCallbacks = []
+      callbacks.forEach((cb) => cb(0))
+    })
+
+    expect(toolbar.style.top).toBe("130px")
+  })
+
+  it("pins an ebook selection by the box the reader sends", async () => {
+    await store.set(configFieldsAtomMap.selectionToolbar, {
+      ...DEFAULT_SELECTION_TOOLBAR_CONFIG,
+      placement: "above",
+    })
+    render(<SelectionToolbar />)
+    const toolbar = getToolbarElement()
+    mockToolbarDimensions(toolbar, 200, 50)
+
+    await act(async () => {
+      window.dispatchEvent(
+        new CustomEvent(EXTERNAL_SELECTION_OPEN_EVENT, {
+          detail: {
+            requestId: "req-1",
+            text: "Selected ebook text",
+            contextParagraphs: [],
+            rect: { top: 300, left: 40, width: 400, height: 60 },
+            anchor: { x: 240, y: 350 },
+            direction: "bottom-right",
+          },
+        }),
+      )
+    })
+
+    expect(toolbar.style.left).toBe("240px")
+    expect(toolbar.style.top).toBe("242px")
   })
 
   it("should position toolbar at bottom-left when selecting from top-right to bottom-left", async () => {

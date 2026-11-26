@@ -32,7 +32,10 @@ describe("trackGlossaryUsed", () => {
   })
 
   it("reports the glossary as its own feature so the daily cache throttles it on its own", () => {
-    trackGlossaryUsed("pageTranslation", [term], "cmn", { provider: "openai", backend_kind: "llm" })
+    trackGlossaryUsed("pageTranslation", [term], "zh-Hans", {
+      provider: "openai",
+      backend_kind: "llm",
+    })
 
     expect(lastEvent()).toEqual({
       feature: ANALYTICS_FEATURE.GLOSSARY,
@@ -41,7 +44,7 @@ describe("trackGlossaryUsed", () => {
       latency_ms: 0,
       provider: "openai",
       backend_kind: "llm",
-      target_language: "cmn",
+      target_language: "zh-Hans",
     })
   })
 
@@ -49,7 +52,7 @@ describe("trackGlossaryUsed", () => {
     let clock = 1_000
     const nowSpy = vi.spyOn(Date, "now").mockImplementation(() => (clock += 5))
     try {
-      trackGlossaryUsed("pageTranslation", [term], "cmn", {
+      trackGlossaryUsed("pageTranslation", [term], "zh-Hans", {
         provider: "openai",
         backend_kind: "llm",
       })
@@ -61,7 +64,7 @@ describe("trackGlossaryUsed", () => {
   })
 
   it("stays silent when nothing matched, so merely owning a glossary reports nothing", () => {
-    trackGlossaryUsed("pageTranslation", [], "cmn", { provider: "openai", backend_kind: "llm" })
+    trackGlossaryUsed("pageTranslation", [], "zh-Hans", { provider: "openai", backend_kind: "llm" })
 
     expect(sendMessageMock).not.toHaveBeenCalled()
   })
@@ -70,29 +73,29 @@ describe("trackGlossaryUsed", () => {
     for (const feature of GLOSSARY_FEATURE_KEYS) {
       sendMessageMock.mockReset()
       resetGlossaryUsageThrottleForTests()
-      trackGlossaryUsed(feature, [term], "cmn")
+      trackGlossaryUsed(feature, [term], "zh-Hans")
       expect(lastEvent().surface).toEqual(expect.any(String))
     }
   })
 
   it("names the feature the terms rode in on, since the daily cache keys on feature alone", () => {
-    trackGlossaryUsed("selectionTranslation", [term], "cmn")
+    trackGlossaryUsed("selectionTranslation", [term], "zh-Hans")
     expect(lastEvent().surface).toBe(ANALYTICS_SURFACE.SELECTION_TOOLBAR)
 
     // No throttle reset: each feature gets its own budget, so a page translation
     // in progress cannot mute the selection toolbar the user just reached for.
     sendMessageMock.mockReset()
-    trackGlossaryUsed("videoSubtitles", [term], "cmn")
+    trackGlossaryUsed("videoSubtitles", [term], "zh-Hans")
     expect(lastEvent().surface).toBe(ANALYTICS_SURFACE.VIDEO_SUBTITLES)
 
     sendMessageMock.mockReset()
-    trackGlossaryUsed("inputTranslation", [term], "cmn")
+    trackGlossaryUsed("inputTranslation", [term], "zh-Hans")
     expect(lastEvent().surface).toBe(ANALYTICS_SURFACE.INPUT_TRANSLATION)
   })
 
   it("reports one paragraph, not every paragraph of a page", () => {
     for (let paragraph = 0; paragraph < 200; paragraph++) {
-      trackGlossaryUsed("pageTranslation", [term], "cmn")
+      trackGlossaryUsed("pageTranslation", [term], "zh-Hans")
     }
 
     expect(sendMessageMock).toHaveBeenCalledTimes(1)
@@ -101,34 +104,34 @@ describe("trackGlossaryUsed", () => {
   it("reports again once the interval has passed, so a tab open past midnight is not muted", () => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date("2026-09-17T12:00:00Z"))
-    trackGlossaryUsed("pageTranslation", [term], "cmn")
+    trackGlossaryUsed("pageTranslation", [term], "zh-Hans")
     expect(sendMessageMock).toHaveBeenCalledTimes(1)
 
     vi.advanceTimersByTime(4 * 60 * 1000)
-    trackGlossaryUsed("pageTranslation", [term], "cmn")
+    trackGlossaryUsed("pageTranslation", [term], "zh-Hans")
     expect(sendMessageMock).toHaveBeenCalledTimes(1)
 
     vi.advanceTimersByTime(60 * 1000)
-    trackGlossaryUsed("pageTranslation", [term], "cmn")
+    trackGlossaryUsed("pageTranslation", [term], "zh-Hans")
     expect(sendMessageMock).toHaveBeenCalledTimes(2)
   })
 
   it("does not spend a feature's budget on a run that matched nothing", () => {
-    trackGlossaryUsed("pageTranslation", [], "cmn")
-    trackGlossaryUsed("pageTranslation", [term], "cmn")
+    trackGlossaryUsed("pageTranslation", [], "zh-Hans")
+    trackGlossaryUsed("pageTranslation", [term], "zh-Hans")
 
     expect(sendMessageMock).toHaveBeenCalledTimes(1)
   })
 
   it("ignores hosted routes that build no glossary-bearing prompt of their own", () => {
-    trackGlossaryUsed("videoSubtitlesSegmentation", [term], "cmn")
-    trackGlossaryUsed("languageDetection", [term], "cmn")
+    trackGlossaryUsed("videoSubtitlesSegmentation", [term], "zh-Hans")
+    trackGlossaryUsed("languageDetection", [term], "zh-Hans")
 
     expect(sendMessageMock).not.toHaveBeenCalled()
   })
 
   it("falls back to the unknown provider rather than dropping the event", () => {
-    trackGlossaryUsed("pageTranslation", [term], "cmn")
+    trackGlossaryUsed("pageTranslation", [term], "zh-Hans")
 
     expect(lastEvent()).toMatchObject(UNKNOWN_FEATURE_PROVIDER)
   })
@@ -144,7 +147,7 @@ describe("trackGlossaryUsed", () => {
           keepOriginal: false,
         },
       ],
-      "cmn",
+      "zh-Hans",
     )
 
     const serialized = JSON.stringify(lastEvent())

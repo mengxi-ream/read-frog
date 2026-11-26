@@ -7,12 +7,26 @@ import type { ResolvedProviderRef, SystemProviderRef } from "../provider-registr
 import type { LLMProviderConfig, TranslateProviderConfig } from "@/types/config/provider"
 import type { HostedAiStatus, HostedAiTierStatus } from "@/utils/hosted-ai/types"
 import { beforeEach, describe, expect, expectTypeOf, it, vi } from "vitest"
+import { fakeBrowser } from "wxt/testing/fake-browser"
+import {
+  LUNA_PROVIDER_ID,
+  SOL_PROVIDER_ID,
+  testHostedAiModels,
+} from "@/utils/hosted-ai/__tests__/test-models"
+import { formatUiAlternatives } from "@/utils/i18n"
 
 // The background owns the request and its cache; content only asks for it.
 const hostedAiStatus = vi.fn<(...args: unknown[]) => Promise<unknown>>()
 
 vi.mock("@/utils/message", () => ({
   sendMessage: (...args: unknown[]) => hostedAiStatus(...args),
+}))
+
+// The plan decides whether a spent pool offers an upgrade; it is read from billing.
+const getBuiltInAiUpgradePlan = vi.fn<() => Promise<"free" | "pro" | null>>()
+
+vi.mock("@/utils/hosted-ai/upgrade-plan", () => ({
+  getBuiltInAiUpgradePlan: () => getBuiltInAiUpgradePlan(),
 }))
 
 const {
@@ -26,9 +40,25 @@ const {
 
 const SYSTEM_PROVIDER: SystemProviderRef = {
   kind: "system",
-  id: "read-frog-free-ai",
-  name: "Built-in AI",
+  id: LUNA_PROVIDER_ID,
+  name: "GPT-6 Luna",
+  model: "gpt-6-luna",
+}
+
+const SOL_PROVIDER: SystemProviderRef = {
+  kind: "system",
+  id: SOL_PROVIDER_ID,
+  name: "GPT-6.2 Sol",
+  model: "gpt-6.2-sol",
+}
+
+const LUNA_REF = {
+  kind: "system",
+  providerId: LUNA_PROVIDER_ID,
+  model: "gpt-6-luna",
   modelTier: "normal",
+  modelRevision: "gpt-6-luna-r1",
+  reasoning: "none",
 }
 
 function tier(overrides: Partial<HostedAiTierStatus> = {}): HostedAiTierStatus {
@@ -37,18 +67,23 @@ function tier(overrides: Partial<HostedAiTierStatus> = {}): HostedAiTierStatus {
     available: true,
     unavailableReason: null,
     upgradeTo: null,
-    requiresUltra: false,
     modelRevision: "normal-r7",
     ...overrides,
   }
 }
 
-function status(normal: HostedAiTierStatus = tier()): HostedAiStatus {
+function status(
+  normal: HostedAiTierStatus = tier(),
+  models: HostedAiStatus["models"] = testHostedAiModels(),
+): HostedAiStatus {
+  const advance = tier({ modelRevision: "advance-r4" })
   return {
-    credits: [],
+    pools: [],
+    models,
     features: {
-      pageTranslation: { normal, advance: tier({ modelRevision: "advance-r4" }) },
-      videoSubtitles: { normal, advance: tier({ modelRevision: "advance-r4" }) },
+      pageTranslation: { normal, advance },
+      videoSubtitles: { normal, advance },
+      languageDetection: { normal, advance },
     } as unknown as HostedAiStatus["features"],
   }
 }
@@ -67,6 +102,7 @@ function deferred<T>() {
 describe("serializeProviderRef status coalescing", () => {
   beforeEach(() => {
     hostedAiStatus.mockReset()
+    fakeBrowser.reset()
   })
 
   it("asks the background once for callers that overlap, and gives each the same verdict", async () => {
@@ -88,12 +124,7 @@ describe("serializeProviderRef status coalescing", () => {
 
     expect(hostedAiStatus).toHaveBeenCalledTimes(1)
     for (const ref of [page, subtitles, segmentation]) {
-      expect(ref).toEqual({
-        kind: "system",
-        providerId: "read-frog-free-ai",
-        modelTier: "normal",
-        modelRevision: "normal-r7",
-      })
+      expect(ref).toEqual(LUNA_REF)
     }
   })
 
@@ -155,7 +186,7 @@ describe("serializeProviderRef status coalescing", () => {
     // every later call to the fail-open path.
     hostedAiStatus.mockResolvedValueOnce(status())
     await expect(serializeProviderRef(SYSTEM_PROVIDER, "pageTranslation")).resolves.toMatchObject({
-      modelRevision: "normal-r7",
+      modelRevision: "gpt-6-luna-r1",
     })
     expect(hostedAiStatus).toHaveBeenCalledTimes(2)
   })
@@ -194,6 +225,188 @@ describe("serializeProviderRef status coalescing", () => {
     // The overload asserts PromptableProviderRef; the implementation must
     // actually deliver one, or every payload typed on the narrow ref lies.
     expect(canProviderRefGenerateText(ref)).toBe(true)
+  })
+})
+
+describe("serializeProviderRef per model", () => {
+  beforeEach(() => {
+    hostedAiStatus.mockReset()
+    fakeBrowser.reset()
+    vi.mocked(formatUiAlternatives).mockClear()
+  })
+
+  it("files the ref under the model's revision and the level the user picked for it", async () => {
+    await fakeBrowser.storage.local.set({
+      config: { builtInAi: { models: { "gpt-6.2-sol": { reasoning: "high" } } } },
+    })
+    hostedAiStatus.mockResolvedValue(status())
+
+    await expect(serializeProviderRef(SOL_PROVIDER, "pageTranslation")).resolves.toEqual({
+      kind: "system",
+      providerId: SOL_PROVIDER_ID,
+      model: "gpt-6.2-sol",
+      modelTier: "advance",
+      modelRevision: "gpt-6.2-sol-r1",
+      reasoning: "high",
+    })
+  })
+
+  it("files a level the model does not take under the model's default", async () => {
+    await fakeBrowser.storage.local.set({
+      config: { builtInAi: { models: { "gpt-6.2-sol": { reasoning: "none" } } } },
+    })
+    hostedAiStatus.mockResolvedValue(status())
+
+    await expect(serializeProviderRef(SOL_PROVIDER, "pageTranslation")).resolves.toMatchObject({
+      reasoning: "low",
+    })
+  })
+
+  it("asks for no level for language detection", async () => {
+    await fakeBrowser.storage.local.set({
+      config: { builtInAi: { models: { "gpt-6.2-sol": { reasoning: "high" } } } },
+    })
+    hostedAiStatus.mockResolvedValue(status())
+
+    await expect(serializeProviderRef(SOL_PROVIDER, "languageDetection")).resolves.toMatchObject({
+      model: "gpt-6.2-sol",
+      reasoning: null,
+    })
+  })
+
+  it("keeps the last stored list's revision while status cannot be reached", async () => {
+    await fakeBrowser.storage.local.set({
+      hostedAiModels: { models: testHostedAiModels(), savedAt: 1 },
+    })
+    hostedAiStatus.mockResolvedValue(null)
+
+    await expect(serializeProviderRef(SYSTEM_PROVIDER, "pageTranslation")).resolves.toEqual(
+      LUNA_REF,
+    )
+  })
+
+  it("refuses a model that cannot run, naming the others and pointing at the first", async () => {
+    hostedAiStatus.mockResolvedValue(
+      status(tier(), testHostedAiModels({ "gpt-6-luna": { available: false } })),
+    )
+
+    const error = await serializeProviderRef(SYSTEM_PROVIDER, "pageTranslation").catch(
+      (reason: unknown) => reason,
+    )
+
+    expect(error).toBeInstanceOf(HostedAiProviderUnavailableError)
+    expect((error as Error).message).toBe("hostedAi.errors.modelUnavailable")
+    expect(formatUiAlternatives).toHaveBeenCalledWith([
+      "Claude Haiku 5.5",
+      "DeepSeek V4.1 Flash",
+      "GPT-6.2 Sol",
+    ])
+    const action = (error as InstanceType<typeof HostedAiProviderUnavailableError>).action
+    expect(action?.label).toBe("hostedAi.actions.chooseModel")
+    expect(action?.url).toContain(
+      `/options.html#/api-providers?section=provider-config&provider=${encodeURIComponent("read-frog-ai:claude-haiku-5-5")}`,
+    )
+  })
+
+  it("refuses a stored model the server stopped listing", async () => {
+    hostedAiStatus.mockResolvedValue(status())
+    const dropped: SystemProviderRef = {
+      kind: "system",
+      id: "read-frog-ai:gpt-5-mini",
+      name: "gpt-5-mini",
+      model: "gpt-5-mini",
+    }
+
+    const availability = await checkProviderAvailability(dropped, "pageTranslation")
+
+    expect(availability).toMatchObject({
+      available: false,
+      message: "hostedAi.errors.modelUnavailable",
+      action: { label: "hostedAi.actions.chooseModel" },
+    })
+  })
+
+  it("refuses a model whose tier the plan does not reach with the tier's own reason", async () => {
+    const wall = tier({
+      accessAllowed: false,
+      available: false,
+      unavailableReason: "ultra_required",
+      upgradeTo: "ultra",
+    })
+    hostedAiStatus.mockResolvedValue({
+      ...status(),
+      features: {
+        pageTranslation: { normal: tier(), advance: wall },
+      } as unknown as HostedAiStatus["features"],
+    })
+
+    await expect(checkProviderAvailability(SOL_PROVIDER, "pageTranslation")).resolves.toEqual({
+      available: false,
+      message: "hostedAi.availability.ultraRequired",
+      action: undefined,
+      reason: "ultra_required",
+      error: expect.any(HostedAiProviderUnavailableError),
+    })
+  })
+
+  it("asks a guest to log in", async () => {
+    const guestWall = tier({
+      accessAllowed: false,
+      available: false,
+      unavailableReason: "authentication_required",
+      upgradeTo: null,
+    })
+    hostedAiStatus.mockResolvedValue({
+      ...status(),
+      features: {
+        pageTranslation: { normal: guestWall, advance: guestWall },
+      } as unknown as HostedAiStatus["features"],
+    })
+
+    await expect(checkProviderAvailability(SYSTEM_PROVIDER, "pageTranslation")).resolves.toEqual({
+      available: false,
+      message: "hostedAi.availability.authenticationRequired",
+      action: { label: "account.login", url: expect.stringMatching(/\/log-in$/) },
+      reason: "authentication_required",
+      error: expect.any(HostedAiProviderUnavailableError),
+    })
+  })
+
+  function spendPool(feature: "pageTranslation" | "videoSubtitles") {
+    const spent = tier({ available: false, unavailableReason: "quota_exhausted" })
+    hostedAiStatus.mockResolvedValue({
+      ...status(),
+      features: {
+        [feature]: { normal: spent, advance: spent },
+      } as unknown as HostedAiStatus["features"],
+    })
+  }
+
+  it("offers a spent pool below Ultra the upgrade, named after the feature that ran dry", async () => {
+    getBuiltInAiUpgradePlan.mockResolvedValue("free")
+    spendPool("videoSubtitles")
+
+    const availability = await checkProviderAvailability(
+      SYSTEM_PROVIDER,
+      "videoSubtitlesSegmentation",
+    )
+
+    expect(availability).toMatchObject({ available: false, reason: "quota_exhausted" })
+    const action = availability.available ? undefined : availability.action
+    expect(action?.label).toBe("action.upgrade")
+    const url = new URL(action!.url)
+    expect(url.pathname).toBe("/pricing")
+    expect(url.searchParams.get("entry")).toBe("extension_quota_exhausted")
+    expect(url.searchParams.get("feature")).toBe("video_subtitles")
+  })
+
+  it("offers Ultra's spent pool nothing: no plan sits above it", async () => {
+    getBuiltInAiUpgradePlan.mockResolvedValue(null)
+    spendPool("pageTranslation")
+
+    await expect(checkProviderAvailability(SYSTEM_PROVIDER, "pageTranslation")).resolves.toEqual(
+      expect.objectContaining({ available: false, reason: "quota_exhausted", action: undefined }),
+    )
   })
 })
 

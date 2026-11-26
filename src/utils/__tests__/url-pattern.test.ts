@@ -308,6 +308,11 @@ describe("normalizeUrlPattern", () => {
     expect(normalizeUrlPattern("*")).toBe("*://*/*")
   })
 
+  it("keeps <all_urls> as the WebExtension token instead of reading it as a host", () => {
+    expect(normalizeUrlPattern("<all_urls>")).toBe("<all_urls>")
+    expect(normalizeUrlPattern("  <all_urls>  ")).toBe("<all_urls>")
+  })
+
   it("keeps TLD and mid-host wildcards", () => {
     expect(normalizeUrlPattern("www.amazon.*")).toBe("*://www.amazon.*/*")
     expect(normalizeUrlPattern("javdb*.com")).toBe("*://javdb*.com/*")
@@ -412,6 +417,29 @@ describe("urlMatchesPattern", () => {
     expect(urlMatchesPattern("file:///etc/hosts", "github.com")).toBe(false)
     expect(urlMatchesPattern("about:blank", "github.com")).toBe(false)
     expect(urlMatchesPattern("chrome-extension://abc/options.html", "*")).toBe(false)
+  })
+
+  // MatchPattern's own <all_urls> rejects data:, blob: and about: URLs, which
+  // are frames page translation injects into (review of #2482).
+  it("matches every URL for <all_urls>, whatever its scheme", () => {
+    for (const url of [
+      "https://memu.so/SKILL.md",
+      "http://localhost:3000/notes.txt",
+      "file:///Users/someone/notes.md",
+      "data:text/plain;charset=utf-8,First%20paragraph.%0A%0ASecond%20paragraph.",
+      "blob:https://example.com/0f2b6a3e-1111-4c2e-9a77-2f6f0a1c9d10",
+      "about:blank",
+    ]) {
+      expect(urlMatchesPattern(url, "<all_urls>")).toBe(true)
+    }
+    expect(urlMatchesPattern("not a url", "<all_urls>")).toBe(false)
+    expect(urlMatchesPattern("", "<all_urls>")).toBe(false)
+  })
+
+  it("keeps * to http(s) pages", () => {
+    expect(urlMatchesPattern("file:///Users/someone/notes.md", "*")).toBe(false)
+    expect(urlMatchesPattern("data:text/plain,First%20paragraph.", "*")).toBe(false)
+    expect(urlMatchesPattern("blob:https://example.com/0f2b6a3e", "*")).toBe(false)
   })
 
   it("returns false for invalid patterns instead of throwing", () => {

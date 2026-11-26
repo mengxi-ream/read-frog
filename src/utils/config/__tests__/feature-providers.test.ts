@@ -3,6 +3,13 @@ import type { HostedAiStatus, HostedAiTierStatus } from "@/utils/hosted-ai/types
 import { describe, expect, it } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { buildFeatureProviderPatch } from "@/utils/constants/feature-providers"
+import { DEFAULT_BUILT_IN_AI_PROVIDER_ID } from "@/utils/constants/provider-ids"
+import {
+  LUNA_PROVIDER_ID,
+  SOL_PROVIDER_ID,
+  testHostedAiModels,
+} from "@/utils/hosted-ai/__tests__/test-models"
+import { sanitizeHostedAiModels } from "@/utils/hosted-ai/models"
 import { isSystemProviderSelectorItem } from "@/utils/providers/provider-display"
 import {
   BUILT_IN_AI_PROVIDER_LOGO,
@@ -26,7 +33,8 @@ function getProviderById(id: string): ProviderConfig {
 function statusWithAllTiers(tier: HostedAiTierStatus): HostedAiStatus {
   const entry = { normal: tier, advance: tier }
   return {
-    credits: [],
+    pools: [],
+    models: testHostedAiModels(),
     features: {
       pageTranslation: entry,
       customAction: entry,
@@ -55,13 +63,13 @@ describe("feature providers", () => {
 
     it("builds patch for the note suggestion feature", () => {
       const patch = buildFeatureProviderPatch({
-        noteSuggestion: "read-frog-free-ai",
+        noteSuggestion: LUNA_PROVIDER_ID,
       })
 
       expect(patch).toEqual({
         selectionToolbar: {
           noteSuggestion: {
-            providerId: "read-frog-free-ai",
+            providerId: LUNA_PROVIDER_ID,
           },
         },
       })
@@ -90,20 +98,21 @@ describe("feature providers", () => {
 
   describe("getSelectableProvidersForCapability", () => {
     it("marks registry-backed system providers for selector grouping", () => {
-      const providers = getSelectableProvidersForCapability("customAction", [])
+      const providers = getSelectableProvidersForCapability(
+        "customAction",
+        [],
+        sanitizeHostedAiModels(testHostedAiModels()),
+      )
 
-      expect(providers).toEqual([
+      expect(providers).toHaveLength(5)
+      expect(providers).toContainEqual(
         expect.objectContaining({
           kind: "system",
-          id: "read-frog-free-ai",
+          id: LUNA_PROVIDER_ID,
+          name: "GPT-6 Luna",
           logo: expect.any(Function),
         }),
-        expect.objectContaining({
-          kind: "system",
-          id: "read-frog-advance-ai",
-          logo: expect.any(Function),
-        }),
-      ])
+      )
 
       const builtInAiProvider = providers[0]
       expect(builtInAiProvider && isSystemProviderSelectorItem(builtInAiProvider)).toBe(true)
@@ -199,7 +208,7 @@ describe("feature providers", () => {
         remainingProviders,
       )
 
-      expect(fallbacks.pageTranslation).toBe("read-frog-free-ai")
+      expect(fallbacks.pageTranslation).toBe(DEFAULT_BUILT_IN_AI_PROVIDER_ID)
     })
 
     it("skips disabled local providers before using the system Normal tier", () => {
@@ -224,7 +233,7 @@ describe("feature providers", () => {
         remainingProviders,
       )
 
-      expect(fallbacks.pageTranslation).toBe("read-frog-free-ai")
+      expect(fallbacks.pageTranslation).toBe(DEFAULT_BUILT_IN_AI_PROVIDER_ID)
     })
 
     it("falls back to the system Normal tier for selection toolbar translation when no local provider is available", () => {
@@ -241,7 +250,7 @@ describe("feature providers", () => {
 
       const fallbacks = computeProviderFallbacksAfterDeletion("deleted-provider", config, [])
 
-      expect(fallbacks).toEqual({ selectionTranslation: "read-frog-free-ai" })
+      expect(fallbacks).toEqual({ selectionTranslation: DEFAULT_BUILT_IN_AI_PROVIDER_ID })
     })
 
     it("falls back to the system Normal tier for note suggestion when no local llm provider remains", () => {
@@ -260,7 +269,7 @@ describe("feature providers", () => {
         getProviderById("google-translate-default"),
       ])
 
-      expect(fallbacks).toEqual({ noteSuggestion: "read-frog-free-ai" })
+      expect(fallbacks).toEqual({ noteSuggestion: DEFAULT_BUILT_IN_AI_PROVIDER_ID })
     })
   })
 
@@ -319,7 +328,6 @@ describe("feature providers", () => {
         available: false,
         unavailableReason: "ultra_required",
         upgradeTo: "ultra",
-        requiresUltra: true,
         modelRevision: "r1",
       }
       const walledOff = statusWithAllTiers(walledOffTier)
@@ -383,7 +391,6 @@ describe("feature providers", () => {
           available: true,
           unavailableReason: null,
           upgradeTo: null,
-          requiresUltra: false,
           modelRevision: "r1",
         })
         languageDetectionWalledOff.features.languageDetection = {
@@ -407,7 +414,6 @@ describe("feature providers", () => {
           available: false,
           unavailableReason: "quota_exhausted",
           upgradeTo: null,
-          requiresUltra: false,
           modelRevision: "r1",
         })
 
@@ -563,7 +569,7 @@ describe("feature providers", () => {
       expect(result?.customActions).toEqual([
         expect.objectContaining({
           id: "action-a",
-          providerId: "read-frog-free-ai",
+          providerId: DEFAULT_BUILT_IN_AI_PROVIDER_ID,
         }),
       ])
     })
@@ -618,7 +624,61 @@ describe("feature providers", () => {
       // Switching to llm mode used to be impossible without a BYOK LLM. Built-in
       // AI is always capability-compatible, so the mode is now always reachable
       // and seeds itself with the hosted provider.
-      expect(result).toEqual({ mode: "llm", providerId: "read-frog-free-ai" })
+      expect(result).toEqual({ mode: "llm", providerId: DEFAULT_BUILT_IN_AI_PROVIDER_ID })
+    })
+
+    describe("with a Built-in AI model stored", () => {
+      const allowedTier: HostedAiTierStatus = {
+        accessAllowed: true,
+        available: true,
+        unavailableReason: null,
+        upgradeTo: null,
+        modelRevision: "r1",
+      }
+      const walledOffTier: HostedAiTierStatus = {
+        accessAllowed: true,
+        available: false,
+        unavailableReason: "ultra_required",
+        upgradeTo: "ultra",
+        modelRevision: "r1",
+      }
+
+      it("keeps the model while status is loading or could not be fetched", () => {
+        // With no status the usable ids name the default model alone.
+        const result = resolveLanguageDetectionConfigForModeChange(
+          { mode: "basic", providerId: SOL_PROVIDER_ID },
+          "llm",
+          DEFAULT_CONFIG.providersConfig,
+          undefined,
+        )
+
+        expect(result).toEqual({ mode: "llm", providerId: SOL_PROVIDER_ID })
+      })
+
+      it("keeps a model the status list does not name", () => {
+        const result = resolveLanguageDetectionConfigForModeChange(
+          { mode: "basic", providerId: "read-frog-ai:retired-model" },
+          "llm",
+          DEFAULT_CONFIG.providersConfig,
+          statusWithAllTiers(allowedTier),
+        )
+
+        expect(result).toEqual({ mode: "llm", providerId: "read-frog-ai:retired-model" })
+      })
+
+      it("replaces a model whose tier the account cannot run", () => {
+        const status = statusWithAllTiers(allowedTier)
+        status.features.languageDetection = { normal: allowedTier, advance: walledOffTier }
+
+        const result = resolveLanguageDetectionConfigForModeChange(
+          { mode: "basic", providerId: SOL_PROVIDER_ID },
+          "llm",
+          DEFAULT_CONFIG.providersConfig,
+          status,
+        )
+
+        expect(result).toEqual({ mode: "llm", providerId: "openai-default" })
+      })
     })
   })
 

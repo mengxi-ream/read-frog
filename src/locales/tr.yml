@@ -51,12 +51,10 @@ popup:
         action: İki dilli moda geçmek için tıklayın
   hub:
     tooltip: Birden fazla çeviri modeliyle aynı anda metin çevirin
-  discord:
-    tooltip: Geliştiricilerle bağlantı kurmak ve yeni özelliklere erken erişim sağlamak için Discord'a katılın
   blog:
     notification: Read Frog'da yenilikler
   aiSmartContext: AI Akıllı Bağlam
-  aiSmartContextDescription: Çeviri kalitesini artırmak için web sayfası bağlamını kullanır. LLM çeviri sağlayıcısı gerektirir.
+  aiSmartContextDescription: Çeviri kalitesini artırmak için web sayfası bağlamını kullanır. LLM sağlayıcısı gerektirir.
   storeReview:
     title: Read Frog'u beğendiniz mi?
     description: Mağazaya bırakacağınız kısa bir değerlendirme, diğer okurların onu bulmasına yardımcı olur.
@@ -69,6 +67,7 @@ popup:
     emailUs: Bize e-posta gönderin
     featureRequest: Özellik önerisi
     bugReport: Hata bildir
+    diagnosePage: "Bu sayfayı tanıla"
     community: Topluluk
     joinDiscord: Discord'a Katıl
     joinWechat: WeChat Grubuna Katıl
@@ -135,6 +134,13 @@ options:
     bugReport:
       title: Hata bildir
       description: Destek talebi açın ve çözülene kadar takip edin
+    troubleshooting:
+      title: "Sorun giderme"
+    diagnostics:
+      title: "Tanılama verilerini dışa aktar"
+      description: "Hata bildirimine eklemek için son günlükleri ve ayarlarınızı (API anahtarları hariç) kaydedin"
+      exportSuccess: "Tanılama verileri kaydedildi"
+      exportFailed: "Tanılama verileri dışa aktarılamadı"
     community:
       title: Topluluk
     discord:
@@ -144,13 +150,40 @@ options:
       title: WeChat grubu
       description: WeChat tartışma grubuna katılmak için QR kodu tarayın
       qrCodeAlt: WeChat QR kodu
+  usage:
+    title: Kullanım
+    pageDescription: Planın ve kalan yapay zekâ kotan.
+    notSignedIn: Giriş yapılmadı
+    guest: Misafir
+    manageSubscription: Aboneliği yönet
+    logInToView: Görmek için giriş yap
+    footer:
+      logIn: Giriş yap, her hafta ücretsiz yapay zekâ kotası kazan
+      upgrade: Yapay zekâ altyazılarının kilidini açmak ve daha fazla yerleşik AI kotası için Pro'ya geç
+      upgradeAction: Yükselt
   apiProviders:
     title: API Sağlayıcıları
-    pageDescription: Read Frog'un çağırdığı yapay zekâ servislerini bağlayın ve her özelliğin hangisini kullanacağını seçin.
-    description: Read Frog'un çağırabileceği sağlayıcıları ekleyin. 20'den fazlası yerleşik gelir; ayrıca Chat Completions uyumlu ve Open Responses API'lerini özel olarak ekleyebilirsiniz.
+    pageDescription: Read Frog'un yerleşik modellerini kullanın veya üçüncü taraf yapay zekâ servislerini bağlayın, ardından her özellik için hangisinin kullanılacağını seçin.
+    description: Read Frog'un yerleşik modellerini kullanın veya üçüncü taraf sağlayıcılar ekleyin. 20'den fazla sağlayıcı önceden yapılandırılmıştır; ayrıca Chat Completions uyumlu ve Open Responses API'lerini özel olarak ekleyebilirsiniz.
     configTitle: Sağlayıcı yapılandırması
     addProvider: Sağlayıcı ekle
-    builtInProvider: Yerleşik sağlayıcı
+    builtInProvider: Yerleşik modeller
+    thirdPartyProviders: Üçüncü taraf sağlayıcılar
+    builtInModel:
+      reasoningDescription: "$1 modelinin yanıt vermeden önce ne kadar düşüneceği. Yüksek seviyeler zor metinlerde daha iyi sonuç verir, ancak daha yavaş yanıt verir ve kotanızdan daha fazlasını kullanır."
+      reasoningDefault: "Varsayılan"
+      reasoningLevels:
+        none: "Kapalı"
+        minimal: "Minimum"
+        low: "Düşük"
+        medium: "Orta"
+        high: "Yüksek"
+        xhigh: "Çok yüksek"
+      unavailableTitle:
+        temporary: "$1 geçici olarak kullanılamıyor"
+        removed: "$1 artık sunulmuyor"
+      unavailableDescription: "Çalışamadığı sürece onu kullanan özellikler hata verir. Devam etmek için bu özellikleri $1 modeline geçirin."
+      unavailableDescriptionNoAlternatives: "Çalışamadığı sürece onu kullanan özellikler hata verir. Devam etmek için bu özellikleri başka bir sağlayıcıya geçirin."
     builtInAiUsage:
       title: Yerleşik AI kotası
       remaining: "%$1 kaldı"
@@ -168,20 +201,23 @@ options:
         videoSubtitles: Video altyazıları
         inputTranslation: Giriş çevirisi
         languageDetection: Dil algılama
+        pdfTranslation: PDF çevirisi
     sponsorCta: Hızlı ve uygun maliyetli yapay zekâ al
     sponsorCtaJalapenoCloud: GLM 5.3ʼte %50 indirim al
+    sponsorCtaIfapi: READFROG koduyla +%10 bakiye
     setApiKeyWarning:
       message: API anahtarınızı $1 sayfasında ayarlayın
     badges:
       featureCount: $1 özellik
       sponsor: Sponsor
       sponsorJalapenoCloud: $$1 ücretsiz
+      sponsorIfapi: Modeller -%90
     dialog:
       title: Yeni sağlayıcı ekle
       groups:
         builtInProviders:
-          title: Yerleşik LLM sağlayıcıları
-          description: Yerleşik büyük dil modeli sağlayıcıları, Base URL gibi çoğu yapılandırmayı doldurmaya gerek yok
+          title: Ön ayarlı LLM sağlayıcıları
+          description: Önceden yapılandırılmış büyük dil modeli sağlayıcıları — Base URL gibi çoğu ayarı doldurmanız gerekmez
         compatibleProviders:
           title: Uyumlu API sağlayıcıları
           description: Chat Completions uyumlu API'ler için Özel Chat Complete, Open Responses API'leri için Özel Responses kullanın.
@@ -249,15 +285,13 @@ options:
       invalidJson: Geçersiz JSON formatı
     providers:
       name:
-        builtInAi: Yerleşik AI
-        builtInAiAdvance: Gelişmiş yerleşik AI
         customChatComplete: Özel Chat Complete
         customResponses: Özel Responses
       attribution:
-        builtInAi: Read Frog tarafından barındırılan standart model. Pro ve Ultra kullanıcıları haftalık kotayla tüm özelliklerde kullanabilir; ücretsiz planda yalnızca özel AI eylemlerinde kullanılabilir.
-        builtInAiAdvance: Read Frog tarafından barındırılan gelişmiş model, yalnızca Ultra üyelerine özeldir. Sayfa çevirisi, özel AI eylemleri ve diğer tüm yerleşik AI özelliklerinde çalışır; haftalık kota ortaktır. Kotayı standart modelden daha hızlı tüketir.
+        builtInAi: Read Frog tarafından barındırılan standart model. Giriş yaptığınızda haftalık kotayla ücretsiz kullanabilirsiniz.
+        builtInAiAdvance: Read Frog tarafından barındırılan gelişmiş model, yalnızca Ultra üyelerine özeldir. Kotayı standart modellerden daha hızlı tüketir.
       description:
-        openai: GPT-4o gibi modeller sağlar
+        openai: GPT modelleri için OpenAI'ın resmi API'si
         azure: Azure dağıtımlarınız üzerinden OpenAI modelleri
         deepseek: Çin'de kullanım için önerilir
         openrouter: Kullandıkça öde fiyatlandırmasıyla birden fazla LLM sağlayıcısı için birleşik arayüz
@@ -267,6 +301,7 @@ options:
         xai: Gerçek zamanlı veri erişimli Grok modelleri sunan Elon Musk'ın AI şirketi
         atlascloud: DeepSeek, Kimi, Qwen, Doubao ve GLM gibi yeni modellere OpenAI uyumlu birleşik erişim platformu
         jalapenocloud: En iyi ekiplerin kullandığı kurumsal düzeyde yapay zekâ, şimdi sizin için!
+        ifapi: GPT, Claude, Gemini ve daha fazlası, resmi fiyatın %10'undan başlayan fiyatlarla
         siliconflow: Çin ve uluslararası modeller için yüksek performanslı çıkarım platformu
         tensdaq: Yüksek maliyetli sabit fiyatlandırmayı ortadan kaldıran pazar odaklı fiyatlandırma ile devrimci açık artırma AI MaaS platformu
         openaiCompatible: OpenAI Chat Completions API ile uyumlu özel bir uç noktaya bağlanın
@@ -554,6 +589,9 @@ options:
     selectionAnnotation:
       title: "Not ekle"
       description: "Seçili metnin altını çizer ve anlamını satırların arasına yazar."
+    selectionAnnotationMode:
+      title: "Not modu"
+      description: "Araç çubuğunu açmadan not modunu açar veya kapatır. Açıkken seçtiğiniz her metne not eklenir."
     actions:
       title: "AI eylemleri"
       description: "Seçili metin üzerinde bir AI eylemi çalıştırır. Özel eylemlerin, burada atayana kadar kısayolu yoktur."
@@ -568,9 +606,7 @@ options:
     pageDescription: Giriş kutularına yazdıklarınızı göndermeden önce çevirin.
     trigger:
       title: Tetikleme
-      enable:
-        title: Etkinleştir
-        description: Herhangi bir giriş alanında boşluk tuşuna hızlıca üç kez basarak yazdıklarınızı çevirin.
+      description: Herhangi bir giriş alanında boşluk tuşuna hızlıca üç kez basarak yazdıklarınızı çevirin.
       threshold:
         title: Tetikleme eşiği
         description: Basışlar arasında izin verilen süre, milisaniye cinsinden. Çeviri tetiklenmiyorsa artırın, yazarken kendiliğinden tetikleniyorsa azaltın.
@@ -589,9 +625,6 @@ options:
     title: Yüzen Buton
     pageDescription: Yüzen düğmenin hangi tarafta duracağını, tıklamanın ne yapacağını ve nerede gizleneceğini ayarlayın.
     demoImageAlt: Yüzen buton demosu
-    enable:
-      title: Yüzen butonu etkinleştir
-      description: Read Frog özelliklerine hızlı erişim için web sayfalarında yüzen butonu görüntüle
     display:
       title: Görünüm
       side:
@@ -610,8 +643,8 @@ options:
       panel: Yan paneli aç
       translate: Sayfa çevirisini aç/kapat
     closeMenu:
-      disableForSite: Bu site için devre dışı bırak
-      disableGlobally: Genel olarak devre dışı bırak
+      title: Yüzen butonu gizle
+    pageTranslationOff: "Sayfa Çevirisi sade modda kapalı"
     tooltips:
       togglePageTranslation: Sayfa çevirisini aç/kapat
       floatingButtonOptions: Kayan düğme seçenekleri
@@ -622,9 +655,6 @@ options:
     title: Seçim Araç Çubuğu
     pageDescription: Metin seçtiğinizde hangi eylemlerin görüneceğini ve araç çubuğunun nerede çıkacağını belirleyin.
     demoImageAlt: Seçim araç çubuğu demosu
-    enable:
-      title: Seçim araç çubuğunu etkinleştir
-      description: Web sayfalarında metin seçtiğinizde araç çubuğunu göstererek hızlı çeviri, seslendirme ve AI eylemleri sunar
     annotation:
       title: "Sözcük notları"
       enable:
@@ -636,13 +666,10 @@ options:
     actions:
       title: Eylemler
       translate:
-        title: Çeviri
         description: Araç çubuğunda çeviri düğmesini göster
       speak:
-        title: Sesli okuma
         description: Seçili metni sesli okuyan seslendirme düğmesini araç çubuğunda göster
       noteSuggestion:
-        title: Not önerileri
         description: Bir yapay zekâ sağlayıcısıyla seçim çevirisinden sonra Notebase'inize kaydedilecek kelimeler önerilir
         action: Eylem
         actionDescription: Öneriyi üreten eylem
@@ -650,6 +677,12 @@ options:
         providerDescription: Öneriyi üreten yapay zekâ sağlayıcısı
     display:
       title: Görünüm
+      placement:
+        title: Konum
+        description: Araç çubuğunun seçili metnin hangi tarafında görüneceğini seçin. Seçilen tarafta yer yoksa diğer tarafta görünür
+        followDirection: Seçim yönünü takip et
+        above: Her zaman üstte
+        below: Her zaman altta
       opacity:
         title: Opaklık
         description: Seçim araç çubuğunun ve buradan açılan genişletilmiş pencerenin opaklığını ayarlayın
@@ -659,8 +692,7 @@ options:
         enterUrlPattern: URL kalıbı girin
         urlPattern: URL kalıbı
     closeMenu:
-      disableForSite: Bu site için devre dışı bırak
-      disableGlobally: Genel olarak devre dışı bırak
+      title: Seçim araç çubuğunu gizle
     errors:
       customActionFailed: Özel eylem başarısız oldu
       customActionFailedFallback: Özel eylem isteği başarısız oldu
@@ -796,6 +828,8 @@ options:
             unquotedAttributeOutput: Bu öznitelik değerini tırnak içine alın, yoksa değer öznitelikten taşabilir.
             filterIgnored: '"$1" etiketinde filtreler yok sayılır. Önce filtrelenmiş değeri atayın.'
             newlineToBrNotLast: newline_to_br yalnızca bir çıktının son filtresi olarak çalışır.
+            mathFilterNotLast: $1 yalnızca bir çıktının son filtresi olarak çalışır.
+            mathFilterInAttribute: $1 filtresini bir öznitelik değerinin içinde kullanmayın. Çizdiği formüllerdeki tırnaklar özniteliği kapatır.
             tooLong: Bu düzen $1 karakterden uzun ve kaydedilemez.
             fieldNotShown: '"$1" bu düzende gösterilmiyor.'
             reservedFieldName: '"$1" alan adı düzenlerde ayrılmıştır. Alanı yeniden adlandırın.'
@@ -1061,8 +1095,8 @@ options:
       pageDescription: Sizin için önemli olan sözcüklere sabit bir çeviri verin ve her listenin nerede geçerli olacağını seçin.
       untitled: Adsız terim sözlüğü
       noGlossaries: Henüz terim sözlüğü yok.
-      enable:
-        title: Etkinleştir
+      appliesTo:
+        title: Geçerli olduğu yerler
         description: Eşleşen terimleri LLM'ye gönderir, böylece onları istediğiniz gibi çevirir. Terim sözlüğü istemin içinde gönderilir, bu yüzden yalnızca LLM sağlayıcısı üzerinde çalışan özellikler için geçerlidir.
       library:
         title: Terim sözlükleriniz
@@ -1192,9 +1226,6 @@ options:
     title: Bağlam Menüsü
     pageDescription: Tarayıcının sağ tık menüsündeki Read Frog seçeneklerini yönetin.
     demoImageAlt: Bağlam menüsü demosu
-    enable:
-      title: Bağlam menüsü çevirisini etkinleştir
-      description: Sayfa veya seçili metni hızlıca çevirmek için tarayıcı sağ tıklama menüsüne çeviri seçenekleri ekle
   translation:
     title: Sayfa Çevirisi
     pageDescription: Sayfaların nasıl çevrileceğini belirleyin — mod, kapsam, istemler ve istek limitleri.
@@ -1343,7 +1374,7 @@ options:
         error: Değer $1 ile $2 arasında olmalıdır
     translationQueue:
       title: Çeviri kuyruğu
-      description: İsteklerin ne kadar hızlı gittiği, her birinin ne kadar metin taşıdığı ve okuyucunun ne kadar önünden gittikleri
+      description: İsteklerin ne kadar hızlı gittiği, her birinin ne kadar metin taşıdığı, her birinin ne kadar sürebileceği ve okuyucunun ne kadar önünden gittikleri
       manageQueue: Kuyruğu yönet
       requestQueueConfig:
         title: Çeviri hızı
@@ -1358,6 +1389,9 @@ options:
           description: "Maksimum karakter: tek bir yapay zekâ isteği ne kadar metin taşır"
         maxItemsPerBatch:
           description: "Maksimum paragraf: tek istekte kaç paragraf birleşir. Yapay zekâ olmayan sağlayıcılar ikisini de yok sayar"
+      requestTimeout:
+        title: İstek zaman aşımı
+        description: "Vazgeçip yeniden denemeden önce yanıt için kaç saniye beklenir. Yapay zekâ toplu istekleri uzunluklarına göre en fazla 100 saniye ek süre alır. Yavaş bir model sürekli zaman aşımına uğruyorsa artırın"
       preloadConfig:
         title: Ön çeviri aralığı
         description: API maliyetlerinden tasarruf etmek için görünüm alanının altındaki ne kadar içeriğin önceden çevrileceğini kontrol edin
@@ -1436,10 +1470,11 @@ options:
       title: Temel ayarlar
       enable:
         title: Video altyazılarını aç
-        description: YouTube, X ve Netflix'te oynatıcı kontrollerine bir çeviri düğmesi ekler.
-      autoStart:
-        title: Video açılınca çevir
-        description: Video yüklenir yüklenmez, düğmeye basmadan altyazıları çevirmeye başlar.
+        description: "Her site için seçin: kapalı, elle (oynatıcıdaki çeviri düğmesiyle başlar) veya otomatik (video açılır açılmaz başlar)."
+        mode:
+          off: "Kapalı"
+          manual: "Elle"
+          auto: "Otomatik"
       aiSegmentation:
         title: AI akıllı bölümlendirme
         description: Yapay zekâ altyazıları cümlelere yeniden böler. Çeviriler daha geç gelir. Güçlü bir LLM gerekir; zayıf modeller satırları atlayabilir veya kaydırabilir.
@@ -1452,8 +1487,6 @@ options:
     aiQuota:
       title: Yapay zekâ altyazı kotası
       description: Yapay zeka konuşma tanıma ile her video için doğru altyazı üretir
-      launchBonusPromo: $1 tarihinden önce abone olun, 300 dakika ek deşifre hediyesi kazanın
-      loginRequired: Yapay zeka altyazı kotanızı görmek için giriş yapın
       upgradeRequired: Yapay zeka altyazıları için Pro veya Ultra aboneliği gerekir
       pools:
         subscription: Aylık kota
@@ -1529,7 +1562,7 @@ options:
           videoSummary: Video özeti (AI akıllı bağlam gerektirir)
     subtitlesQueue:
       title: Altyazı kuyruğu
-      description: Altyazı isteklerinin ne kadar hızlı gittiği ve her birinin kaç satır taşıdığı
+      description: Altyazı isteklerinin ne kadar hızlı gittiği, her birinin kaç satır taşıdığı ve her birinin ne kadar sürebileceği
       manageQueue: Kuyruğu yönet
       requestQueueConfig:
         title: Çeviri hızı
@@ -1544,6 +1577,9 @@ options:
           description: "Maksimum karakter: tek bir yapay zekâ isteği ne kadar metin taşır"
         maxItemsPerBatch:
           description: "Maksimum altyazı satırı: tek istekte kaç satır birleşir. Yapay zekâ olmayan sağlayıcılar ikisini de yok sayar"
+      requestTimeout:
+        title: İstek zaman aşımı
+        description: "Vazgeçip yeniden denemeden önce yanıt için kaç saniye beklenir. Yapay zekâ toplu istekleri uzunluklarına göre en fazla 100 saniye ek süre alır. Yavaş bir model sürekli zaman aşımına uğruyorsa artırın"
     cache:
       title: Önbellek
       clearCache:
@@ -1556,6 +1592,53 @@ options:
           confirm: Onayla
           cancel: İptal
           description: Tüm önbelleğe alınmış AI bölümlendirme sonuçları silinecektir. AI bölümlendirme etkinleştirilmiş bir video oynatıldığında altyazılar yeniden işlenecektir.
+  simpleMode:
+    title: "Sade mod"
+    pageDescription: "Kapattığınız bir özellik hiç yüklenmemiş gibi olur: web sayfalarında görünmez ve kısayolları çalışmaz. Ayarları korunur; yeniden açtığınızda her şey eskisi gibi olur."
+    drawerDescription: "Kapattığınız özellikler hiçbir yerde görünmez. Ayarları korunur"
+    features:
+      customActions:
+        title: "Özel AI Eylemleri"
+        description: "Seçim araç çubuğundaki ve sağ tık menüsündeki AI eylemleri; yerleşik Sözlük ve Cümle Analizi dahil"
+      pageTranslation:
+        title: "Sayfa Çevirisi"
+        description: "Web sayfalarının tamamını çevirir"
+        hover:
+          title: "Üzerine gelme çevirisi"
+          description: "Bir paragrafın üzerine gelin veya uzun basın; yalnızca o paragraf çevrilir"
+      videoSubtitles:
+        title: "Video Altyazıları"
+        description: "Video oynatıcılara çevrilmiş altyazı düğmesi ekler"
+      inputTranslation:
+        title: "Giriş Çevirisi"
+        description: "Herhangi bir giriş alanında boşluk tuşuna hızlıca üç kez basarak yazdıklarınızı çevirin"
+      floatingButton:
+        title: "Yüzen Buton"
+        description: "Read Frog özelliklerine hızlı erişim için web sayfalarında yüzen butonu görüntüle"
+      selectionToolbar:
+        title: "Seçim Araç Çubuğu"
+        description: "Web sayfalarında metin seçtiğinizde araç çubuğunu göstererek hızlı çeviri, seslendirme ve AI eylemleri sunar"
+        annotation:
+          title: "Sözcük notları"
+          description: "Seçili sözcüğün veya ifadenin altını çizer ve anlamını satırların arasına yazar"
+        translate:
+          title: "Seçim çevirisi"
+          description: "Araç çubuğunda çeviri düğmesini göster"
+          noteSuggestion:
+            title: "Not önerileri"
+            description: "Bir yapay zekâ sağlayıcısıyla seçim çevirisinden sonra Notebase'inize kaydedilecek kelimeler önerilir"
+        speak:
+          title: "Sesli okuma"
+          description: "Seçili metni sesli okuyan seslendirme düğmesini araç çubuğunda göster"
+      contextMenu:
+        title: "Bağlam Menüsü"
+        description: "Tarayıcının sağ tık menüsündeki Read Frog seçenekleri"
+      translationHub:
+        title: "Çeviri Merkezi"
+        description: "Birden fazla çeviri modeliyle aynı anda metin çevirin"
+      glossary:
+        title: "Terim sözlüğü"
+        description: "Sizin için önemli sözcükleri belirlediğiniz şekilde çevirir"
   whatsNew:
     title: Yenilikler
     postType:
@@ -1573,8 +1656,8 @@ side:
 translateService:
   title: Çeviri Servisi
   description: Yalnızca web sayfası çevirisi için
-  builtInModels: Built-in Models
-  llmModels: LLM Models
+  builtInModels: Yerleşik modeller
+  llmModels: Üçüncü taraf modeller
   normalTranslator: Normal Çevirmen
   selectServices: Hizmet seçin
   translationProviders: Çeviri Hizmetleri
@@ -1588,7 +1671,7 @@ languageLevels:
   intermediate: Orta
   advanced: İleri
 noAPIKeyConfig:
-  warning: AI modelleri kullanmak istiyorsanız, lütfen önce seçenekler sayfasında API anahtarını ayarlayın
+  warning: Lütfen önce seçenekler sayfasında bu sağlayıcı için API anahtarını ayarlayın
   warningWithLink:
     youMust: Önce
     setTheAPIKey: API anahtarını ayarlamalısınız
@@ -1601,6 +1684,25 @@ translation:
   sameLanguage: Kaynak ve hedef diller farklı olmalıdır
   autoModeSameLanguage: Algılanan dil '$1' hedef dille aynı
   extensionContextInvalidated: Uzantı güncellendi. Bu sayfayı yenileyip tekrar deneyin.
+  inputTranslationFailed: "Giriş çevirisi başarısız"
+pageDiagnosis:
+  title: "Sayfa tanılaması"
+  summary: "$1 çevrildi, $2 çevrilmedi"
+  empty: "Henüz gösterilecek bir şey yok. Sayfa çevirisini açın, ardından bunu yeniden açın."
+  emptyWhileTranslating: "Henüz gösterilecek bir şey yok. Sayfa çevirisi paragraflara ulaştıkça burada görünürler."
+  framesNotIncluded: "Gömülü çerçevelerin içindeki metin burada yer almaz."
+  hint: "Paragraflarını sayfada işaretlemek için bir nedene tıklayın."
+  close: "Kapat"
+  unavailable: "Read Frog bu sayfada çalışamıyor"
+  reasons:
+    noProse: "Çevrilecek kelime yok"
+    tooShort: "Çevrilemeyecek kadar kısa"
+    targetLanguage: "Zaten hedef dilinizde"
+    skipLanguage: "Atladığınız bir dilde"
+    noTranslationNeeded: "Yapay zekâ çeviriye gerek olmadığını söyledi"
+    sameAsSource: "Çeviri orijinalle aynı"
+    emptyResult: "Hizmet hiçbir şey döndürmedi"
+    error: "Çeviri başarısız oldu"
 annotation:
   annotate: "Not ekle"
   enterMode: "Not modu"
@@ -1623,6 +1725,11 @@ speak:
   noTextSelected: Metin seçilmedi
   openaiNotConfigured: OpenAI sağlayıcısı yapılandırılmadı veya etkinleştirilmedi
   openaiApiKeyNotConfigured: OpenAI API anahtarı yapılandırılmadı
+hideMenu:
+  untilReload: Sayfayı yenileyene kadar
+  onSite: $1 sitesinde
+  onAllSites: Tüm sitelerde
+  restoreHint: "$1 veya $2 bölümünden yeniden açabilirsiniz."
 action:
   copy: Kopyala
   copied: Kopyalandı
@@ -1714,6 +1821,7 @@ subtitles:
   requestAiSubtitles: Yapay zeka altyazısı iste
   usingAiSubtitles: Yapay zeka altyazısı kullanılıyor
   settings: Altyazı ayarları
+  autoStartOnPlatform: "$1 üzerinde otomatik başlat"
   toggle:
     enabled: Altyazı çevirisi açık
     disabled: Altyazı çevirisi kapalı
@@ -1751,7 +1859,9 @@ subtitles:
     aiSubscriptionRequired: Yapay zeka altyazıları için Pro veya Ultra aboneliği gerekir
     aiPaymentRequired: Yapay zeka altyazıları oluşturmaya devam etmek için ödeme yönteminizi güncelleyin
     aiVideoTooLong: Bu video yapay zeka altyazıları için çok uzun
-    aiLiveReplayUnsupported: Canlı yayın tekrarları için yapay zeka altyazıları henüz kullanılamıyor
+    aiVideoMismatch: Bu video geldiği gönderiyle eşleşmiyor. Gönderinin sayfasını açıp tekrar deneyin
+    aiLiveReplayUnsupported: Canlı yayınlar ve tekrarları için yapay zeka altyazıları henüz kullanılamıyor
+    aiLiveStreamUnsupported: Yayın canlıyken yapay zeka altyazıları kullanılamıyor. Tekrarı yayınlandığında isteyin
     aiStillProcessing: Yazıya dökme hâlâ sürüyor — birkaç dakika sonra tekrar tıklayın
     aiRequestFailed: Yapay zeka altyazı isteği başarısız oldu, lütfen daha sonra tekrar deneyin
     aiNoResponse: AI hizmeti yanıt vermedi, orijinal metin gösteriliyor
@@ -1770,10 +1880,33 @@ hostedAi:
     serviceUnavailable: Geçici olarak kullanılamıyor
     usedPercent: "Kota kullanımı: %$1"
     resetsAt: "$1'de sıfırlanır"
+  requestId:
+    label: "İstek kimliği:"
+    copy: "İstek kimliğini kopyala"
   errors:
     rateLimited: Çok fazla istek, lütfen daha sonra tekrar deneyin.
     guestRateLimited: Çok fazla misafir isteği. Lütfen daha sonra tekrar deneyin.
     userRateLimited: Çok fazla istek. Lütfen daha sonra tekrar deneyin.
+    modelUnavailable: "$1 şu anda kullanılamıyor. Bunun yerine $2 modelini deneyin."
+    modelUnavailableNoAlternatives: "$1 şu anda kullanılamıyor ve kullanabileceğiniz başka bir yerleşik AI modeli yok. Lütfen daha sonra tekrar deneyin."
+    modelBusy: "$1 şu anda çok yoğun. Biraz sonra tekrar deneyin veya $2 modeline geçin."
+    modelBusyNoAlternatives: "$1 şu anda çok yoğun. Biraz sonra tekrar deneyin."
+  unavailable:
+    temporary: "$1 geçici olarak kullanılamıyor. Bunun yerine $2 modelini deneyin."
+    temporaryNoAlternatives: "$1 geçici olarak kullanılamıyor. Lütfen daha sonra tekrar deneyin."
+    removed: "$1 artık sunulmuyor. Bunun yerine $2 modelini deneyin."
+    removedNoAlternatives: "$1 artık sunulmuyor. Başka bir sağlayıcı seçin."
+  actions:
+    chooseModel: "Model seç"
+  builtInAiPrompt:
+    logInTitle: "Yerleşik AI'ı kullanmak için giriş yapın"
+    logInDescription: "Giriş yaptığınızda yerleşik AI ücretsizdir: haftada yaklaşık 120.000 token."
+    upgradeTitle: "Bu haftaki yerleşik AI hakkınız bitti"
+    upgradeDescription: "Pro ayda yaklaşık 3.000, Ultra yaklaşık 10.000 web sayfası çevirir."
+    upgradeDescriptionPro: "Ultra ayda yaklaşık 10.000 web sayfası çevirir."
+    useMachineTranslation: "Makine çevirisini kullan"
+    switched: "$1 artık $2 kullanıyor."
+    switchFailed: "Makine çevirisine geçilemedi. Lütfen tekrar deneyin."
 hotkey:
   control: Ctrl
   alt: Option
@@ -1837,183 +1970,3 @@ difficultWords:
       C1: Üslup farklarını sezerek okunan uzun, karmaşık, olgusal ve edebi metinler; alanınız dışındaki uzmanlık makaleleri ve uzun teknik talimatlar
       C2: Kullanım kılavuzları, uzmanlık makaleleri ve edebi eserler gibi yapısı ve dili karmaşık soyut metinler dahil, hemen her tür yazılı dil
       unsure: A2 olarak sayılır. Düşükten başlamak daha iyidir; fazla vurgu bildiğiniz kelimeleri işaretleyerek çabucak düzelir, çok az vurguda ise tıklanacak bir şey kalmaz.
-languages:
-  eng: İngilizce
-  cmn: Basitleştirilmiş Çince
-  cmnHant: Geleneksel Çince
-  yue: Kantonca
-  spa: İspanyolca
-  rus: Rusça
-  arb: Arapça
-  ben: Bengalce
-  hin: Hintçe
-  por: Portekizce
-  ind: Endonezce
-  jpn: Japonca
-  fra: Fransızca
-  deu: Almanca
-  jav: Cava Dili
-  kor: Korece
-  tel: Telugu
-  vie: Vietnamca
-  mar: Marathi
-  ita: İtalyanca
-  tam: Tamilce
-  tur: Türkçe
-  urd: Urduca
-  guj: Gujarati
-  pol: Lehçe
-  ukr: Ukraynaca
-  kan: Kannada
-  mai: Maithili
-  mal: Malayalam
-  pes: Farsça
-  mya: Birmanca
-  swh: Svahili
-  sun: Sundaca
-  ron: Romence
-  pan: Pencapça
-  bho: Bhojpuri
-  amh: Amharca
-  hau: Hausaca
-  fuv: Fulani
-  bos: Boşnakça
-  hrv: Hırvatça
-  nld: Felemenkçe
-  srp: Sırpça
-  tha: Tayca
-  ckb: Orta Kürtçe
-  yor: Yoruba
-  uzn: Özbekçe
-  zlm: Malayca
-  ibo: İbo Dili
-  npi: Nepalce
-  ceb: Sebuano
-  skr: Saraiki
-  tgl: Tagalogca
-  hun: Macarca
-  azj: Azerice
-  sin: Sinhalaca
-  koi: Komi-Permyak
-  ell: Yunanca
-  ces: Çekçe
-  mag: Magahi
-  run: Kirundi
-  bel: Belarusça
-  plt: Malgaşça
-  qug: Chimborazo Dağlık Quechua
-  mad: Maduraca
-  nya: Çeva
-  zyb: Zhuangca
-  pbu: Peştuca
-  kin: Kinyarwanda
-  zul: Zuluca
-  bul: Bulgarca
-  swe: İsveççe
-  lin: Lingala
-  som: Somalice
-  hms: Qiandong Miao
-  hnj: Hmong Njua
-  ilo: İlokanoca
-  kaz: Kazakça
-  heb: İbranice
-  nob: Norveççe (Bokmål)
-  nno: Norveççe (Nynorsk)
-  afr: Afrikaanca
-  sqi: Arnavutça
-  asm: Asamca
-  eus: Baskça
-  bre: Bretonca
-  cat: Katalanca
-  cos: Korsikaca
-  cym: Galce
-  dan: Danca
-  div: Divehi
-  epo: Esperanto
-  ekk: Estonca
-  fao: Faroece
-  fij: Fiji Dili
-  fin: Fince
-  fry: Batı Frizce
-  gla: İskoç Galcesi
-  gle: İrlandaca
-  glg: Galiçyaca
-  grn: Guarani
-  hat: Haiti Kreolcesi
-  haw: Hawaiice
-  hye: Ermenice
-  ido: İdo
-  ina: Interlingua
-  isl: İzlandaca
-  kat: Gürcüce
-  khm: Kmerce
-  kir: Kırgızca
-  lao: Laoca
-  lat: Latince
-  lvs: Letonca
-  lit: Litvanca
-  ltz: Lüksemburgca
-  mkd: Makedonca
-  mlt: Maltaca
-  mon: Moğolca
-  mri: Maori
-  nso: Kuzey Sotho
-  oci: Oksitanca
-  ori: Oriya
-  orm: Oromo
-  prs: Dari
-  san: Sanskritçe
-  slk: Slovakça
-  slv: Slovence
-  smo: Samoaca
-  sna: Şona
-  snd: Sindhi
-  sot: Güney Sotho
-  tah: Tahitice
-  tat: Tatarca
-  tgk: Tacikçe
-  tir: Tigrinya
-  ton: Tongaca
-  tsn: Tsvana
-  tuk: Türkmence
-  uig: Uygurca
-  vol: Volapük
-  wol: Volofça
-  xho: Zosa
-  ydd: Yidişçe
-  aka: Akan
-  bam: Bambara
-  bis: Bislama
-  bod: Tibetçe
-  che: Çeçence
-  chv: Çuvaşça
-  dzo: Dzongkha
-  ewe: Ewe
-  kab: Kabilce
-  lug: Luganda
-  oss: Osetçe
-  ssw: Svati
-  ven: Venda
-  war: Waray
-  nde: Kuzey Ndebele
-  nbl: Güney Ndebele
-  pam: Pampanga
-  hil: Hiligaynon
-  bcl: Merkez Bikolano
-  min: Minangkabau
-  ace: Açece
-  bug: Bugisce
-  ban: Balice
-  bjn: Banjar
-  mak: Makasarca
-  sas: Sasak
-  tet: Tetum
-  cha: Chamorro
-  niu: Niue Dili
-  tvl: Tuvaluca
-  gil: Kiribatice
-  mah: Marshall Dili
-  pau: Palau Dili
-  wls: Wallis Dili
-  rar: Rarotongan
-  hif: Fiji Hintçesi

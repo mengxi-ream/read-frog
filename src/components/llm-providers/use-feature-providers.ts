@@ -11,9 +11,11 @@ import {
   FEATURE_PROVIDER_DEFS,
 } from "@/utils/constants/feature-providers"
 import { getSelectionToolbarActions, patchSelectionToolbarAction } from "@/utils/custom-actions"
+import { isFeatureOn } from "@/utils/features"
 import { isSystemProviderSelectorItem } from "@/utils/providers/provider-display"
 import { getSelectableProvidersForCapability } from "@/utils/providers/provider-registry"
 import { providerSupportsTranslationOnlyMode } from "@/utils/providers/translation-only-gate"
+import { useBuiltInAiModels } from "./use-built-in-ai-models"
 import { useHostedAiProviderOptions } from "./use-hosted-ai-provider-options"
 
 export interface FeatureProviderBinding {
@@ -37,8 +39,14 @@ export function useFeatureProvider(featureKey: FeatureKey): FeatureProviderBindi
   // the full list.
   const hideTranslationOnlyUnsupported =
     featureKey === "pageTranslation" && translationMode === "translationOnly"
+  const { models: builtInAiModels } = useBuiltInAiModels()
   const baseProviders = useMemo(() => {
-    const candidates = getSelectableProvidersForCapability(featureKey, providersConfig)
+    const candidates = getSelectableProvidersForCapability(
+      featureKey,
+      providersConfig,
+      builtInAiModels,
+      [providerId],
+    )
     if (!hideTranslationOnlyUnsupported) {
       return candidates
     }
@@ -47,7 +55,7 @@ export function useFeatureProvider(featureKey: FeatureKey): FeatureProviderBindi
         isSystemProviderSelectorItem(option) ||
         providerSupportsTranslationOnlyMode(option.provider),
     )
-  }, [featureKey, providersConfig, hideTranslationOnlyUnsupported])
+  }, [featureKey, providersConfig, builtInAiModels, providerId, hideTranslationOnlyUnsupported])
   const providers = useHostedAiProviderOptions(featureKey, baseProviders)
 
   const setProviderId = useCallback(
@@ -64,7 +72,10 @@ export function useFeatureProvider(featureKey: FeatureKey): FeatureProviderBindi
 }
 
 export interface CustomActionProvidersBinding {
-  /** Only the actions the user can actually trigger, so disabled ones stay out of the UI. */
+  /**
+   * Only the actions the user can actually trigger, so disabled ones stay out of the UI, and
+   * none while simple mode has custom AI actions turned off.
+   */
   actions: SelectionToolbarCustomAction[]
   providers: ProviderSelectorOption[]
   getProviderConfig: (action: SelectionToolbarCustomAction) => ProviderConfig | null
@@ -77,19 +88,29 @@ export function useCustomActionProviders(): CustomActionProvidersBinding {
   const setConfig = useSetAtom(writeConfigAtom)
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
 
-  const baseProviders = useMemo(
-    () => getSelectableProvidersForCapability("customAction", providersConfig),
-    [providersConfig],
-  )
-  const providers = useHostedAiProviderOptions("customAction", baseProviders)
-
+  const { models: builtInAiModels } = useBuiltInAiModels()
+  const customActionsOn = isFeatureOn(config, "customActions")
   const actions = useMemo(
     () =>
-      getSelectionToolbarActions(config.selectionToolbar).filter(
-        (action) => action.enabled !== false,
-      ),
-    [config.selectionToolbar],
+      customActionsOn
+        ? getSelectionToolbarActions(config.selectionToolbar).filter(
+            (action) => action.enabled !== false,
+          )
+        : [],
+    [config.selectionToolbar, customActionsOn],
   )
+
+  const baseProviders = useMemo(
+    () =>
+      getSelectableProvidersForCapability(
+        "customAction",
+        providersConfig,
+        builtInAiModels,
+        actions.map((action) => action.providerId),
+      ),
+    [providersConfig, builtInAiModels, actions],
+  )
+  const providers = useHostedAiProviderOptions("customAction", baseProviders)
 
   const setActionProviderId = useCallback(
     (actionId: string, providerId: string) =>

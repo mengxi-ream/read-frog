@@ -265,30 +265,10 @@ ReadFrog is dual-licensed under GPLv3 and a commercial license.
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for contributor licensing terms.
 
 <a href="https://github.com/mengxi-ream/read-frog/graphs/contributors">
-  <table>
-    <tr>
-      <th colspan="2">
-        <br>
-        <img src="https://contrib.rocks/image?repo=mengxi-ream/read-frog" alt="Read Frog contributors"><br>
-        <br>
-      </th>
-    </tr>
-    <!-- <tr>
-      <td>
-        <picture>
-          <source media="(prefers-color-scheme: dark)" srcset="https://next.ossinsight.io/widgets/official/compose-recent-top-contributors/thumbnail.png?repo_id=967738751&image_size=auto&color_scheme=dark" width="373" height="auto">
-          <img alt="Top Contributors of mengxi-ream/read-frog - Last 28 days" src="https://next.ossinsight.io/widgets/official/compose-recent-top-contributors/thumbnail.png?repo_id=967738751&image_size=auto&color_scheme=light" width="373" height="auto">
-        </picture>
-      </td>
-      <td rowspan="2">
-        <picture>
-          <source media="(prefers-color-scheme: dark)" srcset="https://next.ossinsight.io/widgets/official/compose-last-28-days-stats/thumbnail.png?repo_id=967738751&image_size=4x7&color_scheme=dark" width="655" height="auto">
-          <img alt="Performance Stats of mengxi-ream/read-frog - Last 28 days" src="https://next.ossinsight.io/widgets/official/compose-last-28-days-stats/thumbnail.png?repo_id=967738751&image_size=auto&color_scheme=light" width="655" height="auto">
-        </picture>
-      </td>
-    </tr> -->
-  </table>
+  <img src="https://contrib.rocks/image?repo=mengxi-ream/read-frog" alt="Read Frog contributors" />
 </a>
+
+Made with [contrib.rocks](https://contrib.rocks).
 
 <div align="right">
 
@@ -311,6 +291,10 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for contributor licensing terms.
 Every donation helps us build a better language learning experience. Thank you for supporting our mission!
 
 [![Sponsors][sponsor-image]][sponsor-link]
+
+<a href="https://ifapi.org/?aff=readfrog&utm_source=readfrog&utm_medium=readme">
+  <img src="assets/promotion/ifapi.png" alt="IF API: GPT, Claude, Gemini and more from one key. Read Frog users get +10% credit with code READFROG">
+</a>
 
 <div align="right">
 

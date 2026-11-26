@@ -1,5 +1,6 @@
 import type { ReactNode } from "react"
 import type { To } from "react-router"
+import type { FeatureTag } from "@/utils/features"
 import { useAtomValue } from "jotai"
 import { ShortcutKeyRecorder } from "@/components/shortcut-key-recorder"
 import { toastManager } from "@/components/ui/base-ui/toast"
@@ -7,6 +8,7 @@ import { configAtom } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
 import { formatHotkey } from "@/utils/os"
 import { ConfigItem } from "../../components/config-item"
+import { buildTurnOnLink } from "../advanced/simple-mode/links"
 import { useIsDifficultWordsOpen } from "../difficult-words/access"
 import { findShortcutOwner, getShortcutBindings } from "./shortcut-bindings"
 import { ShortcutTitle } from "./shortcut-title"
@@ -19,8 +21,10 @@ import { ShortcutTitle } from "./shortcut-title"
  * Keys another shortcut already has are turned down, naming that shortcut. A clash saved
  * before this check existed is flagged under the description instead.
  *
- * Without a title, the row hangs off the previous item's, as `ConfigItem` does. While the
- * shortcut's feature is switched off, `turnOn` is where its switch is (see `ShortcutTitle`).
+ * Without a title, the row hangs off the previous item's, as `ConfigItem` does. `feature` is
+ * what the key belongs to: while simple mode has it off, the title offers to turn it on (see
+ * `ShortcutTitle`). `turnOn` is for a switch of the shortcut's own, which counts once the
+ * feature is on.
  */
 export function ShortcutConfigItem({
   id,
@@ -28,6 +32,7 @@ export function ShortcutConfigItem({
   description,
   shortcut,
   onChange,
+  feature,
   turnOn,
 }: {
   id: string
@@ -35,17 +40,19 @@ export function ShortcutConfigItem({
   description?: ReactNode
   shortcut: string
   onChange: (shortcut: string) => void
+  feature?: FeatureTag
   turnOn?: To
 }) {
-  const bindings = getShortcutBindings(useAtomValue(configAtom), {
-    difficultWords: useIsDifficultWordsOpen(),
-  })
+  const config = useAtomValue(configAtom)
+  const bindings = getShortcutBindings(config, { difficultWords: useIsDifficultWordsOpen() })
   const clash = findShortcutOwner(bindings, id, shortcut)
 
   return (
     <ConfigItem
       id={id}
-      title={title && <ShortcutTitle title={title} turnOn={turnOn} />}
+      title={
+        title && <ShortcutTitle title={title} turnOn={buildTurnOnLink(config, feature) ?? turnOn} />
+      }
       description={
         clash ? (
           <>

@@ -75,8 +75,13 @@ describe("v098 to v099 migration", () => {
   })
 
   it("covers every API provider type, so no type can be seeded without a description", () => {
+    // A type added after v099 cannot be in a config this migration sees, and the migration is
+    // frozen, so the check stops at the types v099 knew.
+    const typesAddedAfterV099 = new Set<string>(["ifapi"])
     const config = {
-      providersConfig: API_PROVIDER_TYPES.map((provider, index) => ({
+      providersConfig: API_PROVIDER_TYPES.filter(
+        (provider) => !typesAddedAfterV099.has(provider),
+      ).map((provider, index) => ({
         id: `p${index}`,
         name: provider,
         enabled: true,

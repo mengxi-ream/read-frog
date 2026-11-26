@@ -1,8 +1,10 @@
 import type { BoundaryRequirement } from "./boundary"
 import type { GlossaryEntry, GlossaryMatcher, MatchedTerm } from "./types"
+import { createLogger } from "@/utils/logging/logger"
 import { INVISIBLE_TRANSLATION_CHARACTERS_REGEX } from "../host/translate/text-preparation"
-import { logger } from "../logger"
 import { boundaryRequirementOf, isAtWordBoundary } from "./boundary"
+
+const log = createLogger("glossary/matcher")
 
 function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
@@ -149,7 +151,7 @@ export function createGlossaryMatcher(entries: readonly GlossaryEntry[]): Glossa
           // The regex `i` flag's canonicalisation and String#toLowerCase are not
           // the same relation — Greek final sigma is the reachable case — so a
           // hit can miss the index. Rare enough to log rather than defend.
-          logger.log("Glossary match had no index entry", { matched })
+          log.debug("Glossary match had no index entry", { matched })
           return undefined
         }
         for (const entry of bucket) {

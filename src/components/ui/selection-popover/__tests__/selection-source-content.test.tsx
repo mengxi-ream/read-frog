@@ -1,47 +1,54 @@
 // @vitest-environment jsdom
-import { fireEvent, render, screen } from "@testing-library/react"
-import { describe, expect, it, vi } from "vitest"
+import { cleanup, render, screen } from "@testing-library/react"
+import { createStore, Provider } from "jotai"
+import { afterEach, describe, expect, it, vi } from "vitest"
+import { TooltipProvider } from "@/components/ui/base-ui/tooltip"
+import { configAtom } from "@/utils/atoms/config"
+import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { SelectionSourceContent } from "../selection-source-content"
 
-vi.mock("../copy-button", () => ({
-  CopyButton: () => <button type="button">Copy</button>,
+vi.mock("@/hooks/use-text-to-speech", () => ({
+  selectTTSVoice: (_config: unknown, language: string) => `voice:${language}`,
+  useTextToSpeech: () => ({
+    play: vi.fn<(...args: any[]) => any>(async () => {}),
+    stop: vi.fn<(...args: any[]) => any>(),
+    isFetching: false,
+    isPlaying: false,
+  }),
 }))
 
-vi.mock("../speak-button", () => ({
-  SpeakButton: () => <button type="button">Speak</button>,
-}))
-
-function getViewport(container: HTMLElement) {
-  const viewport = container.querySelector<HTMLElement>("[data-slot=scroll-area-viewport]")
-  expect(viewport).not.toBeNull()
-  return viewport as HTMLElement
+function renderSource(text: string | null) {
+  const store = createStore()
+  store.set(configAtom, DEFAULT_CONFIG)
+  return render(
+    <Provider store={store}>
+      <TooltipProvider>
+        <SelectionSourceContent text={text} emptyPlaceholder="—" />
+      </TooltipProvider>
+    </Provider>,
+  )
 }
 
-describe("selectionSourceContent", () => {
-  it("caps the expanded source text with a max height so short text keeps no blank space", () => {
-    const { container } = render(<SelectionSourceContent text="use" />)
+// The copy and speak tooltips are the buttons' only accessible names.
+function actionButtons() {
+  return screen
+    .queryAllByRole("button")
+    .filter((button) => button.querySelector(".tabler-icon-copy, .tabler-icon-volume"))
+}
 
-    const paragraph = screen.getByText("use")
-    expect(paragraph).toHaveClass("line-clamp-3")
+describe("SelectionSourceContent", () => {
+  afterEach(cleanup)
 
-    // The chevron toggle is the first button rendered inside the source row.
-    const toggle = container.querySelector("button")
-    expect(toggle).not.toBeNull()
-    fireEvent.click(toggle as HTMLButtonElement)
+  it("shows copy and speak for the source text without expanding it", () => {
+    renderSource("Hello there")
 
-    expect(paragraph).not.toHaveClass("line-clamp-3")
-
-    const viewport = getViewport(container)
-    // `max-h-*` lets the area shrink to a one-word selection; a fixed `h-*`
-    // would always reserve the full box and leave a blank gap under the text.
-    expect(viewport).toHaveClass("max-h-18")
-    expect(viewport.className).not.toMatch(/(?:^|\s)h-\d/)
-    expect(getViewport(container).parentElement?.className).not.toMatch(/(?:^|\s)h-\d/)
+    expect(actionButtons()).toHaveLength(2)
   })
 
-  it("does not constrain the height while collapsed", () => {
-    const { container } = render(<SelectionSourceContent text="use" />)
+  it("shows no copy or speak when there is no source text", () => {
+    renderSource(null)
 
-    expect(getViewport(container).className).not.toMatch(/max-h-/)
+    expect(screen.getByText("—")).toBeInTheDocument()
+    expect(actionButtons()).toHaveLength(0)
   })
 })

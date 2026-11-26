@@ -1,3 +1,4 @@
+import type { AnalyticsFeature } from "@/types/analytics"
 import { env } from "@/env"
 import { i18n } from "@/utils/i18n"
 
@@ -34,9 +35,20 @@ export type ExtensionPricingEntry =
   | "extension_plan_badge"
   | "extension_notebase_limit"
 
-export function pricingUrl(entry: ExtensionPricingEntry = "extension_upgrade"): string {
+/**
+ * `feature` names the feature that hit the wall, by its analytics name, so the website
+ * can tell which features send people to pricing. A wall that no single feature raised,
+ * such as the plan badge, leaves it off. A website that predates the parameter ignores it.
+ */
+export function pricingUrl(
+  entry: ExtensionPricingEntry = "extension_upgrade",
+  feature?: AnalyticsFeature,
+): string {
   const url = new URL(websiteUrl("/pricing"))
   url.searchParams.set("entry", entry)
+  if (feature) {
+    url.searchParams.set("feature", feature)
+  }
   return url.toString()
 }
 
@@ -49,8 +61,11 @@ export function logInUrl(): string {
   return websiteUrl("/log-in")
 }
 
-export function upgradeAction(entry: ExtensionPricingEntry = "extension_upgrade"): ErrorAction {
-  return { label: i18n.t("action.upgrade"), url: pricingUrl(entry) }
+export function upgradeAction(
+  entry: ExtensionPricingEntry = "extension_upgrade",
+  feature?: AnalyticsFeature,
+): ErrorAction {
+  return { label: i18n.t("action.upgrade"), url: pricingUrl(entry, feature) }
 }
 
 /**

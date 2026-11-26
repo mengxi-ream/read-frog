@@ -7,7 +7,7 @@ import {
   YOUTUBE_SHORTS_PATH_PATTERN,
   YOUTUBE_WATCH_URL_PATTERN,
 } from "@/utils/constants/subtitles"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
 import { bindSubtitlesToggleShortcut } from "./bind-subtitles-toggle-shortcut"
 import { createYoutubeSubtitlesAdapter } from "./platforms/youtube"
 import { createYoutubeCaptionTrackListener } from "./platforms/youtube/caption-track-listener"
@@ -16,6 +16,8 @@ import { watchShortsActiveReel } from "./platforms/youtube/shorts-active-reel-wa
 import { createShortsTranslateButtonMount } from "./renderer/mount-shorts-translate-button"
 import { mountSubtitlesSidebar, unmountSubtitlesSidebar } from "./renderer/mount-subtitles-sidebar"
 import { mountSubtitlesUI, unmountSubtitlesUI } from "./renderer/mount-subtitles-ui"
+
+const log = createLogger("subtitles.content/init-youtube-subtitles")
 
 function isYoutubeWatch(): boolean {
   return window.location.href.includes(YOUTUBE_WATCH_URL_PATTERN)
@@ -146,7 +148,7 @@ export function initYoutubeSubtitles(ctx: ContentScriptContext) {
 
   const tryInit = () => {
     queue = queue.then(syncSession).catch((error) => {
-      logger.error("[subtitles] failed to sync the YouTube subtitles session", error)
+      log.error("failed to sync the YouTube subtitles session", { error })
     })
   }
 

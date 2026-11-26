@@ -5,8 +5,10 @@ import type { TestSeriesObject } from "./types"
  * spreads the previous version is not a snapshot, because editing v117 would
  * silently change what v118 asserts.
  *
- * Delta from v117: `language.level` is removed and `difficultWords` is added
- * in every series: on, with its default key, running the built-in Dictionary.
+ * Delta from v117: none. v118 moves AI actions whose provider has no API key
+ * onto the Built-in AI, and every action in these series runs on a provider
+ * that has a key. The move itself is covered in
+ * `migration-scripts/v117-to-v118.test.ts`.
  */
 
 export const testSeries: TestSeriesObject = {
@@ -27,6 +29,7 @@ export const testSeries: TestSeriesObject = {
       language: {
         sourceCode: "spa",
         targetCode: "eng",
+        level: "advanced",
       },
       providersConfig: [
         {
@@ -489,11 +492,6 @@ export const testSeries: TestSeriesObject = {
       glossary: {
         enabled: true,
       },
-      difficultWords: {
-        enabled: true,
-        shortcut: "Alt+Shift+V",
-        lookupActionId: "default-dictionary",
-      },
     },
   },
   "config-with-llm-detection-enabled": {
@@ -514,6 +512,7 @@ export const testSeries: TestSeriesObject = {
       language: {
         sourceCode: "jpn",
         targetCode: "eng",
+        level: "beginner",
       },
       providersConfig: [
         {
@@ -919,11 +918,6 @@ export const testSeries: TestSeriesObject = {
       glossary: {
         enabled: true,
       },
-      difficultWords: {
-        enabled: true,
-        shortcut: "Alt+Shift+V",
-        lookupActionId: "default-dictionary",
-      },
     },
   },
   "prompt-token-migration-coverage": {
@@ -944,6 +938,7 @@ export const testSeries: TestSeriesObject = {
       language: {
         sourceCode: "eng",
         targetCode: "cmn",
+        level: "intermediate",
       },
       providersConfig: [
         {
@@ -1452,11 +1447,6 @@ export const testSeries: TestSeriesObject = {
       glossary: {
         enabled: true,
       },
-      difficultWords: {
-        enabled: true,
-        shortcut: "Alt+Shift+V",
-        lookupActionId: "default-dictionary",
-      },
     },
   },
   "default-dictionary-wording": {
@@ -1476,6 +1466,7 @@ export const testSeries: TestSeriesObject = {
       language: {
         sourceCode: "eng",
         targetCode: "cmn",
+        level: "intermediate",
       },
       providersConfig: [
         {
@@ -1881,11 +1872,6 @@ export const testSeries: TestSeriesObject = {
       glossary: {
         enabled: true,
       },
-      difficultWords: {
-        enabled: true,
-        shortcut: "Alt+Shift+V",
-        lookupActionId: "default-dictionary",
-      },
     },
   },
   "custom-action-with-custom-layout": {
@@ -1906,6 +1892,7 @@ export const testSeries: TestSeriesObject = {
       language: {
         sourceCode: "eng",
         targetCode: "cmn",
+        level: "intermediate",
       },
       providersConfig: [
         {
@@ -2365,11 +2352,6 @@ export const testSeries: TestSeriesObject = {
       uiLanguage: "auto",
       glossary: {
         enabled: true,
-      },
-      difficultWords: {
-        enabled: true,
-        shortcut: "Alt+Shift+V",
-        lookupActionId: "default-dictionary",
       },
     },
   },

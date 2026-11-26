@@ -9,11 +9,13 @@ import { lastSyncTimeAtom } from "@/utils/atoms/last-sync-time"
 import { clearAccessToken, getGoogleUserInfo, getValidAccessToken } from "@/utils/google-drive/auth"
 import { syncConfig } from "@/utils/google-drive/sync"
 import { i18n } from "@/utils/i18n"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
 import { ConfigItem } from "../../../../components/config-item"
 import { GlossarySyncReviewDialog } from "./components/glossary-review-dialog"
 import { UnresolvedDialog } from "./components/unresolved-dialog"
 import { useGlossarySync } from "./use-glossary-sync"
+
+const log = createLogger("options/pages/preference/config/google-drive-sync")
 
 export function GoogleDriveSyncConfigItem() {
   const [isSyncing, setIsSyncing] = useState(false)
@@ -65,7 +67,7 @@ export function GoogleDriveSyncConfigItem() {
       accountEmail = (await getGoogleUserInfo(accessToken)).email
       clickAccount.current = accountEmail
     } catch (error) {
-      logger.error("Google Drive sync could not get a token", error)
+      log.error("Google Drive sync could not get a token", { error })
       toastManager.add({
         type: "error",
         title: i18n.t("options.preference.config.googleDrive.syncError"),
@@ -100,7 +102,7 @@ export function GoogleDriveSyncConfigItem() {
       } as const
       toastManager.add({ type: "success", title: messages[result.action] })
     } else {
-      logger.error("Google Drive sync error", result.error)
+      log.error("Google Drive sync error", { error: result.error })
       toastManager.add({
         type: "error",
         title: i18n.t("options.preference.config.googleDrive.syncError"),

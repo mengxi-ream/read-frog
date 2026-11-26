@@ -1,4 +1,5 @@
 import type { APICallError } from "ai"
+import type { ParagraphDiagnosis } from "../paragraph-diagnosis"
 import type { TranslationTextFormat } from "@/types/config/translate"
 import * as React from "react"
 import textSmallCSS from "@/assets/styles/text-small.css?inline"
@@ -9,6 +10,7 @@ import { isTranslationCancelledError } from "@/utils/request/cancellation"
 import { SPINNER_CLASS, TRANSLATION_ERROR_CONTAINER_CLASS } from "../../../constants/dom-labels"
 import { getContainingShadowRoot, getOwnerDocument } from "../../dom/node"
 import { translateTextForPage } from "../translate-variants"
+import { reportPageTranslationRequestFailed } from "../translation-session"
 import { ensurePresetStyles } from "./style-injector"
 
 /**
@@ -125,6 +127,7 @@ export async function getTranslatedTextAndRemoveSpinner(
   isCurrent: () => boolean = () => true,
   textFormat: TranslationTextFormat = "plain",
   translateRequest: () => Promise<string> = () => translateTextForPage(textContent, textFormat),
+  diagnosis?: ParagraphDiagnosis,
 ): Promise<string | undefined> {
   let translatedText: string | undefined
 
@@ -139,6 +142,8 @@ export async function getTranslatedTextAndRemoveSpinner(
     // wrapper (the #1831 leak class).
     if (isTranslationCancelledError(error)) return undefined
     if (!isCurrent()) return undefined
+    diagnosis?.untranslated("error", { error })
+    reportPageTranslationRequestFailed(error)
 
     const errorComponent = React.createElement(TranslationError, {
       nodes,

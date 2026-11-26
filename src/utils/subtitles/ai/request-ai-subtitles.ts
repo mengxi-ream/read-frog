@@ -2,6 +2,7 @@ import type { VideoTranscriptStatus } from "@read-frog/api-contract"
 import type { SubtitlesError } from "@/utils/subtitles/errors"
 import type { SubtitlesFragment } from "@/utils/subtitles/types"
 import { safe } from "@orpc/client"
+import { ANALYTICS_FEATURE } from "@/types/analytics"
 import { billingAction, upgradeAction } from "@/utils/error-action"
 import { i18n } from "@/utils/i18n"
 import { isORPCPublicAppError } from "@/utils/notebase/errors"
@@ -12,8 +13,12 @@ import { OverlaySubtitlesError, ToastSubtitlesError } from "@/utils/subtitles/er
 export interface AiSubtitlesContext {
   videoId: string
   url: string
-  /** Player-reported duration; an untrusted admission pre-check, never the billing basis. */
+  /** The player's length claim; billing never uses it. On X, where one URL can name several
+   * videos, a transcript of another length is refused as another video. */
   durationSec: number
+  /** Names the played video where the URL names a post that can hold several; without it, the
+   * server takes the post's only video. */
+  mediaId?: string
 }
 
 interface VideoTranscriptJob {
@@ -52,7 +57,7 @@ function mapTranscriptError(error: unknown): SubtitlesError {
   if (isORPCPublicAppError(error, "VIDEO_TRANSCRIPTION_SUBSCRIPTION_REQUIRED")) {
     return new ToastSubtitlesError(
       i18n.t("subtitles.errors.aiSubscriptionRequired"),
-      upgradeAction("extension_video_quota"),
+      upgradeAction("extension_video_quota", ANALYTICS_FEATURE.VIDEO_SUBTITLES),
     )
   }
   if (isORPCPublicAppError(error, "VIDEO_TRANSCRIPTION_PAYMENT_REQUIRED")) {
@@ -63,13 +68,16 @@ function mapTranscriptError(error: unknown): SubtitlesError {
     // time the server refuses, only it knows the remainder and we do not.
     return new ToastSubtitlesError(
       i18n.t("subtitles.errors.aiQuotaExceeded"),
-      upgradeAction("extension_video_quota"),
+      upgradeAction("extension_video_quota", ANALYTICS_FEATURE.VIDEO_SUBTITLES),
     )
   }
   if (isORPCPublicAppError(error, "VIDEO_TRANSCRIPTION_UNSUPPORTED_LENGTH")) {
     // A property of the video, not of the account — no upgrade and no waiting
     // for the quota to reset makes this one work, so offer neither.
     return new ToastSubtitlesError(i18n.t("subtitles.errors.aiVideoTooLong"))
+  }
+  if (isORPCPublicAppError(error, "VIDEO_TRANSCRIPTION_VIDEO_MISMATCH")) {
+    return new ToastSubtitlesError(i18n.t("subtitles.errors.aiVideoMismatch"))
   }
   if (isORPCPublicAppError(error, "VIDEO_TRANSCRIPT_NOT_READY")) {
     // The job is fine, the file just is not written yet.
@@ -106,7 +114,10 @@ async function pollUntilCompleted(
     await sleep(POLL_INTERVAL_MS)
     throwIfAborted(signal)
 
-    const { error, data: job } = await safe(orpcClient.videoTranscript.get({ id: initial.id }))
+    // The claim lets the server tell this poller when the row now holds another video.
+    const { error, data: job } = await safe(
+      orpcClient.videoTranscript.get({ id: initial.id, durationSec }),
+    )
     if (error) {
       throw mapTranscriptError(error)
     }
@@ -128,12 +139,14 @@ export async function requestAiSubtitles(
   ctx: AiSubtitlesContext,
   opts?: { signal?: AbortSignal },
 ): Promise<{ segments: SubtitlesFragment[]; detectedLanguage: string }> {
-  const { url, durationSec } = ctx
+  const { url, durationSec, mediaId } = ctx
   const signal = opts?.signal
 
   throwIfAborted(signal)
 
-  const { error, data } = await safe(orpcClient.videoTranscript.create({ url, durationSec }))
+  const { error, data } = await safe(
+    orpcClient.videoTranscript.create({ url, durationSec, mediaId }),
+  )
   if (error) {
     // Sign-in, plan and quota are pre-checked before create is called, so the
     // walls reaching here are races (a subscription that lapsed since the
@@ -147,7 +160,7 @@ export async function requestAiSubtitles(
   throwIfAborted(signal)
 
   const { error: subtitlesError, data: subtitles } = await safe(
-    orpcClient.videoTranscript.getSubtitles({ id: completed.id }),
+    orpcClient.videoTranscript.getSubtitles({ id: completed.id, durationSec }),
   )
   if (subtitlesError) {
     throw mapTranscriptError(subtitlesError)

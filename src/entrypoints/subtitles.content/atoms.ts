@@ -1,4 +1,4 @@
-import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { LanguageTag } from "@read-frog/definitions"
 import type { ViewId } from "./ui/subtitles-settings-panel/views"
 import type { SectionId } from "./ui/subtitles-sidebar/sections"
 import type { SubtitlesSource } from "@/utils/constants/subtitles"
@@ -24,10 +24,13 @@ export const currentVideoIdAtom = atom<string | null>(null)
  */
 export const adPlayingAtom = atom<boolean>(false)
 
+/** True while the video has no media, as on a part switch; the overlay then shows nothing. */
+export const videoLoadingAtom = atom<boolean>(false)
+
 /** Scheduler’s current *translated* cue only (null when no translated cue covers now). */
 export const currentSubtitleAtom = atom<SubtitlesFragment | null>(null)
 
-export const sourceLanguageAtom = atom<LangCodeISO6393 | null>(null)
+export const sourceLanguageAtom = atom<LanguageTag | null>(null)
 
 /** Best original track (baseline or AI-segmented). Read-only for display/coordinator consumers. */
 export const sourceTrackAtom = atom<SubtitlesFragment[]>([])
@@ -41,7 +44,7 @@ export const translatedTrackAtom = atom<SubtitlesFragment[]>([])
  * at the current time (used for original / pending bilingual UI).
  */
 export const displaySubtitleAtom = atom((get): SubtitlesFragment | null => {
-  if (get(adPlayingAtom)) {
+  if (get(adPlayingAtom) || get(videoLoadingAtom)) {
     return null
   }
 
@@ -64,6 +67,8 @@ export const subtitlesSourceAtom = atom<SubtitlesSource>(SUBTITLES_SOURCE.NATIVE
 export const subtitlesSettingsPanelOpenAtom = atom<boolean>(false)
 
 export const subtitlesSettingsPanelViewAtom = atom<ViewId>(ROOT_VIEW)
+
+export const subtitlesTranslateButtonAtom = atom<HTMLElement | null>(null)
 
 export const subtitlesSidebarOpenAtom = atom<boolean>(false)
 
@@ -136,6 +141,8 @@ export const subtitlesShowContentAtom = atom((get): boolean => {
 
   if (!isVisible) return false
 
+  // An error shows alone: with lines still playing under it, stopped translation
+  // would read as still going.
   if (stateData?.state === "error") return false
 
   return hasRenderableSubtitleByMode(subtitle, style.displayMode)

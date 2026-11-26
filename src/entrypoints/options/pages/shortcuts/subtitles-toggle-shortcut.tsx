@@ -12,10 +12,12 @@ export function SubtitlesToggleShortcut() {
       id="subtitles-toggle-shortcut"
       title={i18n.t("options.shortcuts.subtitlesToggle.title")}
       description={i18n.t("options.shortcuts.subtitlesToggle.description")}
+      feature="videoSubtitles"
+      // The shortcut only does something on a site whose subtitles are on.
       turnOn={
-        videoSubtitles.enabled
+        Object.values(videoSubtitles.platforms).some((mode) => mode !== "off")
           ? undefined
-          : buildSectionLink("/video-subtitles", "subtitles-enable")
+          : buildSectionLink("/video-subtitles/sites", "subtitles-sites")
       }
       shortcut={videoSubtitles.toggleShortcut}
       onChange={(nextShortcut) => {

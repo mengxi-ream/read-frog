@@ -13,6 +13,7 @@ export function PageTranslationShortcut() {
       id="page-translation-shortcut"
       title={i18n.t("options.shortcuts.pageTranslation.title")}
       description={i18n.t("options.shortcuts.pageTranslation.description")}
+      feature="pageTranslation"
       shortcut={shortcut}
       onChange={(nextShortcut) => {
         void setTranslateConfig({

@@ -51,12 +51,10 @@ popup:
         action: Nhấp để chuyển sang song ngữ
   hub:
     tooltip: Dịch văn bản với nhiều mô hình đồng thời
-  discord:
-    tooltip: Tham gia Discord để kết nối với các nhà phát triển và truy cập sớm các tính năng mới
   blog:
     notification: Có gì mới trong Read Frog
   aiSmartContext: Ngữ cảnh thông minh AI
-  aiSmartContextDescription: Sử dụng ngữ cảnh trang web để cải thiện chất lượng dịch. Yêu cầu nhà cung cấp dịch LLM.
+  aiSmartContextDescription: Sử dụng ngữ cảnh trang web để cải thiện chất lượng dịch. Yêu cầu nhà cung cấp LLM.
   storeReview:
     title: Bạn thấy Read Frog thế nào?
     description: Một đánh giá trên cửa hàng sẽ giúp nhiều người đọc khác tìm thấy nó.
@@ -69,6 +67,7 @@ popup:
     emailUs: Gửi email cho chúng tôi
     featureRequest: Đề xuất tính năng
     bugReport: Báo lỗi
+    diagnosePage: "Chẩn đoán trang này"
     community: Cộng đồng
     joinDiscord: Tham gia Discord
     joinWechat: Tham gia nhóm WeChat
@@ -135,6 +134,13 @@ options:
     bugReport:
       title: Báo lỗi
       description: Mở phiếu hỗ trợ và theo dõi cho đến khi được khắc phục
+    troubleshooting:
+      title: "Khắc phục sự cố"
+    diagnostics:
+      title: "Xuất dữ liệu chẩn đoán"
+      description: "Lưu nhật ký gần đây và cài đặt (không gồm khóa API) để đính kèm vào báo cáo lỗi"
+      exportSuccess: "Đã lưu dữ liệu chẩn đoán"
+      exportFailed: "Không thể xuất dữ liệu chẩn đoán"
     community:
       title: Cộng đồng
     discord:
@@ -144,13 +150,40 @@ options:
       title: Nhóm WeChat
       description: Quét mã QR để tham gia nhóm thảo luận trên WeChat
       qrCodeAlt: Mã QR WeChat
+  usage:
+    title: Mức sử dụng
+    pageDescription: Gói của bạn và hạn mức AI còn lại.
+    notSignedIn: Chưa đăng nhập
+    guest: Khách
+    manageSubscription: Quản lý gói đăng ký
+    logInToView: Đăng nhập để xem
+    footer:
+      logIn: Đăng nhập để nhận hạn mức AI miễn phí mỗi tuần
+      upgrade: Nâng cấp lên Pro để mở khóa phụ đề AI và thêm hạn mức AI tích hợp
+      upgradeAction: Nâng cấp
   apiProviders:
     title: Nhà cung cấp API
-    pageDescription: Kết nối các dịch vụ AI mà Read Frog sử dụng và chọn dịch vụ cho từng tính năng.
-    description: Thêm các nhà cung cấp mà Read Frog có thể gọi. Hơn 20 nhà cung cấp được tích hợp sẵn; bạn cũng có thể thêm API tùy chỉnh tương thích Chat Completions và API Open Responses.
+    pageDescription: Dùng các mô hình tích hợp của Read Frog hoặc kết nối dịch vụ AI bên thứ ba, rồi chọn dịch vụ cho từng tính năng.
+    description: Dùng các mô hình tích hợp của Read Frog hoặc thêm nhà cung cấp bên thứ ba. Hơn 20 nhà cung cấp đã được cấu hình sẵn; bạn cũng có thể thêm API tùy chỉnh tương thích Chat Completions và API Open Responses.
     configTitle: Cấu hình nhà cung cấp
     addProvider: Thêm nhà cung cấp
-    builtInProvider: Nhà cung cấp tích hợp
+    builtInProvider: Mô hình tích hợp
+    thirdPartyProviders: Nhà cung cấp bên thứ ba
+    builtInModel:
+      reasoningDescription: "Mức độ $1 suy nghĩ trước khi trả lời. Mức càng cao càng xử lý tốt văn bản khó, nhưng trả lời chậm hơn và dùng nhiều hạn mức hơn."
+      reasoningDefault: "Mặc định"
+      reasoningLevels:
+        none: "Tắt"
+        minimal: "Tối thiểu"
+        low: "Thấp"
+        medium: "Trung bình"
+        high: "Cao"
+        xhigh: "Rất cao"
+      unavailableTitle:
+        temporary: "$1 tạm thời không khả dụng"
+        removed: "$1 không còn được cung cấp"
+      unavailableDescription: "Trong lúc mô hình này không chạy được, các tính năng dùng nó sẽ báo lỗi. Để tiếp tục, hãy chuyển chúng sang $1."
+      unavailableDescriptionNoAlternatives: "Trong lúc mô hình này không chạy được, các tính năng dùng nó sẽ báo lỗi. Để tiếp tục, hãy chuyển chúng sang nhà cung cấp khác."
     builtInAiUsage:
       title: Hạn mức AI tích hợp
       remaining: "Còn lại $1%"
@@ -168,20 +201,23 @@ options:
         videoSubtitles: Phụ đề video
         inputTranslation: Dịch đầu vào
         languageDetection: Phát hiện ngôn ngữ
+        pdfTranslation: Dịch PDF
     sponsorCta: Nhận AI nhanh, tiết kiệm chi phí
     sponsorCtaJalapenoCloud: Nhận ưu đãi giảm 50% GLM 5.3
+    sponsorCtaIfapi: Tặng thêm 10% với mã READFROG
     setApiKeyWarning:
       message: Hãy đặt API Key ở trang $1
     badges:
       featureCount: $1 tính năng
       sponsor: Tài trợ
       sponsorJalapenoCloud: Miễn phí $$1
+      sponsorIfapi: Mô hình -90%
     dialog:
       title: Thêm nhà cung cấp mới
       groups:
         builtInProviders:
-          title: Nhà cung cấp LLM tích hợp sẵn
-          description: Các nhà cung cấp mô hình ngôn ngữ lớn tích hợp sẵn, không cần điền hầu hết các cấu hình như Base URL
+          title: Nhà cung cấp LLM cấu hình sẵn
+          description: Các nhà cung cấp mô hình ngôn ngữ lớn đã cấu hình sẵn — không cần điền hầu hết thiết lập như Base URL
         compatibleProviders:
           title: Nhà cung cấp API tương thích
           description: Dùng Tùy chỉnh Chat Complete cho API tương thích Chat Completions hoặc Tùy chỉnh Responses cho API Open Responses.
@@ -249,15 +285,13 @@ options:
       invalidJson: Định dạng JSON không hợp lệ
     providers:
       name:
-        builtInAi: AI tích hợp
-        builtInAiAdvance: AI tích hợp nâng cao
         customChatComplete: Tùy chỉnh Chat Complete
         customResponses: Tùy chỉnh Responses
       attribution:
-        builtInAi: Mô hình tiêu chuẩn do Read Frog lưu trữ. Người dùng Pro và Ultra dùng được ở mọi tính năng trong hạn mức tuần; ở gói miễn phí chỉ dùng được trong hành động AI tùy chỉnh.
-        builtInAiAdvance: Mô hình nâng cao do Read Frog lưu trữ, dành riêng cho thành viên Ultra. Dùng được ở mọi tính năng AI tích hợp — dịch trang, hành động AI tùy chỉnh và hơn nữa — với hạn mức tuần dùng chung. Tiêu hao hạn mức nhanh hơn mô hình tiêu chuẩn.
+        builtInAi: Mô hình tiêu chuẩn do Read Frog lưu trữ. Miễn phí sau khi đăng nhập, theo hạn mức tuần.
+        builtInAiAdvance: Mô hình nâng cao do Read Frog lưu trữ, dành riêng cho thành viên Ultra. Tiêu hao hạn mức nhanh hơn các mô hình tiêu chuẩn.
       description:
-        openai: Cung cấp các mô hình như GPT-4o
+        openai: API chính thức của OpenAI cho các mô hình GPT
         azure: Mô hình OpenAI lưu trữ trên Azure qua các bản triển khai của bạn
         deepseek: Khuyến nghị sử dụng ở Trung Quốc
         openrouter: Giao diện thống nhất cho nhiều nhà cung cấp LLM với giá trả theo lần sử dụng
@@ -267,6 +301,7 @@ options:
         xai: Công ty AI của Elon Musk cung cấp các mô hình Grok với truy cập dữ liệu thời gian thực
         atlascloud: Nền tảng hợp nhất tương thích OpenAI cho các mô hình mới như DeepSeek, Kimi, Qwen, Doubao và GLM
         jalapenocloud: AI cấp doanh nghiệp được các đội ngũ hàng đầu sử dụng, nay dành cho bạn!
+        ifapi: GPT, Claude, Gemini và nhiều mô hình khác, chỉ từ 10% giá chính thức
         siliconflow: Nền tảng suy luận hiệu suất cao cho các mô hình Trung Quốc và quốc tế
         tensdaq: Nền tảng MaaS đấu giá AI cách mạng với giá thị trường, loại bỏ giá cố định cao
         openaiCompatible: Kết nối với endpoint tùy chỉnh tương thích với OpenAI Chat Completions API
@@ -554,6 +589,9 @@ options:
     selectionAnnotation:
       title: "Chú thích"
       description: "Gạch chân văn bản đã chọn và ghi nghĩa của nó giữa các dòng."
+    selectionAnnotationMode:
+      title: "Chế độ chú thích"
+      description: "Bật hoặc tắt chế độ chú thích mà không cần mở thanh công cụ. Khi bật, mọi văn bản bạn chọn đều được chú thích."
     actions:
       title: "Hành động AI"
       description: "Chạy một hành động AI trên văn bản đã chọn. Hành động tùy chỉnh chưa có phím tắt cho đến khi bạn đặt ở đây."
@@ -568,9 +606,7 @@ options:
     pageDescription: Dịch nội dung bạn gõ trong ô nhập trước khi gửi đi.
     trigger:
       title: Kích hoạt
-      enable:
-        title: Bật
-        description: Nhấn phím cách nhanh ba lần trong bất kỳ ô nhập nào để dịch nội dung bạn vừa gõ.
+      description: Nhấn phím cách nhanh ba lần trong bất kỳ ô nhập nào để dịch nội dung bạn vừa gõ.
       threshold:
         title: Ngưỡng kích hoạt
         description: Khoảng cách tối đa giữa các lần nhấn, tính bằng mili giây. Tăng lên nếu không kích hoạt được, giảm xuống nếu bị kích hoạt khi đang gõ.
@@ -589,9 +625,6 @@ options:
     title: Nút nổi
     pageDescription: Đặt vị trí nút nổi, hành động khi nhấp và những trang web cần ẩn nút.
     demoImageAlt: Demo nút nổi
-    enable:
-      title: Bật nút nổi
-      description: Hiển thị nút nổi trên các trang web để truy cập nhanh các tính năng Read Frog
     display:
       title: Hiển thị
       side:
@@ -610,8 +643,8 @@ options:
       panel: Mở bảng điều khiển bên
       translate: Bật/tắt dịch trang
     closeMenu:
-      disableForSite: Tắt cho trang web này
-      disableGlobally: Tắt toàn cục
+      title: Ẩn nút nổi
+    pageTranslationOff: "Dịch trang đang tắt trong chế độ đơn giản"
     tooltips:
       togglePageTranslation: Bật/tắt dịch trang
       floatingButtonOptions: Tùy chọn nút nổi
@@ -622,9 +655,6 @@ options:
     title: Thanh công cụ chọn
     pageDescription: Đặt các thao tác xuất hiện khi bạn chọn văn bản và nơi hiển thị thanh công cụ.
     demoImageAlt: Demo thanh công cụ chọn văn bản
-    enable:
-      title: Bật thanh công cụ chọn văn bản
-      description: Hiển thị thanh công cụ khi chọn văn bản trên trang web để dịch nhanh, đọc to và dùng các hành động AI
     annotation:
       title: "Chú thích từ"
       enable:
@@ -636,13 +666,10 @@ options:
     actions:
       title: Hành động
       translate:
-        title: Dịch
         description: Hiển thị nút dịch trên thanh công cụ
       speak:
-        title: Đọc
         description: Hiển thị nút đọc, dùng để đọc to văn bản đã chọn
       noteSuggestion:
-        title: Gợi ý ghi chú
         description: Sau khi dịch vùng chọn bằng nhà cung cấp AI, gợi ý các từ để lưu vào Notebase
         action: Hành động
         actionDescription: Hành động tạo ra gợi ý
@@ -650,6 +677,12 @@ options:
         providerDescription: Nhà cung cấp AI tạo ra gợi ý
     display:
       title: Hiển thị
+      placement:
+        title: Vị trí
+        description: Chọn thanh công cụ hiện ở phía nào của văn bản đã chọn. Nếu phía đã chọn không đủ chỗ, thanh sẽ hiện ở phía còn lại
+        followDirection: Theo hướng chọn
+        above: Luôn ở trên
+        below: Luôn ở dưới
       opacity:
         title: Độ mờ
         description: Điều chỉnh độ mờ của thanh công cụ chọn văn bản và cửa sổ mở rộng mở từ đó
@@ -659,8 +692,7 @@ options:
         enterUrlPattern: Nhập mẫu URL
         urlPattern: Mẫu URL
     closeMenu:
-      disableForSite: Tắt cho trang web này
-      disableGlobally: Tắt toàn cục
+      title: Ẩn thanh công cụ chọn
     errors:
       customActionFailed: Hành động tuỳ chỉnh thất bại
       customActionFailedFallback: Yêu cầu hành động tuỳ chỉnh thất bại
@@ -796,6 +828,8 @@ options:
             unquotedAttributeOutput: Hãy đặt giá trị thuộc tính này trong dấu ngoặc kép, nếu không giá trị có thể thoát ra ngoài thuộc tính.
             filterIgnored: Bộ lọc bị bỏ qua trong thẻ "$1". Hãy gán giá trị đã lọc trước.
             newlineToBrNotLast: newline_to_br chỉ hoạt động khi là bộ lọc cuối cùng của một đầu ra.
+            mathFilterNotLast: $1 chỉ hoạt động khi là bộ lọc cuối cùng của một đầu ra.
+            mathFilterInAttribute: Đừng dùng $1 trong giá trị thuộc tính. Công thức nó vẽ có dấu ngoặc kép, sẽ kết thúc thuộc tính.
             tooLong: Bố cục này dài hơn $1 ký tự và không thể lưu.
             fieldNotShown: '"$1" không được hiển thị trong bố cục này.'
             reservedFieldName: Tên trường "$1" là tên dành riêng trong bố cục. Hãy đổi tên trường.
@@ -1061,8 +1095,8 @@ options:
       pageDescription: Đặt bản dịch cố định cho những từ quan trọng với bạn, và chọn nơi áp dụng cho từng danh sách.
       untitled: Bảng thuật ngữ chưa đặt tên
       noGlossaries: Chưa có bảng thuật ngữ nào.
-      enable:
-        title: Bật
+      appliesTo:
+        title: Áp dụng cho
         description: Gửi các thuật ngữ khớp cho LLM để dịch đúng theo cách bạn muốn. Bảng thuật ngữ được gửi kèm trong câu lệnh, nên nó chỉ áp dụng cho các tính năng chạy trên nhà cung cấp LLM.
       library:
         title: Bảng thuật ngữ của bạn
@@ -1192,9 +1226,6 @@ options:
     title: Menu ngữ cảnh
     pageDescription: Kiểm soát các mục Read Frog trong menu chuột phải của trình duyệt.
     demoImageAlt: Demo menu ngữ cảnh
-    enable:
-      title: Bật dịch menu ngữ cảnh
-      description: Thêm các tùy chọn dịch vào menu chuột phải của trình duyệt để dịch nhanh trang hoặc văn bản đã chọn
   translation:
     title: Dịch trang
     pageDescription: Kiểm soát cách dịch trang — chế độ, phạm vi, prompt và giới hạn yêu cầu.
@@ -1343,7 +1374,7 @@ options:
         error: Giá trị phải từ $1 đến $2
     translationQueue:
       title: Hàng đợi dịch
-      description: Yêu cầu gửi đi nhanh đến mức nào, mỗi yêu cầu mang bao nhiêu văn bản và dịch trước người đọc bao xa
+      description: Yêu cầu gửi đi nhanh đến mức nào, mỗi yêu cầu mang bao nhiêu văn bản, mỗi yêu cầu được chờ bao lâu và dịch trước người đọc bao xa
       manageQueue: Quản lý hàng đợi
       requestQueueConfig:
         title: Tốc độ dịch
@@ -1358,6 +1389,9 @@ options:
           description: "Số ký tự tối đa: mỗi yêu cầu tới AI mang bao nhiêu văn bản"
         maxItemsPerBatch:
           description: "Số đoạn tối đa: bao nhiêu đoạn gộp chung một yêu cầu. Nhà cung cấp không dùng AI bỏ qua cả hai"
+      requestTimeout:
+        title: Thời gian chờ yêu cầu
+        description: "Số giây chờ phản hồi trước khi bỏ cuộc và thử lại. Yêu cầu AI theo lô được chờ thêm tùy độ dài, tối đa thêm 100 giây. Hãy tăng lên nếu một mô hình chậm liên tục hết thời gian chờ"
       preloadConfig:
         title: Phạm vi dịch trước
         description: Kiểm soát lượng nội dung bên dưới vùng nhìn được dịch trước để tiết kiệm chi phí API
@@ -1436,10 +1470,11 @@ options:
       title: Cơ bản
       enable:
         title: Bật phụ đề video
-        description: Thêm nút dịch vào thanh điều khiển của trình phát trên YouTube, X và Netflix.
-      autoStart:
-        title: Mở video là dịch
-        description: Bắt đầu dịch ngay khi video tải xong, không cần bấm nút.
+        description: "Chọn cho từng trang: tắt, thủ công (bắt đầu bằng nút dịch trong trình phát) hoặc tự động (bắt đầu ngay khi mở video)."
+        mode:
+          off: "Tắt"
+          manual: "Thủ công"
+          auto: "Tự động"
       aiSegmentation:
         title: AI phân đoạn thông minh
         description: AI cắt lại phụ đề thành từng câu. Bản dịch sẽ phản hồi chậm hơn. Cần LLM mạnh; mô hình yếu có thể bỏ sót hoặc lệch dòng.
@@ -1452,8 +1487,6 @@ options:
     aiQuota:
       title: Hạn mức phụ đề AI
       description: AI dùng công nghệ nhận dạng giọng nói để tạo phụ đề chính xác cho mọi video
-      launchBonusPromo: Đăng ký trước $1 để nhận thêm 300 phút chuyển lời nói thành văn bản
-      loginRequired: Đăng nhập để xem hạn mức phụ đề AI của bạn
       upgradeRequired: Phụ đề AI cần gói Pro hoặc Ultra
       pools:
         subscription: Hạn mức hằng tháng
@@ -1529,7 +1562,7 @@ options:
           videoSummary: Tóm tắt video (yêu cầu ngữ cảnh thông minh AI)
     subtitlesQueue:
       title: Hàng đợi phụ đề
-      description: Yêu cầu phụ đề gửi đi nhanh đến mức nào và mỗi yêu cầu mang bao nhiêu dòng
+      description: Yêu cầu phụ đề gửi đi nhanh đến mức nào, mỗi yêu cầu mang bao nhiêu dòng và mỗi yêu cầu được chờ bao lâu
       manageQueue: Quản lý hàng đợi
       requestQueueConfig:
         title: Tốc độ dịch
@@ -1544,6 +1577,9 @@ options:
           description: "Số ký tự tối đa: mỗi yêu cầu tới AI mang bao nhiêu văn bản"
         maxItemsPerBatch:
           description: "Số dòng tối đa: bao nhiêu dòng phụ đề gộp chung một yêu cầu. Nhà cung cấp không dùng AI bỏ qua cả hai"
+      requestTimeout:
+        title: Thời gian chờ yêu cầu
+        description: "Số giây chờ phản hồi trước khi bỏ cuộc và thử lại. Yêu cầu AI theo lô được chờ thêm tùy độ dài, tối đa thêm 100 giây. Hãy tăng lên nếu một mô hình chậm liên tục hết thời gian chờ"
     cache:
       title: Bộ nhớ đệm
       clearCache:
@@ -1556,6 +1592,53 @@ options:
           confirm: Xác nhận
           cancel: Hủy
           description: Tất cả kết quả AI phân đoạn đã lưu trong bộ nhớ đệm sẽ bị xóa. Lần tới khi phát video có bật AI phân đoạn, phụ đề sẽ được xử lý lại.
+  simpleMode:
+    title: "Chế độ đơn giản"
+    pageDescription: "Tính năng đã tắt sẽ như chưa từng được cài: không xuất hiện trên trang web và phím tắt không còn tác dụng. Cài đặt của nó vẫn được giữ, nên bật lại thì mọi thứ vẫn như cũ."
+    drawerDescription: "Tính năng đã tắt sẽ không xuất hiện ở đâu cả. Cài đặt vẫn được giữ"
+    features:
+      customActions:
+        title: "Hành động AI tùy chỉnh"
+        description: "Các hành động AI trên thanh công cụ chọn và menu chuột phải, gồm cả Từ điển và Phân tích câu có sẵn"
+      pageTranslation:
+        title: "Dịch trang"
+        description: "Dịch toàn bộ trang web"
+        hover:
+          title: "Dịch khi di chuột"
+          description: "Di chuột hoặc nhấn giữ một đoạn để chỉ dịch đoạn đó"
+      videoSubtitles:
+        title: "Phụ đề video"
+        description: "Thêm nút phụ đề đã dịch vào trình phát video"
+      inputTranslation:
+        title: "Dịch đầu vào"
+        description: "Nhấn phím cách nhanh ba lần trong bất kỳ ô nhập nào để dịch nội dung bạn vừa gõ"
+      floatingButton:
+        title: "Nút nổi"
+        description: "Hiển thị nút nổi trên các trang web để truy cập nhanh các tính năng Read Frog"
+      selectionToolbar:
+        title: "Thanh công cụ chọn"
+        description: "Hiển thị thanh công cụ khi chọn văn bản trên trang web để dịch nhanh, đọc to và dùng các hành động AI"
+        annotation:
+          title: "Chú thích từ"
+          description: "Gạch chân từ hoặc cụm từ đã chọn và ghi nghĩa của nó giữa các dòng"
+        translate:
+          title: "Dịch vùng chọn"
+          description: "Hiển thị nút dịch trên thanh công cụ"
+          noteSuggestion:
+            title: "Gợi ý ghi chú"
+            description: "Sau khi dịch vùng chọn bằng nhà cung cấp AI, gợi ý các từ để lưu vào Notebase"
+        speak:
+          title: "Đọc"
+          description: "Hiển thị nút đọc, dùng để đọc to văn bản đã chọn"
+      contextMenu:
+        title: "Menu ngữ cảnh"
+        description: "Các mục Read Frog trong menu chuột phải của trình duyệt"
+      translationHub:
+        title: "Trung tâm Dịch thuật"
+        description: "Dịch văn bản với nhiều mô hình đồng thời"
+      glossary:
+        title: "Bảng thuật ngữ"
+        description: "Dịch những từ quan trọng với bạn theo cách bạn đã chọn"
   whatsNew:
     title: Có gì mới
     postType:
@@ -1573,8 +1656,8 @@ side:
 translateService:
   title: Dịch vụ dịch thuật
   description: Chỉ để dịch trang web
-  builtInModels: Built-in Models
-  llmModels: LLM Models
+  builtInModels: Mô hình tích hợp
+  llmModels: Mô hình bên thứ ba
   normalTranslator: Trình dịch thông thường
   selectServices: Chọn dịch vụ
   translationProviders: Dịch vụ dịch thuật
@@ -1588,7 +1671,7 @@ languageLevels:
   intermediate: Trung cấp
   advanced: Nâng cao
 noAPIKeyConfig:
-  warning: Nếu bạn muốn sử dụng mô hình AI, vui lòng đặt API key trên trang tùy chọn trước
+  warning: Vui lòng đặt API key cho nhà cung cấp này trên trang tùy chọn trước
   warningWithLink:
     youMust: Bạn phải
     setTheAPIKey: đặt API key
@@ -1601,6 +1684,25 @@ translation:
   sameLanguage: Ngôn ngữ nguồn và đích phải khác nhau
   autoModeSameLanguage: Ngôn ngữ phát hiện '$1' giống với ngôn ngữ đích
   extensionContextInvalidated: Tiện ích đã được cập nhật. Hãy tải lại trang này rồi thử lại.
+  inputTranslationFailed: "Dịch đầu vào thất bại"
+pageDiagnosis:
+  title: "Chẩn đoán trang"
+  summary: "Đã dịch $1, chưa dịch $2"
+  empty: "Chưa có gì để hiển thị. Hãy bật dịch trang rồi mở lại mục này."
+  emptyWhileTranslating: "Chưa có gì để hiển thị. Các đoạn sẽ hiện ở đây khi tính năng dịch trang xử lý đến chúng."
+  framesNotIncluded: "Văn bản bên trong các khung nhúng không được tính ở đây."
+  hint: "Nhấp vào một lý do để khoanh các đoạn tương ứng trên trang."
+  close: "Đóng"
+  unavailable: "Read Frog không thể chạy trên trang này"
+  reasons:
+    noProse: "Không có chữ để dịch"
+    tooShort: "Quá ngắn để dịch"
+    targetLanguage: "Đã ở ngôn ngữ đích"
+    skipLanguage: "Thuộc ngôn ngữ bạn bỏ qua"
+    noTranslationNeeded: "AI cho rằng không cần dịch"
+    sameAsSource: "Bản dịch giống bản gốc"
+    emptyResult: "Dịch vụ không trả về gì"
+    error: "Dịch thất bại"
 annotation:
   annotate: "Chú thích"
   enterMode: "Chế độ chú thích"
@@ -1623,6 +1725,11 @@ speak:
   noTextSelected: Không có văn bản nào được chọn
   openaiNotConfigured: Nhà cung cấp OpenAI chưa được cấu hình hoặc chưa được bật
   openaiApiKeyNotConfigured: API key OpenAI chưa được cấu hình
+hideMenu:
+  untilReload: Cho đến khi tải lại trang
+  onSite: Trên $1
+  onAllSites: Trên mọi trang web
+  restoreHint: "Có thể bật lại trong $1 hoặc $2."
 action:
   copy: Sao chép
   copied: Đã sao chép
@@ -1714,6 +1821,7 @@ subtitles:
   requestAiSubtitles: Yêu cầu phụ đề AI
   usingAiSubtitles: Đang dùng phụ đề AI
   settings: Cài đặt phụ đề
+  autoStartOnPlatform: "Tự động bật trên $1"
   toggle:
     enabled: Đã bật dịch phụ đề
     disabled: Đã tắt dịch phụ đề
@@ -1751,7 +1859,9 @@ subtitles:
     aiSubscriptionRequired: Phụ đề AI cần gói Pro hoặc Ultra
     aiPaymentRequired: Cập nhật phương thức thanh toán để tiếp tục tạo phụ đề AI
     aiVideoTooLong: Video này quá dài để tạo phụ đề AI
-    aiLiveReplayUnsupported: Phụ đề AI chưa hỗ trợ bản phát lại của buổi phát trực tiếp
+    aiVideoMismatch: Video này không khớp với bài đăng chứa nó. Hãy mở trang của bài đăng rồi thử lại
+    aiLiveReplayUnsupported: Phụ đề AI chưa hỗ trợ buổi phát trực tiếp và bản phát lại của chúng
+    aiLiveStreamUnsupported: Phụ đề AI chưa hỗ trợ buổi phát trực tiếp đang diễn ra. Hãy yêu cầu sau khi có bản phát lại
     aiStillProcessing: Quá trình phiên âm vẫn đang chạy — hãy bấm lại sau vài phút
     aiRequestFailed: Yêu cầu phụ đề AI thất bại, vui lòng thử lại sau
     aiNoResponse: Dịch vụ AI không phản hồi, hiển thị văn bản gốc
@@ -1770,10 +1880,33 @@ hostedAi:
     serviceUnavailable: Tạm thời không khả dụng
     usedPercent: "Đã dùng hạn mức: $1%"
     resetsAt: "Đặt lại lúc $1"
+  requestId:
+    label: "Mã yêu cầu:"
+    copy: "Sao chép mã yêu cầu"
   errors:
     rateLimited: Quá nhiều yêu cầu, vui lòng thử lại sau.
     guestRateLimited: Quá nhiều yêu cầu từ khách. Vui lòng thử lại sau.
     userRateLimited: Quá nhiều yêu cầu. Vui lòng thử lại sau.
+    modelUnavailable: "Hiện không thể dùng $1. Hãy thử $2."
+    modelUnavailableNoAlternatives: "Hiện không thể dùng $1 và bạn không có mô hình AI tích hợp nào khác. Vui lòng thử lại sau."
+    modelBusy: "$1 đang quá tải. Vui lòng thử lại sau giây lát hoặc chuyển sang $2."
+    modelBusyNoAlternatives: "$1 đang quá tải. Vui lòng thử lại sau giây lát."
+  unavailable:
+    temporary: "$1 tạm thời không khả dụng. Hãy thử $2."
+    temporaryNoAlternatives: "$1 tạm thời không khả dụng. Vui lòng thử lại sau."
+    removed: "$1 không còn được cung cấp. Hãy thử $2."
+    removedNoAlternatives: "$1 không còn được cung cấp. Hãy chọn nhà cung cấp khác."
+  actions:
+    chooseModel: "Chọn mô hình"
+  builtInAiPrompt:
+    logInTitle: "Đăng nhập để dùng AI tích hợp"
+    logInDescription: "AI tích hợp miễn phí khi bạn đăng nhập, khoảng 120.000 token mỗi tuần."
+    upgradeTitle: "Bạn đã dùng hết AI tích hợp của tuần này"
+    upgradeDescription: "Pro dịch khoảng 3.000 trang web mỗi tháng, Ultra khoảng 10.000."
+    upgradeDescriptionPro: "Ultra dịch khoảng 10.000 trang web mỗi tháng."
+    useMachineTranslation: "Dùng dịch máy"
+    switched: "$1 giờ dùng $2."
+    switchFailed: "Không thể chuyển sang dịch máy. Vui lòng thử lại."
 hotkey:
   control: Ctrl
   alt: Option
@@ -1837,183 +1970,3 @@ difficultWords:
       C1: Văn bản dài, phức tạp, mang tính thông tin hay văn học, phân biệt được văn phong; bài viết chuyên ngành và hướng dẫn kỹ thuật dài ngoài lĩnh vực của bạn
       C2: Hầu như mọi dạng văn viết, kể cả văn bản trừu tượng có cấu trúc và ngôn ngữ phức tạp, như sách hướng dẫn, bài viết chuyên ngành và tác phẩm văn học
       unsure: Tính là A2. Nên bắt đầu ở mức thấp; tô sáng quá nhiều thì đánh dấu từ đã biết là sửa được ngay, còn quá ít thì chẳng có gì để bấm.
-languages:
-  eng: Tiếng Anh
-  cmn: Tiếng Trung giản thể
-  cmnHant: Tiếng Trung phồn thể
-  yue: Tiếng Quảng Đông
-  spa: Tiếng Tây Ban Nha
-  rus: Tiếng Nga
-  arb: Tiếng Ả Rập
-  ben: Tiếng Bengal
-  hin: Tiếng Hindi
-  por: Tiếng Bồ Đào Nha
-  ind: Tiếng Indonesia
-  jpn: Tiếng Nhật
-  fra: Tiếng Pháp
-  deu: Tiếng Đức
-  jav: Tiếng Java
-  kor: Tiếng Hàn
-  tel: Tiếng Telugu
-  vie: Tiếng Việt
-  mar: Tiếng Marathi
-  ita: Tiếng Ý
-  tam: Tiếng Tamil
-  tur: Tiếng Thổ Nhĩ Kỳ
-  urd: Tiếng Urdu
-  guj: Tiếng Gujarati
-  pol: Tiếng Ba Lan
-  ukr: Tiếng Ukraine
-  kan: Tiếng Kannada
-  mai: Tiếng Maithili
-  mal: Tiếng Malayalam
-  pes: Tiếng Ba Tư
-  mya: Tiếng Miến Điện
-  swh: Tiếng Swahili
-  sun: Tiếng Sunda
-  ron: Tiếng Romania
-  pan: Tiếng Punjab
-  bho: Tiếng Bhojpuri
-  amh: Tiếng Amhara
-  hau: Tiếng Hausa
-  fuv: Tiếng Fulani
-  bos: Tiếng Bosnia
-  hrv: Tiếng Croatia
-  nld: Tiếng Hà Lan
-  srp: Tiếng Serbia
-  tha: Tiếng Thái
-  ckb: Tiếng Kurd Trung
-  yor: Tiếng Yoruba
-  uzn: Tiếng Uzbek
-  zlm: Tiếng Mã Lai
-  ibo: Tiếng Igbo
-  npi: Tiếng Nepal
-  ceb: Tiếng Cebuano
-  skr: Tiếng Saraiki
-  tgl: Tiếng Tagalog
-  hun: Tiếng Hungary
-  azj: Tiếng Azerbaijan
-  sin: Tiếng Sinhala
-  koi: Tiếng Komi-Permyak
-  ell: Tiếng Hy Lạp
-  ces: Tiếng Séc
-  mag: Tiếng Magahi
-  run: Tiếng Rundi
-  bel: Tiếng Belarus
-  plt: Tiếng Malagasy
-  qug: Tiếng Quechua Chimborazo
-  mad: Tiếng Madura
-  nya: Tiếng Chewa
-  zyb: Tiếng Choang
-  pbu: Tiếng Pashto
-  kin: Tiếng Kinyarwanda
-  zul: Tiếng Zulu
-  bul: Tiếng Bulgaria
-  swe: Tiếng Thụy Điển
-  lin: Tiếng Lingala
-  som: Tiếng Somali
-  hms: Tiếng Miêu Qiandong
-  hnj: Tiếng Hmong Njua
-  ilo: Tiếng Ilocano
-  kaz: Tiếng Kazakh
-  heb: Tiếng Hebrew
-  nob: Tiếng Na Uy (Bokmål)
-  nno: Tiếng Na Uy (Nynorsk)
-  afr: Tiếng Afrikaans
-  sqi: Tiếng Albania
-  asm: Tiếng Assam
-  eus: Tiếng Basque
-  bre: Tiếng Breton
-  cat: Tiếng Catalan
-  cos: Tiếng Corsica
-  cym: Tiếng Wales
-  dan: Tiếng Đan Mạch
-  div: Tiếng Divehi
-  epo: Tiếng Esperanto
-  ekk: Tiếng Estonia
-  fao: Tiếng Faroe
-  fij: Tiếng Fiji
-  fin: Tiếng Phần Lan
-  fry: Tiếng Frisia
-  gla: Tiếng Gael Scotland
-  gle: Tiếng Ireland
-  glg: Tiếng Galicia
-  grn: Tiếng Guarani
-  hat: Tiếng Creole Haiti
-  haw: Tiếng Hawaii
-  hye: Tiếng Armenia
-  ido: Tiếng Ido
-  ina: Tiếng Interlingua
-  isl: Tiếng Iceland
-  kat: Tiếng Georgia
-  khm: Tiếng Khmer
-  kir: Tiếng Kyrgyz
-  lao: Tiếng Lào
-  lat: Tiếng Latin
-  lvs: Tiếng Latvia
-  lit: Tiếng Lithuania
-  ltz: Tiếng Luxembourg
-  mkd: Tiếng Macedonia
-  mlt: Tiếng Malta
-  mon: Tiếng Mông Cổ
-  mri: Tiếng Maori
-  nso: Tiếng Bắc Sotho
-  oci: Tiếng Occitan
-  ori: Tiếng Odia
-  orm: Tiếng Oromo
-  prs: Tiếng Dari
-  san: Tiếng Phạn
-  slk: Tiếng Slovak
-  slv: Tiếng Slovenia
-  smo: Tiếng Samoa
-  sna: Tiếng Shona
-  snd: Tiếng Sindhi
-  sot: Tiếng Nam Sotho
-  tah: Tiếng Tahiti
-  tat: Tiếng Tatar
-  tgk: Tiếng Tajik
-  tir: Tiếng Tigrinya
-  ton: Tiếng Tonga
-  tsn: Tiếng Tswana
-  tuk: Tiếng Turkmen
-  uig: Tiếng Uyghur
-  vol: Tiếng Volapük
-  wol: Tiếng Wolof
-  xho: Tiếng Xhosa
-  ydd: Tiếng Yiddish
-  aka: Tiếng Akan
-  bam: Tiếng Bambara
-  bis: Tiếng Bislama
-  bod: Tiếng Tây Tạng
-  che: Tiếng Chechen
-  chv: Tiếng Chuvash
-  dzo: Tiếng Dzongkha
-  ewe: Tiếng Ewe
-  kab: Tiếng Kabyle
-  lug: Tiếng Luganda
-  oss: Tiếng Ossetia
-  ssw: Tiếng Swati
-  ven: Tiếng Venda
-  war: Tiếng Waray
-  nde: Tiếng Bắc Ndebele
-  nbl: Tiếng Nam Ndebele
-  pam: Tiếng Pampanga
-  hil: Tiếng Hiligaynon
-  bcl: Tiếng Bicolano Trung
-  min: Tiếng Minangkabau
-  ace: Tiếng Aceh
-  bug: Tiếng Bugis
-  ban: Tiếng Bali
-  bjn: Tiếng Banjar
-  mak: Tiếng Makassar
-  sas: Tiếng Sasak
-  tet: Tiếng Tetum
-  cha: Tiếng Chamorro
-  niu: Tiếng Niue
-  tvl: Tiếng Tuvalu
-  gil: Tiếng Kiribati
-  mah: Tiếng Marshall
-  pau: Tiếng Palau
-  wls: Tiếng Wallis
-  rar: Tiếng Rarotongan
-  hif: Tiếng Hindi Fiji

@@ -10,10 +10,12 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-libra
 import { createStore, Provider } from "jotai"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { fakeBrowser } from "wxt/testing/fake-browser"
+import { customActionRequestAtom } from "@/components/custom-action/atoms"
 import { TooltipProvider } from "@/components/ui/base-ui/tooltip"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { configAtom } from "@/utils/atoms/config"
 import { CONFIG_STORAGE_KEY, DEFAULT_CONFIG } from "@/utils/constants/config"
+import { GOOGLE_TRANSLATE_PROVIDER_ID } from "@/utils/constants/providers"
 import { getBuiltInDictionaryAction } from "@/utils/custom-actions"
 import { prepareTranslationText } from "@/utils/host/translate/text-preparation"
 import { buildContextSnapshot, createRangeSnapshot, normalizeSelectedText } from "../../utils"
@@ -333,15 +335,18 @@ vi.mock("../translate-button/translation-content", () => ({
   TranslationContent: ({
     selectionContent,
     translatedText,
+    targetLanguage,
     isTranslating,
   }: {
     selectionContent: string | null | undefined
     translatedText: string | undefined
+    targetLanguage: string
     isTranslating: boolean
   }) => (
     <div data-testid="translation-content">
       <span data-testid="translation-selection">{selectionContent}</span>
       <span data-testid="translation-result">{translatedText ?? ""}</span>
+      <span data-testid="translation-language">{targetLanguage}</span>
       <span data-testid="translation-status">{String(isTranslating)}</span>
     </div>
   ),
@@ -400,15 +405,6 @@ vi.mock("@/components/ui/base-ui/toast", () => ({
   },
 }))
 
-vi.mock("@/utils/logger", () => ({
-  logger: {
-    info: vi.fn<(...args: any[]) => any>(),
-    log: vi.fn<(...args: any[]) => any>(),
-    error: vi.fn<(...args: any[]) => any>(),
-    warn: vi.fn<(...args: any[]) => any>(),
-  },
-}))
-
 vi.mock("@/utils/message", () => ({
   onMessage: (...args: unknown[]) => onMessageMock(...args),
   sendMessage: vi.fn<(...args: any[]) => any>(),
@@ -459,6 +455,16 @@ function setSelectionState(
     selection,
     context:
       selection.ranges.length > 0 && selection.text !== "" ? buildContextSnapshot(selection) : null,
+  })
+}
+
+// As the toolbar records a selection the ebook reader relays from a book
+// section: no ranges in this frame, only where it ended.
+function setRelayedEbookSelection(store: TestStore) {
+  store.set(setSelectionStateAtom, {
+    selection: { text: "punched", ranges: [], anchor: { x: 240, y: 138 } },
+    context: { text: "My mom punched me.", paragraphs: ["My mom punched me."] },
+    noteOrigin: null,
   })
 }
 
@@ -712,7 +718,7 @@ describe("selection toolbar requests", () => {
     expect(translateTextCoreMock).toHaveBeenCalledTimes(1)
 
     const updatedConfig = cloneConfig(store.get(configAtom))
-    updatedConfig.language.targetCode = "jpn"
+    updatedConfig.language.targetCode = "ja"
 
     act(() => {
       store.set(configAtom, updatedConfig)
@@ -724,12 +730,45 @@ describe("selection toolbar requests", () => {
 
     expect(translateTextCoreMock.mock.calls[1]?.[0]).toMatchObject({
       langConfig: expect.objectContaining({
-        targetCode: "jpn",
+        targetCode: "ja",
       }),
     })
 
     await waitFor(() => {
       expect(screen.getByTestId("translation-status").textContent).toBe("false")
+    })
+    // Speaking the translation uses the voice for the language it is in.
+    expect(screen.getByTestId("translation-language").textContent).toBe("ja")
+  })
+
+  it("asks for the Built-in AI status only once the translation popover opens", async () => {
+    translateTextCoreMock.mockResolvedValue("translated once")
+    const { sendMessage } = await import("@/utils/message")
+    const statusRequests = () =>
+      vi
+        .mocked(sendMessage)
+        .mock.calls.filter(
+          ([name, data]) =>
+            name === "backgroundFetch" &&
+            String((data as { url?: unknown } | undefined)?.url).includes("hostedAi/status"),
+        )
+
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    setSelectionState(store, { text: "Selected text" })
+    renderWithProviders(<TranslateButton />, store)
+
+    // The selection app mounts on every page and in every frame: loading a
+    // page alone must not reach the server.
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 50))
+    })
+    expect(statusRequests()).toHaveLength(0)
+
+    fireEvent.click(screen.getByRole("button", { name: "action.translation" }))
+
+    await waitFor(() => {
+      expect(statusRequests().length).toBeGreaterThan(0)
     })
   })
 
@@ -1090,6 +1129,38 @@ describe("selection toolbar requests", () => {
     expect(screen.getByTestId("translation-result").textContent).toBe("Selected text")
   })
 
+  // #2466: Google collapsed the newlines of a multi-paragraph selection, and
+  // its zh-TW model then cut the run-on text short after the second paragraph.
+  it("asks translate providers to keep a multi-paragraph selection's line breaks", async () => {
+    translateTextCoreMock.mockResolvedValue("第一段。\n\n第二段。")
+    getOrCreateWebPageContextMock.mockResolvedValue(null)
+
+    const config = cloneConfig(DEFAULT_CONFIG)
+    setSelectionToolbarTranslateProvider(config, GOOGLE_TRANSLATE_PROVIDER_ID)
+    const store = createStore()
+    store.set(configAtom, config)
+    setSelectionState(store, { text: "First paragraph.\n\nSecond paragraph." })
+    renderWithProviders(<TranslateButton />, store)
+
+    fireEvent.click(screen.getByRole("button", { name: "action.translation" }))
+
+    await waitFor(() => {
+      expect(translateTextCoreMock).toHaveBeenCalledTimes(1)
+    })
+    expect(translateTextCoreMock.mock.calls[0]?.[0]).toMatchObject({
+      text: "First paragraph.\n\nSecond paragraph.",
+      providerConfig: {
+        kind: "local",
+        config: expect.objectContaining({ provider: "google-translate" }),
+      },
+      preserveLineBreaks: true,
+    })
+
+    await waitFor(() => {
+      expect(screen.getByTestId("translation-status").textContent).toBe("false")
+    })
+  })
+
   // A note keeps the selection as a custom action run keeps it. Translation
   // prepares its own copy, which drops invisible joiners such as the one that
   // holds an emoji sequence together.
@@ -1227,6 +1298,104 @@ describe("selection toolbar requests", () => {
     expect(toastAddMock).not.toHaveBeenCalled()
   })
 
+  it("opens a context-menu translation of a selection relayed from the ebook reader at its end", async () => {
+    translateTextCoreMock.mockResolvedValue("Ebook result")
+    getOrCreateWebPageContextMock.mockResolvedValue(null)
+
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    setRelayedEbookSelection(store)
+    renderWithProviders(<TranslateButton />, store)
+
+    // The right-click happened inside the book's iframe, so this frame saw no
+    // contextmenu event to take the anchor from.
+    const handler = getRegisteredMessageHandler("openSelectionTranslationFromContextMenu")
+
+    await act(async () => {
+      handler({ data: { selectionText: "punched", fromEbookSection: true } })
+      await Promise.resolve()
+    })
+
+    await waitFor(() => {
+      expect(translateTextCoreMock).toHaveBeenCalledTimes(1)
+    })
+
+    const content = screen.getByTestId("selection-popover-content")
+    expect(content).toHaveAttribute("data-anchor-x", "240")
+    expect(content).toHaveAttribute("data-anchor-y", "138")
+    expect(screen.getByTestId("translation-selection").textContent).toBe("punched")
+    expect(toastAddMock).not.toHaveBeenCalled()
+  })
+
+  it("ignores a right-click this frame recorded for a context menu opened in an ebook section", async () => {
+    translateTextCoreMock.mockResolvedValue("Ebook result")
+    getOrCreateWebPageContextMock.mockResolvedValue(null)
+
+    const paragraph = document.createElement("p")
+    paragraph.textContent = "Reader page header."
+    document.body.appendChild(paragraph)
+
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    setSelectionState(store, { text: "Reader page header.", range: createRangeFor(paragraph) })
+    renderWithProviders(<TranslateButton />, store)
+
+    // A right-click on this frame's own text, a moment before the book selection.
+    act(() => {
+      paragraph.dispatchEvent(
+        new MouseEvent("contextmenu", { bubbles: true, button: 2, clientX: 40, clientY: 20 }),
+      )
+    })
+    act(() => {
+      setRelayedEbookSelection(store)
+    })
+
+    await act(async () => {
+      getRegisteredMessageHandler("openSelectionTranslationFromContextMenu")({
+        data: { selectionText: "punched", fromEbookSection: true },
+      })
+      await Promise.resolve()
+    })
+
+    await waitFor(() => {
+      expect(translateTextCoreMock).toHaveBeenCalledTimes(1)
+    })
+
+    const content = screen.getByTestId("selection-popover-content")
+    expect(content).toHaveAttribute("data-anchor-x", "240")
+    expect(content).toHaveAttribute("data-anchor-y", "138")
+    expect(screen.getByTestId("translation-selection").textContent).toBe("punched")
+  })
+
+  it("translates the menu's text, not this frame's own selection, for a context menu opened in an ebook section", async () => {
+    translateTextCoreMock.mockResolvedValue("Ebook result")
+    getOrCreateWebPageContextMock.mockResolvedValue(null)
+
+    const paragraph = document.createElement("p")
+    paragraph.textContent = "Reader page header."
+    document.body.appendChild(paragraph)
+
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    // The reader cleared its relayed selection; this frame still has its own.
+    setSelectionState(store, { text: "Reader page header.", range: createRangeFor(paragraph) })
+    renderWithProviders(<TranslateButton />, store)
+
+    await act(async () => {
+      getRegisteredMessageHandler("openSelectionTranslationFromContextMenu")({
+        data: { selectionText: "punched", fromEbookSection: true },
+      })
+      await Promise.resolve()
+    })
+
+    await waitFor(() => {
+      expect(translateTextCoreMock).toHaveBeenCalledTimes(1)
+    })
+
+    expect(screen.getByTestId("translation-selection").textContent).toBe("punched")
+    expect(toastAddMock).not.toHaveBeenCalled()
+  })
+
   it("shows a toast when the context menu request cannot recover a selection snapshot", async () => {
     const store = createStore()
     store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
@@ -1284,7 +1453,7 @@ describe("selection toolbar requests", () => {
     )
   })
 
-  it("opens selection translation from the shortcut when the toolbar UI is disabled", async () => {
+  it("opens selection translation from the shortcut while the toolbar is hidden on the site", async () => {
     translateTextCoreMock.mockResolvedValue("Toolbar disabled shortcut result")
     getOrCreateWebPageContextMock.mockResolvedValue(null)
 
@@ -1293,7 +1462,7 @@ describe("selection toolbar requests", () => {
     document.body.appendChild(paragraph)
 
     const config = cloneConfig(DEFAULT_CONFIG)
-    config.selectionToolbar.enabled = false
+    config.selectionToolbar.disabledSelectionToolbarPatterns = [window.location.hostname]
 
     const store = createStore()
     store.set(configAtom, config)
@@ -1335,27 +1504,33 @@ describe("selection toolbar requests", () => {
     expect(event.defaultPrevented).toBe(false)
   })
 
-  it("leaves the selection translation key to the page while Translate is turned off", async () => {
-    const paragraph = document.createElement("p")
-    paragraph.textContent = "Selected text inside a paragraph."
-    document.body.appendChild(paragraph)
+  it.each([
+    ["Translate", (config: Config) => (config.selectionToolbar.features.translate.enabled = false)],
+    ["the whole toolbar", (config: Config) => (config.selectionToolbar.enabled = false)],
+  ])(
+    "leaves the selection translation key to the page while %s is turned off",
+    async (_, turnOff) => {
+      const paragraph = document.createElement("p")
+      paragraph.textContent = "Selected text inside a paragraph."
+      document.body.appendChild(paragraph)
 
-    const config = cloneConfig(DEFAULT_CONFIG)
-    config.selectionToolbar.features.translate.enabled = false
-    const store = createStore()
-    store.set(configAtom, config)
-    setSelectionState(store, { text: "Selected text", range: createRangeFor(paragraph) })
-    renderWithProviders(<TranslateButton />, store)
+      const config = cloneConfig(DEFAULT_CONFIG)
+      turnOff(config)
+      const store = createStore()
+      store.set(configAtom, config)
+      setSelectionState(store, { text: "Selected text", range: createRangeFor(paragraph) })
+      renderWithProviders(<TranslateButton />, store)
 
-    let event!: KeyboardEvent
-    act(() => {
-      event = pressShortcut()
-    })
-    await act(() => Promise.resolve())
+      let event!: KeyboardEvent
+      act(() => {
+        event = pressShortcut()
+      })
+      await act(() => Promise.resolve())
 
-    expect(event.defaultPrevented).toBe(false)
-    expect(translateTextCoreMock).not.toHaveBeenCalled()
-  })
+      expect(event.defaultPrevented).toBe(false)
+      expect(translateTextCoreMock).not.toHaveBeenCalled()
+    },
+  )
 
   it("binds no key for an empty or invalid selection translation shortcut", () => {
     const paragraph = document.createElement("p")
@@ -1784,8 +1959,7 @@ describe("selection toolbar requests", () => {
       expect(streamBackgroundStructuredObjectMock).toHaveBeenCalledTimes(1)
     })
     expect(streamBackgroundStructuredObjectMock.mock.calls[0]?.[0]).toMatchObject({
-      providerId: "read-frog-free-ai",
-      modelTier: "normal",
+      providerId: "read-frog-ai:claude-haiku-5-5",
       requestId: expect.stringMatching(/^[0-9a-f-]{36}$/i),
     })
 
@@ -1903,6 +2077,123 @@ describe("selection toolbar requests", () => {
         action_name: action.name,
       }),
     )
+  })
+
+  it("runs a context-menu action opened in an ebook section on the relayed selection", async () => {
+    streamBackgroundStructuredObjectMock.mockResolvedValue(
+      createStructuredObjectSnapshot({ summary: "Ebook result" }),
+    )
+    const paragraph = document.createElement("p")
+    paragraph.textContent = "Reader page header."
+    document.body.appendChild(paragraph)
+
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    setSelectionState(store, { text: "Reader page header.", range: createRangeFor(paragraph) })
+    renderWithProviders(<SelectionToolbarPinnedItems />, store)
+
+    // A right-click on this frame's own text, a moment before the book selection.
+    act(() => {
+      paragraph.dispatchEvent(
+        new MouseEvent("contextmenu", { bubbles: true, button: 2, clientX: 40, clientY: 20 }),
+      )
+    })
+    act(() => {
+      setRelayedEbookSelection(store)
+    })
+
+    await act(async () => {
+      getRegisteredMessageHandler("openSelectionCustomActionFromContextMenu")({
+        data: {
+          actionId: DEFAULT_DICTIONARY_ACTION.id,
+          selectionText: "punched",
+          fromEbookSection: true,
+        },
+      })
+      await Promise.resolve()
+    })
+
+    await waitFor(() => {
+      expect(streamBackgroundStructuredObjectMock).toHaveBeenCalledTimes(1)
+    })
+
+    const content = screen.getByTestId("selection-popover-content")
+    expect(content).toHaveAttribute("data-anchor-x", "240")
+    expect(content).toHaveAttribute("data-anchor-y", "138")
+    expect(screen.getByTestId("footer-paragraphs").textContent).toContain("My mom punched me.")
+    expect(toastAddMock).not.toHaveBeenCalled()
+  })
+
+  it("runs a context-menu action opened in an ebook section on the menu's text when the relay is stale", async () => {
+    streamBackgroundStructuredObjectMock.mockResolvedValue(
+      createStructuredObjectSnapshot({ summary: "Ebook result" }),
+    )
+
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    setRelayedEbookSelection(store)
+    renderWithProviders(<SelectionToolbarPinnedItems />, store)
+
+    // Extended past "punched" with the keyboard, which the reader does not relay.
+    await act(async () => {
+      getRegisteredMessageHandler("openSelectionCustomActionFromContextMenu")({
+        data: {
+          actionId: DEFAULT_DICTIONARY_ACTION.id,
+          selectionText: "punched me in the face",
+          fromEbookSection: true,
+        },
+      })
+      await Promise.resolve()
+    })
+
+    await waitFor(() => {
+      expect(streamBackgroundStructuredObjectMock).toHaveBeenCalledTimes(1)
+    })
+
+    expect(screen.getByTestId("footer-paragraphs").textContent).toBe("punched me in the face")
+    expect(toastAddMock).not.toHaveBeenCalled()
+  })
+
+  it("carries the note origin recorded with the selection into the custom action request", async () => {
+    streamBackgroundStructuredObjectMock.mockResolvedValue(
+      createStructuredObjectSnapshot({ summary: "Context menu result" }),
+    )
+    const paragraph = document.createElement("p")
+    paragraph.textContent = "Selected text inside a paragraph."
+    document.body.appendChild(paragraph)
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    const selection = {
+      text: "Selected text",
+      ranges: [createRangeSnapshot(createRangeFor(paragraph))],
+    }
+    const noteOrigin = {
+      kind: "ebook",
+      ebookId: "55555555-5555-4555-8555-555555555555",
+      cfi: "epubcfi(/6/2)",
+    } as const
+    store.set(setSelectionStateAtom, {
+      selection,
+      context: buildContextSnapshot(selection),
+      noteOrigin,
+    })
+    renderWithProviders(<SelectionToolbarPinnedItems />, store)
+
+    act(() => {
+      paragraph.dispatchEvent(
+        new MouseEvent("contextmenu", { bubbles: true, button: 2, clientX: 140, clientY: 180 }),
+      )
+    })
+    await act(async () => {
+      getRegisteredMessageHandler("openSelectionCustomActionFromContextMenu")({
+        data: { actionId: DEFAULT_DICTIONARY_ACTION.id, selectionText: "Selected text" },
+      })
+      await Promise.resolve()
+    })
+
+    await waitFor(() => {
+      expect(store.get(customActionRequestAtom)?.noteOrigin).toEqual(noteOrigin)
+    })
   })
 
   it("opens a custom action from its shortcut and tracks the shortcut surface", async () => {

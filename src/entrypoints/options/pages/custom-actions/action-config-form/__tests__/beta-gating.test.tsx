@@ -218,7 +218,7 @@ describe("customActionConfigForm notebase availability", () => {
       ],
       sampleData: {
         selection: "A long article",
-        targetCode: "eng" as const,
+        targetCode: "en" as const,
         values: { "summary-field": "A short summary" },
       },
       notebaseConnection: {

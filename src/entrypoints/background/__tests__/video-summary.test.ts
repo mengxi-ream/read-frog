@@ -22,9 +22,11 @@ vi.mock("../background-stream", () => {
 
 const providerRef: PromptableProviderRef = {
   kind: "system",
-  providerId: "read-frog-free-ai",
+  providerId: "read-frog-ai:gpt-6-luna",
+  model: "gpt-6-luna",
   modelTier: "normal",
   modelRevision: "normal-r1",
+  reasoning: null,
 }
 const request = { transcript: "Video transcript", targetLanguage: "English", providerRef }
 
@@ -59,8 +61,10 @@ describe("video summary cache handlers", () => {
   })
 
   it("reads entries written under the existing video summary cache key", async () => {
-    // Frozen key from the pre-extraction handler for the fixture above.
-    const existingKey = "958c70bddad760bf24d1fe288965fa2c3ade57aca94024932082af53c3b97494"
+    // Frozen key for the fixture above. Built-in AI entries are keyed by model
+    // and reasoning level since v127, so the tier-keyed ones before it were
+    // left behind once; this guards the key from moving again by accident.
+    const existingKey = "c6b1e988580359a534bd38fa4c786a83a3cb748810096fc1dc94bb953e2929af"
     mocks.get.mockImplementation(async (key) =>
       key === existingKey ? { summary: "Existing summary" } : undefined,
     )

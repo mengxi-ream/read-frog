@@ -1,4 +1,4 @@
-import type { SubtitlesProvidersAdapter } from "../../universal-adapter"
+import type { SubtitlesProvidersAdapter } from "../../adapter/subtitles-providers-adapter"
 import {
   NETFLIX_CONTROLS_GROUP_SELECTOR,
   NETFLIX_TRANSLATE_BUTTON_ZOOM,

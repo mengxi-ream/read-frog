@@ -1,5 +1,6 @@
 import type { NodeHotkey } from "@/utils/constants/hotkeys"
 import { useAtom } from "jotai"
+import { FeatureSwitch } from "@/components/feature-switch"
 import { NodeHotkeyIcon } from "@/components/node-hotkey-icon"
 import {
   Select,
@@ -8,7 +9,6 @@ import {
   SelectItem,
   SelectTrigger,
 } from "@/components/ui/base-ui/select"
-import { Switch } from "@/components/ui/base-ui/switch"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { HOTKEY_ICONS, HOTKEYS } from "@/utils/constants/hotkeys"
 import { i18n } from "@/utils/i18n"
@@ -39,7 +39,7 @@ function HotkeyDisplay({ hotkey, shortcut }: { hotkey: NodeHotkey; shortcut: str
 
 export default function NodeTranslationHotkeySelector() {
   const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.pageTranslation)
-  const { enabled, hotkey, shortcut } = translateConfig.node
+  const { hotkey, shortcut } = translateConfig.node
 
   return (
     <div className="flex items-center justify-between gap-2">
@@ -68,12 +68,7 @@ export default function NodeTranslationHotkeySelector() {
           </SelectGroup>
         </SelectContent>
       </Select>
-      <Switch
-        checked={enabled}
-        onCheckedChange={(checked) => {
-          void setTranslateConfig((current) => ({ node: { ...current.node, enabled: checked } }))
-        }}
-      />
+      <FeatureSwitch id="pageTranslation.hover" />
     </div>
   )
 }

@@ -1,4 +1,4 @@
-import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { LanguageTag } from "@read-frog/definitions"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { detectLanguage } from "@/utils/content/language"
 import { MIN_LENGTH_FOR_SKIP_LANGUAGE_DETECTION, shouldSkipByLanguage } from "../translate-text"
@@ -17,10 +17,10 @@ beforeEach(() => {
 describe("shouldSkipByLanguage", () => {
   describe("basic skip logic", () => {
     it("should return true when detected language is in skipLanguages", async () => {
-      mockedDetect.mockResolvedValueOnce("jpn")
+      mockedDetect.mockResolvedValueOnce("ja")
 
       const japaneseText = "これは日本語のテストです。日本語で書かれたテキストです。"
-      const skipLanguages: LangCodeISO6393[] = ["jpn"]
+      const skipLanguages: LanguageTag[] = ["ja"]
 
       const result = await shouldSkipByLanguage(japaneseText, skipLanguages)
 
@@ -28,10 +28,10 @@ describe("shouldSkipByLanguage", () => {
     })
 
     it("should return false when detected language is not in skipLanguages", async () => {
-      mockedDetect.mockResolvedValueOnce("eng")
+      mockedDetect.mockResolvedValueOnce("en")
 
       const englishText = "This is a test written in English."
-      const skipLanguages: LangCodeISO6393[] = ["jpn"]
+      const skipLanguages: LanguageTag[] = ["ja"]
 
       const result = await shouldSkipByLanguage(englishText, skipLanguages)
 
@@ -39,10 +39,10 @@ describe("shouldSkipByLanguage", () => {
     })
 
     it("should return false when skipLanguages is empty", async () => {
-      mockedDetect.mockResolvedValueOnce("jpn")
+      mockedDetect.mockResolvedValueOnce("ja")
 
       const japaneseText = "これは日本語のテストです。日本語で書かれたテキストです。"
-      const skipLanguages: LangCodeISO6393[] = []
+      const skipLanguages: LanguageTag[] = []
 
       const result = await shouldSkipByLanguage(japaneseText, skipLanguages)
 
@@ -53,7 +53,7 @@ describe("shouldSkipByLanguage", () => {
       mockedDetect.mockResolvedValueOnce(null)
 
       const undetectableText = "12345 67890 !@#$%"
-      const skipLanguages: LangCodeISO6393[] = ["jpn", "eng"]
+      const skipLanguages: LanguageTag[] = ["ja", "en"]
 
       const result = await shouldSkipByLanguage(undetectableText, skipLanguages)
 
@@ -63,10 +63,10 @@ describe("shouldSkipByLanguage", () => {
 
   describe("detection options", () => {
     it("never routes a skip decision through an LLM", async () => {
-      mockedDetect.mockResolvedValueOnce("jpn")
+      mockedDetect.mockResolvedValueOnce("ja")
 
       const japaneseText = "これは日本語のテストです。日本語で書かれたテキストです。"
-      const skipLanguages: LangCodeISO6393[] = ["jpn"]
+      const skipLanguages: LanguageTag[] = ["ja"]
 
       const result = await shouldSkipByLanguage(japaneseText, skipLanguages)
 
@@ -85,7 +85,7 @@ describe("shouldSkipByLanguage", () => {
       mockedDetect.mockResolvedValueOnce(null)
 
       const japaneseText = "これは日本語のテストです。日本語で書かれたテキストです。"
-      const skipLanguages: LangCodeISO6393[] = ["jpn"]
+      const skipLanguages: LanguageTag[] = ["ja"]
 
       // No verdict means translate it: withholding a translation on a guess is
       // the worse of the two errors.

@@ -14,7 +14,9 @@ import { SelectionSpeechProvider, SpeakButton, useSelectionSpeech } from "../spe
 const tts = vi.hoisted(() => ({
   instances: 0,
   isPlaying: true,
-  play: vi.fn<(text: string, ttsConfig: unknown, options?: { surface?: string }) => void>(),
+  play: vi.fn<
+    (text: string, ttsConfig: unknown, options?: { surface?: string }) => Promise<void> | void
+  >(),
   stop: vi.fn<(instance: number) => void>(),
 }))
 
@@ -42,7 +44,7 @@ vi.mock("@/components/ui/base-ui/toast", () => ({ toastManager: { add: toastAdd 
 afterEach(() => {
   tts.instances = 0
   tts.isPlaying = true
-  tts.play.mockClear()
+  tts.play.mockReset()
   tts.stop.mockClear()
   toastAdd.mockClear()
   fakeBrowser.reset()
@@ -76,6 +78,7 @@ function selectText(store: ReturnType<typeof createStore>, text: string) {
     createdAt: 0,
     selectionSnapshot: { text, ranges: [] },
     contextSnapshot: { text, paragraphs: [] },
+    noteOrigin: null,
   }
   store.set(selectionSessionAtom, session)
 }
@@ -179,5 +182,35 @@ describe("SelectionSpeechProvider", () => {
 
     expect(pressSpeakKey().defaultPrevented).toBe(false)
     expect(tts.stop).not.toHaveBeenCalled()
+  })
+
+  it("absorbs rejected playback promises from button click and shortcut without unhandledRejection", async () => {
+    tts.isPlaying = false
+    tts.play.mockRejectedValue(
+      new Error(
+        "A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received",
+      ),
+    )
+
+    const unhandledRejections: unknown[] = []
+    const onUnhandledRejection = (reason: unknown) => {
+      unhandledRejections.push(reason)
+    }
+    process.on("unhandledRejection", onUnhandledRejection)
+
+    try {
+      const store = createStore()
+      selectText(store, "Hello there")
+      renderSpeech(store)
+
+      fireEvent.click(screen.getByTestId("menu-row"))
+      pressSpeakKey()
+      await act(() => new Promise((resolve) => setTimeout(resolve, 0)))
+
+      expect(tts.play).toHaveBeenCalledTimes(2)
+      expect(unhandledRejections).toEqual([])
+    } finally {
+      process.off("unhandledRejection", onUnhandledRejection)
+    }
   })
 })

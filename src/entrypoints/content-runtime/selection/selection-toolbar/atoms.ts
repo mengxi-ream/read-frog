@@ -1,3 +1,4 @@
+import type { NoteOriginInput } from "@read-frog/definitions"
 import type { ContextSnapshot, SelectionSnapshot } from "../utils"
 import type { SelectionToolbarCustomActionRequestSlice } from "@/components/custom-action/use-custom-action-execution"
 import type { Config } from "@/types/config/config"
@@ -11,21 +12,37 @@ import { atomFamily } from "jotai-family"
 import { selectAtom } from "jotai/utils"
 import { configAtom } from "@/utils/atoms/config"
 import { findSelectionToolbarAction } from "@/utils/custom-actions"
+import { createLogger } from "@/utils/logging/logger"
+import { onMessage, sendMessage } from "@/utils/message"
+import { getWebPageNoteOrigin } from "@/utils/note-origin"
 import { resolveProviderRefForCapability } from "@/utils/providers/provider-registry"
 import { buildContextSnapshot } from "../utils"
+
+const log = createLogger("selection-toolbar/atoms")
 
 export interface SelectionSession {
   id: number
   createdAt: number
   selectionSnapshot: SelectionSnapshot
   contextSnapshot: ContextSnapshot
+  /**
+   * Where the selection was made, recorded with each note saved from it. Read
+   * when the selection is made, since a save can finish after the page is gone.
+   * Null when the note gets no origin.
+   */
+  noteOrigin: NoteOriginInput | null
 }
 
 let nextSelectionSessionId = 0
 
+/**
+ * `noteOrigin` defaults to the page this frame shows; a selection relayed from
+ * elsewhere (the ebook reader) passes its own, or null.
+ */
 export function createSelectionSession(
   selection: SelectionSnapshot | null,
   context: ContextSnapshot | null,
+  noteOrigin?: NoteOriginInput | null,
 ): SelectionSession | null {
   if (!selection) {
     return null
@@ -41,6 +58,7 @@ export function createSelectionSession(
     createdAt: Date.now(),
     selectionSnapshot: selection,
     contextSnapshot: nextContext,
+    noteOrigin: noteOrigin === undefined ? getWebPageNoteOrigin() : noteOrigin,
   }
 }
 
@@ -62,11 +80,38 @@ export const selectionAtom = atom(
 export const contextAtom = atom(
   (get) => get(selectionSessionAtom)?.contextSnapshot ?? null,
   (get, set, nextContext: ContextSnapshot | null) => {
-    const currentSelection = get(selectionAtom)
-    set(selectionSessionAtom, createSelectionSession(currentSelection, nextContext))
+    const current = get(selectionSessionAtom)
+    set(
+      selectionSessionAtom,
+      createSelectionSession(current?.selectionSnapshot ?? null, nextContext, current?.noteOrigin),
+    )
   },
 )
 export const isSelectionToolbarOpenAtom = atom<boolean>(false)
+
+/**
+ * Hidden from its close menu until the page reloads. It changes no setting:
+ * the background keeps it for the tab, so the toolbar in every frame of the
+ * page follows it, and a reload or a new tab brings the toolbar back. Like a
+ * site opt-out, it hides only the bar; shortcuts keep working.
+ */
+export const isSelectionToolbarHiddenUntilReloadAtom = atom(false)
+isSelectionToolbarHiddenUntilReloadAtom.onMount = (setHidden) => {
+  // A frame whose toolbar starts after another frame hid it, such as an iframe
+  // that loads or navigates later.
+  void (async () => {
+    if (await sendMessage("isSelectionToolbarHiddenUntilReload", undefined)) setHidden(true)
+  })().catch((error) => log.debug("Failed to read the toolbar's hidden state", { error }))
+  return onMessage("selectionToolbarHiddenUntilReload", () => setHidden(true))
+}
+
+/** Hides the toolbar in this frame at once, then in the tab's other frames. */
+export const hideSelectionToolbarUntilReloadAtom = atom(null, (_get, set) => {
+  set(isSelectionToolbarHiddenUntilReloadAtom, true)
+  void (async () => {
+    await sendMessage("hideSelectionToolbarUntilReload", undefined)
+  })().catch((error) => log.debug("Failed to hide the toolbar in other frames", { error }))
+})
 
 export const selectionContentAtom = atom((get) => get(selectionAtom)?.text ?? null)
 
@@ -75,9 +120,17 @@ export const setSelectionStateAtom = atom(
   (
     _get,
     set,
-    nextState: { selection: SelectionSnapshot | null; context: ContextSnapshot | null },
+    nextState: {
+      selection: SelectionSnapshot | null
+      context: ContextSnapshot | null
+      /** Omitted for a selection in this frame's page. */
+      noteOrigin?: NoteOriginInput | null
+    },
   ) => {
-    set(selectionSessionAtom, createSelectionSession(nextState.selection, nextState.context))
+    set(
+      selectionSessionAtom,
+      createSelectionSession(nextState.selection, nextState.context, nextState.noteOrigin),
+    )
   },
 )
 

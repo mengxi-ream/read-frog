@@ -7,9 +7,11 @@ import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { db } from "@/utils/db/dexie/db"
 import { Sha256Hex } from "@/utils/hash"
 import { validateProviderHostedFeature } from "@/utils/hosted-ai/routing"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
 import { getProviderCacheIdentity } from "@/utils/providers/provider-ref"
 import { generateTextForProviderRef } from "./background-stream"
+
+const log = createLogger("background/translation-context-summary")
 
 /**
  * Cached summaries used as context by webpage and subtitle translation.
@@ -38,7 +40,7 @@ export async function getOrGenerateTranslationContextSummary(
 
   const cached = await db.articleSummaryCache.get(cacheKey)
   if (cached) {
-    logger.info("Using cached summary")
+    log.debug("Using cached summary")
     return cached.summary
   }
 
@@ -68,7 +70,7 @@ export async function getOrGenerateTranslationContextSummary(
       createdAt: new Date(),
     })
 
-    logger.info("Generated and cached new summary")
+    log.debug("Generated and cached new summary")
     return summary
   }
 
@@ -76,7 +78,7 @@ export async function getOrGenerateTranslationContextSummary(
     const summary = await requestQueue.enqueue(thunk, Date.now(), cacheKey)
     return summary || null
   } catch (error) {
-    logger.warn("Failed to get/generate summary:", error)
+    log.warn("Failed to get/generate summary", { error })
     return null
   }
 }

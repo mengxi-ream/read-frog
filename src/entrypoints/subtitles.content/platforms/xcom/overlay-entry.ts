@@ -1,4 +1,4 @@
-import type { SubtitlesProvidersAdapter } from "../../universal-adapter"
+import type { SubtitlesProvidersAdapter } from "../../adapter/subtitles-providers-adapter"
 import {
   XCOM_CONTROLS_CONTAINER_ATTRIBUTE,
   XCOM_CONTROLS_CONTAINER_SELECTOR,
@@ -7,11 +7,7 @@ import {
 } from "@/utils/constants/subtitles"
 import { removeReactShadowHost } from "@/utils/react-shadow-host/create-shadow-host"
 import { renderSubtitlesTranslateButton } from "../../renderer/render-translate-button"
-import {
-  findXcomControlsGroup,
-  getCurrentPrimaryXcomStatusVideo,
-  getXcomStatusVideoContainer,
-} from "./dom"
+import { findXcomControlsGroup } from "./dom"
 
 // x.com has no stable selectors, so we stamp our own for getXcomConfig to target.
 function clearStamps(except?: {
@@ -47,9 +43,7 @@ export function clearXcomOverlayEntryPoints(): void {
   removeTranslateButton()
 }
 
-export function ensureXcomOverlayEntryPoint(): boolean {
-  const video = getCurrentPrimaryXcomStatusVideo()
-  const videoContainer = video ? getXcomStatusVideoContainer(video) : null
+export function ensureXcomOverlayEntryPoint(videoContainer: HTMLElement | null): boolean {
   if (!videoContainer) {
     return false
   }

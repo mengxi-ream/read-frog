@@ -219,7 +219,7 @@ describe("buildSentenceAnalysisActionLayout", () => {
         outputSchema: schema,
         value: null,
         selection: "It rained.",
-        targetCode: "eng",
+        targetCode: "en",
         status: "streaming",
       }),
     )
@@ -240,7 +240,7 @@ describe("buildSentenceAnalysisActionLayout", () => {
         outputSchema: schema,
         value: { Structure: "Main clause first." },
         selection: "It rained.",
-        targetCode: "eng",
+        targetCode: "en",
         status: "done",
       }),
     )
@@ -347,7 +347,7 @@ describe("buildImproveWritingActionLayout", () => {
           [slots.summary!.name]: "s",
         },
         selection: "I very like it.",
-        targetCode: "cmn",
+        targetCode: "zh-Hans",
         status: "done",
       }),
     )

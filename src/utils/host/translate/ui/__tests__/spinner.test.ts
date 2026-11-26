@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
 
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { TRANSLATION_ERROR_CONTAINER_CLASS } from "@/utils/constants/dom-labels"
+import { onPageTranslationRequestFailed } from "@/utils/host/translate/translation-session"
 import { TranslationCancelledError } from "@/utils/request/cancellation"
 import {
   cancelSpinnerAnimation,
@@ -78,7 +79,18 @@ describe("spinner", () => {
     expect(spinner.style.borderRightColor).toBe("transparent")
     expect(spinner.style.borderBottomColor).toBe("transparent")
     expect(spinner.style.borderLeftColor).toBe("transparent")
-    expect(spinner.style.borderTopWidth).toBe("1.5px")
+    expect(spinner.style.borderRightWidth).toBe("1.5px")
+
+    // The arc's own width shares a `border-top` shorthand with var(), which the
+    // inline style reads back as "" until the variable resolves. Resolve it.
+    const host = document.createElement("div")
+    host.style.setProperty("--read-frog-muted-foreground", "rgb(115, 115, 115)")
+    host.appendChild(spinner)
+    document.body.appendChild(host)
+    const computed = window.getComputedStyle(spinner)
+    expect(computed.borderTopStyle).toBe("solid")
+    expect(computed.borderTopWidth).toBe(computed.borderRightWidth)
+    host.remove()
   })
 
   it("keeps the gray segment visible when reduced motion is enabled", () => {
@@ -206,5 +218,80 @@ describe("spinner animation registry (#1881)", () => {
     expect(createdAnimations[0]!.cancel).toHaveBeenCalled()
 
     wrapper.remove()
+  })
+})
+
+describe("reporting a paragraph's failed request to the page-translation session", () => {
+  const reported: unknown[] = []
+  let unsubscribe: () => void = () => {}
+
+  beforeEach(() => {
+    reported.length = 0
+    unsubscribe = onPageTranslationRequestFailed((error) => reported.push(error))
+    // A failed request mounts the inline error, whose theme provider listens to
+    // matchMedia; the stubs above leave it without addEventListener.
+    Object.defineProperty(window, "matchMedia", {
+      value: vi.fn<(...args: any[]) => any>().mockReturnValue({
+        matches: false,
+        addEventListener: vi.fn<(...args: any[]) => any>(),
+        removeEventListener: vi.fn<(...args: any[]) => any>(),
+      }),
+      configurable: true,
+      writable: true,
+    })
+  })
+
+  afterEach(() => {
+    unsubscribe()
+    document.body.innerHTML = ""
+  })
+
+  function translateParagraph(request: () => Promise<string>, isCurrent: () => boolean) {
+    const wrapper = document.createElement("span")
+    document.body.append(wrapper)
+    const spinner = createLightweightSpinner(document)
+    wrapper.append(spinner)
+    return getTranslatedTextAndRemoveSpinner(
+      [],
+      "source text",
+      spinner,
+      wrapper,
+      isCurrent,
+      "plain",
+      request,
+    )
+  }
+
+  it("reports a failed request", async () => {
+    const error = Object.assign(new Error("x"), { code: "HOSTED_AI_QUOTA_EXHAUSTED" })
+
+    await translateParagraph(
+      () => Promise.reject(error),
+      () => true,
+    )
+
+    expect(reported).toEqual([error])
+  })
+
+  it("does not report a cancelled request", async () => {
+    await translateParagraph(
+      () => Promise.reject(new TranslationCancelledError("7:session")),
+      () => true,
+    )
+
+    expect(reported).toEqual([])
+  })
+
+  it("does not report a request whose paragraph is no longer current", async () => {
+    let current = true
+    await translateParagraph(
+      () => {
+        current = false
+        return Promise.reject(new Error("x"))
+      },
+      () => current,
+    )
+
+    expect(reported).toEqual([])
   })
 })

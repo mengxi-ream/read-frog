@@ -5,8 +5,8 @@ import {
   INLINE_ATOM_CLASS,
   MARK_ATTRIBUTES,
 } from "@/utils/constants/dom-labels"
-import { logger } from "@/utils/logger"
-import { getEffectiveSiteRule } from "@/utils/site-rules/effective"
+import { createLogger } from "@/utils/logging/logger"
+import { getDocumentSiteRule } from "@/utils/site-rules/effective"
 import { isDontWalkIntoAndDontTranslateAsChildElement, isInlineAtomElement } from "../../dom/filter"
 import { extractTextContent } from "../../dom/traversal"
 import {
@@ -14,6 +14,8 @@ import {
   encodeInlineAtomToken,
   nextFreeInlineAtomIndex,
 } from "../inline-atom-tokens"
+
+const log = createLogger("host/translate/dom/inline-atoms")
 
 /**
  * Inline atoms for bilingual page translation.
@@ -72,7 +74,7 @@ export function extractInlineAtomText(
       // stays dropped exactly as before; the wrapper is the atom when a rule
       // says so. Native <math> also never reaches getComputedStyle, which
       // some environments refuse for MathML.
-      const { preserveTextSelector } = getEffectiveSiteRule(config, window.location.href)
+      const { preserveTextSelector } = getDocumentSiteRule(config)
       if (preserveTextSelector !== null && element.parentElement?.closest(preserveTextSelector)) {
         return ""
       }
@@ -269,9 +271,9 @@ export function renderInlineAtomTranslation(
 
   const missing = atoms.map((_, index) => index).filter((index) => !inserted.has(index))
   if (missing.length > 0) {
-    logger.warn(
-      `[inline-atoms] translation dropped ${missing.length} placeholder(s); appending the formulas`,
-    )
+    log.warn("Translation dropped placeholders; appending the formulas", {
+      missing: missing.length,
+    })
     for (const index of missing) {
       fragment.append(ownerDoc.createTextNode(" "))
       fragment.append(sanitizeInlineAtomClone(atoms[index]!))
@@ -283,7 +285,7 @@ export function renderInlineAtomTranslation(
 
 /** Every element `isInlineAtomElement` accepts: native MathML plus the site-rule atoms. */
 export function getInlineAtomSelector(config: Config): string {
-  const { atomSelector } = getEffectiveSiteRule(config, window.location.href)
+  const { atomSelector } = getDocumentSiteRule(config)
   return atomSelector ? `math,${atomSelector}` : "math"
 }
 

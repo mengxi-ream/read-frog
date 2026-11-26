@@ -4,6 +4,7 @@ import { act, render, renderHook, screen, waitFor } from "@testing-library/react
 import { createElement } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { ANALYTICS_SURFACE } from "@/types/analytics"
+import { trackFeatureUsed } from "@/utils/analytics"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { CUSTOM_ACTION_CONTEXT_CHAR_LIMIT } from "@/utils/custom-action-prompt"
 import { findSelectionToolbarAction, getBuiltInDictionaryAction } from "@/utils/custom-actions"
@@ -264,7 +265,7 @@ describe("useCustomActionExecution", () => {
         executionContext: {
           action,
           provider,
-          targetCode: "cmn",
+          targetCode: "zh-Hans",
           promptTokens: {
             selection,
             paragraphs: selection,
@@ -297,5 +298,52 @@ describe("useCustomActionExecution", () => {
       { name: translation, type: "string" },
     ])
     expect(payload.instructions).not.toContain(`- key: ${JSON.stringify(sentence)}`)
+  })
+
+  it("tracks the run with the Built-in AI model it ran on", async () => {
+    const action = getBuiltInDictionaryAction(DEFAULT_CONFIG.selectionToolbar)
+    const provider = resolveProviderRefForCapability(
+      "customAction",
+      DEFAULT_CONFIG.providersConfig,
+      "read-frog-ai:gpt-6-luna",
+    )
+    if (!provider) throw new Error("a Built-in AI model must resolve")
+    streamBackgroundStructuredObjectMock.mockResolvedValue({
+      output: {},
+      thinking: { status: "complete", text: "" },
+    })
+
+    const { result } = renderHook(() =>
+      useCustomActionExecution({
+        analyticsSurface: ANALYTICS_SURFACE.SELECTION_TOOLBAR,
+        bodyRef: { current: null },
+        executionContext: {
+          action,
+          provider,
+          targetCode: "zh-Hans",
+          promptTokens: {
+            selection: "relic",
+            paragraphs: "relic",
+            targetLanguage: "Simplified Chinese",
+            webTitle: "",
+            webUrl: "https://example.com",
+            webContent: "",
+          },
+        },
+        open: true,
+        popoverSessionKey: 1,
+        rerunNonce: 0,
+      }),
+    )
+
+    await waitFor(() => expect(result.current.isRunning).toBe(false))
+    expect(vi.mocked(trackFeatureUsed)).toHaveBeenCalledWith(
+      expect.objectContaining({
+        provider: "read-frog-built-in-ai",
+        backend_kind: "llm",
+        built_in_ai_model: "gpt-6-luna",
+        outcome: "success",
+      }),
+    )
   })
 })

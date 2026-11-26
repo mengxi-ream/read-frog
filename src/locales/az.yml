@@ -51,12 +51,10 @@ popup:
         action: İkidilli rejimə keçmək üçün klikləyin
   hub:
     tooltip: Mətni eyni anda bir neçə modellə tərcümə edin
-  discord:
-    tooltip: Tərtibatçılarla ünsiyyət qurmaq və yeni funksiyaları erkən sınamaq üçün Discord icmasına qoşulun
   blog:
     notification: Read Frog yenilikləri
   aiSmartContext: Süni intellektlə ağıllı kontekst
-  aiSmartContextDescription: Tərcümənin keyfiyyətini artırmaq üçün səhifənin kontekstindən istifadə edir. LLM tərcümə provayderi tələb olunur.
+  aiSmartContextDescription: Tərcümənin keyfiyyətini artırmaq üçün səhifənin kontekstindən istifadə edir. LLM provayderi tələb olunur.
   storeReview:
     title: Read Frog xoşunuza gəlir?
     description: Mağazada yazacağınız qısa rəy digər oxucuların onu tapmasına kömək edir.
@@ -69,6 +67,7 @@ popup:
     emailUs: Bizə e-poçt göndər
     featureRequest: Funksiya təklif et
     bugReport: Xəta bildir
+    diagnosePage: "Bu səhifəni diaqnoz et"
     community: İcma
     joinDiscord: Discord icmasına qoşul
     joinWechat: WeChat qrupuna qoşul
@@ -135,6 +134,13 @@ options:
     bugReport:
       title: Xəta bildir
       description: Dəstək sorğusu açın və problem həll edilənədək onu izləyin
+    troubleshooting:
+      title: "Problemlərin həlli"
+    diagnostics:
+      title: "Diaqnostika məlumatlarını ixrac et"
+      description: "Xəta hesabatına əlavə etmək üçün son jurnalları və ayarlarınızı (API açarları olmadan) yadda saxlayın"
+      exportSuccess: "Diaqnostika məlumatları yadda saxlanıldı"
+      exportFailed: "Diaqnostika məlumatlarını ixrac etmək mümkün olmadı"
     community:
       title: İcma
     discord:
@@ -144,13 +150,40 @@ options:
       title: WeChat qrupu
       description: WeChat müzakirə qrupuna qoşulmaq üçün QR kodunu skan edin
       qrCodeAlt: WeChat QR kodu
+  usage:
+    title: İstifadə
+    pageDescription: Planınız və qalan süni intellekt kvotanız.
+    notSignedIn: Daxil olunmayıb
+    guest: Qonaq
+    manageSubscription: Abunəliyi idarə et
+    logInToView: Baxmaq üçün daxil olun
+    footer:
+      logIn: Daxil olun və hər həftə pulsuz süni intellekt kvotası alın
+      upgrade: Süni intellekt subtitrlərini açmaq və daha çox daxili süni intellekt kvotası üçün Pro-ya keçin
+      upgradeAction: Təkmilləşdir
   apiProviders:
     title: API provayderləri
-    pageDescription: Read Frog genişlənməsinin istifadə etdiyi süni intellekt xidmətlərini qoşun, sonra hər funksiyanı hansı xidmətin icra edəcəyini seçin.
-    description: Read Frog genişlənməsinin müraciət edə biləcəyi provayderləri əlavə edin. 20-dən çox hazır seçim, həmçinin Chat Completions ilə uyğun API-lər və Open Responses API-ləri üçün fərdi qoşulma dəstəyi var.
+    pageDescription: Read Frog-un daxili modellərindən istifadə edin və ya üçüncü tərəf süni intellekt xidmətlərini qoşun, sonra hər funksiyanı hansı seçimin icra edəcəyini təyin edin.
+    description: Read Frog-un daxili modellərindən istifadə edin və ya üçüncü tərəf provayderlər əlavə edin. 20-dən çox hazır provayder, həmçinin Chat Completions ilə uyğun API-lər və Open Responses API-ləri üçün fərdi qoşulma dəstəyi var.
     configTitle: Provayder konfiqurasiyası
     addProvider: Provayder əlavə et
-    builtInProvider: Daxili provayder
+    builtInProvider: Daxili modellər
+    thirdPartyProviders: Üçüncü tərəf provayderləri
+    builtInModel:
+      reasoningDescription: "$1 modelinin cavab verməzdən əvvəl nə qədər düşünəcəyi. Yüksək səviyyələr çətin mətnlərin öhdəsindən daha yaxşı gəlir, amma daha yavaş cavab verir və kvotanızdan daha çox istifadə edir."
+      reasoningDefault: "Defolt"
+      reasoningLevels:
+        none: "Söndürülüb"
+        minimal: "Minimal"
+        low: "Aşağı"
+        medium: "Orta"
+        high: "Yüksək"
+        xhigh: "Çox yüksək"
+      unavailableTitle:
+        temporary: "$1 müvəqqəti olaraq əlçatan deyil"
+        removed: "$1 artıq təklif olunmur"
+      unavailableDescription: "İşləyə bilmədiyi müddətdə ondan istifadə edən funksiyalar xəta verir. Davam etmək üçün onları $1 modelinə keçirin."
+      unavailableDescriptionNoAlternatives: "İşləyə bilmədiyi müddətdə ondan istifadə edən funksiyalar xəta verir. Davam etmək üçün onları başqa provayderə keçirin."
     builtInAiUsage:
       title: Daxili süni intellekt kvotası
       remaining: "$1% qalıb"
@@ -168,20 +201,23 @@ options:
         videoSubtitles: Video subtitrləri
         inputTranslation: Daxil edilən mətnin tərcüməsi
         languageDetection: Dilin aşkarlanması
+        pdfTranslation: PDF tərcüməsi
     sponsorCta: Sürətli və sərfəli süni intellekt əldə et
     sponsorCtaJalapenoCloud: GLM 5.3 üçün 50% endirim əldə et
+    sponsorCtaIfapi: READFROG kodu ilə +10% balans
     setApiKeyWarning:
       message: API açarını $1 səhifəsində təyin edin
     badges:
       featureCount: $1 funksiya
       sponsor: Dəstəkçi
       sponsorJalapenoCloud: $$1 hədiyyə
+      sponsorIfapi: Modellər -90%
     dialog:
       title: Yeni provayder əlavə et
       groups:
         builtInProviders:
-          title: Daxili LLM provayderləri
-          description: Daxili böyük dil modeli provayderləri üçün əsas URL kimi əksər parametrləri doldurmağa ehtiyac yoxdur
+          title: Hazır LLM provayderləri
+          description: Əvvəlcədən tənzimlənmiş böyük dil modeli provayderləri — Base URL kimi əksər parametrləri doldurmağa ehtiyac yoxdur
         compatibleProviders:
           title: Uyğun API provayderləri
           description: Chat Completions ilə uyğun API-lər üçün Fərdi Chat Complete, Open Responses API-ləri üçün isə Fərdi Responses seçimindən istifadə edin.
@@ -250,15 +286,13 @@ options:
       invalidJson: Yanlış JSON formatı
     providers:
       name:
-        builtInAi: Daxili süni intellekt
-        builtInAiAdvance: Təkmil daxili süni intellekt
         customChatComplete: Fərdi Chat Complete
         customResponses: Fərdi Responses
       attribution:
-        builtInAi: Read Frog serverlərində işləyən standart model. Pro və Ultra üzvləri ondan həftəlik kvota ilə bütün funksiyalarda istifadə edə bilər; pulsuz planda isə yalnız fərdi süni intellekt əməliyyatlarında işləyir.
-        builtInAiAdvance: Yalnız Ultra üzvləri üçün Read Frog serverlərində işləyən təkmil model. Səhifə tərcüməsini, fərdi süni intellekt əməliyyatlarını və bütün digər daxili süni intellekt funksiyalarını ortaq həftəlik kvota ilə icra edir. Kvotanı standart modeldən daha sürətli sərf edir.
+        builtInAi: Read Frog tərəfindən host edilən standart model. Daxil olduqdan sonra həftəlik kvota ilə pulsuz istifadə edə bilərsiniz.
+        builtInAiAdvance: Read Frog tərəfindən host edilən təkmil model, yalnız Ultra üzvləri üçündür. Kvotanı standart modellərdən daha sürətli sərf edir.
       description:
-        openai: GPT-4o kimi modellər təqdim edir
+        openai: GPT modelləri üçün OpenAI-ın rəsmi API-si
         azure: Azure üzərində yerləşdirdiyiniz OpenAI modelləri
         deepseek: Çində istifadə üçün tövsiyə olunur
         openrouter: İstifadəyə görə ödənişlə bir neçə LLM provayderi üçün vahid interfeys
@@ -268,6 +302,7 @@ options:
         xai: Real vaxt məlumatlarına çıxışı olan Grok modellərini təqdim edən, Elon Musk tərəfindən qurulmuş süni intellekt şirkəti
         atlascloud: Yeni DeepSeek, Kimi, Qwen, Doubao, GLM və digər modellərə OpenAI ilə uyğun vahid çıxış
         jalapenocloud: Aparıcı komandaların istifadə etdiyi korporativ səviyyəli süni intellekt indi sizin üçün də əlçatandır!
+        ifapi: GPT, Claude, Gemini və digərləri, rəsmi qiymətin 10%-indən başlayaraq
         siliconflow: Çin və beynəlxalq modellər üçün yüksək məhsuldarlıqlı model icrası platforması
         tensdaq: Bazar əsasında qiymət qoyan, baha sabit tarifləri aradan qaldıran yenilikçi hərrac əsaslı süni intellekt MaaS platforması
         openaiCompatible: OpenAI Chat Completions API ilə uyğun fərdi xidmət ünvanına qoşulun
@@ -555,6 +590,9 @@ options:
     selectionAnnotation:
       title: "Qeyd əlavə et"
       description: "Seçilmiş mətnin altını cızır və mənasını sətirlər arasına yazır."
+    selectionAnnotationMode:
+      title: "Qeyd rejimi"
+      description: "Alətlər panelini açmadan qeyd rejimini açır və ya bağlayır. Açıq olduqda seçdiyiniz hər mətnə qeyd əlavə olunur."
     actions:
       title: "Süni intellekt əməliyyatları"
       description: "Seçilmiş mətn üzərində süni intellekt əməliyyatı işə salın. Fərdi əməliyyatların burada təyin edənə qədər qısayolu olmur."
@@ -569,9 +607,7 @@ options:
     pageDescription: Mətn sahələrinə yazdıqlarınızı göndərməzdən əvvəl tərcümə edin.
     trigger:
       title: İşə salma
-      enable:
-        title: Aktiv et
-        description: İstənilən mətn sahəsində yazdığınızı tərcümə etmək üçün boşluq düyməsini sürətlə üç dəfə basın.
+      description: İstənilən mətn sahəsində yazdığınızı tərcümə etmək üçün boşluq düyməsini sürətlə üç dəfə basın.
       threshold:
         title: İşə salma həddi
         description: Düyməyə ardıcıl basmalar arasında icazə verilən ən uzun fasilə (millisaniyə ilə). Tərcümə başlamırsa, dəyəri artırın; hələ yazarkən başlayırsa, azaldın.
@@ -590,9 +626,6 @@ options:
     title: Üzən düymə
     pageDescription: Üzən düymənin hansı tərəfdə yerləşdiyini, kliklədikdə nə etdiyini və harada gizləndiyini təyin edin.
     demoImageAlt: Üzən düymə nümunəsi
-    enable:
-      title: Üzən düyməni aktiv et
-      description: Read Frog funksiyalarına sürətli çıxış üçün veb səhifələrdə üzən düyməni göstərin
     display:
       title: Görünüş
       side:
@@ -611,8 +644,8 @@ options:
       panel: Yan paneli aç
       translate: Səhifə tərcüməsini aktiv və ya deaktiv et
     closeMenu:
-      disableForSite: Bu sayt üçün deaktiv et
-      disableGlobally: Hər yerdə deaktiv et
+      title: Üzən düyməni gizlət
+    pageTranslationOff: "Səhifə tərcüməsi sadə rejimdə söndürülüb"
     tooltips:
       togglePageTranslation: Səhifə tərcüməsini aktiv və ya deaktiv et
       floatingButtonOptions: Üzən düymə parametrləri
@@ -623,9 +656,6 @@ options:
     title: Seçim alətlər paneli
     pageDescription: Mətn seçdikdə hansı əməliyyatların göründüyünü və alətlər panelinin harada açıldığını təyin edin.
     demoImageAlt: Seçim alətlər paneli nümunəsi
-    enable:
-      title: Seçim alətlər panelini aktiv et
-      description: Sürətli tərcümə, səsləndirmə və süni intellekt əməliyyatları üçün veb səhifələrdə mətn seçərkən alətlər panelini göstərin
     annotation:
       title: "Söz qeydləri"
       enable:
@@ -637,13 +667,10 @@ options:
     actions:
       title: Əməliyyatlar
       translate:
-        title: Tərcümə et
         description: Alətlər panelində tərcümə düyməsini göstərin
       speak:
-        title: Səsləndir
         description: Seçilmiş mətni ucadan oxuyan səsləndirmə düyməsini göstərin
       noteSuggestion:
-        title: Qeyd təklifləri
         description: Seçilmiş mətn süni intellekt provayderi ilə tərcümə edildikdən sonra Notebase daxilində saxlamaq üçün sözlər təklif edin
         action: Əməliyyat
         actionDescription: Təklifi yaradan əməliyyat
@@ -651,6 +678,12 @@ options:
         providerDescription: Təklifi yaradan süni intellekt provayderi
     display:
       title: Görünüş
+      placement:
+        title: Mövqe
+        description: Alətlər panelinin seçilmiş mətnin hansı tərəfində görünəcəyini seçin. Seçilmiş tərəfdə yer yoxdursa, digər tərəfdə görünür
+        followDirection: Seçim istiqamətini izlə
+        above: Həmişə yuxarıda
+        below: Həmişə aşağıda
       opacity:
         title: Qeyri-şəffaflıq
         description: Seçim alətlər panelinin və ondan açılan geniş pəncərənin qeyri-şəffaflığını tənzimləyin
@@ -660,8 +693,7 @@ options:
         enterUrlPattern: URL şablonu daxil edin
         urlPattern: URL şablonu
     closeMenu:
-      disableForSite: Bu sayt üçün deaktiv et
-      disableGlobally: Hər yerdə deaktiv et
+      title: Seçim alətlər panelini gizlət
     errors:
       customActionFailed: Fərdi əməliyyat alınmadı
       customActionFailedFallback: Fərdi əməliyyat sorğusu alınmadı
@@ -797,6 +829,8 @@ options:
             unquotedAttributeOutput: Bu atribut dəyərini dırnaq içinə alın, əks halda dəyər atributdan kənara çıxa bilər.
             filterIgnored: '"$1" teqində filtrlər nəzərə alınmır. Əvvəlcə filtrlənmiş dəyəri mənimsədin.'
             newlineToBrNotLast: newline_to_br yalnız çıxışın son filtri olduqda işləyir.
+            mathFilterNotLast: $1 yalnız çıxışın son filtri olduqda işləyir.
+            mathFilterInAttribute: $1 filtrini atribut dəyərinin içində istifadə etməyin. Onun çəkdiyi düsturlardakı dırnaqlar atributu bağlayır.
             tooLong: Bu tərtibat $1 simvoldan uzundur və yadda saxlanıla bilməz.
             fieldNotShown: '"$1" bu tərtibatda göstərilmir.'
             reservedFieldName: '"$1" sahə adı tərtibatlarda ehtiyatda saxlanılır. Sahənin adını dəyişin.'
@@ -1066,8 +1100,8 @@ options:
       pageDescription: Sizin üçün vacib olan sözlərə sabit tərcümə təyin edin və hər siyahının harada tətbiq olunacağını seçin.
       untitled: Adsız lüğət
       noGlossaries: Hələ lüğət yoxdur.
-      enable:
-        title: Aktiv et
+      appliesTo:
+        title: Tətbiq olunduğu yerlər
         description: Uyğun gələn terminləri LLM-ə göndərir ki, onları istədiyiniz kimi tərcümə etsin. Lüğət sorğunun içində göndərilir, ona görə də yalnız LLM provayderi üzərində işləyən funksiyalara tətbiq olunur.
       library:
         title: Lüğətləriniz
@@ -1197,9 +1231,6 @@ options:
     title: Kontekst menyusu
     pageDescription: Brauzerin sağ klik menyusundakı Read Frog elementlərini idarə edin.
     demoImageAlt: Kontekst menyusu nümunəsi
-    enable:
-      title: Kontekst menyusunda tərcüməni aktiv et
-      description: Səhifəni və seçilmiş mətni sürətlə tərcümə etmək üçün brauzerin sağ klik menyusuna tərcümə seçimləri əlavə edin
   translation:
     title: Səhifə tərcüməsi
     pageDescription: Səhifə tərcüməsinin rejimini, əhatəsini, təlimatlarını və sorğu hədlərini idarə edin.
@@ -1348,7 +1379,7 @@ options:
         error: Dəyər $1 ilə $2 arasında olmalıdır
     translationQueue:
       title: Tərcümə növbəsi
-      description: Sorğuların göndərilmə sürətini, hər sorğudakı mətn miqdarını və oxuduğunuz hissədən nə qədər sonrakı məzmunun əvvəlcədən tərcümə olunacağını təyin edin
+      description: Sorğuların göndərilmə sürətini, hər sorğudakı mətn miqdarını, hər sorğunun nə qədər gözləyə biləcəyini və oxuduğunuz hissədən nə qədər sonrakı məzmunun əvvəlcədən tərcümə olunacağını təyin edin
       manageQueue: Növbəni idarə et
       requestQueueConfig:
         title: Tərcümə sürəti
@@ -1363,6 +1394,9 @@ options:
           description: "Maksimum simvol sayı: bir süni intellekt sorğusunun daşıdığı mətn miqdarı"
         maxItemsPerBatch:
           description: "Maksimum abzas sayı: bir sorğuda neçə abzas birləşdirilir. Süni intellektdən istifadə etməyən provayderlər hər iki parametrə məhəl qoymur"
+      requestTimeout:
+        title: Sorğunun vaxt limiti
+        description: "İmtina edib yenidən cəhd etməzdən əvvəl cavab üçün neçə saniyə gözlənilir. Süni intellektin toplu sorğularına uzunluğuna görə əlavə vaxt verilir, ən çox 100 saniyə. Yavaş model tez-tez vaxt limitini keçirsə, artırın"
       preloadConfig:
         title: Öncədən tərcümə əhatəsi
         description: API xərclərinə qənaət üçün görünən sahənin altındakı məzmunun nə qədərinin öncədən tərcümə ediləcəyini idarə edin
@@ -1441,10 +1475,11 @@ options:
       title: Əsas parametrlər
       enable:
         title: Video subtitrlərini aktiv et
-        description: YouTube, X və Netflix-də video pleyerin idarəetmə panelinə tərcümə düyməsi əlavə edir.
-      autoStart:
-        title: Açılan kimi tərcümə et
-        description: Düyməyə basmadan video yüklənən kimi tərcüməyə başlayın.
+        description: "Hər sayt üçün seçin: söndürülüb, əl ilə (pleyerdəki tərcümə düyməsi ilə başlayır) və ya avtomatik (video açılan kimi başlayır)."
+        mode:
+          off: "Söndürülüb"
+          manual: "Əl ilə"
+          auto: "Avtomatik"
       aiSegmentation:
         title: Süni intellektlə ağıllı seqmentləşdirmə
         description: Süni intellekt subtitrləri cümlələrə yenidən bölür. Tərcümələr daha gec gəlir. Güclü LLM tələb olunur; zəif modellər sətirləri buraxa və ya sürüşdürə bilər.
@@ -1457,8 +1492,6 @@ options:
     aiQuota:
       title: Süni intellekt subtitrlərinin kvotası
       description: Süni intellektlə nitqin tanınması istənilən video üçün dəqiq subtitrlər yaradır
-      launchBonusPromo: Əlavə 300 dəqiqə transkripsiya üçün $1 tarixindən əvvəl abunə olun
-      loginRequired: Süni intellekt subtitrlərinin kvotasını görmək üçün daxil olun
       upgradeRequired: Süni intellekt subtitrləri üçün Pro və ya Ultra abunəliyi tələb olunur
       pools:
         subscription: Aylıq kvota
@@ -1534,7 +1567,7 @@ options:
           videoSummary: Videonun xülasəsi (süni intellektlə ağıllı kontekst tələb olunur)
     subtitlesQueue:
       title: Subtitr növbəsi
-      description: Subtitr sorğularının göndərilmə sürəti və hər sorğudakı sətir sayı
+      description: Subtitr sorğularının göndərilmə sürəti, hər sorğudakı sətir sayı və hər sorğunun nə qədər gözləyə biləcəyi
       manageQueue: Növbəni idarə et
       requestQueueConfig:
         title: Tərcümə sürəti
@@ -1549,6 +1582,9 @@ options:
           description: "Maksimum simvol sayı: bir süni intellekt sorğusunun daşıdığı mətn miqdarı"
         maxItemsPerBatch:
           description: "Maksimum subtitr sətri sayı: bir sorğuda neçə sətir birləşdirilir. Süni intellektdən istifadə etməyən provayderlər hər iki parametrə məhəl qoymur"
+      requestTimeout:
+        title: Sorğunun vaxt limiti
+        description: "İmtina edib yenidən cəhd etməzdən əvvəl cavab üçün neçə saniyə gözlənilir. Süni intellektin toplu sorğularına uzunluğuna görə əlavə vaxt verilir, ən çox 100 saniyə. Yavaş model tez-tez vaxt limitini keçirsə, artırın"
     cache:
       title: Keş
       clearCache:
@@ -1561,6 +1597,53 @@ options:
           confirm: Təsdiqlə
           cancel: Ləğv et
           description: Keşdəki bütün süni intellekt seqmentləşdirmə nəticələri silinəcək. Növbəti dəfə süni intellekt seqmentləşdirməsi aktiv halda video açdıqda subtitrlər yenidən işlənəcək.
+  simpleMode:
+    title: "Sadə rejim"
+    pageDescription: "Söndürdüyünüz funksiya sanki quraşdırılmayıb: veb səhifələrdə görünmür və qısayolları işləmir. Ayarları saxlanılır, ona görə də yenidən yandıranda hər şey əvvəlki kimi olur."
+    drawerDescription: "Söndürdüyünüz funksiyalar heç yerdə görünmür. Ayarları saxlanılır"
+    features:
+      customActions:
+        title: "Fərdi süni intellekt əməliyyatları"
+        description: "Seçim alətlər panelində və sağ klik menyusunda olan süni intellekt əməliyyatları, daxili Lüğət və Cümlə təhlili də daxil olmaqla"
+      pageTranslation:
+        title: "Səhifə tərcüməsi"
+        description: "Veb səhifələri bütövlükdə tərcümə edir"
+        hover:
+          title: "Kursorla tərcümə"
+          description: "Yalnız bir abzası tərcümə etmək üçün kursoru üzərinə gətirin və ya basıb saxlayın"
+      videoSubtitles:
+        title: "Video subtitrləri"
+        description: "Video pleyerlərə tərcümə olunmuş subtitr düyməsi əlavə edir"
+      inputTranslation:
+        title: "Daxil edilən mətnin tərcüməsi"
+        description: "İstənilən mətn sahəsində yazdığınızı tərcümə etmək üçün boşluq düyməsini sürətlə üç dəfə basın"
+      floatingButton:
+        title: "Üzən düymə"
+        description: "Read Frog funksiyalarına sürətli çıxış üçün veb səhifələrdə üzən düyməni göstərin"
+      selectionToolbar:
+        title: "Seçim alətlər paneli"
+        description: "Sürətli tərcümə, səsləndirmə və süni intellekt əməliyyatları üçün veb səhifələrdə mətn seçərkən alətlər panelini göstərin"
+        annotation:
+          title: "Söz qeydləri"
+          description: "Seçilmiş sözün və ya ifadənin altını cızır və mənasını sətirlər arasına yazır"
+        translate:
+          title: "Seçilmiş mətnin tərcüməsi"
+          description: "Alətlər panelində tərcümə düyməsini göstərin"
+          noteSuggestion:
+            title: "Qeyd təklifləri"
+            description: "Seçilmiş mətn süni intellekt provayderi ilə tərcümə edildikdən sonra Notebase daxilində saxlamaq üçün sözlər təklif edin"
+        speak:
+          title: "Səsləndir"
+          description: "Seçilmiş mətni ucadan oxuyan səsləndirmə düyməsini göstərin"
+      contextMenu:
+        title: "Kontekst menyusu"
+        description: "Brauzerin sağ klik menyusundakı Read Frog elementləri"
+      translationHub:
+        title: "Tərcümə mərkəzi"
+        description: "Mətni eyni anda bir neçə modellə tərcümə edin"
+      glossary:
+        title: "Terminlər lüğəti"
+        description: "Sizin üçün vacib olan sözləri seçdiyiniz kimi tərcümə edir"
   whatsNew:
     title: Yeniliklər
     postType:
@@ -1579,7 +1662,7 @@ translateService:
   title: Tərcümə xidməti
   description: Yalnız veb səhifənin tərcüməsi üçün
   builtInModels: Daxili modellər
-  llmModels: LLM modelləri
+  llmModels: Üçüncü tərəf modelləri
   normalTranslator: Adi tərcüməçilər
   selectServices: Xidmətləri seçin
   translationProviders: Tərcümə provayderləri
@@ -1593,7 +1676,7 @@ languageLevels:
   intermediate: Orta
   advanced: Yüksək
 noAPIKeyConfig:
-  warning: Süni intellekt modellərindən istifadə etmək istəyirsinizsə, əvvəlcə parametrlər səhifəsində API açarını təyin edin
+  warning: Əvvəlcə parametrlər səhifəsində bu provayder üçün API açarını təyin edin
   warningWithLink:
     youMust: Əvvəlcə
     setTheAPIKey: API açarını
@@ -1606,6 +1689,25 @@ translation:
   sameLanguage: Mənbə və hədəf dilləri fərqli olmalıdır
   autoModeSameLanguage: Aşkarlanan '$1' dili hədəf dili ilə eynidir
   extensionContextInvalidated: Genişlənmə yeniləndi. Bu səhifəni yeniləyib yenidən cəhd edin.
+  inputTranslationFailed: "Daxil edilən mətnin tərcüməsi alınmadı"
+pageDiagnosis:
+  title: "Səhifə diaqnostikası"
+  summary: "$1 tərcümə olundu, $2 tərcümə olunmadı"
+  empty: "Hələ göstəriləcək heç nə yoxdur. Səhifə tərcüməsini yandırın, sonra bunu yenidən açın."
+  emptyWhileTranslating: "Hələ göstəriləcək heç nə yoxdur. Səhifə tərcüməsi abzaslara çatdıqca onlar burada görünəcək."
+  framesNotIncluded: "Daxil edilmiş çərçivələrin içindəki mətn burada nəzərə alınmır."
+  hint: "Abzaslarını səhifədə işarələmək üçün bir səbəbə klikləyin."
+  close: "Bağla"
+  unavailable: "Read Frog bu səhifədə işləyə bilmir"
+  reasons:
+    noProse: "Tərcümə ediləcək söz yoxdur"
+    tooShort: "Tərcümə üçün çox qısadır"
+    targetLanguage: "Artıq hədəf dilinizdədir"
+    skipLanguage: "Atladığınız dildədir"
+    noTranslationNeeded: "Süni intellekt tərcüməyə ehtiyac olmadığını dedi"
+    sameAsSource: "Tərcümə orijinalla eynidir"
+    emptyResult: "Xidmət heç nə qaytarmadı"
+    error: "Tərcümə alınmadı"
 annotation:
   annotate: "Qeyd əlavə et"
   enterMode: "Qeyd rejimi"
@@ -1628,6 +1730,11 @@ speak:
   noTextSelected: Mətn seçilməyib
   openaiNotConfigured: OpenAI provayderi tənzimlənməyib və ya aktiv deyil
   openaiApiKeyNotConfigured: OpenAI API açarı təyin edilməyib
+hideMenu:
+  untilReload: Səhifəni yeniləyənə qədər
+  onSite: $1 saytında
+  onAllSites: Bütün saytlarda
+  restoreHint: "$1 və ya $2 bölməsində yenidən aktivləşdirə bilərsiniz."
 action:
   copy: Köçür
   copied: Köçürüldü
@@ -1712,6 +1819,7 @@ subtitles:
   requestAiSubtitles: Süni intellekt subtitrləri istə
   usingAiSubtitles: Süni intellekt subtitrlərindən istifadə olunur
   settings: Subtitr ayarları
+  autoStartOnPlatform: "$1 üzərində avtomatik başlat"
   toggle:
     enabled: Subtitr tərcüməsi aktivdir
     disabled: Subtitr tərcüməsi deaktivdir
@@ -1749,7 +1857,9 @@ subtitles:
     aiSubscriptionRequired: Süni intellekt subtitrləri üçün Pro və ya Ultra abunəliyi tələb olunur
     aiPaymentRequired: Süni intellekt subtitrləri yaratmağa davam etmək üçün ödəniş üsulunuzu yeniləyin
     aiVideoTooLong: Bu video süni intellekt subtitrləri üçün həddindən artıq uzundur
-    aiLiveReplayUnsupported: Canlı yayım yazıları üçün süni intellekt subtitrləri hələ əlçatan deyil
+    aiVideoMismatch: Bu video aid olduğu paylaşıma uyğun gəlmir. Paylaşımın öz səhifəsini açıb yenidən cəhd edin
+    aiLiveReplayUnsupported: Canlı yayımlar və onların yazıları üçün süni intellekt subtitrləri hələ əlçatan deyil
+    aiLiveStreamUnsupported: Canlı yayım davam edərkən süni intellekt subtitrləri hələ əlçatan deyil. Yazısı yayımlandıqdan sonra sorğu göndərin
     aiStillProcessing: Transkripsiya hələ davam edir. Nəticəni almaq üçün bir neçə dəqiqə sonra yenidən klikləyin
     aiRequestFailed: Süni intellekt subtitr sorğusu alınmadı, daha sonra yenidən cəhd edin
     aiNoResponse: Süni intellekt xidməti cavab vermədi, orijinal mətndən istifadə olunur
@@ -1768,10 +1878,33 @@ hostedAi:
     serviceUnavailable: Müvəqqəti olaraq əlçatan deyil
     usedPercent: "İstifadə edilmiş kvota: $1%"
     resetsAt: "$1 vaxtında yenilənir"
+  requestId:
+    label: "Sorğu ID-si:"
+    copy: "Sorğu ID-sini köçür"
   errors:
     rateLimited: Həddindən artıq sorğu var, daha sonra yenidən cəhd edin.
     guestRateLimited: Qonaq sorğularının sayı həddindən artıq çoxdur. Daha sonra yenidən cəhd edin.
     userRateLimited: Həddindən artıq sorğu var. Daha sonra yenidən cəhd edin.
+    modelUnavailable: "$1 hazırda işləmir. Onun əvəzinə $2 modelini sınayın."
+    modelUnavailableNoAlternatives: "$1 hazırda işləmir və sizin üçün başqa daxili süni intellekt modeli yoxdur. Daha sonra yenidən cəhd edin."
+    modelBusy: "$1 hazırda çox yüklənib. Bir azdan yenidən cəhd edin və ya $2 modelinə keçin."
+    modelBusyNoAlternatives: "$1 hazırda çox yüklənib. Bir azdan yenidən cəhd edin."
+  unavailable:
+    temporary: "$1 müvəqqəti olaraq əlçatan deyil. Onun əvəzinə $2 modelini sınayın."
+    temporaryNoAlternatives: "$1 müvəqqəti olaraq əlçatan deyil. Daha sonra yenidən cəhd edin."
+    removed: "$1 artıq təklif olunmur. Onun əvəzinə $2 modelini sınayın."
+    removedNoAlternatives: "$1 artıq təklif olunmur. Başqa provayder seçin."
+  actions:
+    chooseModel: "Model seçin"
+  builtInAiPrompt:
+    logInTitle: "Daxili süni intellektdən istifadə üçün daxil olun"
+    logInDescription: "Daxil olduqda daxili süni intellekt pulsuzdur: həftədə təxminən 120 000 token."
+    upgradeTitle: "Bu həftənin daxili süni intellekti bitdi"
+    upgradeDescription: "Pro ayda təxminən 3 000, Ultra isə 10 000 veb səhifə tərcümə edir."
+    upgradeDescriptionPro: "Ultra ayda təxminən 10 000 veb səhifə tərcümə edir."
+    useMachineTranslation: "Maşın tərcüməsindən istifadə et"
+    switched: "$1 indi $2 istifadə edir."
+    switchFailed: "Maşın tərcüməsinə keçmək alınmadı. Yenidən cəhd edin."
 hotkey:
   control: Ctrl düyməsi
   alt: Option düyməsi
@@ -1835,183 +1968,3 @@ difficultWords:
       C1: Üslub fərqlərini seçərək oxunan uzun, mürəkkəb faktiki və bədii mətnlər; öz sahənizdən kənar ixtisas məqalələri və uzun texniki təlimatlar
       C2: Təlimatlar, ixtisas məqalələri və bədii əsərlər kimi quruluşu və dili mürəkkəb abstrakt mətnlər də daxil olmaqla, demək olar ki, hər cür yazılı dil
       unsure: A2 kimi sayılır. Aşağıdan başlamaq daha yaxşıdır; artıq işarələr bildiyiniz sözləri qeyd etməklə tez düzəlir, çox az olanda isə klikləməyə heç nə qalmır.
-languages:
-  eng: İngilis dili
-  cmn: Sadələşdirilmiş çin dili
-  cmnHant: Ənənəvi çin dili
-  yue: Kanton dili
-  spa: İspan dili
-  rus: Rus dili
-  arb: Ərəb dili
-  ben: Benqal dili
-  hin: Hindi dili
-  por: Portuqal dili
-  ind: İndoneziya dili
-  jpn: Yapon dili
-  fra: Fransız dili
-  deu: Alman dili
-  jav: Yava dili
-  kor: Koreya dili
-  tel: Teluqu dili
-  vie: Vyetnam dili
-  mar: Marathi dili
-  ita: İtalyan dili
-  tam: Tamil dili
-  tur: Türk dili
-  urd: Urdu dili
-  guj: Qucarat dili
-  pol: Polyak dili
-  ukr: Ukrayna dili
-  kan: Kannada dili
-  mai: Maythili dili
-  mal: Malayalam dili
-  pes: Fars dili
-  mya: Birma dili
-  swh: Suahili dili
-  sun: Sunda dili
-  ron: Rumın dili
-  pan: Pəncab dili
-  bho: Bhocpuri dili
-  amh: Amhar dili
-  hau: Hausa dili
-  fuv: Fulani dili
-  bos: Bosniya dili
-  hrv: Xorvat dili
-  nld: Niderland dili
-  srp: Serb dili
-  tha: Tay dili
-  ckb: Mərkəzi kürd dili
-  yor: Yoruba dili
-  uzn: Özbək dili
-  zlm: Malay dili
-  ibo: İqbo dili
-  npi: Nepal dili
-  ceb: Sebuano dili
-  skr: Saraiki dili
-  tgl: Taqaloq dili
-  hun: Macar dili
-  azj: Azərbaycan dili
-  sin: Sinhala dili
-  koi: Komi-permyak dili
-  ell: Yunan dili
-  ces: Çex dili
-  mag: Maqahi dili
-  run: Rundi dili
-  bel: Belarus dili
-  plt: Malaqasi dili
-  qug: Çimboraso dağlıq kiçua dili
-  mad: Madura dili
-  nya: Çeva dili
-  zyb: Çjuan dili
-  pbu: Puştu dili
-  kin: Kinyaruanda dili
-  zul: Zulu dili
-  bul: Bolqar dili
-  swe: İsveç dili
-  lin: Linqala dili
-  som: Somali dili
-  hms: Tsyandun myao dili
-  hnj: Hmonq nyua dili
-  ilo: İlokano dili
-  kaz: Qazax dili
-  heb: İvrit dili
-  nob: Norveç bokmol dili
-  nno: Norveç nünorsk dili
-  afr: Afrikaans dili
-  sqi: Alban dili
-  asm: Assam dili
-  eus: Bask dili
-  bre: Breton dili
-  cat: Katalan dili
-  cos: Korsika dili
-  cym: Uels dili
-  dan: Danimarka dili
-  div: Divehi dili
-  epo: Esperanto dili
-  ekk: Eston dili
-  fao: Farer dili
-  fij: Fici dili
-  fin: Fin dili
-  fry: Qərbi friz dili
-  gla: Şotland kelt dili
-  gle: İrland dili
-  glg: Qalisiya dili
-  grn: Quarani dili
-  hat: Haiti kreol dili
-  haw: Havay dili
-  hye: Erməni dili
-  ido: İdo dili
-  ina: İnterlinqva dili
-  isl: İsland dili
-  kat: Gürcü dili
-  khm: Kxmer dili
-  kir: Qırğız dili
-  lao: Laos dili
-  lat: Latın dili
-  lvs: Latış dili
-  lit: Litva dili
-  ltz: Lüksemburq dili
-  mkd: Makedon dili
-  mlt: Malta dili
-  mon: Monqol dili
-  mri: Maori dili
-  nso: Şimali soto dili
-  oci: Oksitan dili
-  ori: Oriya dili
-  orm: Oromo dili
-  prs: Dəri dili
-  san: Sanskrit dili
-  slk: Slovak dili
-  slv: Sloven dili
-  smo: Samoa dili
-  sna: Şona dili
-  snd: Sindhi dili
-  sot: Cənubi soto dili
-  tah: Taiti dili
-  tat: Tatar dili
-  tgk: Tacik dili
-  tir: Tiqrinya dili
-  ton: Tonqa dili
-  tsn: Tsvana dili
-  tuk: Türkmən dili
-  uig: Uyğur dili
-  vol: Volapük dili
-  wol: Volof dili
-  xho: Kosa dili
-  ydd: İdiş dili
-  aka: Akan dili
-  bam: Bambara dili
-  bis: Bislama dili
-  bod: Tibet dili
-  che: Çeçen dili
-  chv: Çuvaş dili
-  dzo: Dzonqxa dili
-  ewe: Eve dili
-  kab: Kabil dili
-  lug: Luqanda dili
-  oss: Osetin dili
-  ssw: Svati dili
-  ven: Venda dili
-  war: Varay dili
-  nde: Şimali ndebele dili
-  nbl: Cənubi ndebele dili
-  pam: Pampanqa dili
-  hil: Hiliqaynon dili
-  bcl: Mərkəzi bikol dili
-  min: Minanqkabau dili
-  ace: Açeh dili
-  bug: Buqi dili
-  ban: Bali dili
-  bjn: Bancar dili
-  mak: Makassar dili
-  sas: Sasak dili
-  tet: Tetum dili
-  cha: Çamorro dili
-  niu: Niue dili
-  tvl: Tuvalu dili
-  gil: Kiribati dili
-  mah: Marşall dili
-  pau: Palau dili
-  wls: Uollis dili
-  rar: Rarotonqa dili
-  hif: Fici hindi dili

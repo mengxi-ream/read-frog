@@ -3,6 +3,7 @@ import {
   IconBrandDiscord,
   IconBrandWechat,
   IconBug,
+  IconFileExport,
   IconMail,
   IconMessageCircle,
 } from "@tabler/icons-react"
@@ -18,6 +19,7 @@ import {
 } from "@/components/ui/base-ui/fluid-card"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/base-ui/hover-card"
 import { env } from "@/env"
+import { useExportDiagnostics } from "@/hooks/use-export-diagnostics"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { buildFeaturebasePortalUrl } from "@/utils/featurebase"
 import { i18n } from "@/utils/i18n"
@@ -77,6 +79,7 @@ function WechatCard({ index }: { index?: number }) {
 export function HelpAndCommunityPage() {
   const uiLanguage = useAtomValue(configFieldsAtomMap.uiLanguage)
   const locale = resolveUiLocale(uiLanguage)
+  const exportDiagnostics = useExportDiagnostics()
 
   return (
     <PageLayout
@@ -149,6 +152,29 @@ export function HelpAndCommunityPage() {
               <FluidCardTitle>{i18n.t("options.helpAndCommunity.bugReport.title")}</FluidCardTitle>
               <FluidCardDescription>
                 {i18n.t("options.helpAndCommunity.bugReport.description")}
+              </FluidCardDescription>
+            </FluidCardHeader>
+          </FluidCard>
+        </FluidCardGroup>
+      </ConfigSection>
+
+      <ConfigSection
+        title={i18n.t("options.helpAndCommunity.troubleshooting.title")}
+        titleClassName="border-b-0"
+      >
+        <FluidCardGroup columns={1}>
+          <FluidCard
+            onClick={() => exportDiagnostics.mutate()}
+            disabled={exportDiagnostics.isPending}
+            label={i18n.t("options.helpAndCommunity.diagnostics.title")}
+          >
+            <FluidCardHeader>
+              <FluidCardMedia icon={IconFileExport} />
+              <FluidCardTitle>
+                {i18n.t("options.helpAndCommunity.diagnostics.title")}
+              </FluidCardTitle>
+              <FluidCardDescription>
+                {i18n.t("options.helpAndCommunity.diagnostics.description")}
               </FluidCardDescription>
             </FluidCardHeader>
           </FluidCard>

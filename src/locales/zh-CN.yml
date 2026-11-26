@@ -15,8 +15,8 @@ dataTypes:
   number: 数字
 contextMenu:
   translate: 翻译
-  translateSelection: 翻译”%s”
-  readAloudSelection: 朗读”%s”
+  translateSelection: 翻译“%s”
+  readAloudSelection: 朗读“%s”
   showOriginal: 显示原文
 sidePanel:
   firefoxUserActionHint: 在 Firefox 中，请从浏览器侧边栏打开陪读蛙。
@@ -51,12 +51,10 @@ popup:
         action: 点击切换为双语对照
   hub:
     tooltip: 一次性调用多个翻译模型翻译文本
-  discord:
-    tooltip: 加入 Discord 与开发者交流，抢先体验新功能
   blog:
     notification: 陪读蛙更新动态
   aiSmartContext: AI 智能上下文
-  aiSmartContextDescription: 结合网页上下文提升翻译效果。需要配置 LLM 翻译服务商。
+  aiSmartContextDescription: 结合网页上下文提升翻译效果。需要使用 LLM 提供商。
   storeReview:
     title: 用得还顺手吗？
     description: 去商店留个评价，能帮更多人发现陪读蛙。
@@ -69,6 +67,7 @@ popup:
     emailUs: 邮件联系
     featureRequest: 功能建议
     bugReport: 报告问题
+    diagnosePage: "诊断此页面"
     community: 社区
     joinDiscord: 加入 Discord
     joinWechat: 加入微信群
@@ -135,6 +134,13 @@ options:
     bugReport:
       title: 报告问题
       description: 提交工单，并跟进直到问题解决
+    troubleshooting:
+      title: "故障排查"
+    diagnostics:
+      title: "导出诊断信息"
+      description: "保存最近的日志和设置（不含 API 密钥），附在问题反馈里"
+      exportSuccess: "诊断信息已保存"
+      exportFailed: "无法导出诊断信息"
     community:
       title: 社区
     discord:
@@ -144,13 +150,40 @@ options:
       title: 微信群
       description: 扫描二维码进入微信讨论群
       qrCodeAlt: 微信二维码
+  usage:
+    title: 用量
+    pageDescription: 查看你的会员和 AI 额度。
+    notSignedIn: 未登录
+    guest: 访客
+    manageSubscription: 管理订阅
+    logInToView: 登录后查看
+    footer:
+      logIn: 登录后每周送免费 AI 额度
+      upgrade: 升级 Pro 解锁 AI 字幕和更多内置 AI 额度
+      upgradeAction: 升级会员
   apiProviders:
     title: API 提供商
-    pageDescription: 接入 Read Frog 调用的 AI 服务，并为每项功能指定使用哪一个。
-    description: 添加 Read Frog 可以调用的提供商。内置 20 多个，也可以添加兼容 Chat Completions 的自定义 API 和 Open Responses 自定义 API。
+    pageDescription: 使用 Read Frog 内置模型或接入第三方 AI 服务，并为每项功能指定使用哪一个。
+    description: 使用 Read Frog 内置模型，或添加第三方提供商。已预置 20 多个常见提供商，也可以添加兼容 Chat Completions 的自定义 API 和 Open Responses 自定义 API。
     configTitle: 提供商配置
     addProvider: 添加提供商
-    builtInProvider: 内置提供商
+    builtInProvider: 内置模型
+    thirdPartyProviders: 第三方提供商
+    builtInModel:
+      reasoningDescription: "$1 回答前思考的程度。档位越高，越能处理难懂的文本，但回答更慢，消耗的额度也更多。"
+      reasoningDefault: "默认"
+      reasoningLevels:
+        none: "关闭"
+        minimal: "极低"
+        low: "低"
+        medium: "中"
+        high: "高"
+        xhigh: "超高"
+      unavailableTitle:
+        temporary: "$1 暂时无法使用"
+        removed: "$1 已不再提供"
+      unavailableDescription: "它无法运行期间，用它的功能会报错。如需继续使用，请把这些功能改用 $1。"
+      unavailableDescriptionNoAlternatives: "它无法运行期间，用它的功能会报错。如需继续使用，请把这些功能改用其他提供商。"
     builtInAiUsage:
       title: 内置 AI 额度
       remaining: "剩余 $1%"
@@ -168,20 +201,23 @@ options:
         videoSubtitles: 视频字幕
         inputTranslation: 输入翻译
         languageDetection: 语言检测
+        pdfTranslation: PDF 翻译
     sponsorCta: 获取高速性价比 AI
     sponsorCtaJalapenoCloud: 获取 GLM 5.3 五折优惠
+    sponsorCtaIfapi: 首充加赠 10%，优惠码 READFROG
     setApiKeyWarning:
       message: 请在 $1 页面设置 API Key
     badges:
       featureCount: $1 个功能
       sponsor: 赞助
       sponsorJalapenoCloud: $$1 免费额度
+      sponsorIfapi: 1 折模型
     dialog:
       title: 添加新提供商
       groups:
         builtInProviders:
-          title: 内置 LLM 提供商
-          description: 内置的大语言模型提供商，无需填写大部分配置比如 Base URL
+          title: 预置 LLM 提供商
+          description: 已预置的大语言模型提供商，无需填写 Base URL 等大部分配置
         compatibleProviders:
           title: 兼容 API 提供商
           description: 兼容 Chat Completions 的 API 使用自定义 Chat Complete，Open Responses API 使用自定义 Responses。
@@ -250,15 +286,13 @@ options:
       invalidJson: JSON 格式无效
     providers:
       name:
-        builtInAi: 内置 AI
-        builtInAiAdvance: 高级内置 AI
         customChatComplete: 自定义 Chat Complete
         customResponses: 自定义 Responses
       attribution:
-        builtInAi: 由 Read Frog 托管的普通模型。Pro 和 Ultra 用户可在全部功能上使用，消耗每周额度；免费用户仅支持在自定义 AI 指令使用。
-        builtInAiAdvance: 由 Read Frog 托管的高级模型，Ultra 会员专属。网页翻译、自定义 AI 指令等全部内置 AI 功能均可使用，共享每周额度，额度消耗比标准模型更快。
+        builtInAi: 由 Read Frog 托管的标准模型，登录后即可免费使用，消耗每周额度。
+        builtInAiAdvance: 由 Read Frog 托管的高级模型，Ultra 会员专属，额度消耗比标准模型更快。
       description:
-        openai: 提供 GPT-4o 等模型
+        openai: OpenAI 官方 API，提供 GPT 系列模型
         azure: 通过 Azure 部署使用 OpenAI 模型
         deepseek: 推荐在中国使用
         openrouter: 多个 LLM 提供商的统一接口，按使用量付费
@@ -268,6 +302,7 @@ options:
         xai: 马斯克的 AI 公司，提供具有实时数据访问能力的 Grok 模型
         atlascloud: 统一的 OpenAI 兼容模型平台，提供 DeepSeek、Kimi、Qwen、豆包、GLM 等较新模型
         jalapenocloud: 顶尖团队都在用的企业级 AI，现在为你而来！
+        ifapi: GPT、Claude、Gemini 等主流模型，低至官方价 1 折，国内专线直连
         siliconflow: 面向中国和国际模型的高性能推理平台
         tensdaq: 革命性竞价 AI MaaS 平台，价格由市场供需决定，告别高成本固定定价
         openaiCompatible: 连接兼容 OpenAI Chat Completions API 的自定义端点
@@ -555,6 +590,9 @@ options:
     selectionAnnotation:
       title: "划词标注"
       description: "给选中的文本加下划线，并在行间显示释义。"
+    selectionAnnotationMode:
+      title: "标注模式"
+      description: "无需打开工具栏即可开启或关闭标注模式。开启后，选中的文本都会自动标注。"
     actions:
       title: "AI 指令"
       description: "对选中的文本运行 AI 指令。自定义指令默认没有快捷键，在这里设置即可。"
@@ -569,9 +607,7 @@ options:
     pageDescription: 在发送之前，把你在输入框里写的内容翻译好。
     trigger:
       title: 触发方式
-      enable:
-        title: 启用
-        description: 在任意输入框中快速连按 3 次空格键，即可翻译你输入的内容。
+      description: 在任意输入框中快速连按 3 次空格键，即可翻译你输入的内容。
       threshold:
         title: 触发阈值
         description: 相邻两次按键之间最多可以间隔多少毫秒。经常触发不了就调大，打字时误触发就调小。
@@ -590,9 +626,6 @@ options:
     title: 悬浮按钮
     pageDescription: 设置悬浮按钮停在哪一侧、点击后做什么，以及在哪些网站不显示。
     demoImageAlt: 悬浮按钮演示
-    enable:
-      title: 启用悬浮按钮
-      description: 在网页上显示悬浮按钮，快速访问陪读蛙功能
     display:
       title: 显示
       side:
@@ -611,8 +644,8 @@ options:
       panel: 打开侧边栏
       translate: 切换页面翻译
     closeMenu:
-      disableForSite: 当前网站禁用
-      disableGlobally: 全局禁用
+      title: 隐藏悬浮按钮
+    pageTranslationOff: "网页翻译已在简洁模式中关闭"
     tooltips:
       togglePageTranslation: 切换页面翻译
       floatingButtonOptions: 悬浮按钮选项
@@ -623,9 +656,6 @@ options:
     title: 选择工具栏
     pageDescription: 设置选中文本时出现哪些操作，以及工具栏在哪些网站显示。
     demoImageAlt: 选择工具栏演示
-    enable:
-      title: 启用选择工具栏
-      description: 在网页上选择文本时显示工具栏，快速翻译、朗读和使用 AI 指令
     annotation:
       title: "划词标注"
       enable:
@@ -637,13 +667,10 @@ options:
     actions:
       title: 操作
       translate:
-        title: 翻译
         description: 在工具栏中显示翻译按钮
       speak:
-        title: 朗读
         description: 在工具栏中显示朗读按钮，用于朗读选中的文本
       noteSuggestion:
-        title: 猜你想存
         description: 使用 AI 提供商进行划词翻译后，推荐可存入笔记库的词条
         action: 指令
         actionDescription: 用于生成「猜你想存」的指令
@@ -651,6 +678,12 @@ options:
         providerDescription: 用于生成「猜你想存」的 AI 提供商
     display:
       title: 显示
+      placement:
+        title: 位置
+        description: 工具栏出现在选中文本的哪一侧。选定的一侧没有空间时，会改到另一侧显示
+        followDirection: 跟随划选方向
+        above: 始终在上方
+        below: 始终在下方
       opacity:
         title: 透明度
         description: 调整选择工具栏及其展开内容窗的透明度
@@ -660,8 +693,7 @@ options:
         enterUrlPattern: 输入网址模式
         urlPattern: 网址模式
     closeMenu:
-      disableForSite: 当前网站禁用
-      disableGlobally: 全局禁用
+      title: 隐藏选择工具栏
     errors:
       customActionFailed: 自定义操作失败
       customActionFailedFallback: 自定义操作请求失败
@@ -802,6 +834,8 @@ options:
             unquotedAttributeOutput: 请给这个属性值加上引号，否则值可能突破属性边界。
             filterIgnored: 「$1」标签中的过滤器会被忽略，请先把过滤后的值赋给变量。
             newlineToBrNotLast: newline_to_br 只有作为输出的最后一个过滤器才有效。
+            mathFilterNotLast: $1 只有作为输出的最后一个过滤器才有效。
+            mathFilterInAttribute: 不要在属性值里使用 $1，它画出的公式含有引号，会提前结束属性。
             tooLong: 版式超过 $1 个字符，无法保存。
             fieldNotShown: 「$1」未在此版式中显示。
             reservedFieldName: 字段名「$1」是版式保留名，请重命名该字段。
@@ -1071,8 +1105,8 @@ options:
       pageDescription: 给你在意的词固定一个译法，并选择每份术语库在哪些网站生效。
       untitled: 未命名术语库
       noGlossaries: 还没有术语库。
-      enable:
-        title: 启用
+      appliesTo:
+        title: 生效范围
         description: 把命中的术语一并发给 LLM，让它按你的写法翻译。术语库是随提示词一起发送的，所以只对运行在 LLM 提供商上的功能生效。
       library:
         title: 你的术语库
@@ -1202,9 +1236,6 @@ options:
     title: 右键菜单
     pageDescription: 控制浏览器右键菜单里的 Read Frog 选项。
     demoImageAlt: 右键菜单演示
-    enable:
-      title: 启用右键翻译
-      description: 在浏览器右键菜单中添加翻译选项，快速翻译页面或所选文本
   translation:
     title: 网页翻译
     pageDescription: 控制页面翻译的方式：模式、范围、提示词和请求限制。
@@ -1353,7 +1384,7 @@ options:
         error: 数值必须在 $1 到 $2 之间
     translationQueue:
       title: 翻译队列
-      description: 请求发出的速度、每个请求承载的文本量，以及提前于阅读位置多远开始翻译
+      description: 请求发出的速度、每个请求承载的文本量、每个请求最多等多久，以及提前于阅读位置多远开始翻译
       manageQueue: 管理队列
       requestQueueConfig:
         title: 翻译速率
@@ -1368,6 +1399,9 @@ options:
           description: 最大字符数：一次 AI 请求最多带多少文本
         maxItemsPerBatch:
           description: 最大段落数：多少个段落合并成一次请求。非 AI 的翻译服务不受这两项影响
+      requestTimeout:
+        title: 请求超时
+        description: "等待响应的秒数，超时就放弃并重试。AI 批量请求会按文本长度额外多等，最多再加 100 秒。模型响应慢、经常超时可以调大"
       preloadConfig:
         title: 预翻译范围
         description: 控制视口下方多少内容会被预先翻译，以节省 API 费用
@@ -1446,10 +1480,11 @@ options:
       title: 基础设置
       enable:
         title: 开启视频字幕
-        description: 在 YouTube、X 和 Netflix 的视频播放器控制栏加上翻译按钮。
-      autoStart:
-        title: 打开视频就翻译
-        description: 视频加载完成后自动开始翻译字幕，不用再点按钮。
+        description: "按网站选择：关闭、手动开启（点播放器里的翻译按钮），或打开视频时自动开启。"
+        mode:
+          off: "关闭"
+          manual: "手动开启"
+          auto: "自动开启"
       aiSegmentation:
         title: AI 智能断句
         description: 让 AI 把字幕重新切成完整句子，会增加翻译响应时间。需要较强的 LLM，弱模型可能漏句或错位。
@@ -1462,8 +1497,6 @@ options:
     aiQuota:
       title: AI 字幕额度
       description: AI 利用语音转文字技术获取任何视频的准确字幕
-      launchBonusPromo: $1 之前购买会员额外赠送 300 分钟转录额度
-      loginRequired: 登录后查看你的 AI 字幕额度
       upgradeRequired: AI 字幕需要 Pro 或 Ultra 订阅
       pools:
         subscription: 每月额度
@@ -1539,7 +1572,7 @@ options:
           videoSummary: 视频摘要（需启用 AI 智能上下文）
     subtitlesQueue:
       title: 字幕队列
-      description: 字幕请求发出的速度，以及每个请求承载的字幕行数
+      description: 字幕请求发出的速度、每个请求承载的字幕行数，以及每个请求最多等多久
       manageQueue: 管理队列
       requestQueueConfig:
         title: 翻译速率
@@ -1554,6 +1587,9 @@ options:
           description: 最大字符数：一次 AI 请求最多带多少文本
         maxItemsPerBatch:
           description: 最大字幕条数：多少条字幕合并成一次请求。非 AI 的翻译服务不受这两项影响
+      requestTimeout:
+        title: 请求超时
+        description: "等待响应的秒数，超时就放弃并重试。AI 批量请求会按文本长度额外多等，最多再加 100 秒。模型响应慢、经常超时可以调大"
     cache:
       title: 缓存
       clearCache:
@@ -1566,6 +1602,53 @@ options:
           confirm: 确认
           cancel: 取消
           description: 这将删除所有已缓存的 AI 断句结果。下次播放启用 AI 断句的视频时，将重新处理字幕。
+  simpleMode:
+    title: "简洁模式"
+    pageDescription: "关掉的功能就像没装：网页上不出现，快捷键也不响应。它的设置会保留，重新打开后一切照旧。"
+    drawerDescription: "关掉的功能不会出现在任何地方，设置会保留"
+    features:
+      customActions:
+        title: "自定义 AI 指令"
+        description: "选择工具栏和右键菜单里的 AI 指令，包括内置的词典、长难句分析"
+      pageTranslation:
+        title: "网页翻译"
+        description: "翻译整个网页"
+        hover:
+          title: "悬停翻译"
+          description: "悬停或长按段落，只翻译这一段"
+      videoSubtitles:
+        title: "视频字幕"
+        description: "在视频播放器里加上翻译字幕按钮"
+      inputTranslation:
+        title: "输入翻译"
+        description: "在任意输入框中快速连按 3 次空格键，即可翻译你输入的内容"
+      floatingButton:
+        title: "悬浮按钮"
+        description: "在网页上显示悬浮按钮，快速访问陪读蛙功能"
+      selectionToolbar:
+        title: "选择工具栏"
+        description: "在网页上选择文本时显示工具栏，快速翻译、朗读和使用 AI 指令"
+        annotation:
+          title: "划词标注"
+          description: "给选中的词或短语加下划线，并在行间写出释义"
+        translate:
+          title: "划词翻译"
+          description: "在工具栏中显示翻译按钮"
+          noteSuggestion:
+            title: "猜你想存"
+            description: "使用 AI 提供商进行划词翻译后，推荐可存入笔记库的词条"
+        speak:
+          title: "朗读"
+          description: "在工具栏中显示朗读按钮，用于朗读选中的文本"
+      contextMenu:
+        title: "右键菜单"
+        description: "浏览器右键菜单里的陪读蛙选项"
+      translationHub:
+        title: "翻译中心"
+        description: "一次性调用多个翻译模型翻译文本"
+      glossary:
+        title: "术语库"
+        description: "让你在意的词按你定的译法翻译"
   whatsNew:
     title: 最近更新
     postType:
@@ -1583,8 +1666,8 @@ side:
 translateService:
   title: 翻译服务
   description: 仅用于翻译网页内容
-  builtInModels: 内建模型
-  llmModels: 大语言模型
+  builtInModels: 内置模型
+  llmModels: 第三方模型
   normalTranslator: 普通翻译
   selectServices: 选择服务
   translationProviders: 翻译服务
@@ -1598,7 +1681,7 @@ languageLevels:
   intermediate: 中级
   advanced: 高级
 noAPIKeyConfig:
-  warning: 如果想要使用 AI 模型，请先在选项页设置 API Key
+  warning: 请先在选项页为该提供商设置 API Key
   warningWithLink:
     youMust: 您必须先
     setTheAPIKey: 设置 API Key
@@ -1611,11 +1694,30 @@ translation:
   sameLanguage: 源语言和目标语言必须不同
   autoModeSameLanguage: 检测到的语言 '$1' 与目标语言相同
   extensionContextInvalidated: 扩展已更新，请刷新此页面后重试。
+  inputTranslationFailed: "输入翻译失败"
+pageDiagnosis:
+  title: "页面诊断"
+  summary: "已翻译 $1 段，未翻译 $2 段"
+  empty: "暂无内容。请先开启网页翻译，再打开此面板。"
+  emptyWhileTranslating: "暂无内容。网页翻译处理到的段落会显示在这里。"
+  framesNotIncluded: "嵌入框架（iframe）里的文字不在此统计范围内。"
+  hint: "点击原因，在页面上框出对应段落。"
+  close: "关闭"
+  unavailable: "陪读蛙无法在此页面运行"
+  reasons:
+    noProse: "没有可翻译的文字"
+    tooShort: "太短，不翻译"
+    targetLanguage: "已是目标语言"
+    skipLanguage: "属于你设置跳过的语言"
+    noTranslationNeeded: "AI 认为无需翻译"
+    sameAsSource: "译文与原文相同"
+    emptyResult: "翻译服务没有返回内容"
+    error: "翻译失败"
 annotation:
   annotate: "划词标注"
-  enterMode: "进入划词模式"
-  exitMode: "退出划词模式"
-  modeLabel: "划词模式"
+  enterMode: "进入标注模式"
+  exitMode: "退出标注模式"
+  modeLabel: "标注模式"
   noTextSelected: "没有选中文本"
   tooLong: "请选择一个词或短语来标注"
   multipleParagraphs: "请在同一段落内选择文本来标注"
@@ -1633,6 +1735,11 @@ speak:
   noTextSelected: 未选择文本
   openaiNotConfigured: OpenAI 提供商未配置或未启用
   openaiApiKeyNotConfigured: OpenAI API Key 未配置
+hideMenu:
+  untilReload: 直到刷新页面
+  onSite: 在 $1 上
+  onAllSites: 在所有网站上
+  restoreHint: "可在「$1」或「$2」中重新开启。"
 action:
   copy: 复制
   copied: 已复制
@@ -1724,6 +1831,7 @@ subtitles:
   requestAiSubtitles: 请求 AI 字幕
   usingAiSubtitles: 正在使用 AI 字幕中
   settings: 字幕设置
+  autoStartOnPlatform: "在 $1 上自动开启"
   toggle:
     enabled: 字幕翻译已开启
     disabled: 字幕翻译已关闭
@@ -1761,7 +1869,9 @@ subtitles:
     aiSubscriptionRequired: AI 字幕需要 Pro 或 Ultra 订阅
     aiPaymentRequired: 请更新支付方式后继续生成 AI 字幕
     aiVideoTooLong: 视频过长，暂不支持生成 AI 字幕
-    aiLiveReplayUnsupported: 暂不支持为直播回放生成 AI 字幕
+    aiVideoMismatch: 视频与所在帖子不匹配，请打开帖子详情页后重试
+    aiLiveReplayUnsupported: 暂不支持为直播及直播回放生成 AI 字幕
+    aiLiveStreamUnsupported: 直播进行中暂不支持 AI 字幕，回放上线后再请求
     aiStillProcessing: 转录仍在进行中，几分钟后再点一次即可继续获取
     aiRequestFailed: AI 字幕请求失败，请稍后重试
     aiNoResponse: AI 服务未响应，使用原文显示
@@ -1780,10 +1890,33 @@ hostedAi:
     serviceUnavailable: 暂时不可用
     usedPercent: "额度已使用 $1%"
     resetsAt: "$1 重置"
+  requestId:
+    label: "请求 ID："
+    copy: "复制请求 ID"
   errors:
     rateLimited: 请求过于频繁，请稍后再试
     guestRateLimited: 游客请求过于频繁，请稍后再试
     userRateLimited: 请求过于频繁，请稍后再试
+    modelUnavailable: "$1 暂时无法使用，可改用 $2"
+    modelUnavailableNoAlternatives: "$1 暂时无法使用，目前也没有其他可用的内置 AI 模型，请稍后再试"
+    modelBusy: "$1 当前繁忙，请稍后再试，或改用 $2"
+    modelBusyNoAlternatives: "$1 当前繁忙，请稍后再试"
+  unavailable:
+    temporary: "$1 暂时无法使用，可改用 $2"
+    temporaryNoAlternatives: "$1 暂时无法使用，请稍后再试"
+    removed: "$1 已不再提供，可改用 $2"
+    removedNoAlternatives: "$1 已不再提供，请改用其他提供商"
+  actions:
+    chooseModel: "选择模型"
+  builtInAiPrompt:
+    logInTitle: "登录后使用内置 AI"
+    logInDescription: "登录后即可免费使用内置 AI，每周约 12 万 token。"
+    upgradeTitle: "本周的内置 AI 额度用完了"
+    upgradeDescription: "Pro 每月约可翻译 3,000 个网页，Ultra 约 10,000 个。"
+    upgradeDescriptionPro: "Ultra 每月约可翻译 10,000 个网页。"
+    useMachineTranslation: "改用机器翻译"
+    switched: "$1已改用 $2"
+    switchFailed: "没能切换到机器翻译，请重试"
 hotkey:
   control: Ctrl
   alt: Option
@@ -1847,183 +1980,3 @@ difficultWords:
       C1: 较长、较复杂的事实性和文学性文字，能体会风格的差别；不是自己领域的专业文章和较长的技术说明
       C2: 几乎所有形式的书面语，包括抽象的、结构和语言都很复杂的文字，比如说明书、专业文章、文学作品
       unsure: 按 A2 算。宁可偏低：标多了，点「认识」很快调上去；标少了，没有东西可点，很难发现
-languages:
-  eng: 英语
-  cmn: 简体中文
-  cmnHant: 繁体中文
-  yue: 粤语
-  spa: 西班牙语
-  rus: 俄语
-  arb: 阿拉伯语
-  ben: 孟加拉语
-  hin: 印地语
-  por: 葡萄牙语
-  ind: 印度尼西亚语
-  jpn: 日语
-  fra: 法语
-  deu: 德语
-  jav: 爪哇语
-  kor: 韩语
-  tel: 泰卢固语
-  vie: 越南语
-  mar: 马拉地语
-  ita: 意大利语
-  tam: 泰米尔语
-  tur: 土耳其语
-  urd: 乌尔都语
-  guj: 古吉拉特语
-  pol: 波兰语
-  ukr: 乌克兰语
-  kan: 卡纳达语
-  mai: 迈蒂利语
-  mal: 马拉雅拉姆语
-  pes: 波斯语
-  mya: 缅甸语
-  swh: 斯瓦希里语
-  sun: 巽他语
-  ron: 罗马尼亚语
-  pan: 旁遮普语
-  bho: 博杰普尔语
-  amh: 阿姆哈拉语
-  hau: 豪萨语
-  fuv: 富拉语
-  bos: 波斯尼亚语
-  hrv: 克罗地亚语
-  nld: 荷兰语
-  srp: 塞尔维亚语
-  tha: 泰语
-  ckb: 中库尔德语
-  yor: 约鲁巴语
-  uzn: 乌兹别克语
-  zlm: 马来语
-  ibo: 伊博语
-  npi: 尼泊尔语
-  ceb: 宿务语
-  skr: 萨拉基语
-  tgl: 塔加洛语
-  hun: 匈牙利语
-  azj: 阿塞拜疆语
-  sin: 僧伽罗语
-  koi: 科米-彼尔米亚克语
-  ell: 希腊语
-  ces: 捷克语
-  mag: 摩揭陀语
-  run: 基隆迪语
-  bel: 白俄罗斯语
-  plt: 马达加斯加语
-  qug: 钦博拉索高地克丘亚语
-  mad: 马都拉语
-  nya: 齐切瓦语
-  zyb: 壮语
-  pbu: 普什图语
-  kin: 卢旺达语
-  zul: 祖鲁语
-  bul: 保加利亚语
-  swe: 瑞典语
-  lin: 林加拉语
-  som: 索马里语
-  hms: 黔东苗语
-  hnj: 苗语
-  ilo: 伊洛卡诺语
-  kaz: 哈萨克语
-  heb: 希伯来语
-  nob: 挪威语(书面语)
-  nno: 挪威语(新挪威语)
-  afr: 南非荷兰语
-  sqi: 阿尔巴尼亚语
-  asm: 阿萨姆语
-  eus: 巴斯克语
-  bre: 布列塔尼语
-  cat: 加泰罗尼亚语
-  cos: 科西嘉语
-  cym: 威尔士语
-  dan: 丹麦语
-  div: 迪维希语
-  epo: 世界语
-  ekk: 爱沙尼亚语
-  fao: 法罗语
-  fij: 斐济语
-  fin: 芬兰语
-  fry: 西弗里斯兰语
-  gla: 苏格兰盖尔语
-  gle: 爱尔兰语
-  glg: 加利西亚语
-  grn: 瓜拉尼语
-  hat: 海地克里奥尔语
-  haw: 夏威夷语
-  hye: 亚美尼亚语
-  ido: 伊多语
-  ina: 国际语
-  isl: 冰岛语
-  kat: 格鲁吉亚语
-  khm: 高棉语
-  kir: 吉尔吉斯语
-  lao: 老挝语
-  lat: 拉丁语
-  lvs: 拉脱维亚语
-  lit: 立陶宛语
-  ltz: 卢森堡语
-  mkd: 马其顿语
-  mlt: 马耳他语
-  mon: 蒙古语
-  mri: 毛利语
-  nso: 北索托语
-  oci: 奥克语
-  ori: 奥里亚语
-  orm: 奥罗莫语
-  prs: 达里语
-  san: 梵语
-  slk: 斯洛伐克语
-  slv: 斯洛文尼亚语
-  smo: 萨摩亚语
-  sna: 绍纳语
-  snd: 信德语
-  sot: 南索托语
-  tah: 塔希提语
-  tat: 鞑靼语
-  tgk: 塔吉克语
-  tir: 提格里尼亚语
-  ton: 汤加语
-  tsn: 茨瓦纳语
-  tuk: 土库曼语
-  uig: 维吾尔语
-  vol: 沃拉普克语
-  wol: 沃洛夫语
-  xho: 科萨语
-  ydd: 意第绪语
-  aka: 阿肯语
-  bam: 班巴拉语
-  bis: 比斯拉马语
-  bod: 藏语
-  che: 车臣语
-  chv: 楚瓦什语
-  dzo: 宗卡语
-  ewe: 埃维语
-  kab: 卡比尔语
-  lug: 卢干达语
-  oss: 奥塞梯语
-  ssw: 斯威士语
-  ven: 文达语
-  war: 瓦瑞语
-  nde: 北恩德贝莱语
-  nbl: 南恩德贝莱语
-  pam: 邦板牙语
-  hil: 希利盖农语
-  bcl: 中比科尔语
-  min: 米南卡保语
-  ace: 亚齐语
-  bug: 布吉语
-  ban: 巴厘语
-  bjn: 班查尔语
-  mak: 望加锡语
-  sas: 萨萨克语
-  tet: 德顿语
-  cha: 查莫罗语
-  niu: 纽埃语
-  tvl: 图瓦卢语
-  gil: 吉尔伯特语
-  mah: 马绍尔语
-  pau: 帕劳语
-  wls: 瓦利斯语
-  rar: 拉罗汤加语
-  hif: 斐济印地语

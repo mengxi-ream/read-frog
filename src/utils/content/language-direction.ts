@@ -1,14 +1,11 @@
-import type { LangCodeISO6393 } from "@read-frog/definitions"
-import { ISO6393_TO_6391, RTL_LANG_CODES } from "@read-frog/definitions"
+import type { LanguageTag } from "@read-frog/definitions"
+import { getLanguageDirection } from "@read-frog/definitions"
 
 interface LanguageDirectionAndLang {
   dir: "ltr" | "rtl"
-  lang?: string
+  lang: string
 }
 
-export function getLanguageDirectionAndLang(targetCode: LangCodeISO6393): LanguageDirectionAndLang {
-  const dir = RTL_LANG_CODES.includes(targetCode) ? "rtl" : "ltr"
-  const lang = ISO6393_TO_6391[targetCode]
-
-  return { dir, lang }
+export function getLanguageDirectionAndLang(targetCode: LanguageTag): LanguageDirectionAndLang {
+  return { dir: getLanguageDirection(targetCode), lang: targetCode }
 }

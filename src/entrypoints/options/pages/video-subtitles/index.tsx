@@ -1,6 +1,5 @@
 import { i18n } from "@/utils/i18n"
 import { PageLayout } from "../../components/page-layout"
-import { AiQuotaSection } from "./ai-quota"
 import { CacheSection } from "./cache"
 import { CustomPromptsSection } from "./custom-prompts"
 import { PreferenceSection } from "./preference"
@@ -15,7 +14,6 @@ export function VideoSubtitlesPage() {
       innerClassName="flex flex-col gap-10"
     >
       <PreferenceSection />
-      <AiQuotaSection />
       <SubtitlesStyleSection />
       <CustomPromptsSection />
       <SubtitlesQueueSection />

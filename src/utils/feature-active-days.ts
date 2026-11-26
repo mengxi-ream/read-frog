@@ -1,5 +1,7 @@
 import { storage } from "#imports"
-import { logger } from "./logger"
+import { createLogger } from "@/utils/logging/logger"
+
+const log = createLogger("feature-active-days")
 
 const STORAGE_KEY = "local:featureActiveDays" as const
 
@@ -69,6 +71,6 @@ export async function recordFeatureActiveDay(): Promise<void> {
 
     await storage.setItem(STORAGE_KEY, next)
   } catch (error) {
-    logger.warn("[FeatureActiveDays] Failed to record an active day", error)
+    log.warn("Failed to record an active day", { error })
   }
 }

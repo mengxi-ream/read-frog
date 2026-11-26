@@ -9,14 +9,22 @@ import {
   getGuideDictionaryNotebaseState,
   startGuideDictionaryNotebaseTracking,
 } from "@/utils/guide/dictionary-notebase"
-import { resolveGuideTargetLanguage } from "@/utils/guide/target-language"
-import { logger } from "@/utils/logger"
+import {
+  getGuideTargetLanguageAnswer,
+  resolveGuideTargetLanguage,
+} from "@/utils/guide/target-language"
+import { createLogger } from "@/utils/logging/logger"
+import { setupContentScriptLogging } from "@/utils/logging/setup"
 import { onMessage, sendMessage } from "@/utils/message"
 import { createExtensionStatusResponse } from "./extension-status"
+
+const log = createLogger("guide.content")
 
 export default defineContentScript({
   matches: env.WXT_OFFICIAL_SITE_ORIGINS.map((origin: string) => `${origin}/*`),
   async main() {
+    setupContentScriptLogging()
+
     onMessage("pinStateChanged", (msg) => {
       window.postMessage({ source: `${kebabCase(APP_NAME)}-ext`, ...msg }, "*")
     })
@@ -68,9 +76,11 @@ export default defineContentScript({
         if (!config) return
 
         if (type === "setTargetLanguage") {
-          const langCodeISO6393 = resolveGuideTargetLanguage(e.data)
-          if (!langCodeISO6393) {
-            logger.warn("guide setTargetLanguage ignored: missing or invalid language code", e.data)
+          const targetCode = resolveGuideTargetLanguage(e.data)
+          if (!targetCode) {
+            log.warn("guide setTargetLanguage ignored: missing or invalid language code", {
+              data: e.data,
+            })
             return
           }
           // If we set storage too early, react of side content has not been mounted yet,
@@ -80,15 +90,14 @@ export default defineContentScript({
           await new Promise((resolve) => setTimeout(resolve, 500))
           await storage.setItem<Config>(`local:${CONFIG_STORAGE_KEY}`, {
             ...config,
-            language: { ...config.language, targetCode: langCodeISO6393 },
+            language: { ...config.language, targetCode },
           })
         } else if (type === "getTargetLanguage") {
-          const targetLanguage = config.language.targetCode
           window.postMessage(
             {
               source: `${kebabCase(APP_NAME)}-ext`,
               type: "getTargetLanguage",
-              data: { targetLanguage },
+              data: getGuideTargetLanguageAnswer(config.language.targetCode),
             },
             "*",
           )

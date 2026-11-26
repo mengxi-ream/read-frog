@@ -1,6 +1,7 @@
 import type { Browser } from "#imports"
 import type { Config } from "@/types/config/config"
 import { browser, storage } from "#imports"
+import { env } from "@/env"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext } from "@/utils/analytics"
 import { CONFIG_STORAGE_KEY } from "@/utils/constants/config"
@@ -9,30 +10,35 @@ import {
   parseTabIdFromStorageKey,
   TRANSLATION_STATE_KEY_PREFIX,
 } from "@/utils/constants/storage-keys"
-import { getSelectionToolbarActions } from "@/utils/custom-actions"
+import {
+  getSelectionContextMenuItems,
+  MENU_ID_SELECTION_CUSTOM_ACTION_PREFIX,
+  MENU_ID_SELECTION_READ_ALOUD,
+  MENU_ID_SELECTION_TRANSLATE,
+  MENU_ID_TRANSLATE,
+  PAGE_CONTEXT_MENU_ITEM_FEATURES,
+} from "@/utils/context-menu"
+import { isFeatureOn, isShown } from "@/utils/features"
 import { i18n } from "@/utils/i18n"
+import { createLogger } from "@/utils/logging/logger"
 import { sendMessage } from "@/utils/message"
 import { ensureInitializedConfig } from "./config"
 import { getPageTranslationEnabled, setPageTranslationEnabled } from "./page-translation-state"
 
-export const MENU_ID_TRANSLATE = "read-frog-translate"
-export const MENU_ID_SELECTION_TRANSLATE = "read-frog-selection-translate"
-export const MENU_ID_SELECTION_READ_ALOUD = "read-frog-selection-read-aloud"
-export const MENU_ID_SELECTION_CUSTOM_ACTION_PREFIX = "read-frog-selection-custom-action:"
-
-function getSelectionCustomActionMenuId(actionId: string) {
-  return `${MENU_ID_SELECTION_CUSTOM_ACTION_PREFIX}${actionId}`
-}
+const log = createLogger("background/context-menu")
 
 /**
  * Register all context menu event listeners synchronously
  * This must be called during main() execution to ensure listeners are registered
  * before Chrome completes initialization
  */
-export function registerContextMenuListeners() {
+export function registerContextMenuListeners(waitUntilReady: () => Promise<void>) {
   // Listen for config changes to update context menu
   storage.watch<Config>(`local:${CONFIG_STORAGE_KEY}`, async (newConfig) => {
     if (newConfig) {
+      // On first start after an update, config migration writes the config before
+      // i18n is initialized; Chrome rejects a menu item with title "".
+      await waitUntilReady()
       await updateContextMenuItems(newConfig)
     }
   })
@@ -96,38 +102,17 @@ async function updateContextMenuItems(config: Config) {
   // Remove all existing menu items first
   await browser.contextMenus.removeAll()
 
-  const { enabled: translateEnabled } = config.contextMenu
-  const enabledCustomActions = getSelectionToolbarActions(config.selectionToolbar).filter(
-    (action) => action.enabled !== false,
-  )
-
-  if (translateEnabled) {
-    browser.contextMenus.create({
-      id: MENU_ID_TRANSLATE,
-      title: i18n.t("contextMenu.translate"),
-      contexts: ["page"],
-    })
-
-    browser.contextMenus.create({
-      id: MENU_ID_SELECTION_TRANSLATE,
-      title: i18n.t("contextMenu.translateSelection"),
-      contexts: ["selection"],
-    })
-
-    browser.contextMenus.create({
-      id: MENU_ID_SELECTION_READ_ALOUD,
-      title: i18n.t("contextMenu.readAloudSelection"),
-      contexts: ["selection"],
-    })
-
-    if (enabledCustomActions.length > 0) {
-      enabledCustomActions.forEach((action) => {
-        browser.contextMenus.create({
-          id: getSelectionCustomActionMenuId(action.id),
-          title: action.name,
-          contexts: ["selection"],
-        })
+  if (isFeatureOn(config, "contextMenu")) {
+    if (isShown(config, PAGE_CONTEXT_MENU_ITEM_FEATURES)) {
+      browser.contextMenus.create({
+        id: MENU_ID_TRANSLATE,
+        title: i18n.t("contextMenu.translate"),
+        contexts: ["page"],
       })
+    }
+
+    for (const item of getSelectionContextMenuItems(config)) {
+      browser.contextMenus.create({ ...item, contexts: ["selection"] })
     }
   }
 
@@ -145,7 +130,7 @@ async function updateContextMenuItems(config: Config) {
  */
 async function updateTranslateMenuTitle(tabId: number, enabled?: boolean) {
   const config = await ensureInitializedConfig()
-  if (!config?.contextMenu.enabled) {
+  if (!config || !isShown(config, PAGE_CONTEXT_MENU_ITEM_FEATURES)) {
     return
   }
 
@@ -206,6 +191,54 @@ async function handleContextMenuClick(
 }
 
 /**
+ * A menu click can land on a tab with no content script to receive it: a
+ * browser page, the Web Store, or a tab left open across an extension update.
+ */
+function warnMenuActionNotDelivered(error: unknown) {
+  log.warn("Failed to deliver context menu action to the tab", { error })
+}
+
+/**
+ * Whether the menu was opened in a book section of the readfrog.app ebook
+ * reader: a blob: frame the site made (see isReadFrogEbookSection). Only its
+ * URL is known here.
+ */
+function isReadFrogEbookSectionFrame(frameUrl: string | undefined) {
+  if (!frameUrl?.startsWith("blob:")) {
+    return false
+  }
+
+  try {
+    return env.WXT_OFFICIAL_SITE_ORIGINS.includes(new URL(frameUrl).origin)
+  } catch {
+    return false
+  }
+}
+
+/**
+ * A selection action goes to the frame the menu was opened in, whose toolbar
+ * holds the selection. A book section has no toolbar: the reader relays its
+ * selections to the top frame's, so the action goes there, marked as coming
+ * from the book. The top frame never saw that right-click, so it acts on the
+ * relayed selection, not on its own.
+ */
+function getSelectionActionDelivery(
+  info: Browser.contextMenus.OnClickData,
+  tabId: number,
+  selectionText: string,
+) {
+  if (typeof info.frameId !== "number") {
+    return { target: tabId, data: { selectionText } }
+  }
+
+  if (isReadFrogEbookSectionFrame(info.frameUrl)) {
+    return { target: { tabId, frameId: 0 }, data: { selectionText, fromEbookSection: true } }
+  }
+
+  return { target: { tabId, frameId: info.frameId }, data: { selectionText } }
+}
+
+/**
  * Handle translate menu click - toggle page translation
  */
 async function handleTranslateClick(tabId: number, tabUrl?: string) {
@@ -214,7 +247,9 @@ async function handleTranslateClick(tabId: number, tabUrl?: string) {
 
   if (!newState) {
     await setPageTranslationEnabled(tabId, false, tabUrl, true)
-    void sendMessage("notifyTranslationStateChanged", { enabled: false }, tabId)
+    void sendMessage("notifyTranslationStateChanged", { enabled: false }, tabId).catch(
+      warnMenuActionNotDelivered,
+    )
   }
 
   // Notify content script in that specific tab
@@ -230,7 +265,7 @@ async function handleTranslateClick(tabId: number, tabUrl?: string) {
         : undefined,
     },
     tabId,
-  )
+  ).catch(warnMenuActionNotDelivered)
 
   // Update menu title immediately
   await updateTranslateMenuTitle(tabId, newState)
@@ -245,14 +280,10 @@ async function handleSelectionTranslateClick(
     return
   }
 
-  const target = typeof info.frameId === "number" ? { tabId, frameId: info.frameId } : tabId
+  const { target, data } = getSelectionActionDelivery(info, tabId, selectionText)
 
-  void sendMessage(
-    "openSelectionTranslationFromContextMenu",
-    {
-      selectionText,
-    },
-    target,
+  void sendMessage("openSelectionTranslationFromContextMenu", data, target).catch(
+    warnMenuActionNotDelivered,
   )
 }
 
@@ -265,9 +296,11 @@ async function handleSelectionReadAloudClick(
     return
   }
 
-  const target = typeof info.frameId === "number" ? { tabId, frameId: info.frameId } : tabId
+  const { target, data } = getSelectionActionDelivery(info, tabId, selectionText)
 
-  void sendMessage("readAloudSelectionFromContextMenu", { selectionText }, target)
+  void sendMessage("readAloudSelectionFromContextMenu", data, target).catch(
+    warnMenuActionNotDelivered,
+  )
 }
 
 async function handleSelectionCustomActionClick(
@@ -280,14 +313,9 @@ async function handleSelectionCustomActionClick(
     return
   }
 
-  const target = typeof info.frameId === "number" ? { tabId, frameId: info.frameId } : tabId
+  const { target, data } = getSelectionActionDelivery(info, tabId, selectionText)
 
-  void sendMessage(
-    "openSelectionCustomActionFromContextMenu",
-    {
-      actionId,
-      selectionText,
-    },
-    target,
+  void sendMessage("openSelectionCustomActionFromContextMenu", { actionId, ...data }, target).catch(
+    warnMenuActionNotDelivered,
   )
 }

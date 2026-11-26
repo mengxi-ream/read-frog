@@ -17,15 +17,18 @@ const UPGRADE_TOOLTIP_KEYS = {
 export function UpgradePlanBadge({
   plan,
   tooltipContainer,
+  tooltipPositionerClassName,
 }: {
   plan: HostedAiUpgradePlan
   tooltipContainer?: ComponentProps<typeof PlanBadge>["tooltipContainer"]
+  tooltipPositionerClassName?: string
 }) {
   return (
     <PlanBadge
       plan={plan}
       upgradeTooltip={i18n.t(UPGRADE_TOOLTIP_KEYS[plan])}
       tooltipContainer={tooltipContainer}
+      tooltipPositionerClassName={tooltipPositionerClassName}
     />
   )
 }

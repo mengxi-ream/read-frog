@@ -1,3 +1,4 @@
+import type { LanguageTag } from "@read-frog/definitions"
 import type { ThinkingSnapshot } from "@/types/background-stream"
 import { IconLoader2 } from "@tabler/icons-react"
 import { Activity } from "react"
@@ -9,6 +10,7 @@ import { SpeakButton } from "@/components/ui/selection-popover/speak-button"
 interface TranslationContentProps {
   selectionContent: string | null | undefined
   translatedText: string | undefined
+  targetLanguage: LanguageTag
   isTranslating: boolean
   thinking: ThinkingSnapshot | null
 }
@@ -16,6 +18,7 @@ interface TranslationContentProps {
 export function TranslationContent({
   selectionContent,
   translatedText,
+  targetLanguage,
   isTranslating,
   thinking,
 }: TranslationContentProps) {
@@ -36,7 +39,7 @@ export function TranslationContent({
         <Activity mode={translatedText ? "visible" : "hidden"}>
           <div className="flex items-center gap-1">
             <CopyButton text={translatedText} />
-            <SpeakButton text={translatedText} />
+            <SpeakButton text={translatedText} language={targetLanguage} />
           </div>
         </Activity>
       </div>

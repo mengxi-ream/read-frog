@@ -462,6 +462,36 @@ describe("site rule node selectors", () => {
   })
 })
 
+describe("hidden attribute", () => {
+  // science.nasa.gov's secondary nav (#1474): the wrapper carries the `hidden`
+  // attribute and the site's stylesheet displays it anyway; its dropdowns stay
+  // hidden until a button removes their `hidden` attribute.
+  it("walks a hidden-attribute region that author CSS displays, but not its closed dropdown", () => {
+    const host = fixture(`
+      <div class="secondary-nav" hidden style="display:block">
+        <nav>
+          <ul>
+            <li id="missions"><a href="/missions">Science Missions</a></li>
+            <li>
+              <button id="topics"><span>Science Topics</span></button>
+              <ul id="submenu" hidden>
+                <li id="earth"><a href="/earth">Earth Science</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    `)
+    walkAndLabelElement(host, "walk-hidden-attribute", DEFAULT_CONFIG)
+
+    expect(host.querySelector("#missions")).toHaveAttribute(PARAGRAPH_ATTRIBUTE)
+    expect(host.querySelector("#topics")).toHaveAttribute(PARAGRAPH_ATTRIBUTE)
+    expect(host.querySelector("#submenu")).not.toHaveAttribute(WALKED_ATTRIBUTE)
+    expect(host.querySelector("#earth")).not.toHaveAttribute(PARAGRAPH_ATTRIBUTE)
+    host.remove()
+  })
+})
+
 describe("document root labeling guard", () => {
   it("never labels documentElement as a paragraph even with inline-level children beside body", () => {
     // Unstyled custom elements default to display:inline, so a reader-mode
@@ -588,10 +618,12 @@ describe("document shell notranslate exemption", () => {
   })
 })
 
-describe("plain-text document <pre> exemption", () => {
-  // A .txt URL renders as one browser-generated <pre> holding the entire file
-  // (Chrome also gives it `white-space: pre-wrap`), so the blanket PRE block
-  // leaves such a page with nothing to translate at all.
+describe("<pre> in a document the browser shows as plain text", () => {
+  // A .txt or .md URL renders as one browser-generated <pre> holding the entire
+  // file (Chrome also gives it `white-space: pre-wrap`), so the blanket PRE
+  // block would leave such a page with nothing to translate at all. The
+  // built-in `readfrog-plain-text-document` rule un-blocks PRE for those
+  // document types only.
   const STORY_TEXT = "First hard wrapped paragraph.\n\nSecond hard wrapped paragraph."
 
   function withContentType(contentType: string, callback: () => void) {
@@ -610,18 +642,22 @@ describe("plain-text document <pre> exemption", () => {
     return document.getElementById("viewer")!
   }
 
-  it("walks and labels the generated <pre> of a text/plain document", () => {
-    withContentType("text/plain", () => {
-      const viewer = renderPlainTextViewer()
+  it("walks and labels the generated <pre> of plain-text and markdown documents", () => {
+    for (const contentType of ["text/plain", "text/markdown", "text/x-markdown"]) {
+      withContentType(contentType, () => {
+        const viewer = renderPlainTextViewer()
 
-      walkAndLabelElement(document.body, "plain-text-pre", DEFAULT_CONFIG)
+        walkAndLabelElement(document.body, `plain-text-pre-${contentType}`, DEFAULT_CONFIG)
 
-      expect(viewer).toHaveAttribute(WALKED_ATTRIBUTE)
-      expect(viewer).toHaveAttribute(PARAGRAPH_ATTRIBUTE)
-      // PRE is in FORCE_BLOCK_TAGS, so the exempted viewer is a block unit.
-      expect(viewer).toHaveAttribute(BLOCK_ATTRIBUTE)
-      expect(extractTextContent(viewer, DEFAULT_CONFIG)).toContain("Second hard wrapped paragraph.")
-    })
+        expect(viewer).toHaveAttribute(WALKED_ATTRIBUTE)
+        expect(viewer).toHaveAttribute(PARAGRAPH_ATTRIBUTE)
+        // PRE is in FORCE_BLOCK_TAGS, so the un-blocked viewer is a block unit.
+        expect(viewer).toHaveAttribute(BLOCK_ATTRIBUTE)
+        expect(extractTextContent(viewer, DEFAULT_CONFIG)).toContain(
+          "Second hard wrapped paragraph.",
+        )
+      })
+    }
   })
 
   it("keeps blocking an authored <pre> in an html document", () => {
@@ -639,9 +675,10 @@ describe("plain-text document <pre> exemption", () => {
     }
   })
 
-  it("lets a site rule that names PRE explicitly win over the exemption", () => {
-    // The exemption un-blocks what the defaults block, so an author who wants
-    // PRE blocked on a plain-text host must be able to say so.
+  it("lets a later site rule block PRE again", () => {
+    // User rules come after every built-in rule and tag-set deltas are
+    // last-wins, so an author who wants PRE blocked on a plain-text host can
+    // say so.
     withContentType("text/plain", () => {
       const viewer = renderPlainTextViewer()
       const config = configWithSiteRule({ "dontWalkTags.add": ["PRE"] })
@@ -665,8 +702,21 @@ describe("plain-text document <pre> exemption", () => {
     })
   })
 
+  it("keeps PRE blocked when the built-in rule is disabled", () => {
+    withContentType("text/plain", () => {
+      const viewer = renderPlainTextViewer()
+      const config = structuredClone(DEFAULT_CONFIG)
+      config.siteRules.disabledBuiltInRules = ["readfrog-plain-text-document"]
+
+      walkAndLabelElement(document.body, "rule-disabled", config)
+
+      expect(viewer).not.toHaveAttribute(WALKED_ATTRIBUTE)
+      expect(viewer).not.toHaveAttribute(PARAGRAPH_ATTRIBUTE)
+    })
+  })
+
   it("keeps other plain-text-ish document types blocked", () => {
-    for (const contentType of ["application/json", "text/markdown", "text/xml"]) {
+    for (const contentType of ["application/json", "text/xml"]) {
       withContentType(contentType, () => {
         const viewer = renderPlainTextViewer()
 

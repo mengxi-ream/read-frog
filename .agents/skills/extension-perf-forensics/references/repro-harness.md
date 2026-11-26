@@ -40,7 +40,7 @@ const patchOnce = () => sw.evaluate(async () => {
   if (!config.translate.page.autoTranslatePatterns.includes('example.com')) {
     config.translate.page.autoTranslatePatterns.push('example.com'); dirty = true
   }
-  if (config.language.targetCode !== 'cmn') { config.language.targetCode = 'cmn'; dirty = true }
+  if (config.language.targetCode !== 'zh-Hans') { config.language.targetCode = 'zh-Hans'; dirty = true }
   if (dirty) await chrome.storage.local.set({ config })
   return config.translate.providerId
 })
@@ -51,7 +51,7 @@ await patchOnce()      // …then re-assert
 const verified = await sw.evaluate(async () => {
   const { config } = await chrome.storage.local.get('config')
   return config?.translate?.page?.autoTranslatePatterns?.includes('example.com')
-    && config?.language?.targetCode === 'cmn'
+    && config?.language?.targetCode === 'zh-Hans'
 })
 if (!verified) throw new Error('config patch did not stick')
 ```

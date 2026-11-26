@@ -11,6 +11,7 @@ export function TranslationHubShortcut() {
       id="translation-hub-shortcut"
       title={i18n.t("options.shortcuts.translationHub.title")}
       description={i18n.t("options.shortcuts.translationHub.description")}
+      feature="translationHub"
       shortcut={translationHub.shortcut}
       onChange={(nextShortcut) => {
         void setTranslationHub({ shortcut: nextShortcut })

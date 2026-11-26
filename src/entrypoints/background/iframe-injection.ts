@@ -8,13 +8,17 @@ import {
   CONTENT_LOADER_SCRIPT_FILE,
   CONTENT_RUNTIME_PARTS_WINDOW_KEY,
 } from "@/utils/content-runtime/parts"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
 import { onMessage } from "@/utils/message"
 import { isSiteEnabled, SITE_CONTROL_URL_WINDOW_KEY } from "@/utils/site-control"
+import { ensureRemoteSiteRulesLoaded } from "@/utils/site-rules/active"
 import { getEffectiveSiteRule } from "@/utils/site-rules/effective"
 import { urlMatchesPattern } from "@/utils/url-pattern"
 import { isSameOriginIframeSender, resolveSiteControlUrl } from "./iframe-injection-utils"
 import { getPageTranslationEnabled } from "./page-translation-state"
+import { isSelectionToolbarHiddenInTab } from "./selection-toolbar-hidden"
+
+const log = createLogger("background/iframe-injection")
 
 // The parts of the content runtime an iframe can get; the side UI is top-frame only
 type IframeContentPart = Extract<ContentRuntimePart, "host" | "selection">
@@ -205,10 +209,7 @@ async function injectHostContentIntoFrame(
         return
       }
     } catch (error) {
-      logger.error(
-        "[Background][IframeInjection] Failed to resolve iframe injection prerequisites",
-        error,
-      )
+      log.error("[IframeInjection] Failed to resolve iframe injection prerequisites", { error })
       return
     }
 
@@ -239,7 +240,7 @@ async function injectHostContentIntoFrame(
         )
       }
     } catch (error) {
-      logger.warn("[Background][IframeInjection] Failed to inject iframe content scripts", error)
+      log.warn("[IframeInjection] Failed to inject iframe content scripts", { error })
     }
   } finally {
     for (const part of partsToInject) {
@@ -261,7 +262,7 @@ export async function injectHostContentIntoTabIframes(
       options,
     ))
   } catch (error) {
-    logger.warn("[Background][IframeInjection] Failed to resolve iframe injection state", error)
+    log.warn("[IframeInjection] Failed to resolve iframe injection state", { error })
     return
   }
 
@@ -271,10 +272,7 @@ export async function injectHostContentIntoTabIframes(
   try {
     frames = await getFrameSnapshot(tabId)
   } catch (error) {
-    logger.error(
-      "[Background][IframeInjection] Failed to resolve tab iframe injection prerequisites",
-      error,
-    )
+    log.error("[IframeInjection] Failed to resolve tab iframe injection prerequisites", { error })
     return
   }
 
@@ -310,10 +308,12 @@ export function setupIframeInjection() {
     const tabId = sender.tab?.id
     if (tabId === undefined || !sender.frameId) return false
     try {
+      // The site rule lookups below need the remote rules too.
       const [tab, storedConfig, frames] = await Promise.all([
         browser.tabs.get(tabId),
         getLocalConfig(),
         getFrameSnapshot(tabId),
+        ensureRemoteSiteRulesLoaded(),
       ])
       const config = storedConfig ?? DEFAULT_CONFIG
       const frameUrl = resolveSiteControlUrl(sender.frameId, sender.url, frames)
@@ -336,6 +336,9 @@ export function setupIframeInjection() {
         )
       )
         return false
+      // Hidden from a toolbar's × until the page reloads: like a site opt-out,
+      // the frame gets no toolbar runtime.
+      if (await isSelectionToolbarHiddenInTab(tabId)) return false
       if (
         getEffectiveSiteRule(config, tab.url).injectIntoIframes === false ||
         getEffectiveSiteRule(config, frameUrl).injectIntoIframes === false
@@ -356,13 +359,15 @@ export function setupIframeInjection() {
           pendingScriptDocumentKeys.has(getScriptDocumentInjectionKey(details, part)),
       )
     } catch (error) {
-      logger.warn(
-        "[Background][IframeInjection] Failed to activate same-origin selection runtime",
-        error,
-      )
+      log.warn("[IframeInjection] Failed to activate same-origin selection runtime", { error })
       return false
     }
   })
+
+  // Site control in the frames the subtitles loader runs in goes by the page
+  // too (see isFrameSiteEnabled). An embedded video player can't read the url
+  // of a page on another site, so it asks.
+  onMessage("getSenderTabUrl", ({ sender }) => sender.tab?.url ?? null)
 
   browser.tabs.onRemoved.addListener(clearTabDocumentState)
   browser.webNavigation.onBeforeNavigate.addListener((details) => {
@@ -378,7 +383,7 @@ export function setupIframeInjection() {
   // translation eagerly injects host content into newly completed subframes.
   browser.webNavigation.onCompleted.addListener(async (details) => {
     try {
-      const config = await getLocalConfig()
+      const [config] = await Promise.all([getLocalConfig(), ensureRemoteSiteRulesLoaded()])
       if (details.frameId === 0) {
         if (!isFullRuntimeAutoInjectUrl(details.url, config)) return
 
@@ -411,7 +416,7 @@ export function setupIframeInjection() {
 
       await injectHostContentIntoFrame(details, undefined, config)
     } catch (error) {
-      logger.warn("[Background][IframeInjection] Failed to resolve iframe injection state", error)
+      log.warn("[IframeInjection] Failed to resolve iframe injection state", { error })
     }
   })
 }

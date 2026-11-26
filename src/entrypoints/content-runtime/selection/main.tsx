@@ -62,7 +62,7 @@ async function mountSelectionUI(ctx: ContentScriptContext) {
     position: "overlay",
     anchor: "body",
     css: SELECTION_UI_CSS,
-    onMount: (container, shadow, shadowHost) => {
+    onMount: (container, _shadow, shadowHost) => {
       const wrapper = insertShadowRootUIWrapperInto(container, shadowHost)
       shadowWrapper = wrapper
       protectSelectAllShadowRoot(shadowHost, wrapper)
@@ -76,7 +76,7 @@ async function mountSelectionUI(ctx: ContentScriptContext) {
                 <ThemeProvider container={wrapper}>
                   <TooltipProvider>
                     <LocaleBoundary>
-                      <App uiContainer={container} portalContainer={shadow} />
+                      <App uiContainer={container} portalContainer={wrapper} />
                     </LocaleBoundary>
                   </TooltipProvider>
                 </ThemeProvider>

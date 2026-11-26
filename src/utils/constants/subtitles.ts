@@ -1,12 +1,18 @@
+import type { SubtitlesPlatform } from "@/types/config/subtitles"
+
 // Timing constants
 export const NAVIGATION_HANDLER_DELAY = 1000
 export const FETCH_CHECK_INTERVAL = 100
 export const FETCH_SUBTITLES_TIMEOUT = 10_000
 export const MAX_GAP_MS = 2_000
 export const PAUSE_TIMEOUT_MS = 1_000
+export const PLAYER_WATCH_POLL_INTERVAL_MS = 1000
 // How long the pointer rests on the subtitles before pause-on-hover pauses the video,
 // so a pointer passing over them on its way to the controls does not.
 export const HOVER_PAUSE_DELAY_MS = 500
+// A subtitle host can drop a request and answer the next, so a file is asked for this often.
+export const TRACK_FETCH_ATTEMPTS = 3
+export const TRACK_FETCH_RETRY_DELAY_MS = 500
 
 // Segmentation constants
 export const MAX_WORDS = 15
@@ -19,6 +25,17 @@ export const TRANSLATION_BATCH_SIZE = 5
 export const TRANSLATE_LOOK_AHEAD_MS = 30_000
 export const PROCESS_LOOK_AHEAD_MS = 60_000
 export const MAX_LOOKAHEAD_RATE = 4
+// A line this close to showing (scaled with playback rate) without its translation gets a
+// machine one meanwhile; a few hundred milliseconds of Microsoft land before it shows.
+export const MACHINE_PLACEHOLDER_LEAD_MS = 1_500
+// A failed batch goes again this long after it failed, or as soon as another batch comes back:
+// a provider that is down is asked every 10 s instead of in a loop, and a paused or short
+// video, which sends no new batch, still gets its lines once the provider is back.
+export const FAILED_BATCH_RETRY_MS = 10_000
+// Requests wait this long after a seek starts, and another seek meanwhile starts the wait
+// again: a held seek key, a seek every 30–90 ms, then sends once, for where it lands, instead
+// of a look-ahead window for every place it passes. Only time tells it from separate seeks.
+export const SEEK_SETTLE_MS = 200
 
 // DOM IDs
 export const READ_FROG_SUBTITLES_UI_HOST_ID = "read-frog-subtitles-ui-host"
@@ -69,6 +86,8 @@ export const XCOM_STATUS_POLL_INTERVAL_MS = 2000
 export const XCOM_PLAYER_MUTATION_DEBOUNCE_MS = 50
 // x.com renders captions from a partial duplicate track labelled like this.
 export const XCOM_RENDER_TRACK_LABEL = "clone"
+// x.com labels the captions it generates like this; only uploaded ones count from 01:00:00.
+export const XCOM_AUTO_GENERATED_TRACK_MARK = "(auto-generated)"
 
 // Netflix specific
 export const NETFLIX_WATCH_PATH_PATTERN = /^\/watch\/(\d+)/
@@ -92,6 +111,51 @@ export const NETFLIX_LOAD_POST_MESSAGE_TIMEOUT_MS = NETFLIX_LOAD_TIMEOUT_MS + 20
 export const NETFLIX_PAGE_POLL_INTERVAL_MS = 100
 export const NETFLIX_WATCH_POLL_INTERVAL_MS = 1000
 export const NETFLIX_TRANSLATE_BUTTON_ZOOM = 1.4
+
+// edX specific
+export const EDX_VIDEO_SELECTOR = ".video[data-metadata]"
+export const EDX_HTML5_VIDEO_SELECTOR = ".video-player video"
+export const EDX_ACTIVE_VIDEO_ATTRIBUTE = "data-read-frog-edx-video"
+export const EDX_ACTIVE_VIDEO_SELECTOR = `[${EDX_ACTIVE_VIDEO_ATTRIBUTE}]`
+export const EDX_PLAYER_SELECTOR = `${EDX_ACTIVE_VIDEO_SELECTOR} .video-wrapper`
+export const EDX_CONTROLS_SELECTOR = ".video-controls"
+export const EDX_CONTROLS_BAR_SELECTOR = `${EDX_ACTIVE_VIDEO_SELECTOR} .secondary-controls`
+export const EDX_NATIVE_SUBTITLES_SELECTOR = `${EDX_ACTIVE_VIDEO_SELECTOR} .closed-captions`
+export const EDX_ACTIVE_LANGUAGE_SELECTOR = ".langs-list .is-active[data-lang-code]"
+export const EDX_LAST_LINE_DURATION_MS = 3000
+
+// Udemy specific
+export const UDEMY_PLAYER_SELECTOR = "[data-purpose='shaka-video-player']"
+export const UDEMY_CONTROLS_SELECTOR = "[data-purpose='video-controls']"
+export const UDEMY_CONTROL_BAR_SELECTOR = "[data-purpose='video-control-bar']"
+export const UDEMY_CAPTIONS_BUTTON_SELECTOR = "[data-purpose='captions-dropdown-button']"
+// The control bar's own `…user-inactive--<hash>` state class, matched on the bar's parent only:
+// other elements always carry a `…hide-when-user-inactive--<hash>` class.
+export const UDEMY_INACTIVE_CONTROLS_SELECTOR = `[class*='--user-inactive--']:has(> ${UDEMY_CONTROLS_SELECTOR})`
+export const UDEMY_NATIVE_SUBTITLES_SELECTOR = "[id$='-captions-display-container']"
+
+// Bilibili specific
+export const BILIBILI_PLAYER_SELECTOR = ".bpx-player-container"
+// The video and its controls, without the danmaku bar the player container also holds below them.
+export const BILIBILI_VIDEO_AREA_SELECTOR = ".bpx-player-video-area"
+export const BILIBILI_CONTROLS_SELECTOR = ".bpx-player-control-wrap"
+export const BILIBILI_CONTROLS_BAR_SELECTOR = ".bpx-player-control-bottom-right"
+// The player's own buttons, which sit at the top of a taller controls row.
+export const BILIBILI_CONTROL_BUTTON_HEIGHT = 22
+export const BILIBILI_NATIVE_SUBTITLES_SELECTOR = ".bpx-player-subtitle-wrap"
+// The player's own signed request; an unsigned one answers with another video's subtitles.
+export const BILIBILI_PLAYER_INFO_URL_PATTERN =
+  /^(?:https:)?\/\/api\.bilibili\.com\/x\/player\/wbi\/v2\?/
+export const BILIBILI_SUBTITLES_REQUEST_TYPE = "READ_FROG_BILIBILI_SUBTITLES"
+export const BILIBILI_SUBTITLES_RESPONSE_TYPE = "READ_FROG_BILIBILI_SUBTITLES_DONE"
+// The page script waits this long for the player to reach the part and report its subtitle list.
+export const BILIBILI_PAGE_WAIT_TIMEOUT_MS = 5000
+// A page script injected after the player asked repeats the player's request once, within this.
+export const BILIBILI_PLAYER_INFO_REFETCH_TIMEOUT_MS = 3000
+// Outwaits the page's wait and its one repeated request, with room for a throttled background tab.
+export const BILIBILI_POST_MESSAGE_TIMEOUT_MS =
+  BILIBILI_PAGE_WAIT_TIMEOUT_MS + BILIBILI_PLAYER_INFO_REFETCH_TIMEOUT_MS + 2000
+export const BILIBILI_PAGE_POLL_INTERVAL_MS = 100
 
 // YouTube player wait constants
 export const MAX_PLAYER_WAIT_ATTEMPTS = 50
@@ -181,3 +245,13 @@ export const SUBTITLE_CSS_PRESETS: Record<SubtitleCssPresetId, string> = {
 // Subtitles source
 export const SUBTITLES_SOURCE = { NATIVE: "native", AI: "ai" } as const
 export type SubtitlesSource = (typeof SUBTITLES_SOURCE)[keyof typeof SUBTITLES_SOURCE]
+
+// Brand names, so they stay the same in every UI language.
+export const SUBTITLES_PLATFORM_NAMES = {
+  youtube: "YouTube",
+  xcom: "X",
+  netflix: "Netflix",
+  bilibili: "Bilibili",
+  udemy: "Udemy",
+  edx: "edX",
+} as const satisfies Record<SubtitlesPlatform, string>

@@ -70,7 +70,7 @@ function speakButtons(action: any): Record<string, string | null> {
       outputSchema: action.outputSchema,
       value,
       selection: "s",
-      targetCode: "eng",
+      targetCode: "en",
       status: "done",
     }),
   )
@@ -160,7 +160,7 @@ describe("v102 to v103 migration", () => {
         outputSchema: action.outputSchema,
         value: { "Field blank": " ", "Field zero": 0 },
         selection: "s",
-        targetCode: "eng",
+        targetCode: "en",
         status: "streaming",
       }),
     )
@@ -380,7 +380,7 @@ describe("layouts written by the v102 to v103 migration", () => {
           outputSchema: action.outputSchema,
           value,
           selection: "The selection",
-          targetCode: "cmn",
+          targetCode: "zh-Hans",
           status,
         }),
       )

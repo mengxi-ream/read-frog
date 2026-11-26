@@ -196,16 +196,10 @@ ReadFrog は GPLv3 と商用ライセンスのデュアルライセンスです�
 コントリビューターのライセンス条件は [CONTRIBUTING.md](../CONTRIBUTING.md) を参照してください。
 
 <a href="https://github.com/mengxi-ream/read-frog/graphs/contributors">
-  <table>
-    <tr>
-      <th colspan="2">
-        <br>
-        <img src="https://contrib.rocks/image?repo=mengxi-ream/read-frog" alt="Read Frog contributors"><br>
-        <br>
-      </th>
-    </tr>
-  </table>
+  <img src="https://contrib.rocks/image?repo=mengxi-ream/read-frog" alt="Read Frog contributors" />
 </a>
+
+Made with [contrib.rocks](https://contrib.rocks).
 
 ## 📜 商用ライセンス付与
 
@@ -216,6 +210,10 @@ ReadFrog は GPLv3 と商用ライセンスのデュアルライセンスです�
 すべての寄付は、より良い言語学習体験を作る助けになります。私たちのミッションを支援していただきありがとうございます。
 
 [![Sponsors][sponsor-image]][sponsor-link]
+
+<a href="https://ifapi.org/?aff=readfrog&utm_source=readfrog&utm_medium=readme">
+  <img src="../assets/promotion/ifapi.png" alt="IF API: GPT, Claude, Gemini and more from one key. Read Frog users get +10% credit with code READFROG">
+</a>
 
 <div align="right">
 

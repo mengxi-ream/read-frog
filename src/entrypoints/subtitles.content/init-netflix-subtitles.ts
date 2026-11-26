@@ -60,7 +60,8 @@ export function initNetflixSubtitles(ctx: ContentScriptContext) {
       if (lastPlayer) {
         removeNetflixTranslateButton()
         unmountSubtitlesUI()
-        adapter.notifyNavigation()
+        // A leave, not a navigation: a navigation would wait for a player and report it missing.
+        adapter.notifyLeave()
       }
       lastMovieId = null
       lastPlayer = null

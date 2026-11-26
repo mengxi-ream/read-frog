@@ -8,7 +8,9 @@ import { APP_NAME } from "@/utils/constants/app"
 import { buildGlossaryDocument } from "@/utils/glossary/sync/document"
 import { readLocalGlossary } from "@/utils/glossary/sync/local-store"
 import { i18n } from "@/utils/i18n"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
+
+const log = createLogger("use-export-config")
 
 interface UseExportConfigOptions {
   config: Config
@@ -53,7 +55,7 @@ export function useExportConfig({
           glossary = buildGlossaryDocument(await readLocalGlossary())
         } catch (error) {
           glossaryFailed = true
-          logger.error("Could not read the glossary for export", error)
+          log.error("Could not read the glossary for export", { error })
         }
       }
 

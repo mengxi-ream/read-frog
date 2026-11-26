@@ -20,7 +20,11 @@ import {
 } from "@/types/config/provider"
 import { FEATURE_KEYS, FEATURE_PROVIDER_DEFS } from "@/utils/constants/feature-providers"
 import { getSelectionToolbarActions, patchSelectionToolbarAction } from "@/utils/custom-actions"
-import { getUsableProviderIdsForCapability } from "@/utils/providers/provider-availability"
+import {
+  getUsableProviderIdsForCapability,
+  isProviderIdPlanWalled,
+} from "@/utils/providers/provider-availability"
+import { isSystemProviderId } from "@/utils/providers/provider-registry"
 
 export function getProviderConfigById<T extends ProviderConfig>(
   providersConfig: T[],
@@ -115,11 +119,19 @@ export function resolveLanguageDetectionConfigForModeChange(
     return null
   }
 
-  const hasSelectedProvider =
-    currentConfig.providerId !== undefined && availableIds.includes(currentConfig.providerId)
+  const selectedProviderId = currentConfig.providerId
+  // A stored Built-in AI model stays unless status puts it behind a plan this
+  // account lacks. The usable list only names the models of a status at hand, and with
+  // none (still loading, or the request failed) just the default model, which
+  // would otherwise swap the user's model out behind their back.
+  const keepsSelectedProvider =
+    selectedProviderId !== undefined &&
+    (availableIds.includes(selectedProviderId) ||
+      (isSystemProviderId(selectedProviderId) &&
+        !isProviderIdPlanWalled(selectedProviderId, "languageDetection", status)))
   return {
     mode: "llm",
-    providerId: hasSelectedProvider ? currentConfig.providerId : availableIds[0]!,
+    providerId: keepsSelectedProvider ? selectedProviderId : availableIds[0]!,
   }
 }
 

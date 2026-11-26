@@ -18,6 +18,7 @@ function renderPanel() {
     <SubtitlesProviders
       adapter={
         {
+          platform: "youtube",
           embedded: false,
           supportsAiSubtitles: false,
           supportsSidebar: false,
@@ -38,13 +39,23 @@ const back = () => fireEvent.click(button("Back to subtitles menu"))
 
 describe("subtitles settings panel navigation", () => {
   beforeEach(() => {
+    vi.stubGlobal(
+      "ResizeObserver",
+      class {
+        observe() {}
+        disconnect() {}
+      },
+    )
     subtitlesStore.set(subtitlesSettingsPanelOpenAtom, true)
     subtitlesStore.set(subtitlesSettingsPanelViewAtom, ROOT_VIEW)
     downloadSourceSubtitles.mockReset().mockResolvedValue(undefined)
     downloadTranslatedSubtitles.mockReset().mockResolvedValue(undefined)
   })
 
-  afterEach(cleanup)
+  afterEach(() => {
+    cleanup()
+    vi.unstubAllGlobals()
+  })
 
   it("groups both downloads behind one entry, each row being its own button", async () => {
     renderPanel()

@@ -2,7 +2,6 @@ import type { VersionTestData } from "../example/types"
 import { assert, describe, expect, it } from "vitest"
 import { configSchema } from "@/types/config/config"
 import { CONFIG_SCHEMA_VERSION } from "@/utils/constants/config"
-import { logger } from "@/utils/logger"
 import {
   LATEST_SCHEMA_VERSION,
   migrateConfig,
@@ -86,14 +85,17 @@ describe("all Config Migrations", () => {
 
             // Output success info in verbose mode
             if (process.env.VITEST_VERBOSE) {
-              logger.info(
-                `✓ Migration v${fromVersion} -> v${toVersion} [${seriesId}]: ${oldSeriesData.description}`,
+              // stdout rather than console: vitest.setup.ts silences the console.
+              process.stdout.write(
+                `✓ Migration v${fromVersion} -> v${toVersion} [${seriesId}]: ${oldSeriesData.description}\n`,
               )
             }
           } else {
             // Series doesn't exist in new version - skip migration test for this series
             if (process.env.VITEST_VERBOSE) {
-              logger.info(`⚠ Skipping series "${seriesId}" - not present in v${toVersion}`)
+              process.stdout.write(
+                `⚠ Skipping series "${seriesId}" - not present in v${toVersion}\n`,
+              )
             }
           }
         }

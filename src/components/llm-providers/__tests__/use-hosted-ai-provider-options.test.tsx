@@ -5,10 +5,9 @@ import type { ProviderSelectorOption } from "@/utils/providers/provider-display"
 import { renderHook } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { useHostedAiProviderOptions } from "@/components/llm-providers/use-hosted-ai-provider-options"
-import {
-  BUILT_IN_AI_PROVIDER_ID,
-  BUILT_IN_AI_ADVANCE_PROVIDER_ID,
-} from "@/utils/constants/provider-ids"
+import { LUNA_PROVIDER_ID, testHostedAiModels } from "@/utils/hosted-ai/__tests__/test-models"
+import { findHostedAiModel, sanitizeHostedAiModels } from "@/utils/hosted-ai/models"
+import { createBuiltInAiSelectorItem } from "@/utils/providers/provider-registry"
 
 const { hostedAiState } = vi.hoisted(() => {
   const state: { value: HostedAiStatusResult } = {
@@ -21,8 +20,13 @@ vi.mock("@/components/llm-providers/use-hosted-ai-status", () => ({
   useHostedAiStatus: () => hostedAiState.value,
 }))
 
-function systemOption(id: string): ProviderSelectorOption {
-  return { kind: "system", id, name: id, logo: () => "logo.png" }
+const MODELS = sanitizeHostedAiModels(testHostedAiModels())
+
+/** The menu option for a model in the test catalog. */
+function modelOption(modelId: string): ProviderSelectorOption {
+  const model = findHostedAiModel(MODELS, modelId)
+  if (!model) throw new Error(`Model "${modelId}" is not in the test catalog`)
+  return createBuiltInAiSelectorItem(model)
 }
 
 function tier(overrides: Partial<HostedAiTierStatus> = {}): HostedAiTierStatus {
@@ -31,7 +35,6 @@ function tier(overrides: Partial<HostedAiTierStatus> = {}): HostedAiTierStatus {
     available: true,
     unavailableReason: null,
     upgradeTo: null,
-    requiresUltra: false,
     modelRevision: "r1",
     ...overrides,
   }
@@ -40,27 +43,23 @@ function tier(overrides: Partial<HostedAiTierStatus> = {}): HostedAiTierStatus {
 /**
  * The tier pair the server sends for a feature this plan does not fund.
  *
- * `unavailableReason` carries it, not the absence of a `credits` pool:
- * `createTierStatus` maps an unfunded Ultra-gated tier to `ultra_required`
- * ("an upgrade wall, not an outage"), and `tierRequiresUltra` is true for the
- * normal tier of every feature outside `customAction`. An unfunded feature
- * whose tiers still report `unavailableReason: null` is not a state the server
- * can produce.
+ * `unavailableReason` carries it, not the absence of a pool: `createTierStatus`
+ * maps an unfunded plan-gated tier to `pro_required` or `ultra_required` ("an
+ * upgrade wall, not an outage"). An unfunded feature whose tiers still report
+ * `unavailableReason: null` is not a state the server can produce.
  */
 function unfundedTiers(): { normal: HostedAiTierStatus; advance: HostedAiTierStatus } {
   return {
     normal: tier({
       available: false,
-      unavailableReason: "ultra_required",
-      upgradeTo: "ultra",
-      requiresUltra: true,
+      unavailableReason: "pro_required",
+      upgradeTo: "pro",
     }),
     advance: tier({
       accessAllowed: false,
       available: false,
       unavailableReason: "ultra_required",
       upgradeTo: "ultra",
-      requiresUltra: true,
     }),
   }
 }
@@ -94,10 +93,8 @@ function customActionDailyCredit(usedPercent = 0) {
   return dailyCredit(["customAction"], usedPercent)
 }
 
-const PROVIDERS: ProviderSelectorOption[] = [
-  systemOption(BUILT_IN_AI_PROVIDER_ID),
-  systemOption(BUILT_IN_AI_ADVANCE_PROVIDER_ID),
-]
+/** A normal-tier model, then an advance-tier one. */
+const PROVIDERS: ProviderSelectorOption[] = [modelOption("gpt-6-luna"), modelOption("gpt-6.2-sol")]
 
 function getDisabled(providers: ProviderSelectorOption[]): Array<boolean | undefined> {
   return providers.map((provider) => ("disabled" in provider ? provider.disabled : undefined))
@@ -114,7 +111,8 @@ describe("useHostedAiProviderOptions", () => {
       isPending: false,
       isError: false,
       status: {
-        credits: [customActionDailyCredit()],
+        pools: [customActionDailyCredit()],
+        models: testHostedAiModels(),
         features: allFeatures({
           customAction: {
             normal: tier(),
@@ -133,25 +131,56 @@ describe("useHostedAiProviderOptions", () => {
     expect(getDisabled(result.current)).toEqual([false, true])
   })
 
+  it("lets a guest pick what signing in unlocks, keeping plan-gated tiers grayed", () => {
+    // As the server answers a guest: sign-in on both tiers, and the plan the
+    // tier needs once signed in. The run asks a guest to log in; only a model
+    // that would still need a plan stays locked, as it is for a free account.
+    hostedAiState.value = {
+      isSignedIn: false,
+      isPending: false,
+      isError: false,
+      status: {
+        pools: [customActionDailyCredit()],
+        models: testHostedAiModels(),
+        features: allFeatures({
+          pageTranslation: {
+            normal: tier({
+              accessAllowed: false,
+              available: false,
+              unavailableReason: "authentication_required",
+            }),
+            advance: tier({
+              accessAllowed: false,
+              available: false,
+              unavailableReason: "authentication_required",
+              upgradeTo: "ultra",
+            }),
+          },
+        }),
+      },
+    }
+
+    const { result } = renderHook(() => useHostedAiProviderOptions("pageTranslation", PROVIDERS))
+
+    expect(getDisabled(result.current)).toEqual([false, true])
+    expect(result.current.map((p) => ("upgradeTo" in p ? p.upgradeTo : "absent"))).toEqual([
+      undefined,
+      "ultra",
+    ])
+  })
+
   it("badges each option with the plan the server says this account lacks", () => {
     hostedAiState.value = {
       isSignedIn: true,
       isPending: false,
       isError: false,
       status: {
-        credits: [customActionDailyCredit()],
+        pools: [customActionDailyCredit()],
+        models: testHostedAiModels(),
         features: allFeatures({
-          pageTranslation: {
-            normal: tier({ requiresUltra: true }),
-            advance: tier({ requiresUltra: true }),
-          },
           customAction: {
             normal: tier({ upgradeTo: "pro" }),
-            advance: tier({ upgradeTo: "ultra", requiresUltra: true }),
-          },
-          noteSuggestion: {
-            normal: tier({ requiresUltra: true }),
-            advance: tier({ requiresUltra: true }),
+            advance: tier({ upgradeTo: "ultra" }),
           },
         }),
       },
@@ -163,7 +192,7 @@ describe("useHostedAiProviderOptions", () => {
     expect(badges).toEqual(["pro", "ultra"])
   })
 
-  it("leaves an option the account can already run unbadged, whatever the plan fact", () => {
+  it("leaves an option the account can already run unbadged", () => {
     // An Ultra account: the tier is Ultra-only as a product fact, but this
     // account lacks nothing, so the server reports no plan to buy.
     hostedAiState.value = {
@@ -171,13 +200,9 @@ describe("useHostedAiProviderOptions", () => {
       isPending: false,
       isError: false,
       status: {
-        credits: [customActionDailyCredit()],
-        features: allFeatures({
-          customAction: {
-            normal: tier(),
-            advance: tier({ requiresUltra: true }),
-          },
-        }),
+        pools: [customActionDailyCredit()],
+        models: testHostedAiModels(),
+        features: allFeatures(),
       },
     }
 
@@ -197,7 +222,8 @@ describe("useHostedAiProviderOptions", () => {
       isError: false,
       status: {
         // A free plan funds customAction only — pageTranslation has no pool.
-        credits: [customActionDailyCredit()],
+        pools: [customActionDailyCredit()],
+        models: testHostedAiModels(),
         features: allFeatures({ pageTranslation: unfundedTiers() }),
       },
     }
@@ -213,7 +239,8 @@ describe("useHostedAiProviderOptions", () => {
       isPending: false,
       isError: false,
       status: {
-        credits: [dailyCredit(["selectionTranslation"])],
+        pools: [dailyCredit(["selectionTranslation"])],
+        models: testHostedAiModels(),
         features: allFeatures({
           selectionTranslation: {
             normal: tier(),
@@ -240,7 +267,8 @@ describe("useHostedAiProviderOptions", () => {
       isPending: false,
       isError: false,
       status: {
-        credits: [customActionDailyCredit()],
+        pools: [customActionDailyCredit()],
+        models: testHostedAiModels(),
         features: allFeatures({ selectionTranslation: unfundedTiers() }),
       },
     }
@@ -258,7 +286,8 @@ describe("useHostedAiProviderOptions", () => {
       isPending: false,
       isError: false,
       status: {
-        credits: [dailyCredit(["noteSuggestion"])],
+        pools: [dailyCredit(["noteSuggestion"])],
+        models: testHostedAiModels(),
         features: allFeatures({
           noteSuggestion: {
             normal: tier(),
@@ -267,7 +296,6 @@ describe("useHostedAiProviderOptions", () => {
               available: false,
               unavailableReason: "ultra_required",
               upgradeTo: "ultra",
-              requiresUltra: true,
             }),
           },
         }),
@@ -287,7 +315,8 @@ describe("useHostedAiProviderOptions", () => {
       isPending: false,
       isError: false,
       status: {
-        credits: [customActionDailyCredit()],
+        pools: [customActionDailyCredit()],
+        models: testHostedAiModels(),
         features: allFeatures({ noteSuggestion: unfundedTiers() }),
       },
     }
@@ -303,7 +332,8 @@ describe("useHostedAiProviderOptions", () => {
       isPending: false,
       isError: false,
       status: {
-        credits: [customActionDailyCredit(100)],
+        pools: [customActionDailyCredit(100)],
+        models: testHostedAiModels(),
         features: allFeatures({
           customAction: {
             normal: tier({ available: false, unavailableReason: "quota_exhausted" }),
@@ -337,10 +367,70 @@ describe("useHostedAiProviderOptions", () => {
 
       expect(result.current).not.toBe(PROVIDERS)
       expect(result.current[0]).toMatchObject({
-        id: BUILT_IN_AI_PROVIDER_ID,
+        id: LUNA_PROVIDER_ID,
         disabled: expect.any(Boolean),
       })
     }
+  })
+
+  it("judges every model by its own tier", () => {
+    hostedAiState.value = {
+      isSignedIn: true,
+      isPending: false,
+      isError: false,
+      status: {
+        pools: [customActionDailyCredit()],
+        models: testHostedAiModels(),
+        features: allFeatures({
+          customAction: {
+            normal: tier({ upgradeTo: null }),
+            advance: tier({
+              accessAllowed: false,
+              available: false,
+              unavailableReason: "ultra_required",
+              upgradeTo: "ultra",
+            }),
+          },
+        }),
+      },
+    }
+    const options = MODELS!.map(createBuiltInAiSelectorItem)
+
+    const { result } = renderHook(() => useHostedAiProviderOptions("customAction", options))
+
+    expect(result.current.map((p) => [p.name, "upgradeTo" in p ? p.upgradeTo : null])).toEqual([
+      ["Claude Haiku 5.5", undefined],
+      ["GPT-6 Luna", undefined],
+      ["DeepSeek V4.1 Flash", undefined],
+      ["GPT-6.2 Sol", "ultra"],
+      ["Claude Sonnet 5.5", "ultra"],
+    ])
+    expect(getDisabled(result.current)).toEqual([false, false, false, true, true])
+  })
+
+  it("leaves a model no list names to the server, since it has no tier to judge", () => {
+    hostedAiState.value = {
+      isSignedIn: true,
+      isPending: false,
+      isError: false,
+      status: {
+        pools: [],
+        models: testHostedAiModels(),
+        features: allFeatures({ customAction: unfundedTiers() }),
+      },
+    }
+    const unlisted: ProviderSelectorOption = {
+      kind: "system",
+      id: "read-frog-ai:gpt-5-mini",
+      name: "gpt-5-mini",
+      logo: () => "logo.png",
+      model: "gpt-5-mini",
+      available: false,
+    }
+
+    const { result } = renderHook(() => useHostedAiProviderOptions("customAction", [unlisted]))
+
+    expect(result.current[0]).toBe(unlisted)
   })
 
   it("passes local provider configs through unchanged", () => {

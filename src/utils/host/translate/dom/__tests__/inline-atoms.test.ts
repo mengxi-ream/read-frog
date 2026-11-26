@@ -7,7 +7,7 @@ import {
   INLINE_ATOM_CLASS,
   WALKED_ATTRIBUTE,
 } from "@/utils/constants/dom-labels"
-import { logger } from "@/utils/logger"
+import { captureLogs } from "@/utils/logging/testing"
 import { extractTextContent } from "../../../dom/traversal"
 import {
   containsInlineAtomOutsideWrappers,
@@ -339,7 +339,7 @@ describe("renderInlineAtomTranslation", () => {
   })
 
   it("appends dropped atoms after the text and warns once", () => {
-    const warn = vi.spyOn(logger, "warn").mockImplementation(() => {})
+    const logs = captureLogs()
     const { extraction } = extract(
       "<p>Let <math><mi>x</mi></math> and <math><mi>y</mi></math> be.</p>",
     )
@@ -347,7 +347,7 @@ describe("renderInlineAtomTranslation", () => {
     renderInlineAtomTranslation(container, "没有占位符。", extraction)
     expect(container.textContent).toBe("没有占位符。 x y")
     expect(container.querySelectorAll("math")).toHaveLength(2)
-    expect(warn).toHaveBeenCalledTimes(1)
+    expect(logs.filter((record) => record.level === "warn")).toHaveLength(1)
   })
 
   it("resolves tokens against the collision offset", () => {

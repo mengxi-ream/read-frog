@@ -1,7 +1,14 @@
 import type { Config } from "@/types/config/config"
+import { ANALYTICS_FEATURE } from "@/types/analytics"
 import { getLocalConfig } from "@/utils/config/storage"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import { promptForBuiltInAiRefusal } from "@/utils/content-runtime/built-in-ai-prompt"
 import { removeOrShowNodeTranslation } from "@/utils/host/translate/node-manipulation"
+import {
+  isPageTranslationRequestFailureClaimed,
+  onPageTranslationRequestFailed,
+} from "@/utils/host/translate/translation-session"
+import { getBuiltInAiRefusalKind } from "@/utils/hosted-ai/refusal"
 import { sendMessage } from "@/utils/message"
 import { createNodeTranslationPreview } from "./node-translation-preview"
 import { registerNodeTranslationTriggerListeners } from "./node-translation-trigger"
@@ -35,10 +42,53 @@ export function registerNodeTranslationTriggers(): () => void {
   }
 
   const translateNode = async (block: Element, config: Config) => {
-    const didTranslate = await removeOrShowNodeTranslation(block, config)
+    // A paragraph's error is drawn in place and reported, never thrown, and the call
+    // returns once every paragraph of the node is done, so its refusals are the ones
+    // reported meanwhile. Another node's hover can overlap and land here too: the prompt
+    // is one per refusal, whichever node it names.
+    let refusal: unknown
+    const stopListening = onPageTranslationRequestFailed((error) => {
+      if (refusal === undefined && getBuiltInAiRefusalKind(error)) {
+        refusal = error
+      }
+    })
+    let didTranslate: boolean
+    try {
+      didTranslate = await removeOrShowNodeTranslation(block, config)
+    } finally {
+      stopListening()
+    }
     if (didTranslate) {
       requestIframeInjectionAfterSuccessfulTopFrameNodeTranslation()
     }
+
+    // A page-translation session that already asked about this refusal answers for it.
+    if (
+      refusal === undefined ||
+      signal.aborted ||
+      isPageTranslationRequestFailureClaimed(refusal)
+    ) {
+      return
+    }
+    void promptForBuiltInAiRefusal(refusal, {
+      // Hover translation runs on page translation's provider.
+      feature: "pageTranslation",
+      analyticsFeature: ANALYTICS_FEATURE.PAGE_TRANSLATION,
+      trigger: "user",
+      retry: () => void retranslateNode(block),
+    })
+  }
+
+  /**
+   * After a switch to machine translation: the node's paragraphs all carry a translation
+   * or an inline error now, so the first toggle takes them off and the second translates
+   * the node again on the new provider.
+   */
+  const retranslateNode = async (block: Element) => {
+    const config = await getCurrentConfig()
+    if (!config) return
+    await removeOrShowNodeTranslation(block, config)
+    await translateNode(block, config)
   }
 
   const preview = createNodeTranslationPreview()

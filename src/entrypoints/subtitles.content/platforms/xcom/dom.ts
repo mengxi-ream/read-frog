@@ -12,24 +12,44 @@ const XCOM_VIDEO_CONTAINER_SELECTORS = [
   "[data-testid='videoPlayerContainer']",
 ]
 
+// X hides a card's media from screen readers, yet plays a broadcast replay there.
+const XCOM_HIDDEN_ANCESTOR_SELECTOR =
+  "[aria-hidden='true']:not([data-testid='card.layoutLarge.media'])"
+
+// X's media view: a post's media as slides in a dialog over the page, with no article.
+const XCOM_MEDIA_VIEW_SELECTOR = "[role='dialog'][aria-modal='true']"
+
 function hasRenderedSize(element: HTMLElement): boolean {
   const rect = element.getBoundingClientRect()
   return rect.width > 0 && rect.height > 0
 }
 
+// The media view keeps the slides it does not show mounted beside the screen, paused;
+// going by the center, only one slide counts mid-swipe.
+function isCenteredOnScreen(element: HTMLElement): boolean {
+  const { left, width } = element.getBoundingClientRect()
+  const center = left + width / 2
+  return center >= 0 && center <= window.innerWidth
+}
+
+// The URL names the media view's post, though not always which of its media is shown.
+function getMediaViewStatusId(video: HTMLVideoElement): string | null {
+  return video.closest(XCOM_MEDIA_VIEW_SELECTOR) ? getXcomStatusId() : null
+}
+
 function isCandidateStatusVideo(video: HTMLVideoElement): boolean {
   return (
     video.isConnected &&
-    !video.closest("[aria-hidden='true']") &&
+    !video.closest(XCOM_HIDDEN_ANCESTOR_SELECTOR) &&
     !!getXcomStatusVideoContainer(video) &&
-    !!video.closest("article")
+    (!!video.closest("article") || (!!getMediaViewStatusId(video) && isCenteredOnScreen(video)))
   )
 }
 
 function belongsToStatus(video: HTMLVideoElement, statusId: string): boolean {
   const article = video.closest("article")
   if (!article) {
-    return false
+    return getMediaViewStatusId(video) === statusId
   }
 
   return Array.from(article.querySelectorAll<HTMLAnchorElement>("a[href]")).some(
@@ -87,7 +107,7 @@ export function findXcomControlsGroup(videoContainer: HTMLElement): HTMLElement 
 
 export function getCurrentPrimaryXcomStatusVideo(): HTMLVideoElement | null {
   const candidates = Array.from(
-    document.querySelectorAll<HTMLVideoElement>("article video"),
+    document.querySelectorAll<HTMLVideoElement>(`article video, ${XCOM_MEDIA_VIEW_SELECTOR} video`),
   ).filter(isCandidateStatusVideo)
   const statusId = getXcomStatusId()
   const current = statusId ? candidates.filter((video) => belongsToStatus(video, statusId)) : []
@@ -95,10 +115,12 @@ export function getCurrentPrimaryXcomStatusVideo(): HTMLVideoElement | null {
   return pickActiveCandidate(candidates, current)
 }
 
+// A quoted post's card links to no post of its own, so its video resolves to the post quoting
+// it; the server finds the video by its media id, or as the only one, across both posts.
 function getXcomVideoStatusId(video: HTMLVideoElement): string | null {
   const article = video.closest("article")
   if (!article) {
-    return null
+    return getMediaViewStatusId(video)
   }
 
   for (const anchor of article.querySelectorAll<HTMLAnchorElement>("a[href]")) {
@@ -115,6 +137,25 @@ function getXcomVideoStatusId(video: HTMLVideoElement): string | null {
 export function getCurrentXcomVideoId(): string | null {
   const video = getCurrentXcomSubtitlesVideo()
   return (video && getXcomVideoStatusId(video)) ?? getXcomStatusId()
+}
+
+const toXcomPostUrl = (statusId: string | null) =>
+  statusId ? `https://x.com/i/status/${statusId}` : null
+
+/** The playing video's own post, which a timeline or parent post URL does not name. */
+export function getCurrentXcomVideoUrl(): string | null {
+  return toXcomPostUrl(getCurrentXcomVideoId())
+}
+
+/** The post holding this video, never the page's: an ad links to no post of its own. */
+export function getXcomVideoPostUrl(video: HTMLVideoElement): string | null {
+  return toXcomPostUrl(getXcomVideoStatusId(video))
+}
+
+/** Its video is still a candidate: in the page, not behind the media view nor off its screen. */
+export function isXcomCandidatePlayer(container: HTMLElement | null): boolean {
+  const video = container?.querySelector("video")
+  return !!video && isCandidateStatusVideo(video)
 }
 
 function getReadFrogXcomStatusVideo(): HTMLVideoElement | null {

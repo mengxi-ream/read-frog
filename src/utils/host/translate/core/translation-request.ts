@@ -1,9 +1,10 @@
 import type { InlineAtomExtraction } from "../dom/inline-atoms"
+import type { UntranslatedReason } from "../paragraph-diagnosis"
 import type { PageTranslationRequestOptions } from "../translate-variants"
 import type { Config } from "@/types/config/config"
 import type { TranslationTextFormat } from "@/types/config/translate"
 import type { TransNode } from "@/types/dom"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
 import { resolvePageTranslationProvider } from "@/utils/providers/provider-ref"
 import { getOwnerDocument } from "../../dom/node"
 import { extractInlineAtomText, getInlineAtomSelector } from "../dom/inline-atoms"
@@ -14,6 +15,8 @@ import { shouldSkipAsTargetLanguage } from "../target-language-skip"
 import { normalizeForComparison } from "../text-preparation"
 import { translateTextForPage } from "../translate-variants"
 import { isNumericContent } from "../ui/translation-utils"
+
+const log = createLogger("host/translate/core/translation-request")
 
 interface PageTranslationSource extends InlineAtomExtraction {
   nodes: readonly TransNode[]
@@ -39,20 +42,19 @@ export function preparePageTranslationSource(
 }
 
 /**
- * Run before either mode inserts its spinner; virtual paragraphs use this too.
- * Pass prose (`filterText`), never the HTML request: language detection on
- * markup is noise.
+ * Why a paragraph should not be sent at all, or null to send it. Run before
+ * either mode inserts its spinner; virtual paragraphs use this too. Pass prose
+ * (`filterText`), never the HTML request: language detection on markup is
+ * noise.
  */
-export async function shouldSkipPageTranslationText(
+export async function getPageTranslationSkipReason(
   text: string,
   config: Config,
-): Promise<boolean> {
-  return (
-    !text.trim() ||
-    isNumericContent(text) ||
-    (await shouldFilterSmallParagraph(text, config)) ||
-    (await shouldSkipAsTargetLanguage(text, config))
-  )
+): Promise<UntranslatedReason | null> {
+  if (!text.trim() || isNumericContent(text)) return "noProse"
+  if (await shouldFilterSmallParagraph(text, config)) return "tooShort"
+  if (await shouldSkipAsTargetLanguage(text, config)) return "targetLanguage"
+  return null
 }
 
 const unsupportedDeepLXHtmlAttributeProviders = new Set<string>()
@@ -208,7 +210,7 @@ export function createPageTranslationRequest(
         supportedDeepLXHtmlAttributeProviders.delete(deepLXProviderKey)
         finishDeepLXHtmlAttributeProbe(deepLXProviderKey, ownedDeepLXProbe, "unsupported")
       }
-      logger.warn("HTML attribute placeholders were not preserved; retrying full HTML", error)
+      log.warn("HTML attribute placeholders were not preserved; retrying full HTML", { error })
       return translateLegacyHtml()
     }
   }

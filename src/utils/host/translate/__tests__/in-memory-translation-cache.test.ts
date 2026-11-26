@@ -1,5 +1,3 @@
-// @vitest-environment jsdom
-
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { NO_TRANSLATION_SENTINEL } from "@/utils/constants/prompt"
 import { sendMessage } from "@/utils/message"
@@ -32,8 +30,9 @@ const googleProviderConfig = {
 } as never
 
 const langConfig = {
-  sourceCode: "eng" as const,
-  targetCode: "cmn" as const,
+  sourceCode: "en" as const,
+  targetCode: "zh-Hans" as const,
+  level: "intermediate" as const,
 }
 
 const sendMessageMock = vi.mocked(sendMessage)
@@ -81,7 +80,7 @@ describe("in-memory translation tier in translateTextCore", () => {
 
     await expect(translate("Hello")).resolves.toBe("你好")
     await expect(
-      translate("Hello", { langConfig: { ...langConfig, targetCode: "jpn" as const } }),
+      translate("Hello", { langConfig: { ...langConfig, targetCode: "ja" as const } }),
     ).resolves.toBe("こんにちは")
 
     expect(sendMessageMock).toHaveBeenCalledTimes(2)

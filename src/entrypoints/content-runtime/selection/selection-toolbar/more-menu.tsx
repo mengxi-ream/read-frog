@@ -29,18 +29,19 @@ import {
   IconPlus,
   IconVolume,
 } from "@tabler/icons-react"
-import { useAtom } from "jotai"
+import { useAtomValue, useSetAtom } from "jotai"
 import { useRef, useState } from "react"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/base-ui/popover"
 import { Separator } from "@/components/ui/base-ui/separator"
 import { SelectionToolbarTooltip } from "@/components/ui/selection-popover/selection-tooltip"
-import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { configAtom, configFieldsAtomMap } from "@/utils/atoms/config"
 import { SELECTION_CONTENT_OVERLAY_LAYERS } from "@/utils/constants/selection-overlay-layers"
 import { i18n } from "@/utils/i18n"
 import { sendMessage } from "@/utils/message"
 import { buildAddCustomActionOptionsRoute } from "@/utils/navigation"
 import {
   getSelectionToolbarItems,
+  hasAddCustomActionRow,
   reorderSelectionToolbarItems,
   setSelectionToolbarItemPinned,
 } from "@/utils/selection-toolbar-items"
@@ -53,12 +54,15 @@ import { useSelectionTranslationPopover } from "./translate-button/provider"
 
 type SelectionSpeech = ReturnType<typeof useSelectionSpeech>
 
-// The toolbar's "more" menu: every enabled item, pinned or not, in the
+// The toolbar's "more" menu: every shown item, pinned or not, in the
 // toolbar's order. A row runs its item; its pin puts the item's button on the
 // toolbar or takes it off; its grip drags it to a new place in the order.
-// Below the list, a last row opens the options page's "add action" dialog.
+// Below the list, while custom actions are on, a last row opens the options
+// page's "add action" dialog. The toolbar leaves the menu out when it would
+// have no rows (see hasSelectionToolbarMoreMenu).
 export function SelectionToolbarMoreMenu() {
-  const [selectionToolbar, setSelectionToolbar] = useAtom(configFieldsAtomMap.selectionToolbar)
+  const config = useAtomValue(configAtom)
+  const setSelectionToolbar = useSetAtom(configFieldsAtomMap.selectionToolbar)
   const [open, setOpen] = useState(false)
   // Opened by hover, the menu closes when the pointer leaves it. Once the
   // user works in it, it stays (a press elsewhere, Escape or the button close
@@ -69,7 +73,7 @@ export function SelectionToolbarMoreMenu() {
   const { openToolbarTranslation } = useSelectionTranslationPopover()
   const { openToolbarCustomAction } = useSelectionCustomActionPopover()
   const speech = useSelectionSpeech()
-  const items = getSelectionToolbarItems(selectionToolbar).filter((item) => item.enabled)
+  const items = getSelectionToolbarItems(config).filter((item) => item.shown)
   const label = i18n.t("action.moreActions")
 
   const changeOpen = (nextOpen: boolean) => {
@@ -148,17 +152,23 @@ export function SelectionToolbarMoreMenu() {
             void setSelectionToolbar((current) => reorderSelectionToolbarItems(current, orderedIds))
           }}
         />
-        {/* Edge to edge: the component's own horizontal width wins over a bare `w-auto`. */}
-        <Separator className="-mx-1 my-1 data-[orientation=horizontal]:w-auto" />
-        {/* Its icon lines up with the rows' icons, past their grips. */}
-        <button
-          type="button"
-          className="flex h-8 shrink-0 cursor-pointer items-center gap-2 rounded-md pr-1 pl-4.5 text-left text-muted-foreground hover:bg-secondary hover:text-foreground"
-          onClick={addCustomAction}
-        >
-          <IconPlus className="size-4 shrink-0" strokeWidth={1.6} />
-          <span className="truncate">{i18n.t("action.addCustomAction")}</span>
-        </button>
+        {hasAddCustomActionRow(config) && (
+          <>
+            {/* Edge to edge: the component's own horizontal width wins over a bare `w-auto`. */}
+            {items.length > 0 && (
+              <Separator className="-mx-1 my-1 data-[orientation=horizontal]:w-auto" />
+            )}
+            {/* Its icon lines up with the rows' icons, past their grips. */}
+            <button
+              type="button"
+              className="flex h-8 shrink-0 cursor-pointer items-center gap-2 rounded-md pr-1 pl-4.5 text-left text-muted-foreground hover:bg-secondary hover:text-foreground"
+              onClick={addCustomAction}
+            >
+              <IconPlus className="size-4 shrink-0" strokeWidth={1.6} />
+              <span className="truncate">{i18n.t("action.addCustomAction")}</span>
+            </button>
+          </>
+        )}
       </PopoverContent>
     </Popover>
   )

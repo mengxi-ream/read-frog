@@ -34,18 +34,18 @@ describe("shouldEnableAutoTranslation", () => {
     })
 
     await expect(
-      shouldEnableAutoTranslation("https://example.com/story", "spa", config),
+      shouldEnableAutoTranslation("https://example.com/story", "es", config),
     ).resolves.toBe(false)
   })
 
   it("returns false when a never-auto-translate pattern matches even if the detected language matches", async () => {
     const config = createConfig({
       neverAutoTranslatePatterns: ["example.com"],
-      autoTranslateLanguages: ["spa"],
+      autoTranslateLanguages: ["es"],
     })
 
     await expect(
-      shouldEnableAutoTranslation("https://example.com/story", "spa", config),
+      shouldEnableAutoTranslation("https://example.com/story", "es", config),
     ).resolves.toBe(false)
   })
 
@@ -58,14 +58,14 @@ describe("shouldEnableAutoTranslation", () => {
     })
 
     await expect(
-      shouldEnableAutoTranslation("https://news.example.com/story", "spa", config),
+      shouldEnableAutoTranslation("https://news.example.com/story", "es", config),
     ).resolves.toBe(true)
   })
 
   it("returns true when an auto-translate language matches and no never-auto-translate pattern matches", async () => {
     const config = createConfig(
       {
-        autoTranslateLanguages: ["eng"],
+        autoTranslateLanguages: ["en"],
       },
       {
         sourceCode: "auto",
@@ -73,24 +73,24 @@ describe("shouldEnableAutoTranslation", () => {
     )
 
     await expect(
-      shouldEnableAutoTranslation("https://example.com/story", "eng", config),
+      shouldEnableAutoTranslation("https://example.com/story", "en", config),
     ).resolves.toBe(true)
   })
 
   it("returns false when no auto-translate rule matches", async () => {
     const config = createConfig({
       autoTranslatePatterns: ["example.com"],
-      autoTranslateLanguages: ["spa"],
+      autoTranslateLanguages: ["es"],
     })
 
     await expect(
-      shouldEnableAutoTranslation("https://other.example/story", "eng", config),
+      shouldEnableAutoTranslation("https://other.example/story", "en", config),
     ).resolves.toBe(false)
   })
 
   it("returns false for undetected language when no pattern matches", async () => {
     const config = createConfig({
-      autoTranslateLanguages: ["spa"],
+      autoTranslateLanguages: ["es"],
     })
 
     await expect(

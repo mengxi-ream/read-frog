@@ -101,7 +101,10 @@ export function normalizeShortcut(
     modifiers.push("Meta")
   }
 
-  modifiers.push(parsedHotkey.key)
+  // The Turkish Q layout's I key types a dotless "ı". The library keeps that as
+  // its own key, yet fires an "I" shortcut on it too, so "Mod+ı" and "Mod+I" would
+  // be two bindings for one press. Store it as I, which also matches it.
+  modifiers.push(parsedHotkey.key === "ı" ? "I" : parsedHotkey.key)
   return modifiers.join("+")
 }
 

@@ -1,4 +1,4 @@
-import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { LanguageTag } from "@read-frog/definitions"
 import type { ComponentProps } from "react"
 import type { LanguageItem } from "./language-combobox-options"
 import { useMemo } from "react"
@@ -24,7 +24,7 @@ function AutoBadge() {
 interface LanguageComboboxProps<T extends string> {
   // `NoInfer` so `items` alone decides `T`. Inferring from `value` instead would
   // narrow `T` to whatever a caller's state happens to be typed as — a page
-  // holding a `LangCodeISO6393` would lose `"auto"` from its own handler, and
+  // holding a `LanguageTag` would lose `"auto"` from its own handler, and
   // its guard against it would become a dead comparison.
   value: NoInfer<T>
   onValueChange: (value: NoInfer<T>) => void
@@ -34,7 +34,7 @@ interface LanguageComboboxProps<T extends string> {
    * `getGlossaryTargetLanguageItems` is the one caller doing that today.
    */
   items?: LanguageItem<T>[]
-  detectedLangCode?: LangCodeISO6393
+  detectedLangCode?: LanguageTag
   /** Offers auto under a fixed name, for callers with no page to detect a language from. */
   autoLabel?: string
   placeholder?: string
@@ -43,7 +43,7 @@ interface LanguageComboboxProps<T extends string> {
   className?: string
 }
 
-export function LanguageCombobox<T extends string = LangCodeISO6393 | "auto">({
+export function LanguageCombobox<T extends string = LanguageTag | "auto">({
   value,
   onValueChange,
   items,
@@ -55,7 +55,7 @@ export function LanguageCombobox<T extends string = LangCodeISO6393 | "auto">({
 }: LanguageComboboxProps<T>) {
   const languageItems = useMemo(() => {
     if (items) return items
-    // The rows built here are `LangCodeISO6393 | "auto"`, which is exactly the
+    // The rows built here are `LanguageTag | "auto"`, which is exactly the
     // default `T`. A caller whose values are anything else — the glossary's
     // `all` — has to pass `items`, because there are no rows this branch could
     // build for it.

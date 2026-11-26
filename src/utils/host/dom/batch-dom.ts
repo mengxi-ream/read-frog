@@ -2,6 +2,10 @@
  * Utility for batching DOM operations to minimize layout thrashing and style recalculations
  */
 
+import { createLogger } from "@/utils/logging/logger"
+
+const log = createLogger("host/dom/batch-dom")
+
 type DOMOperation = () => void
 
 class DOMBatcher {
@@ -43,7 +47,7 @@ class DOMBatcher {
       try {
         op()
       } catch (error) {
-        console.error("Error executing batched DOM operation:", error)
+        log.error("Batched DOM operation failed", { error })
       }
     }
 

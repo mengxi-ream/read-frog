@@ -6,14 +6,15 @@ import { useAtomValue } from "jotai"
 import { useCallback, useRef, useState } from "react"
 import { isAbortError } from "@/components/ui/selection-popover/inline-error"
 import { classifyResolvedProvider } from "@/utils/analytics-provider"
-import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { configAtom } from "@/utils/atoms/config"
 import { streamBackgroundNoteSuggestion } from "@/utils/content-script/background-stream-client"
 import { STREAM_PORT_DISCONNECTED_MESSAGE } from "@/utils/content-script/port-streaming"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { resolveNoteSuggestionAction } from "@/utils/custom-actions"
+import { isFeatureOn } from "@/utils/features"
 import { getOrCreateWebPageContext } from "@/utils/host/translate/webpage-context"
-import { getHostedAiTierStatus } from "@/utils/hosted-ai/status"
-import { logger } from "@/utils/logger"
+import { getHostedAiModelVerdict } from "@/utils/hosted-ai/status"
+import { createLogger } from "@/utils/logging/logger"
 import { noteSuggestionEnvelopeSchema } from "@/utils/note-suggestion/types"
 import { validateNoteSuggestion } from "@/utils/note-suggestion/validate"
 import { resolveModelId } from "@/utils/providers/model-id"
@@ -21,6 +22,10 @@ import { getProviderOptionsWithOverride } from "@/utils/providers/options"
 import { fetchHostedAiStatus } from "@/utils/providers/provider-ref"
 import { getTopLevelReasoning } from "@/utils/providers/reasoning"
 import { buildNoteSuggestionPrompts } from "./prompt"
+
+const log = createLogger(
+  "content-runtime/selection/selection-toolbar/note-suggestion/use-note-suggestion",
+)
 
 export interface NoteSuggestionSessionResult {
   /** Composite key: popoverSessionKey:translateRequestKey:rerunNonce. */
@@ -69,7 +74,7 @@ export interface NoteSuggestionFireInput {
  * no card.
  */
 export function useNoteSuggestion() {
-  const selectionToolbar = useAtomValue(configFieldsAtomMap.selectionToolbar)
+  const config = useAtomValue(configAtom)
   const [suggestion, setSuggestion] = useState<NoteSuggestionSessionResult | null>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
   // Sets rather than single slots so an A→B→A key round-trip inside one
@@ -78,9 +83,9 @@ export function useNoteSuggestion() {
   // when the popover closes to keep them bounded.
   const completedSessionKeysRef = useRef<Set<string>>(new Set())
   const shownSessionKeysRef = useRef<Set<string>>(new Set())
-  const latestRef = useRef(selectionToolbar)
+  const latestRef = useRef(config)
   // oxlint-disable-next-line react/refs -- latest-value ref: writing it during render is what keeps callbacks in sync
-  latestRef.current = selectionToolbar
+  latestRef.current = config
 
   const cancel = useCallback(() => {
     abortControllerRef.current?.abort()
@@ -104,8 +109,10 @@ export function useNoteSuggestion() {
   }, [])
 
   const maybeFire = useCallback((input: NoteSuggestionFireInput) => {
-    const config = latestRef.current
-    if (!config.noteSuggestion.enabled) {
+    const currentConfig = latestRef.current
+    // Also off while selection translation is: the translation the context menu opens
+    // goes without suggestions then, as the toolbar's would.
+    if (!isFeatureOn(currentConfig, "selectionToolbar.translate.noteSuggestion")) {
       return
     }
     if (completedSessionKeysRef.current.has(input.sessionKey)) {
@@ -118,7 +125,9 @@ export function useNoteSuggestion() {
       return
     }
 
-    const actionSnapshot = structuredClone(resolveNoteSuggestionAction(config))
+    const actionSnapshot = structuredClone(
+      resolveNoteSuggestionAction(currentConfig.selectionToolbar),
+    )
 
     const abortController = new AbortController()
     abortControllerRef.current = abortController
@@ -132,26 +141,28 @@ export function useNoteSuggestion() {
       }
 
       if (provider.kind === "system") {
-        // A background auto-fire feature must not hammer a hosted tier the
-        // account cannot use: skip silently on any explicit unavailable
-        // verdict — durable facts (sign-in, Ultra plan) and reported runtime
-        // state (quota exhausted, service down) alike, since nobody is
-        // watching to act on the error and status is far cheaper than a
-        // doomed stream call. Fail open when status itself is unreachable —
-        // the run surfaces any real error, which `fetchHostedAiStatus` already
-        // does; going through it also shares the request with whatever else
-        // resolves a hosted ref at the same moment, since one status response
-        // covers every feature.
+        // A background auto-fire feature must not hammer a model the account
+        // cannot use: skip silently on any explicit verdict against it —
+        // durable facts (sign-in, plan) and reported runtime state (quota
+        // exhausted, the model unable to run) alike, since nobody is watching
+        // to act on the error and status is far cheaper than a doomed stream
+        // call. Fail open when status itself is unreachable — the run surfaces
+        // any real error, which `fetchHostedAiStatus` already does; going
+        // through it also shares the request with whatever else resolves a
+        // hosted ref at the same moment, since one status response covers
+        // every feature.
         const status = await fetchHostedAiStatus()
         if (signal.aborted) {
           return
         }
-        const tierStatus = getHostedAiTierStatus(status, "noteSuggestion", provider.modelTier)
-        if (tierStatus && !tierStatus.available) {
-          logger.info(
-            "[NoteSuggestion] Skipped: hosted tier unavailable",
-            tierStatus.unavailableReason,
-          )
+        const verdict = getHostedAiModelVerdict(status, "noteSuggestion", provider.model)
+        if (verdict.kind === "blocked" || verdict.kind === "unavailable") {
+          log.debug("Skipped: model unavailable", {
+            model: provider.model,
+            verdict: verdict.kind,
+            unavailableReason:
+              verdict.kind === "blocked" ? verdict.tierStatus.unavailableReason : null,
+          })
           completedSessionKeysRef.current.add(input.sessionKey)
           return
         }
@@ -179,7 +190,6 @@ export function useNoteSuggestion() {
         provider.kind === "system"
           ? {
               providerId: provider.id,
-              modelTier: provider.modelTier,
               requestId: getRandomUUID(),
               instructions: systemPrompt,
               prompt,
@@ -222,7 +232,7 @@ export function useNoteSuggestion() {
         : null
 
       if (!validated) {
-        logger.info("[NoteSuggestion] Discarded schema/semantically invalid suggestion output")
+        log.info("Discarded schema/semantically invalid suggestion output")
         return
       }
 
@@ -246,12 +256,12 @@ export function useNoteSuggestion() {
         // treat it like an abort so it does not block a later attempt for
         // this session.
         if (error instanceof Error && error.message === STREAM_PORT_DISCONNECTED_MESSAGE) {
-          logger.info("[NoteSuggestion] Suggestion stream port disconnected", error)
+          log.debug("Suggestion stream port disconnected", { error })
           return
         }
 
         completedSessionKeysRef.current.add(input.sessionKey)
-        logger.info("[NoteSuggestion] Suggestion request failed", error)
+        log.warn("Suggestion request failed", { error })
       })
       .finally(() => {
         if (abortControllerRef.current === abortController) {

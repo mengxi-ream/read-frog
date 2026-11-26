@@ -58,7 +58,7 @@ function createNetflixAdapter() {
     getVideoElement: () => ({ currentTime: 0 }),
     getState: () => "idle",
   }
-  ;(adapter as any).subtitlesScheduler = scheduler
+  ;(adapter as any).player.subtitlesScheduler = scheduler
   return { adapter, scheduler }
 }
 
@@ -70,7 +70,7 @@ describe("Netflix track poll", () => {
   it("leaves a failed load's error on screen while the same track stays selected", async () => {
     page.answer = async () => pageReply()
     const { adapter, scheduler } = createNetflixAdapter()
-    await (adapter as any).startTranslation()
+    await (adapter as any).starter.startTranslation()
     expect(scheduler.setState).toHaveBeenLastCalledWith("error", {
       message: "subtitles.errors.trackFileNotLoaded",
     })
@@ -88,7 +88,7 @@ describe("Netflix track poll", () => {
   it("loads again after a failure once the viewer picks another track", async () => {
     page.answer = async () => pageReply()
     const { adapter, scheduler } = createNetflixAdapter()
-    await (adapter as any).startTranslation()
+    await (adapter as any).starter.startTranslation()
 
     page.answer = async () => pageReply({ trackId: "T:ja" })
     await adapter.handleSourceTrackChanged()
@@ -106,7 +106,7 @@ describe("Netflix track poll", () => {
     page.answer = (action) =>
       action === "load" && ++loads === 1 ? firstLoad : Promise.resolve(pageReply())
     const { adapter, scheduler } = createNetflixAdapter()
-    const starting = (adapter as any).startTranslation()
+    const starting = (adapter as any).starter.startTranslation()
     await vi.waitFor(() => expect(loadRequests()).toBe(1))
     scheduler.reset.mockClear()
 

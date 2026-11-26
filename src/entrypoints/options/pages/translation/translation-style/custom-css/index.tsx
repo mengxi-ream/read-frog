@@ -15,7 +15,7 @@ import { PreviewControls } from "./preview-controls"
  * controls further down, so the state for those lives here rather than beside them.
  */
 export function CustomCssPage() {
-  const [language, setLanguage] = useState("zh")
+  const [language, setLanguage] = useState("zh-Hans")
   const [dir, setDir] = useState<"ltr" | "rtl">("ltr")
   const [text, setText] = useState(PREVIEW_TEXT)
 

@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 
 const onMessageMock = vi.fn<(...args: any[]) => any>()
 const generateTextForProviderRefMock = vi.fn<(...args: any[]) => any>()
-const loggerErrorMock = vi.fn<(...args: any[]) => any>()
 
 vi.mock("@/utils/message", () => ({
   onMessage: onMessageMock,
@@ -13,12 +12,6 @@ vi.mock("@/utils/message", () => ({
 // message adapter over it, so that is the boundary worth mocking.
 vi.mock("../background-stream", () => ({
   generateTextForProviderRef: generateTextForProviderRefMock,
-}))
-
-vi.mock("@/utils/logger", () => ({
-  logger: {
-    error: loggerErrorMock,
-  },
 }))
 
 const localPayload = {
@@ -60,9 +53,11 @@ describe("llm-generate-text", () => {
       ...localPayload,
       providerRef: {
         kind: "system" as const,
-        providerId: "read-frog-advance-ai" as const,
+        providerId: "read-frog-ai:gpt-6.2-sol" as const,
+        model: "gpt-6.2-sol",
         modelTier: "advance" as const,
         modelRevision: "advance-r1",
+        reasoning: null,
       },
       requestId: "123e4567-e89b-42d3-a456-426614174000",
     }
@@ -78,12 +73,14 @@ describe("llm-generate-text", () => {
   it("logs and rethrows handler errors", async () => {
     generateTextForProviderRefMock.mockRejectedValue(new Error("provider unavailable"))
 
+    // vi.resetModules() brings a fresh logger with the fresh module; capture that one.
+    const logs = (await import("@/utils/logging/testing")).captureLogs()
     const { setupLLMGenerateTextMessageHandlers } = await import("../llm-generate-text")
     setupLLMGenerateTextMessageHandlers()
     const handler = getRegisteredMessageHandler("backgroundGenerateText")
 
     await expect(handler({ data: localPayload })).rejects.toThrow("provider unavailable")
-    expect(loggerErrorMock).toHaveBeenCalled()
+    expect(logs.filter((record) => record.level === "error")).not.toHaveLength(0)
   })
 
   it.each([undefined, null, "", "unknownFeature", "toString"])(
@@ -98,9 +95,11 @@ describe("llm-generate-text", () => {
             ...localPayload,
             providerRef: {
               kind: "system",
-              providerId: "read-frog-free-ai",
+              providerId: "read-frog-ai:gpt-6-luna",
+              model: "gpt-6-luna",
               modelTier: "normal",
               modelRevision: "r1",
+              reasoning: null,
             },
             hostedFeature,
           },

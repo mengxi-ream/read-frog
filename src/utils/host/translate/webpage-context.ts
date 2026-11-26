@@ -1,8 +1,10 @@
 import type { WebPageContext } from "@/types/content"
 import { getSourceDocumentTitle } from "@/utils/content/document-title"
 import { getDocumentDescription } from "@/utils/content/metadata"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
 import { truncateWebPageContent, WEB_PAGE_CONTENT_CHAR_LIMIT } from "./webpage-content"
+
+const log = createLogger("host/translate/webpage-context")
 
 export interface CachedWebPageContext extends WebPageContext {
   url: string
@@ -10,6 +12,17 @@ export interface CachedWebPageContext extends WebPageContext {
 }
 
 let cachedWebPageContext: CachedWebPageContext | null = null
+
+/**
+ * The build in progress, shared by every caller that arrives while it runs.
+ * Page translation asks for the context once per paragraph, and the first
+ * screen starts all of its paragraphs at once. Each build clones and parses the
+ * whole document, so without this every one of them ran its own: 59 full-page
+ * parses on a Google results page, about 13 s of main-thread work before the
+ * first batch could be sent. Smart context hid this by building the context
+ * once before the first paragraph, which is why the page was faster with it on.
+ */
+let pendingWebPageContext: { url: string; promise: Promise<CachedWebPageContext> } | null = null
 
 function createDefuddleSnapshotDocument() {
   const clonedDoc = document.implementation.createHTMLDocument(document.title)
@@ -69,7 +82,7 @@ async function extractWebpageContent(): Promise<string> {
       return createMarkdownContent(prepareMarkdownSource(result.content), window.location.href)
     }
   } catch (error) {
-    logger.warn("Defuddle parsing failed, falling back to body text:", error)
+    log.warn("Defuddle parsing failed, falling back to body text", { error })
   }
   return document.body?.textContent || ""
 }
@@ -132,12 +145,35 @@ export async function getOrCreateWebPageContext(): Promise<CachedWebPageContext 
     cachedWebPageContext = { ...cachedWebPageContext, url: currentUrl }
     return cachedWebPageContext
   }
+  if (
+    pendingWebPageContext &&
+    (pendingWebPageContext.url === currentUrl ||
+      isInPageAnchorChange(pendingWebPageContext.url, currentUrl))
+  ) {
+    return await pendingWebPageContext.promise
+  }
 
-  cachedWebPageContext = {
-    url: currentUrl,
+  const pending = { url: currentUrl, promise: buildWebPageContext(currentUrl) }
+  pendingWebPageContext = pending
+  try {
+    const context = await pending.promise
+    // A build started for a newer URL meanwhile is the one to keep.
+    if (pendingWebPageContext === pending) {
+      cachedWebPageContext = context
+    }
+    return context
+  } finally {
+    if (pendingWebPageContext === pending) {
+      pendingWebPageContext = null
+    }
+  }
+}
+
+async function buildWebPageContext(url: string): Promise<CachedWebPageContext> {
+  return {
+    url,
     webTitle: getSourceDocumentTitle(),
     webDescription: getDocumentDescription(document),
     webContent: truncateWebPageContent(await extractWebpageContent()),
   }
-  return cachedWebPageContext
 }

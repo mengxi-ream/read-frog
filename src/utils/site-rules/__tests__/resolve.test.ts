@@ -2,7 +2,12 @@
 import type { SiteRule } from "@/types/config/site-rules"
 import { describe, expect, it } from "vitest"
 import { siteRuleSchema } from "@/types/config/site-rules"
-import { EMPTY_RESOLVED_SITE_RULE, resolveSiteRule, urlMatchesRule } from "../resolve"
+import {
+  contentTypeMatchesRule,
+  EMPTY_RESOLVED_SITE_RULE,
+  resolveSiteRule,
+  urlMatchesRule,
+} from "../resolve"
 
 const URL_ON_SITE = "https://example.com/article"
 
@@ -515,5 +520,81 @@ describe("urlMatchesRule", () => {
     expect(urlMatchesRule("https://github.com/foo/bar", githubRule)).toBe(true)
     expect(urlMatchesRule("https://github.com/settings/profile", githubRule)).toBe(false)
     expect(urlMatchesRule("https://github.com/foo/bar/settings", githubRule)).toBe(false)
+  })
+
+  it("reaches local files and data:/blob: frames only through <all_urls>", () => {
+    for (const url of [
+      "file:///Users/someone/notes.md",
+      "data:text/plain,First%20paragraph.",
+      "blob:https://example.com/0f2b6a3e-1111-4c2e-9a77-2f6f0a1c9d10",
+    ]) {
+      expect(urlMatchesRule(url, { matches: "<all_urls>" })).toBe(true)
+      expect(urlMatchesRule(url, { matches: "*" })).toBe(false)
+    }
+    expect(urlMatchesRule("https://memu.so/SKILL.md", { matches: "<all_urls>" })).toBe(true)
+  })
+})
+
+describe("contentTypeMatchesRule", () => {
+  it("admits every document when the rule lists no types", () => {
+    expect(contentTypeMatchesRule("text/html", {})).toBe(true)
+    expect(contentTypeMatchesRule(undefined, {})).toBe(true)
+  })
+
+  it("admits only the listed types, case-insensitively and without parameters", () => {
+    const markdownRule = { contentTypes: ["Text/Markdown; charset=utf-8"] }
+    expect(contentTypeMatchesRule("text/markdown", markdownRule)).toBe(true)
+    expect(contentTypeMatchesRule("TEXT/MARKDOWN", markdownRule)).toBe(true)
+    expect(contentTypeMatchesRule("text/plain", markdownRule)).toBe(false)
+  })
+
+  it("never admits a document whose type is unknown", () => {
+    expect(contentTypeMatchesRule(undefined, { contentTypes: ["text/plain"] })).toBe(false)
+  })
+})
+
+describe("resolveSiteRule with contentTypes", () => {
+  const plainTextRule = rule({
+    id: "plain-text",
+    matches: "<all_urls>",
+    contentTypes: ["text/plain"],
+    "dontWalkTags.remove": ["PRE"],
+  })
+
+  it("applies a content-type rule only to documents of that type", () => {
+    const plain = resolveSiteRule(URL_ON_SITE, [plainTextRule], [], [], "text/plain")
+    expect(plain.matchedRuleIds).toEqual(["plain-text"])
+    expect(plain.dontWalkTags!.has("PRE")).toBe(false)
+
+    expect(resolveSiteRule(URL_ON_SITE, [plainTextRule], [], [], "text/html")).toBe(
+      EMPTY_RESOLVED_SITE_RULE,
+    )
+    expect(resolveSiteRule(URL_ON_SITE, [plainTextRule], [], [])).toBe(EMPTY_RESOLVED_SITE_RULE)
+  })
+
+  it("lets a later site rule override what a content-type rule set", () => {
+    const resolved = resolveSiteRule(
+      URL_ON_SITE,
+      [plainTextRule],
+      [rule({ id: "user", "dontWalkTags.add": ["PRE"] })],
+      [],
+      "text/plain",
+    )
+    expect(resolved.matchedRuleIds).toEqual(["plain-text", "user"])
+    expect(resolved.dontWalkTags!.has("PRE")).toBe(true)
+  })
+
+  it("combines a URL pattern and content types", () => {
+    const pythonOnSite = rule({
+      id: "python-source",
+      contentTypes: ["text/x-python"],
+      "dontWalkTags.remove": ["PRE"],
+    })
+    expect(
+      resolveSiteRule(URL_ON_SITE, [], [pythonOnSite], [], "text/x-python").matchedRuleIds,
+    ).toEqual(["python-source"])
+    expect(resolveSiteRule("https://other.com/a.py", [], [pythonOnSite], [], "text/x-python")).toBe(
+      EMPTY_RESOLVED_SITE_RULE,
+    )
   })
 })

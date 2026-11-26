@@ -62,6 +62,13 @@
     ]
   },
   {
+    "id": "readfrog-plain-text-document",
+    "description": "A browser shows a .txt or .md file as one generated <pre> holding the whole file, which the default PRE block would skip entirely. Walk it so the text translates one blank-line paragraph at a time. Matches on document type, on any URL including local files and data: or blob: frames; an authored <pre> in an HTML page stays blocked. Site and user rules come later and can block PRE again with dontWalkTags.add",
+    "matches": "<all_urls>",
+    "contentTypes": ["text/plain", "text/markdown", "text/x-markdown"],
+    "dontWalkTags.remove": ["PRE"]
+  },
+  {
     "id": "pdf",
     "matches": "https://app.infread.com/pdf/*",
     "includeSelectors": ["#viewerContainer p"],
@@ -167,7 +174,8 @@
       "[data-testid='inlinePrompt']",
       "span[class='css-1jxf684 r-bcqeeo r-1ttztb7 r-qvutc0 r-poiln3 r-n6v787 r-1cwl3u0']",
       "[data-testid=primaryColumn] [class='css-175oi2r r-kzbkwu r-3pj75a'] > div > span[class='css-1jxf684 r-bcqeeo r-1ttztb7 r-qvutc0 r-poiln3']",
-      ".font-chirp.text-body.font-normal"
+      ".font-chirp.text-body.font-normal",
+      "main [dir=auto].whitespace-pre-wrap"
     ],
     "forceInlineStyleSelectors": [
       "[data-testid=\"tweetText\"] div.r-xoduu5",
@@ -198,7 +206,8 @@
       "h2[role=heading]",
       "[class='css-175oi2r r-1awozwy r-18u37iz r-1wtj0ep r-6gpygo'],[class='css-175oi2r r-1d09ksm r-18u37iz r-1wbh5a2 r-1471scf'],[class='css-175oi2r r-1kbdv8c r-18u37iz r-1wtj0ep r-1ye8kvj r-1s2bzr4']",
       ".imt-caption-container *",
-      "[data-testid=videoComponent]"
+      "[data-testid=videoComponent]",
+      "main [dir=auto].whitespace-pre-wrap > button"
     ],
     "forceBlockNodeSelectors.add": ["[data-testid=\"tweetText\"] div.r-6koalj"],
     "forceBlockStyleSelectors.add": ["[data-testid=\"tweetText\"] div.r-6koalj"],
@@ -216,7 +225,8 @@
       "[data-testid='tweetText'],[style*='-webkit-line-clamp'] {-webkit-line-clamp: unset!important;}",
       "[role=dialog] [style*='webkit-line-clamp'] {-webkit-line-clamp: unset!important;}",
       ".r-h9hxbl{width:unset;}",
-      "[aria-label=Grok] [data-testid=ScrollSnap-SwipeableList] [role=presentation] > div > div { max-height: unset !important; }"
+      "[aria-label=Grok] [data-testid=ScrollSnap-SwipeableList] [role=presentation] > div > div { max-height: unset !important; }",
+      "main [dir=auto].whitespace-pre-wrap[class*='line-clamp-']:has(.read-frog-translated-content-wrapper) {-webkit-line-clamp: unset!important;}"
     ]
   },
   {
@@ -300,7 +310,7 @@
     "injectedCss": "span,.x569fbc { max-height:unset;-webkit-line-clamp:unset;height:unset;white-space:unset; }",
     "excludeSelectors.add": [
       ".x6s0dn4.x40hh3e.xrvj5dj.xxfwaov",
-      ".x6s0dn4.x78zum5",
+      ".x6s0dn4.x78zum5:not(:has([data-pressable-container]))",
       ".xpvyfi4.x1xdureb.x1agbcgv,.xqcrz7y.x1xdureb.x1agbcgv",
       ".xpvyfi4.x1npkx4u.x1ms6mhf"
     ],
@@ -609,7 +619,8 @@
       "[class='col-lg-9 position-relative pr-lg-5 mb-6 mr-lg-5']",
       "[class*='IssueIndexPage-module__middlePaneGrid'] div[class='p-4 text-center rounded-2 border color-border-muted']",
       "[class*='ModelsPlaygroundRoute-module__playgroundContainer']",
-      "article [class='f6 color-fg-muted mt-1']"
+      "article [class='f6 color-fg-muted mt-1']",
+      ".repos-list-description"
     ],
     "forceInlineStyleSelectors": ["g-emoji", "a.anchor"],
     "injectedCss": ".TimelineItem-body .Link--primary { -webkit-line-clamp: unset; }",
@@ -656,7 +667,8 @@
       ".bpDald,.discussion-title {-webkit-line-clamp:unset!important;}",
       "li>div[class*='Box-sc'],div[class*='Box-sc']>button[class*='prc-Token-TokenBase'],li[class*='card-label-module']>button[class*='prc-Token-TokenBase'] {height:unset!important;}",
       "#memex-project-view-root [class*=table-row__StyledTableRow-sc],#memex-project-view-root [class*=base-cell-module__Box] {height:unset!important;}",
-      "[class*='GridCard-module__description'] {-webkit-line-clamp: unset;}"
+      "[class*='GridCard-module__description'] {-webkit-line-clamp: unset;}",
+      ".repos-list-description:has(.read-frog-translated-content-wrapper) [class*='prc-Truncate-Truncate'] {white-space: normal!important;overflow: visible!important;}"
     ]
   },
   {
@@ -1233,15 +1245,14 @@
   },
   {
     "id": "lowendtalk",
+    "description": "Was an include whitelist (headings, post bodies, the sidebar, discussion-list meta) that left category and page descriptions, latest-post titles, search results and comment headers in English. The whole page translates now; the excludes keep out only what machine translation garbles. Usernames get transliterated, so the author block of each post and comment header is excluded whole (.Author: the avatar link's title, the img's alt and the name), because translation-only mode sends a header's run as HTML and swaps the reply into every text node and title/alt under it, and excluding .Username alone left the name inside the serialized .Author. Also kept out: usernames elsewhere; the Thanked by box, a list of names whose `.ThankedBy > span` CSS wraps an inserted translation in parentheses; the In this Discussion list of names and times; and the sidebar category counts",
     "matches": "lowendtalk.com",
-    "excludeSelectors": [".ClearFix .Count"],
-    "includeSelectors": [
-      "[role=heading]",
-      "h1",
-      ".userContent",
-      ".DismissMessage",
-      ".PanelColumn",
-      ".Meta-Discussion"
+    "excludeSelectors": [
+      ".ClearFix .Count",
+      ".Author",
+      ".Username",
+      ".ThankedByBox",
+      ".PanelInThisDiscussion"
     ]
   },
   {
@@ -2126,6 +2137,24 @@
     "forceBlockStyleSelectors.add": ["[href^='#page']"]
   },
   {
+    "id": "ietf-rfc-plaintext",
+    "description": "An RFC published as plain text renders its whole body in <pre>: the title page in a bare <pre>, every later page in <pre class=\"newpage\">, and the datatracker document page in one <pre> under .card-body. PRE is hard-blocked by default for authored code, so the RFC body was never walked. v3 (xml2rfc) RFCs write prose as <p> and keep only code and figures in <pre>, so those stay blocked: pre.sourcecode and .artwork pre on the HTML renderings, and every <pre> inside .rfc-content-type-xml2rfc on rfc-editor.org/info pages, whose figures carry no class. span.grey is the running page header and footer of the plain-text pages",
+    "matches": [
+      "www.rfc-editor.org/rfc/*",
+      "www.rfc-editor.org/info/*",
+      "datatracker.ietf.org/doc/html/*",
+      "datatracker.ietf.org/doc/rfc*",
+      "datatracker.ietf.org/doc/draft-*"
+    ],
+    "dontWalkTags.remove": ["PRE"],
+    "excludeSelectors": [
+      "pre.sourcecode",
+      ".artwork pre",
+      ".rfc-content-type-xml2rfc pre",
+      "pre span.grey"
+    ]
+  },
+  {
     "id": "newsminimalist",
     "matches": "https://www.newsminimalist.com/",
     "forceBlockNodeSelectors.add": [".inline-flex"],
@@ -2426,7 +2455,7 @@
     "id": "cnn",
     "matches": "*.cnn.com",
     "description": "多视频页面不好处理，暂时不支持",
-    "excludeSelectors.add": [".ad-slot-header__wrapper", "#pageFooter"]
+    "excludeSelectors.add": [".ad-slot-header__wrapper"]
   },
   {
     "id": "githubBlog",
@@ -4578,7 +4607,7 @@
   },
   {
     "id": "gamefaqs-guides",
-    "description": "GameFAQs serves a text guide as an HTML page whose entire body is a run of <pre id=\"faqspan-N\"> blocks (about 50k characters each) under #faqtext. PRE is hard-blocked by default for authored code, and the plain-text exemption only covers text/plain documents, so the guide was never walked while the page around it translated. Limited to guide pages, where a <pre> holds the author's prose; its blank lines then split it into one translation per paragraph",
+    "description": "GameFAQs serves a text guide as an HTML page whose entire body is a run of <pre id=\"faqspan-N\"> blocks (about 50k characters each) under #faqtext. PRE is hard-blocked by default for authored code, and readfrog-plain-text-document only covers plain-text and markdown documents, so the guide was never walked while the page around it translated. Limited to guide pages, where a <pre> holds the author's prose; its blank lines then split it into one translation per paragraph",
     "matches": "gamefaqs.gamespot.com/*/faqs/*",
     "dontWalkTags.remove": ["PRE"]
   },
@@ -4593,5 +4622,11 @@
     "description": "The header dropdowns open on pure CSS hover (`.onedepth.twoDepth_hover:hover .twoDepth_wrap`), which changes no DOM, so the walk never came back to them after skipping them as display: none. The all-categories menu needs no entry: opening it sets a style on <body>, which already re-walks it",
     "matches": "*.thenorthfacekorea.co.kr",
     "walkHiddenSelectors": [".header-gnb .twoDepth_wrap"]
+  },
+  {
+    "id": "raea",
+    "description": "raea.io draws its letter's display lines ([data-ink]) as canvas ink and makes their DOM text transparent, so a translation inside them never shows. Recoloring only the translation is not enough: the ink keeps drawing the English over a translation-only swap, and a bilingual translation breaks the ink's resize handler. While a translation is on the page, show the lines as plain text and hide the canvas, the site's own fallback when the ink fails to load. `body` outranks the site's rule without !important, so translation styles keep their colors",
+    "matches": "raea.io",
+    "injectedCss": "body .letter.ink-on [data-ink] { color: var(--foreground); }\n.letter > canvas[aria-hidden='true'] { display: none; }"
   }
 ]

@@ -1,5 +1,6 @@
 import type { ReactNode } from "react"
 import type { SelectionSession } from "../atoms"
+import type { ContextMenuSelection } from "../use-selection-open-request"
 import type { SelectionPopoverActions } from "@/components/ui/selection-popover"
 import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { createContext, use, useCallback, useEffect, useMemo, useRef, useState } from "react"
@@ -14,11 +15,13 @@ import { ReviewDueTab } from "@/components/ui/selection-popover/review-due-tab"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
 import { classifyResolvedProvider, UNKNOWN_FEATURE_PROVIDER } from "@/utils/analytics-provider"
-import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { findSelectionToolbarAction, getSelectionToolbarActions } from "@/utils/custom-actions"
+import { configAtom, configFieldsAtomMap } from "@/utils/atoms/config"
+import { findSelectionToolbarAction } from "@/utils/custom-actions"
 import { onMessage } from "@/utils/message"
+import { getWebPageNoteOrigin } from "@/utils/note-origin"
 import { resolveProviderRefForCapability } from "@/utils/providers/provider-registry"
 import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-host"
+import { getSelectionToolbarItems } from "@/utils/selection-toolbar-items"
 import { notifySelectionLookup } from "../../selection-lookups"
 import { normalizeSelectedText } from "../../utils"
 import {
@@ -68,7 +71,8 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
   const selectionSession = useAtomValue(selectionSessionAtom)
   const selection = useAtomValue(selectionAtom)
   const context = useAtomValue(contextAtom)
-  const selectionToolbarConfig = useAtomValue(configFieldsAtomMap.selectionToolbar)
+  const config = useAtomValue(configAtom)
+  const selectionToolbarConfig = config.selectionToolbar
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
   const [customActionRequest, setCustomActionRequest] = useAtom(customActionRequestAtom)
   const setIsSelectionToolbarOpen = useSetAtom(isSelectionToolbarOpenAtom)
@@ -107,6 +111,7 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
               cleanSelection,
               contextText: cleanSelection ? session?.contextSnapshot.text || cleanSelection : "",
               surface: pendingRequest.surface,
+              noteOrigin: session?.noteOrigin ?? null,
               sessionKey: sessionKeyRef.current,
               // A reuse forces a rerun even when the retriggered request
               // resolves to an identical execution key.
@@ -170,6 +175,7 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
                   text: "",
                   paragraphs: [],
                 },
+                noteOrigin: getWebPageNoteOrigin(),
               }
             : null),
       })
@@ -178,7 +184,7 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
   )
 
   const openContextMenuCustomAction = useCallback(
-    (actionId: string) => {
+    (actionId: string, menu: ContextMenuSelection) => {
       const action = findSelectionToolbarAction(selectionToolbarConfig, actionId)
       if (!action || action.enabled === false) {
         const nextError = createSelectionToolbarPrecheckError("customAction", "actionUnavailable")
@@ -196,7 +202,7 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
         return
       }
 
-      const request = resolveContextMenuOpenRequest()
+      const request = resolveContextMenuOpenRequest(menu)
       if (!request) {
         const nextError = createSelectionToolbarPrecheckError("customAction", "missingSelection")
         void trackFeatureUsed({
@@ -226,15 +232,16 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
     [openActionRequest, providersConfig, resolveContextMenuOpenRequest, selectionToolbarConfig],
   )
 
-  // An action switched off has no key, whatever it was given.
+  // An action's key goes with its toolbar item: an action switched off has none, whatever it was
+  // given, and neither has any while simple mode has custom actions or the toolbar switched off.
   const actionShortcuts = useMemo(
     () =>
       Object.fromEntries(
-        getSelectionToolbarActions(selectionToolbarConfig)
-          .filter((action) => action.enabled !== false)
-          .map((action) => [action.id, action.shortcut]),
+        getSelectionToolbarItems(config).flatMap((item) =>
+          item.kind === "action" && item.shown ? [[item.id, item.action.shortcut]] : [],
+        ),
       ),
-    [selectionToolbarConfig],
+    [config],
   )
 
   useSelectionShortcuts(actionShortcuts, (actionId, session) => {
@@ -253,7 +260,7 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
 
   useEffect(() => {
     return onMessage("openSelectionCustomActionFromContextMenu", (message) => {
-      openContextMenuCustomAction(message.data.actionId)
+      openContextMenuCustomAction(message.data.actionId, message.data)
     })
   }, [openContextMenuCustomAction])
 

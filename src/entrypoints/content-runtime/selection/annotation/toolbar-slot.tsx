@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/selection-popover/selection-tooltip"
 import { ANALYTICS_SURFACE } from "@/types/analytics"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { getAnnotationShortcut } from "@/utils/constants/selection"
+import { getAnnotationModeShortcut, getAnnotationShortcut } from "@/utils/constants/selection"
 import { i18n } from "@/utils/i18n"
 import { ANNOTATION_ICON } from "@/utils/iconify/bundled-icons"
 import { cn } from "@/utils/styles/utils"
@@ -121,9 +121,13 @@ export function AnnotateButton({ onPointerEnter }: { onPointerEnter: () => void 
   )
 }
 
-/** The switch into annotation mode, in the slot that opens at the toolbar's left edge. */
+/**
+ * The switch into annotation mode, in the slot that opens at the toolbar's left
+ * edge. Its tooltip shows the mode's key, the way in without the toolbar.
+ */
 export function AnnotateReveal({ open }: { open: boolean }) {
   const { mode, setMode } = useAnnotation()
+  const { annotation } = useAtomValue(configFieldsAtomMap.selectionToolbar)
   const setIsSelectionToolbarOpen = useSetAtom(isSelectionToolbarOpenAtom)
   const label = i18n.t("annotation.enterMode")
 
@@ -137,7 +141,9 @@ export function AnnotateReveal({ open }: { open: boolean }) {
       )}
     >
       <SelectionToolbarTooltip
-        content={label}
+        content={
+          <ShortcutTooltipLabel label={label} shortcut={getAnnotationModeShortcut(annotation)} />
+        }
         render={<span className="flex h-7 w-9 shrink-0 items-center justify-center" />}
       >
         <Switch

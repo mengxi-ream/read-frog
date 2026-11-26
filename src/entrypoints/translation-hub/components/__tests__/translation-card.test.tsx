@@ -7,6 +7,7 @@ import { TranslationCard } from "@/entrypoints/translation-hub/components/transl
 const {
   anchoredToastAddMock,
   clipboardWriteMock,
+  languageAtom,
   glossaryAtom,
   providersAtom,
   requestAtom,
@@ -21,6 +22,7 @@ const {
 } = vi.hoisted(() => ({
   anchoredToastAddMock: vi.fn<(options: unknown) => void>(),
   clipboardWriteMock: vi.fn<(text: string) => void>(),
+  languageAtom: {},
   glossaryAtom: {},
   providersAtom: {},
   requestAtom: {},
@@ -28,7 +30,8 @@ const {
   streamBackgroundTextMock: vi.fn<(...args: unknown[]) => Promise<{ output: string }>>(),
   executeTranslateMock: vi.fn<(...args: unknown[]) => Promise<string>>(),
   ttsAtom: {},
-  ttsPlayMock: vi.fn<(text: string, config: object) => Promise<void>>(),
+  ttsPlayMock:
+    vi.fn<(text: string, config: object, options?: { forcedVoice?: string }) => Promise<void>>(),
   ttsStopMock: vi.fn<() => void>(),
   providerRefState: { kind: "local" },
   mutationFnState: { current: null as null | ((request: unknown) => Promise<string | undefined>) },
@@ -39,6 +42,7 @@ const ttsConfig = vi.hoisted(() => ({ defaultVoice: "en-US-AriaNeural" }))
 
 interface UseMutationMockShape {
   data: string | undefined
+  variables?: { targetLanguage: string }
   isError: boolean
   isPending: boolean
   mutate: (request: unknown) => void
@@ -67,6 +71,7 @@ vi.mock("jotai", () => ({
   useAtom: () => [["provider-1"], vi.fn<(value: unknown) => void>()],
   useAtomValue: (atom: object) => {
     if (atom === requestAtom) return null
+    if (atom === languageAtom) return { level: "intermediate" }
     if (atom === glossaryAtom) return { enabled: false }
     if (atom === ttsAtom) return ttsConfig
     if (atom === providersAtom) return []
@@ -88,6 +93,7 @@ vi.mock("@/components/ui/base-ui/toast", () => ({
 }))
 
 vi.mock("@/hooks/use-text-to-speech", () => ({
+  selectTTSVoice: (_config: unknown, language: string) => `voice:${language}`,
   useTextToSpeech: () => ({
     play: ttsPlayMock,
     stop: ttsStopMock,
@@ -97,6 +103,7 @@ vi.mock("@/hooks/use-text-to-speech", () => ({
 
 vi.mock("@/utils/atoms/config", () => ({
   configFieldsAtomMap: {
+    language: languageAtom,
     glossary: glossaryAtom,
     tts: ttsAtom,
     providersConfig: providersAtom,
@@ -111,6 +118,7 @@ describe("TranslationCard speech", () => {
     ttsState.isPlaying = false
     useMutationMock.current = {
       data: "Translated text",
+      variables: { targetLanguage: "pt-PT" },
       isError: false,
       isPending: false,
       mutate: vi.fn<(request: unknown) => void>(),
@@ -118,7 +126,7 @@ describe("TranslationCard speech", () => {
     }
   })
 
-  it("plays the card's translated text using the configured voice settings", () => {
+  it("plays the card's translation with the voice for the language it was translated into", () => {
     render(
       <TranslationCard
         providerId="provider-1"
@@ -129,7 +137,9 @@ describe("TranslationCard speech", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "translationHub.speakTranslation" }))
 
-    expect(ttsPlayMock).toHaveBeenCalledWith("Translated text", ttsConfig)
+    expect(ttsPlayMock).toHaveBeenCalledWith("Translated text", ttsConfig, {
+      forcedVoice: "voice:pt-PT",
+    })
   })
 
   it("stops speech while audio is loading or playing", () => {
@@ -188,18 +198,34 @@ vi.mock("@/utils/config/helpers", () => ({
   getProviderConfigById: () => ({ id: "provider-1", name: "OpenAI", provider: "openai" }),
 }))
 
+// Names a Built-in AI model; the ref above already carries the name.
+vi.mock("@/components/llm-providers/use-built-in-ai-models", () => ({
+  useBuiltInAiModels: () => ({ models: null, isLive: false }),
+}))
+
 vi.mock("@/utils/providers/provider-registry", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/utils/providers/provider-registry")>()),
   BUILT_IN_AI_PROVIDER_LOGO: "built-in-logo",
   resolveProviderRefForCapability: () =>
     providerRefState.kind === "system"
-      ? { kind: "system", id: "read-frog-free-ai", name: "Built-in AI", modelTier: "normal" }
-      : {
-          kind: "local",
-          id: "provider-1",
-          name: "OpenAI",
-          config: { id: "provider-1", name: "OpenAI", provider: "openai" },
-        },
+      ? { kind: "system", id: "read-frog-ai:gpt-6-luna", name: "GPT-6 Luna", model: "gpt-6-luna" }
+      : providerRefState.kind === "google"
+        ? {
+            kind: "local",
+            id: "google-translate-default",
+            name: "Google Translate",
+            config: {
+              id: "google-translate-default",
+              name: "Google Translate",
+              provider: "google-translate",
+            },
+          }
+        : {
+            kind: "local",
+            id: "provider-1",
+            name: "OpenAI",
+            config: { id: "provider-1", name: "OpenAI", provider: "openai" },
+          },
 }))
 
 vi.mock("@/utils/content-script/background-stream-client", () => ({
@@ -274,7 +300,7 @@ describe("TranslationCard built-in translation", () => {
     streamBackgroundTextMock.mockResolvedValueOnce({ output: "Translated by built-in AI" })
     render(
       <TranslationCard
-        providerId="read-frog-free-ai"
+        providerId="read-frog-ai:gpt-6-luna"
         isExpanded
         onExpandedChange={vi.fn<(expanded: boolean) => void>()}
       />,
@@ -292,8 +318,7 @@ describe("TranslationCard built-in translation", () => {
     expect(streamBackgroundTextMock).toHaveBeenCalledWith(
       expect.objectContaining({
         providerKind: "system",
-        providerId: "read-frog-free-ai",
-        modelTier: "normal",
+        providerId: "read-frog-ai:gpt-6-luna",
         hostedFeature: "pageTranslation",
         requestId: expect.any(String),
         instructions: expect.any(String),
@@ -301,6 +326,9 @@ describe("TranslationCard built-in translation", () => {
       }),
       { signal: expect.any(AbortSignal) },
     )
+    // No cache keeps a Hub result, so the background asks for the level the
+    // user picked for the model when it sends the request.
+    expect(streamBackgroundTextMock.mock.calls[0]![0]).not.toHaveProperty("builtInAiReasoning")
   })
 
   it("uses the Hub prompt snapshot and a fresh hosted request ID each time", async () => {
@@ -308,7 +336,7 @@ describe("TranslationCard built-in translation", () => {
     streamBackgroundTextMock.mockResolvedValue({ output: " result " })
     render(
       <TranslationCard
-        providerId="read-frog-free-ai"
+        providerId="read-frog-ai:gpt-6-luna"
         isExpanded
         onExpandedChange={vi.fn<(expanded: boolean) => void>()}
       />,
@@ -388,6 +416,43 @@ describe("TranslationCard built-in translation", () => {
   })
 })
 
+describe("TranslationCard translate providers", () => {
+  beforeEach(() => {
+    executeTranslateMock.mockReset()
+  })
+
+  // Google's transport collapses unprotected newlines, which ran typed
+  // paragraphs together and let its zh-TW model cut them short (#2466).
+  it("keeps the line breaks of typed text", async () => {
+    providerRefState.kind = "google"
+    executeTranslateMock.mockResolvedValueOnce("第一段。\n\n第二段。")
+    render(
+      <TranslationCard
+        providerId="google-translate-default"
+        isExpanded
+        onExpandedChange={vi.fn<(expanded: boolean) => void>()}
+      />,
+    )
+
+    const result = await mutationFnState.current!({
+      inputText: "First paragraph.\n\nSecond paragraph.",
+      sourceLanguage: "eng",
+      targetLanguage: "cmn-Hant",
+      timestamp: 1,
+      promptConfig: { promptId: "default", patterns: [] },
+    })
+
+    expect(result).toBe("第一段。\n\n第二段。")
+    expect(executeTranslateMock).toHaveBeenCalledWith(
+      "First paragraph.\n\nSecond paragraph.",
+      expect.objectContaining({ sourceCode: "eng", targetCode: "cmn-Hant" }),
+      expect.objectContaining({ provider: "google-translate" }),
+      expect.any(Function),
+      expect.objectContaining({ preserveLineBreaks: true }),
+    )
+  })
+})
+
 describe("TranslationCard error display", () => {
   beforeEach(() => {
     providerRefState.kind = "local"
@@ -418,5 +483,82 @@ describe("TranslationCard error display", () => {
     expect(errorParagraph.className).toContain("break-words")
     // whitespace-pre-wrap preserves newlines in multi-line provider errors
     expect(errorParagraph.className).toContain("whitespace-pre-wrap")
+    // A provider's error has no Built-in AI request id.
+    expect(screen.queryByText("hostedAi.requestId.label")).not.toBeInTheDocument()
+  })
+
+  it("shows a failed Built-in AI call's request id under its message", () => {
+    const requestId = "123e4567-e89b-42d3-a456-426614174000"
+    useMutationMock.current = {
+      ...useMutationMock.current,
+      error: Object.assign(new Error("Internal server error"), { builtInAiRequestId: requestId }),
+    }
+
+    render(
+      <TranslationCard
+        providerId="provider-1"
+        isExpanded
+        onExpandedChange={vi.fn<(expanded: boolean) => void>()}
+      />,
+    )
+
+    expect(screen.getByText("Internal server error")).toBeInTheDocument()
+    expect(screen.getByText(requestId)).toBeInTheDocument()
+  })
+})
+
+describe("TranslationCard when Built-in AI refuses", () => {
+  function renderWithError(error: Error) {
+    useMutationMock.current = {
+      data: undefined,
+      isError: true,
+      isPending: false,
+      mutate: vi.fn<(request: unknown) => void>(),
+      error,
+    }
+    render(
+      <TranslationCard
+        providerId="provider-1"
+        isExpanded
+        onExpandedChange={vi.fn<(expanded: boolean) => void>()}
+      />,
+    )
+  }
+
+  it("offers the upgrade in the card, with the feature on the link", () => {
+    const open = vi.spyOn(window, "open").mockReturnValue(null)
+    // The background's refusal for a spent pool below Ultra carries its action.
+    renderWithError(
+      Object.assign(new Error("Built-in AI quota used up"), {
+        code: "HOSTED_AI_QUOTA_EXHAUSTED",
+        action: {
+          label: "Upgrade",
+          url: "https://readfrog.app/pricing?entry=extension_quota_exhausted",
+        },
+      }),
+    )
+
+    fireEvent.click(screen.getByRole("button", { name: "action.upgrade" }))
+
+    const url = new URL(open.mock.calls[0]![0] as string)
+    expect(url.pathname).toBe("/pricing")
+    expect(url.searchParams.get("entry")).toBe("extension_quota_exhausted")
+    expect(url.searchParams.get("feature")).toBe("translation_hub")
+    open.mockRestore()
+  })
+
+  it("offers a guest the log-in", () => {
+    renderWithError(Object.assign(new Error("Log in to use Built-in AI"), { code: "UNAUTHORIZED" }))
+
+    expect(screen.getByRole("button", { name: "account.login" })).toBeInTheDocument()
+  })
+
+  it("offers Ultra no upgrade: its refusal carries no action", () => {
+    renderWithError(
+      Object.assign(new Error("Built-in AI quota used up"), { code: "HOSTED_AI_QUOTA_EXHAUSTED" }),
+    )
+
+    expect(screen.getByText("Built-in AI quota used up")).toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: "action.upgrade" })).not.toBeInTheDocument()
   })
 })

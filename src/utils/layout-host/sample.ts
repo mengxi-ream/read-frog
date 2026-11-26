@@ -1,4 +1,4 @@
-import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { LanguageTag } from "@read-frog/definitions"
 import type {
   DictionarySlot,
   ImproveWritingSlot,
@@ -488,7 +488,7 @@ function sampleValueFor(
 // Improve-Writing-shaped one, else the dictionary sample's.
 export function createLayoutSampleData(
   outputSchema: readonly Field[],
-  targetCode: LangCodeISO6393,
+  targetCode: LanguageTag,
 ): SampleData {
   const locale = contentLocaleFor(targetCode)
   const { selection } = isSentenceAnalysisShaped(outputSchema)
@@ -511,7 +511,7 @@ export function createLayoutSampleData(
 export function syncLayoutSampleData(
   sampleData: SampleData | undefined,
   outputSchema: readonly Field[],
-  targetCode: LangCodeISO6393,
+  targetCode: LanguageTag,
 ): SampleData {
   if (!sampleData) return createLayoutSampleData(outputSchema, targetCode)
   const valueOf = sampleValueFor(outputSchema, contentLocaleFor(sampleData.targetCode))

@@ -74,6 +74,7 @@ describe("dEFAULT_CONFIG", () => {
       "microsoft-translate-default",
       "openai-default",
       "jalapenocloud-default",
+      "ifapi-default",
       "deepseek-default",
     ])
     expect(DEFAULT_CONFIG.pageTranslation.providerId).toBe("microsoft-translate-default")
@@ -87,10 +88,23 @@ describe("dEFAULT_CONFIG", () => {
     ).toEqual(
       expect.objectContaining({
         model: {
-          model: "GLM-5.2",
+          model: "GLM-5.3",
           isCustomModel: false,
           customModel: null,
         },
+      }),
+    )
+    expect(
+      DEFAULT_CONFIG.providersConfig.find((provider) => provider.id === "ifapi-default"),
+    ).toEqual(
+      expect.objectContaining({
+        baseURL: "https://cn.ifapi.org/v1",
+        model: {
+          model: "gpt-6-luna",
+          isCustomModel: false,
+          customModel: null,
+        },
+        providerOptions: { reasoning_effort: "none" },
       }),
     )
     expect(
@@ -98,7 +112,7 @@ describe("dEFAULT_CONFIG", () => {
     ).toEqual(
       expect.objectContaining({
         model: {
-          model: "deepseek-v4-flash",
+          model: "deepseek-flash",
           isCustomModel: false,
           customModel: null,
         },
@@ -121,14 +135,14 @@ describe("dEFAULT_CONFIG", () => {
     >
 
     delete legacyNode.forceRetranslation
-    legacyConfig.language.targetCode = "jpn"
+    legacyConfig.language.targetCode = "ja"
 
     const result = configSchema.safeParse(legacyConfig)
 
     expect(result.success).toBe(true)
     if (!result.success) return
     expect(result.data.pageTranslation.node.forceRetranslation).toBe(false)
-    expect(result.data.language.targetCode).toBe("jpn")
+    expect(result.data.language.targetCode).toBe("ja")
   })
 
   it("rebuilds schema-valid built-in action state for persistence", async () => {
@@ -144,9 +158,19 @@ describe("dEFAULT_CONFIG", () => {
     )
     expect(config.selectionToolbar.builtInActions.dictionary).toEqual({
       enabled: true,
-      providerId: "read-frog-free-ai",
+      providerId: "read-frog-ai:claude-haiku-5-5",
     })
     expect(config.selectionToolbar.customActions).toEqual([])
+    // Translation runs on Built-in AI; note suggestions keep their own default.
+    expect([
+      config.pageTranslation.providerId,
+      config.selectionToolbar.features.translate.providerId,
+      config.inputTranslation.providerId,
+      config.videoSubtitles.providerId,
+    ]).toEqual(Array.from({ length: 4 }, () => "read-frog-ai:claude-haiku-5-5"))
+    expect(config.selectionToolbar.noteSuggestion.providerId).toBe(
+      DEFAULT_CONFIG.selectionToolbar.noteSuggestion.providerId,
+    )
     expect(createDefaultDictionaryAction()).toEqual(
       expect.objectContaining({
         id: "default-dictionary",
@@ -196,7 +220,7 @@ describe("createDefaultDictionaryAction layout", () => {
         outputSchema: action.outputSchema,
         value,
         selection: "blossom",
-        targetCode: "cmn",
+        targetCode: "zh-Hans",
         status: "done",
       }),
     )

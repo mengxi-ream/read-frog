@@ -1,4 +1,4 @@
-import { useAtom } from "jotai"
+import { useAtom, useAtomValue } from "jotai"
 import { useEffect, useMemo, useRef } from "react"
 import { useLocation, useNavigate } from "react-router"
 import {
@@ -10,7 +10,9 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/base-ui/command"
+import { configAtom } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
+import { buildTurnOnLink } from "../pages/advanced/simple-mode/links"
 import { useIsDifficultWordsOpen } from "../pages/difficult-words/access"
 import { commandPaletteOpenAtom } from "./atoms"
 import { SEARCH_ITEMS } from "./search-items"
@@ -29,6 +31,7 @@ export function SettingsSearch() {
   const navigate = useNavigate()
   const { pathname, search, key: locationKey } = useLocation()
   const lastHandledLocationRef = useRef<string | null>(null)
+  const config = useAtomValue(configAtom)
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -74,6 +77,12 @@ export function SettingsSearch() {
 
   function handleSelect(item: (typeof SEARCH_ITEMS)[number]) {
     setOpen(false)
+
+    const turnOnLink = buildTurnOnLink(config, item.feature)
+    if (turnOnLink !== undefined) {
+      void navigate(turnOnLink)
+      return
+    }
 
     const targetSearch = buildSectionSearch(item.sectionId)
     if (pathname === item.route && search === targetSearch) {

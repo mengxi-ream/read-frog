@@ -1,7 +1,7 @@
-import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { LanguageTag } from "@read-frog/definitions"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import type { SupportedUiLocale } from "@/utils/i18n/locales"
-import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
+import { LANGUAGE_ENGLISH_NAMES } from "@read-frog/definitions"
 import {
   LAYOUT_ALLOWED_TAGS,
   LAYOUT_ANNOTATE_MAX_ITEMS,
@@ -105,7 +105,7 @@ export interface AiConfigHelperPromptInput {
   // Names the action's name must not repeat.
   otherActionNames: readonly string[]
   uiLocale: SupportedUiLocale
-  targetCode: LangCodeISO6393
+  targetCode: LanguageTag
 }
 
 // Wraps `content` in a fence longer than any backtick run inside it, so a
@@ -233,8 +233,8 @@ export function buildAiConfigHelperPrompt({
   uiLocale,
   targetCode,
 }: AiConfigHelperPromptInput): string {
-  const uiLanguage = LANG_CODE_TO_EN_NAME[langCodeOfLocale(uiLocale)]
-  const targetLanguage = LANG_CODE_TO_EN_NAME[targetCode]
+  const uiLanguage = LANGUAGE_ENGLISH_NAMES[langCodeOfLocale(uiLocale)]
+  const targetLanguage = LANGUAGE_ENGLISH_NAMES[targetCode]
   const fieldTypes = quoteList(selectionToolbarCustomActionOutputTypeSchema.options)
   const reservedNames = quoteList(LAYOUT_RESERVED_FIELD_NAMES)
   // A label as the user's editor shows it, with the English one beside it.

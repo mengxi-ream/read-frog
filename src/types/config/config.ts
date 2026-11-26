@@ -1,4 +1,4 @@
-import { langCodeISO6393Schema } from "@read-frog/definitions"
+import { langLevel } from "@read-frog/definitions"
 import { z } from "zod"
 import {
   BUILT_IN_ACTION_IDS,
@@ -18,13 +18,17 @@ import {
   getProviderIdsForCapability,
 } from "@/utils/providers/provider-registry"
 import { normalizeSelectionToolbarLists } from "@/utils/selection-toolbar-order"
+import { builtInAiConfigSchema } from "./built-in-ai"
 import { floatingButtonSchema } from "./floating-button"
 import { glossaryConfigSchema } from "./glossary"
 import { languageDetectionConfigSchema } from "./language-detection"
+import { storedLanguageTagSchema } from "./language-tag"
 import { providersConfigSchema } from "./provider"
+import { storedProviderIdListSchema, storedProviderIdSchema } from "./provider-id"
 import {
   selectionToolbarBuiltInActionsSchema,
   selectionToolbarCustomActionsSchema,
+  selectionToolbarPlacementSchema,
 } from "./selection-toolbar"
 import { shortcutSchema } from "./shortcut"
 import { siteRulesConfigSchema } from "./site-rules"
@@ -33,13 +37,14 @@ import { translateConfigSchema } from "./translate"
 import { ttsConfigSchema } from "./tts"
 // Language schema
 const languageSchema = z.object({
-  sourceCode: langCodeISO6393Schema.or(z.literal("auto")),
-  targetCode: langCodeISO6393Schema,
+  sourceCode: storedLanguageTagSchema.or(z.literal("auto")),
+  targetCode: storedLanguageTagSchema,
+  level: langLevel,
 })
 
 const selectionToolbarFeatureSchema = z.object({
   enabled: z.boolean(),
-  providerId: z.string().nonempty(),
+  providerId: storedProviderIdSchema,
   shortcut: shortcutSchema,
 })
 
@@ -64,6 +69,10 @@ const selectionToolbarAnnotationSchema = z
     // the user cleared it. Optional rather than defaulted, for the reason
     // given on the speak feature's key.
     shortcut: shortcutSchema.optional(),
+    // The key that turns annotation mode on and off (see
+    // getAnnotationModeShortcut), optional for the same reason: the v119
+    // migration must still tell a missing key from one the user chose.
+    modeShortcut: shortcutSchema.optional(),
   })
   .default(() => ({ enabled: true }))
 
@@ -73,6 +82,9 @@ const selectionToolbarSchema = z
     enabled: z.boolean(),
     disabledSelectionToolbarPatterns: z.array(z.string()),
     opacity: z.number().min(MIN_SELECTION_OVERLAY_OPACITY).max(MAX_SELECTION_OVERLAY_OPACITY),
+    // `.default()` lets a config stored before v128 parse in UI contexts that
+    // load ahead of the background migration.
+    placement: selectionToolbarPlacementSchema.default("followDirection"),
     features: z.object({
       translate: selectionToolbarFeatureSchema,
       speak: selectionToolbarSpeakFeatureSchema,
@@ -92,7 +104,7 @@ const selectionToolbarSchema = z
     noteSuggestion: z.object({
       enabled: z.boolean(),
       actionId: z.string().nonempty(),
-      providerId: z.string().nonempty(),
+      providerId: storedProviderIdSchema,
     }),
   })
   .superRefine((selectionToolbar, ctx) => {
@@ -114,7 +126,7 @@ const selectionToolbarSchema = z
   .transform((selectionToolbar) => normalizeSelectionToolbarLists(selectionToolbar))
 
 // Difficult words: marks the words on a page the reader probably does not
-// know. `.default()` lets a config stored before v118 parse in UI contexts
+// know. `.default()` lets a config stored before v132 parse in UI contexts
 // that load ahead of the background migration.
 const difficultWordsSchema = z
   .object({
@@ -141,15 +153,18 @@ const sideContentSchema = z.object({
 // and writing that over the user's settings.
 const translationHubSchema = z
   .object({
+    // Simple mode's translation hub switch (src/utils/features.ts).
+    enabled: z.boolean().default(true),
     shortcut: shortcutSchema,
-    selectedProviderIds: z.array(z.string().min(1)).nullable().default(null),
-    sourceCode: langCodeISO6393Schema.or(z.literal("auto")).nullable().default(null),
-    targetCode: langCodeISO6393Schema.nullable().default(null),
+    selectedProviderIds: storedProviderIdListSchema.nullable().default(null),
+    sourceCode: storedLanguageTagSchema.or(z.literal("auto")).nullable().default(null),
+    targetCode: storedLanguageTagSchema.nullable().default(null),
     // A missing ID in a pre-migration config must stay unset until v102 copies
     // the page prompt; another UI context may write this config first.
     promptId: z.string().min(1).nullable().default(null),
   })
   .default({
+    enabled: true,
     shortcut: DEFAULT_TRANSLATION_HUB_SHORTCUT_KEY,
     selectedProviderIds: null,
     sourceCode: null,
@@ -167,17 +182,28 @@ const contextMenuSchema = z.object({
   enabled: z.boolean(),
 })
 
+// Simple mode's switch for the custom AI actions people trigger: the selection
+// toolbar's action buttons, the context menu's action items and the action
+// shortcuts (src/utils/features.ts). The actions themselves live in
+// `selectionToolbar.customActions`. `.default()` lets pre-v130 config parse in
+// UI contexts that load before the migration.
+const customActionsSchema = z
+  .object({
+    enabled: z.boolean(),
+  })
+  .default({ enabled: true })
+
 // input translation language selector: 'sourceCode', 'targetCode', or fixed language code
 const inputTranslationLangSchema = z.union([
   z.literal("sourceCode"),
   z.literal("targetCode"),
-  langCodeISO6393Schema,
+  storedLanguageTagSchema,
 ])
 
 // input translation schema (triple-space trigger)
 const inputTranslationSchema = z.object({
   enabled: z.boolean(),
-  providerId: z.string().nonempty(),
+  providerId: storedProviderIdSchema,
   fromLang: inputTranslationLangSchema,
   toLang: inputTranslationLangSchema,
   enableCycle: z.boolean(),
@@ -218,6 +244,7 @@ export const configSchema = z
     sideContent: sideContentSchema,
     betaExperience: betaExperienceSchema,
     contextMenu: contextMenuSchema,
+    customActions: customActionsSchema,
     inputTranslation: inputTranslationSchema,
     videoSubtitles: videoSubtitlesSchema,
     siteControl: siteControlSchema,
@@ -225,6 +252,7 @@ export const configSchema = z
     uiLanguage: uiLanguageSchema,
     translationHub: translationHubSchema,
     glossary: glossaryConfigSchema,
+    builtInAi: builtInAiConfigSchema,
     difficultWords: difficultWordsSchema,
   })
   .superRefine((data, ctx) => {

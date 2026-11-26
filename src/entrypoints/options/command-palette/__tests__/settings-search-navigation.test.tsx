@@ -23,6 +23,15 @@ const mockedSectionScroll = vi.hoisted(() => ({
     .mockResolvedValue(true),
 }))
 
+const mockedSimpleMode = vi.hoisted(() => ({ subtitlesOff: false }))
+
+vi.mock("../../pages/advanced/simple-mode/links", () => ({
+  buildTurnOnLink: (_config: unknown, tag: unknown) =>
+    tag === "videoSubtitles" && mockedSimpleMode.subtitlesOff
+      ? "/advanced/simple-mode?section=simple-mode-videoSubtitles"
+      : undefined,
+}))
+
 vi.mock("#imports", () => ({
   i18n: {
     t: (key: string) => key,
@@ -51,6 +60,13 @@ vi.mock("../search-items", () => ({
       route: "/page-translation",
       titleKey: "translation-mode-title",
       pageKey: "translation-page",
+    },
+    {
+      sectionId: "subtitles-ai-quota",
+      route: "/usage",
+      titleKey: "subtitles-quota-title",
+      pageKey: "usage-page",
+      feature: "videoSubtitles",
     },
   ],
 }))
@@ -94,6 +110,7 @@ describe("settings search navigation", () => {
     mockedRouter.location.pathname = "/"
     mockedRouter.location.search = ""
     mockedRouter.location.key = "loc-1"
+    mockedSimpleMode.subtitlesOff = false
 
     mockedSectionScroll.buildSectionSearch.mockClear()
     mockedSectionScroll.buildSectionSearch.mockImplementation(
@@ -116,6 +133,30 @@ describe("settings search navigation", () => {
       search: "?section=translation-mode",
     })
     expect(mockedSectionScroll.scrollToSectionWhenReady).not.toHaveBeenCalled()
+  })
+
+  it("opens a feature's section like any other while the feature is on", () => {
+    renderSettingsSearch()
+
+    fireEvent.click(screen.getByRole("button", { name: "subtitles-quota-title" }))
+
+    expect(mockedRouter.navigate).toHaveBeenCalledWith({
+      pathname: "/usage",
+      search: "?section=subtitles-ai-quota",
+    })
+  })
+
+  it("lands on the feature's switch when simple mode turned it off", () => {
+    mockedSimpleMode.subtitlesOff = true
+
+    renderSettingsSearch()
+
+    fireEvent.click(screen.getByRole("button", { name: "subtitles-quota-title" }))
+
+    expect(mockedRouter.navigate).toHaveBeenCalledTimes(1)
+    expect(mockedRouter.navigate).toHaveBeenCalledWith(
+      "/advanced/simple-mode?section=simple-mode-videoSubtitles",
+    )
   })
 
   it("scrolls directly when current location already matches route and section", () => {

@@ -2,10 +2,10 @@
 
 Repo-specific facts for the generic workflow in `SKILL.md`. Do not re-derive them.
 
-## Tooling on this machine
+## Tooling
 
-- `python3` is 3.12 with Pillow installed, and `ffmpeg`/`ffprobe` are on `PATH` (Homebrew). `scripts/build_demo.py` and `scripts/qa_demo.py` run directly — no venv, no `ffmpeg-static`.
-- Puppeteer is **not** a dependency of this repo. `npm i puppeteer` inside the session scratchpad; Chrome binaries are already cached in `~/.cache/puppeteer`, so this is fast and installs nothing into the repository.
+- `scripts/build_demo.py` and `scripts/qa_demo.py` need `ffmpeg`/`ffprobe` on `PATH` and Python ≥ 3.10 with Pillow. Check for them before the take; they run directly, with no venv and no `ffmpeg-static`.
+- Puppeteer is **not** a dependency of this repo. `npm i puppeteer` inside the session scratchpad so nothing is installed into the repository.
 - Upload with `gh image <file> --repo mengxi-ream/read-frog`. Verified here on 2026-09-17 with gh-image v1.3.0: it went through the normal `gh` token, asked for no browser session and no Keychain access, and printed one bare `user-attachments` URL. Accept nothing else as the result.
 - Measured cost of a small take: `pnpm build` ≈ 5 s (warm), record two scenes ≈ 40 s, assemble MP4 + GIF ≈ 10 s.
 
@@ -28,7 +28,7 @@ Start from [recorder-template.js](recorder-template.js) — a working two-scene 
 - A fresh config also triggers `selectFreshTranslateProviders()`, which probes Google Translate and can hang for seconds on a blocked network. Let the service worker settle before you patch config, and warm the flow before the take.
 - Patch the **whole** `config` object in `chrome.storage.local` from the service-worker target, with mutations inlined in the evaluated function; patch, wait ~4 s, patch again, and echo the values back. Background init/migration clobbers early writes, a partial config fails `configSchema.safeParse` and silently falls back to `DEFAULT_CONFIG`, and the MV3 service-worker CSP blocks `new Function`/eval.
 - The page-translation keys live under **`config.pageTranslation`** (`.mode`, `.providerId`, `.requestQueueConfig`) — there is no top-level `config.translate`. The schema is non-strict, so writing a stale key is stripped without an error and the patch looks like it worked. Always return the value you just set.
-- **Always force `config.language.targetCode = 'cmn'`.** Onboarding overwrites it with the browser UI language, and the same-language skip then translates nothing on an English fixture — a video of the extension doing nothing, with passing "no errors" logs.
+- **Always force `config.language.targetCode = 'zh-Hans'`.** Onboarding overwrites it with the browser UI language, and the same-language skip then translates nothing on an English fixture — a video of the extension doing nothing, with passing "no errors" logs.
 - Toggle translation with the webext-core envelope from the service worker: `chrome.tabs.sendMessage(tabId, { id, type: 'askManagerToTogglePageTranslation', data: { enabled }, timestamp })`. Do not synthesize Alt+E: on macOS Option+E is a dead key and the hotkey never fires.
 - Provider: `microsoft-translate-default` needs no API key but does need real network. It is the default choice for demos — nothing secret can end up on camera, and it is already `DEFAULT_CONFIG.pageTranslation.providerId`. Slow the queues (`pageTranslation.requestQueueConfig.rate/capacity = 1`) only when the point of the scene is a spinner.
 - Set `config.floatingButton.enabled = false` unless the floating button is the subject; otherwise it rides along in every frame.

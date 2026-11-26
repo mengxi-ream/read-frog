@@ -1,11 +1,9 @@
-import selectionToolbarDemoImage from "@/assets/demo/selection-toolbar.png"
-import { GradientBackground } from "@/components/gradient-background"
 import { i18n } from "@/utils/i18n"
 import { PageLayout } from "../../components/page-layout"
 import { ActionsSection } from "./actions"
 import { AnnotationSection } from "./annotation"
 import { DisplaySection } from "./display"
-import { EnableItem } from "./enable-item"
+import { SelectionToolbarPreview } from "./selection-toolbar-preview"
 
 export function SelectionToolbarPage() {
   return (
@@ -14,16 +12,10 @@ export function SelectionToolbarPage() {
       description={i18n.t("options.selectionToolbar.pageDescription")}
       innerClassName="flex flex-col gap-10"
     >
-      <GradientBackground>
-        <img
-          src={selectionToolbarDemoImage}
-          alt={i18n.t("options.selectionToolbar.demoImageAlt")}
-          className="h-auto w-100"
-        />
-      </GradientBackground>
-      <EnableItem />
-      <ActionsSection />
+      <SelectionToolbarPreview />
+      {/* In simple mode's order: annotation, then the toolbar's buttons. */}
       <AnnotationSection />
+      <ActionsSection />
       <DisplaySection />
     </PageLayout>
   )

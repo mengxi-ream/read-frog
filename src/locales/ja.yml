@@ -51,12 +51,10 @@ popup:
         action: クリックしてバイリンガルへ切り替え
   hub:
     tooltip: 複数の翻訳モデルで同時にテキストを翻訳
-  discord:
-    tooltip: Discordに参加して開発者とつながり、新機能を先行体験しましょう
   blog:
     notification: Read Frog の最新情報
   aiSmartContext: AI スマートコンテキスト
-  aiSmartContextDescription: ウェブページのコンテキストを使用して翻訳品質を向上させます。LLM翻訳プロバイダーが必要です。
+  aiSmartContextDescription: ウェブページのコンテキストを使用して翻訳品質を向上させます。LLM プロバイダーが必要です。
   storeReview:
     title: Read Frog はいかがですか？
     description: ストアでのレビューが、他の読者に見つけてもらう助けになります。
@@ -69,6 +67,7 @@ popup:
     emailUs: メールで問い合わせ
     featureRequest: 機能リクエスト
     bugReport: 不具合を報告
+    diagnosePage: "このページを診断"
     community: コミュニティ
     joinDiscord: Discordに参加
     joinWechat: WeChatグループに参加
@@ -135,6 +134,13 @@ options:
     bugReport:
       title: 不具合を報告
       description: サポートチケットを作成し、解決までの状況を追えます
+    troubleshooting:
+      title: "トラブルシューティング"
+    diagnostics:
+      title: "診断情報をエクスポート"
+      description: "最近のログと設定（API キーは除く）を保存して、不具合の報告に添付できます"
+      exportSuccess: "診断情報を保存しました"
+      exportFailed: "診断情報をエクスポートできませんでした"
     community:
       title: コミュニティ
     discord:
@@ -144,13 +150,40 @@ options:
       title: WeChat グループ
       description: QR コードをスキャンして WeChat のディスカッショングループに参加
       qrCodeAlt: WeChat QR コード
+  usage:
+    title: 使用量
+    pageDescription: プランと AI の残り利用枠を確認できます。
+    notSignedIn: 未ログイン
+    guest: ゲスト
+    manageSubscription: サブスクリプションを管理
+    logInToView: ログインすると表示されます
+    footer:
+      logIn: ログインすると毎週無料の AI 利用枠がもらえます
+      upgrade: Pro にアップグレードすると AI 字幕と、より多くの組み込み AI 利用枠が使えます
+      upgradeAction: アップグレード
   apiProviders:
     title: APIプロバイダー
-    pageDescription: Read Frog が呼び出す AI サービスを接続し、各機能で使うものを選びます。
-    description: Read Frog が呼び出せるプロバイダーを追加します。20 以上を内蔵し、Chat Completions 互換 API と Open Responses API をカスタム追加できます。
+    pageDescription: Read Frog の組み込みモデルを使うかサードパーティの AI サービスを接続し、各機能で使うものを選びます。
+    description: Read Frog の組み込みモデルを使うか、サードパーティのプロバイダーを追加します。20 以上のプリセットプロバイダーに加え、Chat Completions 互換 API と Open Responses API をカスタム追加できます。
     configTitle: プロバイダー設定
     addProvider: プロバイダーを追加
-    builtInProvider: 組み込みプロバイダー
+    builtInProvider: 組み込みモデル
+    thirdPartyProviders: サードパーティのプロバイダー
+    builtInModel:
+      reasoningDescription: "$1 が回答する前にどれだけ考えるかです。レベルが高いほど難しい文章をうまく扱えますが、回答が遅くなり、クォータの消費も増えます。"
+      reasoningDefault: "デフォルト"
+      reasoningLevels:
+        none: "オフ"
+        minimal: "最小"
+        low: "低"
+        medium: "中"
+        high: "高"
+        xhigh: "最高"
+      unavailableTitle:
+        temporary: "$1 は一時的に利用できません"
+        removed: "$1 は提供が終了しました"
+      unavailableDescription: "利用できない間、これを使う機能はエラーになります。引き続き使うには、それらの機能を $1 に切り替えてください。"
+      unavailableDescriptionNoAlternatives: "利用できない間、これを使う機能はエラーになります。引き続き使うには、それらの機能を別のプロバイダーに切り替えてください。"
     builtInAiUsage:
       title: 組み込み AI クォータ
       remaining: "残り $1%"
@@ -168,20 +201,23 @@ options:
         videoSubtitles: 動画字幕
         inputTranslation: 入力翻訳
         languageDetection: 言語検出
+        pdfTranslation: PDF 翻訳
     sponsorCta: 高速で高コスパのAIを入手
     sponsorCtaJalapenoCloud: GLM 5.3 を 50% オフで入手
+    sponsorCtaIfapi: 初回チャージ +10%・コード READFROG
     setApiKeyWarning:
       message: API キーは $1 ページで設定してください
     badges:
       featureCount: $1 件の機能
       sponsor: スポンサー
       sponsorJalapenoCloud: $$1 無料
+      sponsorIfapi: モデル 90% オフ
     dialog:
       title: 新しいプロバイダーを追加
       groups:
         builtInProviders:
-          title: 組み込みLLMプロバイダー
-          description: 組み込みの大規模言語モデルプロバイダー、Base URLなどの設定が不要
+          title: プリセット LLM プロバイダー
+          description: あらかじめ設定済みの大規模言語モデルプロバイダーで、Base URL などの設定入力が不要です
         compatibleProviders:
           title: 互換 API プロバイダー
           description: Chat Completions 互換 API にはカスタム Chat Complete、Open Responses API にはカスタム Responses を使用します。
@@ -249,15 +285,13 @@ options:
       invalidJson: 無効なJSON形式
     providers:
       name:
-        builtInAi: 組み込み AI
-        builtInAiAdvance: 高度な組み込み AI
         customChatComplete: カスタム Chat Complete
         customResponses: カスタム Responses
       attribution:
-        builtInAi: Read Frog がホストする標準モデル。Pro と Ultra のユーザーは週間クォータの範囲ですべての機能で利用でき、無料プランではカスタム AI アクションでのみ利用できます。
-        builtInAiAdvance: Read Frog がホストする高性能モデルで、Ultra メンバー専用です。ページ翻訳やカスタム AI アクションなど、すべての組み込み AI 機能で利用でき、週間クォータを共有します。標準モデルよりクォータの消費が速くなります。
+        builtInAi: Read Frog がホストする標準モデルです。ログインすると週間クォータの範囲で無料で使えます。
+        builtInAiAdvance: Read Frog がホストする高性能モデルで、Ultra メンバー専用です。標準モデルよりクォータの消費が速くなります。
       description:
-        openai: GPT-4oなどのモデルを提供
+        openai: GPT モデルを提供する OpenAI 公式 API
         azure: Azure のデプロイ経由で OpenAI モデルを利用
         deepseek: 中国国内での使用を推奨
         openrouter: 複数のLLMプロバイダの統合インターフェース、従量課金制
@@ -267,6 +301,7 @@ options:
         xai: リアルタイムデータアクセス可能なGrokモデルを提供するイーロン・マスクのAI企業
         atlascloud: DeepSeek、Kimi、Qwen、Doubao、GLMなどの新しめのモデルにOpenAI互換でアクセスできる統合プラットフォーム
         jalapenocloud: トップチームが使うエンタープライズ級 AI を、あなたにも！
+        ifapi: GPT・Claude・Gemini など主要モデルを公式価格の最大 90% オフで
         siliconflow: 中国および国際モデル向けの高性能推論プラットフォーム
         tensdaq: 革命的入札型AI MaaSプラットフォーム、市場の需給で価格が決まり高コスト固定料金を排除
         openaiCompatible: OpenAI Chat Completions API 互換のカスタムエンドポイントに接続
@@ -554,6 +589,9 @@ options:
     selectionAnnotation:
       title: "注釈"
       description: "選択したテキストに下線を引き、行間に意味を表示します。"
+    selectionAnnotationMode:
+      title: "注釈モード"
+      description: "ツールバーを開かずに注釈モードをオン・オフします。オンの間は、選択したテキストに自動で注釈が付きます。"
     actions:
       title: "AI アクション"
       description: "選択したテキストに AI アクションを実行します。カスタムアクションには最初はショートカットがないので、ここで設定してください。"
@@ -568,9 +606,7 @@ options:
     pageDescription: 入力欄に書いた内容を、送信する前に翻訳します。
     trigger:
       title: トリガー
-      enable:
-        title: 有効化
-        description: 任意の入力欄でスペースキーを素早く3回押すと、入力した内容を翻訳します。
+      description: 任意の入力欄でスペースキーを素早く3回押すと、入力した内容を翻訳します。
       threshold:
         title: トリガーしきい値
         description: 連続する押下の間隔として許される長さ（ミリ秒）です。反応しないときは大きく、入力中に誤って動くときは小さくします。
@@ -589,9 +625,6 @@ options:
     title: フローティングボタン
     pageDescription: フローティングボタンを表示する側、クリック時の動作、非表示にするサイトを設定します。
     demoImageAlt: フローティングボタンデモ
-    enable:
-      title: フローティングボタンを有効化
-      description: ウェブページにフローティングボタンを表示し、Read Frog機能に素早くアクセス
     display:
       title: 表示
       side:
@@ -610,8 +643,8 @@ options:
       panel: サイドパネルを開く
       translate: ページ翻訳を切り替え
     closeMenu:
-      disableForSite: このサイトで無効化
-      disableGlobally: グローバルで無効化
+      title: フローティングボタンを非表示
+    pageTranslationOff: "ページ翻訳はシンプルモードでオフになっています"
     tooltips:
       togglePageTranslation: ページ翻訳を切り替え
       floatingButtonOptions: フローティングボタンのオプション
@@ -622,9 +655,6 @@ options:
     title: 選択ツールバー
     pageDescription: テキストを選択したときに表示するアクションと、ツールバーを表示するサイトを設定します。
     demoImageAlt: 選択ツールバーデモ
-    enable:
-      title: 選択ツールバーを有効化
-      description: ウェブページでテキストを選択したときにツールバーを表示し、すばやく翻訳・読み上げ・AIアクションを実行します
     annotation:
       title: "単語注釈"
       enable:
@@ -636,13 +666,10 @@ options:
     actions:
       title: アクション
       translate:
-        title: 翻訳
         description: ツールバーに翻訳ボタンを表示します
       speak:
-        title: 読み上げ
         description: 選択したテキストを読み上げる読み上げボタンをツールバーに表示します
       noteSuggestion:
-        title: ノートの提案
         description: AI プロバイダーで選択テキストを翻訳した後、Notebase に保存する単語を提案します
         action: アクション
         actionDescription: 保存候補を生成するアクション
@@ -650,6 +677,12 @@ options:
         providerDescription: 保存候補を生成する AI プロバイダー
     display:
       title: 表示
+      placement:
+        title: 位置
+        description: 選択したテキストのどちら側にツールバーを表示するかを選びます。選んだ側に空きがない場合は反対側に表示します
+        followDirection: 選択方向に合わせる
+        above: 常に上
+        below: 常に下
       opacity:
         title: 透明度
         description: 選択ツールバーとそこから開く展開ウィンドウの透明度を調整します
@@ -659,8 +692,7 @@ options:
         enterUrlPattern: URL パターンを入力
         urlPattern: URL パターン
     closeMenu:
-      disableForSite: このサイトで無効化
-      disableGlobally: グローバルで無効化
+      title: 選択ツールバーを非表示
     errors:
       customActionFailed: カスタムアクションに失敗しました
       customActionFailedFallback: カスタムアクションのリクエストに失敗しました
@@ -796,6 +828,8 @@ options:
             unquotedAttributeOutput: この属性値を引用符で囲んでください。囲まないと値が属性の外にはみ出すおそれがあります。
             filterIgnored: 「$1」タグではフィルターは無視されます。先にフィルター後の値を代入してください。
             newlineToBrNotLast: newline_to_br は出力の最後のフィルターとしてのみ機能します。
+            mathFilterNotLast: $1 は出力の最後のフィルターとしてのみ機能します。
+            mathFilterInAttribute: 属性値の中では $1 を使わないでください。描画した数式に含まれる引用符で属性が終わってしまいます。
             tooLong: このレイアウトは $1 文字を超えているため保存できません。
             fieldNotShown: 「$1」はこのレイアウトに表示されません。
             reservedFieldName: フィールド名「$1」はレイアウトの予約名です。フィールドの名前を変更してください。
@@ -1061,8 +1095,8 @@ options:
       pageDescription: 大切な言葉に決まった訳語を指定し、それぞれの用語集を適用する範囲を選びます。
       untitled: 無題の用語集
       noGlossaries: 用語集がまだありません。
-      enable:
-        title: 有効にする
+      appliesTo:
+        title: 適用される機能
         description: 一致した用語を LLM に渡し、指定どおりの訳語で出力させます。用語集はプロンプトに含めて送られるため、LLM プロバイダーで動作する機能にのみ適用されます。
       library:
         title: 登録した用語集
@@ -1192,9 +1226,6 @@ options:
     title: コンテキストメニュー
     pageDescription: ブラウザーの右クリックメニューに表示される Read Frog の項目を設定します。
     demoImageAlt: コンテキストメニューデモ
-    enable:
-      title: 右クリック翻訳を有効化
-      description: ブラウザの右クリックメニューに翻訳オプションを追加し、ページや選択テキストを素早く翻訳
   translation:
     title: ページ翻訳
     pageDescription: ページ翻訳の方法を設定します。モード、範囲、プロンプト、リクエスト制限など。
@@ -1343,7 +1374,7 @@ options:
         error: 値は $1 から $2 の間である必要があります
     translationQueue:
       title: 翻訳キュー
-      description: リクエストを送る速さ、1回あたりのテキスト量、読者よりどれだけ先を翻訳するか
+      description: リクエストを送る速さ、1回あたりのテキスト量、1回あたりの最大待ち時間、読者よりどれだけ先を翻訳するか
       manageQueue: キューを管理
       requestQueueConfig:
         title: 翻訳速度
@@ -1358,6 +1389,9 @@ options:
           description: 最大文字数：1 回の AI リクエストで送るテキストの量
         maxItemsPerBatch:
           description: 最大段落数：1 回のリクエストにまとめる段落の数。AI 以外の翻訳サービスには効きません
+      requestTimeout:
+        title: リクエストのタイムアウト
+        description: "応答を待つ秒数。超えると打ち切って再試行します。AI のバッチリクエストは文章の長さに応じて最大 100 秒まで追加で待ちます。遅いモデルでタイムアウトが続くときは大きくしてください"
       preloadConfig:
         title: 事前翻訳範囲
         description: ビューポート下のコンテンツをどれだけ事前翻訳するかを制御し、API コストを節約します
@@ -1436,10 +1470,11 @@ options:
       title: 基本設定
       enable:
         title: 動画字幕を有効にする
-        description: YouTube、X、Netflix の動画プレーヤーのコントロールバーに翻訳ボタンを表示します。
-      autoStart:
-        title: 動画を開いたら翻訳する
-        description: 動画の読み込みが終わり次第、ボタンを押さなくても字幕の翻訳を始めます。
+        description: "サイトごとに選べます：オフ、手動（プレーヤーの翻訳ボタンで開始）、自動（動画を開いたら開始）。"
+        mode:
+          off: "オフ"
+          manual: "手動"
+          auto: "自動"
       aiSegmentation:
         title: AI スマート区切り
         description: AI が字幕を文単位に切り直します。翻訳の応答が遅くなります。高性能な LLM が必要です。性能の低いモデルでは字幕の欠落やずれが起きることがあります。
@@ -1452,8 +1487,6 @@ options:
     aiQuota:
       title: AI字幕の利用枠
       description: AIの音声認識で、どんな動画にも正確な字幕を生成します
-      launchBonusPromo: $1 までに加入すると、文字起こし 300 分を追加でプレゼント
-      loginRequired: ログインしてAI字幕の利用枠を確認
       upgradeRequired: AI字幕には Pro または Ultra プランが必要です
       pools:
         subscription: 月間クォータ
@@ -1529,7 +1562,7 @@ options:
           videoSummary: 動画要約（AI スマートコンテキストが必要）
     subtitlesQueue:
       title: 字幕キュー
-      description: 字幕リクエストを送る速さと、1回あたりの行数
+      description: 字幕リクエストを送る速さ、1回あたりの行数、1回あたりの最大待ち時間
       manageQueue: キューを管理
       requestQueueConfig:
         title: 翻訳速度
@@ -1544,6 +1577,9 @@ options:
           description: 最大文字数：1 回の AI リクエストで送るテキストの量
         maxItemsPerBatch:
           description: 最大字幕行数：1 回のリクエストにまとめる字幕の数。AI 以外の翻訳サービスには効きません
+      requestTimeout:
+        title: リクエストのタイムアウト
+        description: "応答を待つ秒数。超えると打ち切って再試行します。AI のバッチリクエストは文章の長さに応じて最大 100 秒まで追加で待ちます。遅いモデルでタイムアウトが続くときは大きくしてください"
     cache:
       title: キャッシュ
       clearCache:
@@ -1556,6 +1592,53 @@ options:
           confirm: 確認
           cancel: キャンセル
           description: すべてのキャッシュされたAI区切り結果が削除されます。次回AI区切りを有効にして動画を再生すると、字幕が再処理されます。
+  simpleMode:
+    title: "シンプルモード"
+    pageDescription: "オフにした機能は、インストールしていないのと同じになります。ウェブページに表示されず、ショートカットも反応しません。設定は保持されるので、オンに戻せば元どおりに使えます。"
+    drawerDescription: "オフにした機能はどこにも表示されなくなります。設定は保持されます"
+    features:
+      customActions:
+        title: "カスタム AI アクション"
+        description: "選択ツールバーと右クリックメニューの AI アクション。組み込みの「辞書」「構文解析」も含みます"
+      pageTranslation:
+        title: "ページ翻訳"
+        description: "ウェブページ全体を翻訳します"
+        hover:
+          title: "ホバー翻訳"
+          description: "段落にホバーまたは長押しすると、その段落だけ翻訳します"
+      videoSubtitles:
+        title: "動画字幕"
+        description: "動画プレーヤーに翻訳字幕のボタンを追加します"
+      inputTranslation:
+        title: "入力翻訳"
+        description: "任意の入力欄でスペースキーを素早く3回押すと、入力した内容を翻訳します"
+      floatingButton:
+        title: "フローティングボタン"
+        description: "ウェブページにフローティングボタンを表示し、Read Frog機能に素早くアクセス"
+      selectionToolbar:
+        title: "選択ツールバー"
+        description: "ウェブページでテキストを選択したときにツールバーを表示し、すばやく翻訳・読み上げ・AIアクションを実行します"
+        annotation:
+          title: "単語注釈"
+          description: "選択した単語やフレーズに下線を引き、行間に意味を書き込みます"
+        translate:
+          title: "選択範囲の翻訳"
+          description: "ツールバーに翻訳ボタンを表示します"
+          noteSuggestion:
+            title: "ノートの提案"
+            description: "AI プロバイダーで選択テキストを翻訳した後、Notebase に保存する単語を提案します"
+        speak:
+          title: "読み上げ"
+          description: "選択したテキストを読み上げる読み上げボタンをツールバーに表示します"
+      contextMenu:
+        title: "コンテキストメニュー"
+        description: "ブラウザーの右クリックメニューに表示される Read Frog の項目"
+      translationHub:
+        title: "翻訳ハブ"
+        description: "複数の翻訳モデルで同時にテキストを翻訳"
+      glossary:
+        title: "用語集"
+        description: "大切な言葉を、決めた訳語で翻訳します"
   whatsNew:
     title: 新機能
     postType:
@@ -1573,8 +1656,8 @@ side:
 translateService:
   title: 翻訳サービス
   description: ウェブページの翻訳にのみ使用
-  builtInModels: Built-in Models
-  llmModels: LLM Models
+  builtInModels: 組み込みモデル
+  llmModels: サードパーティモデル
   normalTranslator: 通常翻訳
   selectServices: サービスを選択
   translationProviders: 翻訳サービス
@@ -1588,7 +1671,7 @@ languageLevels:
   intermediate: 中級
   advanced: 上級
 noAPIKeyConfig:
-  warning: AIモデルを使用するには、まずオプションページでAPIキーを設定してください
+  warning: まずオプションページでこのプロバイダーの API キーを設定してください
   warningWithLink:
     youMust: まず
     setTheAPIKey: APIキーを設定
@@ -1601,6 +1684,25 @@ translation:
   sameLanguage: ソース言語とターゲット言語は異なる必要があります
   autoModeSameLanguage: 検出された言語 '$1' はターゲット言語と同じです
   extensionContextInvalidated: 拡張機能が更新されました。このページを再読み込みしてからもう一度お試しください。
+  inputTranslationFailed: "入力翻訳に失敗しました"
+pageDiagnosis:
+  title: "ページ診断"
+  summary: "翻訳済み $1 段落、未翻訳 $2 段落"
+  empty: "まだ表示する内容がありません。ページ翻訳をオンにしてから、もう一度開いてください。"
+  emptyWhileTranslating: "まだ表示する内容がありません。ページ翻訳が段落に達すると、ここに表示されます。"
+  framesNotIncluded: "埋め込みフレーム内のテキストはここには含まれません。"
+  hint: "理由をクリックすると、該当する段落をページ上で囲んで表示します。"
+  close: "閉じる"
+  unavailable: "このページでは Read Frog を実行できません"
+  reasons:
+    noProse: "翻訳する文字がありません"
+    tooShort: "短すぎるため翻訳しません"
+    targetLanguage: "すでに翻訳先の言語です"
+    skipLanguage: "スキップする言語に設定されています"
+    noTranslationNeeded: "AI が翻訳不要と判断しました"
+    sameAsSource: "訳文が原文と同じでした"
+    emptyResult: "翻訳サービスから何も返されませんでした"
+    error: "翻訳に失敗しました"
 annotation:
   annotate: "注釈を付ける"
   enterMode: "注釈モード"
@@ -1623,6 +1725,11 @@ speak:
   noTextSelected: テキストが選択されていません
   openaiNotConfigured: OpenAIプロバイダーが設定されていないか有効になっていません
   openaiApiKeyNotConfigured: OpenAI APIキーが設定されていません
+hideMenu:
+  untilReload: ページを再読み込みするまで
+  onSite: $1 で
+  onAllSites: すべてのサイトで
+  restoreHint: "「$1」または「$2」からいつでも再表示できます。"
 action:
   copy: コピー
   copied: コピー済み
@@ -1714,6 +1821,7 @@ subtitles:
   requestAiSubtitles: AI字幕をリクエスト
   usingAiSubtitles: AI字幕を使用中
   settings: 字幕設定
+  autoStartOnPlatform: "$1 で自動開始"
   toggle:
     enabled: 字幕翻訳をオンにしました
     disabled: 字幕翻訳をオフにしました
@@ -1751,7 +1859,9 @@ subtitles:
     aiSubscriptionRequired: AI字幕には Pro または Ultra プランが必要です
     aiPaymentRequired: AI字幕の生成を続けるにはお支払い方法を更新してください
     aiVideoTooLong: この動画は長すぎるためAI字幕を生成できません
-    aiLiveReplayUnsupported: ライブ配信のアーカイブはまだAI字幕に対応していません
+    aiVideoMismatch: この動画は元の投稿と一致しません。投稿のページを開いてもう一度お試しください
+    aiLiveReplayUnsupported: ライブ配信とそのアーカイブはまだAI字幕に対応していません
+    aiLiveStreamUnsupported: 配信中のライブはまだAI字幕に対応していません。アーカイブの公開後にリクエストしてください
     aiStillProcessing: 文字起こしは進行中です。数分後にもう一度クリックしてください
     aiRequestFailed: AI字幕のリクエストに失敗しました。しばらくしてから再試行してください
     aiNoResponse: AIサービスが応答しませんでした。原文を表示します
@@ -1770,10 +1880,33 @@ hostedAi:
     serviceUnavailable: 一時的に利用できません
     usedPercent: "利用枠: $1% 使用済み"
     resetsAt: "$1 にリセット"
+  requestId:
+    label: "リクエスト ID:"
+    copy: "リクエスト ID をコピー"
   errors:
     rateLimited: リクエストが多すぎます。後でもう一度お試しください。
     guestRateLimited: ゲストからのリクエストが多すぎます。後でもう一度お試しください。
     userRateLimited: リクエストが多すぎます。後でもう一度お試しください。
+    modelUnavailable: "$1 は現在利用できません。代わりに $2 をお試しください。"
+    modelUnavailableNoAlternatives: "$1 は現在利用できず、ほかに利用できる組み込み AI モデルもありません。しばらくしてからもう一度お試しください。"
+    modelBusy: "$1 は現在混み合っています。少し待ってからもう一度お試しいただくか、$2 に切り替えてください。"
+    modelBusyNoAlternatives: "$1 は現在混み合っています。少し待ってからもう一度お試しください。"
+  unavailable:
+    temporary: "$1 は一時的に利用できません。代わりに $2 をお試しください。"
+    temporaryNoAlternatives: "$1 は一時的に利用できません。しばらくしてからもう一度お試しください。"
+    removed: "$1 は提供が終了しました。代わりに $2 をお試しください。"
+    removedNoAlternatives: "$1 は提供が終了しました。別のプロバイダーを選んでください。"
+  actions:
+    chooseModel: "モデルを選択"
+  builtInAiPrompt:
+    logInTitle: "ログインして組み込み AI を使う"
+    logInDescription: "ログインすると、組み込み AI を週に約 12 万トークンまで無料で使えます。"
+    upgradeTitle: "今週の組み込み AI を使い切りました"
+    upgradeDescription: "Pro なら毎月約 3,000 件、Ultra なら約 10,000 件のウェブページを翻訳できます。"
+    upgradeDescriptionPro: "Ultra なら毎月約 10,000 件のウェブページを翻訳できます。"
+    useMachineTranslation: "機械翻訳を使う"
+    switched: "$1は $2 を使うようになりました。"
+    switchFailed: "機械翻訳に切り替えられませんでした。もう一度お試しください。"
 hotkey:
   control: Ctrl
   alt: Option
@@ -1837,183 +1970,3 @@ difficultWords:
       C1: 長く複雑な、事実に基づく文章や文学作品を、文体の違いを味わいながら読める。専門外の専門的な記事や長い技術的な説明書
       C2: 抽象的で構成も言葉も複雑な文章を含む、ほぼあらゆる書き言葉。マニュアル、専門的な記事、文学作品など
       unsure: A2 として扱います。低めから始めるのがおすすめです。ハイライトが多すぎても知っている単語をマークすればすぐ直りますが、少なすぎるとクリックするものがありません。
-languages:
-  eng: 英語
-  cmn: 簡体字中国語
-  cmnHant: 繁体字中国語
-  yue: 広東語
-  spa: スペイン語
-  rus: ロシア語
-  arb: アラビア語
-  ben: ベンガル語
-  hin: ヒンディー語
-  por: ポルトガル語
-  ind: インドネシア語
-  jpn: 日本語
-  fra: フランス語
-  deu: ドイツ語
-  jav: ジャワ語
-  kor: 韓国語
-  tel: テルグ語
-  vie: ベトナム語
-  mar: マラーティー語
-  ita: イタリア語
-  tam: タミル語
-  tur: トルコ語
-  urd: ウルドゥー語
-  guj: グジャラート語
-  pol: ポーランド語
-  ukr: ウクライナ語
-  kan: カンナダ語
-  mai: マイティリー語
-  mal: マラヤーラム語
-  pes: ペルシャ語
-  mya: ビルマ語
-  swh: スワヒリ語
-  sun: スンダ語
-  ron: ルーマニア語
-  pan: パンジャブ語
-  bho: ボージュプリー語
-  amh: アムハラ語
-  hau: ハウサ語
-  fuv: フラ語
-  bos: ボスニア語
-  hrv: クロアチア語
-  nld: オランダ語
-  srp: セルビア語
-  tha: タイ語
-  ckb: 中央クルド語
-  yor: ヨルバ語
-  uzn: ウズベク語
-  zlm: マレー語
-  ibo: イボ語
-  npi: ネパール語
-  ceb: セブアノ語
-  skr: サライキ語
-  tgl: タガログ語
-  hun: ハンガリー語
-  azj: アゼルバイジャン語
-  sin: シンハラ語
-  koi: コミ・ペルミャク語
-  ell: ギリシャ語
-  ces: チェコ語
-  mag: マガヒー語
-  run: ルンディ語
-  bel: ベラルーシ語
-  plt: マダガスカル語
-  qug: チンボラソ高地キチュア語
-  mad: マドゥラ語
-  nya: チェワ語
-  zyb: チワン語
-  pbu: パシュトー語
-  kin: ルワンダ語
-  zul: ズールー語
-  bul: ブルガリア語
-  swe: スウェーデン語
-  lin: リンガラ語
-  som: ソマリ語
-  hms: 黔東ミャオ語
-  hnj: フモン語
-  ilo: イロカノ語
-  kaz: カザフ語
-  heb: ヘブライ語
-  nob: ノルウェー語（ブークモール）
-  nno: ノルウェー語（ニーノシュク）
-  afr: アフリカーンス語
-  sqi: アルバニア語
-  asm: アッサム語
-  eus: バスク語
-  bre: ブルトン語
-  cat: カタルーニャ語
-  cos: コルシカ語
-  cym: ウェールズ語
-  dan: デンマーク語
-  div: ディベヒ語
-  epo: エスペラント
-  ekk: エストニア語
-  fao: フェロー語
-  fij: フィジー語
-  fin: フィンランド語
-  fry: 西フリジア語
-  gla: スコットランド・ゲール語
-  gle: アイルランド語
-  glg: ガリシア語
-  grn: グアラニー語
-  hat: ハイチ・クレオール語
-  haw: ハワイ語
-  hye: アルメニア語
-  ido: イド語
-  ina: インターリングア
-  isl: アイスランド語
-  kat: ジョージア語
-  khm: クメール語
-  kir: キルギス語
-  lao: ラオ語
-  lat: ラテン語
-  lvs: ラトビア語
-  lit: リトアニア語
-  ltz: ルクセンブルク語
-  mkd: マケドニア語
-  mlt: マルタ語
-  mon: モンゴル語
-  mri: マオリ語
-  nso: 北ソト語
-  oci: オック語
-  ori: オリヤー語
-  orm: オロモ語
-  prs: ダリー語
-  san: サンスクリット語
-  slk: スロバキア語
-  slv: スロベニア語
-  smo: サモア語
-  sna: ショナ語
-  snd: シンド語
-  sot: 南ソト語
-  tah: タヒチ語
-  tat: タタール語
-  tgk: タジク語
-  tir: ティグリニャ語
-  ton: トンガ語
-  tsn: ツワナ語
-  tuk: トルクメン語
-  uig: ウイグル語
-  vol: ヴォラピュク
-  wol: ウォロフ語
-  xho: コサ語
-  ydd: イディッシュ語
-  aka: アカン語
-  bam: バンバラ語
-  bis: ビスラマ語
-  bod: チベット語
-  che: チェチェン語
-  chv: チュヴァシ語
-  dzo: ゾンカ語
-  ewe: エウェ語
-  kab: カビル語
-  lug: ガンダ語
-  oss: オセット語
-  ssw: スワジ語
-  ven: ベンダ語
-  war: ワライ語
-  nde: 北ンデベレ語
-  nbl: 南ンデベレ語
-  pam: パンパンガ語
-  hil: ヒリガイノン語
-  bcl: 中央ビコール語
-  min: ミナンカバウ語
-  ace: アチェ語
-  bug: ブギス語
-  ban: バリ語
-  bjn: バンジャル語
-  mak: マカッサル語
-  sas: ササク語
-  tet: テトゥン語
-  cha: チャモロ語
-  niu: ニウエ語
-  tvl: ツバル語
-  gil: キリバス語
-  mah: マーシャル語
-  pau: パラオ語
-  wls: ウォリス語
-  rar: ラロトンガ語
-  hif: フィジー・ヒンディー語

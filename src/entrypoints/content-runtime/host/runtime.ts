@@ -1,21 +1,25 @@
-import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { LanguageTag } from "@read-frog/definitions"
 import type { ContentScriptContext } from "#imports"
 import type { Config } from "@/types/config/config"
 import { storage } from "#imports"
 import { configSchema } from "@/types/config/config"
 import { CONFIG_STORAGE_KEY, DEFAULT_CONFIG } from "@/utils/constants/config"
 import { detectPageLanguageLightweight } from "@/utils/content/page-language"
+import { isFeatureOn } from "@/utils/features"
 import { ensurePresetStyles } from "@/utils/host/translate/ui/style-injector"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
 import { onMessage, sendMessage } from "@/utils/message"
 import { clearEffectiveSiteControlUrl } from "@/utils/site-control"
 import { areSamePageTranslationOrigin } from "@/utils/url"
 import { bindTranslationHubShortcutKey } from "./bind-translation-hub-shortcut"
 import { setupUrlChangeListener } from "./listen"
+import { closePageDiagnosisPanel, togglePageDiagnosisPanel } from "./page-diagnosis"
 import { bindTranslationModeShortcutKey } from "./translation-control/bind-translation-mode-shortcut"
 import { bindTranslationShortcutKey } from "./translation-control/bind-translation-shortcut"
 import { registerNodeTranslationTriggers } from "./translation-control/node-translation"
 import { PageTranslationManager } from "./translation-control/page-translation"
+
+const log = createLogger("content-runtime/host/runtime")
 
 export async function bootstrapHostContent(
   ctx: ContentScriptContext,
@@ -31,7 +35,7 @@ export async function bootstrapHostContent(
 
   const preloadConfig =
     initialConfig?.pageTranslation.page.preload ?? DEFAULT_CONFIG.pageTranslation.page.preload
-  let detectedPageLanguage: { url: string; code: LangCodeISO6393 | "und" } | undefined
+  let detectedPageLanguage: { url: string; code: LanguageTag | "und" } | undefined
   let detectionGeneration = 0
   const manager = new PageTranslationManager(
     {
@@ -44,9 +48,11 @@ export async function bootstrapHostContent(
 
   const cleanupPageTranslationTriggers = manager.registerPageTranslationTriggers()
 
-  // The tab-title switch applies to an already-translated page at once. Only
-  // the top frame owns the title, so iframes skip parsing every config write.
-  const cleanupTitleTranslationWatch =
+  // The tab-title switch applies to an already-translated page at once, and
+  // switching page translation off in simple mode takes the translations off
+  // the page. Only the top frame owns the title, so iframes skip parsing every
+  // config write; they stop when the top frame's stop reaches them.
+  const cleanupConfigWatch =
     window === window.top
       ? storage.watch<Config>(`local:${CONFIG_STORAGE_KEY}`, (config) => {
           const parsedConfig = configSchema.safeParse(config)
@@ -54,6 +60,12 @@ export async function bootstrapHostContent(
             manager.setTitleTranslationEnabled(
               parsedConfig.data.pageTranslation.page.translateTitle,
             )
+            // Not only while active: stop() also cancels a start still awaiting its
+            // checks, which would translate the page once they pass. On an idle page
+            // it does nothing.
+            if (!isFeatureOn(parsedConfig.data, "pageTranslation")) {
+              manager.stop()
+            }
           }
         })
       : () => {}
@@ -80,7 +92,7 @@ export async function bootstrapHostContent(
     translationEnabled = await sendMessage("getEnablePageTranslationFromContentScript", undefined)
   } catch (error) {
     // Extension context may be invalidated during update, proceed without auto-start
-    logger.error("Failed to check translation state:", error)
+    log.error("Failed to check translation state", { error })
   }
   if (translationEnabled) {
     void manager.start()
@@ -90,7 +102,7 @@ export async function bootstrapHostContent(
     if (from !== to) {
       detectionGeneration += 1
       detectedPageLanguage = undefined
-      logger.info("URL changed from", from, "to", to)
+      log.debug("URL changed", { from, to })
       if (manager.isActive) {
         if (areSamePageTranslationOrigin(from, to)) {
           // Same-document route change: keep the session and wrappers
@@ -151,17 +163,26 @@ export async function bootstrapHostContent(
         })
       : () => {}
 
+  // The popup sends this to the top frame only. Frames translate on their own and
+  // keep their own verdicts, so the panel covers the top frame and says so.
+  const cleanupPageDiagnosisListener =
+    window === window.top
+      ? onMessage("togglePageTranslationDiagnostics", () => togglePageDiagnosisPanel())
+      : () => {}
+
   ctx.onInvalidated(() => {
     cleanupUrlListener()
     teardownNodeTranslation()
     cleanupPageTranslationTriggers()
-    cleanupTitleTranslationWatch()
+    cleanupConfigWatch()
     cleanupTranslationShortcut()
     cleanupTranslationModeShortcut()
     cleanupTranslationHubShortcut()
     cleanupTranslationStateListener()
     cleanupFrameTranslationStateListener()
     cleanupDetectedLanguageRefreshListener()
+    cleanupPageDiagnosisListener()
+    closePageDiagnosisPanel()
     window.removeEventListener("extension:URLChange", handleExtensionUrlChange)
     window.__READ_FROG_HOST_INJECTED__ = false
     clearEffectiveSiteControlUrl()

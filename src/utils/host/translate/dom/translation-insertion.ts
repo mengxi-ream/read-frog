@@ -1,7 +1,7 @@
 import type { Config } from "@/types/config/config"
 import type { TranslationNodeStyleConfig } from "@/types/config/translate"
 import type { TransNode } from "@/types/dom"
-import { getEffectiveSiteRule } from "@/utils/site-rules/effective"
+import { getDocumentSiteRule } from "@/utils/site-rules/effective"
 import {
   BLOCK_CONTENT_CLASS,
   FLOAT_WRAP_ATTRIBUTE,
@@ -97,10 +97,18 @@ function isDisplacedBelowFloat(translatedNode: HTMLElement): boolean {
   if (translatedRect.height <= 0) return false
 
   const style = window.getComputedStyle(translatedNode)
-  const lineHeight = resolveLineHeight(style)
+  // The box sits on the baseline of the line it opens, and that line is at least
+  // as tall as the source text's line height, which the wrapper inherits. When
+  // custom CSS makes the translation smaller than its source (16px under an
+  // 80px heading on a 115px line), the box lands that much lower with no float
+  // anywhere, so judge the gap by the taller of the two line heights.
+  const lineHeight = Math.max(
+    resolveLineHeight(style) ?? 0,
+    resolveLineHeight(window.getComputedStyle(wrapper)) ?? 0,
+  )
   // Without font metrics there is no scale to judge the gap against, and a zero
   // threshold would flag every ordinary translation. Leave the layout alone.
-  if (lineHeight === null) return false
+  if (lineHeight === 0) return false
   const marginTop = Number.parseFloat(style.marginTop) || 0
 
   // Undisplaced, the translation opens the line right after the source text, so
@@ -154,10 +162,7 @@ export async function insertTranslatedNodeIntoWrapper(
   const layoutSourceDisplay = isHTMLElement(layoutSource)
     ? window.getComputedStyle(layoutSource).display
     : undefined
-  const { forceBlockStyleSelector, forceInlineStyleSelector } = getEffectiveSiteRule(
-    config,
-    window.location.href,
-  )
+  const { forceBlockStyleSelector, forceInlineStyleSelector } = getDocumentSiteRule(config)
   const wrapperStyleSources = styleSources ?? [layoutSource]
   const siteRuleForceBlockStyle = sourceRunMatchesSelector(
     wrapperStyleSources,

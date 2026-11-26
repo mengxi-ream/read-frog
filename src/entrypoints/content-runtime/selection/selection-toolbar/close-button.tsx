@@ -1,21 +1,23 @@
 import { IconX } from "@tabler/icons-react"
-import { useAtom } from "jotai"
+import { useAtom, useSetAtom } from "jotai"
 import { useState } from "react"
+import { addSitePattern, HideMenuItems } from "@/components/hide-menu-items"
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/base-ui/dropdown-menu"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { SELECTION_CONTENT_OVERLAY_LAYERS } from "@/utils/constants/selection-overlay-layers"
 import { i18n } from "@/utils/i18n"
 import { shadowWrapper } from "../main"
+import { hideSelectionToolbarUntilReloadAtom } from "./atoms"
 
 export const DropEvent = "rf-dropdown-change"
 
 export function CloseButton() {
   const [selectionToolbar, setSelectionToolbar] = useAtom(configFieldsAtomMap.selectionToolbar)
+  const hideUntilReload = useSetAtom(hideSelectionToolbarUntilReloadAtom)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -48,29 +50,26 @@ export function CloseButton() {
         align="start"
         side="right"
         positionerClassName={SELECTION_CONTENT_OVERLAY_LAYERS.selectionOverlay}
-        className="w-fit! whitespace-nowrap"
+        className="w-fit! max-w-72 min-w-48 whitespace-nowrap"
       >
-        <DropdownMenuItem
-          onMouseDown={handleMouseDown}
-          onClick={() => {
-            const currentDomain = window.location.hostname
-            const currentPatterns = selectionToolbar.disabledSelectionToolbarPatterns || []
+        <HideMenuItems
+          title={i18n.t("options.selectionToolbar.closeMenu.title")}
+          settingsLocation={`${i18n.t("popup.options")} → ${i18n.t("options.selectionToolbar.title")}`}
+          onHideUntilReload={hideUntilReload}
+          onHideOnSite={(hostname) => {
             void setSelectionToolbar({
               ...selectionToolbar,
-              disabledSelectionToolbarPatterns: [...currentPatterns, currentDomain],
+              disabledSelectionToolbarPatterns: addSitePattern(
+                selectionToolbar.disabledSelectionToolbarPatterns ?? [],
+                hostname,
+              ),
             })
           }}
-        >
-          {i18n.t("options.selectionToolbar.closeMenu.disableForSite")}
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onMouseDown={handleMouseDown}
-          onClick={() => {
+          onHideOnAllSites={() => {
             void setSelectionToolbar({ ...selectionToolbar, enabled: false })
           }}
-        >
-          {i18n.t("options.selectionToolbar.closeMenu.disableGlobally")}
-        </DropdownMenuItem>
+          onItemMouseDown={handleMouseDown}
+        />
       </DropdownMenuContent>
     </DropdownMenu>
   )

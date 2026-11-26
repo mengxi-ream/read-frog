@@ -1,4 +1,3 @@
-// @vitest-environment jsdom
 // oxlint-disable typescript/unbound-method -- Storage methods are arrow-function mocks.
 
 import type { Config } from "@/types/config/config"
@@ -44,13 +43,13 @@ describe("Translation Hub preferences", () => {
     const providerId = first.get(selectedProviderIdsAtom)[0]!
 
     await first.set(selectedProviderIdsAtom, [providerId])
-    await first.set(sourceLangCodeAtom, "spa")
-    await first.set(targetLangCodeAtom, "eng")
+    await first.set(sourceLangCodeAtom, "es")
+    await first.set(targetLangCodeAtom, "en")
 
     const reopened = openHub()
     expect(reopened.get(selectedProviderIdsAtom)).toEqual([providerId])
-    expect(reopened.get(sourceLangCodeAtom)).toBe("spa")
-    expect(reopened.get(targetLangCodeAtom)).toBe("eng")
+    expect(reopened.get(sourceLangCodeAtom)).toBe("es")
+    expect(reopened.get(targetLangCodeAtom)).toBe("en")
     expect(persisted.value.language).toEqual(DEFAULT_CONFIG.language)
   })
 
@@ -59,8 +58,8 @@ describe("Translation Hub preferences", () => {
     await first.set(selectedProviderIdsAtom, [])
     expect(openHub().get(selectedProviderIdsAtom)).toEqual([])
 
-    await first.set(selectedProviderIdsAtom, ["removed-provider", "read-frog-free-ai"])
-    expect(openHub().get(selectedProviderIdsAtom)).toEqual(["read-frog-free-ai"])
+    await first.set(selectedProviderIdsAtom, ["removed-provider", "read-frog-ai:gpt-6-luna"])
+    expect(openHub().get(selectedProviderIdsAtom)).toEqual(["read-frog-ai:gpt-6-luna"])
 
     const localId = DEFAULT_CONFIG.providersConfig.find(
       (provider) => provider.enabled && provider.provider === "microsoft-translate",
@@ -77,16 +76,16 @@ describe("Translation Hub preferences", () => {
     const store = openHub()
     store.set(configAtom, {
       ...store.get(configAtom),
-      language: { ...DEFAULT_CONFIG.language, sourceCode: "auto", targetCode: "spa" },
+      language: { ...DEFAULT_CONFIG.language, sourceCode: "auto", targetCode: "es" },
     })
     store.set(exchangeLangCodesAtom)
 
-    expect(store.get(sourceLangCodeAtom)).toBe("spa")
-    expect(store.get(targetLangCodeAtom)).toBe("eng")
+    expect(store.get(sourceLangCodeAtom)).toBe("es")
+    expect(store.get(targetLangCodeAtom)).toBe("en")
     await vi.waitFor(() => expect(storageAdapter.set).toHaveBeenCalledTimes(1))
     expect(persisted.value.translationHub).toMatchObject({
-      sourceCode: "spa",
-      targetCode: "eng",
+      sourceCode: "es",
+      targetCode: "en",
     })
   })
 })

@@ -20,11 +20,23 @@ export const REQUIRED_GAP_PX = GLOSS_LINE_PX + GLOSS_GAP_PX + UNDERLINE_OFFSET_P
 
 const PROBE_LENGTH = 24
 
+/** Text smaller than this gets a mark but no gloss. */
+export const MIN_GLOSSED_FONT_PX = 11
+
 export interface LeadingMeasurement {
   fontSize: number
   /** The used line-height in px, or `null` for `normal`, which leaves no gap. */
   lineHeight: number | null
   inkHeight: number
+}
+
+/**
+ * Whether the measured text is too small for a gloss under it. The text's own
+ * size, not its block's: a page can set a tiny size on a container and the
+ * real one on the text inside (YouTube's comments: 10px, then the text).
+ */
+export function isTooSmallForGloss(measurement: LeadingMeasurement): boolean {
+  return measurement.fontSize < MIN_GLOSSED_FONT_PX
 }
 
 /** The gap a line leaves under its glyphs, in px. */
@@ -95,27 +107,35 @@ export function findLineHeightOwner(block: Element, probe: Text | null): Element
 
 const CLIP_CHECK_DEPTH = 8
 
+/** Whether the box already cuts some of its content off. */
+function isCuttingOff(element: Element): boolean {
+  return element.scrollHeight > element.clientHeight + 1
+}
+
 /**
  * Whether taller lines would be clipped or misplaced: a fixed box that hides
- * its overflow, a line clamp, vertical text, an editor. Then the block gets
- * marks but no glosses.
+ * its overflow, a line clamp that is already cutting text off, vertical text,
+ * an editor. Then the block gets marks but no glosses.
+ *
+ * A clamp that cuts nothing off is no reason: it clamps by lines, not by
+ * height, so taller lines hide nothing that was shown. Pages clamp every
+ * comment or card the same way, however short (YouTube's comments, at 4).
  */
 export function isLeadingUnsafe(block: Element): boolean {
   const blockStyle = getComputedStyle(block)
   if (blockStyle.writingMode !== "horizontal-tb") return true
-  if (Number.parseFloat(blockStyle.fontSize) < 11) return true
   if (block instanceof HTMLElement && block.isContentEditable) return true
 
   let element: Element | null = block
   for (let depth = 0; element && depth < CLIP_CHECK_DEPTH; depth += 1) {
     const style = getComputedStyle(element)
     const lineClamp = style.getPropertyValue("-webkit-line-clamp")
-    if (lineClamp !== "" && lineClamp !== "none") return true
+    if (lineClamp !== "" && lineClamp !== "none" && isCuttingOff(element)) return true
     if (style.position === "fixed") return true
     const overflowY = style.overflowY
     if (
       (overflowY === "hidden" || overflowY === "clip") &&
-      (style.maxHeight !== "none" || element.scrollHeight > element.clientHeight + 1)
+      (style.maxHeight !== "none" || isCuttingOff(element))
     ) {
       return true
     }
@@ -134,12 +154,7 @@ export function isLeadingClipped(block: Element): boolean {
   let element: Element | null = block
   for (let depth = 0; element && depth < CLIP_CHECK_DEPTH; depth += 1) {
     const { overflowY } = getComputedStyle(element)
-    if (
-      (overflowY === "hidden" || overflowY === "clip") &&
-      element.scrollHeight > element.clientHeight + 1
-    ) {
-      return true
-    }
+    if ((overflowY === "hidden" || overflowY === "clip") && isCuttingOff(element)) return true
     element = element.parentElement
   }
   return false

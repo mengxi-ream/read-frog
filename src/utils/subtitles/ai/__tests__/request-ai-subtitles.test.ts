@@ -22,6 +22,7 @@ vi.mock("@/utils/orpc/client", () => ({
 const { requestAiSubtitles } = await import("../request-ai-subtitles")
 
 const ctx = { videoId: "abc", url: "https://youtube.com/watch?v=abc", durationSec: 600 }
+const MEDIA_ID = "2119833138889158657"
 
 /** Resolves with the rejection value so its shape (action included) can be asserted. */
 function rejection(promise: Promise<unknown>): Promise<unknown> {
@@ -86,7 +87,9 @@ describe("requestAiSubtitles", () => {
     const result = await promise
 
     expect(get).toHaveBeenCalledTimes(2)
-    expect(get).toHaveBeenCalledWith({ id: "job-2" })
+    // Every poll carries the claim, so the server can say the row now holds another video.
+    expect(get).toHaveBeenCalledWith({ id: "job-2", durationSec: 600 })
+    expect(getSubtitles).toHaveBeenCalledWith({ id: "job-2", durationSec: 600 })
     expect(result).toEqual({
       detectedLanguage: "ja",
       segments: [{ text: "こんにちは", start: 0, end: 5000 }],
@@ -140,7 +143,7 @@ describe("requestAiSubtitles", () => {
       message: "subtitles.errors.aiQuotaExceeded",
       action: {
         label: "action.upgrade",
-        url: "https://readfrog.app/pricing?entry=extension_video_quota",
+        url: "https://readfrog.app/pricing?entry=extension_video_quota&feature=video_subtitles",
       },
     })
     expect(get).not.toHaveBeenCalled()
@@ -156,7 +159,9 @@ describe("requestAiSubtitles", () => {
     await expect(rejection(requestAiSubtitles(ctx))).resolves.toMatchObject({
       name: "ToastSubtitlesError",
       message: "subtitles.errors.aiSubscriptionRequired",
-      action: { url: "https://readfrog.app/pricing?entry=extension_video_quota" },
+      action: {
+        url: "https://readfrog.app/pricing?entry=extension_video_quota&feature=video_subtitles",
+      },
     })
     expect(get).not.toHaveBeenCalled()
   })
@@ -192,6 +197,43 @@ describe("requestAiSubtitles", () => {
     expect(get).not.toHaveBeenCalled()
   })
 
+  it("names the played video to create by the context's media id", async () => {
+    create.mockResolvedValue({ id: "job-8", status: "completed", detectedLanguage: "en" })
+    getSubtitles.mockResolvedValue({ id: "job-8", detectedLanguage: "en", segments: [] })
+
+    await requestAiSubtitles({ ...ctx, mediaId: MEDIA_ID })
+
+    expect(create).toHaveBeenCalledWith({
+      url: ctx.url,
+      durationSec: ctx.durationSec,
+      mediaId: MEDIA_ID,
+    })
+  })
+
+  it("tells the user the transcript is of another video", async () => {
+    create.mockRejectedValue(new ORPCError("VIDEO_TRANSCRIPTION_VIDEO_MISMATCH", { defined: true }))
+
+    await expect(rejection(requestAiSubtitles(ctx))).resolves.toMatchObject({
+      name: "ToastSubtitlesError",
+      message: "subtitles.errors.aiVideoMismatch",
+    })
+    expect(get).not.toHaveBeenCalled()
+  })
+
+  it("tells the user the transcript is of another video when a poll finds it", async () => {
+    vi.useFakeTimers()
+    create.mockResolvedValue({ id: "job-9", status: "pending", detectedLanguage: null })
+    get.mockRejectedValue(new ORPCError("VIDEO_TRANSCRIPTION_VIDEO_MISMATCH", { defined: true }))
+
+    const settled = rejection(requestAiSubtitles(ctx))
+    await vi.advanceTimersByTimeAsync(1_000)
+
+    await expect(settled).resolves.toMatchObject({
+      name: "ToastSubtitlesError",
+      message: "subtitles.errors.aiVideoMismatch",
+    })
+  })
+
   it("shows a localized generic error for other create failures", async () => {
     create.mockRejectedValue(new ORPCError("VIDEO_TRANSCRIPT_NOT_FOUND", { defined: true }))
     await expect(requestAiSubtitles(ctx)).rejects.toThrow("subtitles.errors.aiRequestFailed")
@@ -201,15 +243,21 @@ describe("requestAiSubtitles", () => {
   // `get` and `getSubtitles` sit behind the same entitlement middleware as
   // `create`, so a subscription that lapses mid-poll surfaces here.
   it("offers the upgrade when the plan wall arrives while polling", async () => {
+    vi.useFakeTimers()
     create.mockResolvedValue({ id: "job-5", status: "pending", detectedLanguage: null })
     get.mockRejectedValue(
       new ORPCError("VIDEO_TRANSCRIPTION_SUBSCRIPTION_REQUIRED", { defined: true }),
     )
 
-    await expect(rejection(requestAiSubtitles(ctx))).resolves.toMatchObject({
+    const settled = rejection(requestAiSubtitles(ctx))
+    await vi.advanceTimersByTimeAsync(1_000)
+
+    await expect(settled).resolves.toMatchObject({
       name: "ToastSubtitlesError",
       message: "subtitles.errors.aiSubscriptionRequired",
-      action: { url: "https://readfrog.app/pricing?entry=extension_video_quota" },
+      action: {
+        url: "https://readfrog.app/pricing?entry=extension_video_quota&feature=video_subtitles",
+      },
     })
     expect(getSubtitles).not.toHaveBeenCalled()
   })

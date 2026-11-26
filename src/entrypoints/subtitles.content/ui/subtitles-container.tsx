@@ -2,6 +2,7 @@ import { useAtomValue } from "jotai"
 import { use } from "react"
 import { AnchoredToastProvider } from "@/components/ui/base-ui/toast"
 import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-host"
+import { subtitlesAnchoredToastManager } from "@/utils/subtitles/toast"
 import { subtitlesDisplayAtom, subtitlesShowContentAtom, subtitlesShowStateAtom } from "../atoms"
 import { WordLookupCard } from "../learning/word-lookup-card"
 import { StateMessage } from "./state-message"
@@ -29,7 +30,11 @@ export function SubtitlesContainer() {
         {isVisible && (
           <>
             <SubtitlesView showContent={showContent} />
-            <StateMessage state={showState} message={stateData?.message} />
+            <StateMessage
+              state={showState}
+              message={stateData?.message}
+              requestId={stateData?.requestId}
+            />
           </>
         )}
       </div>
@@ -41,7 +46,10 @@ export function SubtitlesContainer() {
       )}
 
       <WordLookupCard />
-      <AnchoredToastProvider portalProps={{ container: shadowWrapper }} />
+      <AnchoredToastProvider
+        toastManager={subtitlesAnchoredToastManager}
+        portalProps={{ container: shadowWrapper }}
+      />
     </div>
   )
 }

@@ -24,9 +24,11 @@ function setHost(host: string): void {
   })
 }
 
+// Attached: like a browser, jsdom computes no white-space for a detached element.
 function createRoot(whiteSpace: string = "pre-wrap"): HTMLDivElement {
   const root = document.createElement("div")
   root.style.whiteSpace = whiteSpace
+  document.body.appendChild(root)
   return root
 }
 
@@ -52,6 +54,7 @@ function insertAtBoundary(boundary: DOMBoundary, marker: HTMLElement): void {
 
 beforeEach(() => {
   setHost("paragraph.example")
+  document.body.replaceChildren()
 })
 
 describe("buildVirtualParagraphUnits", () => {
@@ -383,7 +386,6 @@ describe("canSplitParagraphIntoDescendants", () => {
   function walkedFixture(markup: string, whiteSpace: string): HTMLElement {
     const root = createRoot(whiteSpace)
     root.innerHTML = markup
-    document.body.appendChild(root)
     walkAndLabelElement(root, "walk-split", DEFAULT_CONFIG)
     return root
   }
@@ -492,7 +494,6 @@ describe("virtual paragraph unit runs", () => {
   ) {
     const root = createRoot(whiteSpace)
     build(root)
-    document.body.appendChild(root)
     const plan = buildVirtualParagraphPlan(root, config)
     return { root, plan }
   }
