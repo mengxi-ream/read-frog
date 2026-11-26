@@ -20,7 +20,7 @@ import { configAtom, configFieldsAtomMap } from "@/utils/atoms/config"
 import { getDifficultWordsShortcut } from "@/utils/constants/difficult-words"
 import { difficultWordsTab, useDifficultWordsAccess } from "@/utils/difficult-words/tab-state"
 import { i18n } from "@/utils/i18n"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
 import { onMessage, sendMessage } from "@/utils/message"
 import { isShortcutEmpty, isValidShortcut } from "@/utils/shortcut"
 import { useAnnotation } from "../annotation/provider"
@@ -30,6 +30,8 @@ import { DifficultWordCard } from "./card"
 import { KnownCheck } from "./known-check"
 import { LevelPicker } from "./level-picker"
 import { DifficultWordsSession, showRestrictedNotice, showSignInRequiredNotice } from "./session"
+
+const log = createLogger("selection/difficult-words")
 
 const EMPTY_VIEW: DifficultWordsView = { card: null, check: null, levelLang: null }
 const subscribeNothing = () => () => {}
@@ -131,7 +133,7 @@ function DifficultWordsRuntime() {
         })
       }
     } catch (error) {
-      logger.error("[DifficultWords] Failed to start:", error)
+      log.error("Failed to start", { error })
     } finally {
       startingRef.current = false
     }

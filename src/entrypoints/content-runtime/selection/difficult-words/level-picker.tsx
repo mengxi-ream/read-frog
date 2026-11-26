@@ -7,9 +7,12 @@ import {
   SELECTION_CONTENT_OVERLAY_LAYERS,
   SELECTION_CONTENT_OVERLAY_ROOT_ATTRIBUTE,
 } from "@/utils/constants/selection-overlay-layers"
-import { getLevelDescription, getLevelLabel } from "@/utils/difficult-words/levels"
+import {
+  getLevelDescription,
+  getLevelLabel,
+  getVocabLanguageName,
+} from "@/utils/difficult-words/levels"
 import { i18n } from "@/utils/i18n"
-import { getLanguageName } from "@/utils/language-labels"
 import { cn } from "@/utils/styles/utils"
 
 /**
@@ -29,7 +32,7 @@ export function LevelPicker({
   onDismiss: () => void
 }) {
   const [saving, setSaving] = useState<VocabLevel | null>(null)
-  const languageName = getLanguageName(lang)
+  const languageName = getVocabLanguageName(lang)
 
   return (
     <div

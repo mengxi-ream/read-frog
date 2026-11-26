@@ -1215,11 +1215,6 @@ options:
     lookupAction:
       title: Sözə kliklədikdə işə düşür
       description: İşarələnmiş sözə kliklədikdə açılan AI əməliyyatı. Başqasını seçməsəniz, daxili Lüğətdir.
-    colors:
-      title: Rənglər
-      description: İki işarə rənginin mənası
-      hard: Çətin, yəqin ki, sizin üçün yenidir
-      learning: Öyrənilir, Notebase-ə saxlanılıb
     levels:
       title: Oxu səviyyəniz
       description: Hər dilin öz səviyyəsi var. O dildə səhifəni ilk dəfə axtaranda soruşulur və bildiyiniz sözləri qeyd etdikcə tənzimlənir.

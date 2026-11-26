@@ -1215,11 +1215,6 @@ options:
     lookupAction:
       title: Al hacer clic en una palabra se ejecuta
       description: La acción AI que se abre al hacer clic en una palabra resaltada. El Diccionario integrado, salvo que elijas otra.
-    colors:
-      title: Colores
-      description: Qué significan los dos colores de resaltado
-      hard: Difícil, probablemente nueva para ti
-      learning: Aprendiendo, guardada en una Notebase
     levels:
       title: Tu nivel de lectura
       description: Cada idioma tiene el suyo. Se te pregunta la primera vez que buscas en una página en ese idioma y se ajusta a medida que marcas las palabras que conoces.

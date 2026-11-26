@@ -1210,11 +1210,6 @@ options:
     lookupAction:
       title: Khi bấm vào một từ sẽ chạy
       description: Hành động AI mở ra khi bạn bấm vào một từ được tô sáng. Mặc định là Từ điển có sẵn, trừ khi bạn chọn cái khác.
-    colors:
-      title: Màu sắc
-      description: Ý nghĩa của hai màu tô sáng
-      hard: Khó, có lẽ còn mới với bạn
-      learning: Đang học, đã lưu vào Notebase
     levels:
       title: Trình độ đọc của bạn
       description: Mỗi ngôn ngữ có trình độ riêng. Bạn sẽ được hỏi khi quét một trang bằng ngôn ngữ đó lần đầu, và trình độ tự điều chỉnh khi bạn đánh dấu những từ đã biết.

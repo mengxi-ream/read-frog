@@ -1,16 +1,15 @@
 import { supportsHighlightApi } from "@/utils/annotate/marks"
 
 // The marks, as CSS Custom Highlights: nothing is written into the page, and
-// the engine paints them with the text. One highlight per kind of word and
-// tone of page — a paragraph of light text on a dark page takes the dark
-// colours — and one more for the word under the pointer.
+// the engine paints them with the text. One highlight per tone of page — a
+// paragraph of light text on a dark page takes the dark colours — and one
+// more for the word under the pointer.
 //
 // Below the annotation underline (priority -1 against its 0), so a word that
 // is both marked and annotated shows both; the hover above everything.
 //
 // Typed locally, as in utils/annotate/marks.ts: lib.dom gained these late.
 
-export type MarkKind = "hard" | "learning"
 /** The page behind the word: "dark" when its text is light. */
 export type MarkTone = "light" | "dark"
 
@@ -31,16 +30,14 @@ type HighlightConstructor = new () => HighlightLike
 const BASE_PRIORITY = -1
 const HOVER_PRIORITY = 1
 
-export function highlightName(kind: MarkKind, tone: MarkTone, hover = false): string {
-  return `read-frog-${kind}${hover ? "-hover" : ""}${tone === "dark" ? "-dark" : ""}`
+export function highlightName(tone: MarkTone, hover = false): string {
+  return `read-frog-hard${hover ? "-hover" : ""}${tone === "dark" ? "-dark" : ""}`
 }
 
-export const HIGHLIGHT_NAMES = (["hard", "learning"] as const).flatMap((kind) =>
-  (["light", "dark"] as const).flatMap((tone) => [
-    highlightName(kind, tone),
-    highlightName(kind, tone, true),
-  ]),
-)
+export const HIGHLIGHT_NAMES = (["light", "dark"] as const).flatMap((tone) => [
+  highlightName(tone),
+  highlightName(tone, true),
+])
 
 function getRegistry(): HighlightRegistryLike | null {
   const registry = (globalThis as { CSS?: { highlights?: unknown } }).CSS?.highlights as
@@ -57,21 +54,21 @@ export class DifficultWordHighlights {
     return supportsHighlightApi()
   }
 
-  add(kind: MarkKind, tone: MarkTone, range: Range) {
-    this.ensure(highlightName(kind, tone), BASE_PRIORITY)?.add(range)
+  add(tone: MarkTone, range: Range) {
+    this.ensure(highlightName(tone), BASE_PRIORITY)?.add(range)
   }
 
-  remove(kind: MarkKind, tone: MarkTone, range: Range) {
-    this.highlights.get(highlightName(kind, tone))?.delete(range)
+  remove(tone: MarkTone, range: Range) {
+    this.highlights.get(highlightName(tone))?.delete(range)
     if (this.hover?.range === range) this.setHover(null)
   }
 
   /** Deepens one mark, the one under the pointer; `null` for none. */
-  setHover(mark: { kind: MarkKind; tone: MarkTone; range: Range } | null) {
+  setHover(mark: { tone: MarkTone; range: Range } | null) {
     if (this.hover) this.highlights.get(this.hover.name)?.delete(this.hover.range)
     this.hover = null
     if (!mark) return
-    const name = highlightName(mark.kind, mark.tone, true)
+    const name = highlightName(mark.tone, true)
     this.ensure(name, HOVER_PRIORITY)?.add(mark.range)
     this.hover = { name, range: mark.range }
   }

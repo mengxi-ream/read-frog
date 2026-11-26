@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
-import type { VocabEvent } from "@read-frog/api-contract"
+import type { VocabEvent, VocabLang, VocabSeen } from "@read-frog/api-contract"
 import type { Mock } from "vitest"
+import type { SelectionSession } from "../../selection-toolbar/atoms"
 import type { Config } from "@/types/config/config"
 import type { DifficultWordMark, DifficultWordsScannerHost } from "@/utils/difficult-words/scanner"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
@@ -16,6 +17,9 @@ interface FakeScanner {
   showLemma: Mock<(lang: string, lemma: string) => void>
   refreshVisible: Mock<(events: VocabEvent[]) => void>
   retryLevel: Mock<(lang: string) => void>
+  noteSeen: Mock<(mark: DifficultWordMark) => void>
+  markForSelection: Mock<(range: Range, word: string) => DifficultWordMark | null>
+  languageAt: Mock<(node: Node) => VocabLang | null>
 }
 
 const mocks = vi.hoisted(() => ({
@@ -54,7 +58,9 @@ vi.mock("@/utils/difficult-words/scanner", () => ({
     markAt = vi.fn<() => unknown>(() => mocks.markAt)
     isMarked = vi.fn<() => boolean>(() => true)
     paragraphOf = vi.fn<() => string>(() => "The ubiquitous cat.")
-    languageAt = vi.fn<() => null>(() => null)
+    languageAt = vi.fn<(node: Node) => VocabLang | null>(() => null)
+    noteSeen = vi.fn<(mark: DifficultWordMark) => void>()
+    markForSelection = vi.fn<(range: Range, word: string) => DifficultWordMark | null>(() => null)
 
     constructor(host: DifficultWordsScannerHost) {
       mocks.host = host
@@ -67,18 +73,40 @@ const RECT = { left: 10, right: 60, top: 10, bottom: 30, width: 50, height: 20 }
 
 function markIn(block: Element): DifficultWordMark {
   return {
-    kind: "hard",
     tone: "light",
     range: { getClientRects: () => [RECT], getBoundingClientRect: () => RECT } as unknown as Range,
     word: "ubiquitous",
     lemma: "ubiquitous",
-    lang: "eng",
+    lang: "en",
+    v: 1,
     block,
   }
 }
 
+/** The reader selected `text` of `element`'s text from `start`, and looked it up. */
+function selectionOf(element: Element, start: number, text: string): SelectionSession {
+  const node = element.firstChild!
+  return {
+    id: 1,
+    createdAt: Date.now(),
+    selectionSnapshot: {
+      text,
+      ranges: [
+        {
+          startContainer: node,
+          startOffset: start,
+          endContainer: node,
+          endOffset: start + text.length,
+        },
+      ],
+    },
+    contextSnapshot: { text: element.textContent ?? "", paragraphs: [] },
+    noteOrigin: null,
+  }
+}
+
 function createSession() {
-  const session = new DifficultWordsSession("cmn", {
+  const session = new DifficultWordsSession("zh-Hans", {
     getConfig: () => ({}) as Config,
     setRequest: vi.fn<(request: unknown) => void>(),
     isAnnotationMode: () => false,
@@ -144,23 +172,23 @@ describe("DifficultWordsSession", () => {
     session = createSession()
     const host = mocks.host!
 
-    host.onNeedsLevel(["fra", "deu"], performance.now())
-    host.onNeedsLevel(["spa"], performance.now())
-    expect(session.getView().levelLang).toBe("fra")
+    host.onNeedsLevel(["fr", "de"], performance.now())
+    host.onNeedsLevel(["es"], performance.now())
+    expect(session.getView().levelLang).toBe("fr")
 
     session.dismissLevel()
-    expect(session.getView().levelLang).toBe("deu")
+    expect(session.getView().levelLang).toBe("de")
     const sentBefore = performance.now()
     await vi.advanceTimersByTimeAsync(10)
     await session.pickLevel("B1")
-    expect(mocks.setLevel).toHaveBeenCalledWith({ lang: "deu", level: "B1" })
-    expect(mocks.scanner!.retryLevel).toHaveBeenCalledWith("deu")
-    expect(session.getView().levelLang).toBe("spa")
+    expect(mocks.setLevel).toHaveBeenCalledWith({ lang: "de", level: "B1" })
+    expect(mocks.scanner!.retryLevel).toHaveBeenCalledWith("de")
+    expect(session.getView().levelLang).toBe("es")
 
     // A request out while the level was saved: its paragraphs go again, nothing is asked.
-    host.onNeedsLevel(["deu", "fra"], sentBefore)
+    host.onNeedsLevel(["de", "fr"], sentBefore)
     expect(mocks.scanner!.retryLevel).toHaveBeenCalledTimes(2)
-    expect(session.getView().levelLang).toBe("spa")
+    expect(session.getView().levelLang).toBe("es")
 
     session.dismissLevel()
     expect(session.getView().levelLang).toBeNull()
@@ -175,7 +203,15 @@ describe("DifficultWordsSession", () => {
     expect(recorded()).toEqual([])
 
     session.onCardSave(mark, "saved")
-    expect(recorded()).toEqual([expect.objectContaining({ kind: "save", word: "ubiquitous" })])
+    expect(recorded()).toEqual([
+      expect.objectContaining({
+        kind: "save",
+        lang: "en",
+        word: "ubiquitous",
+        lemma: "ubiquitous",
+        hl: 1,
+      }),
+    ])
   })
 
   it("undoes the card's I know it by judging the paragraphs on screen again with the undo", async () => {
@@ -183,15 +219,16 @@ describe("DifficultWordsSession", () => {
     const mark = markIn(document.querySelector("#a")!)
     await openCard(mark)
     expect(session.getView().card?.mark).toBe(mark)
+    expect(mocks.scanner!.noteSeen).toHaveBeenCalledWith(mark)
 
     session.markCardKnown()
     const known = mocks.scanner!.refreshVisible.mock.calls[0]![0][0]!
-    expect(known).toMatchObject({ kind: "known", word: "ubiquitous" })
+    expect(known).toMatchObject({ kind: "known", word: "ubiquitous", lemma: "ubiquitous", hl: 1 })
     undoLast()
 
-    expect(mocks.scanner!.showLemma).toHaveBeenCalledWith("eng", "ubiquitous")
+    expect(mocks.scanner!.showLemma).toHaveBeenCalledWith("en", "ubiquitous")
     expect(mocks.scanner!.refreshVisible).toHaveBeenLastCalledWith([
-      expect.objectContaining({ kind: "undo", lang: "eng", target: known.id }),
+      expect.objectContaining({ kind: "undo", lang: "en", target: known.id }),
     ])
     expect(recorded()).toEqual([])
   })
@@ -203,15 +240,63 @@ describe("DifficultWordsSession", () => {
     await vi.advanceTimersByTimeAsync(300)
     expect(session.getView().check?.mark).toBe(mark)
 
+    expect(mocks.scanner!.noteSeen).not.toHaveBeenCalled()
     session.markCheckKnown()
+    expect(mocks.scanner!.noteSeen).toHaveBeenCalledWith(mark)
     const [known] = recorded()
     undoLast()
 
     expect(recorded()).toEqual([
       known,
-      expect.objectContaining({ kind: "undo", lang: "eng", target: known!.id }),
+      expect.objectContaining({ kind: "undo", lang: "en", target: known!.id }),
     ])
     expect(mocks.scanner!.refreshVisible).not.toHaveBeenCalled()
+  })
+
+  it("records a marked word looked up under its lemma, and counts it seen; another word by its paragraph's language", () => {
+    session = createSession()
+    const block = document.querySelector("#a")!
+    const mark = markIn(block)
+    mocks.scanner!.markForSelection.mockImplementation((_range, word) =>
+      word === mark.word ? mark : null,
+    )
+    mocks.scanner!.languageAt.mockReturnValue("en")
+
+    session.onSelectionLookup(selectionOf(block, 4, "ubiquitous"))
+    session.onSelectionLookup(selectionOf(block, 15, "cat"))
+    // More than one word.
+    session.onSelectionLookup(selectionOf(block, 4, "ubiquitous cat"))
+
+    expect(mocks.scanner!.noteSeen).toHaveBeenCalledTimes(1)
+    expect(mocks.scanner!.noteSeen).toHaveBeenCalledWith(mark)
+    const [marked, other] = recorded()
+    expect(recorded()).toHaveLength(2)
+    expect(marked).toMatchObject({
+      kind: "lookup",
+      lang: "en",
+      word: "ubiquitous",
+      lemma: "ubiquitous",
+      hl: 1,
+    })
+    expect(other).toMatchObject({ kind: "lookup", lang: "en", word: "cat" })
+    expect(other).not.toHaveProperty("lemma")
+    expect(other).not.toHaveProperty("hl")
+  })
+
+  it("sends the reader's own language with each request, and the words seen to the background", async () => {
+    session = createSession()
+    const host = mocks.host!
+    const seen: VocabSeen[] = [{ lang: "en", v: 2, words: ["ubiquitous"] }]
+
+    await host.judge([{ id: "b1", text: "The ubiquitous cat." }])
+    host.seen(seen)
+
+    expect(mocks.sendMessage).toHaveBeenCalledWith("judgeDifficultWords", {
+      own: "zh-Hans",
+      blocks: [{ id: "b1", text: "The ubiquitous cat." }],
+      events: undefined,
+    })
+    expect(mocks.sendMessage).toHaveBeenCalledWith("recordDifficultWordsSeen", { seen })
   })
 
   it("gives the pointer cursor to the hovered word's paragraph, not the page", async () => {

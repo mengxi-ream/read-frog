@@ -1,5 +1,22 @@
-import type { VocabLevel } from "@read-frog/api-contract"
-import { i18n } from "@/utils/i18n"
+import type { VocabLang, VocabLevel } from "@read-frog/api-contract"
+import { getUiLocale, i18n } from "@/utils/i18n"
+import { getLanguageName } from "@/utils/language-labels"
+
+/**
+ * A language words are judged in, as the reader reads it. Portuguese is one
+ * list under `pt-BR`, European Portuguese judged with it, so its level is
+ * named for both.
+ */
+export function getVocabLanguageName(lang: VocabLang) {
+  if (lang !== "pt-BR") return getLanguageName(lang)
+  try {
+    return (
+      new Intl.DisplayNames([getUiLocale()], { type: "language" }).of("pt") ?? getLanguageName(lang)
+    )
+  } catch {
+    return getLanguageName(lang)
+  }
+}
 
 /** A reading level's name: the CEFR's own, or "Not sure". */
 export function getLevelLabel(level: VocabLevel) {

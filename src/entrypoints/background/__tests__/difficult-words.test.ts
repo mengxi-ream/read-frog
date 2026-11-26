@@ -1,6 +1,10 @@
-import type { VocabEvent, VocabJudgeInput } from "@read-frog/api-contract"
+import type { VocabEvent, VocabJudgeInput, VocabLang, VocabSeen } from "@read-frog/api-contract"
 import { ORPCError } from "@orpc/client"
-import { VOCAB_JUDGE_MAX_EVENTS } from "@read-frog/api-contract"
+import {
+  VOCAB_JUDGE_MAX_EVENTS,
+  VOCAB_JUDGE_MAX_LANGS,
+  VOCAB_SEEN_MAX_WORDS,
+} from "@read-frog/api-contract"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { browser, storage } from "#imports"
 
@@ -38,15 +42,20 @@ const ACCESS_TTL_MS = 60 * 60_000
 const store = new Map<string, unknown>()
 
 let nextEvent = 0
-function event(word = "ubiquitous"): VocabEvent {
+function event(word = "ubiquitous", lang: VocabLang = "en"): VocabEvent {
   nextEvent += 1
   return {
     id: `0190f5c6-2d0c-7000-8000-${String(nextEvent).padStart(12, "0")}`,
-    lang: "eng",
+    lang,
     kind: "known",
     word,
     at: "2026-11-03T00:00:00.000Z",
   }
+}
+
+/** Marked words seen in `lang`, marked under version 1. */
+function seenIn(lang: VocabLang, ...words: string[]): VocabSeen {
+  return { lang, v: 1, words }
 }
 
 function undoOf(record: VocabEvent): VocabEvent {
@@ -283,6 +292,106 @@ describe("DifficultWordsOutbox", () => {
     expect(send).toHaveBeenCalledTimes(1)
     expect(store.get(OUTBOX_KEY)).toEqual([])
   })
+
+  describe("the words seen", () => {
+    it("go with the next records, once", async () => {
+      const send = vi.fn<Send>(ackAll)
+      const outbox = new DifficultWordsOutbox(send)
+      const record = event()
+
+      outbox.addSeen([seenIn("en", "ubiquitous"), seenIn("en", "mat", "ubiquitous")])
+      await outbox.add([record])
+      await vi.advanceTimersByTimeAsync(300)
+
+      expect(send).toHaveBeenCalledTimes(1)
+      expect(send).toHaveBeenCalledWith({
+        events: [record],
+        seen: [seenIn("en", "ubiquitous", "mat")],
+      })
+      await vi.advanceTimersByTimeAsync(60_000)
+      expect(send).toHaveBeenCalledTimes(1)
+    })
+
+    it("go on their own a few seconds after, by language and version", async () => {
+      const send = vi.fn<Send>(ackAll)
+      const outbox = new DifficultWordsOutbox(send)
+
+      outbox.addSeen([seenIn("en", "ubiquitous"), { lang: "en", v: 2, words: ["mat"] }])
+      await vi.advanceTimersByTimeAsync(4_999)
+      expect(send).not.toHaveBeenCalled()
+      await vi.advanceTimersByTimeAsync(1)
+
+      expect(send).toHaveBeenCalledWith({
+        seen: [seenIn("en", "ubiquitous"), { lang: "en", v: 2, words: ["mat"] }],
+      })
+    })
+
+    it("are not sent again when the request carrying them failed", async () => {
+      const send = vi.fn<Send>(async () => {
+        throw new TypeError("Failed to fetch")
+      })
+      const outbox = new DifficultWordsOutbox(send)
+      const record = event()
+
+      outbox.addSeen([seenIn("en", "ubiquitous")])
+      await outbox.add([record])
+      await vi.advanceTimersByTimeAsync(300)
+      expect(send).toHaveBeenLastCalledWith({
+        events: [record],
+        seen: [seenIn("en", "ubiquitous")],
+      })
+
+      // The record is tried again; the words seen are not.
+      await vi.advanceTimersByTimeAsync(2_000)
+      expect(send).toHaveBeenCalledTimes(2)
+      expect(send).toHaveBeenLastCalledWith({ events: [record] })
+    })
+
+    it(`go ${VOCAB_SEEN_MAX_WORDS} a request at most, the rest straight after`, async () => {
+      const send = vi.fn<Send>(ackAll)
+      const outbox = new DifficultWordsOutbox(send)
+      const words = Array.from({ length: VOCAB_SEEN_MAX_WORDS + 5 }, (_, index) => `word${index}`)
+
+      outbox.addSeen([seenIn("en", ...words)])
+      await vi.advanceTimersByTimeAsync(5_001)
+
+      expect(send).toHaveBeenCalledTimes(2)
+      expect(send.mock.calls[0]![0].seen).toEqual([
+        seenIn("en", ...words.slice(0, VOCAB_SEEN_MAX_WORDS)),
+      ])
+      expect(send.mock.calls[1]![0].seen).toEqual([
+        seenIn("en", ...words.slice(VOCAB_SEEN_MAX_WORDS)),
+      ])
+    })
+
+    it(`share a request's ${VOCAB_JUDGE_MAX_LANGS} languages with the records, the others going next`, async () => {
+      const send = vi.fn<Send>(ackAll)
+      const outbox = new DifficultWordsOutbox(send)
+      const records = [event("cat", "en"), event("chat", "fr"), event("Katze", "de")]
+
+      outbox.addSeen([seenIn("fr", "omniprésent"), seenIn("es", "gato"), seenIn("it", "gatto")])
+      await outbox.add(records)
+      await vi.advanceTimersByTimeAsync(301)
+
+      expect(send).toHaveBeenCalledTimes(2)
+      expect(send.mock.calls[0]![0]).toEqual({
+        events: records,
+        seen: [seenIn("fr", "omniprésent"), seenIn("es", "gato")],
+      })
+      expect(send.mock.calls[1]![0]).toEqual({ seen: [seenIn("it", "gatto")] })
+    })
+
+    it(`hands out records in ${VOCAB_JUDGE_MAX_LANGS} languages at most, the others still in order`, async () => {
+      const outbox = new DifficultWordsOutbox(vi.fn<Send>(ackAll))
+      const langs: VocabLang[] = ["en", "fr", "de", "es", "it"]
+      const records = langs.map((lang) => event("word", lang))
+      const later = event("other", "en")
+      await outbox.add([...records, later])
+
+      expect(await outbox.take()).toEqual([...records.slice(0, 4), later])
+      expect(await outbox.take()).toEqual([records[4]])
+    })
+  })
 })
 
 describe("difficult words handlers", () => {
@@ -362,10 +471,10 @@ describe("difficult words handlers", () => {
   })
 
   describe("judgeDifficultWords", () => {
-    const blocks = [{ id: "b1", words: ["ubiquitous"] }]
+    const blocks = [{ id: "b1", text: "The ubiquitous cat." }]
     const output = {
       acked: [] as string[],
-      blocks: [{ id: "b1", lang: "eng", v: 1, hard: [], learning: [] }],
+      blocks: [{ id: "b1", lang: "en", v: 1, hard: [] }],
       needsLevel: [],
     }
 
@@ -376,9 +485,13 @@ describe("difficult words handlers", () => {
         acked: input.events?.map((entry) => entry.id) ?? [],
       }))
 
-      const response = await ask("judgeDifficultWords", { own: "cmn", blocks, events: [record] })
+      const response = await ask("judgeDifficultWords", {
+        own: "zh-Hans",
+        blocks,
+        events: [record],
+      })
 
-      expect(judgeMock).toHaveBeenCalledWith({ own: "cmn", events: [record], blocks })
+      expect(judgeMock).toHaveBeenCalledWith({ own: "zh-Hans", events: [record], blocks })
       expect(response).toEqual({ ok: true, output: { ...output, acked: [record.id] } })
       expect(store.get(OUTBOX_KEY)).toEqual([])
     })
@@ -409,6 +522,19 @@ describe("difficult words handlers", () => {
       expect(store.get(OUTBOX_KEY)).toEqual([])
     })
 
+    it("carries the words seen a page sent, once", async () => {
+      judgeMock.mockResolvedValue(output)
+      const seen = [seenIn("en", "ubiquitous")]
+
+      await ask("recordDifficultWordsSeen", { seen })
+      await ask("judgeDifficultWords", { own: "zh-Hans", blocks })
+      await ask("judgeDifficultWords", { own: "zh-Hans", blocks })
+
+      expect(judgeMock).toHaveBeenCalledTimes(2)
+      expect(judgeMock.mock.calls[0]![0]).toEqual({ own: "zh-Hans", seen, blocks })
+      expect(judgeMock.mock.calls[1]![0]).toEqual({ own: "zh-Hans", blocks })
+    })
+
     it("answers a failure the page can act on, and keeps the verdict it gives", async () => {
       judgeMock.mockRejectedValue(new ORPCError("VOCAB_BETA_RESTRICTED", { status: 403 }))
 
@@ -428,7 +554,7 @@ describe("difficult words handlers", () => {
 
   it("tells the other open pages about a word the reader knows", async () => {
     vi.spyOn(browser.tabs, "query").mockResolvedValue([{ id: 1 }, { id: 2 }, {}] as any)
-    const change = { lang: "eng", lemma: "ubiquitous", known: true }
+    const change = { lang: "en", lemma: "ubiquitous", known: true }
 
     await ask("broadcastDifficultWordLemma", change, { tab: { id: 1 } })
 

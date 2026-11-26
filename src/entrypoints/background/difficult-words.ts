@@ -1,10 +1,14 @@
-import type { VocabEvent, VocabJudgeInput } from "@read-frog/api-contract"
+import type { VocabEvent, VocabJudgeInput, VocabLang, VocabSeen } from "@read-frog/api-contract"
 import type { DifficultWordsAccess, DifficultWordsFailure } from "@/utils/difficult-words/types"
 import { ORPCError } from "@orpc/client"
-import { VOCAB_JUDGE_MAX_EVENTS } from "@read-frog/api-contract"
+import {
+  VOCAB_JUDGE_MAX_EVENTS,
+  VOCAB_JUDGE_MAX_LANGS,
+  VOCAB_SEEN_MAX_WORDS,
+} from "@read-frog/api-contract"
 import { GATED_FEATURES } from "@read-frog/definitions"
 import { browser, storage } from "#imports"
-import { logger } from "@/utils/logger"
+import { createLogger } from "@/utils/logging/logger"
 import { onMessage, sendMessage } from "@/utils/message"
 import { backgroundOrpcClient } from "@/utils/orpc/background-client"
 
@@ -15,6 +19,12 @@ import { backgroundOrpcClient } from "@/utils/orpc/background-client"
 // before a tab closes, the browser quits or the service worker is torn down
 // still reaches the server. Each record has its own id: one sent twice is
 // stored once, so a request that may or may not have arrived is sent again.
+//
+// The marked words the reader saw go with the records, but only once: the
+// server counts them and keeps nothing to tell a second sending by, so a
+// request that fails is not sent again with them.
+
+const log = createLogger("background/difficult-words")
 
 const OUTBOX_KEY = "local:difficultWordsOutbox" as const
 const ACCESS_CACHE_KEY = "session:difficultWordsAccess" as const
@@ -29,6 +39,8 @@ const ACCESS_TTL_MS = 60 * 60_000
 const FLUSH_DELAY_MS = 300
 /** After these, the records wait for the next request the pages make. */
 const RETRY_DELAYS_MS = [2_000, 10_000, 60_000]
+/** Seen words wait this long for a request a page makes, then go on their own. */
+const SEEN_FLUSH_DELAY_MS = 5_000
 
 export function toDifficultWordsFailure(error: unknown): DifficultWordsFailure {
   if (!(error instanceof ORPCError)) {
@@ -64,15 +76,22 @@ function isUnsendable(failure: DifficultWordsFailure) {
 }
 
 /**
- * The records still to be stored, oldest first.
+ * The records still to be stored, oldest first, and the seen words still to
+ * be sent.
  *
  * An undo goes in the same request as the record it takes back or a later
  * one, never while that record is on its way in another: the server acks an
  * undo of a record it has not stored yet and does nothing, and the record,
  * sent again, would then stand.
+ *
+ * One request names at most VOCAB_JUDGE_MAX_LANGS languages in its records
+ * and seen words together; the rest go in the next one.
  */
 export class DifficultWordsOutbox {
   private events: VocabEvent[] = []
+  /** By language and version. */
+  private readonly seen = new Map<string, { lang: VocabLang; v: number; words: Set<string> }>()
+  private seenTimer: ReturnType<typeof setTimeout> | null = null
   private readonly inFlight = new Set<string>()
   /** Handed to a request at least once, or left from before: the server may have them. */
   private readonly attempted = new Set<string>()
@@ -97,7 +116,7 @@ export class DifficultWordsOutbox {
         if (this.events.length > 0) this.schedule(FLUSH_DELAY_MS)
       })
       .catch((error) => {
-        logger.warn("[DifficultWords] Failed to read the record queue:", error)
+        log.warn("Failed to read the record queue", { error })
       })
     return this.loaded
   }
@@ -109,7 +128,7 @@ export class DifficultWordsOutbox {
 
   private persist() {
     void storage.setItem(OUTBOX_KEY, this.events).catch((error) => {
-      logger.warn("[DifficultWords] Failed to save the record queue:", error)
+      log.warn("Failed to save the record queue", { error })
     })
   }
 
@@ -173,11 +192,15 @@ export class DifficultWordsOutbox {
     const queued = new Set(this.events.map((event) => event.id))
     const taken: VocabEvent[] = []
     const takenIds = new Set<string>()
+    const langs = new Set<VocabLang>()
     for (const event of this.events) {
       if (taken.length >= VOCAB_JUDGE_MAX_EVENTS) break
       if (this.inFlight.has(event.id)) continue
       // Its record is on its way in another request: the undo waits for it.
       if (event.kind === "undo" && queued.has(event.target) && !takenIds.has(event.target)) continue
+      // A language past the limit waits for the next request, its own records still in order.
+      if (!langs.has(event.lang) && langs.size >= VOCAB_JUDGE_MAX_LANGS) continue
+      langs.add(event.lang)
       taken.push(event)
       takenIds.add(event.id)
     }
@@ -225,6 +248,66 @@ export class DifficultWordsOutbox {
     if (this.events.some((event) => !this.inFlight.has(event.id))) this.schedule(0)
   }
 
+  /** Queues marked words the reader saw, to go with the next request. */
+  addSeen(groups: VocabSeen[]) {
+    for (const { lang, v, words } of groups) {
+      const key = `${lang}\u0000${v}`
+      let group = this.seen.get(key)
+      if (!group) {
+        group = { lang, v, words: new Set() }
+        this.seen.set(key, group)
+      }
+      for (const word of words) group.words.add(word)
+    }
+    if (this.seen.size > 0 && !this.seenTimer) this.scheduleSeen(SEEN_FLUSH_DELAY_MS)
+  }
+
+  /**
+   * The seen words a request carrying `events` can take too, taken out for
+   * good: at most VOCAB_SEEN_MAX_WORDS, in the languages the records name or
+   * in others up to VOCAB_JUDGE_MAX_LANGS in all.
+   */
+  takeSeen(events: VocabEvent[]): VocabSeen[] {
+    const langs = new Set<VocabLang>(events.map((event) => event.lang))
+    const taken: VocabSeen[] = []
+    let room = VOCAB_SEEN_MAX_WORDS
+    for (const [key, group] of this.seen) {
+      if (room === 0) break
+      if (!langs.has(group.lang)) {
+        if (langs.size >= VOCAB_JUDGE_MAX_LANGS) continue
+        langs.add(group.lang)
+      }
+      const words = [...group.words].slice(0, room)
+      for (const word of words) group.words.delete(word)
+      if (group.words.size === 0) this.seen.delete(key)
+      taken.push({ lang: group.lang, v: group.v, words })
+      room -= words.length
+    }
+    return taken
+  }
+
+  /**
+   * After a request: seen words it had no room for go straight after one
+   * that went through, and a while after one that failed.
+   */
+  settleSeen(ok: boolean) {
+    if (this.seen.size === 0) {
+      if (this.seenTimer) clearTimeout(this.seenTimer)
+      this.seenTimer = null
+      return
+    }
+    if (ok) this.scheduleSeen(0)
+    else if (!this.seenTimer) this.scheduleSeen(SEEN_FLUSH_DELAY_MS)
+  }
+
+  private scheduleSeen(delay: number) {
+    if (this.seenTimer) clearTimeout(this.seenTimer)
+    this.seenTimer = setTimeout(() => {
+      this.seenTimer = null
+      void this.flush()
+    }, delay)
+  }
+
   private schedule(delay: number) {
     if (this.timer) clearTimeout(this.timer)
     this.timer = setTimeout(() => {
@@ -236,14 +319,20 @@ export class DifficultWordsOutbox {
   /** Sends the queue on its own, when no page request came to carry it. */
   async flush() {
     const events = await this.take()
-    if (events.length === 0) return
+    const seen = this.takeSeen(events)
+    if (events.length === 0 && seen.length === 0) return
     try {
-      const output = await this.send({ events })
+      const output = await this.send({
+        ...(events.length > 0 && { events }),
+        ...(seen.length > 0 && { seen }),
+      })
       this.settle(events, { acked: output.acked })
+      this.settleSeen(true)
     } catch (error) {
       const failure = toDifficultWordsFailure(error)
-      logger.warn("[DifficultWords] Failed to send records:", failure.kind)
+      log.warn("Failed to send records", { failure: failure.kind })
       this.settle(events, { failure })
+      this.settleSeen(false)
     }
   }
 }
@@ -260,7 +349,7 @@ export async function clearDifficultWordsAccessCache(): Promise<void> {
   try {
     await storage.removeItem(ACCESS_CACHE_KEY)
   } catch (error) {
-    logger.warn("[DifficultWords] Failed to clear the access cache:", error)
+    log.warn("Failed to clear the access cache", { error })
   }
 }
 
@@ -284,7 +373,7 @@ function fetchAccess(): Promise<DifficultWordsAccess> {
       // The server no longer knows the key: the feature left the gated list
       // when it opened to everyone.
       if (error instanceof ORPCError && error.code === "BAD_REQUEST") return "allowed"
-      logger.warn("[DifficultWords] Access check failed:", error)
+      log.warn("Access check failed", { error })
       return "unknown"
     })
     .then(async (access) => {
@@ -319,17 +408,21 @@ export function setupDifficultWordsHandlers() {
       await outbox.afterTargets(newEvents)
     }
     const events = await outbox.take()
+    const seen = outbox.takeSeen(events)
     try {
       const output = await backgroundOrpcClient.vocab.judge({
         ...(own ? { own } : {}),
         ...(events.length > 0 ? { events } : {}),
+        ...(seen.length > 0 ? { seen } : {}),
         blocks,
       })
       outbox.settle(events, { acked: output.acked })
+      outbox.settleSeen(true)
       return { ok: true as const, output }
     } catch (error) {
       const failure = toDifficultWordsFailure(error)
       outbox.settle(events, { failure })
+      outbox.settleSeen(false)
       // The judge is the fresher verdict: the controls that ask for access hide with it.
       if (failure.kind === "signedOut") await cacheAccess("signedOut")
       else if (failure.kind === "restricted") await cacheAccess("denied")
@@ -339,6 +432,10 @@ export function setupDifficultWordsHandlers() {
 
   onMessage("recordDifficultWordEvents", async (message) => {
     await outbox.add(message.data.events)
+  })
+
+  onMessage("recordDifficultWordsSeen", (message) => {
+    outbox.addSeen(message.data.seen)
   })
 
   // A word the reader knows is unmarked in every open page, not just this one.

@@ -1,4 +1,4 @@
-import type { VocabEvent, VocabJudgeBlock } from "@read-frog/api-contract"
+import type { VocabEvent, VocabJudgeBlock, VocabSeen } from "@read-frog/api-contract"
 import type { LanguageTag } from "@read-frog/definitions"
 import type {
   DifficultWordLemmaChange,
@@ -245,6 +245,8 @@ interface ProtocolMap {
     events?: VocabEvent[]
   }) => DifficultWordsJudgeResponse
   recordDifficultWordEvents: (data: { events: VocabEvent[] }) => void
+  // Marked words the reader saw: they go with the next request, sent once.
+  recordDifficultWordsSeen: (data: { seen: VocabSeen[] }) => void
   broadcastDifficultWordLemma: (data: DifficultWordLemmaChange) => void
   // to a tab's top frame
   difficultWordLemmaChanged: (data: DifficultWordLemmaChange) => void

@@ -1,5 +1,5 @@
 import type { VocabEvent, VocabLang, VocabLevel, VocabWordEventKind } from "@read-frog/api-contract"
-import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { LanguageTag } from "@read-frog/definitions"
 import type { SelectionSession } from "../selection-toolbar/atoms"
 import type { CustomActionRequest } from "@/components/custom-action/atoms"
 import type { SaveToNotebaseOutcome } from "@/components/custom-action/use-save-to-notebase"
@@ -18,6 +18,7 @@ import { uuidv7 } from "@/utils/difficult-words/uuid"
 import { logInUrl } from "@/utils/error-action"
 import { i18n } from "@/utils/i18n"
 import { sendMessage } from "@/utils/message"
+import { getWebPageNoteOrigin } from "@/utils/note-origin"
 import { orpcClient } from "@/utils/orpc/client"
 import { toLiveRange } from "../utils"
 
@@ -100,10 +101,18 @@ export function showRestrictedNotice() {
   })
 }
 
+/** A word to record: a marked one, or one the reader looked up that is not marked. */
+type RecordedWord = DifficultWordMark | { lang: VocabLang; word: string }
+
 /** The last line a range is on, in viewport px. */
 function lastLineRect(range: Range): DOMRect {
   const rects = range.getClientRects()
   return rects[rects.length - 1] ?? range.getBoundingClientRect()
+}
+
+/** Whether a record can carry `word`: the server takes words up to VOCAB_WORD_MAX_LENGTH. */
+function isRecordable(word: string) {
+  return word.length > 0 && word.length <= VOCAB_WORD_MAX_LENGTH
 }
 
 /**
@@ -136,7 +145,8 @@ export class DifficultWordsSession {
   private disposed = false
 
   constructor(
-    private readonly own: LangCodeISO6393,
+    /** The reader's own language, whose paragraphs are not judged. */
+    private readonly own: LanguageTag,
     private readonly options: DifficultWordsSessionOptions,
   ) {
     this.scanner = new DifficultWordsScanner({
@@ -149,6 +159,9 @@ export class DifficultWordsSession {
       onFailure: (failure) => this.showFailure(failure),
       onRecovered: () => toastManager.close(OFFLINE_TOAST_ID),
       onMarksChange: () => this.options.onCountChange(this.scanner.count),
+      seen: (groups) => {
+        void sendMessage("recordDifficultWordsSeen", { seen: groups })
+      },
       onEmpty: () => {
         toastManager.add({
           id: EMPTY_TOAST_ID,
@@ -300,6 +313,12 @@ export class DifficultWordsSession {
     } catch {
       return
     }
+    const mark = this.scanner.markForSelection(range, word)
+    if (mark) {
+      this.scanner.noteSeen(mark)
+      this.record(mark, "lookup")
+      return
+    }
     const lang = this.scanner.languageAt(range.startContainer)
     if (lang) this.record({ lang, word }, "lookup")
   }
@@ -307,6 +326,7 @@ export class DifficultWordsSession {
   // ---- marking a word known
 
   private markKnown(mark: DifficultWordMark, withVisible: boolean) {
+    this.scanner.noteSeen(mark)
     const event = this.event(mark, "known")
     this.scanner.hideLemma(mark.lang, mark.lemma)
     void sendMessage("broadcastDifficultWordLemma", {
@@ -354,15 +374,25 @@ export class DifficultWordsSession {
 
   // ---- records
 
-  private event(
-    word: { lang: VocabLang; word: string },
-    kind: VocabWordEventKind,
-  ): VocabEvent | null {
-    if (word.word.length === 0 || word.word.length > VOCAB_WORD_MAX_LENGTH) return null
-    return { id: uuidv7(), lang: word.lang, kind, word: word.word, at: new Date().toISOString() }
+  /**
+   * A record of what the reader did with a word. A marked word's carries the
+   * lemma it was marked under and the version that marked it (`hl`), so the
+   * server stores it under that lemma and counts it with the words seen.
+   */
+  private event(word: RecordedWord, kind: VocabWordEventKind): VocabEvent | null {
+    if (!isRecordable(word.word)) return null
+    return {
+      id: uuidv7(),
+      lang: word.lang,
+      kind,
+      word: word.word,
+      ...("lemma" in word && { hl: word.v }),
+      ...("lemma" in word && isRecordable(word.lemma) && { lemma: word.lemma }),
+      at: new Date().toISOString(),
+    }
   }
 
-  private record(word: { lang: VocabLang; word: string }, kind: VocabWordEventKind) {
+  private record(word: RecordedWord, kind: VocabWordEventKind) {
     const event = this.event(word, kind)
     if (event) void sendMessage("recordDifficultWordEvents", { events: [event] })
   }
@@ -537,6 +567,7 @@ export class DifficultWordsSession {
   private open(mark: DifficultWordMark) {
     this.clearTimer("showCheckTimer")
     if (this.view.check) this.setView({ check: null })
+    this.scanner.noteSeen(mark)
 
     if (this.options.isAnnotationMode()) {
       const session: SelectionSession = {
@@ -554,6 +585,7 @@ export class DifficultWordsSession {
           ],
         },
         contextSnapshot: { text: this.scanner.paragraphOf(mark), paragraphs: [] },
+        noteOrigin: getWebPageNoteOrigin(),
       }
       if (this.options.annotate(session)) this.record(mark, "open")
       return
@@ -581,6 +613,7 @@ export class DifficultWordsSession {
       surface: ANALYTICS_SURFACE.DIFFICULT_WORDS,
       sessionKey: this.nextCardKey,
       rerunNonce: 0,
+      noteOrigin: getWebPageNoteOrigin(),
     })
     const rect = lastLineRect(mark.range)
     this.setView({

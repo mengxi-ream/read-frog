@@ -15,9 +15,12 @@ import {
 import { Skeleton } from "@/components/ui/base-ui/skeleton"
 import { openLogIn } from "@/components/user-account-menu/shared"
 import { authClient } from "@/utils/auth/auth-client"
-import { getLevelDescription, getLevelLabel } from "@/utils/difficult-words/levels"
+import {
+  getLevelDescription,
+  getLevelLabel,
+  getVocabLanguageName,
+} from "@/utils/difficult-words/levels"
 import { i18n } from "@/utils/i18n"
-import { getLanguageName } from "@/utils/language-labels"
 import { orpc } from "@/utils/orpc/client"
 import { ConfigItem } from "../../components/config-item"
 import { ConfigSection } from "../../components/config-section"
@@ -123,7 +126,7 @@ function LevelItem({
   disabled: boolean
   onChange: (level: VocabLevel) => void
 }) {
-  const languageName = getLanguageName(profile.lang)
+  const languageName = getVocabLanguageName(profile.lang)
 
   return (
     <ConfigItem

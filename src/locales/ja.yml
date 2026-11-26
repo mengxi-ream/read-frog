@@ -1210,11 +1210,6 @@ options:
     lookupAction:
       title: 単語をクリックしたときに実行
       description: ハイライトされた単語をクリックしたときに開く AI アクション。ほかを選ばない限り、内蔵の辞書です。
-    colors:
-      title: 色
-      description: 2 種類のハイライト色の意味
-      hard: 難しい：おそらく初めて見る単語
-      learning: 学習中：Notebase に保存済み
     levels:
       title: 読解レベル
       description: 言語ごとに設定されます。その言語のページを初めてスキャンするときに尋ねられ、知っている単語をマークするにつれて調整されます。

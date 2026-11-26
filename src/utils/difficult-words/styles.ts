@@ -1,4 +1,4 @@
-import type { MarkKind, MarkTone } from "./highlights"
+import type { MarkTone } from "./highlights"
 import hostThemeCss from "@/assets/styles/host-theme.css?raw"
 import { highlightName } from "./highlights"
 
@@ -14,22 +14,20 @@ import { highlightName } from "./highlights"
  */
 export const DIFFICULT_WORD_HOVER_ATTRIBUTE = "data-read-frog-difficult-word-hover"
 
-function highlightRule(kind: MarkKind, tone: MarkTone, hover: boolean) {
-  const token = `--read-frog-highlight-${kind}${hover ? "-hover" : ""}`
+function highlightRule(tone: MarkTone, hover: boolean) {
+  const token = `--read-frog-highlight-hard${hover ? "-hover" : ""}`
   // Light text on a dark page is lifted with the mark, so it stays readable on it.
   const declarations =
     tone === "dark"
       ? `background-color: var(${token}-dark); color: var(${token}-ink);`
       : `background-color: var(${token});`
-  return `::highlight(${highlightName(kind, tone, hover)}) { ${declarations} }`
+  return `::highlight(${highlightName(tone, hover)}) { ${declarations} }`
 }
 
 export function buildDifficultWordsDocumentCss(): string {
   const rules = [hostThemeCss]
-  for (const kind of ["hard", "learning"] as const) {
-    for (const tone of ["light", "dark"] as const) {
-      rules.push(highlightRule(kind, tone, false), highlightRule(kind, tone, true))
-    }
+  for (const tone of ["light", "dark"] as const) {
+    rules.push(highlightRule(tone, false), highlightRule(tone, true))
   }
   rules.push(
     `[${DIFFICULT_WORD_HOVER_ATTRIBUTE}], [${DIFFICULT_WORD_HOVER_ATTRIBUTE}] * { cursor: pointer !important; }`,

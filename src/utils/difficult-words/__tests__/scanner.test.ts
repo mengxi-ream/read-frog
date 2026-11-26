@@ -85,6 +85,7 @@ function createHost(judge: Judge) {
     onFailure: vi.fn<DifficultWordsScannerHost["onFailure"]>(),
     onRecovered: vi.fn<DifficultWordsScannerHost["onRecovered"]>(),
     onMarksChange: vi.fn<DifficultWordsScannerHost["onMarksChange"]>(),
+    seen: vi.fn<DifficultWordsScannerHost["seen"]>(),
     onEmpty: vi.fn<DifficultWordsScannerHost["onEmpty"]>(),
   } satisfies DifficultWordsScannerHost
 }
@@ -112,10 +113,9 @@ function judgeHard(hard: string[], v: number | (() => number) = 1): Judge {
     answer(
       blocks.map((block) => ({
         id: block.id,
-        lang: "eng",
+        lang: "en",
         v: typeof v === "function" ? v() : v,
         hard: findWords(block.text, hard),
-        learning: [],
       })),
     )
 }
@@ -150,7 +150,7 @@ const PARAGRAPH = "The ubiquitous cat sat on the ubiquitous mat."
 
 const KNOWN: VocabEvent = {
   id: "0190f5c6-2d0c-7000-8000-000000000001",
-  lang: "eng",
+  lang: "en",
   kind: "known",
   word: "ubiquitous",
   at: "2026-11-03T00:00:00.000Z",
@@ -168,6 +168,26 @@ function onScreen(element: Element) {
   } as DOMRect)
 }
 
+/** Takes `element` off screen, below the viewport. */
+function offScreen(element: Element) {
+  vi.spyOn(element, "getBoundingClientRect").mockReturnValue({
+    top: 2000,
+    bottom: 2020,
+    left: 0,
+    right: 100,
+    width: 100,
+    height: 20,
+  } as DOMRect)
+}
+
+/** The text of `element` from `start` to `end`, as a selection would be. */
+function rangeIn(element: Element, start: number, end: number) {
+  const range = document.createRange()
+  range.setStart(element.firstChild!, start)
+  range.setEnd(element.firstChild!, end)
+  return range
+}
+
 /** A promise held until `release` is called. */
 function hold() {
   let release!: () => void
@@ -178,12 +198,23 @@ function hold() {
 }
 
 let scanner: DifficultWordsScanner | null = null
+let page = 0
 
 beforeEach(() => {
   vi.useFakeTimers()
   vi.stubGlobal("IntersectionObserver", FakeIntersectionObserver)
   vi.stubGlobal("Highlight", FakeHighlight)
   vi.stubGlobal("CSS", { highlights: registry })
+  // jsdom lays nothing out and gives ranges no rect: a word is where its paragraph is.
+  Object.defineProperty(Range.prototype, "getBoundingClientRect", {
+    configurable: true,
+    value(this: Range) {
+      return (this.startContainer.parentElement ?? document.body).getBoundingClientRect()
+    },
+  })
+  // A page of its own for each test: the words seen are counted once a page.
+  page += 1
+  history.replaceState(null, "", `/page-${page}`)
 })
 
 afterEach(() => {
@@ -191,6 +222,8 @@ afterEach(() => {
   scanner = null
   registry.clear()
   document.body.replaceChildren()
+  Reflect.deleteProperty(Range.prototype, "getBoundingClientRect")
+  vi.restoreAllMocks()
   vi.unstubAllGlobals()
   vi.useRealTimers()
 })
@@ -255,10 +288,9 @@ describe("DifficultWordsScanner", () => {
       answer([
         {
           id: blocks[0]!.id,
-          lang: "cmn",
+          lang: "zh-Hans",
           v: 1,
           hard: [{ w: "量子纠缠", lemma: "量子纠缠", at: [5, 2, 13, 40] }],
-          learning: [],
         },
       ]),
     )
@@ -272,7 +304,7 @@ describe("DifficultWordsScanner", () => {
       { id: "b1", text, hint: "zh-CN", group: expect.any(String) },
     ])
     expect(painted()).toEqual(["量子纠缠", "量子纠缠"])
-    expect(scanner.languageAt($("#a").firstChild!)).toBe("cmn")
+    expect(scanner.languageAt($("#a").firstChild!)).toBe("zh-Hans")
   })
 
   it("unmarks a word the reader knows in every paragraph, and marks it again on undo", async () => {
@@ -284,12 +316,12 @@ describe("DifficultWordsScanner", () => {
     await flush()
     expect(painted()).toHaveLength(3)
 
-    scanner.hideLemma("eng", "ubiquitous")
+    scanner.hideLemma("en", "ubiquitous")
 
     expect(painted()).toEqual([])
     expect(scanner.count).toBe(0)
 
-    scanner.showLemma("eng", "ubiquitous")
+    scanner.showLemma("en", "ubiquitous")
 
     expect(painted()).toHaveLength(3)
   })
@@ -301,7 +333,7 @@ describe("DifficultWordsScanner", () => {
     scanner = started.scanner
     started.observer.fire([$("#a")])
     await flush()
-    scanner.hideLemma("eng", "ubiquitous")
+    scanner.hideLemma("en", "ubiquitous")
 
     $("#a").firstChild!.textContent = "A ubiquitous cat again."
     await vi.advanceTimersByTimeAsync(100)
@@ -393,7 +425,7 @@ describe("DifficultWordsScanner", () => {
     scanner = started.scanner
     const event: VocabEvent = {
       id: "0190f5c6-2d0c-7000-8000-000000000001",
-      lang: "eng",
+      lang: "en",
       kind: "known",
       word: "ubiquitous",
       at: "2026-11-03T00:00:00.000Z",
@@ -439,7 +471,7 @@ describe("DifficultWordsScanner", () => {
     onScreen($("#a"))
     const undo: VocabEvent = {
       id: "0190f5c6-2d0c-7000-8000-000000000002",
-      lang: "eng",
+      lang: "en",
       kind: "undo",
       target: KNOWN.id,
       at: "2026-11-03T00:00:01.000Z",
@@ -502,19 +534,17 @@ describe("DifficultWordsScanner", () => {
     let hasLevel = false
     const judge = judgeHard(["ubiquitous"])
     const host = createHost((blocks) =>
-      hasLevel
-        ? judge(blocks)
-        : answer([{ id: blocks[0]!.id, lang: "eng", skip: "level" }], ["eng"]),
+      hasLevel ? judge(blocks) : answer([{ id: blocks[0]!.id, lang: "en", skip: "level" }], ["en"]),
     )
     const started = await startScanner(host)
     scanner = started.scanner
     started.observer.fire([$("#a")])
     await flush()
-    expect(host.onNeedsLevel).toHaveBeenCalledWith(["eng"], expect.any(Number))
+    expect(host.onNeedsLevel).toHaveBeenCalledWith(["en"], expect.any(Number))
     expect(painted()).toEqual([])
 
     hasLevel = true
-    scanner.retryLevel("eng")
+    scanner.retryLevel("en")
     await settle()
 
     expect(host.judge).toHaveBeenCalledTimes(2)
@@ -681,6 +711,114 @@ describe("DifficultWordsScanner", () => {
       scanner.dispose()
       await vi.advanceTimersByTimeAsync(120_000)
       expect(host.judge).toHaveBeenCalledTimes(2)
+    })
+  })
+
+  describe("the marked words the reader saw", () => {
+    it("counts a word seen once it has been on screen for a second in all, and each lemma once a page", async () => {
+      document.body.innerHTML = `<p id="a">${PARAGRAPH}</p><p id="b">Ubiquitous mats everywhere around.</p>`
+      const host = createHost(judgeHard(["ubiquitous"]))
+      const started = await startScanner(host)
+      scanner = started.scanner
+      started.observer.fire([$("#a"), $("#b")])
+      await flush()
+
+      onScreen($("#a"))
+      await vi.advanceTimersByTimeAsync(500)
+      offScreen($("#a"))
+      await vi.advanceTimersByTimeAsync(5_000)
+      expect(host.seen).not.toHaveBeenCalled()
+
+      onScreen($("#a"))
+      await vi.advanceTimersByTimeAsync(500)
+      expect(host.seen).toHaveBeenCalledTimes(1)
+      expect(host.seen).toHaveBeenCalledWith([{ lang: "en", v: 1, words: ["ubiquitous"] }])
+
+      // The same lemma in another paragraph, and marking switched off and on again.
+      onScreen($("#b"))
+      await vi.advanceTimersByTimeAsync(5_000)
+      scanner.dispose()
+      const again = await startScanner(host)
+      scanner = again.scanner
+      again.observer.fire([$("#a"), $("#b")])
+      await flush()
+      await vi.advanceTimersByTimeAsync(5_000)
+      expect(host.seen).toHaveBeenCalledTimes(1)
+    })
+
+    it("does not count the time the page is hidden", async () => {
+      document.body.innerHTML = `<p id="a">${PARAGRAPH}</p>`
+      const host = createHost(judgeHard(["ubiquitous"]))
+      const started = await startScanner(host)
+      scanner = started.scanner
+      started.observer.fire([$("#a")])
+      await flush()
+      onScreen($("#a"))
+      const visibility = vi.spyOn(document, "visibilityState", "get").mockReturnValue("hidden")
+
+      await vi.advanceTimersByTimeAsync(10_000)
+      expect(host.seen).not.toHaveBeenCalled()
+
+      visibility.mockReturnValue("visible")
+      await vi.advanceTimersByTimeAsync(1_000)
+      expect(host.seen).toHaveBeenCalledTimes(1)
+    })
+
+    it("sends the words seen together, as on the page, by language and the version that marked them", async () => {
+      document.body.innerHTML =
+        "<p id='a'>Ubiquitous cats sat on the mat.</p><p id='b'>Le chat omniprésent dort.</p>"
+      const host = createHost((blocks) =>
+        answer(
+          blocks.map((block) =>
+            block.text.startsWith("Le")
+              ? { id: block.id, lang: "fr", v: 3, hard: findWords(block.text, ["omniprésent"]) }
+              : {
+                  id: block.id,
+                  lang: "en",
+                  v: 1,
+                  hard: findWords(block.text, ["ubiquitous", "mat"]),
+                },
+          ),
+        ),
+      )
+      const started = await startScanner(host)
+      scanner = started.scanner
+      started.observer.fire([$("#a"), $("#b")])
+      await flush()
+      onScreen($("#a"))
+      onScreen($("#b"))
+
+      await vi.advanceTimersByTimeAsync(1_000)
+
+      expect(host.seen).toHaveBeenCalledTimes(1)
+      expect(host.seen).toHaveBeenCalledWith([
+        { lang: "en", v: 1, words: ["Ubiquitous", "mat"] },
+        { lang: "fr", v: 3, words: ["omniprésent"] },
+      ])
+    })
+
+    it("finds the marked word a selection is, and counts one opened or said known at once", async () => {
+      document.body.innerHTML = `<p id="a">${PARAGRAPH}</p>`
+      const host = createHost(judgeHard(["ubiquitous"]))
+      const started = await startScanner(host)
+      scanner = started.scanner
+      started.observer.fire([$("#a")])
+      await flush()
+
+      expect(scanner.markForSelection(rangeIn($("#a"), 15, 18), "cat")).toBeNull()
+      const mark = scanner.markForSelection(rangeIn($("#a"), 30, 40), "ubiquitous")
+      expect(mark).toMatchObject({ word: "ubiquitous", lemma: "ubiquitous", lang: "en", v: 1 })
+      expect(mark!.range.startOffset).toBe(30)
+
+      scanner.noteSeen(mark!)
+      scanner.noteSeen(mark!)
+      expect(host.seen).toHaveBeenCalledTimes(1)
+      expect(host.seen).toHaveBeenCalledWith([{ lang: "en", v: 1, words: ["ubiquitous"] }])
+
+      // Another page: counted again.
+      history.replaceState(null, "", "/another-page")
+      scanner.noteSeen(mark!)
+      expect(host.seen).toHaveBeenCalledTimes(2)
     })
   })
 

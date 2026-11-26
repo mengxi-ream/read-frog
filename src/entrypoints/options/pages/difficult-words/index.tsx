@@ -15,7 +15,6 @@ import { ConfigItem } from "../../components/config-item"
 import { ConfigSection } from "../../components/config-section"
 import { PageLayout } from "../../components/page-layout"
 import { ShortcutConfigItem } from "../shortcuts/shortcut-config-item"
-import { ColorsItem } from "./colors-item"
 import { LevelsSection } from "./levels-section"
 
 export function DifficultWordsPage() {
@@ -30,7 +29,6 @@ export function DifficultWordsPage() {
       <ConfigSection title={i18n.t("options.difficultWords.usage.title")}>
         <ShortcutItem />
         <LookupActionItem />
-        <ColorsItem />
       </ConfigSection>
       <LevelsSection />
     </PageLayout>

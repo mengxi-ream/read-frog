@@ -4,12 +4,17 @@ import type {
   VocabJudgedBlock,
   VocabLang,
   VocabMarkedWord,
+  VocabSeen,
   VocabSkippedBlock,
 } from "@read-frog/api-contract"
 import type { BlockText } from "./blocks"
-import type { MarkKind, MarkTone } from "./highlights"
+import type { MarkTone } from "./highlights"
 import type { DifficultWordsFailure, DifficultWordsJudgeResponse } from "./types"
-import { VOCAB_JUDGE_MAX_BLOCKS, VOCAB_JUDGE_MAX_TEXT_LENGTH } from "@read-frog/api-contract"
+import {
+  VOCAB_JUDGE_MAX_BLOCKS,
+  VOCAB_JUDGE_MAX_TEXT_LENGTH,
+  VOCAB_WORD_MAX_LENGTH,
+} from "@read-frog/api-contract"
 import { toneForColor } from "@/utils/annotate/layer"
 import {
   BlockDiscovery,
@@ -38,15 +43,21 @@ import { isVocabLang } from "./types"
 // it was judged with. A newer version (the reader just said they know a word,
 // and the threshold moved) makes the paragraphs judged before it stale: they
 // are judged again as they come near.
+//
+// The server also counts the marked words the reader saw, to learn what
+// passing one over says: a word is seen once it has been on screen for a
+// second in all, or opened, or said known, and each lemma once a page.
 
 export interface DifficultWordMark {
-  kind: MarkKind
   tone: MarkTone
   range: Range
   /** The word as on the page. */
   word: string
+  /** The lemma it was marked under. */
   lemma: string
   lang: VocabLang
+  /** The version of the reader's threshold that marked it. */
+  v: number
   block: Element
 }
 
@@ -64,6 +75,8 @@ export interface DifficultWordsScannerHost {
   onRecovered: () => void
   /** The marked words changed. */
   onMarksChange: () => void
+  /** Marked words the reader saw, by language and the version that marked them. */
+  seen: (groups: VocabSeen[]) => void
   /** The whole page was read, and there is nothing on it to judge. */
   onEmpty: () => void
 }
@@ -83,7 +96,8 @@ interface ScanBlock {
   lang: VocabLang | null
   /** The threshold version it was judged with. */
   v: number
-  result: Pick<VocabJudgedBlock, "hard" | "learning"> | null
+  /** The words the answer marked. */
+  hard: VocabMarkedWord[] | null
   marks: DifficultWordMark[]
 }
 
@@ -96,9 +110,22 @@ const OFFLINE_RETRY_MS = [2_000, 10_000, 60_000]
 const RATE_LIMIT_FALLBACK_MS = 10_000
 /** One screen above and below the viewport. */
 const NEAR_MARGIN = "100% 0px 100% 0px"
+/** How often the marks on screen are looked at, to tell which ones the reader saw. */
+const SEEN_SAMPLE_MS = 250
+/** A marked word on screen this long in all was seen. */
+const SEEN_AFTER_MS = 1_000
 
 function lemmaKey(lang: VocabLang, lemma: string) {
   return `${lang}\u0000${lemma}`
+}
+
+// The lemmas seen on this page, kept apart from any one scanner: marking
+// switched off and on again on a page does not count a word twice.
+let pageSeen: { url: string; keys: Set<string> } | null = null
+
+function seenOnThisPage(): Set<string> {
+  if (pageSeen?.url !== location.href) pageSeen = { url: location.href, keys: new Set() }
+  return pageSeen.keys
 }
 
 function isSkipped(result: VocabJudgedBlock | VocabSkippedBlock): result is VocabSkippedBlock {
@@ -114,9 +141,16 @@ function viewportDistance(element: Element) {
     : window.innerHeight * 2 - rect.bottom
 }
 
-function isOnScreen(element: Element) {
-  const rect = element.getBoundingClientRect()
-  return rect.bottom > 0 && rect.top < window.innerHeight && rect.width > 0 && rect.height > 0
+function isOnScreen(target: Element | Range) {
+  const rect = target.getBoundingClientRect()
+  return (
+    rect.bottom > 0 &&
+    rect.top < window.innerHeight &&
+    rect.right > 0 &&
+    rect.left < window.innerWidth &&
+    rect.width > 0 &&
+    rect.height > 0
+  )
 }
 
 function scheduleIdle(callback: () => void): () => void {
@@ -157,6 +191,10 @@ export class DifficultWordsScanner {
   private failing = false
   private disposed = false
   private resumeTimer: ReturnType<typeof setTimeout> | null = null
+  /** How long each lemma not seen yet has been on screen, in ms. */
+  private readonly onScreenMs = new Map<string, number>()
+  private seenTimer: ReturnType<typeof setInterval> | null = null
+  private lastSeenSample = 0
   private readonly intersections = new IntersectionObserver(
     (entries) => this.onIntersect(entries),
     { rootMargin: NEAR_MARGIN },
@@ -190,6 +228,8 @@ export class DifficultWordsScanner {
     window.addEventListener("online", this.onOnline)
     this.discovery = new BlockDiscovery(root, this.resolver)
     this.scheduleDiscovery()
+    this.lastSeenSample = performance.now()
+    this.seenTimer = setInterval(() => this.sampleSeen(), SEEN_SAMPLE_MS)
   }
 
   dispose() {
@@ -198,6 +238,7 @@ export class DifficultWordsScanner {
     if (this.flushTimer) clearTimeout(this.flushTimer)
     if (this.dirtyTimer) clearTimeout(this.dirtyTimer)
     if (this.resumeTimer) clearTimeout(this.resumeTimer)
+    if (this.seenTimer) clearInterval(this.seenTimer)
     this.intersections.disconnect()
     this.mutations.disconnect()
     window.removeEventListener("online", this.onOnline)
@@ -224,6 +265,29 @@ export class DifficultWordsScanner {
   /** Deepens a mark under the pointer; `null` for none. */
   setHover(mark: DifficultWordMark | null) {
     this.highlights.setHover(mark)
+  }
+
+  /**
+   * The marked word a selection is, if it is one: it starts in the mark and
+   * reads as its word.
+   */
+  markForSelection(range: Range, word: string): DifficultWordMark | null {
+    const node = range.startContainer
+    const element = node instanceof Element ? node : node.parentElement
+    const blockElement = element && this.resolver.blockOf(element)
+    const block = blockElement ? this.blocks.get(blockElement) : undefined
+    return (
+      block?.marks.find(
+        (mark) =>
+          mark.word === word &&
+          mark.range.comparePoint(range.startContainer, range.startOffset) === 0,
+      ) ?? null
+    )
+  }
+
+  /** The reader opened `mark` or said they know it: seen, however long it was on screen. */
+  noteSeen(mark: DifficultWordMark) {
+    this.reportSeen([mark])
   }
 
   /** The language of the judged paragraph `node` is in, if it was judged. */
@@ -253,7 +317,7 @@ export class DifficultWordsScanner {
     if (!marks) return
     this.byLemma.delete(key)
     for (const mark of marks) {
-      this.highlights.remove(mark.kind, mark.tone, mark.range)
+      this.highlights.remove(mark.tone, mark.range)
       const block = this.blocks.get(mark.block)
       if (block) block.marks = block.marks.filter((other) => other !== mark)
     }
@@ -265,9 +329,8 @@ export class DifficultWordsScanner {
     const key = lemmaKey(lang, lemma)
     if (!this.hidden.delete(key)) return
     for (const block of this.blocks.values()) {
-      if (block.state !== "judged" || block.lang !== lang || !block.result) continue
-      const words = [...block.result.hard, ...block.result.learning]
-      if (words.some((word) => word.lemma === lemma)) this.paint(block)
+      if (block.state !== "judged" || block.lang !== lang || !block.hard) continue
+      if (block.hard.some((word) => word.lemma === lemma)) this.paint(block)
     }
     this.host.onMarksChange()
   }
@@ -363,7 +426,7 @@ export class DifficultWordsScanner {
       payload: null,
       lang: null,
       v: 0,
-      result: null,
+      hard: null,
       marks: [],
     })
     this.intersections.observe(element)
@@ -541,10 +604,10 @@ export class DifficultWordsScanner {
       if (block.seq !== seq) continue
       if (failure.kind === "error") {
         // Refused as sent: not sent again until it changes.
-        block.state = block.result ? "judged" : "skipped"
+        block.state = block.hard ? "judged" : "skipped"
       } else {
         // Marks already painted stay: they are still the best answer there is.
-        block.state = block.result ? "judged" : "new"
+        block.state = block.hard ? "judged" : "new"
         if (block.state === "new" && this.near.has(block)) this.pending.add(block)
       }
       // Changed while it was out: read again, as an answer would have it.
@@ -594,7 +657,7 @@ export class DifficultWordsScanner {
   private apply(block: ScanBlock, result: VocabJudgedBlock | VocabSkippedBlock) {
     if (isSkipped(result)) {
       block.state = "skipped"
-      block.result = null
+      block.hard = null
       block.lang = isVocabLang(result.lang) ? result.lang : null
       this.clearMarks(block)
       if (result.skip === "level" && block.lang) {
@@ -609,7 +672,7 @@ export class DifficultWordsScanner {
       block.state = "judged"
       block.lang = result.lang
       block.v = result.v
-      block.result = { hard: result.hard, learning: result.learning }
+      block.hard = result.hard
       this.paint(block)
       this.noteVersion(result.lang, result.v)
       if (this.isStale(block) && this.near.has(block)) this.pending.add(block)
@@ -630,34 +693,75 @@ export class DifficultWordsScanner {
 
   private paint(block: ScanBlock) {
     this.clearMarks(block)
-    const { result, read, lang } = block
-    if (!result || !read || !lang) return
+    const { hard, read, lang, v } = block
+    if (!hard || !read || !lang) return
     const tone = toneForColor(getComputedStyle(block.element).color)
-    for (const kind of ["hard", "learning"] as const) {
-      for (const word of result[kind]) {
-        const key = lemmaKey(lang, word.lemma)
-        if (this.hidden.has(key)) continue
-        for (const range of this.rangesFor(block, read, word)) {
-          const mark: DifficultWordMark = {
-            kind,
-            tone,
-            range,
-            word: word.w,
-            lemma: word.lemma,
-            lang,
-            block: block.element,
-          }
-          block.marks.push(mark)
-          this.highlights.add(kind, tone, range)
-          let marks = this.byLemma.get(key)
-          if (!marks) {
-            marks = new Set()
-            this.byLemma.set(key, marks)
-          }
-          marks.add(mark)
+    for (const word of hard) {
+      const key = lemmaKey(lang, word.lemma)
+      if (this.hidden.has(key)) continue
+      for (const range of this.rangesFor(block, read, word)) {
+        const mark: DifficultWordMark = {
+          tone,
+          range,
+          word: word.w,
+          lemma: word.lemma,
+          lang,
+          v,
+          block: block.element,
         }
+        block.marks.push(mark)
+        this.highlights.add(tone, range)
+        let marks = this.byLemma.get(key)
+        if (!marks) {
+          marks = new Set()
+          this.byLemma.set(key, marks)
+        }
+        marks.add(mark)
       }
     }
+  }
+
+  // Adds the time since the last look to each lemma marked on screen, once
+  // however many of its marks are; at a second in all, it was seen. Time with
+  // the page hidden does not count.
+  private sampleSeen() {
+    const now = performance.now()
+    const elapsed = Math.min(now - this.lastSeenSample, SEEN_SAMPLE_MS * 2)
+    this.lastSeenSample = now
+    if (document.visibilityState !== "visible" || this.byLemma.size === 0) return
+    const seen = seenOnThisPage()
+    const counted = new Set<string>()
+    const done: DifficultWordMark[] = []
+    for (const block of this.near) {
+      if (block.marks.length === 0 || !isOnScreen(block.element)) continue
+      for (const mark of block.marks) {
+        const key = lemmaKey(mark.lang, mark.lemma)
+        if (seen.has(key) || counted.has(key) || !isOnScreen(mark.range)) continue
+        counted.add(key)
+        const total = (this.onScreenMs.get(key) ?? 0) + elapsed
+        if (total >= SEEN_AFTER_MS) done.push(mark)
+        else this.onScreenMs.set(key, total)
+      }
+    }
+    if (done.length > 0) this.reportSeen(done)
+  }
+
+  /** `marks` were seen: each lemma once a page, under the version that marked it. */
+  private reportSeen(marks: DifficultWordMark[]) {
+    const seen = seenOnThisPage()
+    const groups = new Map<string, VocabSeen>()
+    for (const mark of marks) {
+      const key = lemmaKey(mark.lang, mark.lemma)
+      if (seen.has(key)) continue
+      seen.add(key)
+      this.onScreenMs.delete(key)
+      if (mark.word.length > VOCAB_WORD_MAX_LENGTH) continue
+      const groupKey = `${mark.lang}\u0000${mark.v}`
+      const group = groups.get(groupKey)
+      if (group) group.words.push(mark.word)
+      else groups.set(groupKey, { lang: mark.lang, v: mark.v, words: [mark.word] })
+    }
+    if (groups.size > 0) this.host.seen([...groups.values()])
   }
 
   /** Where `word` is in the text that was sent, each place checked against that text. */
@@ -676,7 +780,7 @@ export class DifficultWordsScanner {
   private clearMarks(block: ScanBlock) {
     if (block.marks.length === 0) return
     for (const mark of block.marks) {
-      this.highlights.remove(mark.kind, mark.tone, mark.range)
+      this.highlights.remove(mark.tone, mark.range)
       const key = lemmaKey(mark.lang, mark.lemma)
       const marks = this.byLemma.get(key)
       marks?.delete(mark)

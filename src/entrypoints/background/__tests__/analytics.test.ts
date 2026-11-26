@@ -289,7 +289,7 @@ describe("background analytics", () => {
       latency_ms: 0,
       provider: "unknown",
       backend_kind: "unknown",
-      target_language: "cmn",
+      target_language: "zh-Hans",
     } as const
 
     const { captureFeatureUsedEventInBackground } = createAnalytics()
@@ -356,7 +356,7 @@ describe("background analytics", () => {
       outcome: "success",
       latency_ms: 100,
       ...PAGE_EVENT_FIELDS,
-      target_language: "cmn",
+      target_language: "zh-Hans",
       source_language: "jpn",
     } as unknown as FeatureUsedEventProperties)
 

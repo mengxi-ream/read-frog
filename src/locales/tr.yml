@@ -1210,11 +1210,6 @@ options:
     lookupAction:
       title: Bir kelimeye tıklayınca çalışır
       description: Vurgulanan bir kelimeye tıkladığınızda açılan AI eylemi. Başkasını seçmediğiniz sürece yerleşik Sözlük.
-    colors:
-      title: Renkler
-      description: İki vurgu renginin anlamı
-      hard: Zor, muhtemelen sizin için yeni
-      learning: Öğreniliyor, bir Notebase'e kaydedildi
     levels:
       title: Okuma seviyeniz
       description: Her dilin kendi seviyesi vardır. O dilde bir sayfayı ilk kez taradığınızda sorulur ve bildiğiniz kelimeleri işaretledikçe ayarlanır.

@@ -1210,11 +1210,6 @@ options:
     lookupAction:
       title: 단어를 클릭하면 실행
       description: 강조 표시된 단어를 클릭할 때 열리는 AI 액션입니다. 다른 것을 고르지 않으면 기본 제공 사전입니다.
-    colors:
-      title: 색상
-      description: 두 가지 강조 색상의 의미
-      hard: 어려움, 아마 처음 보는 단어
-      learning: 학습 중, Notebase에 저장됨
     levels:
       title: 읽기 수준
       description: 언어마다 따로 있습니다. 그 언어의 페이지를 처음 스캔할 때 묻고, 아는 단어를 표시할수록 조정됩니다.

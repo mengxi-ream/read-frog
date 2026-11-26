@@ -1220,11 +1220,6 @@ options:
     lookupAction:
       title: 点开难词时运行
       description: 点开标出的词时打开的 AI 指令，默认是内置的词典
-    colors:
-      title: 颜色
-      description: 两种标记颜色的意思
-      hard: 难词：你可能不认识
-      learning: 在学：已经存进笔记库
     levels:
       title: 我的阅读水平
       description: 每种语言分开算。第一次扫描某种语言的页面时会问你，之后根据你标「认识」的词自动调整。

@@ -1357,11 +1357,6 @@ options:
     lookupAction:
       title: Clicking a word runs
       description: The AI action that opens when you click a highlighted word. The built-in Dictionary unless you pick another.
-    colors:
-      title: Colors
-      description: What the two highlight colors mean
-      hard: Difficult, probably new to you
-      learning: Learning, saved to a notebase
     levels:
       title: Your reading level
       description: Each language has its own. You're asked the first time you scan a page in it, and it adjusts as you mark the words you know.
