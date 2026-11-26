@@ -21,15 +21,26 @@ const NAVIGATE_EVENTS = {
 }
 
 const SHORTS_ACTIVE_PLAYER = "#reel-overlay-container .html5-video-player"
+// The watch page's player, and the only one in an embed.
 const WATCH_PLAYER = "#movie_player.html5-video-player"
 const ABOVE_PLAYER_CHROME_BELOW_PLAYER_MENUS = 60
 
-function createYoutubeAiSubtitlesContext() {
+/**
+ * The video in a layout's own player. YouTube keeps the player of a layout it has left hidden in
+ * the page, and can build one before showing it, so the first video on the page may be another
+ * layout's.
+ */
+function videoInPlayer(player: string): string {
+  return `${player} video.html5-main-video`
+}
+
+function createYoutubeAiSubtitlesContext(videoSelector: string) {
   // YouTube's claim is never checked against the transcript, so an ad's length here is harmless.
-  return resolveAiSubtitlesContext({
-    url: location.href,
-    video: document.querySelector<HTMLVideoElement>("video.html5-main-video"),
-  })
+  return () =>
+    resolveAiSubtitlesContext({
+      url: location.href,
+      video: document.querySelector<HTMLVideoElement>(videoSelector),
+    })
 }
 
 async function isYoutubeLiveContent(): Promise<boolean> {
@@ -55,7 +66,7 @@ const YOUTUBE_MODE_CONFIGS: Record<YoutubeMode, PlatformConfig> = {
     embedded: false,
     subtitlesZIndex: ABOVE_PLAYER_CHROME_BELOW_PLAYER_MENUS,
     selectors: {
-      video: "video.html5-main-video",
+      video: videoInPlayer(WATCH_PLAYER),
       playerContainer: WATCH_PLAYER,
       controlsBar: "#movie_player .ytp-right-controls",
       nativeSubtitles: YOUTUBE_NATIVE_SUBTITLES_CLASS,
@@ -74,7 +85,7 @@ const YOUTUBE_MODE_CONFIGS: Record<YoutubeMode, PlatformConfig> = {
     },
     supportsSidebar: true,
     getVideoId: getYoutubeVideoId,
-    createAiSubtitlesContext: createYoutubeAiSubtitlesContext,
+    createAiSubtitlesContext: createYoutubeAiSubtitlesContext(videoInPlayer(WATCH_PLAYER)),
     isAdPlaying: isYoutubeAdPlaying,
     isLiveContent: isYoutubeLiveContent,
   },
@@ -84,8 +95,8 @@ const YOUTUBE_MODE_CONFIGS: Record<YoutubeMode, PlatformConfig> = {
     embedded: true,
     subtitlesZIndex: ABOVE_PLAYER_CHROME_BELOW_PLAYER_MENUS,
     selectors: {
-      video: "video.html5-main-video",
-      playerContainer: "#movie_player.html5-video-player",
+      video: videoInPlayer(WATCH_PLAYER),
+      playerContainer: WATCH_PLAYER,
       controlsBar: ".quick-actions-wrapper",
       nativeSubtitles: YOUTUBE_NATIVE_SUBTITLES_CLASS,
     },
@@ -102,7 +113,7 @@ const YOUTUBE_MODE_CONFIGS: Record<YoutubeMode, PlatformConfig> = {
       checkVisibility: () => true,
     },
     getVideoId: getYoutubeVideoId,
-    createAiSubtitlesContext: createYoutubeAiSubtitlesContext,
+    createAiSubtitlesContext: createYoutubeAiSubtitlesContext(videoInPlayer(WATCH_PLAYER)),
     isAdPlaying: isYoutubeAdPlaying,
     isLiveContent: isYoutubeLiveContent,
   },
@@ -119,7 +130,7 @@ const YOUTUBE_MODE_CONFIGS: Record<YoutubeMode, PlatformConfig> = {
       return Number.isFinite(ratio) && ratio > 0 ? ratio : null
     },
     selectors: {
-      video: "video.html5-main-video",
+      video: videoInPlayer(SHORTS_ACTIVE_PLAYER),
       playerContainer: SHORTS_ACTIVE_PLAYER,
       nativeSubtitles: YOUTUBE_NATIVE_SUBTITLES_CLASS,
     },
@@ -130,7 +141,7 @@ const YOUTUBE_MODE_CONFIGS: Record<YoutubeMode, PlatformConfig> = {
       checkVisibility: () => true,
     },
     getVideoId: getYoutubeVideoId,
-    createAiSubtitlesContext: createYoutubeAiSubtitlesContext,
+    createAiSubtitlesContext: createYoutubeAiSubtitlesContext(videoInPlayer(SHORTS_ACTIVE_PLAYER)),
     isAdPlaying: isYoutubeAdPlaying,
     isLiveContent: isYoutubeLiveContent,
   },
