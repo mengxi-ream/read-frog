@@ -225,20 +225,27 @@ Direct translation without separators
  * video. Numbered, with subtitle rules 5 and 6, none were. Page translation
  * keeps `%%`: its paragraphs are whole sentences, and page text carries its
  * own `[1]` citations and reference numbers, which models took for ours.
+ *
+ * A cue can span lines (Netflix dialogue `- A\n- B`, wrapped WebVTT cues), so
+ * the rules and the example show a segment running over two lines. Asked for
+ * "one line per input segment", Haiku numbered the second line of a dialogue
+ * cue in about a quarter of such batches, and BatchQueue retried each one.
  */
 export const NUMBERED_BATCH_TRANSLATE_PROMPT = `## Multi-segment Translation Rules
-The input segments are numbered [1], [2], [3] and so on. Output one line per input segment, in the same order, starting with the same number in brackets followed by that segment's translation. Do not merge or split segments, and output nothing else.
+The input segments are numbered [1], [2], [3] and so on. A segment starts with its number in brackets at the start of a line and can run over several lines. Output the segments in the same order, each starting with the same number in brackets followed by that segment's translation, and keep each segment's line breaks. Only the first line of a segment gets a number. Do not merge or split segments, and output nothing else.
 
 ## Example
 
 ### Input:
 [1] Segment A
-[2] Segment B
+[2] Segment B, first line
+Segment B, second line
 [3] Segment C
 
 ### Output:
 [1] Translation of segment A
-[2] Translation of segment B
+[2] Translation of segment B, first line
+Translation of segment B, second line
 [3] Translation of segment C
 `
 

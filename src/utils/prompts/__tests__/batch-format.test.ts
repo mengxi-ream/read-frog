@@ -23,7 +23,7 @@ describe("batch formats", () => {
     ["separated", SEPARATED_BATCH_FORMAT],
     ["numbered", NUMBERED_BATCH_FORMAT],
   ])("reads back what the %s format writes", (_name, format) => {
-    const texts = ["so today I want to show you", "how the mixer works", "and why"]
+    const texts = ["so today I want to show you", "- You okay?\n- Yeah.", "and why"]
     expect(format.parse(format.join(texts))).toEqual(texts)
   })
 
