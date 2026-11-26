@@ -99,6 +99,12 @@ interface ScanBlock {
   /** The words the answer marked. */
   hard: VocabMarkedWord[] | null
   marks: DifficultWordMark[]
+  /** When it was last sent, by `performance.now()`. */
+  sentAt: number
+  /** How long after its last send its next change waits to be judged. */
+  changeWait: number
+  /** Not sent before this, by `performance.now()`. */
+  notBefore: number
 }
 
 const MAX_IN_FLIGHT = 2
@@ -109,6 +115,15 @@ const SLICE_MS = 8
 const OFFLINE_RETRY_MS = [2_000, 10_000, 60_000]
 /** How long to wait out a limit when the server's reset time is no use. */
 const RATE_LIMIT_FALLBACK_MS = 10_000
+/**
+ * Judged again at once on every change, a paragraph that keeps changing (a
+ * clock, a countdown) would spend the day's words. Its first change is judged
+ * at once; the next waits the shortest wait after the paragraph's last send,
+ * and each one after twice as long, up to the longest. A change that comes
+ * the longest wait or more after the last send is judged at once again.
+ */
+const CHANGE_WAIT_MIN_MS = 1_000
+const CHANGE_WAIT_MAX_MS = 5 * 60_000
 const DAY_MS = 24 * 60 * 60_000
 /** One screen above and below the viewport. */
 const NEAR_MARGIN = "100% 0px 100% 0px"
@@ -183,7 +198,8 @@ export class DifficultWordsScanner {
   private readonly byLemma = new Map<string, Set<DifficultWordMark>>()
   /** Words the reader said they know, unmarked here whatever an answer says. */
   private readonly hidden = new Set<string>()
-  private readonly versions = new Map<VocabLang, number>()
+  /** For each language, the threshold the newest request's answer used, and when that request went. */
+  private readonly versions = new Map<VocabLang, { v: number; sentAt: number }>()
   private readonly groups = new WeakMap<Element, string>()
   private readonly dirty = new Set<Element>()
   private readonly added: Node[] = []
@@ -470,6 +486,9 @@ export class DifficultWordsScanner {
       v: 0,
       hard: null,
       marks: [],
+      sentAt: Number.NEGATIVE_INFINITY,
+      changeWait: 0,
+      notBefore: 0,
     })
     this.intersections.observe(element)
   }
@@ -486,11 +505,9 @@ export class DifficultWordsScanner {
   }
 
   private isStale(block: ScanBlock) {
-    return (
-      block.state === "judged" &&
-      block.lang !== null &&
-      block.v < (this.versions.get(block.lang) ?? 0)
-    )
+    if (block.state !== "judged" || block.lang === null) return false
+    const current = this.versions.get(block.lang)
+    return current !== undefined && block.v !== current.v
   }
 
   private onIntersect(entries: IntersectionObserverEntry[]) {
@@ -531,13 +548,20 @@ export class DifficultWordsScanner {
       if (batch.length === 0) break
       void this.send(batch)
     }
+    // With a request free, what is left waits out a change's wait.
+    if (this.inFlight < MAX_IN_FLIGHT && this.pending.size > 0) {
+      let next = Number.POSITIVE_INFINITY
+      for (const block of this.pending) next = Math.min(next, block.notBefore)
+      this.scheduleFlush(Math.max(0, next - performance.now()))
+    }
   }
 
   private takeBatch(): ScanBlock[] {
+    const now = performance.now()
     const candidates: ScanBlock[] = []
     for (const block of this.pending) {
-      if (block.element.isConnected) candidates.push(block)
-      else this.drop(block)
+      if (!block.element.isConnected) this.drop(block)
+      else if (block.notBefore <= now) candidates.push(block)
     }
     const distances = new Map(candidates.map((block) => [block, viewportDistance(block.element)]))
     candidates.sort((a, b) => distances.get(a)! - distances.get(b)!)
@@ -599,14 +623,15 @@ export class DifficultWordsScanner {
   }
 
   private async send(batch: ScanBlock[], events?: VocabEvent[]) {
+    const sentAt = performance.now()
     const sent = batch.map((block) => {
       block.seq += 1
       block.state = "sending"
       block.dirty = false
+      block.sentAt = sentAt
       return { block, seq: block.seq, payload: block.payload! }
     })
     this.inFlight += 1
-    const sentAt = performance.now()
     let response: DifficultWordsJudgeResponse
     try {
       response = await this.host.judge(
@@ -633,7 +658,7 @@ export class DifficultWordsScanner {
     response.output.blocks.forEach((result, index) => {
       const entry = sent[index]
       if (!entry || entry.block.seq !== entry.seq || result.id !== entry.payload.id) return
-      this.apply(entry.block, result)
+      this.apply(entry.block, result, sentAt)
     })
     if (response.output.needsLevel.length > 0) {
       this.host.onNeedsLevel(response.output.needsLevel, sentAt)
@@ -715,7 +740,7 @@ export class DifficultWordsScanner {
     this.flushTimer = null
   }
 
-  private apply(block: ScanBlock, result: VocabJudgedBlock | VocabSkippedBlock) {
+  private apply(block: ScanBlock, result: VocabJudgedBlock | VocabSkippedBlock, sentAt: number) {
     if (isSkipped(result)) {
       block.state = "skipped"
       block.hard = null
@@ -735,7 +760,7 @@ export class DifficultWordsScanner {
       block.v = result.v
       block.hard = result.hard
       this.paint(block)
-      this.noteVersion(result.lang, result.v)
+      this.noteVersion(result.lang, result.v, sentAt)
       if (this.isStale(block) && this.near.has(block)) this.pending.add(block)
     }
     if (block.dirty) {
@@ -744,9 +769,16 @@ export class DifficultWordsScanner {
     }
   }
 
-  private noteVersion(lang: VocabLang, v: number) {
-    if (v <= (this.versions.get(lang) ?? 0)) return
-    this.versions.set(lang, v)
+  /**
+   * The newest request's answer says which threshold is current: a newer one
+   * for the same account, or a lower one after the reader switched accounts.
+   * The paragraphs judged with any other are judged again.
+   */
+  private noteVersion(lang: VocabLang, v: number, sentAt: number) {
+    const current = this.versions.get(lang)
+    if (current && sentAt < current.sentAt) return
+    this.versions.set(lang, { v, sentAt })
+    if (current?.v === v) return
     for (const block of this.near) {
       if (this.isStale(block)) this.pending.add(block)
     }
@@ -962,6 +994,14 @@ export class DifficultWordsScanner {
     block.payload = null
     // The words marked were in the old text: a send that fails leaves none.
     block.hard = null
+    // One that keeps changing waits longer each time, as CHANGE_WAIT_MIN_MS says.
+    const now = performance.now()
+    if (now - block.sentAt >= CHANGE_WAIT_MAX_MS) block.changeWait = 0
+    block.notBefore = block.sentAt + block.changeWait
+    block.changeWait = Math.min(
+      Math.max(block.changeWait * 2, CHANGE_WAIT_MIN_MS),
+      CHANGE_WAIT_MAX_MS,
+    )
     if (this.near.has(block)) {
       this.pending.add(block)
       this.scheduleFlush(FLUSH_DELAY_MS)

@@ -2,7 +2,7 @@ import type { SaveToNotebaseOutcome } from "@/components/custom-action/use-save-
 import type { SelectionPopoverPosition } from "@/components/ui/selection-popover"
 import { IconCheck } from "@tabler/icons-react"
 import { useAtomValue } from "jotai"
-import { use } from "react"
+import { use, useState } from "react"
 import { CustomActionPanel } from "@/components/custom-action/custom-action-panel"
 import { isSaveToNotebaseDialogOpenAtom } from "@/components/custom-action/save-to-notebase-dialog-atom"
 import { Button } from "@/components/ui/base-ui/button"
@@ -40,11 +40,19 @@ export function DifficultWordCard({
 }) {
   const container = use(ShadowWrapperContext)
   const isSaveToNotebaseDialogOpen = useAtomValue(isSaveToNotebaseDialogOpenAtom)
+  const [pinned, setPinned] = useState(false)
+  // Owned here, so a card closed from outside it (its word known, here or in
+  // another tab) also drops the pin: the next word's card opens unpinned.
+  if (!open && pinned) {
+    setPinned(false)
+  }
 
   return (
     <SelectionPopover.Root
       open={open}
       anchor={anchor}
+      pinned={pinned}
+      onPinnedChange={setPinned}
       onOpenChange={(nextOpen) => {
         if (!nextOpen) onClose()
       }}

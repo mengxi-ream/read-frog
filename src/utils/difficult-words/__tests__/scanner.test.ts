@@ -419,6 +419,58 @@ describe("DifficultWordsScanner", () => {
     expect(host.judge).toHaveBeenCalledTimes(3)
   })
 
+  it("takes a lower threshold from a newer answer, as after switching accounts, and judges again only what the old one judged", async () => {
+    document.body.innerHTML = `<p id="a">${PARAGRAPH}</p><p id="b">${PARAGRAPH}</p>`
+    let version = 7
+    const host = createHost(judgeHard(["ubiquitous"], () => version))
+    const started = await startScanner(host)
+    scanner = started.scanner
+    started.observer.fire([$("#a")])
+    await flush()
+
+    // Another account, whose threshold is numbered from 1.
+    version = 1
+    started.observer.fire([$("#b")])
+    await flush()
+    await vi.advanceTimersByTimeAsync(10_000)
+
+    expect(sentIds(host, 1)).toEqual(["b2"])
+    expect(sentIds(host, 2)).toEqual(["b1"])
+    expect(host.judge).toHaveBeenCalledTimes(3)
+  })
+
+  it("judges a paragraph that keeps changing less and less often, and at once again after it is left alone", async () => {
+    document.body.innerHTML = `<p id="a">The ubiquitous sale ends in 60 seconds.</p>`
+    const host = createHost(judgeHard(["ubiquitous"]))
+    const started = await startScanner(host)
+    scanner = started.scanner
+    started.observer.fire([$("#a")])
+    await flush()
+    const text = $("#a").firstChild as Text
+    const lastText = () => host.judge.mock.lastCall![0][0]!.text
+
+    for (let left = 59; left > 0; left -= 1) {
+      text.data = `The ubiquitous sale ends in ${left} seconds.`
+      await vi.advanceTimersByTimeAsync(1_000)
+    }
+    // Once on coming near, at once on the first change, then 1, 2, 4, 8, 16
+    // and 32 s after each send: not once a second.
+    expect(host.judge).toHaveBeenCalledTimes(7)
+
+    // The last change is not lost: it is judged when its wait is over.
+    await vi.advanceTimersByTimeAsync(60_000)
+    expect(host.judge).toHaveBeenCalledTimes(8)
+    expect(lastText()).toBe("The ubiquitous sale ends in 1 seconds.")
+    expect(painted()).toEqual(["ubiquitous"])
+
+    await vi.advanceTimersByTimeAsync(5 * 60_000)
+    text.data = "The ubiquitous sale is over."
+    await vi.advanceTimersByTimeAsync(100)
+    await flush()
+    expect(host.judge).toHaveBeenCalledTimes(9)
+    expect(lastText()).toBe("The ubiquitous sale is over.")
+  })
+
   it("sends the reader's records with the judged paragraphs on screen, or alone when there are none", async () => {
     document.body.innerHTML = `<p id="a">${PARAGRAPH}</p>`
     const host = createHost(judgeHard(["ubiquitous"]))
