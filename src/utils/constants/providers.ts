@@ -231,7 +231,7 @@ export const PROVIDER_ITEMS: Record<
     apiKeyUrl: "https://www.jalapeno-cloud.ai/readfrog",
     sponsor: {
       sponsoring: true,
-      referUrl: "https://www.jalapeno-cloud.ai/recharge-campaign",
+      referUrl: "https://www.jalapeno-cloud.ai/readfrog",
       // Both default to the generic sponsor wording; Jalapeno names its actual offer instead.
       badgeI18nKey: "options.apiProviders.badges.sponsorJalapenoCloud",
       ctaI18nKey: "options.apiProviders.sponsorCtaJalapenoCloud",

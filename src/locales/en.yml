@@ -203,14 +203,14 @@ options:
         languageDetection: Language detection
         pdfTranslation: PDF translation
     sponsorCta: Get fast, cost-effective AI
-    sponsorCtaJalapenoCloud: "$$1 + Up to 60% bonus"
+    sponsorCtaJalapenoCloud: "Black Friday, DS4.1 Flash 50% off"
     sponsorCtaIfapi: "+10% credit, use code READFROG"
     setApiKeyWarning:
       message: Please set your API key on the $1 page
     badges:
       featureCount: $1 features
       sponsor: Sponsor
-      sponsorJalapenoCloud: "60% bonus"
+      sponsorJalapenoCloud: "1$$ + 60% gift"
       sponsorIfapi: 90% Off Models
     dialog:
       title: Add new provider
@@ -301,7 +301,7 @@ options:
         anthropic: Claude models known for safety and reasoning excellence
         xai: Elon Musk's AI company offering Grok models with real-time data access
         atlascloud: Unified OpenAI-compatible access to newer DeepSeek, Kimi, Qwen, Doubao, GLM, and other models
-        jalapenocloud: Enterprise-grade AI used by top teams — now made for you!
+        jalapenocloud: "50~30% off Flash, fixed every week"
         ifapi: GPT, Claude, Gemini and more, from 10% of list price
         siliconflow: High-performance inference platform for Chinese and international models
         tensdaq: Revolutionary bidding AI MaaS platform with market-driven pricing, eliminating high-cost fixed pricing

@@ -203,14 +203,14 @@ options:
         languageDetection: 言語検出
         pdfTranslation: PDF 翻訳
     sponsorCta: 高速で高コスパのAIを入手
-    sponsorCtaJalapenoCloud: "$$1 + Up to 60% bonus"
+    sponsorCtaJalapenoCloud: "ブラックフライデー、DS4.1 Flash 50% オフ"
     sponsorCtaIfapi: 初回チャージ +10%・コード READFROG
     setApiKeyWarning:
       message: API キーは $1 ページで設定してください
     badges:
       featureCount: $1 件の機能
       sponsor: スポンサー
-      sponsorJalapenoCloud: "ボーナス 60%"
+      sponsorJalapenoCloud: "1$$ + 60%増"
       sponsorIfapi: モデル 90% オフ
     dialog:
       title: 新しいプロバイダーを追加
@@ -300,7 +300,7 @@ options:
         anthropic: 安全性と推論能力に優れたClaudeモデル
         xai: リアルタイムデータアクセス可能なGrokモデルを提供するイーロン・マスクのAI企業
         atlascloud: DeepSeek、Kimi、Qwen、Doubao、GLMなどの新しめのモデルにOpenAI互換でアクセスできる統合プラットフォーム
-        jalapenocloud: トップチームが使うエンタープライズ級 AI を、あなたにも！
+        jalapenocloud: "毎週定期的に Flash が 50~30% オフ"
         ifapi: GPT・Claude・Gemini など主要モデルを公式価格の最大 90% オフで
         siliconflow: 中国および国際モデル向けの高性能推論プラットフォーム
         tensdaq: 革命的入札型AI MaaSプラットフォーム、市場の需給で価格が決まり高コスト固定料金を排除
