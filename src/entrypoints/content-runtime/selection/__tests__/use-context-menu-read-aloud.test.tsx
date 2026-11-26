@@ -95,6 +95,19 @@ describe("useContextMenuReadAloud", () => {
     expect(playMock).toHaveBeenCalledWith("First line\nSecond line", TTS_CONFIG)
   })
 
+  it("reads all of this frame's selection when the menu's text is its first 16,384 characters", () => {
+    const article = document.createElement("p")
+    article.textContent = Array.from({ length: 3000 }, (_, index) => `word${index}`).join(" ")
+    document.body.replaceChildren(article)
+    window.getSelection()?.selectAllChildren(article)
+    render(<Harness />)
+
+    // Firefox cuts a menu's selection text at 16,384 characters, mid-word.
+    readAloudFromContextMenu({ selectionText: article.textContent.slice(0, 16_384).trim() })
+
+    expect(playMock).toHaveBeenCalledWith(article.textContent, TTS_CONFIG)
+  })
+
   it("reads the menu's text, not this frame's selection, for a menu opened in an ebook section", () => {
     render(<Harness />)
 

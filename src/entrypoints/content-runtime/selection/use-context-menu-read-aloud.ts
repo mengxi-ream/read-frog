@@ -6,19 +6,30 @@ import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { onMessage } from "@/utils/message"
 import { readSelectionSnapshot, toComparableSelectionText } from "./utils"
 
+// Firefox gives a menu only the first 16,384 characters of the browser's text
+// for its selection.
+const MENU_SELECTION_TEXT_MAX_LENGTH = 16_384
+
+function isMenuSelection(selection: Selection, menuText: string) {
+  const browserText = selection.toString()
+  const comparableMenuText = toComparableSelectionText(menuText)
+  return (
+    toComparableSelectionText(browserText) === comparableMenuText ||
+    toComparableSelectionText(browserText.slice(0, MENU_SELECTION_TEXT_MAX_LENGTH)) ===
+      comparableMenuText
+  )
+}
+
 /**
  * The menu's text is the selection it was opened on. This frame's selection is
  * read the way the toolbar reads it, since the menu's text keeps furigana next
- * to its base text, but only while it is still that selection: the browser's
- * text for it must be the menu's. A selection made or changed since the menu
- * opened is another one.
+ * to its base text and can be cut short, but only while it is still that
+ * selection: the browser's text for it must be the menu's. A selection made or
+ * changed since the menu opened is another one.
  */
 function readMenuSelectionText(menuText: string) {
   const selection = window.getSelection()
-  if (
-    !selection ||
-    toComparableSelectionText(selection.toString()) !== toComparableSelectionText(menuText)
-  ) {
+  if (!selection || !isMenuSelection(selection, menuText)) {
     return menuText
   }
 
