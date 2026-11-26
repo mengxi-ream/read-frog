@@ -250,18 +250,21 @@ export class SubtitlesStarter {
       }
 
       const errorMessage = error instanceof Error ? error.message : String(error)
+      const action = error instanceof ToastSubtitlesError ? error.action : undefined
+      // The source is still AI here: the revert to native after this hides the player, so a failed
+      // AI request is told in a toast, never on the player.
+      const isAiRequest = this.subtitlesSwitch.source === SUBTITLES_SOURCE.AI
 
-      if (error instanceof ToastSubtitlesError) {
+      if (error instanceof ToastSubtitlesError || isAiRequest) {
         // The loading state has no auto-hide of its own (unlike "error"), so
         // the toast branch has to clear it — otherwise the "Loading AI
         // subtitles" pill stays on the player forever after a wall.
         this.getScheduler()?.setState("idle")
-        // Only the AI request has a control on screen to point at; the source
-        // is still AI here because reverting to native happens after this.
-        if (this.subtitlesSwitch.source === SUBTITLES_SOURCE.AI) {
-          showAiSubtitlesWallToast(errorMessage, error.action)
+        // Only the AI request has a control on screen to point at.
+        if (isAiRequest) {
+          showAiSubtitlesWallToast(errorMessage, action)
         } else {
-          showSubtitlesErrorToast(errorMessage, error.action)
+          showSubtitlesErrorToast(errorMessage, action)
         }
       } else {
         this.getScheduler()?.setState("error", {

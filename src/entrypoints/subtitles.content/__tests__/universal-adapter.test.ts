@@ -415,34 +415,46 @@ describe("universalVideoAdapter", () => {
     expect(startTranslationSpy).toHaveBeenCalledTimes(1)
   })
 
-  it("returns to the site's subtitles when an AI track fails to reload, and checks no more", async () => {
-    const { adapter, subtitlesFetcher } = createAdapter([])
-    ;(adapter as any).subtitlesSwitch.source = SUBTITLES_SOURCE.AI
-    subtitlesFetcher.fetch.mockRejectedValue(
-      new ToastSubtitlesError("subtitles.errors.aiSubscriptionRequired"),
-    )
-    let active = true
-    const scheduler = Object.assign(attachScheduler(adapter, true), {
-      hide: vi.fn<() => void>(() => {
-        active = false
-      }),
-    })
-    scheduler.isActive.mockImplementation(() => active)
-    const showNativeSubtitles = vi
-      .spyOn((adapter as any).nativeCaptions, "showNativeSubtitles")
-      .mockImplementation(() => {})
+  it.each([
+    {
+      reason: "a refusal",
+      error: new ToastSubtitlesError("subtitles.errors.aiSubscriptionRequired"),
+    },
+    {
+      reason: "a failure",
+      error: new OverlaySubtitlesError("subtitles.errors.aiServiceUnavailable"),
+    },
+  ])(
+    "returns to the site's subtitles when an AI track fails to reload with $reason, and tells why once",
+    async ({ error }) => {
+      const { adapter, subtitlesFetcher } = createAdapter([])
+      ;(adapter as any).subtitlesSwitch.source = SUBTITLES_SOURCE.AI
+      subtitlesFetcher.fetch.mockRejectedValue(error)
+      let active = true
+      const scheduler = Object.assign(attachScheduler(adapter, true), {
+        hide: vi.fn<() => void>(() => {
+          active = false
+        }),
+      })
+      scheduler.isActive.mockImplementation(() => active)
+      const showNativeSubtitles = vi
+        .spyOn((adapter as any).nativeCaptions, "showNativeSubtitles")
+        .mockImplementation(() => {})
 
-    // Bilibili checks the track every second.
-    await adapter.handleSourceTrackChanged()
-    await adapter.handleSourceTrackChanged()
+      // Bilibili checks the track every second.
+      await adapter.handleSourceTrackChanged()
+      await adapter.handleSourceTrackChanged()
 
-    expect(subtitlesFetcher.fetch).toHaveBeenCalledOnce()
-    expect(scheduler.hide).toHaveBeenCalled()
-    expect(mocks.showAiSubtitlesWallToast).toHaveBeenCalledOnce()
-    expect((adapter as any).subtitlesSwitch.source).toBe(SUBTITLES_SOURCE.NATIVE)
-    expect(subtitlesStore.get(subtitlesSourceAtom)).toBe(SUBTITLES_SOURCE.NATIVE)
-    expect(showNativeSubtitles).toHaveBeenCalled()
-  })
+      expect(subtitlesFetcher.fetch).toHaveBeenCalledOnce()
+      expect(scheduler.hide).toHaveBeenCalled()
+      expect(mocks.showAiSubtitlesWallToast).toHaveBeenCalledOnce()
+      expect(mocks.showAiSubtitlesWallToast).toHaveBeenCalledWith(error.message, undefined)
+      expect(scheduler.setState).not.toHaveBeenCalledWith("error", expect.anything())
+      expect((adapter as any).subtitlesSwitch.source).toBe(SUBTITLES_SOURCE.NATIVE)
+      expect(subtitlesStore.get(subtitlesSourceAtom)).toBe(SUBTITLES_SOURCE.NATIVE)
+      expect(showNativeSubtitles).toHaveBeenCalled()
+    },
+  )
 
   it("ignores source track changes when translation is disabled", async () => {
     const { adapter, subtitlesFetcher } = createAdapter([{ text: "hello", start: 0, end: 500 }])
@@ -1000,6 +1012,25 @@ describe("universalVideoAdapter", () => {
 
     expect(mocks.showAiSubtitlesWallToast).toHaveBeenCalledWith(
       "subtitles.errors.aiVideoTooLong",
+      undefined,
+    )
+  })
+
+  // The revert to native after a failed AI request hides the player, so an error painted there is never seen.
+  it("tells a failed AI request in a toast, not on the player", async () => {
+    const { adapter, subtitlesFetcher } = createAdapter([])
+    ;(adapter as any).subtitlesSwitch.source = SUBTITLES_SOURCE.AI
+    subtitlesFetcher.fetch.mockRejectedValue(
+      new OverlaySubtitlesError("subtitles.errors.aiRequestFailed"),
+    )
+    const scheduler = attachScheduler(adapter, true)
+
+    await expect((adapter as any).starter.startTranslation()).resolves.toBe(false)
+
+    expect(scheduler.setState).toHaveBeenLastCalledWith("idle")
+    expect(scheduler.setState).not.toHaveBeenCalledWith("error", expect.anything())
+    expect(mocks.showAiSubtitlesWallToast).toHaveBeenCalledWith(
+      "subtitles.errors.aiRequestFailed",
       undefined,
     )
   })
