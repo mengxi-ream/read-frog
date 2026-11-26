@@ -253,6 +253,24 @@ describe("DifficultWordsSession", () => {
     expect(mocks.scanner!.refreshVisible).not.toHaveBeenCalled()
   })
 
+  it("still hides the next word's ✓ when the pointer leaves it, after a ✓ was pressed", async () => {
+    session = createSession()
+    const block = document.querySelector("#a")!
+    await hover(markIn(block))
+    await vi.advanceTimersByTimeAsync(300)
+    // Pressed: the ✓ goes away under the pointer, which never leaves it.
+    session.checkPointerEnter()
+    session.markCheckKnown()
+
+    const next = markIn(block)
+    await hover(next)
+    await vi.advanceTimersByTimeAsync(300)
+    expect(session.getView().check?.mark).toBe(next)
+    await hover(null)
+    await vi.advanceTimersByTimeAsync(300)
+    expect(session.getView().check).toBeNull()
+  })
+
   it("records a marked word looked up under its lemma, and counts it seen; another word by its paragraph's language", () => {
     session = createSession()
     const block = document.querySelector("#a")!

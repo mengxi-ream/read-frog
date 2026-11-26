@@ -630,6 +630,8 @@ export class DifficultWordsSession {
   }
 
   private setView(next: Partial<DifficultWordsView>) {
+    // A ✓ taken away under the pointer, as when it is pressed, hears no pointerleave.
+    if (next.check === null) this.overCheck = false
     this.view = { ...this.view, ...next }
     this.notify()
   }
