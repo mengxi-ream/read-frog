@@ -203,7 +203,7 @@ options:
         languageDetection: 言語検出
         pdfTranslation: PDF 翻訳
     sponsorCta: 高速で高コスパのAIを入手
-    sponsorCtaJalapenoCloud: GLM 5.3 を 50% オフで入手
+    sponsorCtaJalapenoCloud: "$$1+Up to 60% bonus"
     sponsorCtaIfapi: 初回チャージ +10%・コード READFROG
     setApiKeyWarning:
       message: API キーは $1 ページで設定してください

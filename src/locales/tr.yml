@@ -203,7 +203,7 @@ options:
         languageDetection: Dil algılama
         pdfTranslation: PDF çevirisi
     sponsorCta: Hızlı ve uygun maliyetli yapay zekâ al
-    sponsorCtaJalapenoCloud: GLM 5.3ʼte %50 indirim al
+    sponsorCtaJalapenoCloud: "$$1+Up to 60% bonus"
     sponsorCtaIfapi: READFROG koduyla +%10 bakiye
     setApiKeyWarning:
       message: API anahtarınızı $1 sayfasında ayarlayın

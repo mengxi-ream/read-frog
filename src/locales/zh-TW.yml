@@ -203,7 +203,7 @@ options:
         languageDetection: 語言偵測
         pdfTranslation: PDF 翻譯
     sponsorCta: 取得高速高性價比 AI
-    sponsorCtaJalapenoCloud: 取得 GLM 5.3 五折優惠
+    sponsorCtaJalapenoCloud: "$$1+Up to 60% bonus"
     sponsorCtaIfapi: 首儲加贈 10%，優惠碼 READFROG
     setApiKeyWarning:
       message: 請在 $1 頁面設定 API 金鑰
