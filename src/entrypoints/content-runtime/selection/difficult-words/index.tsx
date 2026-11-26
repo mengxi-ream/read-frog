@@ -109,7 +109,7 @@ function DifficultWordsRuntime() {
         return
       }
 
-      const next = new DifficultWordsSession(latest.language.targetCode, {
+      const next = new DifficultWordsSession({
         getConfig: () => store.get(configAtom),
         setRequest,
         isAnnotationMode: () => annotationRef.current.mode,

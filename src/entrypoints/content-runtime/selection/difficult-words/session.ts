@@ -1,5 +1,4 @@
 import type { VocabEvent, VocabLang, VocabLevel, VocabWordEventKind } from "@read-frog/api-contract"
-import type { LanguageTag } from "@read-frog/definitions"
 import type { SelectionSession } from "../selection-toolbar/atoms"
 import type { CustomActionRequest } from "@/components/custom-action/atoms"
 import type { SaveToNotebaseOutcome } from "@/components/custom-action/use-save-to-notebase"
@@ -144,14 +143,16 @@ export class DifficultWordsSession {
   private signedOut = false
   private disposed = false
 
-  constructor(
-    /** The reader's own language, whose paragraphs are not judged. */
-    private readonly own: LanguageTag,
-    private readonly options: DifficultWordsSessionOptions,
-  ) {
+  constructor(private readonly options: DifficultWordsSessionOptions) {
     this.scanner = new DifficultWordsScanner({
+      // The reader's own language, whose paragraphs are not judged, is the one the
+      // settings have now: a target changed while marking is on counts from the next request.
       judge: (blocks, events) =>
-        sendMessage("judgeDifficultWords", { own: this.own, blocks, events }),
+        sendMessage("judgeDifficultWords", {
+          own: this.options.getConfig().language.targetCode,
+          blocks,
+          events,
+        }),
       record: (events) => {
         void sendMessage("recordDifficultWordEvents", { events })
       },

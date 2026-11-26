@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import type { VocabEvent, VocabLang, VocabSeen } from "@read-frog/api-contract"
+import type { LanguageTag } from "@read-frog/definitions"
 import type { Mock } from "vitest"
 import type { SelectionSession } from "../../selection-toolbar/atoms"
 import type { Config } from "@/types/config/config"
@@ -105,9 +106,12 @@ function selectionOf(element: Element, start: number, text: string): SelectionSe
   }
 }
 
+/** The target language in the settings, as `getConfig` reads it. */
+let targetCode: LanguageTag = "zh-Hans"
+
 function createSession() {
-  const session = new DifficultWordsSession("zh-Hans", {
-    getConfig: () => ({}) as Config,
+  const session = new DifficultWordsSession({
+    getConfig: () => ({ language: { targetCode } }) as Config,
     setRequest: vi.fn<(request: unknown) => void>(),
     isAnnotationMode: () => false,
     annotate: () => false,
@@ -149,6 +153,7 @@ function undoLast() {
 let session: DifficultWordsSession | null = null
 
 beforeEach(() => {
+  targetCode = "zh-Hans"
   vi.useFakeTimers()
   vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) =>
     setTimeout(() => callback(performance.now()), 16),
@@ -315,6 +320,20 @@ describe("DifficultWordsSession", () => {
       events: undefined,
     })
     expect(mocks.sendMessage).toHaveBeenCalledWith("recordDifficultWordsSeen", { seen })
+  })
+
+  it("sends the target language the settings have now, not the one marking was started with", async () => {
+    session = createSession()
+    const host = mocks.host!
+
+    await host.judge([{ id: "b1", text: "The ubiquitous cat." }])
+    targetCode = "es"
+    await host.judge([{ id: "b2", text: "The ubiquitous dog." }])
+
+    const owns = mocks.sendMessage.mock.calls
+      .filter(([type]) => type === "judgeDifficultWords")
+      .map(([, data]) => (data as { own: string }).own)
+    expect(owns).toEqual(["zh-Hans", "es"])
   })
 
   it("gives the pointer cursor to the hovered word's paragraph, not the page", async () => {
