@@ -529,6 +529,32 @@ describe("DifficultWordsScanner", () => {
     expect(started.observer.observed).toEqual(new Set([$("#a"), $("#b"), $("#blank")]))
   })
 
+  it("reads the new body a page swaps in to navigate, and lets go of the old one's marks", async () => {
+    document.body.innerHTML = `<p id="a">${PARAGRAPH}</p>`
+    const host = createHost(judgeHard(["ubiquitous", "dog"]))
+    const started = await startScanner(host)
+    scanner = started.scanner
+    started.observer.fire([$("#a")])
+    await flush()
+    expect(scanner.count).toBe(1)
+    host.onMarksChange.mockClear()
+
+    const next = document.createElement("body")
+    next.innerHTML = `<p id="b">The ubiquitous dog.</p>`
+    document.documentElement.replaceChild(next, document.body)
+    await vi.advanceTimersByTimeAsync(100)
+
+    expect(painted()).toEqual([])
+    expect(scanner.count).toBe(0)
+    expect(host.onMarksChange).toHaveBeenCalled()
+    expect(started.observer.observed.has($("#b"))).toBe(true)
+
+    started.observer.fire([$("#b")])
+    await flush()
+    expect(host.judge.mock.calls[1]![0][0]!.text).toBe("The ubiquitous dog.")
+    expect(painted()).toEqual(["ubiquitous", "dog"])
+  })
+
   it("asks for a level, and judges the paragraphs waiting for it once it is given", async () => {
     document.body.innerHTML = `<p id="a">${PARAGRAPH}</p>`
     let hasLevel = false
@@ -645,6 +671,86 @@ describe("DifficultWordsScanner", () => {
       expect(host.judge).toHaveBeenCalledTimes(3)
       expect(host.judge.mock.calls[2]![0][0]!.text).toBe("The ubiquitous dog.")
       expect(painted()).toEqual(["ubiquitous", "dog"])
+    })
+
+    it("ends a wait for the connection once another request gets an answer", async () => {
+      document.body.innerHTML = `<p id="a">${PARAGRAPH}</p><p id="b">${PARAGRAPH}</p>`
+      const first = hold()
+      const second = hold()
+      const judge = judgeHard(["ubiquitous"])
+      const host = createHost(async (blocks) => {
+        const call = host.judge.mock.calls.length
+        if (call === 1) {
+          await first.held
+          return { ok: false, failure: { kind: "offline" } }
+        }
+        if (call === 2) await second.held
+        return judge(blocks)
+      })
+      const started = await startScanner(host)
+      scanner = started.scanner
+      started.observer.fire([$("#a")])
+      await flush()
+      started.observer.fire([$("#b")])
+      await flush()
+      expect(host.judge).toHaveBeenCalledTimes(2)
+
+      first.release()
+      await settle()
+      second.release()
+      await flush()
+
+      expect(host.judge).toHaveBeenCalledTimes(3)
+      expect(sentIds(host, 2)).toEqual(["b1"])
+    })
+
+    it("sends again, once it can, a changed paragraph whose new text did not go", async () => {
+      document.body.innerHTML = `<p id="a">${PARAGRAPH}</p>`
+      const judge = judgeHard(["ubiquitous", "dog"])
+      const host = createHost((blocks) =>
+        host.judge.mock.calls.length === 2
+          ? { ok: false, failure: { kind: "offline" } }
+          : judge(blocks),
+      )
+      const started = await startScanner(host)
+      scanner = started.scanner
+      started.observer.fire([$("#a")])
+      await flush()
+
+      ;($("#a").firstChild as Text).data = "The ubiquitous dog."
+      await vi.advanceTimersByTimeAsync(100)
+      await flush()
+      expect(host.judge).toHaveBeenCalledTimes(2)
+      expect(painted()).toEqual([])
+
+      await vi.advanceTimersByTimeAsync(2_000)
+      expect(host.judge).toHaveBeenCalledTimes(3)
+      expect(painted()).toEqual(["ubiquitous", "dog"])
+    })
+
+    it("waits a while, not at once, for a reset time already past by this clock", async () => {
+      document.body.innerHTML = `<p id="a">${PARAGRAPH}</p>`
+      const past = () => new Date(Date.now() - 5_000).toISOString()
+      const host = createHost(() =>
+        host.judge.mock.calls.length === 1
+          ? { ok: false, failure: { kind: "rateLimited", resetAt: past() } }
+          : { ok: false, failure: { kind: "dailyLimit", resetAt: past() } },
+      )
+      const started = await startScanner(host)
+      scanner = started.scanner
+      started.observer.fire([$("#a")])
+      await flush()
+
+      await vi.advanceTimersByTimeAsync(9_999)
+      expect(host.judge).toHaveBeenCalledTimes(1)
+      await vi.advanceTimersByTimeAsync(1)
+      expect(host.judge).toHaveBeenCalledTimes(2)
+
+      await vi.advanceTimersByTimeAsync(9_999)
+      expect(host.judge).toHaveBeenCalledTimes(2)
+      await vi.advanceTimersByTimeAsync(1)
+      await settle()
+      expect(host.judge).toHaveBeenCalledTimes(3)
     })
 
     it("waits out a rate limit until the time the server gives", async () => {

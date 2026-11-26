@@ -53,6 +53,18 @@ describe("readBlockText", () => {
     expect(nodes.map((node) => node.data)).toEqual(["First ", "part", "second", "third"])
   })
 
+  it("leaves out hidden text, as a block of its own, keeping the words around it apart", () => {
+    mount(
+      "<p id='p'>Shown <span id='tip' style='display: none'>tooltip <b id='b'>text</b></span>here</p>",
+    )
+    const resolver = new BlockResolver()
+    const tip = document.querySelector("#tip")!
+
+    expect(readBlockText(document.querySelector("#p")!, resolver).text).toBe("Shown \nhere")
+    expect(resolver.blockOf(document.querySelector("#b")!)).toBe(tip)
+    expect(resolver.blockOf(tip)).toBe(tip)
+  })
+
   it("does not walk into the blocks nested in it", () => {
     mount("<div id='d'>Intro<p>one <b id='b'>two</b></p>outro</div>")
     const resolver = new BlockResolver()

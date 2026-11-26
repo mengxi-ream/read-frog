@@ -2083,6 +2083,7 @@ difficultWords:
   clearTooltip: Remove the highlights from this page
   translationOnlyUnavailable: Not available in "Translation only" mode, which leaves no original text on the page
   unavailableHere: Read Frog isn't on for this page
+  unavailableHereHint: If the page was open before Read Frog was installed or updated, refresh it and try again.
   known: I know it
   knownDescription: Mark as known. It won't be highlighted again, on this page or others.
   markKnown: I know this word

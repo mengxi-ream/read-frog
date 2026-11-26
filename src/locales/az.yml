@@ -1934,6 +1934,7 @@ difficultWords:
   clearTooltip: Bu səhifədəki işarələri silir
   translationOnlyUnavailable: Səhifədə orijinal mətn saxlamayan "Yalnız tərcümə" rejimində əlçatan deyil
   unavailableHere: Read Frog bu səhifədə aktiv deyil
+  unavailableHereHint: Bu səhifə Read Frog quraşdırılmadan və ya yenilənmədən əvvəl açılıbsa, onu yeniləyin və yenidən cəhd edin.
   known: Bilirəm
   knownDescription: Bilinən kimi qeyd et. Bu söz nə bu səhifədə, nə də digərlərində bir daha işarələnməyəcək.
   markKnown: Bu sözü bilirəm

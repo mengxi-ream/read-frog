@@ -1941,6 +1941,7 @@ difficultWords:
   clearTooltip: Quita los resaltados de esta página
   translationOnlyUnavailable: No disponible en el modo «Solo traducción», que no deja texto original en la página
   unavailableHere: Read Frog no está activado en esta página
+  unavailableHereHint: Si la página ya estaba abierta antes de instalar o actualizar Read Frog, recárgala y vuelve a intentarlo.
   known: La conozco
   knownDescription: Marcar como conocida. No volverá a resaltarse, ni en esta página ni en otras.
   markKnown: Conozco esta palabra

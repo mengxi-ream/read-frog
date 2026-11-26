@@ -107,7 +107,9 @@ const DIRTY_DELAY_MS = 100
 const SLICE_MS = 8
 /** How long to wait before trying the server again, failure after failure. */
 const OFFLINE_RETRY_MS = [2_000, 10_000, 60_000]
+/** How long to wait out a limit when the server's reset time is no use. */
 const RATE_LIMIT_FALLBACK_MS = 10_000
+const DAY_MS = 24 * 60 * 60_000
 /** One screen above and below the viewport. */
 const NEAR_MARGIN = "100% 0px 100% 0px"
 /** How often the marks on screen are looked at, to tell which ones the reader saw. */
@@ -126,6 +128,15 @@ let pageSeen: { url: string; keys: Set<string> } | null = null
 function seenOnThisPage(): Set<string> {
   if (pageSeen?.url !== location.href) pageSeen = { url: location.href, keys: new Set() }
   return pageSeen.keys
+}
+
+/**
+ * How long until the server's reset time. One already past by this clock
+ * means it runs ahead of the server's, which still refuses: the wait is the
+ * fallback, not none.
+ */
+function untilReset(resetAt: number, now: number) {
+  return resetAt > now ? resetAt - now : RATE_LIMIT_FALLBACK_MS
 }
 
 function isSkipped(result: VocabJudgedBlock | VocabSkippedBlock): result is VocabSkippedBlock {
@@ -187,6 +198,8 @@ export class DifficultWordsScanner {
   /** No more requests until `resume()`: signed out, not in the beta, out of words for the day. */
   private halted: DifficultWordsFailure | null = null
   private pausedUntil = 0
+  /** The pause is a wait for the connection, not for a rate limit. */
+  private pausedOffline = false
   private offlineFailures = 0
   private failing = false
   private disposed = false
@@ -202,10 +215,7 @@ export class DifficultWordsScanner {
 
   private readonly mutations = new MutationObserver((records) => this.onMutations(records))
   private readonly onOnline = () => {
-    this.pausedUntil = 0
-    // The wait after a failure is cut short, not waited out.
-    if (this.flushTimer) clearTimeout(this.flushTimer)
-    this.flushTimer = null
+    this.endOfflineWait()
     this.scheduleFlush(0)
   }
 
@@ -224,7 +234,12 @@ export class DifficultWordsScanner {
     ensureDifficultWordsDocumentStyles()
     const root = document.body
     if (!root) return
-    this.mutations.observe(root, { childList: true, characterData: true, subtree: true })
+    // From the root, to see a page swap in a new body to navigate (Turbo Drive).
+    this.mutations.observe(document.documentElement, {
+      childList: true,
+      characterData: true,
+      subtree: true,
+    })
     window.addEventListener("online", this.onOnline)
     this.discovery = new BlockDiscovery(root, this.resolver)
     this.scheduleDiscovery()
@@ -388,6 +403,7 @@ export class DifficultWordsScanner {
     this.resumeTimer = null
     this.halted = null
     this.pausedUntil = 0
+    this.pausedOffline = false
     for (const block of this.near) {
       if (block.state === "new" || this.isStale(block)) this.pending.add(block)
     }
@@ -580,6 +596,8 @@ export class DifficultWordsScanner {
       return
     }
     this.offlineFailures = 0
+    // The server answered: a wait for the connection, set by another request, is over.
+    this.endOfflineWait()
     if (this.failing) {
       this.failing = false
       this.host.onRecovered()
@@ -628,22 +646,25 @@ export class DifficultWordsScanner {
       case "dailyLimit": {
         this.halted = failure
         const resetAt = failure.resetAt ? Date.parse(failure.resetAt) : Number.NaN
-        if (Number.isFinite(resetAt) && resetAt - now < 24 * 60 * 60_000) {
+        if (Number.isFinite(resetAt) && resetAt - now < DAY_MS) {
           if (this.resumeTimer) clearTimeout(this.resumeTimer)
-          this.resumeTimer = setTimeout(() => this.resume(), Math.max(0, resetAt - now))
+          this.resumeTimer = setTimeout(() => this.resume(), untilReset(resetAt, now))
         }
         break
       }
       case "rateLimited": {
         const resetAt = failure.resetAt ? Date.parse(failure.resetAt) : Number.NaN
-        this.pausedUntil = Number.isFinite(resetAt) ? resetAt : now + RATE_LIMIT_FALLBACK_MS
-        this.scheduleFlush(Math.max(0, this.pausedUntil - now))
+        const wait = Number.isFinite(resetAt) ? untilReset(resetAt, now) : RATE_LIMIT_FALLBACK_MS
+        this.pausedUntil = now + wait
+        this.pausedOffline = false
+        this.scheduleFlush(wait)
         break
       }
       case "offline": {
         const delay = OFFLINE_RETRY_MS[Math.min(this.offlineFailures, OFFLINE_RETRY_MS.length - 1)]!
         this.offlineFailures += 1
         this.pausedUntil = now + delay
+        this.pausedOffline = true
         this.scheduleFlush(delay)
         break
       }
@@ -652,6 +673,18 @@ export class DifficultWordsScanner {
         this.scheduleFlush(FLUSH_DELAY_MS)
         break
     }
+  }
+
+  /**
+   * The connection is back, as the browser or an answer says: the wait for
+   * it is cut short, not waited out. A rate limit is still waited out.
+   */
+  private endOfflineWait() {
+    if (!this.pausedOffline) return
+    this.pausedOffline = false
+    this.pausedUntil = 0
+    if (this.flushTimer) clearTimeout(this.flushTimer)
+    this.flushTimer = null
   }
 
   private apply(block: ScanBlock, result: VocabJudgedBlock | VocabSkippedBlock) {
@@ -792,10 +825,22 @@ export class DifficultWordsScanner {
   // Paragraphs being watched are read again when their text changes. New
   // ones are found in what was added, a text node that was blank included:
   // an element that only had children come and go (a feed's list, or the
-  // body itself) is no paragraph, and is not watched as one.
+  // body itself) is no paragraph, and is not watched as one. Only the body
+  // is read: of the root, a new body swapped in is taken as added content.
   private onMutations(records: MutationRecord[]) {
+    const root = document.documentElement
     for (const record of records) {
       const target = record.target
+      if (target === root) {
+        for (const node of record.addedNodes) {
+          if (!(node instanceof Element) || node.localName !== "body") continue
+          this.resolver.forget(node)
+          this.added.push(node)
+        }
+        if (record.removedNodes.length > 0) this.sawRemovals = true
+        continue
+      }
+      if (!document.body?.contains(target)) continue
       if (record.type === "characterData") {
         if (isInScanSkippedSubtree(target)) continue
         const parent = target.parentElement
@@ -845,13 +890,15 @@ export class DifficultWordsScanner {
         else this.addBlock(element)
       }
     }
+    let changed = false
     if (this.sawRemovals) {
       this.sawRemovals = false
       for (const block of [...this.blocks.values()]) {
-        if (!block.element.isConnected) this.drop(block)
+        if (block.element.isConnected) continue
+        changed = changed || block.marks.length > 0
+        this.drop(block)
       }
     }
-    let changed = false
     for (const element of [...this.dirty]) {
       this.dirty.delete(element)
       const block = this.blocks.get(element)
@@ -883,6 +930,8 @@ export class DifficultWordsScanner {
     this.clearMarks(block)
     block.state = "new"
     block.payload = null
+    // The words marked were in the old text: a send that fails leaves none.
+    block.hard = null
     if (this.near.has(block)) {
       this.pending.add(block)
       this.scheduleFlush(FLUSH_DELAY_MS)

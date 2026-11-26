@@ -1936,6 +1936,7 @@ difficultWords:
   clearTooltip: Bỏ tô sáng trên trang này
   translationOnlyUnavailable: Không dùng được ở chế độ "Chỉ bản dịch", vì chế độ này không giữ văn bản gốc trên trang
   unavailableHere: Read Frog không bật trên trang này
+  unavailableHereHint: Nếu trang đã mở từ trước khi cài đặt hoặc cập nhật Read Frog, hãy tải lại trang rồi thử lại.
   known: Đã biết
   knownDescription: Đánh dấu là đã biết. Từ này sẽ không được tô sáng nữa, trên trang này hay trang khác.
   markKnown: Tôi biết từ này

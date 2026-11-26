@@ -248,6 +248,24 @@ export class DifficultWordsOutbox {
     if (this.events.some((event) => !this.inFlight.has(event.id))) this.schedule(0)
   }
 
+  /**
+   * Drops every record and seen word not stored yet: the account changed,
+   * and they say nothing about the new one. A request already on its way
+   * went as the account that made them.
+   */
+  async clear() {
+    await this.load()
+    this.events = []
+    this.attempted.clear()
+    this.seen.clear()
+    this.retries = 0
+    if (this.timer) clearTimeout(this.timer)
+    this.timer = null
+    if (this.seenTimer) clearTimeout(this.seenTimer)
+    this.seenTimer = null
+    this.persist()
+  }
+
   /** Queues marked words the reader saw, to go with the next request. */
   addSeen(groups: VocabSeen[]) {
     for (const { lang, v, words } of groups) {
@@ -343,6 +361,15 @@ interface CachedAccess {
 }
 
 let accessInflight: Promise<DifficultWordsAccess> | null = null
+let activeOutbox: DifficultWordsOutbox | null = null
+
+/**
+ * Drops the records not sent yet: the auth cookie changed, so the account
+ * may have, and the server would count them for whoever is signed in now.
+ */
+export async function clearDifficultWordsOutbox(): Promise<void> {
+  await activeOutbox?.clear()
+}
 
 /** Drops the verdict: the auth cookie changed, so the account may have. */
 export async function clearDifficultWordsAccessCache(): Promise<void> {
@@ -394,6 +421,7 @@ async function cacheAccess(access: Exclude<DifficultWordsAccess, "unknown">) {
 
 export function setupDifficultWordsHandlers() {
   const outbox = new DifficultWordsOutbox((input) => backgroundOrpcClient.vocab.judge(input))
+  activeOutbox = outbox
   outbox.start()
 
   onMessage("getDifficultWordsAccess", async (message) => {

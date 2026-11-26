@@ -1936,6 +1936,7 @@ difficultWords:
   clearTooltip: Bu sayfadaki vurguları kaldırır
   translationOnlyUnavailable: Sayfada orijinal metin bırakmayan "Yalnızca çeviri" modunda kullanılamaz
   unavailableHere: Read Frog bu sayfada açık değil
+  unavailableHereHint: Sayfa Read Frog yüklenmeden veya güncellenmeden önce açıldıysa yenileyip tekrar deneyin.
   known: Biliyorum
   knownDescription: Bilinen olarak işaretle. Ne bu sayfada ne de diğerlerinde bir daha vurgulanmaz.
   markKnown: Bu kelimeyi biliyorum

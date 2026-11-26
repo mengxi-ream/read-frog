@@ -98,10 +98,9 @@ export function SelectionCustomActionProvider({ children }: { children: ReactNod
       const selectionText = session?.selectionSnapshot.text ?? ""
       const cleanSelection = normalizeSelectedText(selectionText)
 
-      if (mode === "open") {
-        sessionKeyRef.current += 1
-        if (pendingRequest) notifySelectionLookup(session)
-      }
+      if (mode === "open") sessionKeyRef.current += 1
+      // A pinned card run on a new selection looks that one up too.
+      if (pendingRequest) notifySelectionLookup(session)
 
       setCustomActionRequest((previous) =>
         pendingRequest

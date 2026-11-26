@@ -6,6 +6,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { browser } from "#imports"
 import { Button } from "@/components/ui/base-ui/button"
 import { Kbd, KbdGroup } from "@/components/ui/base-ui/kbd"
+import { toastManager } from "@/components/ui/base-ui/toast"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { getDifficultWordsShortcut } from "@/utils/constants/difficult-words"
@@ -68,6 +69,15 @@ function DifficultWordsToggle({ shortcut }: { shortcut: string }) {
     mutationFn: (enabled: boolean) =>
       sendMessage("setDifficultWordsEnabled", { enabled }, { tabId: tabId!, frameId: 0 }),
     onSuccess: (next) => queryClient.setQueryData(stateKey, next),
+    // The page never answered: Read Frog is not running in it. The state
+    // read failing alone says nothing, as the page may still be loading.
+    onError: () => {
+      toastManager.add({
+        type: "error",
+        title: i18n.t("difficultWords.unavailableHere"),
+        description: i18n.t("difficultWords.unavailableHereHint"),
+      })
+    },
     meta: { suppressToast: true },
   })
 

@@ -238,6 +238,44 @@ describe("DifficultWordsSession", () => {
     expect(recorded()).toEqual([])
   })
 
+  it("leaves a click on a word in a control to the control, whether native or by its role", async () => {
+    document.body.innerHTML = `
+      <p id="a">The ubiquitous cat.</p>
+      <a href="#" id="link">The ubiquitous cat.</a>
+      <div role="tab"><span id="tab">The ubiquitous cat.</span></div>
+      <ul role="listbox"><li role="option" id="option">The ubiquitous cat.</li></ul>`
+    session = createSession()
+
+    const results: Record<string, { prevented: boolean; opened: boolean }> = {}
+    for (const id of ["link", "tab", "option", "a"]) {
+      const target = document.querySelector(`#${id}`)!
+      mocks.markAt = markIn(target)
+      window.dispatchEvent(new MouseEvent("pointerdown", { button: 0, clientX: 20, clientY: 20 }))
+      const click = new MouseEvent("click", {
+        bubbles: true,
+        cancelable: true,
+        button: 0,
+        detail: 1,
+        clientX: 20,
+        clientY: 20,
+      })
+      target.dispatchEvent(click)
+      await vi.advanceTimersByTimeAsync(300)
+
+      results[id] = {
+        prevented: click.defaultPrevented,
+        opened: session.getView().card?.mark.block === target,
+      }
+    }
+
+    expect(results).toEqual({
+      link: { prevented: false, opened: false },
+      tab: { prevented: false, opened: false },
+      option: { prevented: false, opened: false },
+      a: { prevented: true, opened: true },
+    })
+  })
+
   it("undoes the ✓ by recording the undo alone", async () => {
     session = createSession()
     const mark = markIn(document.querySelector("#a")!)

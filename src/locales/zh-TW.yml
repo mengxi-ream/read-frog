@@ -1946,6 +1946,7 @@ difficultWords:
   clearTooltip: 清除這頁上標出的難詞
   translationOnlyUnavailable: 「僅顯示翻譯」模式下頁面上沒有原文，無法掃描難詞
   unavailableHere: 陪讀蛙在這個頁面上沒有啟用
+  unavailableHereHint: 如果這個頁面是在安裝或更新陪讀蛙之前開啟的，請重新整理後再試。
   known: 認識
   knownDescription: 標為認識：這頁和其他頁都不再標出這個詞
   markKnown: 認識這個詞

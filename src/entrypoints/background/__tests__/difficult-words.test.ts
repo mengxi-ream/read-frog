@@ -31,6 +31,7 @@ vi.mock("@/utils/message", () => ({
 const {
   DifficultWordsOutbox,
   clearDifficultWordsAccessCache,
+  clearDifficultWordsOutbox,
   setupDifficultWordsHandlers,
   toDifficultWordsFailure,
 } = await import("../difficult-words")
@@ -533,6 +534,26 @@ describe("difficult words handlers", () => {
       expect(judgeMock).toHaveBeenCalledTimes(2)
       expect(judgeMock.mock.calls[0]![0]).toEqual({ own: "zh-Hans", seen, blocks })
       expect(judgeMock.mock.calls[1]![0]).toEqual({ own: "zh-Hans", blocks })
+    })
+
+    it("does not carry records made before the account changed", async () => {
+      const before = event("ubiquitous")
+      const seen = seenIn("en", "ubiquitous")
+      judgeMock.mockRejectedValueOnce(new TypeError("Failed to fetch"))
+      await ask("judgeDifficultWords", { blocks, events: [before] })
+      await ask("recordDifficultWordsSeen", { seen: [seen] })
+      expect(store.get(OUTBOX_KEY)).toEqual([before])
+
+      await clearDifficultWordsOutbox()
+      expect(store.get(OUTBOX_KEY)).toEqual([])
+
+      const after = event("cat")
+      judgeMock.mockImplementation(async (input: VocabJudgeInput) => ({
+        ...output,
+        acked: input.events?.map((entry) => entry.id) ?? [],
+      }))
+      await ask("judgeDifficultWords", { blocks, events: [after] })
+      expect(judgeMock).toHaveBeenLastCalledWith({ events: [after], blocks })
     })
 
     it("answers a failure the page can act on, and keeps the verdict it gives", async () => {

@@ -61,7 +61,10 @@ export class BlockResolver {
         break
       }
       path.push(current)
-      if (!isInlineDisplay(getComputedStyle(current).display)) {
+      // Hidden text (a tooltip, a collapsed "more") is no part of the line
+      // it sits in: a block of its own, never on screen, so never read.
+      const display = getComputedStyle(current).display
+      if (display === "none" || !isInlineDisplay(display)) {
         block = current
         break
       }

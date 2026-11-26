@@ -6,7 +6,7 @@ import { AUTH_CACHE_GROUP_KEY, DEFAULT_PROXY_CACHE_TTL_MS } from "@/utils/consta
 import { createLogger } from "@/utils/logging/logger"
 import { onMessage } from "@/utils/message"
 import { SessionCacheGroupRegistry } from "../../utils/session-cache/session-cache-group-registry"
-import { clearDifficultWordsAccessCache } from "./difficult-words"
+import { clearDifficultWordsAccessCache, clearDifficultWordsOutbox } from "./difficult-words"
 import { clearHostedAiStatusCache } from "./hosted-ai-status"
 
 const log = createLogger("background/proxy-fetch")
@@ -110,6 +110,10 @@ export function proxyFetch() {
       })
       invalidateAuthCache().catch((error) =>
         log.error("Failed to invalidate auth cache", { error }),
+      )
+      // Only here, not on a granted permission below: the account is the same then.
+      clearDifficultWordsOutbox().catch((error) =>
+        log.error("Failed to clear the difficult-words records", { error }),
       )
     })
   }

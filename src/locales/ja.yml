@@ -1936,6 +1936,7 @@ difficultWords:
   clearTooltip: このページのハイライトを消します
   translationOnlyUnavailable: 「翻訳のみ」モードではページに原文が残らないため、使えません
   unavailableHere: このページでは Read Frog が有効になっていません
+  unavailableHereHint: Read Frog のインストールや更新より前から開いていたページなら、再読み込みしてもう一度お試しください。
   known: 知っている
   knownDescription: 既知としてマークします。このページでも他のページでも、もうハイライトされません。
   markKnown: この単語は知っている

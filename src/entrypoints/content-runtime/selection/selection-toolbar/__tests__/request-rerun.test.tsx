@@ -18,6 +18,7 @@ import { CONFIG_STORAGE_KEY, DEFAULT_CONFIG } from "@/utils/constants/config"
 import { GOOGLE_TRANSLATE_PROVIDER_ID } from "@/utils/constants/providers"
 import { getBuiltInDictionaryAction } from "@/utils/custom-actions"
 import { prepareTranslationText } from "@/utils/host/translate/text-preparation"
+import { onSelectionLookup } from "../../selection-lookups"
 import { buildContextSnapshot, createRangeSnapshot, normalizeSelectedText } from "../../utils"
 import { setSelectionStateAtom } from "../atoms"
 import { SelectionCustomActionProvider } from "../custom-action-button/provider"
@@ -1925,6 +1926,10 @@ describe("selection toolbar requests", () => {
     streamBackgroundStructuredObjectMock
       .mockReturnValueOnce(firstRun.promise)
       .mockReturnValueOnce(secondRun.promise)
+    const lookups: unknown[] = []
+    const stopListening = onSelectionLookup((session) => {
+      lookups.push(session)
+    })
 
     const paragraph = document.createElement("p")
     paragraph.textContent = "Selected text inside a paragraph."
@@ -2012,6 +2017,9 @@ describe("selection toolbar requests", () => {
     await waitFor(() => {
       expect(screen.getByText('{"summary":"Second result"}')).toBeInTheDocument()
     })
+    // Each run was a lookup, the pinned card's too.
+    expect(lookups).toHaveLength(2)
+    stopListening()
   })
 
   it("opens a custom action from the context menu with the captured selection session", async () => {

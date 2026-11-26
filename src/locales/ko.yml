@@ -1936,6 +1936,7 @@ difficultWords:
   clearTooltip: 이 페이지의 강조 표시를 지웁니다
   translationOnlyUnavailable: "'번역만' 모드에서는 페이지에 원문이 남지 않아 사용할 수 없습니다"
   unavailableHere: 이 페이지에서는 Read Frog가 켜져 있지 않습니다
+  unavailableHereHint: Read Frog를 설치하거나 업데이트하기 전부터 열려 있던 페이지라면 새로고침한 뒤 다시 시도하세요.
   known: 알아요
   knownDescription: 아는 단어로 표시합니다. 이 페이지와 다른 페이지에서 더 이상 강조 표시되지 않습니다.
   markKnown: 이 단어를 알아요

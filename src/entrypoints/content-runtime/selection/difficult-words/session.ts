@@ -28,8 +28,28 @@ const OPEN_DELAY_MS = 300
 /** Further than this between press and release, the click was a drag. */
 const CLICK_SLOP_PX = 4
 const UNDO_MS = 5_000
-/** Where a click goes to the page as it would without the marks. */
-const PASS_THROUGH_SELECTOR = "a, button, input, label, summary, [role=button], [contenteditable]"
+/** Where a click goes to the page as it would without the marks: on a control, native or by its role. */
+const PASS_THROUGH_SELECTOR = [
+  "a",
+  "button",
+  "input",
+  "label",
+  "summary",
+  "[contenteditable]",
+  ...[
+    "button",
+    "link",
+    "checkbox",
+    "radio",
+    "switch",
+    "tab",
+    "option",
+    "menuitem",
+    "menuitemcheckbox",
+    "menuitemradio",
+    "treeitem",
+  ].map((role) => `[role=${role}]`),
+].join(", ")
 
 const SIGNED_OUT_TOAST_ID = "difficult-words-signed-out"
 const RESTRICTED_TOAST_ID = "difficult-words-restricted"
