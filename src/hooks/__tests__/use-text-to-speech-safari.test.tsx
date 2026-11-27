@@ -34,22 +34,28 @@ class FakeSource {
 
 const userActivation = { isActive: false }
 
-/** Like Safari's: a resume() outside a click never settles. */
+/** Like Safari's: until a click has started it, a resume() outside one never settles. */
 class FakeAudioContext {
   static instance: FakeAudioContext | undefined
 
   state: AudioContextState = "suspended"
   destination = {}
   sources: FakeSource[] = []
+  private started = false
 
   constructor() {
     FakeAudioContext.instance = this
   }
 
   resume = vi.fn<() => Promise<void>>(() => {
-    if (!userActivation.isActive) return new Promise<void>(() => {})
+    if (!this.started && !userActivation.isActive) return new Promise<void>(() => {})
+    this.started = true
     this.state = "running"
     return Promise.resolve()
+  })
+
+  suspend = vi.fn<() => Promise<void>>(async () => {
+    this.state = "suspended"
   })
 
   decodeAudioData = vi.fn<(data: ArrayBuffer) => Promise<unknown>>(async (data) =>
@@ -70,7 +76,7 @@ Object.defineProperty(navigator, "userActivation", {
 })
 // The hook picks its player when it loads.
 vi.stubEnv("BROWSER", "safari")
-const { useTextToSpeech } = await import("../use-text-to-speech")
+let useTextToSpeech: typeof import("../use-text-to-speech").useTextToSpeech
 
 const ttsConfig = {
   defaultVoice: "en-US-DavisNeural",
@@ -106,17 +112,18 @@ function playbackMessages() {
   return sendMessageMock.mock.calls.filter(([type]) => type.startsWith("ttsPlayback"))
 }
 
-beforeEach(() => {
-  // Every test is a page the user has not clicked yet.
+beforeEach(async () => {
+  // Every test is a page the user has not clicked yet, with a player of its own.
+  vi.resetModules()
+  ;({ useTextToSpeech } = await import("../use-text-to-speech"))
+  FakeAudioContext.instance = undefined
   userActivation.isActive = false
-  if (FakeAudioContext.instance) FakeAudioContext.instance.state = "suspended"
   synthesizeChunksAsTheirText()
 })
 
 afterEach(() => {
   cleanup()
   vi.clearAllMocks()
-  if (FakeAudioContext.instance) FakeAudioContext.instance.sources = []
 })
 
 afterAll(() => {
@@ -145,6 +152,8 @@ describe("useTextToSpeech in Safari", () => {
       await run
     })
     expect(result.current.isPlaying).toBe(false)
+    // A running context keeps the Mac awake, even when it is silent.
+    expect(FakeAudioContext.instance!.state).toBe("suspended")
     expect(sendMessageMock).toHaveBeenCalledWith(
       "edgeTtsSynthesize",
       expect.objectContaining({ text: "Hello" }),
@@ -180,6 +189,7 @@ describe("useTextToSpeech in Safari", () => {
     await new Promise((resolve) => setTimeout(resolve, 0))
     expect(sources()).toHaveLength(2)
     expect(result.current.isPlaying).toBe(false)
+    expect(FakeAudioContext.instance!.state).toBe("suspended")
     expect(playbackMessages()).toEqual([])
   })
 
@@ -211,6 +221,7 @@ describe("useTextToSpeech in Safari", () => {
       await secondRun
     })
     expect(toastAddMock).not.toHaveBeenCalled()
+    expect(FakeAudioContext.instance!.state).toBe("suspended")
   })
 
   it("says why there was no sound when it could not start, unless the run is a quiet one", async () => {

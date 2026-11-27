@@ -28,9 +28,11 @@ function base64ToArrayBuffer(base64: string): ArrayBuffer {
  * Plays synthesized speech in the document that asked for it, through Web Audio.
  *
  * For Safari, which has no offscreen document and whose extension background
- * cannot play audio. A page may start audio only within a few seconds of the
- * user's click (navigator.userActivation.isActive), but an AudioContext
- * started then keeps running, so the later chunks of a long text play too.
+ * cannot play audio. Safari starts an AudioContext only within a few seconds
+ * of the user's click (navigator.userActivation.isActive). Once started, it
+ * resumes without a click, so the later chunks of a long text play too.
+ * A running context keeps the Mac from sleeping even when it is silent, so the
+ * context runs only while a chunk plays.
  * Decoded audio has no URL, so a page's CSP cannot block it the way it blocks
  * a blob: <audio>.
  *
@@ -39,18 +41,23 @@ function base64ToArrayBuffer(base64: string): ArrayBuffer {
 export class WebAudioPlaybackController {
   private context: AudioContext | null = null
   // The resume() a click started. Safari never settles one it refused.
-  private starting: Promise<void> | undefined
+  private unlocking: Promise<void> | undefined
+  // Whether that resume() has settled, so the context resumes without a click.
+  private unlocked = false
   private run: PlaybackRun | null = null
 
   /**
-   * Starts the context if the user has just clicked, which is when Safari
+   * Starts the context the first time the user clicks, which is when Safari
    * allows it (navigator.userActivation.isActive). Call it from the click
    * handler, before anything is awaited.
    */
   prepare(): AudioContext {
     const context = (this.context ??= new AudioContext())
-    if (context.state !== "running" && navigator.userActivation.isActive) {
-      this.starting = context.resume()
+    if (!this.unlocked && navigator.userActivation.isActive) {
+      this.unlocking = context.resume().then(() => {
+        this.unlocked = true
+        this.suspendIfIdle()
+      })
     }
     return context
   }
@@ -77,20 +84,26 @@ export class WebAudioPlaybackController {
       run.source.disconnect()
     }
     run.resolve({ ok: false, reason })
+    this.suspendIfIdle()
   }
 
   private async start(run: PlaybackRun, context: AudioContext, audioBase64: string) {
     try {
       const buffer = await context.decodeAudioData(base64ToArrayBuffer(audioBase64))
-      if (context.state !== "running") {
-        await this.starting
+      if (!this.unlocking) {
+        throw new Error(PLAYBACK_BLOCKED_MESSAGE)
       }
-      // Stopped or replaced while it decoded: stop() has answered for it.
+      await this.unlocking
+      // Stopped or replaced meanwhile: stop() has answered for it, and
+      // resuming for it would leave the context running.
       if (this.run !== run) {
         return
       }
-      if (context.state !== "running") {
-        throw new Error(PLAYBACK_BLOCKED_MESSAGE)
+      // Safari runs suspend() and resume() in the order they are called, so a
+      // stop() from here on still leaves the context suspended.
+      await context.resume()
+      if (this.run !== run) {
+        return
       }
 
       const source = context.createBufferSource()
@@ -101,6 +114,7 @@ export class WebAudioPlaybackController {
         this.run = null
         source.disconnect()
         run.resolve({ ok: true })
+        this.suspendIfIdle()
       }
       run.source = source
       source.start()
@@ -108,6 +122,13 @@ export class WebAudioPlaybackController {
       if (this.run !== run) return
       this.run = null
       run.reject(error)
+      this.suspendIfIdle()
+    }
+  }
+
+  private suspendIfIdle() {
+    if (this.unlocked && !this.run) {
+      void this.context?.suspend()
     }
   }
 }
