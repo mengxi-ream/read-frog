@@ -6,8 +6,9 @@ import {
   VOCAB_JUDGE_MAX_LANGS,
   VOCAB_SEEN_MAX_WORDS,
 } from "@read-frog/api-contract"
-import { GATED_FEATURES } from "@read-frog/definitions"
+import { AUTH_COOKIE_PATTERNS, GATED_FEATURES } from "@read-frog/definitions"
 import { browser, storage } from "#imports"
+import { env } from "@/env"
 import { createLogger } from "@/utils/logging/logger"
 import { onMessage, sendMessage } from "@/utils/message"
 import { backgroundOrpcClient } from "@/utils/orpc/background-client"
@@ -30,9 +31,9 @@ const OUTBOX_KEY = "local:difficultWordsOutbox" as const
 const ACCESS_CACHE_KEY = "session:difficultWordsAccess" as const
 
 /**
- * Every page with the floating button asks, so the verdict is kept a while:
- * a change of account clears it, the popup asks afresh each time it opens,
- * and the judge's own refusal replaces it.
+ * Every page with the floating button asks, and so does the popup each time it
+ * opens, so the verdict is kept a while: a change of account clears it, the
+ * settings page asks afresh, and the judge's own refusal replaces it.
  */
 const ACCESS_TTL_MS = 60 * 60_000
 /** A card closing records its word and judges the paragraphs on screen right after: one request for both. */
@@ -389,20 +390,50 @@ async function readCachedAccess(): Promise<DifficultWordsAccess | null> {
   }
 }
 
-function fetchAccess(): Promise<DifficultWordsAccess> {
-  accessInflight ??= backgroundOrpcClient.featureAccess
-    .status({ featureKey: GATED_FEATURES.difficult_words })
-    .then((status): DifficultWordsAccess => (status.allowed ? "allowed" : "denied"))
-    .catch((error): DifficultWordsAccess => {
-      if (error instanceof ORPCError && (error.code === "UNAUTHORIZED" || error.status === 401)) {
-        return "signedOut"
-      }
-      // The server no longer knows the key: the feature left the gated list
-      // when it opened to everyone.
-      if (error instanceof ORPCError && error.code === "BAD_REQUEST") return "allowed"
-      log.warn("Access check failed", { error })
-      return "unknown"
+/**
+ * Whether a request to the API could go out signed in. Without a session
+ * cookie for it, the server could only answer that the reader is signed out,
+ * so that is the answer, with no request: most readers who ask are signed out.
+ * Without host access to the API the cookie can't be read, and the request
+ * wouldn't carry it either.
+ *
+ * `true` when there is no telling: the cookies can't be read (Firefox with
+ * first-party isolation wants a `firstPartyDomain`), or the browser is Safari,
+ * where reading the cookies of a site it hasn't been allowed on asks the user
+ * for access, and pages ask here without the reader doing anything.
+ */
+async function mayBeSignedIn(): Promise<boolean> {
+  if (import.meta.env.BROWSER === "safari") return true
+  try {
+    const cookies = await browser.cookies.getAll({ url: env.WXT_API_URL })
+    return cookies.some((cookie) => AUTH_COOKIE_PATTERNS.some((name) => cookie.name.includes(name)))
+  } catch (error) {
+    log.warn("Could not read the session cookie", { error })
+    return true
+  }
+}
+
+async function checkAccess(): Promise<DifficultWordsAccess> {
+  if (!(await mayBeSignedIn())) return "signedOut"
+  try {
+    const status = await backgroundOrpcClient.featureAccess.status({
+      featureKey: GATED_FEATURES.difficult_words,
     })
+    return status.allowed ? "allowed" : "denied"
+  } catch (error) {
+    if (error instanceof ORPCError && (error.code === "UNAUTHORIZED" || error.status === 401)) {
+      return "signedOut"
+    }
+    // The server no longer knows the key: the feature left the gated list
+    // when it opened to everyone.
+    if (error instanceof ORPCError && error.code === "BAD_REQUEST") return "allowed"
+    log.warn("Access check failed", { error })
+    return "unknown"
+  }
+}
+
+function fetchAccess(): Promise<DifficultWordsAccess> {
+  accessInflight ??= checkAccess()
     .then(async (access) => {
       if (access !== "unknown") await cacheAccess(access)
       return access
