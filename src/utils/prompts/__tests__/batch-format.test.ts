@@ -32,6 +32,16 @@ describe("batch formats", () => {
       "[1]\nso today\n[2]\n- You okay?\n- Yeah.",
     )
   })
+
+  it("reads back texts that start with a bracketed number of their own", () => {
+    for (const texts of [
+      ["[2] items left", "next"],
+      ["[2] items left"],
+      ["first", "[1] Smith et al., 2019\n[2] Jones, 2020"],
+    ]) {
+      expect(NUMBERED_BATCH_FORMAT.parse(NUMBERED_BATCH_FORMAT.join(texts))).toEqual(texts)
+    }
+  })
 })
 
 describe("parseNumberedBatchResult", () => {
@@ -39,6 +49,13 @@ describe("parseNumberedBatchResult", () => {
     expect(
       parseNumberedBatchResult("[1]\n所以今天\n[2]\n- 你还好吗？\n- 嗯。\n[3]\n调音台"),
     ).toEqual(["所以今天", "- 你还好吗？\n- 嗯。", "调音台"])
+  })
+
+  it("keeps a translation's own leading [n] when numbers sit on lines of their own", () => {
+    expect(parseNumberedBatchResult("[1]\n[2] 剩余物品\n[2]\n下一个")).toEqual([
+      "[2] 剩余物品",
+      "下一个",
+    ])
   })
 
   it("also reads a reply with each text on its number's line", () => {
