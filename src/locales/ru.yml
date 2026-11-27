@@ -203,14 +203,14 @@ options:
         languageDetection: Определение языка
         pdfTranslation: Перевод PDF
     sponsorCta: Получить быстрый и выгодный ИИ
-    sponsorCtaJalapenoCloud: Получить GLM 5.3 со скидкой 50 %
+    sponsorCtaJalapenoCloud: "Чёрная пятница, DS4.1 Flash −50%"
     sponsorCtaIfapi: "+10% к балансу с кодом READFROG"
     setApiKeyWarning:
       message: Укажите API-ключ на странице $1
     badges:
       featureCount: $1 функций
       sponsor: Спонсор
-      sponsorJalapenoCloud: $$1 бесплатно
+      sponsorJalapenoCloud: "1$$ + ещё 60%"
       sponsorIfapi: Модели -90%
     dialog:
       title: Добавить нового провайдера
@@ -300,7 +300,7 @@ options:
         anthropic: Модели Claude, известные своей безопасностью и превосходными рассуждениями
         xai: ИИ-компания Илона Маска, предлагающая модели Grok с доступом к данным в реальном времени
         atlascloud: Единая OpenAI-совместимая платформа для новых моделей DeepSeek, Kimi, Qwen, Doubao, GLM и других
-        jalapenocloud: ИИ корпоративного уровня, которым пользуются ведущие команды — теперь и для вас!
+        jalapenocloud: "Скидка 50~30% на Flash — фиксированно каждую неделю"
         ifapi: GPT, Claude, Gemini и другие модели от 10% официальной цены
         siliconflow: Высокопроизводительная платформа вывода для китайских и международных моделей
         tensdaq: Революционная MaaS-платформа с рыночным ценообразованием, устраняющая высокие фиксированные цены

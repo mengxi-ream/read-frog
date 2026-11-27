@@ -128,6 +128,16 @@ export function normalizeSelectedText(value: string | null | undefined) {
   return value?.replace(ZERO_WIDTH_CHAR_REGEX, "").trim() ?? ""
 }
 
+// A context menu's selection text and the same selection read here can differ
+// in whitespace, such as line breaks, and in zero-width characters, which the
+// ebook reader strips.
+const COMPARABLE_ZERO_WIDTH_CHAR_REGEX = /[\u200B-\u200D\uFEFF]/g
+
+/** Text to compare two readings of a selection by. */
+export function toComparableSelectionText(text: string) {
+  return text.replace(COMPARABLE_ZERO_WIDTH_CHAR_REGEX, "").replace(WHITESPACE_REGEX, " ").trim()
+}
+
 function normalizeParagraphText(value: string) {
   return value.replace(ZERO_WIDTH_CHAR_REGEX, "").replace(WHITESPACE_REGEX, " ").trim()
 }

@@ -7,6 +7,7 @@ import {
   DEFAULT_TRANSLATE_PROMPT_ID,
   isNoTranslationSentinel,
   NO_TRANSLATION_SENTINEL,
+  NUMBERED_BATCH_TRANSLATE_PROMPT,
   PRECISION_REWRITE_TRANSLATE_PROMPT_ID,
 } from "@/utils/constants/prompt"
 import { HTML_ATTRIBUTE_MARKER } from "@/utils/host/translate/html-attribute-markers"
@@ -375,7 +376,7 @@ describe("no-translation sentinel", () => {
     expect(result.systemPrompt).toContain("Translation B")
     expect(result.systemPrompt).not.toContain(`${NO_TRANSLATION_SENTINEL}\n\n%%`)
     expect(result.systemPrompt).not.toContain("this one is already written in")
-    // The page batch block is byte-identical to the one subtitles use.
+    // Page translation keeps the %% batch block; it is part of the page cache key.
     expect(result.systemPrompt).toContain(DEFAULT_BATCH_TRANSLATE_PROMPT)
   })
 
@@ -391,7 +392,27 @@ describe("no-translation sentinel", () => {
     )
   })
 
-  it("never leaks the sentinel into subtitle prompts, which share the batch rules", async () => {
+  it("appends the numbered batch rules to a custom subtitle prompt in batch mode", async () => {
+    mockGetLocalConfig.mockResolvedValue({
+      ...DEFAULT_CONFIG,
+      videoSubtitles: {
+        ...DEFAULT_CONFIG.videoSubtitles,
+        customPromptsConfig: {
+          promptId: "mine",
+          patterns: [{ id: "mine", name: "Mine", systemPrompt: "My prompt", prompt: "{{input}}" }],
+        },
+      },
+    })
+
+    const result = await getSubtitlesTranslatePrompt("Japanese", "[1] Hello\n[2] world", {
+      isBatch: true,
+    })
+
+    expect(result.systemPrompt).toBe(`My prompt\n\n${NUMBERED_BATCH_TRANSLATE_PROMPT}`)
+    expect(result.prompt).toBe("[1] Hello\n[2] world")
+  })
+
+  it("never leaks the sentinel into subtitle batch prompts", async () => {
     mockGetLocalConfig.mockResolvedValue(DEFAULT_CONFIG)
 
     const result = await getSubtitlesTranslatePrompt("Japanese", "Hello world", {
@@ -399,9 +420,9 @@ describe("no-translation sentinel", () => {
       context: { webTitle: "Video", webDescription: "Desc", videoSummary: "Sum" },
     })
 
-    // isBatch is what appends the shared batch block — assert it actually
-    // arrived, or the marker check below passes vacuously.
-    expect(result.systemPrompt).toContain(DEFAULT_BATCH_TRANSLATE_PROMPT)
+    // isBatch is what appends the batch block — assert it actually arrived,
+    // or the marker check below passes vacuously.
+    expect(result.systemPrompt).toContain(NUMBERED_BATCH_TRANSLATE_PROMPT)
     // The subtitle pipeline has no sentinel mapping; the marker must never
     // appear in its prompts (rule or example).
     expect(result.systemPrompt).not.toContain(NO_TRANSLATION_SENTINEL)

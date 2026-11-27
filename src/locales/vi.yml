@@ -203,14 +203,14 @@ options:
         languageDetection: Phát hiện ngôn ngữ
         pdfTranslation: Dịch PDF
     sponsorCta: Nhận AI nhanh, tiết kiệm chi phí
-    sponsorCtaJalapenoCloud: Nhận ưu đãi giảm 50% GLM 5.3
+    sponsorCtaJalapenoCloud: "Black Friday, DS4.1 Flash giảm 50%"
     sponsorCtaIfapi: Tặng thêm 10% với mã READFROG
     setApiKeyWarning:
       message: Hãy đặt API Key ở trang $1
     badges:
       featureCount: $1 tính năng
       sponsor: Tài trợ
-      sponsorJalapenoCloud: Miễn phí $$1
+      sponsorJalapenoCloud: "1$$ + tặng 60%"
       sponsorIfapi: Mô hình -90%
     dialog:
       title: Thêm nhà cung cấp mới
@@ -300,7 +300,7 @@ options:
         anthropic: Các mô hình Claude nổi tiếng về độ an toàn và khả năng suy luận xuất sắc
         xai: Công ty AI của Elon Musk cung cấp các mô hình Grok với truy cập dữ liệu thời gian thực
         atlascloud: Nền tảng hợp nhất tương thích OpenAI cho các mô hình mới như DeepSeek, Kimi, Qwen, Doubao và GLM
-        jalapenocloud: AI cấp doanh nghiệp được các đội ngũ hàng đầu sử dụng, nay dành cho bạn!
+        jalapenocloud: "Flash giảm 50~30% cố định mỗi tuần"
         ifapi: GPT, Claude, Gemini và nhiều mô hình khác, chỉ từ 10% giá chính thức
         siliconflow: Nền tảng suy luận hiệu suất cao cho các mô hình Trung Quốc và quốc tế
         tensdaq: Nền tảng MaaS đấu giá AI cách mạng với giá thị trường, loại bỏ giá cố định cao
