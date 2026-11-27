@@ -474,6 +474,17 @@ describe("difficult words handlers", () => {
       expect(statusMock).toHaveBeenCalledTimes(1)
     })
 
+    // Staging and preview APIs name the cookie with their own prefix.
+    it("asks the server for a session cookie of any prefix", async () => {
+      getCookiesMock.mockResolvedValue([
+        { name: "__Secure-readfrog-staging.session_token" } as Browser.cookies.Cookie,
+      ])
+      statusMock.mockResolvedValue({ allowed: true })
+
+      await expect(ask("getDifficultWordsAccess")).resolves.toBe("allowed")
+      expect(statusMock).toHaveBeenCalledTimes(1)
+    })
+
     it("asks the server when the cookies can't be read", async () => {
       getCookiesMock.mockRejectedValue(new Error("First-Party Isolation is enabled"))
       statusMock.mockResolvedValue({ allowed: true })

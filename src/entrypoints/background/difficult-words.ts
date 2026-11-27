@@ -6,7 +6,7 @@ import {
   VOCAB_JUDGE_MAX_LANGS,
   VOCAB_SEEN_MAX_WORDS,
 } from "@read-frog/api-contract"
-import { AUTH_COOKIE_PATTERNS, GATED_FEATURES } from "@read-frog/definitions"
+import { GATED_FEATURES } from "@read-frog/definitions"
 import { browser, storage } from "#imports"
 import { env } from "@/env"
 import { createLogger } from "@/utils/logging/logger"
@@ -397,6 +397,11 @@ async function readCachedAccess(): Promise<DifficultWordsAccess | null> {
  * Without host access to the API the cookie can't be read, and the request
  * wouldn't carry it either.
  *
+ * Any session cookie the request would carry counts, whatever its prefix: the
+ * API names it `<prefix>.session_token`, and staging and preview APIs set their
+ * own prefix in place of the default `better-auth`. A cookie of something else
+ * that happens to match only means the server is asked.
+ *
  * `true` when there is no telling: the cookies can't be read (Firefox with
  * first-party isolation wants a `firstPartyDomain`), or the browser is Safari,
  * where reading the cookies of a site it hasn't been allowed on asks the user
@@ -406,7 +411,7 @@ async function mayBeSignedIn(): Promise<boolean> {
   if (import.meta.env.BROWSER === "safari") return true
   try {
     const cookies = await browser.cookies.getAll({ url: env.WXT_API_URL })
-    return cookies.some((cookie) => AUTH_COOKIE_PATTERNS.some((name) => cookie.name.includes(name)))
+    return cookies.some((cookie) => cookie.name.endsWith(".session_token"))
   } catch (error) {
     log.warn("Could not read the session cookie", { error })
     return true
