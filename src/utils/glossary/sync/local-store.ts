@@ -1,4 +1,5 @@
 import type { LanguageTag } from "@read-frog/definitions"
+import type { InsertType } from "dexie"
 import type { SyncedGlossary, SyncedTerm } from "./document"
 import type { GlossaryChangeCounts, GlossarySnapshot } from "./merge-document"
 import type GlossaryTerm from "@/utils/db/dexie/tables/glossary-term"
@@ -215,11 +216,11 @@ export async function clearSyncBase(): Promise<void> {
  * schema. The column holds a string either way; a value this build does not
  * recognise simply never matches a page, and reaches the other device intact.
  */
-function toStoredTerm(term: SyncedTerm): GlossaryTerm {
+function toStoredTerm(term: SyncedTerm): InsertType<GlossaryTerm, never> {
   return {
     ...term,
     targetLang: normalizeStoredTargetLang(term.targetLang) as LanguageTag,
-  } as GlossaryTerm
+  }
 }
 
 export type GlossaryCapOverflow = {

@@ -1,4 +1,5 @@
 import type { VocabEvent, VocabJudgeInput, VocabLang, VocabSeen } from "@read-frog/api-contract"
+import type { Browser } from "#imports"
 import { ORPCError } from "@orpc/client"
 import {
   VOCAB_JUDGE_MAX_EVENTS,
@@ -7,6 +8,7 @@ import {
 } from "@read-frog/api-contract"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { browser, storage } from "#imports"
+import { env } from "@/env"
 
 const statusMock = vi.fn<(...args: any[]) => any>()
 const judgeMock = vi.fn<(...args: any[]) => any>()
@@ -396,8 +398,18 @@ describe("DifficultWordsOutbox", () => {
 })
 
 describe("difficult words handlers", () => {
+  const sessionCookie = { name: "__Secure-better-auth.session_token" } as Browser.cookies.Cookie
+  const getCookiesMock =
+    vi.fn<(details: Browser.cookies.GetAllDetails) => Promise<Browser.cookies.Cookie[]>>()
+
   beforeEach(() => {
+    getCookiesMock.mockResolvedValue([sessionCookie])
+    browser.cookies.getAll = getCookiesMock
     setupDifficultWordsHandlers()
+  })
+
+  afterEach(() => {
+    vi.unstubAllEnvs()
   })
 
   describe("getDifficultWordsAccess", () => {
@@ -442,6 +454,54 @@ describe("difficult words handlers", () => {
       statusMock.mockResolvedValueOnce({ allowed: true })
       await expect(ask("getDifficultWordsAccess")).resolves.toBe("allowed")
       expect(statusMock).toHaveBeenCalledTimes(3)
+    })
+
+    it("answers signed out without asking the server while the browser has no session cookie", async () => {
+      getCookiesMock.mockResolvedValue([
+        { name: "better-auth.session_data" } as Browser.cookies.Cookie,
+      ])
+
+      await expect(ask("getDifficultWordsAccess")).resolves.toBe("signedOut")
+      await expect(ask("getDifficultWordsAccess", { fresh: true })).resolves.toBe("signedOut")
+      expect(getCookiesMock).toHaveBeenCalledWith({ url: env.WXT_API_URL })
+      expect(statusMock).not.toHaveBeenCalled()
+
+      // Signing in sets the cookie, and the cookie listener clears the cache.
+      getCookiesMock.mockResolvedValue([sessionCookie])
+      await clearDifficultWordsAccessCache()
+      statusMock.mockResolvedValue({ allowed: true })
+      await expect(ask("getDifficultWordsAccess")).resolves.toBe("allowed")
+      expect(statusMock).toHaveBeenCalledTimes(1)
+    })
+
+    // Staging and preview APIs name the cookie with their own prefix.
+    it("asks the server for a session cookie of any prefix", async () => {
+      getCookiesMock.mockResolvedValue([
+        { name: "__Secure-readfrog-staging.session_token" } as Browser.cookies.Cookie,
+      ])
+      statusMock.mockResolvedValue({ allowed: true })
+
+      await expect(ask("getDifficultWordsAccess")).resolves.toBe("allowed")
+      expect(statusMock).toHaveBeenCalledTimes(1)
+    })
+
+    it("asks the server when the cookies can't be read", async () => {
+      getCookiesMock.mockRejectedValue(new Error("First-Party Isolation is enabled"))
+      statusMock.mockResolvedValue({ allowed: true })
+
+      await expect(ask("getDifficultWordsAccess")).resolves.toBe("allowed")
+      expect(statusMock).toHaveBeenCalledTimes(1)
+    })
+
+    // Reading the cookies of a site Safari hasn't been allowed on asks the user.
+    it("does not look for the cookie in Safari", async () => {
+      vi.stubEnv("BROWSER", "safari")
+      getCookiesMock.mockResolvedValue([])
+      statusMock.mockRejectedValue(new ORPCError("UNAUTHORIZED"))
+
+      await expect(ask("getDifficultWordsAccess")).resolves.toBe("signedOut")
+      expect(getCookiesMock).not.toHaveBeenCalled()
+      expect(statusMock).toHaveBeenCalledTimes(1)
     })
 
     it("counts the feature as open once the server no longer gates it", async () => {
