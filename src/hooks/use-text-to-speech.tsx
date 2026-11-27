@@ -4,6 +4,11 @@ import type {
   SurfaceByFeature,
 } from "@/types/analytics"
 import type { TTSConfig } from "@/types/config/tts"
+import type {
+  TTSPlaybackStartRequest,
+  TTSPlaybackStartResponse,
+  TTSPlaybackStopRequest,
+} from "@/types/tts-playback"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useAtomValue } from "jotai"
 import { useRef, useState } from "react"
@@ -19,6 +24,10 @@ import { i18n } from "@/utils/i18n"
 import { createLogger } from "@/utils/logging/logger"
 import { sendMessage } from "@/utils/message"
 import { splitTextByUtf8Bytes } from "@/utils/server/edge-tts/chunk"
+import {
+  PLAYBACK_BLOCKED_MESSAGE,
+  WebAudioPlaybackController,
+} from "@/utils/tts-playback/web-audio-controller"
 
 const log = createLogger("use-text-to-speech")
 
@@ -38,6 +47,33 @@ interface SynthesizedAudioChunk {
 }
 
 const TTS_ERROR_TOAST_ID = "tts-synthesize-error"
+
+// Safari plays in the document that asked, through one player that every
+// reader in the document shares: its extension background cannot play audio,
+// and it has no offscreen document. Every other browser plays from the
+// background, which keeps one player for all tabs.
+const documentPlayback =
+  import.meta.env.BROWSER === "safari" ? new WebAudioPlaybackController() : null
+
+async function preparePlayback(): Promise<void> {
+  // Safari's player was prepared in play(), while the click still counted.
+  if (documentPlayback) return
+  await sendMessage("ttsPlaybackPrepare")
+}
+
+async function startPlayback(request: TTSPlaybackStartRequest): Promise<TTSPlaybackStartResponse> {
+  return documentPlayback
+    ? documentPlayback.play(request)
+    : sendMessage("ttsPlaybackStart", request)
+}
+
+function stopPlayback(request: TTSPlaybackStopRequest): void {
+  if (documentPlayback) {
+    documentPlayback.stop(request)
+    return
+  }
+  void sendMessage("ttsPlaybackStop", request).catch(() => {})
+}
 
 function toSignedValue(value: number, unit: "%" | "Hz"): string {
   return `${value >= 0 ? "+" : ""}${value}${unit}`
@@ -113,7 +149,20 @@ function getTTSFriendlyErrorDescription(error: Error): string | undefined {
     return "Audio playback was interrupted. Please try again."
   }
 
+  if (error.message.includes(PLAYBACK_BLOCKED_MESSAGE)) {
+    return i18n.t("speak.playbackBlocked")
+  }
+
   return error.message || undefined
+}
+
+function getTTSErrorTitle(error: Error): string {
+  // The speech was generated; Safari would not play it.
+  if (error.message.includes(PLAYBACK_BLOCKED_MESSAGE)) {
+    return i18n.t("speak.failedToPlaySound")
+  }
+
+  return i18n.t("speak.failedToGenerateSpeech")
 }
 
 async function synthesizeEdgeTTSAudioChunk(
@@ -160,7 +209,7 @@ export function useTextToSpeech(
     const activeRequestId = activeRequestIdRef.current
     activeRequestIdRef.current = null
     if (activeRequestId) {
-      void sendMessage("ttsPlaybackStop", { requestId: activeRequestId }).catch(() => {})
+      stopPlayback({ requestId: activeRequestId })
     }
 
     setIsPlaying(false)
@@ -194,7 +243,7 @@ export function useTextToSpeech(
         if (isSuperseded()) return
         // The failed run may have left its audio playing.
         activeRequestIdRef.current = null
-        void sendMessage("ttsPlaybackStop", { requestId }).catch(() => {})
+        stopPlayback({ requestId })
         throw error
       }
     },
@@ -208,7 +257,7 @@ export function useTextToSpeech(
       if (!variables.quiet) {
         toastManager.add({
           type: "error",
-          title: i18n.t("speak.failedToGenerateSpeech"),
+          title: getTTSErrorTitle(error),
           id: TTS_ERROR_TOAST_ID,
           description: getTTSFriendlyErrorDescription(error),
         })
@@ -237,7 +286,7 @@ export function useTextToSpeech(
     }
     const chunks = splitTextByUtf8Bytes(text)
     setTotalChunks(chunks.length)
-    await sendMessage("ttsPlaybackPrepare")
+    await preparePlayback()
     if (isSuperseded()) {
       return
     }
@@ -274,7 +323,7 @@ export function useTextToSpeech(
       // isPlaying belongs to the active run; a superseded one leaves it alone.
       if (!isSuperseded()) setIsPlaying(true)
       try {
-        const playbackResult = await sendMessage("ttsPlaybackStart", {
+        const playbackResult = await startPlayback({
           requestId,
           audioBase64: audioChunk.audioBase64,
           contentType: audioChunk.contentType,
@@ -340,6 +389,8 @@ export function useTextToSpeech(
       quiet?: boolean
     },
   ) => {
+    // Inside the click, before anything is awaited: Safari starts audio only then.
+    documentPlayback?.prepare()
     return playMutation.mutateAsync({
       text,
       ttsConfig,

@@ -61,6 +61,7 @@ export function MoreMenu() {
   const uiLanguage = useAtomValue(configFieldsAtomMap.uiLanguage)
   const locale = resolveUiLocale(uiLanguage)
   const latestBlogPost = useLatestBlogPost()
+  const reviewUrl = getReviewUrl("popup")
 
   return (
     <DropdownMenu>
@@ -161,13 +162,12 @@ export function MoreMenu() {
             {i18n.t("popup.more.starGithub")}
           </DropdownMenuItem>
 
-          <DropdownMenuItem
-            onClick={() => openExternal(getReviewUrl("popup"))}
-            className="cursor-pointer"
-          >
-            <Icon icon="tabler:star" className="size-4" strokeWidth={1.6} />
-            {i18n.t("popup.more.rateUs")}
-          </DropdownMenuItem>
+          {reviewUrl && (
+            <DropdownMenuItem onClick={() => openExternal(reviewUrl)} className="cursor-pointer">
+              <Icon icon="tabler:star" className="size-4" strokeWidth={1.6} />
+              {i18n.t("popup.more.rateUs")}
+            </DropdownMenuItem>
+          )}
         </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>

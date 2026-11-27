@@ -45,8 +45,10 @@ const EDGE_ADD_ONS_EXTENSION_ID = "cbcbomlgikfbdnoaohcjfledcoklcjbo"
  * The build target cannot say: Chrome and Edge run the same build, Edge users can install
  * from the Chrome Web Store, and nothing stops the Chrome zip from being uploaded to Edge.
  * Any other id — an unpacked dev build, or Firefox's gecko id — falls back to the target.
+ * Null for Safari, which has no store listing yet.
  */
-function getInstalledStore(): "chrome" | "edge" | "firefox" {
+function getInstalledStore(): "chrome" | "edge" | "firefox" | null {
+  if (import.meta.env.BROWSER === "safari") return null
   if (browser.runtime.id === EDGE_ADD_ONS_EXTENSION_ID) return "edge"
   if (browser.runtime.id === CHROME_WEB_STORE_EXTENSION_ID) return "chrome"
   if (import.meta.env.BROWSER === "edge" || import.meta.env.BROWSER === "firefox") {
@@ -69,9 +71,14 @@ function getInstalledStore(): "chrome" | "edge" | "firefox" {
  *
  * Slugs are cosmetic — the extension id resolves the listing — but they are kept current
  * so the click does not eat a redirect hop.
+ *
+ * Null when there is no store page to send the user to; nothing then asks for a review.
  */
-export function getReviewUrl(utmSource: string = "extension"): string {
+export function getReviewUrl(utmSource: string = "extension"): string | null {
   const store = getInstalledStore()
+  if (!store) {
+    return null
+  }
   if (store === "edge") {
     return `https://microsoftedge.microsoft.com/addons/detail/read-frog-translate-l/${EDGE_ADD_ONS_EXTENSION_ID}?form=MA13IW&utm_source=${utmSource}`
   }

@@ -625,6 +625,7 @@ options:
   floatingButton:
     title: 플로팅 버튼
     pageDescription: 플로팅 버튼이 놓일 위치와 클릭 동작, 숨길 사이트를 설정하세요.
+    pageDescriptionWithoutClickAction: 플로팅 버튼이 놓일 위치와 숨길 사이트를 설정하세요.
     demoImageAlt: 플로팅 버튼 데모
     display:
       title: 표시
@@ -1715,6 +1716,8 @@ speak:
   fetchingAudio: 오디오 생성 중...
   playingAudio: 오디오 재생 중...
   failedToGenerateSpeech: 음성 생성 실패
+  failedToPlaySound: 소리를 재생하지 못했습니다
+  playbackBlocked: Safari는 페이지를 클릭한 직후에만 소리를 재생할 수 있습니다. 다시 시도하세요.
   noTextSelected: 텍스트가 선택되지 않았습니다
   openaiNotConfigured: OpenAI 공급자가 구성되지 않았거나 활성화되지 않았습니다
   openaiApiKeyNotConfigured: OpenAI API 키가 구성되지 않았습니다

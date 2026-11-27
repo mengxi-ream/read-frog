@@ -625,6 +625,7 @@ options:
   floatingButton:
     title: Nút nổi
     pageDescription: Đặt vị trí nút nổi, hành động khi nhấp và những trang web cần ẩn nút.
+    pageDescriptionWithoutClickAction: Đặt vị trí nút nổi và những trang web cần ẩn nút.
     demoImageAlt: Demo nút nổi
     display:
       title: Hiển thị
@@ -1715,6 +1716,8 @@ speak:
   fetchingAudio: Đang tạo âm thanh...
   playingAudio: Đang phát âm thanh...
   failedToGenerateSpeech: Không thể tạo giọng nói
+  failedToPlaySound: Không thể phát âm thanh
+  playbackBlocked: Safari chỉ phát âm thanh ngay sau khi bạn nhấp vào trang. Vui lòng thử lại.
   noTextSelected: Không có văn bản nào được chọn
   openaiNotConfigured: Nhà cung cấp OpenAI chưa được cấu hình hoặc chưa được bật
   openaiApiKeyNotConfigured: API key OpenAI chưa được cấu hình

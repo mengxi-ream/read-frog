@@ -626,6 +626,7 @@ options:
   floatingButton:
     title: Botón flotante
     pageDescription: Elige en qué lado se coloca el botón flotante, qué hace al pulsarlo y dónde permanece oculto.
+    pageDescriptionWithoutClickAction: Elige en qué lado se coloca el botón flotante y dónde permanece oculto.
     demoImageAlt: Demostración del botón flotante
     display:
       title: Visualización
@@ -1720,6 +1721,8 @@ speak:
   fetchingAudio: Generando audio...
   playingAudio: Reproduciendo audio...
   failedToGenerateSpeech: No se pudo generar voz
+  failedToPlaySound: No se pudo reproducir el sonido
+  playbackBlocked: Safari solo reproduce sonido justo después de hacer clic en la página. Inténtalo de nuevo.
   noTextSelected: No hay texto seleccionado
   openaiNotConfigured: El proveedor OpenAI no está configurado o activado
   openaiApiKeyNotConfigured: La clave API de OpenAI no está configurada

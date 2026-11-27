@@ -420,6 +420,40 @@ describe("floatingButton controls", () => {
     expect(sendMessage).toHaveBeenCalledWith("toggleSidePanel", undefined)
   })
 
+  // A config brought over from another browser can say "panel".
+  it("translates on a panel click in Safari, which has no side panel", () => {
+    vi.stubEnv("BROWSER", "safari")
+    onTestFinished(() => {
+      vi.stubEnv("BROWSER", "chrome")
+    })
+    vi.useFakeTimers()
+    renderFloatingButton({ clickAction: "panel" })
+
+    const mainButton = getMainButton()
+
+    fireEvent.pointerDown(mainButton, {
+      pointerId: 1,
+      pointerType: "mouse",
+      button: 0,
+      clientX: 900,
+      clientY: 500,
+    })
+    vi.advanceTimersByTime(349)
+    fireEvent.pointerUp(mainButton, {
+      pointerId: 1,
+      pointerType: "mouse",
+      button: 0,
+      clientX: 900,
+      clientY: 500,
+    })
+
+    expect(sendMessage).toHaveBeenCalledWith(
+      "tryToSetEnablePageTranslationOnContentScript",
+      expect.objectContaining({ enabled: true }),
+    )
+    expect(sendMessage).not.toHaveBeenCalledWith("toggleSidePanel", undefined)
+  })
+
   it("leaves the difficult-words button out for an account it is not open to", () => {
     difficultWordsAccessMock.data = "denied"
     renderFloatingButton()

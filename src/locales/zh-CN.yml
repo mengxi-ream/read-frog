@@ -626,6 +626,7 @@ options:
   floatingButton:
     title: 悬浮按钮
     pageDescription: 设置悬浮按钮停在哪一侧、点击后做什么，以及在哪些网站不显示。
+    pageDescriptionWithoutClickAction: 设置悬浮按钮停在哪一侧，以及在哪些网站不显示。
     demoImageAlt: 悬浮按钮演示
     display:
       title: 显示
@@ -1725,6 +1726,8 @@ speak:
   fetchingAudio: 正在获取音频...
   playingAudio: 正在播放音频...
   failedToGenerateSpeech: 语音生成失败
+  failedToPlaySound: 无法播放声音
+  playbackBlocked: Safari 只在点击页面后的片刻内允许播放声音，请再试一次。
   noTextSelected: 未选择文本
   openaiNotConfigured: OpenAI 提供商未配置或未启用
   openaiApiKeyNotConfigured: OpenAI API Key 未配置

@@ -626,6 +626,7 @@ options:
   floatingButton:
     title: Floating Button
     pageDescription: Set which side the floating button sits on, what a click does, and where it stays hidden.
+    pageDescriptionWithoutClickAction: Set which side the floating button sits on and where it stays hidden.
     demoImageAlt: Floating button demo
     display:
       title: Display
@@ -1862,6 +1863,8 @@ speak:
   fetchingAudio: Generating audio...
   playingAudio: Playing audio...
   failedToGenerateSpeech: Failed to generate speech
+  failedToPlaySound: Couldn't play the sound
+  playbackBlocked: Safari plays sound only right after a click on the page. Please try again.
   noTextSelected: No text selected
   openaiNotConfigured: OpenAI provider is not configured or enabled
   openaiApiKeyNotConfigured: OpenAI API key is not configured

@@ -59,4 +59,5 @@ export const EDGE_TTS_USER_AGENT =
 
 export const EDGE_TTS_HTTP_ENABLED = import.meta.env.WXT_EDGE_TTS_HTTP_ENABLED !== "false"
 
-export const EDGE_TTS_SUPPORTED_BROWSERS = ["chrome", "edge", "firefox"] as const
+// Safari synthesizes in the background too, but plays in the page (see use-text-to-speech).
+export const EDGE_TTS_SUPPORTED_BROWSERS = ["chrome", "edge", "firefox", "safari"] as const

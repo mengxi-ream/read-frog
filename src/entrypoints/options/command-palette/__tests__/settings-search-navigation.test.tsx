@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { createStore, Provider } from "jotai"
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { SettingsSearch } from "../settings-search"
 
 const mockedRouter = vi.hoisted(() => ({
@@ -68,6 +68,13 @@ vi.mock("../search-items", () => ({
       pageKey: "usage-page",
       feature: "videoSubtitles",
     },
+    {
+      sectionId: "floating-button-click-action",
+      route: "/floating-button",
+      gate: "sidePanel",
+      titleKey: "click-action-title",
+      pageKey: "floating-button-page",
+    },
   ],
 }))
 
@@ -120,6 +127,28 @@ describe("settings search navigation", () => {
     mockedSectionScroll.getSectionIdFromSearch.mockReturnValue(null)
     mockedSectionScroll.scrollToSectionWhenReady.mockReset()
     mockedSectionScroll.scrollToSectionWhenReady.mockResolvedValue(true)
+  })
+
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
+
+  it.each(["chrome", "edge", "firefox"])(
+    "finds the floating button's click action in %s",
+    (target) => {
+      vi.stubEnv("BROWSER", target)
+      renderSettingsSearch()
+
+      expect(screen.getByRole("button", { name: "click-action-title" })).toBeInTheDocument()
+    },
+  )
+
+  it("leaves the floating button's click action out in Safari, which has no side panel to open", () => {
+    vi.stubEnv("BROWSER", "safari")
+    renderSettingsSearch()
+
+    expect(screen.queryByRole("button", { name: "click-action-title" })).toBeNull()
+    expect(screen.getByRole("button", { name: "translation-mode-title" })).toBeInTheDocument()
   })
 
   it("navigates with section query when target route differs", () => {

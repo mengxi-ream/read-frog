@@ -59,10 +59,12 @@ export default defineConfig({
       "alarms",
       "cookies",
       "contextMenus",
-      "identity",
+      // Safari has none of identity, offscreen or sidePanel, and its build has no
+      // offscreen or side panel page, so its manifest doesn't ask for them.
+      ...(browser !== "safari" ? ["identity"] : []),
       "scripting",
       "webNavigation",
-      ...(browser !== "firefox" ? ["offscreen", "sidePanel"] : []),
+      ...(browser !== "firefox" && browser !== "safari" ? ["offscreen", "sidePanel"] : []),
     ],
     host_permissions: [
       "*://*/*", // Required for scripting.executeScript in any frame

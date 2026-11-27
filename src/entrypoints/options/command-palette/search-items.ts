@@ -19,8 +19,11 @@ export interface SearchItem {
    * with that feature, like the feature's pages: choosing it lands on the feature's switch.
    */
   feature?: FeatureTag
-  /** Found only while the feature is open to the account: in testing, its page is hidden too. */
-  gate?: "difficultWords"
+  /**
+   * Found only while its section is shown. difficultWords: while the feature is open to the
+   * account (in testing, its page is hidden too). sidePanel: in browsers with a side panel.
+   */
+  gate?: "difficultWords" | "sidePanel"
 }
 
 type SearchItemDefinition = Omit<SearchItem, "titleKey" | "descriptionKey" | "pageKey"> & {
@@ -439,6 +442,7 @@ export const SEARCH_ITEMS: SearchItem[] = [
   {
     sectionId: "floating-button-click-action",
     route: "/floating-button",
+    gate: "sidePanel",
     titleKey: "options.floatingButton.clickAction.title",
     descriptionKey: "options.floatingButton.clickAction.description",
     pageKey: "options.floatingButton.title",

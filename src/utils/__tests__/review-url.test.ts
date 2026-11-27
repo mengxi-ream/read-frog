@@ -43,4 +43,10 @@ describe("getReviewUrl", () => {
     installedWithId("unpacked-dev-build-id")
     expect(getReviewUrl()).toBe(expected)
   })
+
+  it("has no review page for Safari, which has no store listing yet", () => {
+    vi.stubEnv("BROWSER", "safari")
+    installedWithId("app.readfrog.Extension (UNSIGNED)")
+    expect(getReviewUrl("popup")).toBeNull()
+  })
 })
