@@ -240,6 +240,7 @@ describe("useTextToSpeech in Safari", () => {
     expect(toastAddMock).toHaveBeenCalledExactlyOnceWith(
       expect.objectContaining({
         type: "error",
+        title: "speak.failedToPlaySound",
         description: "speak.playbackBlocked",
       }),
     )

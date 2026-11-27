@@ -1726,6 +1726,7 @@ speak:
   fetchingAudio: 正在取得音訊…
   playingAudio: 正在播放音訊…
   failedToGenerateSpeech: 語音產生失敗
+  failedToPlaySound: 無法播放聲音
   playbackBlocked: Safari 只在點擊頁面後的片刻內允許播放聲音，請再試一次。
   noTextSelected: 未選取文字
   openaiNotConfigured: 尚未設定或啟用 OpenAI 提供者

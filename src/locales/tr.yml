@@ -1716,6 +1716,7 @@ speak:
   fetchingAudio: Ses oluşturuluyor...
   playingAudio: Ses çalınıyor...
   failedToGenerateSpeech: Konuşma oluşturulamadı
+  failedToPlaySound: Ses çalınamadı
   playbackBlocked: Safari yalnızca sayfaya tıkladıktan hemen sonra ses çalar. Lütfen yeniden deneyin.
   noTextSelected: Metin seçilmedi
   openaiNotConfigured: OpenAI sağlayıcısı yapılandırılmadı veya etkinleştirilmedi

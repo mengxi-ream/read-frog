@@ -156,6 +156,15 @@ function getTTSFriendlyErrorDescription(error: Error): string | undefined {
   return error.message || undefined
 }
 
+function getTTSErrorTitle(error: Error): string {
+  // The speech was generated; Safari would not play it.
+  if (error.message.includes(PLAYBACK_BLOCKED_MESSAGE)) {
+    return i18n.t("speak.failedToPlaySound")
+  }
+
+  return i18n.t("speak.failedToGenerateSpeech")
+}
+
 async function synthesizeEdgeTTSAudioChunk(
   chunk: string,
   voice: string,
@@ -248,7 +257,7 @@ export function useTextToSpeech(
       if (!variables.quiet) {
         toastManager.add({
           type: "error",
-          title: i18n.t("speak.failedToGenerateSpeech"),
+          title: getTTSErrorTitle(error),
           id: TTS_ERROR_TOAST_ID,
           description: getTTSFriendlyErrorDescription(error),
         })

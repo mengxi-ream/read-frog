@@ -1721,6 +1721,7 @@ speak:
   fetchingAudio: Generando audio...
   playingAudio: Reproduciendo audio...
   failedToGenerateSpeech: No se pudo generar voz
+  failedToPlaySound: No se pudo reproducir el sonido
   playbackBlocked: Safari solo reproduce sonido justo después de hacer clic en la página. Inténtalo de nuevo.
   noTextSelected: No hay texto seleccionado
   openaiNotConfigured: El proveedor OpenAI no está configurado o activado

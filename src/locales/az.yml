@@ -1721,6 +1721,7 @@ speak:
   fetchingAudio: Səs yaradılır...
   playingAudio: Səs oxudulur...
   failedToGenerateSpeech: Nitq yaratmaq mümkün olmadı
+  failedToPlaySound: Səsi səsləndirmək mümkün olmadı
   playbackBlocked: Safari səsi yalnız səhifəyə klik etdikdən dərhal sonra səsləndirir. Yenidən cəhd edin.
   noTextSelected: Mətn seçilməyib
   openaiNotConfigured: OpenAI provayderi tənzimlənməyib və ya aktiv deyil

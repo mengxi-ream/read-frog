@@ -1716,6 +1716,7 @@ speak:
   fetchingAudio: Генерация аудио...
   playingAudio: Воспроизведение аудио...
   failedToGenerateSpeech: Не удалось сгенерировать речь
+  failedToPlaySound: Не удалось воспроизвести звук
   playbackBlocked: Safari воспроизводит звук только сразу после щелчка на странице. Попробуйте ещё раз.
   noTextSelected: Текст не выделен
   openaiNotConfigured: Провайдер OpenAI не настроен или не включён

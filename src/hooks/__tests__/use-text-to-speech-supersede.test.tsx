@@ -164,7 +164,9 @@ describe("useTextToSpeech failures", () => {
     await act(async () => {
       await expect(result.current.play("B", ttsConfig)).rejects.toThrow("offline")
     })
-    expect(toastManager.add).toHaveBeenCalledOnce()
+    expect(toastManager.add).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({ title: "speak.failedToGenerateSpeech" }),
+    )
   })
 
   it("does not emit unhandledRejection when a prefetched chunk rejects after the active chunk fails", async () => {
@@ -269,6 +271,7 @@ describe("useTextToSpeech failures", () => {
     })
     expect(toastManager.add).toHaveBeenCalledWith(
       expect.objectContaining({
+        title: "speak.failedToGenerateSpeech",
         description: "Audio playback was interrupted. Please try again.",
       }),
     )

@@ -1716,6 +1716,7 @@ speak:
   fetchingAudio: Đang tạo âm thanh...
   playingAudio: Đang phát âm thanh...
   failedToGenerateSpeech: Không thể tạo giọng nói
+  failedToPlaySound: Không thể phát âm thanh
   playbackBlocked: Safari chỉ phát âm thanh ngay sau khi bạn nhấp vào trang. Vui lòng thử lại.
   noTextSelected: Không có văn bản nào được chọn
   openaiNotConfigured: Nhà cung cấp OpenAI chưa được cấu hình hoặc chưa được bật

@@ -1716,6 +1716,7 @@ speak:
   fetchingAudio: 音声を生成しています...
   playingAudio: 音声を再生しています...
   failedToGenerateSpeech: 音声生成に失敗しました
+  failedToPlaySound: 音声を再生できませんでした
   playbackBlocked: Safari では、ページをクリックした直後しか音声を再生できません。もう一度お試しください。
   noTextSelected: テキストが選択されていません
   openaiNotConfigured: OpenAIプロバイダーが設定されていないか有効になっていません
