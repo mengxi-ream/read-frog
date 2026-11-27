@@ -428,6 +428,7 @@ options:
         lastSyncTime: Đồng bộ lần cuối lúc
         logout: Đăng xuất
         logoutSuccess: Đã đăng xuất khỏi tài khoản Google
+        unsupported: Trình duyệt này chưa hỗ trợ đồng bộ Google Drive
         unresolved:
           title: Giải quyết đồng bộ cấu hình
           description: Cấu hình cục bộ và từ xa khác nhau. Vui lòng chọn phiên bản nào để giữ cho mỗi trường.

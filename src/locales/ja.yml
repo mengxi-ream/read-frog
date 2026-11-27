@@ -428,6 +428,7 @@ options:
         lastSyncTime: 最終同期時間
         logout: ログアウト
         logoutSuccess: Googleアカウントからログアウトしました
+        unsupported: このブラウザではまだ Google Drive 同期を利用できません
         unresolved:
           title: 設定の同期解決
           description: ローカルとリモートの設定が異なります。各フィールドについて、保持するバージョンを選択してください。

@@ -429,6 +429,7 @@ options:
         lastSyncTime: 最后同步时间
         logout: 登出账号
         logoutSuccess: 已登出 Google 账号
+        unsupported: 此浏览器暂不支持 Google Drive 同步
         unresolved:
           title: 配置同步解决
           description: 本地与云端配置存在差异，请选择每个字段要保留的版本。

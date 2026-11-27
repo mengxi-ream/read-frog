@@ -429,6 +429,7 @@ options:
         lastSyncTime: Última sincronización a las
         logout: Cerrar sesión
         logoutSuccess: Sesión de cuenta de Google cerrada
+        unsupported: La sincronización con Google Drive aún no está disponible en este navegador
         unresolved:
           title: Resolución de sincronización de configuración
           description: Las configuraciones local y remota difieren. Elige qué versión conservar para cada campo.

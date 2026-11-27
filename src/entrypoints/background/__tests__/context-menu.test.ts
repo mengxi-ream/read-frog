@@ -1,5 +1,5 @@
 import type { Config } from "@/types/config/config"
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { browser, storage } from "#imports"
 import {
   MENU_ID_SELECTION_CUSTOM_ACTION_PREFIX,
@@ -19,6 +19,9 @@ const { sendMessageMock, ensureInitializedConfigMock } = vi.hoisted(() => ({
 }))
 const storageSetItemMock = vi.fn<(...args: any[]) => any>()
 const contextMenuClickListeners: Array<(info: any, tab?: any) => Promise<void> | void> = []
+const sessionStorageListeners: Array<
+  (changes: Record<string, { newValue?: unknown }>) => Promise<void>
+> = []
 
 vi.mock("@/utils/message", () => ({
   sendMessage: sendMessageMock,
@@ -59,6 +62,7 @@ function createConfig(enabled: boolean): Config {
 describe("background context menu", () => {
   beforeEach(() => {
     contextMenuClickListeners.length = 0
+    sessionStorageListeners.length = 0
     vi.clearAllMocks()
     sendMessageMock.mockResolvedValue(undefined)
 
@@ -72,7 +76,9 @@ describe("background context menu", () => {
     browser.tabs.query = vi.fn<(...args: any[]) => any>().mockResolvedValue([{ id: 1 }])
     browser.tabs.onActivated.addListener = vi.fn<(...args: any[]) => any>()
     browser.tabs.onUpdated.addListener = vi.fn<(...args: any[]) => any>()
-    browser.storage.session.onChanged.addListener = vi.fn<(...args: any[]) => any>()
+    browser.storage.session.onChanged.addListener = vi.fn<(...args: any[]) => any>((listener) => {
+      sessionStorageListeners.push(listener)
+    })
 
     storage.watch = vi.fn<(...args: any[]) => any>()
     storage.getItem = vi.fn<(...args: any[]) => any>().mockResolvedValue({ enabled: true })
@@ -91,6 +97,10 @@ describe("background context menu", () => {
             "Sentence Analysis",
         })[key] ?? key,
     ) as typeof i18n.t
+  })
+
+  afterEach(() => {
+    vi.unstubAllEnvs()
   })
 
   it("creates page and selection menu items when the context menu is enabled", async () => {
@@ -429,5 +439,47 @@ describe("background context menu", () => {
         error: loggedError(noReceiver.message),
       }),
     )
+  })
+
+  function getSessionStorageListener() {
+    const listener = sessionStorageListeners[0]
+    if (!listener) {
+      throw new Error("storage.session.onChanged listener was not registered")
+    }
+    return listener
+  }
+
+  it("reads the active tab to title the page item", async () => {
+    vi.stubEnv("BROWSER", "chrome")
+    ensureInitializedConfigMock.mockResolvedValue(createConfig(true))
+    registerContextMenuListeners(async () => {})
+
+    await initializeContextMenu()
+    await getSessionStorageListener()({ "translationState.1": { newValue: { enabled: false } } })
+
+    expect(browser.tabs.query).toHaveBeenNthCalledWith(1, { active: true, currentWindow: true })
+    expect(browser.tabs.query).toHaveBeenNthCalledWith(2, { active: true, currentWindow: true })
+    expect(browser.contextMenus.update).toHaveBeenLastCalledWith(MENU_ID_TRANSLATE, {
+      title: "Translate",
+    })
+  })
+
+  // Both run unasked: when the menu is built, and when any tab's translation
+  // changes. Safari would put its website access dialog up for an active tab on
+  // a site it hasn't allowed.
+  it("in Safari, reads the active tab only among tabs it may access", async () => {
+    vi.stubEnv("BROWSER", "safari")
+    ensureInitializedConfigMock.mockResolvedValue(createConfig(true))
+    // The active tab is on a site Safari hasn't allowed, so the query leaves it out.
+    browser.tabs.query = vi.fn<(...args: any[]) => any>().mockResolvedValue([])
+    registerContextMenuListeners(async () => {})
+
+    await initializeContextMenu()
+    await getSessionStorageListener()({ "translationState.1": { newValue: { enabled: true } } })
+
+    const query = { active: true, currentWindow: true, url: "*://*/*" }
+    expect(browser.tabs.query).toHaveBeenNthCalledWith(1, query)
+    expect(browser.tabs.query).toHaveBeenNthCalledWith(2, query)
+    expect(browser.contextMenus.update).not.toHaveBeenCalled()
   })
 })

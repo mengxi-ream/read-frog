@@ -429,6 +429,7 @@ options:
         lastSyncTime: 最後同步時間
         logout: 登出帳號
         logoutSuccess: 已登出 Google 帳號
+        unsupported: 此瀏覽器暫不支援 Google Drive 同步
         unresolved:
           title: 設定同步解決
           description: 本機與雲端設定存在差異，請選擇每個欄位要保留的版本。

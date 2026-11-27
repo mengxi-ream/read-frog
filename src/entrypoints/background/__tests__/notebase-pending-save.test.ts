@@ -1,9 +1,12 @@
 import type { NotebaseGetSchemaOutput } from "@read-frog/api-contract"
+import type { Browser } from "#imports"
 import type { Config } from "@/types/config/config"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import type { PendingCreateNotebaseSave, PendingNotebaseSave } from "@/utils/notebase/pending-save"
 import { ORPCError } from "@orpc/client"
 import { describe, expect, it, vi } from "vitest"
+import { browser } from "#imports"
+import { env } from "@/env"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { getBuiltInDictionaryAction } from "@/utils/custom-actions"
 import {
@@ -11,7 +14,10 @@ import {
   createPendingConnectedNotebaseSave,
   createPendingNotebaseSave,
 } from "@/utils/notebase/pending-save"
-import { createNotebasePendingSaveProcessor } from "../notebase-pending-save"
+import {
+  createNotebasePendingSaveProcessor,
+  setupNotebasePendingSaveProcessor,
+} from "../notebase-pending-save"
 
 function cloneConfig(config: Config): Config {
   return JSON.parse(JSON.stringify(config)) as Config
@@ -886,5 +892,37 @@ describe("notebase pending save processor", () => {
       const input = deps.createNotebase.mock.calls[0]?.[0]
       expect(input.options.initialRow).not.toHaveProperty("origin")
     })
+  })
+})
+
+describe("setupNotebasePendingSaveProcessor", () => {
+  // Safari calls cookies.onChanged listeners with no argument at all.
+  it("retries on a sign-in cookie change, and ignores a change that comes with no details", async () => {
+    const addCookieListener =
+      vi.fn<(listener: (changeInfo?: Browser.cookies.CookieChangeInfo) => void) => void>()
+    browser.cookies.onChanged.addListener = addCookieListener
+    // Called once at the start of every run.
+    const waitUntilReady = vi.fn<() => Promise<void>>(async () => {})
+    setupNotebasePendingSaveProcessor(waitUntilReady)
+    const onCookieChanged = addCookieListener.mock.calls[0]?.[0]
+    if (!onCookieChanged) {
+      throw new Error("Expected cookies.onChanged listener to be registered")
+    }
+    // Lets the startup run, which finds nothing pending, finish.
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    expect(waitUntilReady).toHaveBeenCalledOnce()
+
+    expect(() => onCookieChanged(undefined)).not.toThrow()
+    expect(waitUntilReady).toHaveBeenCalledOnce()
+
+    onCookieChanged({
+      cookie: {
+        domain: `.${env.WXT_AUTH_COOKIE_DOMAINS[0]}`,
+        name: "__Secure-better-auth.session_token",
+      } as Browser.cookies.Cookie,
+      removed: false,
+      cause: "explicit",
+    })
+    expect(waitUntilReady).toHaveBeenCalledTimes(2)
   })
 })

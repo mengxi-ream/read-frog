@@ -17,6 +17,7 @@ import { urlMatchesPattern } from "@/utils/url-pattern"
 import { isSameOriginIframeSender, resolveSiteControlUrl } from "./iframe-injection-utils"
 import { getPageTranslationEnabled } from "./page-translation-state"
 import { isSelectionToolbarHiddenInTab } from "./selection-toolbar-hidden"
+import { getTabWithoutAccessPrompt } from "./tabs-without-access-prompt"
 
 const log = createLogger("background/iframe-injection")
 
@@ -397,7 +398,12 @@ export function setupIframeInjection() {
 
       // Read the current URL so rules survive MV3 worker restarts and follow
       // SPA navigation, without enumerating frames on ordinary pages.
-      const { url: topFrameUrl } = await browser.tabs.get(details.tabId)
+      const tab = await getTabWithoutAccessPrompt(details.tabId)
+      // Only in Safari, for a page on a site it hasn't allowed. Injecting into
+      // any frame of the page needs access to the page itself, which Safari
+      // would stop to ask the user for.
+      if (!tab) return
+      const { url: topFrameUrl } = tab
       const fullRuntimeAutoInjectUrl = isFullRuntimeAutoInjectUrl(topFrameUrl, config)
         ? topFrameUrl
         : isFullRuntimeAutoInjectUrl(details.url, config)

@@ -428,6 +428,7 @@ options:
         lastSyncTime: Son senkronizasyon
         logout: Çıkış yap
         logoutSuccess: Google hesabından çıkış yapıldı
+        unsupported: Google Drive senkronizasyonu bu tarayıcıda henüz kullanılamıyor
         unresolved:
           title: Yapılandırma senkronizasyon çözümü
           description: Yerel ve uzak yapılandırmalar farklı. Lütfen her alan için hangi sürümün tutulacağını seçin.

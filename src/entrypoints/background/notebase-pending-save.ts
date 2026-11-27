@@ -5,6 +5,7 @@ import type {
   NotebaseRowCreateInput,
   NotebaseRowCreateManyInput,
 } from "@read-frog/api-contract"
+import type { Browser } from "#imports"
 import type { AnalyticsFailureReason } from "@/types/analytics"
 import type { Config } from "@/types/config/config"
 import type { SelectionToolbarCustomActionNotebaseAccount } from "@/types/config/selection-toolbar"
@@ -757,8 +758,10 @@ export function setupNotebasePendingSaveProcessor(waitUntilReady: () => Promise<
   void processPendingNotebaseSave("startup")
 
   if (browser.cookies?.onChanged) {
-    browser.cookies.onChanged.addListener((changeInfo) => {
-      if (isAuthCookieChange(changeInfo.cookie)) {
+    // Safari calls this with no argument (webkit.org/b/267514), so there's no
+    // telling which cookie changed.
+    browser.cookies.onChanged.addListener((changeInfo?: Browser.cookies.CookieChangeInfo) => {
+      if (changeInfo && isAuthCookieChange(changeInfo.cookie)) {
         void processPendingNotebaseSave("auth-cookie-change")
       }
     })

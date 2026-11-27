@@ -429,6 +429,7 @@ options:
         lastSyncTime: Son sinxronlaşdırma vaxtı
         logout: Çıxış et
         logoutSuccess: Google hesabından çıxış edildi
+        unsupported: Google Drive sinxronlaşdırması bu brauzerdə hələ mövcud deyil
         unresolved:
           title: Konfiqurasiya sinxronlaşdırmasında ziddiyyətlərin həlli
           description: Yerli və uzaqdakı konfiqurasiyalar fərqlidir. Hər sahə üçün hansı versiyanın saxlanacağını seçin.

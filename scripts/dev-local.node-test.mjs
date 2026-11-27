@@ -2,7 +2,8 @@ import assert from "node:assert/strict"
 import { describe, it } from "node:test"
 import { assertApiIdentity, createWxtEnvironment, resolveMonorepoRoot } from "./dev-local.mjs"
 
-describe("local extension worktree connection", () => {
+// node:test waits on the promises its suites and tests return.
+void describe("local extension worktree connection", () => {
   const identity = { instance: "wt-abc", fingerprint: "checkout-abc" }
   const topology = {
     api: "https://api.wt-abc.readfrog.localhost:1355",
@@ -10,7 +11,7 @@ describe("local extension worktree connection", () => {
     cookieDomain: "wt-abc.readfrog.localhost",
   }
 
-  it("uses the selected monorepo for both source aliases and runtime URLs", () => {
+  void it("uses the selected monorepo for both source aliases and runtime URLs", () => {
     const root = resolveMonorepoRoot()
     assert.equal(resolveMonorepoRoot(root), root)
     assert.throws(() => resolveMonorepoRoot(`${root}/apps/server`), /monorepo root/)
@@ -32,7 +33,7 @@ describe("local extension worktree connection", () => {
     )
   })
 
-  it("refuses an API route belonging to another checkout or a failed API", () => {
+  void it("refuses an API route belonging to another checkout or a failed API", () => {
     const ready = {
       status: 200,
       headers: {

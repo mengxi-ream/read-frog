@@ -15,6 +15,15 @@ export function newUserGuide() {
 }
 
 export async function guidePinExtension() {
+  // Safari can't say whether the button is on the toolbar, and has no pinning:
+  // it puts an enabled extension's button there by default. Answering "pinned"
+  // lets the website's guide move on instead of waiting for a pin that can't
+  // happen.
+  if (typeof browser.action.getUserSettings !== "function") {
+    onMessage("getPinState", () => true)
+    return
+  }
+
   onMessage("getPinState", async () => {
     const { isOnToolbar } = await browser.action.getUserSettings()
     return isOnToolbar

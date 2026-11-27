@@ -24,6 +24,7 @@ import { createLogger } from "@/utils/logging/logger"
 import { sendMessage } from "@/utils/message"
 import { ensureInitializedConfig } from "./config"
 import { getPageTranslationEnabled, setPageTranslationEnabled } from "./page-translation-state"
+import { queryTabsWithoutAccessPrompt } from "./tabs-without-access-prompt"
 
 const log = createLogger("background/context-menu")
 
@@ -67,7 +68,10 @@ export function registerContextMenuListeners(waitUntilReady: () => Promise<void>
 
         if (!Number.isNaN(tabId)) {
           // Only update menu if this is the active tab
-          const [activeTab] = await browser.tabs.query({ active: true, currentWindow: true })
+          const [activeTab] = await queryTabsWithoutAccessPrompt({
+            active: true,
+            currentWindow: true,
+          })
           if (activeTab?.id === tabId) {
             const newValue = change.newValue as { enabled: boolean } | undefined
             await updateTranslateMenuTitle(tabId, newValue?.enabled)
@@ -117,7 +121,7 @@ async function updateContextMenuItems(config: Config) {
   }
 
   // Update translate menu title for current tab
-  const [activeTab] = await browser.tabs.query({ active: true, currentWindow: true })
+  const [activeTab] = await queryTabsWithoutAccessPrompt({ active: true, currentWindow: true })
   if (activeTab?.id) {
     await updateTranslateMenuTitle(activeTab.id)
   }
