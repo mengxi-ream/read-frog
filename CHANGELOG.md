@@ -1,5 +1,21 @@
 # @read-frog/extension
 
+## 1.63.0
+
+### Minor Changes
+
+- [#2450](https://github.com/mengxi-ream/read-frog/pull/2450) [`45cc5f1`](https://github.com/mengxi-ream/read-frog/commit/45cc5f1ecc950b7f6abf90f2b79dfa850f102345) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(difficult-words): highlight the words on a page you probably don't know, from the popup, the floating button or a shortcut. Click one to look it up, mark the ones you know so they stay unhighlighted on every page, and set your reading level per language in the new Difficult words settings page.
+
+### Patch Changes
+
+- [#2600](https://github.com/mengxi-ream/read-frog/pull/2600) [`352f433`](https://github.com/mengxi-ream/read-frog/commit/352f4338b8f2eb38f3f600438a93cc802bf772d9) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(options): remove the always-on switch from Built-in AI model cards, which could not be turned off
+
+- [#2598](https://github.com/mengxi-ream/read-frog/pull/2598) [`64ec1f8`](https://github.com/mengxi-ream/read-frog/commit/64ec1f838e620d6315a5ac74f59d9f02c5c0d3a9) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(context-menu): read aloud the text the menu was opened on, even if the page's selection changed while the menu was open
+
+- [#2602](https://github.com/mengxi-ream/read-frog/pull/2602) [`efb9d51`](https://github.com/mengxi-ream/read-frog/commit/efb9d51a6403d049e43b31a9782365ef97838c41) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(subtitles): send subtitle batches as numbered cues so Claude Haiku translates every line
+
+- [#2601](https://github.com/mengxi-ream/read-frog/pull/2601) [`e210720`](https://github.com/mengxi-ream/read-frog/commit/e210720ccbe9154b766dc6d1d9629cc5f9ff5a9b) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(subtitles): make the YouTube subtitles switch work after going into or out of Shorts
+
 ## 1.62.1
 
 ### Patch Changes
