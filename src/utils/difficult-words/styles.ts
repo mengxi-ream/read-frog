@@ -26,8 +26,9 @@ function highlightRules(tone: MarkTone, hover: boolean) {
     `::highlight(${name}) { ${declarations} }`,
     // A word under furigana or pinyin is marked from its first character to
     // its last, taking in the readings between them: those keep their own
-    // look, as the reading over its last character does.
-    `rt::highlight(${name}), rp::highlight(${name}) { background-color: transparent; color: currentcolor; }`,
+    // look, as the reading over its last character does. Every element in a
+    // reading too, since the first rule paints each element on its own.
+    `:is(rt, rp, rt *, rp *)::highlight(${name}) { background-color: transparent; color: currentcolor; }`,
   ]
 }
 
