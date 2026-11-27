@@ -429,8 +429,9 @@ describe("includeSelectors whitelist", () => {
     expect(document.getElementById("code-lang")!.hasAttribute(WALKED_ATTRIBUTE)).toBe(false)
   })
 
-  // X Articles in focus mode (/article/...) render outside <main> and <article>.
-  it("labels X Articles in focus mode without main or article wrappers", () => {
+  // X Articles in focus mode (/article/...) render outside <main> and <article>,
+  // and may embed tweet cards (<article>) inside [data-article-part="body"].
+  it("labels X Articles in focus mode and excludes embedded post chrome", () => {
     setUrl("https://x.com/poteto/article/2069824386283319343")
     document.body.innerHTML = `
       <div class="bg-primary min-h-dvh w-full">
@@ -442,19 +443,52 @@ describe("includeSelectors whitelist", () => {
               <div class="contents">
                 <p class="font-article whitespace-pre-wrap" id="focus-p"><span>The best way to manage agents starts with a three minute egg.</span></p>
               </div>
+              <div class="my-6">
+                <div role="link">
+                  <article class="flex flex-col gap-1">
+                    <div class="x-middot-group">
+                      <a href="/systematicls"><div dir="auto" id="embedded-author">sysls</div></a>
+                      <a href="/systematicls"><span id="embedded-handle">@systematicls</span></a>
+                      <a href="/systematicls/status/2068744484259827902" id="embedded-date">Jun 21</a>
+                    </div>
+                    <div dir="auto" class="text-body whitespace-pre-wrap" id="embedded-post"><span>Being a great agentic engineer is actually just being a great manager.</span> <button id="embedded-show-more">Show more</button></div>
+                    <div role="group">
+                      <div data-engagement-action="generic"><button aria-label="View count"><span class="x-animated-count-visual" id="embedded-views">25K</span></button></div>
+                    </div>
+                  </article>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
     `
+    const config = structuredClone(DEFAULT_CONFIG)
 
-    walkAndLabelElement(document.body, "w1", structuredClone(DEFAULT_CONFIG))
+    walkAndLabelElement(document.body, "w1", config)
 
-    expect(document.getElementById("focus-title")!.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(true)
-    expect(document.getElementById("focus-p")!.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(true)
-    expect(document.getElementById("focus-read-time")!.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(
-      false,
-    )
+    for (const id of ["focus-title", "focus-p", "embedded-post"]) {
+      expect(document.getElementById(id)!.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(true)
+    }
+
+    for (const id of [
+      "focus-read-time",
+      "embedded-author",
+      "embedded-handle",
+      "embedded-date",
+      "embedded-show-more",
+      "embedded-views",
+    ]) {
+      expect(document.getElementById(id)!.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(false)
+    }
+
+    for (const id of ["embedded-author", "embedded-date", "embedded-show-more", "embedded-views"]) {
+      expect(document.getElementById(id)!.hasAttribute(WALKED_ATTRIBUTE)).toBe(false)
+    }
+
+    const embeddedText = extractTextContent(document.getElementById("embedded-post")!, config)
+    expect(embeddedText).toContain("Being a great agentic engineer")
+    expect(embeddedText).not.toContain("Show more")
   })
 
   it("labels repository descriptions in GitHub's React org repository list (issue #2483)", () => {
