@@ -629,7 +629,7 @@ describe("translation queue helpers", () => {
     expect(generateArticleSummaryMock).not.toHaveBeenCalled()
     // A batch of one cue, numbered like any subtitle batch.
     expect(executeTranslateMock).toHaveBeenCalledWith(
-      "[1] hello",
+      "[1]\nhello",
       DEFAULT_CONFIG.language,
       llmProvider,
       expect.any(Function),
@@ -654,7 +654,7 @@ describe("translation queue helpers", () => {
         batchQueueConfig: { maxCharactersPerBatch: 1000, maxItemsPerBatch: 10 },
       },
     })
-    executeTranslateMock.mockResolvedValue("[1] 所以今天\n[2] 我想给你看")
+    executeTranslateMock.mockResolvedValue("[1]\n所以今天\n[2]\n我想给你看")
 
     const { setupSubtitlesTranslationHandlers } = await import("../subtitles-translation")
     setupSubtitlesTranslationHandlers()
@@ -676,7 +676,7 @@ describe("translation queue helpers", () => {
       "我想给你看",
     ])
     expect(executeTranslateMock).toHaveBeenCalledTimes(1)
-    expect(executeTranslateMock.mock.calls[0]![0]).toBe("[1] so today\n[2] I want to show you")
+    expect(executeTranslateMock.mock.calls[0]![0]).toBe("[1]\nso today\n[2]\nI want to show you")
   })
 
   it("keeps subtitle translations with different video context in separate batches", async () => {
@@ -737,7 +737,7 @@ describe("translation queue helpers", () => {
     expect(executeTranslateMock).toHaveBeenCalledTimes(2)
     expect(executeTranslateMock).toHaveBeenNthCalledWith(
       1,
-      "[1] hello",
+      "[1]\nhello",
       DEFAULT_CONFIG.language,
       llmProvider,
       expect.any(Function),
@@ -751,7 +751,7 @@ describe("translation queue helpers", () => {
     )
     expect(executeTranslateMock).toHaveBeenNthCalledWith(
       2,
-      "[1] hello",
+      "[1]\nhello",
       DEFAULT_CONFIG.language,
       llmProvider,
       expect.any(Function),
