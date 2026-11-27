@@ -626,6 +626,7 @@ options:
   floatingButton:
     title: 懸浮按鈕
     pageDescription: 設定懸浮按鈕停在哪一側、點擊後做什麼，以及在哪些網站不顯示。
+    pageDescriptionWithoutClickAction: 設定懸浮按鈕停在哪一側，以及在哪些網站不顯示。
     demoImageAlt: 懸浮按鈕示範
     display:
       title: 顯示
@@ -1725,6 +1726,7 @@ speak:
   fetchingAudio: 正在取得音訊…
   playingAudio: 正在播放音訊…
   failedToGenerateSpeech: 語音產生失敗
+  playbackBlocked: Safari 只在點擊頁面後的片刻內允許播放聲音，請再試一次。
   noTextSelected: 未選取文字
   openaiNotConfigured: 尚未設定或啟用 OpenAI 提供者
   openaiApiKeyNotConfigured: 尚未設定 OpenAI API 金鑰

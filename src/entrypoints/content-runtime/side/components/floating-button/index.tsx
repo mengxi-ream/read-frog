@@ -20,6 +20,7 @@ import { isFeatureOn } from "@/utils/features"
 import { i18n } from "@/utils/i18n"
 import { sendMessage } from "@/utils/message"
 import { buildSimpleModeRowRoute } from "@/utils/navigation"
+import { hasSidePanel } from "@/utils/side-panel"
 import { cn } from "@/utils/styles/utils"
 import { urlMatchesPattern } from "@/utils/url-pattern"
 import {
@@ -215,7 +216,8 @@ export default function FloatingButton() {
   }
 
   const handleFloatingButtonClick = () => {
-    if (floatingButton.clickAction === "translate") {
+    // Without a side panel, the button translates whatever its click action says.
+    if (floatingButton.clickAction === "translate" || !hasSidePanel()) {
       if (!isFeatureOn(config, "pageTranslation")) {
         showPageTranslationOffToast()
         return

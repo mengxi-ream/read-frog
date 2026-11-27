@@ -626,6 +626,7 @@ options:
   floatingButton:
     title: Üzən düymə
     pageDescription: Üzən düymənin hansı tərəfdə yerləşdiyini, kliklədikdə nə etdiyini və harada gizləndiyini təyin edin.
+    pageDescriptionWithoutClickAction: Üzən düymənin hansı tərəfdə yerləşdiyini və harada gizləndiyini təyin edin.
     demoImageAlt: Üzən düymə nümunəsi
     display:
       title: Görünüş
@@ -1720,6 +1721,7 @@ speak:
   fetchingAudio: Səs yaradılır...
   playingAudio: Səs oxudulur...
   failedToGenerateSpeech: Nitq yaratmaq mümkün olmadı
+  playbackBlocked: Safari səsi yalnız səhifəyə klik etdikdən dərhal sonra səsləndirir. Yenidən cəhd edin.
   noTextSelected: Mətn seçilməyib
   openaiNotConfigured: OpenAI provayderi tənzimlənməyib və ya aktiv deyil
   openaiApiKeyNotConfigured: OpenAI API açarı təyin edilməyib

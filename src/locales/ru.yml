@@ -625,6 +625,7 @@ options:
   floatingButton:
     title: Плавающая кнопка
     pageDescription: Выберите сторону плавающей кнопки, действие по клику и сайты, где её скрывать.
+    pageDescriptionWithoutClickAction: Выберите сторону плавающей кнопки и сайты, где её скрывать.
     demoImageAlt: Демо плавающей кнопки
     display:
       title: Отображение
@@ -1715,6 +1716,7 @@ speak:
   fetchingAudio: Генерация аудио...
   playingAudio: Воспроизведение аудио...
   failedToGenerateSpeech: Не удалось сгенерировать речь
+  playbackBlocked: Safari воспроизводит звук только сразу после щелчка на странице. Попробуйте ещё раз.
   noTextSelected: Текст не выделен
   openaiNotConfigured: Провайдер OpenAI не настроен или не включён
   openaiApiKeyNotConfigured: API-ключ OpenAI не настроен

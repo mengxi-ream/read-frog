@@ -23,6 +23,7 @@ const STORE_REVIEW_PROMPT_QUERY_KEY = ["store-review-prompt"]
  */
 export function StoreReviewPrompt() {
   const queryClient = useQueryClient()
+  const reviewUrl = getReviewUrl("popup-prompt")
 
   const { data: shouldShow } = useQuery({
     queryKey: STORE_REVIEW_PROMPT_QUERY_KEY,
@@ -40,12 +41,12 @@ export function StoreReviewPrompt() {
     await queryClient.invalidateQueries({ queryKey: STORE_REVIEW_PROMPT_QUERY_KEY })
   }
 
-  const handleRate = async () => {
-    window.open(getReviewUrl("popup-prompt"), "_blank", "noopener,noreferrer")
+  const handleRate = async (url: string) => {
+    window.open(url, "_blank", "noopener,noreferrer")
     await dismiss()
   }
 
-  if (!shouldShow) return null
+  if (!shouldShow || !reviewUrl) return null
 
   return (
     <div className="absolute inset-x-4 bottom-3 z-10 flex flex-col gap-2 rounded-lg border border-accent/40 bg-background px-3 py-2.5 shadow-md">
@@ -64,7 +65,12 @@ export function StoreReviewPrompt() {
           {i18n.t("popup.storeReview.description")}
         </span>
       </div>
-      <Button variant="accent" size="sm" className="self-start" onClick={() => void handleRate()}>
+      <Button
+        variant="accent"
+        size="sm"
+        className="self-start"
+        onClick={() => void handleRate(reviewUrl)}
+      >
         <Icon icon="tabler:star-filled" />
         {i18n.t("popup.storeReview.action")}
       </Button>

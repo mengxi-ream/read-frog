@@ -625,6 +625,7 @@ options:
   floatingButton:
     title: Yüzen Buton
     pageDescription: Yüzen düğmenin hangi tarafta duracağını, tıklamanın ne yapacağını ve nerede gizleneceğini ayarlayın.
+    pageDescriptionWithoutClickAction: Yüzen düğmenin hangi tarafta duracağını ve nerede gizleneceğini ayarlayın.
     demoImageAlt: Yüzen buton demosu
     display:
       title: Görünüm
@@ -1715,6 +1716,7 @@ speak:
   fetchingAudio: Ses oluşturuluyor...
   playingAudio: Ses çalınıyor...
   failedToGenerateSpeech: Konuşma oluşturulamadı
+  playbackBlocked: Safari yalnızca sayfaya tıkladıktan hemen sonra ses çalar. Lütfen yeniden deneyin.
   noTextSelected: Metin seçilmedi
   openaiNotConfigured: OpenAI sağlayıcısı yapılandırılmadı veya etkinleştirilmedi
   openaiApiKeyNotConfigured: OpenAI API anahtarı yapılandırılmadı

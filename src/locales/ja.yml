@@ -625,6 +625,7 @@ options:
   floatingButton:
     title: フローティングボタン
     pageDescription: フローティングボタンを表示する側、クリック時の動作、非表示にするサイトを設定します。
+    pageDescriptionWithoutClickAction: フローティングボタンを表示する側と、非表示にするサイトを設定します。
     demoImageAlt: フローティングボタンデモ
     display:
       title: 表示
@@ -1715,6 +1716,7 @@ speak:
   fetchingAudio: 音声を生成しています...
   playingAudio: 音声を再生しています...
   failedToGenerateSpeech: 音声生成に失敗しました
+  playbackBlocked: Safari では、ページをクリックした直後しか音声を再生できません。もう一度お試しください。
   noTextSelected: テキストが選択されていません
   openaiNotConfigured: OpenAIプロバイダーが設定されていないか有効になっていません
   openaiApiKeyNotConfigured: OpenAI APIキーが設定されていません
