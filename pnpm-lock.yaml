@@ -318,8 +318,8 @@ importers:
         specifier: 0.22.0
         version: 0.22.0
       '@read-frog/layout-engine':
-        specifier: 0.8.0
-        version: 0.8.0(@codemirror/lang-liquid@6.3.4)(@codemirror/lint@6.9.8)(@codemirror/state@6.7.6)(@codemirror/view@6.44.2)(dompurify@3.5.0)(liquidjs@10.30.1)(morphdom@2.7.8)(react@19.3.1)(temml@0.14.0)
+        specifier: 0.9.0
+        version: 0.9.0(@codemirror/lang-liquid@6.3.4)(@codemirror/lint@6.9.8)(@codemirror/state@6.7.6)(@codemirror/view@6.44.2)(dompurify@3.5.0)(liquidjs@10.30.1)(morphdom@2.7.8)(react@19.3.1)(temml@0.14.0)
       '@remixicon/react':
         specifier: ^4.9.0
         version: 4.9.0(react@19.3.1)
@@ -2215,8 +2215,8 @@ packages:
   '@read-frog/definitions@0.22.0':
     resolution: {integrity: sha512-6ubFo9PvfwGU2aFEF5eDM8/mRs8t0rwmoP0v+/NhkVsuv3YU/4CYNWB8XmqyUpREKtQBig6pYuzxiUmTeAJQCw==}
 
-  '@read-frog/layout-engine@0.8.0':
-    resolution: {integrity: sha512-WHwMTMZyCZvmKqaSSMvcICJyTh29Wi9HvcK1jYOZHG35QBDCETbkjb0zGSgUnVolJoaPpEp87gvkwHcODMrssg==}
+  '@read-frog/layout-engine@0.9.0':
+    resolution: {integrity: sha512-yOO4AO4S09L90ZZEmMPiXmDG9nlwG+FwIRlSXeL9GWUi8aPtVDClGYkL26LnYOHpLaqnVPJb01zddd3jwIJC6A==}
     peerDependencies:
       '@codemirror/lang-liquid': ^6.3.3
       '@codemirror/lint': ^6.9.7
@@ -8395,7 +8395,7 @@ snapshots:
       temporal-polyfill: 1.0.7
       zod: 4.6.7
 
-  '@read-frog/layout-engine@0.8.0(@codemirror/lang-liquid@6.3.4)(@codemirror/lint@6.9.8)(@codemirror/state@6.7.6)(@codemirror/view@6.44.2)(dompurify@3.5.0)(liquidjs@10.30.1)(morphdom@2.7.8)(react@19.3.1)(temml@0.14.0)':
+  '@read-frog/layout-engine@0.9.0(@codemirror/lang-liquid@6.3.4)(@codemirror/lint@6.9.8)(@codemirror/state@6.7.6)(@codemirror/view@6.44.2)(dompurify@3.5.0)(liquidjs@10.30.1)(morphdom@2.7.8)(react@19.3.1)(temml@0.14.0)':
     dependencies:
       liquidjs: 10.30.1
     optionalDependencies:
