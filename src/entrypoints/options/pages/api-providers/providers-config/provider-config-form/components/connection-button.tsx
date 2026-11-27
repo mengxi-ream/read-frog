@@ -16,9 +16,7 @@ const CONNECTION_TEST_FEEDBACK_DURATION_MS = 5_000
 
 type ConnectionTestFeedback = "success" | "failed" | "slow"
 
-interface ConnectionTestFeedbackState {
-  status: ConnectionTestFeedback
-  requestId: number
+interface ConnectionTestInputs {
   provider: APIProviderConfig["provider"]
   apiKey: string | undefined
   connectionURL: string | undefined
@@ -79,14 +77,44 @@ function ConnectionFeedbackIcon({ feedback }: { feedback: ConnectionTestFeedback
   )
 }
 
+function getConnectionTestInputs(providerConfig: APIProviderConfig): ConnectionTestInputs {
+  return {
+    provider: providerConfig.provider,
+    apiKey: providerConfig.apiKey,
+    connectionURL: getProviderConnectionURL(providerConfig),
+    providerSpecificSettings:
+      "providerSpecificSettings" in providerConfig
+        ? providerConfig.providerSpecificSettings
+        : undefined,
+  }
+}
+
+function isSameConnectionTestInputs(a: ConnectionTestInputs, b: ConnectionTestInputs) {
+  return (
+    a.provider === b.provider &&
+    a.apiKey === b.apiKey &&
+    a.connectionURL === b.connectionURL &&
+    a.providerSpecificSettings === b.providerSpecificSettings
+  )
+}
+
 export function ConnectionTestButton({ providerConfig }: { providerConfig: APIProviderConfig }) {
+  // A test result only describes the settings it ran with. When any of them changes, remount the
+  // button so the old result, its timer and its in-flight request are dropped together.
+  const inputs = getConnectionTestInputs(providerConfig)
+  const [seenInputs, setSeenInputs] = useState(inputs)
+  const [generation, setGeneration] = useState(0)
+  if (!isSameConnectionTestInputs(seenInputs, inputs)) {
+    setSeenInputs(inputs)
+    setGeneration((current) => current + 1)
+  }
+
+  return <ConnectionTestButtonBody key={generation} providerConfig={providerConfig} />
+}
+
+function ConnectionTestButtonBody({ providerConfig }: { providerConfig: APIProviderConfig }) {
   const { apiKey, provider } = providerConfig
-  const connectionURL = getProviderConnectionURL(providerConfig)
-  const providerSpecificSettings =
-    "providerSpecificSettings" in providerConfig
-      ? providerConfig.providerSpecificSettings
-      : undefined
-  const [feedback, setFeedback] = useState<ConnectionTestFeedbackState | null>(null)
+  const [feedback, setFeedback] = useState<ConnectionTestFeedback | null>(null)
   const latestRequestIdRef = useRef(0)
   const feedbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -117,24 +145,15 @@ export function ConnectionTestButton({ providerConfig }: { providerConfig: APIPr
       }
 
       clearFeedbackTimeout()
-      setFeedback({
-        status: nextFeedback,
-        requestId,
-        provider,
-        apiKey,
-        connectionURL,
-        providerSpecificSettings,
-      })
+      setFeedback(nextFeedback)
       feedbackTimeoutRef.current = setTimeout(() => {
         if (requestId === latestRequestIdRef.current) {
-          setFeedback((currentFeedback) =>
-            currentFeedback?.requestId === requestId ? null : currentFeedback,
-          )
+          setFeedback(null)
         }
         feedbackTimeoutRef.current = null
       }, CONNECTION_TEST_FEEDBACK_DURATION_MS)
     },
-    [apiKey, clearFeedbackTimeout, connectionURL, provider, providerSpecificSettings],
+    [clearFeedbackTimeout],
   )
 
   const handleTestConnection = () => {
@@ -159,28 +178,11 @@ export function ConnectionTestButton({ providerConfig }: { providerConfig: APIPr
   }
 
   useEffect(() => {
-    latestRequestIdRef.current += 1
-    clearFeedbackTimeout()
-    mutation.reset()
-    // eslint-disable-next-line react/exhaustive-deps
-  }, [provider, apiKey, connectionURL, providerSpecificSettings, clearFeedbackTimeout])
-
-  useEffect(() => {
     return () => {
       latestRequestIdRef.current += 1
       clearFeedbackTimeout()
     }
   }, [clearFeedbackTimeout])
-
-  const visibleFeedback =
-    feedback &&
-    feedback.requestId === latestRequestIdRef.current &&
-    feedback.provider === provider &&
-    feedback.apiKey === apiKey &&
-    feedback.connectionURL === connectionURL &&
-    feedback.providerSpecificSettings === providerSpecificSettings
-      ? feedback.status
-      : null
 
   return (
     <Button
@@ -197,10 +199,10 @@ export function ConnectionTestButton({ providerConfig }: { providerConfig: APIPr
             {i18n.t("options.apiProviders.testConnection.testing")}
           </span>
         </>
-      ) : visibleFeedback ? (
+      ) : feedback ? (
         <>
-          <ConnectionFeedbackIcon feedback={visibleFeedback} />
-          <span className="text-xs">{i18n.t(connectionTestFeedbackLabelKey[visibleFeedback])}</span>
+          <ConnectionFeedbackIcon feedback={feedback} />
+          <span className="text-xs">{i18n.t(connectionTestFeedbackLabelKey[feedback])}</span>
         </>
       ) : (
         <span className="text-xs">{i18n.t("options.apiProviders.testConnection.button")}</span>

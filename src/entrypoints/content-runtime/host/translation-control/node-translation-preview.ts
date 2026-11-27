@@ -141,7 +141,7 @@ export function createNodeTranslationPreview(): NodeTranslationPreview {
 
     root.append(host)
     // Settle the hidden style first, so the first ring fades in instead of popping.
-    void getComputedStyle(outline).opacity
+    void getComputedStyle(outline).getPropertyValue("opacity")
     return outline
   }
 

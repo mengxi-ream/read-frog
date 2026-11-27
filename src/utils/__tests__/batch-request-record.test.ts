@@ -1,14 +1,11 @@
-import type BatchRequestRecord from "@/utils/db/dexie/tables/batch-request-record"
 import { describe, expect, it, vi } from "vitest"
 import { calculateRequestSavingRatio } from "../batch-request-record"
 
 // The module reaches for Dexie at import time, which has no IndexedDB to open under vitest.
 vi.mock("@/utils/db/dexie/db", () => ({ db: {} }))
 
-function records(...originalRequestCounts: number[]): BatchRequestRecord[] {
-  return originalRequestCounts.map(
-    (originalRequestCount) => ({ originalRequestCount }) as BatchRequestRecord,
-  )
+function records(...originalRequestCounts: number[]) {
+  return originalRequestCounts.map((originalRequestCount) => ({ originalRequestCount }))
 }
 
 describe("calculateRequestSavingRatio", () => {

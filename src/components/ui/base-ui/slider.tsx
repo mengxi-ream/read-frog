@@ -4,7 +4,15 @@ import type { MotionValue } from "motion/react"
 import type { CSSProperties, HTMLAttributes, PointerEvent as ReactPointerEvent, Ref } from "react"
 import { Slider as SliderPrimitive } from "@base-ui/react/slider"
 import { animate, AnimatePresence, motion, useMotionValue, useTransform } from "motion/react"
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
+import {
+  useCallback,
+  useEffect,
+  useEffectEvent,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
 import { spring } from "@/utils/styles/springs"
 import { cn } from "@/utils/styles/utils"
 
@@ -139,14 +147,17 @@ function ValueDisplay({
   const [inputValue, setInputValue] = useState("")
   const inputRef = useRef<HTMLInputElement>(null)
 
+  // Seed the input from the current value when editing starts, not on every `values` change,
+  // which would clobber what's being typed.
+  const startEdit = (index: number) => {
+    setInputValue(String(at(values, index)))
+    onStartEdit(index)
+  }
+
   useEffect(() => {
     if (editingIndex !== null) {
-      // eslint-disable-next-line react/set-state-in-effect
-      setInputValue(String(at(values, editingIndex)))
       requestAnimationFrame(() => inputRef.current?.select())
     }
-    // Re-running on every `values` change would clobber what's being typed.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editingIndex])
 
   const commitEdit = useCallback(
@@ -198,7 +209,7 @@ function ValueDisplay({
     }
 
     return (
-      <span className="cursor-text select-none" onClick={() => onStartEdit(index)}>
+      <span className="cursor-text select-none" onClick={() => startEdit(index)}>
         {formatValue(at(values, index))}
       </span>
     )
@@ -297,12 +308,6 @@ function Slider({
   const trackWidthRef = useRef(0)
   const dragging = useRef(false)
   const activeDragThumb = useRef<number>(0)
-  const valuesRef = useRef(values)
-  const minRef = useRef(min)
-  const maxRef = useRef(max)
-  valuesRef.current = values
-  minRef.current = min
-  maxRef.current = max
 
   const [isHovered, setIsHovered] = useState(false)
   const [isPressed, setIsPressed] = useState(false)
@@ -315,19 +320,12 @@ function Slider({
   } | null>(null)
   const [focusedThumb, setFocusedThumb] = useState<number | null>(null)
   const [showHoverTooltip, setShowHoverTooltip] = useState(false)
-  const hoverDelayRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Show hover tooltip after 100ms delay
+  // Show hover tooltip after 100ms delay. Leaving hides it again in the pointer-leave handler.
   useEffect(() => {
-    if (isHovered) {
-      hoverDelayRef.current = setTimeout(() => setShowHoverTooltip(true), 100)
-    } else {
-      if (hoverDelayRef.current) clearTimeout(hoverDelayRef.current)
-      setShowHoverTooltip(false)
-    }
-    return () => {
-      if (hoverDelayRef.current) clearTimeout(hoverDelayRef.current)
-    }
+    if (!isHovered) return undefined
+    const timer = setTimeout(() => setShowHoverTooltip(true), 100)
+    return () => clearTimeout(timer)
   }, [isHovered])
 
   const motionX0 = useMotionValue(0)
@@ -387,8 +385,11 @@ function Slider({
   )
 
   const initialSyncDone = useRef(false)
-  const [ready, setReady] = useState(false)
-  useLayoutEffect(() => {
+  // Hidden until the first measurement has positioned the thumbs. A motion value writes
+  // straight to the DOM, so showing the track costs no extra render.
+  const trackOpacity = useMotionValue(0)
+  // Effect events read the latest props and state without becoming effect dependencies.
+  const syncInitialPosition = useEffectEvent(() => {
     const el = trackRef.current
     if (!el || initialSyncDone.current) return
     const w = el.offsetWidth
@@ -398,11 +399,22 @@ function Slider({
       motionX1.set(valueToPixel(values[1], min, max, w))
     }
     initialSyncDone.current = true
-    // eslint-disable-next-line react/set-state-in-effect
-    setReady(true)
-    // Runs once, before first paint, off whatever the initial props were.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    trackOpacity.set(1)
+  })
+  // Runs once, before first paint, off whatever the initial props were.
+  useLayoutEffect(() => {
+    syncInitialPosition()
   }, [])
+
+  const syncToTrackWidth = useEffectEvent((w: number) => {
+    trackWidthRef.current = w
+    if (!dragging.current && initialSyncDone.current) {
+      animate(motionX0, valueToPixel(at(values, 0), min, max, w), spring.moderate)
+      if (isRange && values[1] !== undefined) {
+        animate(motionX1, valueToPixel(values[1], min, max, w), spring.moderate)
+      }
+    }
+  })
 
   // Track width measurement (resize only)
   useEffect(() => {
@@ -410,33 +422,24 @@ function Slider({
     if (!el) return undefined
     const ro = new ResizeObserver(([entry]) => {
       if (!entry) return
-      const w = entry.contentRect.width
-      trackWidthRef.current = w
-      if (!dragging.current && initialSyncDone.current) {
-        const v = valuesRef.current
-        const mn = minRef.current
-        const mx = maxRef.current
-        animate(motionX0, valueToPixel(at(v, 0), mn, mx, w), spring.moderate)
-        if (isRange && v[1] !== undefined) {
-          animate(motionX1, valueToPixel(v[1], mn, mx, w), spring.moderate)
-        }
-      }
+      syncToTrackWidth(entry.contentRect.width)
     })
     ro.observe(el)
     return () => ro.disconnect()
-  }, [isRange, motionX0, motionX1])
+  }, [])
 
   // Sync motion values on value change (keyboard, programmatic).
   // Depend on a primitive key rather than the `values` array — its identity
   // changes every render (toThumbValues allocates), which would restart the
-  // animation on unrelated re-renders (hover/tooltip state churn).
+  // animation on unrelated re-renders (hover/tooltip state churn). The effect
+  // reads the thumb values back out of the key for the same reason.
   const valuesKey = values.join(",")
   useEffect(() => {
     if (!initialSyncDone.current) return
     if (dragging.current) return
     const tw = trackWidthRef.current
     if (tw <= 0) return
-    const v = valuesRef.current
+    const v = valuesKey.split(",").map(Number)
     animate(motionX0, valueToPixel(at(v, 0), min, max, tw), spring.moderate)
     if (isRange && v[1] !== undefined) {
       animate(motionX1, valueToPixel(v[1], min, max, tw), spring.moderate)
@@ -711,6 +714,7 @@ function Slider({
         onPointerEnter={() => setIsHovered(true)}
         onPointerLeave={() => {
           setIsHovered(false)
+          setShowHoverTooltip(false)
           setHoverPreview(null)
         }}
         onMouseMove={(e) => {
@@ -793,10 +797,10 @@ function Slider({
         </SliderPrimitive.Root>
 
         {/* Visual track with pointer handlers */}
-        <div
+        <motion.div
           ref={trackRef}
           className="relative w-full cursor-ew-resize py-2"
-          style={{ height: THUMB_SIZE + 16, opacity: ready ? 1 : 0 }}
+          style={{ height: THUMB_SIZE + 16, opacity: trackOpacity }}
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
@@ -918,7 +922,7 @@ function Slider({
 
           {renderVisualThumb(0)}
           {isRange && renderVisualThumb(1)}
-        </div>
+        </motion.div>
       </div>
 
       {(valuePosition === "bottom" || valuePosition === "right") && valueDisplay}

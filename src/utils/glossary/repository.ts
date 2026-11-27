@@ -1,4 +1,5 @@
 import type { LanguageTag } from "@read-frog/definitions"
+import type { InsertType } from "dexie"
 import type { ParsedGlossaryRow } from "./csv"
 import type { GlossaryTargetLang } from "./target-language"
 import type { GlossaryEntry } from "./types"
@@ -379,7 +380,7 @@ export async function importGlossaryRows(
   }
 
   const now = new Date()
-  const records: GlossaryTerm[] = [...byKey.entries()].map(([key, { row }]) => ({
+  const records: InsertType<GlossaryTerm, never>[] = [...byKey.entries()].map(([key, { row }]) => ({
     id: existingByKey.get(key)?.id ?? getRandomUUID(),
     glossaryId,
     matchKey: buildMatchKey(row.source, row.caseSensitive),
@@ -391,7 +392,7 @@ export async function importGlossaryRows(
     // absent from the table is the only one that starts enabled.
     enabled: existingByKey.get(key)?.enabled ?? true,
     updatedAt: now,
-  })) as GlossaryTerm[]
+  }))
 
   // Nothing survived to write — the file was empty, or every row was dropped by
   // an unrecognised `targetLanguage` or a third column that was never a language
