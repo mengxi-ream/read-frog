@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
-import type { APICallError } from "ai"
 import type { ReactElement } from "react"
 import { cleanup, fireEvent, render, waitFor } from "@testing-library/react"
+import { APICallError } from "ai"
 import { createStore, Provider } from "jotai"
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { TooltipProvider } from "@/components/ui/base-ui/tooltip"
@@ -56,10 +56,12 @@ describe("translation error shadow portals", () => {
   })
 
   it("mounts error hover card content inside the shadow wrapper", async () => {
-    const error = {
+    const error = new APICallError({
       message: "Request failed",
+      url: "https://api.example.com/v1/chat/completions",
+      requestBodyValues: {},
       statusCode: 500,
-    } as APICallError
+    })
 
     const { container, shadowWrapper } = renderInShadow(<ErrorButton error={error} />)
     const trigger = container.querySelector("[data-slot='hover-card-trigger']")
@@ -79,7 +81,11 @@ describe("translation error shadow portals", () => {
   })
 
   it("swaps the stale-context error for a reload hint and drops the fake status code", async () => {
-    const error = { message: "Extension context invalidated." } as APICallError
+    const error = new APICallError({
+      message: "Extension context invalidated.",
+      url: "https://api.example.com/v1/chat/completions",
+      requestBodyValues: {},
+    })
 
     const { container, shadowWrapper } = renderInShadow(<ErrorButton error={error} />)
     fireEvent.mouseEnter(container.querySelector("[data-slot='hover-card-trigger']")!)

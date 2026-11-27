@@ -12,7 +12,9 @@ function relayedError(name: string, message: string) {
 }
 
 describe("classifyFailureReason", () => {
-  it.each([
+  // The thrown value is `unknown`, as it is for the classifier. Letting TypeScript infer a union of
+  // the rows would type every plain-object row as a `ProviderSetupError`.
+  it.each<[scenario: string, error: unknown, expected: string]>([
     ["a provider without an API key", namedError("AI_LoadAPIKeyError"), "missing_api_key"],
     ["output that failed its schema", namedError("AI_NoObjectGeneratedError"), "invalid_output"],
     [
@@ -100,7 +102,7 @@ describe("classifyFailureReason", () => {
     )
   })
 
-  it.each([
+  it.each<[scenario: string, error: unknown]>([
     ["an unrelated error", new Error("boom")],
     ["an unknown code", Object.assign(new Error("x"), { code: "constructor" })],
     ["a made-up reason", Object.assign(new Error("x"), { reason: "gremlins" })],
