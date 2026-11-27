@@ -367,6 +367,96 @@ describe("includeSelectors whitelist", () => {
     expect(sourceText).not.toContain("Show more")
   })
 
+  // X Articles in the updated Tailwind web app render without
+  // data-testid="twitterArticleReadView"; prose lives under
+  // [data-article-part="title"] and [data-article-part="body"].
+  it("labels X Articles in status view and excludes code block chrome", () => {
+    setUrl("https://x.com/_philschmid/status/2125579472594223340")
+    document.body.innerHTML = `
+      <main>
+        <article class="flex flex-col gap-1">
+          <div id="author-name">Philipp Schmid</div>
+          <div dir="auto" class="max-w-full text-lead font-normal text-primary whitespace-pre-wrap" id="intro-post"><span>Here are 5 things I changed.</span></div>
+          <h1 dir="auto" data-article-part="title" class="font-article" id="article-title">5 Habits i changed when working with Gemini 4 Neon</h1>
+          <div data-article-part="byline"><span id="read-time">6 min read</span></div>
+          <div data-article-part="body">
+            <style>.x-article-body {}</style>
+            <div class="x-article-body">
+              <div class="contents">
+                <p class="font-article whitespace-pre-wrap" id="article-p"><span>When you use a coding agent every day, your prompt is only a small part.</span></p>
+                <h3 class="font-article" id="article-h3"><strong>Remove strict rules</strong></h3>
+                <blockquote class="font-article" id="article-quote"><span>A short quote inside the article.</span></blockquote>
+                <ul><li class="font-article" id="article-li">Keep your global rules short.</li></ul>
+                <figure><figcaption id="article-caption">Legacy vs lean stack</figcaption></figure>
+                <div class="x-article-code">
+                  <div><span class="x-article-code-font" id="code-lang">markdown</span><button aria-label="Copy code" id="code-copy">Copy</button></div>
+                  <div class="x-article-code-body"><pre class="highlights"><code id="code-body">const x = 1</code></pre></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+      </main>
+      <div id="S:1" style="display: none">
+        <h1 dir="auto" data-article-part="title" id="ssr-duplicate-title">5 Habits i changed when working with Gemini 4 Neon</h1>
+      </div>
+    `
+
+    walkAndLabelElement(document.body, "w1", structuredClone(DEFAULT_CONFIG))
+
+    for (const id of [
+      "intro-post",
+      "article-title",
+      "article-p",
+      "article-h3",
+      "article-quote",
+      "article-li",
+      "article-caption",
+    ]) {
+      expect(document.getElementById(id)!.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(true)
+    }
+
+    for (const id of [
+      "author-name",
+      "read-time",
+      "code-lang",
+      "code-copy",
+      "code-body",
+      "ssr-duplicate-title",
+    ]) {
+      expect(document.getElementById(id)!.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(false)
+    }
+    expect(document.getElementById("code-lang")!.hasAttribute(WALKED_ATTRIBUTE)).toBe(false)
+  })
+
+  // X Articles in focus mode (/article/...) render outside <main> and <article>.
+  it("labels X Articles in focus mode without main or article wrappers", () => {
+    setUrl("https://x.com/poteto/article/2069824386283319343")
+    document.body.innerHTML = `
+      <div class="bg-primary min-h-dvh w-full">
+        <div class="contents">
+          <h1 dir="auto" data-article-part="title" class="font-article" id="focus-title">Loops You Can Trust</h1>
+          <div data-article-part="byline"><span id="focus-read-time">12 min read</span></div>
+          <div data-article-part="body">
+            <div class="x-article-body">
+              <div class="contents">
+                <p class="font-article whitespace-pre-wrap" id="focus-p"><span>The best way to manage agents starts with a three minute egg.</span></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `
+
+    walkAndLabelElement(document.body, "w1", structuredClone(DEFAULT_CONFIG))
+
+    expect(document.getElementById("focus-title")!.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(true)
+    expect(document.getElementById("focus-p")!.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(true)
+    expect(document.getElementById("focus-read-time")!.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(
+      false,
+    )
+  })
+
   it("labels repository descriptions in GitHub's React org repository list (issue #2483)", () => {
     setUrl("https://github.com/orgs/facebookresearch/repositories")
     document.body.innerHTML = `

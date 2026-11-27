@@ -175,7 +175,9 @@
       "span[class='css-1jxf684 r-bcqeeo r-1ttztb7 r-qvutc0 r-poiln3 r-n6v787 r-1cwl3u0']",
       "[data-testid=primaryColumn] [class='css-175oi2r r-kzbkwu r-3pj75a'] > div > span[class='css-1jxf684 r-bcqeeo r-1ttztb7 r-qvutc0 r-poiln3']",
       ".font-chirp.text-body.font-normal",
-      "main [dir=auto].whitespace-pre-wrap"
+      "main [dir=auto].whitespace-pre-wrap",
+      "[data-article-part='title']",
+      "[data-article-part='body']"
     ],
     "forceInlineStyleSelectors": [
       "[data-testid=\"tweetText\"] div.r-xoduu5",
@@ -207,7 +209,8 @@
       "[class='css-175oi2r r-1awozwy r-18u37iz r-1wtj0ep r-6gpygo'],[class='css-175oi2r r-1d09ksm r-18u37iz r-1wbh5a2 r-1471scf'],[class='css-175oi2r r-1kbdv8c r-18u37iz r-1wtj0ep r-1ye8kvj r-1s2bzr4']",
       ".imt-caption-container *",
       "[data-testid=videoComponent]",
-      "main [dir=auto].whitespace-pre-wrap > button"
+      "main [dir=auto].whitespace-pre-wrap > button",
+      ".x-article-code"
     ],
     "forceBlockNodeSelectors.add": ["[data-testid=\"tweetText\"] div.r-6koalj"],
     "forceBlockStyleSelectors.add": ["[data-testid=\"tweetText\"] div.r-6koalj"],
