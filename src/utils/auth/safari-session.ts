@@ -96,7 +96,11 @@ async function describe(cookies: Browser.cookies.Cookie[]): Promise<string> {
  */
 async function extendSessionCookie(sent: Browser.cookies.Cookie, answer: SessionAnswer) {
   const expiresAt = answer?.session?.expiresAt
-  const endsAt = typeof expiresAt === "string" ? Date.parse(expiresAt) / 1000 : Number.NaN
+  // Whole seconds, as Safari keeps a cookie's expiry: the API's end has
+  // milliseconds, so the cookie would otherwise always look a moment short of
+  // it, and be set again after every get-session.
+  const endsAt =
+    typeof expiresAt === "string" ? Math.floor(Date.parse(expiresAt) / 1000) : Number.NaN
   if (!Number.isFinite(endsAt)) return
   try {
     const cookie = (await readSessionCookies()).find((each) => keyOf(each) === keyOf(sent))

@@ -347,6 +347,26 @@ describe("the cookie changes the API's responses ask for", () => {
     })
   })
 
+  it("counts the session's end in whole seconds, as Safari keeps a cookie's expiry", async () => {
+    // The API's end has milliseconds: one within the cookie's last second is no later.
+    const cookie = sessionCookie()
+    const inLastSecond = new Date(COOKIE_ENDS * 1000 + 114).toISOString()
+    const w = newWorld({ jar: [cookie], sessions: new Map([[cookie.value, inLastSecond]]) })
+    const { fetchWithSessionToken, mocks } = await load(w)
+
+    await fetchWithSessionToken(GET_SESSION)
+
+    expect(mocks.set).not.toHaveBeenCalled()
+
+    // A later one is set in whole seconds.
+    w.sessions.set(cookie.value, new Date((COOKIE_ENDS + 7 * DAY) * 1000 + 114).toISOString())
+    await fetchWithSessionToken(GET_SESSION)
+
+    expect(mocks.set).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({ expirationDate: COOKIE_ENDS + 7 * DAY }),
+    )
+  })
+
   it("keeps a cookie set for the whole site set for it", async () => {
     const cookie = sessionCookie({
       domain: ".readfrog.test",
