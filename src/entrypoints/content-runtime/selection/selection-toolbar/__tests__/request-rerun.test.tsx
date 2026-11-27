@@ -18,6 +18,7 @@ import { CONFIG_STORAGE_KEY, DEFAULT_CONFIG } from "@/utils/constants/config"
 import { GOOGLE_TRANSLATE_PROVIDER_ID } from "@/utils/constants/providers"
 import { getBuiltInDictionaryAction } from "@/utils/custom-actions"
 import { prepareTranslationText } from "@/utils/host/translate/text-preparation"
+import { onSelectionLookup } from "../../selection-lookups"
 import { buildContextSnapshot, createRangeSnapshot, normalizeSelectedText } from "../../utils"
 import { setSelectionStateAtom } from "../atoms"
 import { SelectionCustomActionProvider } from "../custom-action-button/provider"
@@ -278,18 +279,33 @@ vi.mock("@/components/ui/selection-popover/selection-toolbar-footer-content", ()
   SelectionToolbarFooterContent: ({
     children,
     paragraphsText,
-    onProviderChange,
     onRegenerate,
-    providers,
+    start,
     titleText,
-    value,
   }: {
     children?: ReactNode
     paragraphsText: string | null | undefined
-    onProviderChange: (id: string) => void
     onRegenerate: () => void
-    providers: Array<{ id: string; disabled?: boolean; kind?: string }>
+    start?: ReactNode
     titleText: string | null | undefined
+  }) => (
+    <div>
+      <span data-testid="footer-title">{titleText}</span>
+      <span data-testid="footer-paragraphs">{paragraphsText}</span>
+      {children}
+      <button type="button" aria-label="Regenerate" onClick={onRegenerate}>
+        Regenerate
+      </button>
+      {start}
+    </div>
+  ),
+  SelectionToolbarProviderSelect: ({
+    onChange,
+    providers,
+    value,
+  }: {
+    onChange: (id: string) => void
+    providers: Array<{ id: string; disabled?: boolean; kind?: string }>
     value: string
   }) => {
     // Skip the hosted system entries so the pick stays aligned with
@@ -300,26 +316,18 @@ vi.mock("@/components/ui/selection-popover/selection-toolbar-footer-content", ()
     )
 
     return (
-      <div>
-        <span data-testid="footer-title">{titleText}</span>
-        <span data-testid="footer-paragraphs">{paragraphsText}</span>
-        {children}
-        <button type="button" aria-label="Regenerate" onClick={onRegenerate}>
-          Regenerate
-        </button>
-        <button
-          type="button"
-          aria-label="Change provider"
-          disabled={!nextProvider}
-          onClick={() => {
-            if (nextProvider) {
-              onProviderChange(nextProvider.id)
-            }
-          }}
-        >
-          Change provider
-        </button>
-      </div>
+      <button
+        type="button"
+        aria-label="Change provider"
+        disabled={!nextProvider}
+        onClick={() => {
+          if (nextProvider) {
+            onChange(nextProvider.id)
+          }
+        }}
+      >
+        Change provider
+      </button>
     )
   },
 }))
@@ -1918,6 +1926,10 @@ describe("selection toolbar requests", () => {
     streamBackgroundStructuredObjectMock
       .mockReturnValueOnce(firstRun.promise)
       .mockReturnValueOnce(secondRun.promise)
+    const lookups: unknown[] = []
+    const stopListening = onSelectionLookup((session) => {
+      lookups.push(session)
+    })
 
     const paragraph = document.createElement("p")
     paragraph.textContent = "Selected text inside a paragraph."
@@ -2005,6 +2017,9 @@ describe("selection toolbar requests", () => {
     await waitFor(() => {
       expect(screen.getByText('{"summary":"Second result"}')).toBeInTheDocument()
     })
+    // Each run was a lookup, the pinned card's too.
+    expect(lookups).toHaveLength(2)
+    stopListening()
   })
 
   it("opens a custom action from the context menu with the captured selection session", async () => {

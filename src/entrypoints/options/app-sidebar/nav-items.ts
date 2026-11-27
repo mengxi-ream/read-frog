@@ -24,6 +24,7 @@ export const ROUTE_DEFS = [
   { path: "/context-menu", feature: "contextMenu" },
   { path: "/input-translation", feature: "inputTranslation" },
   { path: "/tts" },
+  { path: "/difficult-words" },
   // Advanced is a sidebar GROUP with no page of its own; this path only exists
   // so links made before that change still land somewhere.
   { path: "/advanced" },

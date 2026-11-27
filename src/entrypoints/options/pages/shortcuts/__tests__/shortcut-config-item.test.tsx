@@ -10,6 +10,7 @@ import { getActionShortcutId, getShortcutBindings } from "../shortcut-bindings"
 import { ShortcutConfigItem } from "../shortcut-config-item"
 
 const toastAdd = vi.hoisted(() => vi.fn<(toast: unknown) => void>())
+const difficultWordsOpen = vi.hoisted(() => ({ value: true }))
 
 // Shows the substitutions, so a message can be checked for the shortcut it names.
 vi.mock("@/utils/i18n", () => ({
@@ -21,8 +22,13 @@ vi.mock("@/utils/i18n", () => ({
 
 vi.mock("@/components/ui/base-ui/toast", () => ({ toastManager: { add: toastAdd } }))
 
+vi.mock("../../difficult-words/access", () => ({
+  useIsDifficultWordsOpen: () => difficultWordsOpen.value,
+}))
+
 afterEach(() => {
   toastAdd.mockClear()
+  difficultWordsOpen.value = true
   fakeBrowser.reset()
 })
 
@@ -70,11 +76,12 @@ describe("shortcut bindings", () => {
       },
     ]
 
-    const bindings = getShortcutBindings(config)
+    const bindings = getShortcutBindings(config, { difficultWords: true })
 
     expect(bindings.map((binding) => binding.id)).toEqual([
       "page-translation-shortcut",
       "translation-mode-shortcut",
+      "difficult-words-shortcut",
       "selection-translation-shortcut",
       "selection-speak-shortcut",
       "selection-annotation-shortcut",
@@ -95,14 +102,24 @@ describe("shortcut bindings", () => {
     const paragraphBinding = (bindings: ReturnType<typeof getShortcutBindings>) =>
       bindings.find((binding) => binding.id === "node-translation-shortcut")
 
-    expect(paragraphBinding(getShortcutBindings(config))).toBeUndefined()
+    expect(paragraphBinding(getShortcutBindings(config, { difficultWords: true }))).toBeUndefined()
 
     config.pageTranslation.node.hotkey = "custom"
-    expect(paragraphBinding(getShortcutBindings(config))).toEqual({
+    expect(paragraphBinding(getShortcutBindings(config, { difficultWords: true }))).toEqual({
       id: "node-translation-shortcut",
       title: "options.shortcuts.nodeTranslation.title",
       shortcut: "Alt+Shift+K",
     })
+  })
+
+  it("lists the difficult words shortcut only for an account that can use it", () => {
+    const ids = (difficultWords: boolean) =>
+      getShortcutBindings(structuredClone(DEFAULT_CONFIG), { difficultWords }).map(
+        (binding) => binding.id,
+      )
+
+    expect(ids(true)).toContain("difficult-words-shortcut")
+    expect(ids(false)).not.toContain("difficult-words-shortcut")
   })
 })
 
@@ -132,6 +149,33 @@ describe("ShortcutConfigItem", () => {
 
     await waitFor(() => {
       expect(onChange).toHaveBeenCalledWith("Alt+Shift+K")
+    })
+    expect(toastAdd).not.toHaveBeenCalled()
+  })
+
+  it("turns down the difficult words key for an account that can use it", async () => {
+    const onChange = await renderItem(structuredClone(DEFAULT_CONFIG), "Alt+Shift+R")
+
+    record({ key: "v", altKey: true, shiftKey: true, code: "KeyV" })
+
+    await waitFor(() => {
+      expect(toastAdd).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: expect.stringMatching(/\|options\.shortcuts\.difficultWords\.title$/),
+        }),
+      )
+    })
+    expect(onChange).not.toHaveBeenCalled()
+  })
+
+  it("lets another shortcut have the difficult words key while the account cannot use it", async () => {
+    difficultWordsOpen.value = false
+    const onChange = await renderItem(structuredClone(DEFAULT_CONFIG), "Alt+Shift+R")
+
+    record({ key: "v", altKey: true, shiftKey: true, code: "KeyV" })
+
+    await waitFor(() => {
+      expect(onChange).toHaveBeenCalledWith("Alt+Shift+V")
     })
     expect(toastAdd).not.toHaveBeenCalled()
   })

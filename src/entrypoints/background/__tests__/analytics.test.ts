@@ -280,6 +280,32 @@ describe("background analytics", () => {
     })
   })
 
+  it("reports where difficult words were switched on, with the reader's language and the site", async () => {
+    storageGetItemMock.mockResolvedValueOnce(true).mockResolvedValueOnce("install-123")
+    const event = {
+      feature: "difficult_words",
+      surface: "floating_button",
+      outcome: "success",
+      latency_ms: 0,
+      provider: "unknown",
+      backend_kind: "unknown",
+      target_language: "zh-Hans",
+    } as const
+
+    const { captureFeatureUsedEventInBackground } = createAnalytics()
+    await captureFeatureUsedEventInBackground(event, { id: 42, url: "https://example.com/post" })
+    await captureFeatureUsedEventInBackground(
+      { ...event, surface: "selection_toolbar" } as unknown as typeof event,
+      { id: 42, url: "https://example.com/post" },
+    )
+
+    expect(posthogCaptureMock).toHaveBeenCalledTimes(1)
+    expect(posthogCaptureMock).toHaveBeenCalledWith("feature_used", {
+      ...event,
+      site_domain: "example.com",
+    })
+  })
+
   it("reports no site domain for non-web tabs", async () => {
     storageGetItemMock.mockResolvedValueOnce(true).mockResolvedValueOnce("install-123")
 
@@ -330,7 +356,7 @@ describe("background analytics", () => {
       outcome: "success",
       latency_ms: 100,
       ...PAGE_EVENT_FIELDS,
-      target_language: "cmn",
+      target_language: "zh-Hans",
       source_language: "jpn",
     } as unknown as FeatureUsedEventProperties)
 

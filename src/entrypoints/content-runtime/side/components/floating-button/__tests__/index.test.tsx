@@ -5,12 +5,16 @@ import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { atom, createStore, Provider } from "jotai"
 import { afterEach, beforeAll, describe, expect, it, onTestFinished, vi } from "vitest"
 import { configAtom, configFieldsAtomMap } from "@/utils/atoms/config"
+import { difficultWordsTab } from "@/utils/difficult-words/tab-state"
 import { i18n } from "@/utils/i18n"
 import { sendMessage } from "@/utils/message"
 import FloatingButton from ".."
 
 const toastAddMock = vi.fn<(...args: any[]) => any>()
 const toastCloseMock = vi.fn<(...args: any[]) => any>()
+const difficultWordsAccessMock = vi.hoisted(() => ({
+  data: "denied" as "allowed" | "denied" | "signedOut" | "unknown" | undefined,
+}))
 
 vi.mock("#imports", () => ({
   browser: {
@@ -51,9 +55,15 @@ vi.mock("@/utils/atoms/config", async () => {
       floatingButton: floatingButtonAtom,
       sideContent: atom({ width: 360 }),
       uiLanguage: atom("en"),
+      difficultWords: atom({ enabled: true, lookupActionId: "default-dictionary" }),
     },
   }
 })
+
+vi.mock("@/utils/difficult-words/tab-state", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/utils/difficult-words/tab-state")>()),
+  useDifficultWordsAccess: () => ({ data: difficultWordsAccessMock.data }),
+}))
 
 vi.mock("../../../atoms", () => ({
   enablePageTranslationAtom: atom({ enabled: false }),
@@ -96,6 +106,8 @@ beforeAll(() => {
 afterEach(() => {
   vi.useRealTimers()
   vi.restoreAllMocks()
+  difficultWordsAccessMock.data = "denied"
+  difficultWordsTab.update({ enabled: false, count: 0 })
   vi.mocked(sendMessage).mockReset()
   toastAddMock.mockReset()
   toastCloseMock.mockReset()
@@ -408,6 +420,41 @@ describe("floatingButton controls", () => {
     expect(sendMessage).toHaveBeenCalledWith("toggleSidePanel", undefined)
   })
 
+  it("leaves the difficult-words button out for an account it is not open to", () => {
+    difficultWordsAccessMock.data = "denied"
+    renderFloatingButton()
+
+    expect(screen.queryByRole("button", { name: "difficultWords.scanTooltip" })).toBeNull()
+  })
+
+  it("puts the difficult-words button above the translate button and switches marking on", () => {
+    difficultWordsAccessMock.data = "allowed"
+    const setEnabled = vi.spyOn(difficultWordsTab, "setEnabled")
+    renderFloatingButton()
+
+    const difficultWordsButton = screen.getByRole("button", { name: "difficultWords.scanTooltip" })
+    const translateButton = screen.getByRole("button", {
+      name: "options.floatingButton.tooltips.togglePageTranslation",
+    })
+    expect(
+      difficultWordsButton.compareDocumentPosition(translateButton) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
+
+    fireEvent.click(difficultWordsButton)
+    expect(setEnabled).toHaveBeenCalledWith(true, "floating_button")
+  })
+
+  it("keeps the way to clear the marks whatever the account's access", () => {
+    difficultWordsAccessMock.data = "signedOut"
+    const setEnabled = vi.spyOn(difficultWordsTab, "setEnabled")
+    renderFloatingButton()
+    act(() => difficultWordsTab.update({ enabled: true, count: 7 }))
+
+    fireEvent.click(screen.getByRole("button", { name: "difficultWords.clearCount" }))
+    expect(setEnabled).toHaveBeenCalledWith(false, "floating_button")
+  })
+
   it("shows a Firefox sidebar help link when the browser requires an extension user action", async () => {
     vi.useFakeTimers()
     vi.mocked(sendMessage).mockResolvedValue({
@@ -591,6 +638,7 @@ describe("floatingButton controls", () => {
     renderFloatingButton()
 
     const mainButton = getMainButton()
+    // Translate, close, lock and settings; difficult words is not open to this account.
     expect(screen.getAllByRole("button")).toHaveLength(4)
 
     fireEvent.pointerDown(mainButton, {

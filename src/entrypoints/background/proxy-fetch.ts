@@ -6,6 +6,7 @@ import { AUTH_CACHE_GROUP_KEY, DEFAULT_PROXY_CACHE_TTL_MS } from "@/utils/consta
 import { createLogger } from "@/utils/logging/logger"
 import { onMessage } from "@/utils/message"
 import { SessionCacheGroupRegistry } from "../../utils/session-cache/session-cache-group-registry"
+import { clearDifficultWordsAccessCache, clearDifficultWordsOutbox } from "./difficult-words"
 import { clearHostedAiStatusCache } from "./hosted-ai-status"
 
 const log = createLogger("background/proxy-fetch")
@@ -46,7 +47,11 @@ export function proxyFetch() {
     // carries no identity to check itself against, so it rides this hook rather
     // than keying on a user id — reading one in the background costs a
     // get-session round trip, the very traffic this listener exists to avoid.
-    await Promise.all([sessionCache.clear(), clearHostedAiStatusCache()])
+    await Promise.all([
+      sessionCache.clear(),
+      clearHostedAiStatusCache(),
+      clearDifficultWordsAccessCache(),
+    ])
   }
 
   // Listen for cookie changes to invalidate auth-related cache
@@ -105,6 +110,10 @@ export function proxyFetch() {
       })
       invalidateAuthCache().catch((error) =>
         log.error("Failed to invalidate auth cache", { error }),
+      )
+      // Only here, not on a granted permission below: the account is the same then.
+      clearDifficultWordsOutbox().catch((error) =>
+        log.error("Failed to clear the difficult-words records", { error }),
       )
     })
   }

@@ -51,6 +51,10 @@ vi.mock("../selection/built-in-ai-prompt-dialog", () => ({
   BuiltInAiPromptDialog: () => null,
 }))
 
+vi.mock("../selection/difficult-words", () => ({
+  DifficultWords: () => null,
+}))
+
 vi.mock("../side/components/floating-button", () => ({
   default: () => null,
 }))

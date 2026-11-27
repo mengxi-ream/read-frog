@@ -40,10 +40,19 @@ vi.mock("@/components/ui/selection-popover", () => ({
   },
 }))
 vi.mock("@/components/custom-action/custom-action-panel", () => ({
-  CustomActionPanel: (props: { getNoteOrigin?: () => unknown }) => {
-    panel.props = props
-    return null
+  CustomActionPanel: {
+    Root: ({ children }: { children: ReactNode }) => children,
+    Header: () => null,
+    Body: () => null,
+    Footer: (props: { getNoteOrigin?: () => unknown }) => {
+      panel.props = props
+      return null
+    },
+    ProviderSelect: () => null,
   },
+}))
+vi.mock("@/components/ui/selection-popover/review-due-tab", () => ({
+  ReviewDueTab: () => null,
 }))
 vi.mock("@/components/custom-action/save-to-notebase-dialog-host", () => ({
   SaveToNotebaseDialogHost: () => null,

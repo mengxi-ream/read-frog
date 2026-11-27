@@ -6,6 +6,7 @@ import { openOptionsPage } from "@/utils/navigation"
 import { version } from "../../../package.json"
 import { AISmartContext } from "./components/ai-smart-context"
 import { AlwaysTranslate } from "./components/always-translate"
+import { DifficultWordsButton } from "./components/difficult-words-button"
 import LanguageOptionsSelector from "./components/language-options-selector"
 import { MoreMenu } from "./components/more-menu"
 import Hotkey from "./components/node-translation-hotkey-selector"
@@ -38,15 +39,18 @@ function App() {
           </div>
           <LanguageOptionsSelector />
           <ProvidersField />
-          {pageTranslationOn && (
-            <>
-              <TranslatePromptSelector />
-              <div className="flex w-full items-center gap-2">
+          {pageTranslationOn && <TranslatePromptSelector />}
+          {/* Difficult words is not part of page translation: its button stays when simple
+              mode turns page translation off, and the row goes when it has nothing in it. */}
+          <div className="flex w-full items-center gap-2 empty:hidden">
+            {pageTranslationOn && (
+              <>
                 <TranslationModeSelector />
                 <TranslateButton className="min-w-0 flex-1" />
-              </div>
-            </>
-          )}
+              </>
+            )}
+            <DifficultWordsButton />
+          </div>
           <SiteControlToggle />
           {pageTranslationOn && (
             <>

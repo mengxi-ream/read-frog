@@ -27,6 +27,7 @@ import {
   setUpDatabaseCleanup,
 } from "./db-cleanup"
 import { setupDiagnosticsHandlers } from "./diagnostics"
+import { setupDifficultWordsHandlers } from "./difficult-words"
 import { setupEdgeTTSMessageHandlers } from "./edge-tts"
 import { setupFeatureUsedEventHandlers } from "./feature-used-event"
 import { setupGlossaryMessageHandlers } from "./glossary"
@@ -165,6 +166,7 @@ export default defineBackground({
 
     proxyFetch()
     setupHostedAiStatusHandler()
+    setupDifficultWordsHandlers()
     setupGlossaryMessageHandlers()
     setupNotebasePendingSaveProcessor(() => backgroundReady)
     setupEdgeTTSMessageHandlers()

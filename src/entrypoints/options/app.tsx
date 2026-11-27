@@ -45,6 +45,9 @@ const InputTranslationPage = lazy(() =>
 const TextToSpeechPage = lazy(() =>
   import("./pages/text-to-speech").then((module) => ({ default: module.TextToSpeechPage })),
 )
+const DifficultWordsPage = lazy(() =>
+  import("./pages/difficult-words").then((module) => ({ default: module.DifficultWordsPage })),
+)
 const GlossaryPage = lazy(() =>
   import("./pages/advanced/glossary").then((module) => ({ default: module.GlossaryPage })),
 )
@@ -152,6 +155,7 @@ const ROUTE_COMPONENTS: Record<RoutePath, ComponentType> = {
   "/context-menu": ContextMenuPage,
   "/input-translation": InputTranslationPage,
   "/tts": TextToSpeechPage,
+  "/difficult-words": DifficultWordsPage,
   "/advanced": AdvancedRedirect,
   "/help-and-community": HelpAndCommunityPage,
   "/advanced/glossary": GlossaryPage,

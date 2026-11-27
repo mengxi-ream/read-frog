@@ -1,4 +1,5 @@
 import type { Config } from "@/types/config/config"
+import { getDifficultWordsShortcut } from "@/utils/constants/difficult-words"
 import {
   getAnnotationModeShortcut,
   getAnnotationShortcut,
@@ -22,9 +23,13 @@ export function getActionShortcutId(actionId: string) {
 /**
  * Every key combination Read Frog listens for on a page. They all hear the same keystrokes, so
  * two of them on one key would both run. Hover translation is in only while it uses a custom
- * shortcut: its other hotkeys are a single key or a long press, not a combination.
+ * shortcut: its other hotkeys are a single key or a long press, not a combination. Difficult
+ * words is in only for an account that can use it: the page listens for its key only then.
  */
-export function getShortcutBindings(config: Config): ShortcutBinding[] {
+export function getShortcutBindings(
+  config: Config,
+  { difficultWords }: { difficultWords: boolean },
+): ShortcutBinding[] {
   const { features } = config.selectionToolbar
   const { node } = config.pageTranslation
   return [
@@ -38,6 +43,15 @@ export function getShortcutBindings(config: Config): ShortcutBinding[] {
       title: i18n.t("options.shortcuts.translationMode.title"),
       shortcut: config.pageTranslation.modeShortcut,
     },
+    ...(difficultWords
+      ? [
+          {
+            id: "difficult-words-shortcut",
+            title: i18n.t("options.shortcuts.difficultWords.title"),
+            shortcut: getDifficultWordsShortcut(config.difficultWords),
+          },
+        ]
+      : []),
     {
       id: "selection-translation-shortcut",
       title: i18n.t("options.shortcuts.selectionTranslation.title"),
