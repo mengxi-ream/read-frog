@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { browser, storage } from "#imports"
 import { CONFIG_STORAGE_KEY, DEFAULT_DETECTED_CODE } from "@/utils/constants/config"
 import { getDetectedCodeStateKey, getTranslationStateKey } from "@/utils/constants/storage-keys"
@@ -98,6 +98,10 @@ describe("translationMessage", () => {
     storageSetItemMock.mockResolvedValue(undefined)
     storageRemoveItemMock.mockResolvedValue(undefined)
     shouldEnableAutoTranslationMock.mockResolvedValue(false)
+  })
+
+  afterEach(() => {
+    vi.unstubAllEnvs()
   })
 
   it("persists manager-enabled state and injects current iframes from the top frame", async () => {
@@ -223,6 +227,7 @@ describe("translationMessage", () => {
   })
 
   it("stores detected language by sender tab and notifies when it is the active tab", async () => {
+    vi.stubEnv("BROWSER", "chrome")
     await setupSubject()
     tabsQueryMock.mockResolvedValue([{ id: 42 }])
 
@@ -231,6 +236,7 @@ describe("translationMessage", () => {
       sender: { tab: { id: 42 }, frameId: 0 },
     })
 
+    expect(tabsQueryMock).toHaveBeenCalledExactlyOnceWith({ active: true, currentWindow: true })
     expect(storageSetItemMock).toHaveBeenCalledWith(getDetectedCodeStateKey(42), "zh-Hans")
     expect(sendMessageMock).toHaveBeenCalledWith("detectedPageLanguageChanged", {
       detectedCode: "zh-Hans",
@@ -246,6 +252,30 @@ describe("translationMessage", () => {
       sender: { tab: { id: 42 }, frameId: 0 },
     })
 
+    expect(storageSetItemMock).toHaveBeenCalledWith(getDetectedCodeStateKey(42), "ja")
+    expect(sendMessageMock).not.toHaveBeenCalledWith("detectedPageLanguageChanged", {
+      detectedCode: "ja",
+    })
+  })
+
+  // A tab in the background can report while the active tab is on a site Safari
+  // hasn't allowed, and asking about that tab would put Safari's website access
+  // dialog up.
+  it("in Safari, looks for the active tab only among tabs it may access", async () => {
+    vi.stubEnv("BROWSER", "safari")
+    await setupSubject()
+    tabsQueryMock.mockResolvedValue([])
+
+    await getHandler("reportDetectedPageLanguage")({
+      data: { detectedCodeOrUnd: "ja", url: "https://ja.example.test" },
+      sender: { tab: { id: 42 }, frameId: 0 },
+    })
+
+    expect(tabsQueryMock).toHaveBeenCalledExactlyOnceWith({
+      active: true,
+      currentWindow: true,
+      url: "*://*/*",
+    })
     expect(storageSetItemMock).toHaveBeenCalledWith(getDetectedCodeStateKey(42), "ja")
     expect(sendMessageMock).not.toHaveBeenCalledWith("detectedPageLanguageChanged", {
       detectedCode: "ja",

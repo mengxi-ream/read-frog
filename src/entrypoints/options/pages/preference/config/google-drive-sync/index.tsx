@@ -6,7 +6,12 @@ import { toastManager } from "@/components/ui/base-ui/toast"
 import { useGoogleDriveAuth } from "@/hooks/use-google-drive-auth"
 import { resolutionsAtom, unresolvedConfigsAtom } from "@/utils/atoms/google-drive-sync"
 import { lastSyncTimeAtom } from "@/utils/atoms/last-sync-time"
-import { clearAccessToken, getGoogleUserInfo, getValidAccessToken } from "@/utils/google-drive/auth"
+import {
+  clearAccessToken,
+  getGoogleUserInfo,
+  getValidAccessToken,
+  isGoogleDriveSyncSupported,
+} from "@/utils/google-drive/auth"
 import { syncConfig } from "@/utils/google-drive/sync"
 import { i18n } from "@/utils/i18n"
 import { createLogger } from "@/utils/logging/logger"
@@ -18,6 +23,32 @@ import { useGlossarySync } from "./use-glossary-sync"
 const log = createLogger("options/pages/preference/config/google-drive-sync")
 
 export function GoogleDriveSyncConfigItem() {
+  return isGoogleDriveSyncSupported() ? <GoogleDriveSync /> : <UnsupportedGoogleDriveSync />
+}
+
+function UnsupportedGoogleDriveSync() {
+  return (
+    <ConfigItem
+      id="google-drive-sync"
+      title={i18n.t("options.preference.config.googleDrive.title")}
+      description={
+        <div className="flex flex-col gap-2">
+          {i18n.t("options.preference.config.googleDrive.description")}
+          <span className="text-xs">
+            {i18n.t("options.preference.config.googleDrive.unsupported")}
+          </span>
+        </div>
+      }
+    >
+      <Button variant="outline" size="sm" disabled>
+        <Icon icon="logos:google-drive" />
+        {i18n.t("options.preference.config.googleDrive.sync")}
+      </Button>
+    </ConfigItem>
+  )
+}
+
+function GoogleDriveSync() {
   const [isSyncing, setIsSyncing] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const {

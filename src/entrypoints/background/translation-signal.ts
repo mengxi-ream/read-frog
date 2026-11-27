@@ -22,6 +22,7 @@ import {
   isPageTranslationStateInUrlScope,
   setPageTranslationEnabled,
 } from "./page-translation-state"
+import { queryTabsWithoutAccessPrompt } from "./tabs-without-access-prompt"
 
 const log = createLogger("background/translation-signal")
 
@@ -59,7 +60,7 @@ function notifyDetectedCodeChanged(detectedCode: LanguageTag) {
 }
 
 async function isActiveCurrentWindowTab(tabId: number): Promise<boolean> {
-  const [activeTab] = await browser.tabs.query({ active: true, currentWindow: true })
+  const [activeTab] = await queryTabsWithoutAccessPrompt({ active: true, currentWindow: true })
   return activeTab?.id === tabId
 }
 

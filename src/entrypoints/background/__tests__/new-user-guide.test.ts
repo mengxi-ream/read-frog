@@ -1,19 +1,21 @@
-import { afterEach, describe, expect, it, vi } from "vitest"
+import { afterEach, describe, expect, it, onTestFinished, vi } from "vitest"
 import { browser } from "#imports"
 import { captureLogs, logRecord } from "@/utils/logging/testing"
 
-const { sendMessageMock } = vi.hoisted(() => ({
+const { onMessageMock, sendMessageMock } = vi.hoisted(() => ({
+  onMessageMock: vi.fn<(type: string, handler: () => unknown) => void>(),
   sendMessageMock: vi.fn<(...args: unknown[]) => Promise<unknown>>(),
 }))
 
 vi.mock("@/utils/message", () => ({
-  onMessage: () => {},
+  onMessage: onMessageMock,
   sendMessage: sendMessageMock,
 }))
 
 describe("guidePinExtension", () => {
   afterEach(() => {
     vi.restoreAllMocks()
+    onMessageMock.mockClear()
   })
 
   // Every service worker start tells the site's tabs again, and a tab with no
@@ -47,5 +49,25 @@ describe("guidePinExtension", () => {
       { isPinned: true },
       3,
     )
+  })
+
+  // Safari has neither, and puts every enabled extension's button on the
+  // toolbar itself. Answering anything else would hold up the website's guide.
+  it("answers pinned, without checking or polling, when the browser can't tell", async () => {
+    const { getUserSettings, onUserSettingsChanged } = browser.action
+    Object.assign(browser.action, { getUserSettings: undefined, onUserSettingsChanged: undefined })
+    onTestFinished(() => {
+      Object.assign(browser.action, { getUserSettings, onUserSettingsChanged })
+    })
+    const setIntervalSpy = vi.spyOn(globalThis, "setInterval")
+    const tabsQuery = vi.spyOn(browser.tabs, "query")
+    const { guidePinExtension } = await import("../new-user-guide")
+
+    await guidePinExtension()
+
+    const getPinState = onMessageMock.mock.calls.find(([type]) => type === "getPinState")?.[1]
+    expect(await getPinState?.()).toBe(true)
+    expect(setIntervalSpy).not.toHaveBeenCalled()
+    expect(tabsQuery).not.toHaveBeenCalled()
   })
 })

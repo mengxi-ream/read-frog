@@ -1,3 +1,4 @@
+import type { Browser } from "#imports"
 import type { ProxyResponse } from "@/types/proxy-fetch"
 import { AUTH_COOKIE_PATTERNS } from "@read-frog/definitions"
 import { browser, storage } from "#imports"
@@ -51,7 +52,11 @@ export function proxyFetch() {
 
   // Listen for cookie changes to invalidate auth-related cache
   if (browser.cookies?.onChanged) {
-    browser.cookies.onChanged.addListener(async (changeInfo) => {
+    browser.cookies.onChanged.addListener(async (changeInfo?: Browser.cookies.CookieChangeInfo) => {
+      // Safari calls this with no argument (webkit.org/b/267514), so there's no
+      // telling which cookie changed.
+      if (!changeInfo) return
+
       const { cookie, removed, cause } = changeInfo
       // Check if it's an auth-related cookie for monitored domains
       if (

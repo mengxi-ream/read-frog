@@ -10,6 +10,7 @@ import {
   getPageTranslationState,
   isPageTranslationStateInUrlScope,
 } from "./page-translation-state"
+import { queryTabsWithoutAccessPrompt } from "./tabs-without-access-prompt"
 
 const log = createLogger("background/browser-action-icon")
 
@@ -74,7 +75,7 @@ export function registerActionIconListeners() {
 }
 
 export async function initializeActionIcons() {
-  const tabs = await browser.tabs.query({})
+  const tabs = await queryTabsWithoutAccessPrompt({})
 
   await Promise.all(
     tabs.map(async (tab) => {

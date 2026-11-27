@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { browser, storage } from "#imports"
 import { getTranslationStateKey } from "@/utils/constants/storage-keys"
 
@@ -6,6 +6,7 @@ const setIconMock = vi.fn<(...args: any[]) => any>()
 const storageGetItemMock = vi.fn<(...args: any[]) => any>()
 const storageOnChangedAddListenerMock = vi.fn<(...args: any[]) => any>()
 const webNavigationOnCommittedAddListenerMock = vi.fn<(...args: any[]) => any>()
+const tabsQueryMock = vi.fn<(...args: any[]) => any>()
 
 const DEFAULT_ACTION_ICON_PATHS = {
   16: "/icon/16.png",
@@ -47,10 +48,16 @@ describe("browser action icon", () => {
     browser.action.setIcon = setIconMock
     browser.storage.session.onChanged.addListener = storageOnChangedAddListenerMock
     browser.webNavigation.onCommitted.addListener = webNavigationOnCommittedAddListenerMock
+    browser.tabs.query = tabsQueryMock
     storage.getItem = storageGetItemMock
 
     setIconMock.mockResolvedValue(undefined)
     storageGetItemMock.mockResolvedValue(undefined)
+    tabsQueryMock.mockResolvedValue([])
+  })
+
+  afterEach(() => {
+    vi.unstubAllEnvs()
   })
 
   it("updates the tab icon when translation state changes", async () => {
@@ -137,5 +144,36 @@ describe("browser action icon", () => {
 
     expect(storageGetItemMock).not.toHaveBeenCalled()
     expect(setIconMock).not.toHaveBeenCalled()
+  })
+
+  it("restores every tab's icon on startup", async () => {
+    vi.stubEnv("BROWSER", "chrome")
+    tabsQueryMock.mockResolvedValue([{ id: 42 }, { id: 7 }])
+    storageGetItemMock.mockImplementation(async (key: string) =>
+      key === getTranslationStateKey(42) ? { enabled: true, origin: "https://example.com" } : null,
+    )
+    const { initializeActionIcons } = await import("../browser-action-icon")
+
+    await initializeActionIcons()
+
+    expect(tabsQueryMock).toHaveBeenCalledExactlyOnceWith({})
+    expect(setIconMock).toHaveBeenCalledWith({ tabId: 42, path: ACTIVE_ACTION_ICON_PATHS })
+    expect(setIconMock).toHaveBeenCalledWith({ tabId: 7, path: DEFAULT_ACTION_ICON_PATHS })
+  })
+
+  // Asking about every open tab would put Safari's website access dialog up on
+  // startup.
+  it("in Safari, restores icons on startup only for tabs on sites it may access", async () => {
+    vi.stubEnv("BROWSER", "safari")
+    tabsQueryMock.mockResolvedValue([{ id: 42 }])
+    const { initializeActionIcons } = await import("../browser-action-icon")
+
+    await initializeActionIcons()
+
+    expect(tabsQueryMock).toHaveBeenCalledExactlyOnceWith({ url: "*://*/*" })
+    expect(setIconMock).toHaveBeenCalledExactlyOnceWith({
+      tabId: 42,
+      path: DEFAULT_ACTION_ICON_PATHS,
+    })
   })
 })

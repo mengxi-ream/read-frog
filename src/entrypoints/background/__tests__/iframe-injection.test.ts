@@ -1,5 +1,5 @@
 import type { Config } from "@/types/config/config"
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { browser, storage } from "#imports"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { getSelectionToolbarHiddenKey } from "@/utils/constants/storage-keys"
@@ -20,6 +20,7 @@ const webNavigationOnCompletedAddListenerMock = vi.fn<(...args: any[]) => any>()
 const getAllFramesMock = vi.fn<(...args: any[]) => any>()
 const executeScriptMock = vi.fn<(...args: any[]) => any>()
 const tabsGetMock = vi.fn<(...args: any[]) => any>()
+const tabsQueryMock = vi.fn<(...args: any[]) => any>()
 const storageGetItemMock = vi.fn<(...args: any[]) => any>()
 
 // Hoisted: the mocked modules are evaluated before a plain `const` here would be
@@ -137,6 +138,7 @@ describe("setupIframeInjection", () => {
 
     browser.tabs.onRemoved.addListener = tabsOnRemovedAddListenerMock
     browser.tabs.get = tabsGetMock
+    browser.tabs.query = tabsQueryMock
     browser.webNavigation.onBeforeNavigate.addListener =
       webNavigationOnBeforeNavigateAddListenerMock
     browser.webNavigation.onCompleted.addListener = webNavigationOnCompletedAddListenerMock
@@ -152,6 +154,11 @@ describe("setupIframeInjection", () => {
     ])
     storageGetItemMock.mockResolvedValue({ enabled: true })
     executeScriptMock.mockResolvedValue(undefined)
+    tabsQueryMock.mockResolvedValue([])
+  })
+
+  afterEach(() => {
+    vi.unstubAllEnvs()
   })
 
   it("loads both runtimes only when a same-origin iframe selection requests them", async () => {
@@ -513,6 +520,41 @@ describe("setupIframeInjection", () => {
     tabsGetMock.mockResolvedValue({ url: "https://reader.example/viewer" })
     getLocalConfigMock.mockResolvedValue(createConfig({ eagerIframeInjection: true }))
     await onCompleted(createDetails({ url: "https://other.example/frame" }))
+    expect(executeScriptMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        args: loaderContextArgs("https://reader.example/viewer", ["host", "selection"]),
+      }),
+    )
+  })
+
+  // Getting the tab would put Safari's website access dialog up for the page's
+  // site, and Safari lets no script into any frame of a page it hasn't allowed.
+  it("in Safari, leaves a frame alone when the page it's in is on a site it hasn't allowed", async () => {
+    vi.stubEnv("BROWSER", "safari")
+    const { onCompleted } = await setupSubject()
+    // The frame itself matches a rule that injects into iframes.
+    getLocalConfigMock.mockResolvedValue(createConfig({ eagerIframeInjection: true }))
+
+    await onCompleted(createDetails({ url: "https://reader.example/frame" }))
+
+    expect(tabsQueryMock).toHaveBeenCalledExactlyOnceWith({ url: "*://*/*" })
+    expect(tabsGetMock).not.toHaveBeenCalled()
+    expect(executeScriptMock).not.toHaveBeenCalled()
+  })
+
+  it("in Safari, follows the page's rule as usual when its site is allowed", async () => {
+    vi.stubEnv("BROWSER", "safari")
+    const { onCompleted } = await setupSubject()
+    storageGetItemMock.mockResolvedValue({ enabled: false })
+    getLocalConfigMock.mockResolvedValue(createConfig({ eagerIframeInjection: true }))
+    tabsQueryMock.mockResolvedValue([
+      { id: currentTabId + 1, url: "https://example.com/" },
+      { id: currentTabId, url: "https://reader.example/viewer" },
+    ])
+
+    await onCompleted(createDetails({ url: "https://other.example/frame" }))
+
+    expect(tabsGetMock).not.toHaveBeenCalled()
     expect(executeScriptMock).toHaveBeenCalledWith(
       expect.objectContaining({
         args: loaderContextArgs("https://reader.example/viewer", ["host", "selection"]),

@@ -7,7 +7,6 @@ import { GOOGLE_DRIVE_TOKEN_STORAGE_KEY } from "../constants/config"
 const log = createLogger("google-drive/auth")
 
 const GOOGLE_CLIENT_ID = env.WXT_GOOGLE_CLIENT_ID ?? "YOUR_CLIENT_ID"
-const GOOGLE_REDIRECT_URI = browser.identity.getRedirectURL()
 const GOOGLE_SCOPES = [
   "https://www.googleapis.com/auth/drive.appdata",
   "https://www.googleapis.com/auth/userinfo.email",
@@ -49,6 +48,14 @@ export type GoogleAuthToken = z.infer<typeof googleAuthTokenSchema>
 export type GoogleUserInfo = z.infer<typeof googleUserInfoSchema>
 
 /**
+ * Whether this browser can sign in to Google, which Drive sync can't do without.
+ * Safari has no `identity` API at all.
+ */
+export function isGoogleDriveSyncSupported(): boolean {
+  return typeof browser.identity?.launchWebAuthFlow === "function"
+}
+
+/**
  * Get token from storage with validation
  */
 async function getTokenFromStorage(): Promise<GoogleAuthToken | null> {
@@ -81,7 +88,10 @@ export async function authenticateGoogleDriveAndSaveTokenToStorage(): Promise<st
     const authUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth")
     authUrl.searchParams.set("client_id", GOOGLE_CLIENT_ID)
     authUrl.searchParams.set("response_type", "token")
-    authUrl.searchParams.set("redirect_uri", GOOGLE_REDIRECT_URI)
+    // Read only here: the settings page's opening screen imports this module,
+    // and reading it at load time in a browser without `identity` breaks that
+    // whole page.
+    authUrl.searchParams.set("redirect_uri", browser.identity.getRedirectURL())
     authUrl.searchParams.set("scope", GOOGLE_SCOPES.join(" "))
     authUrl.searchParams.set("prompt", "select_account")
 
