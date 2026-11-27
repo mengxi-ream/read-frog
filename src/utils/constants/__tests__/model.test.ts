@@ -558,7 +558,8 @@ describe("getProviderOptions", () => {
     })
 
     it("should list DeepSeek V4.1 Flash on the hosts that serve it", () => {
-      // deepseek-v4-flash stays listed until v128-to-v129 has moved configs off it.
+      // deepseek-v4-flash stays listed one more release: v128-to-v129 and v132-to-v133 move
+      // configs off it, but a UI context can still read a config the background has not migrated.
       expect(LLM_PROVIDER_MODELS.deepseek).toEqual([
         "deepseek-flash",
         "deepseek-v4-flash",
@@ -586,6 +587,11 @@ describe("getProviderOptions", () => {
       expect(LLM_PROVIDER_MODELS.alibaba).toEqual(
         expect.arrayContaining(["deepseek-v4.1-flash", "deepseek-v4.1-flash-1017"]),
       )
+    })
+
+    it("should list Qwen3.7 Max on Alibaba and turn its thinking off", () => {
+      expect(LLM_PROVIDER_MODELS.alibaba).toContain("qwen3.7-max")
+      expect(getProviderOptions("qwen3.7-max", "alibaba").alibaba?.enableThinking).toBe(false)
     })
 
     it("should only list the models GroqCloud, Cerebras and Kimi still serve", () => {

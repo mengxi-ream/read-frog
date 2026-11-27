@@ -1,8 +1,8 @@
 import type { JSONValue } from "ai"
 
-// Reviewed against provider catalogs, provider deprecation pages and AI SDK docs on 2026-11-21.
+// Reviewed against provider catalogs, provider deprecation pages and AI SDK docs on 2026-11-27.
 // Persisted provider configs validate against these enums: only drop an ID together with a
-// config migration that moves saved configs off it (the latest is v128-to-v129).
+// config migration that moves saved configs off it (the latest is v132-to-v133).
 export const LLM_PROVIDER_MODELS = {
   // Shut down by OpenAI and moved off in v128-to-v129: gpt-4.1-nano and the gpt-5*-chat-latest
   // and gpt-5*-codex ids. https://developers.openai.com/api/docs/deprecations
@@ -67,14 +67,19 @@ export const LLM_PROVIDER_MODELS = {
   ],
   // deepseek-chat and deepseek-reasoner were retired on 2026-07-24; v119-to-v120 moves them off.
   // deepseek-flash is DeepSeek's alias for whichever V4.x Flash release is current (V4.1 Flash
-  // 1017 as of 2026-11-21). V4 Flash is retired and the deepseek-v4-flash name only temporarily
-  // routes to V4.1 Flash, so v128-to-v129 moves configs to deepseek-flash. deepseek-v4-flash
-  // stays listed for now because it was the default: a UI context that reads storage before the
-  // background runs v128-to-v129 must still parse those configs. Drop it in a later update.
-  // https://api-docs.deepseek.com/updates (reviewed 2026-11-21)
+  // 1017 as of 2026-11-27). V4 Flash is retired and the deepseek-v4-flash name only temporarily
+  // routes to V4.1 Flash, so v128-to-v129 and v132-to-v133 move configs to deepseek-flash.
+  // deepseek-v4-flash stays listed for one more release: a UI context that reads storage before
+  // the background has run v132-to-v133 must still parse those configs (an unparseable config
+  // reads as the defaults and the next save overwrites it). Drop it in the next update.
+  // https://api-docs.deepseek.com/updates (reviewed 2026-11-27)
   deepseek: ["deepseek-flash", "deepseek-v4-flash", "deepseek-v4-pro"],
   // Shut down by Google and moved off in v128-to-v129: gemini-3-pro-preview,
-  // gemini-3.1-flash-lite-preview, gemini-2.0-flash and the two image previews.
+  // gemini-3.1-flash-lite-preview, gemini-2.0-flash and the two image previews. Google stops
+  // serving gemini-2.5-pro and gemini-2.5-flash on 2026-12-01 and routes them to gemini-3.8-flash
+  // and gemini-3.5-flash-lite; v132-to-v133 moves saved configs there. Both ids stay listed for
+  // one more release for the same reason as deepseek-v4-flash above; drop them in the next
+  // update. gemini-2.5-flash-lite is not deprecated.
   // https://ai.google.dev/gemini-api/docs/deprecations
   google: [
     "gemini-3.5-flash-lite",
@@ -416,6 +421,7 @@ export const LLM_PROVIDER_MODELS = {
   alibaba: [
     "qwen3.8-flash",
     "qwen3.8-max",
+    "qwen3.7-max",
     "qwen3.7-flash",
     "qwen3.7-plus",
     "deepseek-v4.1-flash",
