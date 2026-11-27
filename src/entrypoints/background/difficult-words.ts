@@ -9,6 +9,7 @@ import {
 import { GATED_FEATURES } from "@read-frog/definitions"
 import { browser, storage } from "#imports"
 import { env } from "@/env"
+import { readSessionCookies } from "@/utils/auth/safari-session"
 import { createLogger } from "@/utils/logging/logger"
 import { onMessage, sendMessage } from "@/utils/message"
 import { backgroundOrpcClient } from "@/utils/orpc/background-client"
@@ -403,12 +404,12 @@ async function readCachedAccess(): Promise<DifficultWordsAccess | null> {
  * that happens to match only means the server is asked.
  *
  * `true` when there is no telling: the cookies can't be read (Firefox with
- * first-party isolation wants a `firstPartyDomain`), or the browser is Safari,
- * where reading the cookies of a site it hasn't been allowed on asks the user
- * for access, and pages ask here without the reader doing anything.
+ * first-party isolation wants a `firstPartyDomain`). Safari sends the session
+ * cookies it can read itself, so they are the answer there; it reads none
+ * without access to the site, since reading them would ask the user for it.
  */
 async function mayBeSignedIn(): Promise<boolean> {
-  if (import.meta.env.BROWSER === "safari") return true
+  if (import.meta.env.BROWSER === "safari") return (await readSessionCookies()).length > 0
   try {
     const cookies = await browser.cookies.getAll({ url: env.WXT_API_URL })
     return cookies.some((cookie) => cookie.name.endsWith(".session_token"))

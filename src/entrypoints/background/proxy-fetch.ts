@@ -3,6 +3,7 @@ import type { ProxyResponse } from "@/types/proxy-fetch"
 import { AUTH_COOKIE_PATTERNS } from "@read-frog/definitions"
 import { browser, storage } from "#imports"
 import { env } from "@/env"
+import { fetchWithSessionToken, onSessionCookiesChange } from "@/utils/auth/safari-session"
 import { AUTH_CACHE_GROUP_KEY, DEFAULT_PROXY_CACHE_TTL_MS } from "@/utils/constants/proxy-fetch"
 import { createLogger } from "@/utils/logging/logger"
 import { onMessage } from "@/utils/message"
@@ -59,7 +60,7 @@ export function proxyFetch() {
   if (browser.cookies?.onChanged) {
     browser.cookies.onChanged.addListener(async (changeInfo?: Browser.cookies.CookieChangeInfo) => {
       // Safari calls this with no argument (webkit.org/b/267514), so there's no
-      // telling which cookie changed.
+      // telling which cookie changed. It watches its own way, below.
       if (!changeInfo) return
 
       const { cookie, removed, cause } = changeInfo
@@ -117,6 +118,19 @@ export function proxyFetch() {
         log.error("Failed to invalidate auth cache", { error }),
       )
       // Only here, not on a granted permission below: the account is the same then.
+      clearDifficultWordsOutbox().catch((error) =>
+        log.error("Failed to clear the difficult-words records", { error }),
+      )
+    })
+  }
+
+  // Safari reads the session cookies again whenever any cookie changes, and
+  // does what the listener above does when they are not the ones it last saw.
+  if (import.meta.env.BROWSER === "safari") {
+    onSessionCookiesChange(() => {
+      invalidateAuthCache().catch((error) =>
+        log.error("Failed to invalidate auth cache", { error }),
+      )
       clearDifficultWordsOutbox().catch((error) =>
         log.error("Failed to clear the difficult-words records", { error }),
       )
@@ -213,13 +227,17 @@ export function proxyFetch() {
       await invalidateCache(cacheGroupKey)
     }
 
-    const response = await fetch(url, {
-      method: finalMethod,
-      headers: headers ? new Headers(headers) : undefined,
-      body,
-      credentials: credentials ?? "include",
-      redirect,
-    })
+    // In Safari a request to the API carries the session itself.
+    const response = await (import.meta.env.BROWSER === "safari" ? fetchWithSessionToken : fetch)(
+      url,
+      {
+        method: finalMethod,
+        headers: headers ? new Headers(headers) : undefined,
+        body,
+        credentials: credentials ?? "include",
+        redirect,
+      },
+    )
 
     const responseHeaders: [string, string][] = [...response.headers.entries()]
     const responseBody =
