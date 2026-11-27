@@ -1,6 +1,5 @@
 // @vitest-environment jsdom
 
-import type { ContentScriptContext } from "#imports"
 import { act } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { storage } from "#imports"
@@ -103,8 +102,11 @@ function createContentScriptContext() {
     ctx: {
       onInvalidated: (callback: () => void) => {
         invalidationCallbacks.push(callback)
+        return () => {
+          invalidationCallbacks.splice(invalidationCallbacks.indexOf(callback), 1)
+        }
       },
-    } as ContentScriptContext,
+    },
     invalidate: () => {
       for (const callback of invalidationCallbacks) {
         callback()

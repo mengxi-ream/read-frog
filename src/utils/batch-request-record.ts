@@ -47,7 +47,9 @@ export async function putBatchRequestRecord({
  * The share of requests batching folded away: every record is one request that stood in for
  * `originalRequestCount` of them. 0 when nothing was recorded, or when nothing was batched.
  */
-export function calculateRequestSavingRatio(batchRequestRecords: BatchRequestRecord[]): number {
+export function calculateRequestSavingRatio(
+  batchRequestRecords: Pick<BatchRequestRecord, "originalRequestCount">[],
+): number {
   if (!batchRequestRecords.length) return 0
 
   const originalRequestCount = batchRequestRecords.reduce(

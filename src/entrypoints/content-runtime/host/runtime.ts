@@ -22,7 +22,7 @@ import { PageTranslationManager } from "./translation-control/page-translation"
 const log = createLogger("content-runtime/host/runtime")
 
 export async function bootstrapHostContent(
-  ctx: ContentScriptContext,
+  ctx: Pick<ContentScriptContext, "onInvalidated">,
   initialConfig: Config | null,
 ) {
   ensurePresetStyles(document)

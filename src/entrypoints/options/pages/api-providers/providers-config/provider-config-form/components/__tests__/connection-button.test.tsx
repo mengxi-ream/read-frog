@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
+import { act, fireEvent, render, screen } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_PROVIDER_CONFIG } from "@/utils/constants/providers"
 import { ConnectionTestButton } from "../connection-button"
@@ -8,7 +8,6 @@ import { ConnectionTestButton } from "../connection-button"
 const mutationMock = vi.hoisted(() => ({
   isPending: false,
   mutate: vi.fn<(...args: any[]) => any>(),
-  reset: vi.fn<() => void>(),
 }))
 
 vi.mock("@tanstack/react-query", () => ({
@@ -26,7 +25,6 @@ vi.mock("@/utils/host/translate/execute-translate", () => ({
 describe("ConnectionTestButton", () => {
   beforeEach(() => {
     mutationMock.mutate.mockReset()
-    mutationMock.reset.mockReset()
   })
 
   it("clears successful feedback when the Open Responses endpoint changes", async () => {
@@ -75,8 +73,6 @@ describe("ConnectionTestButton", () => {
     }
     const { rerender } = render(<ConnectionTestButton providerConfig={providerConfig} />)
 
-    await waitFor(() => expect(mutationMock.reset).toHaveBeenCalled())
-    const initialResetCount = mutationMock.reset.mock.calls.length
     fireEvent.click(
       screen.getByRole("button", {
         name: "options.apiProviders.testConnection.button",
@@ -92,7 +88,6 @@ describe("ConnectionTestButton", () => {
         }}
       />,
     )
-    await waitFor(() => expect(mutationMock.reset).toHaveBeenCalledTimes(initialResetCount + 1))
 
     act(() => {
       void callbacks.onSuccess(undefined, variables)

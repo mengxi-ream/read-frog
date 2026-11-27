@@ -27,8 +27,9 @@ const NOT_STARTED: DifficultWordsTabState = { enabled: false, count: 0 }
 /** Marks the difficult words on the page, or clears them. Shown to the accounts it is open to, and wherever it is on. */
 export function DifficultWordsButton() {
   const difficultWords = useAtomValue(configFieldsAtomMap.difficultWords)
-  // Asked afresh: opening the popup is where a newly opened feature is looked for.
-  const access = useDifficultWordsAccess(difficultWords.enabled, { fresh: true })
+  // The cached verdict, as the pages get: the popup opens often, and a change
+  // of account clears the cache.
+  const access = useDifficultWordsAccess(difficultWords.enabled)
   if (!difficultWords.enabled) return null
   return (
     <DifficultWordsToggle
