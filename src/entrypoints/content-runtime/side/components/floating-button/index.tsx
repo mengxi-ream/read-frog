@@ -29,6 +29,7 @@ import {
 } from "../../atoms"
 import { shadowWrapper } from "../../main"
 import HiddenButton from "./components/hidden-button"
+import DifficultWordsButton from "./difficult-words-button"
 import TranslateButton from "./translate-button"
 
 const readFrogLogoUrl = new URL(readFrogLogo, browser.runtime.getURL("/")).href
@@ -422,6 +423,9 @@ export default function FloatingButton() {
       style={containerStyle}
       onMouseLeave={handleMouseLeave}
     >
+      {!isDraggingButton && (
+        <DifficultWordsButton side={floatingButtonSide} expanded={isFloatingButtonExpanded} />
+      )}
       {/* Translating the page goes with page translation when simple mode turns it off. */}
       {!isDraggingButton && isFeatureOn(config, "pageTranslation") && (
         <TranslateButton side={floatingButtonSide} expanded={isFloatingButtonExpanded} />

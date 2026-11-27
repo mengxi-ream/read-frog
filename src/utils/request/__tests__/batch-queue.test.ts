@@ -1,10 +1,10 @@
 import type { Config } from "@/types/config/config"
 import type { ProviderConfig } from "@/types/config/provider"
 import { afterEach, describe, expect, it, vi } from "vitest"
-import { parseBatchResult } from "@/entrypoints/background/translation-queues"
 import { BATCH_SEPARATOR } from "@/utils/constants/prompt"
 import { Sha256Hex } from "@/utils/hash"
 import { executeTranslate } from "@/utils/host/translate/execute-translate"
+import { parseBatchResult } from "@/utils/prompts/batch-format"
 import { BatchQueue } from "../batch-queue"
 import { RequestQueue } from "../request-queue"
 

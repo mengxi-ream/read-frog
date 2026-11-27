@@ -13,6 +13,7 @@ import {
 import { configAtom } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
 import { buildTurnOnLink } from "../pages/advanced/simple-mode/links"
+import { useIsDifficultWordsOpen } from "../pages/difficult-words/access"
 import { commandPaletteOpenAtom } from "./atoms"
 import { SEARCH_ITEMS } from "./search-items"
 import {
@@ -43,9 +44,12 @@ export function SettingsSearch() {
     return () => document.removeEventListener("keydown", handleKeyDown)
   }, [setOpen])
 
+  const isDifficultWordsOpen = useIsDifficultWordsOpen()
+
   const groupedItems = useMemo(() => {
     const groups = new Map<(typeof SEARCH_ITEMS)[number]["pageKey"], typeof SEARCH_ITEMS>()
     for (const item of SEARCH_ITEMS) {
+      if (item.gate === "difficultWords" && !isDifficultWordsOpen) continue
       const existing = groups.get(item.pageKey)
       if (existing) {
         existing.push(item)
@@ -54,7 +58,7 @@ export function SettingsSearch() {
       }
     }
     return groups
-  }, [])
+  }, [isDifficultWordsOpen])
 
   useEffect(() => {
     const sectionId = getSectionIdFromSearch(search)

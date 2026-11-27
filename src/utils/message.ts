@@ -1,4 +1,11 @@
+import type { VocabEvent, VocabJudgeBlock, VocabSeen } from "@read-frog/api-contract"
 import type { LanguageTag } from "@read-frog/definitions"
+import type {
+  DifficultWordLemmaChange,
+  DifficultWordsAccess,
+  DifficultWordsJudgeResponse,
+  DifficultWordsTabState,
+} from "./difficult-words/types"
 import type { GuideDictionaryNotebaseCompletionInput } from "./guide/dictionary-notebase"
 import type {
   BuiltInAiPromptEvent,
@@ -225,6 +232,26 @@ interface ProtocolMap {
   // because content scripts cannot read the session storage that cache lives in.
   // Null means "no verdict" (fetch failed); callers fail open on it.
   getHostedAiStatus: () => Promise<HostedAiStatus | null>
+  // difficult words. The background owns the server traffic: the access
+  // verdict, cached for every tab, and the queue of what the reader did with
+  // marked words, which must outlive the page it happened on.
+  // `fresh` skips the cached verdict: the popup asks it so a new grant shows at once.
+  getDifficultWordsAccess: (data?: { fresh?: boolean }) => DifficultWordsAccess
+  // `events` are queued first, so the blocks are judged with them counted. An
+  // undo among them waits for the request carrying the record it takes back.
+  judgeDifficultWords: (data: {
+    own?: LanguageTag
+    blocks: VocabJudgeBlock[]
+    events?: VocabEvent[]
+  }) => DifficultWordsJudgeResponse
+  recordDifficultWordEvents: (data: { events: VocabEvent[] }) => void
+  // Marked words the reader saw: they go with the next request, sent once.
+  recordDifficultWordsSeen: (data: { seen: VocabSeen[] }) => void
+  broadcastDifficultWordLemma: (data: DifficultWordLemmaChange) => void
+  // to a tab's top frame
+  difficultWordLemmaChanged: (data: DifficultWordLemmaChange) => void
+  getDifficultWordsState: () => DifficultWordsTabState
+  setDifficultWordsEnabled: (data: { enabled: boolean }) => DifficultWordsTabState
   // network proxy
   backgroundFetch: (data: ProxyRequest) => Promise<ProxyResponse>
   // local log — the background owns it; every other context hands it its

@@ -149,27 +149,50 @@ export function RegenerateButton({
   )
 }
 
-export function SelectionToolbarFooterContent({
-  children,
-  className,
-  paragraphsText,
-  onProviderChange,
-  onRegenerate,
+/** The provider picker that sits on the left of a selection card's footer. */
+export function SelectionToolbarProviderSelect({
+  onChange,
   providers,
-  titleText,
   value,
 }: {
-  children?: React.ReactNode
-  className?: string
-  paragraphsText: string | null | undefined
-  onProviderChange: (id: string) => void
-  onRegenerate: () => void
+  onChange: (id: string) => void
   providers: ProviderSelectorOption[]
-  titleText: string | null | undefined
   value: string
 }) {
   const popoverOverlay = useSelectionPopoverOverlayProps()
 
+  return (
+    <ProviderSelector
+      providers={providers}
+      value={value}
+      onChange={onChange}
+      className="max-w-full"
+      triggerNameClassName={SELECTION_TOOLBAR_FOOTER_COMPACT_CLASSES.label}
+      triggerSize="sm"
+      selectContentProps={popoverOverlay}
+    />
+  )
+}
+
+/**
+ * A selection card's footer: `start` on the left (the host's, such as a
+ * provider picker), then `children`, the context details and regenerate.
+ */
+export function SelectionToolbarFooterContent({
+  children,
+  className,
+  paragraphsText,
+  onRegenerate,
+  start,
+  titleText,
+}: {
+  children?: React.ReactNode
+  className?: string
+  paragraphsText: string | null | undefined
+  onRegenerate: () => void
+  start?: React.ReactNode
+  titleText: string | null | undefined
+}) {
   return (
     <SelectionPopover.Footer
       className={cn(
@@ -180,17 +203,7 @@ export function SelectionToolbarFooterContent({
         className,
       )}
     >
-      <div className="max-w-52 min-w-0 flex-1">
-        <ProviderSelector
-          providers={providers}
-          value={value}
-          onChange={onProviderChange}
-          className="max-w-full"
-          triggerNameClassName={SELECTION_TOOLBAR_FOOTER_COMPACT_CLASSES.label}
-          triggerSize="sm"
-          selectContentProps={popoverOverlay}
-        />
-      </div>
+      <div className="max-w-52 min-w-0 flex-1">{start}</div>
       <div className="flex min-w-0 items-center gap-1">
         {children}
         <ContextDetailsButton titleText={titleText} paragraphsText={paragraphsText} />

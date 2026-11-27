@@ -6,13 +6,13 @@ import type { WebPagePromptContext } from "@/types/content"
 import type { ProviderRequestRouting } from "@/types/hosted-request"
 import type { MatchedTerm } from "@/utils/glossary/types"
 import type { PromptResolver } from "@/utils/host/translate/api/ai"
+import type { BatchFormat } from "@/utils/prompts/batch-format"
 import type { SerializableProviderRef } from "@/utils/providers/provider-ref"
 import { LANGUAGE_ENGLISH_NAMES } from "@read-frog/definitions"
 import { storage } from "#imports"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { putBatchRequestRecord } from "@/utils/batch-request-record"
 import { CONFIG_STORAGE_KEY, DEFAULT_CONFIG } from "@/utils/constants/config"
-import { BATCH_SEPARATOR, BATCH_SEPARATOR_LINE_PATTERN } from "@/utils/constants/prompt"
 import { BATCH_TIMEOUT_PER_CHAR_MS, MAX_BATCH_EXTRA_TIMEOUT_MS } from "@/utils/constants/translate"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { Sha256Hex } from "@/utils/hash"
@@ -20,8 +20,8 @@ import { executeTranslate } from "@/utils/host/translate/execute-translate"
 import { withBuiltInAiRequestId } from "@/utils/hosted-ai/request-id"
 import { requireHostedFeature } from "@/utils/hosted-ai/routing"
 import { createLogger } from "@/utils/logging/logger"
-import { getSubtitlesTranslatePrompt } from "@/utils/prompts/subtitles"
-import { getTranslatePrompt } from "@/utils/prompts/translate"
+import { getSubtitlesTranslatePrompt, SUBTITLE_BATCH_FORMAT } from "@/utils/prompts/subtitles"
+import { getTranslatePrompt, PAGE_BATCH_FORMAT } from "@/utils/prompts/translate"
 import { BatchQueue } from "@/utils/request/batch-queue"
 import { CancelledScopeRegistry, isTranslationCancelledError } from "@/utils/request/cancellation"
 import { RequestQueue, RequestQueueTimeoutError } from "@/utils/request/request-queue"
@@ -138,13 +138,6 @@ function rethrowWithHostedRequestId(hostedRequestId: string | undefined) {
   }
 }
 
-export function parseBatchResult(result: string): string[] {
-  return result
-    .trim()
-    .split(BATCH_SEPARATOR_LINE_PATTERN)
-    .map((t) => t.trim())
-}
-
 /**
  * The time a batch gets on top of the user's request timeout, for its size.
  * The cap is on this extra only, so raising the request timeout lengthens every
@@ -253,13 +246,12 @@ function isSameWording(a: MatchedTerm, b: MatchedTerm): boolean {
 export async function executeBatchTranslation<TContext>(
   dataList: TranslateBatchData<TContext>[],
   promptResolver: PromptResolver<TContext>,
+  batchFormat: BatchFormat,
   signal?: AbortSignal,
   hostedRequestId?: string,
 ): Promise<string[]> {
   const { langConfig, context } = dataList[0]!
-  const texts = dataList.map((d) => d.text)
-
-  const batchText = texts.join(`\n\n${BATCH_SEPARATOR}\n\n`)
+  const batchText = batchFormat.join(dataList.map((d) => d.text))
   const result = await executeQueuedTranslation(
     batchText,
     langConfig,
@@ -273,7 +265,7 @@ export async function executeBatchTranslation<TContext>(
       glossaryTerms: mergeBatchGlossaryTerms(dataList),
     },
   )
-  return parseBatchResult(result)
+  return batchFormat.parse(result)
 }
 
 export type TranslateBatchData<TContext = unknown> = QueuedTranslationRouting & {
@@ -309,6 +301,9 @@ interface TranslationQueueSetupConfig<TContext = unknown> {
   requestQueueConfig: RequestQueueConfig
   batchQueueConfig: BatchQueueConfig
   promptResolver: PromptResolver<TContext>
+  // How a batch is written into one request and read back. It must be the
+  // format `promptResolver` describes to the model in its batch rules.
+  batchFormat: BatchFormat
   // Present only for queues whose requests carry cancellation scopes.
   isScopeCancelled?: (scopeKey: string) => boolean
   queueName: "webpage" | "subtitles"
@@ -321,7 +316,7 @@ interface TranslationQueueSetupConfig<TContext = unknown> {
 async function createTranslationQueues<TContext>(config: TranslationQueueSetupConfig<TContext>) {
   const { rate, capacity, timeoutMs } = config.requestQueueConfig
   const { maxCharactersPerBatch, maxItemsPerBatch } = config.batchQueueConfig
-  const { promptResolver, isScopeCancelled, queueName, configSource } = config
+  const { promptResolver, batchFormat, isScopeCancelled, queueName, configSource } = config
   const queueLog = log.with({ queue: queueName })
 
   queueLog.debug("Queue initialized", {
@@ -393,7 +388,13 @@ async function createTranslationQueues<TContext>(config: TranslationQueueSetupCo
           })
         }
         // Homogeneous per batch: hostedFeature is part of the batch key.
-        return await executeBatchTranslation(dataList, promptResolver, signal, hostedRequestId)
+        return await executeBatchTranslation(
+          dataList,
+          promptResolver,
+          batchFormat,
+          signal,
+          hostedRequestId,
+        )
       }
 
       return requestQueue
@@ -527,6 +528,7 @@ export function createWebPageTranslationQueues() {
         requestQueueConfig,
         batchQueueConfig,
         promptResolver: webPromptResolver,
+        batchFormat: PAGE_BATCH_FORMAT,
         isScopeCancelled: (scopeKey) => cancelledScopes.has(scopeKey),
         queueName: "webpage",
         configSource,
@@ -553,6 +555,7 @@ export function createSubtitlesTranslationQueues() {
         requestQueueConfig,
         batchQueueConfig,
         promptResolver: getSubtitlesTranslatePrompt,
+        batchFormat: SUBTITLE_BATCH_FORMAT,
         queueName: "subtitles",
         configSource,
       }),

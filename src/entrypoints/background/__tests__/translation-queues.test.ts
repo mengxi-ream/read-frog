@@ -3,6 +3,7 @@ import type { MatchedTerm } from "@/utils/glossary/types"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { BATCH_SEPARATOR, NO_TRANSLATION_SENTINEL } from "@/utils/constants/prompt"
+import { SEPARATED_BATCH_FORMAT } from "@/utils/prompts/batch-format"
 import { isTranslationCancelledError } from "@/utils/request/cancellation"
 
 const onMessageMock = vi.fn<(...args: any[]) => any>()
@@ -626,8 +627,9 @@ describe("translation queue helpers", () => {
 
     expect(result).toBe("translated subtitle")
     expect(generateArticleSummaryMock).not.toHaveBeenCalled()
+    // A batch of one cue, numbered like any subtitle batch.
     expect(executeTranslateMock).toHaveBeenCalledWith(
-      "hello",
+      "[1]\nhello",
       DEFAULT_CONFIG.language,
       llmProvider,
       expect.any(Function),
@@ -640,6 +642,41 @@ describe("translation queue helpers", () => {
         },
       }),
     )
+  })
+
+  it("sends a subtitle batch as numbered cues and maps the numbered reply back to each cue", async () => {
+    ensureInitializedConfigMock.mockResolvedValue({
+      ...DEFAULT_CONFIG,
+      videoSubtitles: {
+        ...DEFAULT_CONFIG.videoSubtitles,
+        providerId: llmProvider.id,
+        requestQueueConfig: { rate: 10, capacity: 10, timeoutMs: 20_000 },
+        batchQueueConfig: { maxCharactersPerBatch: 1000, maxItemsPerBatch: 10 },
+      },
+    })
+    executeTranslateMock.mockResolvedValue("[1]\n所以今天\n[2]\n我想给你看")
+
+    const { setupSubtitlesTranslationHandlers } = await import("../subtitles-translation")
+    setupSubtitlesTranslationHandlers()
+    const handler = getRegisteredMessageHandler("enqueueSubtitlesTranslateRequest")
+    const cue = (text: string) =>
+      handler({
+        data: {
+          text,
+          langConfig: DEFAULT_CONFIG.language,
+          providerRef: { kind: "local" as const, config: llmProvider },
+          scheduleAt: Date.now(),
+          hash: `numbered-${text}`,
+          webTitle: "Video title",
+        },
+      })
+
+    await expect(Promise.all([cue("so today"), cue("I want to show you")])).resolves.toEqual([
+      "所以今天",
+      "我想给你看",
+    ])
+    expect(executeTranslateMock).toHaveBeenCalledTimes(1)
+    expect(executeTranslateMock.mock.calls[0]![0]).toBe("[1]\nso today\n[2]\nI want to show you")
   })
 
   it("keeps subtitle translations with different video context in separate batches", async () => {
@@ -700,7 +737,7 @@ describe("translation queue helpers", () => {
     expect(executeTranslateMock).toHaveBeenCalledTimes(2)
     expect(executeTranslateMock).toHaveBeenNthCalledWith(
       1,
-      "hello",
+      "[1]\nhello",
       DEFAULT_CONFIG.language,
       llmProvider,
       expect.any(Function),
@@ -714,7 +751,7 @@ describe("translation queue helpers", () => {
     )
     expect(executeTranslateMock).toHaveBeenNthCalledWith(
       2,
-      "hello",
+      "[1]\nhello",
       DEFAULT_CONFIG.language,
       llmProvider,
       expect.any(Function),
@@ -1732,7 +1769,7 @@ describe("translation queue helpers", () => {
     /** The terms the batch actually sent, as executeBatchTranslation merged them. */
     async function mergedTermsFor(dataList: ReturnType<typeof batchMember>[]) {
       const { executeBatchTranslation } = await import("../translation-queues")
-      await executeBatchTranslation(dataList, promptResolver)
+      await executeBatchTranslation(dataList, promptResolver, SEPARATED_BATCH_FORMAT)
       const options = executeTranslateMock.mock.calls.at(-1)![4] as {
         glossaryTerms?: readonly MatchedTerm[]
       }

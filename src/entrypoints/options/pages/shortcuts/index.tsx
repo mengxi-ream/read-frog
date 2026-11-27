@@ -1,6 +1,7 @@
 import { i18n } from "@/utils/i18n"
 import { PageLayout } from "../../components/page-layout"
 import { ActionShortcuts } from "./action-shortcuts"
+import { DifficultWordsShortcut } from "./difficult-words-shortcut"
 import { NodeTranslationHotkey } from "./node-translation-hotkey"
 import { PageTranslationShortcut } from "./page-translation-shortcut"
 import { SelectionAnnotationModeShortcut } from "./selection-annotation-mode-shortcut"
@@ -27,6 +28,7 @@ export function ShortcutsPage() {
     >
       <PageTranslationShortcut />
       <TranslationModeShortcut />
+      <DifficultWordsShortcut />
       <SelectionTranslationShortcut />
       <SelectionSpeakShortcut />
       <SelectionAnnotationShortcut />

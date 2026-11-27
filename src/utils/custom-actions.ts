@@ -83,13 +83,20 @@ export function findSelectionToolbarAction(
  * the built-in Dictionary once that one is turned off or deleted.
  */
 export function resolveWordLookupAction(config: Config): SelectionToolbarCustomAction {
-  const action = findSelectionToolbarAction(
-    config.selectionToolbar,
-    config.videoSubtitles.wordLookupActionId,
-  )
-  return action && action.enabled !== false
-    ? action
-    : getBuiltInDictionaryAction(config.selectionToolbar)
+  return resolveLookupAction(config.selectionToolbar, config.videoSubtitles.wordLookupActionId)
+}
+
+/** The action a click on a marked difficult word runs, picked and falling back the same way. */
+export function resolveDifficultWordLookupAction(config: Config): SelectionToolbarCustomAction {
+  return resolveLookupAction(config.selectionToolbar, config.difficultWords.lookupActionId)
+}
+
+function resolveLookupAction(
+  selectionToolbar: SelectionToolbarConfig,
+  actionId: string,
+): SelectionToolbarCustomAction {
+  const action = findSelectionToolbarAction(selectionToolbar, actionId)
+  return action && action.enabled !== false ? action : getBuiltInDictionaryAction(selectionToolbar)
 }
 
 export function resolveNoteSuggestionAction(

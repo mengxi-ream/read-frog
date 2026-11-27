@@ -1,3 +1,4 @@
+import type { BatchFormat } from "./batch-format"
 import type { TranslatePromptOptions, TranslatePromptResult } from "./translate"
 import type { SubtitlePromptContext } from "@/types/content"
 import { getLocalConfig } from "@/utils/config/storage"
@@ -6,7 +7,6 @@ import { appendGlossaryToSystemPrompt } from "@/utils/glossary/prompt"
 import { DEFAULT_CONFIG } from "../constants/config"
 import {
   BUILT_IN_SUBTITLE_TRANSLATE_PROMPTS,
-  DEFAULT_BATCH_TRANSLATE_PROMPT,
   DEFAULT_TRANSLATE_PROMPT_ID,
   getTokenCellText,
   SUBTITLE_INPUT,
@@ -15,7 +15,14 @@ import {
   SUBTITLE_WEB_TITLE,
   VIDEO_SUMMARY,
 } from "../constants/prompt"
+import { NUMBERED_BATCH_FORMAT } from "./batch-format"
 import { resolvePromptReplacementValue } from "./translate"
+
+/**
+ * Subtitle batches number their cues: see NUMBERED_BATCH_TRANSLATE_PROMPT for
+ * why. The subtitle queue joins and splits with the same format.
+ */
+export const SUBTITLE_BATCH_FORMAT: BatchFormat = NUMBERED_BATCH_FORMAT
 
 export async function getSubtitlesTranslatePrompt(
   targetLang: string,
@@ -44,7 +51,7 @@ export async function getSubtitlesTranslatePrompt(
   if (options?.isBatch) {
     systemPrompt = `${systemPrompt}
 
-${DEFAULT_BATCH_TRANSLATE_PROMPT}`
+${SUBTITLE_BATCH_FORMAT.prompt}`
   }
 
   // Build title and summary replacement values

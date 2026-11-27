@@ -75,6 +75,8 @@ export const DEFAULT_SUBTITLE_TRANSLATE_SYSTEM_PROMPT = `You are a professional 
 2. Keep subtitle timing alignment natural by matching the original subtitle segment boundaries and sentence flow.
 3. Preserve speaker intent, tone, punctuation, and line-break structure unless a small adjustment is required for fluent subtitles.
 4. For content that should not be translated (such as proper nouns, code, etc.), keep the original text.
+5. Translate every segment into ${getTokenCellText(SUBTITLE_TARGET_LANGUAGE)}, even when it is only part of a sentence that continues in the next segment. Never return a segment unchanged in its original language.
+6. Each segment gets its own translation. Do not merge segments or move words between them, even when a sentence runs across several.
 
 ## Video Metadata for Context Awareness
 Video title: ${getTokenCellText(SUBTITLE_WEB_TITLE)}
@@ -169,7 +171,8 @@ export const DEFAULT_SUBTITLE_TRANSLATE_PROMPTS_CONFIG = {
 }
 
 /**
- * Shared by the webpage and subtitles batch pipelines. The worked example below
+ * The `%%` batch format (`SEPARATED_BATCH_FORMAT`), used by page translation;
+ * subtitles use NUMBERED_BATCH_TRANSLATE_PROMPT. The worked example below
  * must keep a real translation in every output slot: demonstrating
  * NO_TRANSLATION_SENTINEL in one of them taught models a ~1-in-3 base rate for
  * the marker and silently dropped paragraphs that needed translating. See
@@ -212,6 +215,47 @@ Single paragraph content
 
 ### Single paragraph Output:
 Direct translation without separators
+`
+
+/**
+ * The numbered batch format (`NUMBERED_BATCH_FORMAT`), used by subtitles.
+ * Speech-recognition captions are sentence fragments, and with `%%` lines
+ * between them Claude Haiku 5.5 returned whole batches unchanged in English,
+ * separators and all: 56% of the lines in the batches it got wrong for one
+ * video. Numbered, with subtitle rules 5 and 6, none were. Page translation
+ * keeps `%%`: its paragraphs are whole sentences, and page text carries its
+ * own `[1]` citations and reference numbers, which models took for ours.
+ *
+ * Each number sits on a line of its own, with the cue's text on the lines
+ * after it, so a cue that spans lines (Netflix dialogue `- A\n- B`, wrapped
+ * WebVTT cues) needs no special case. With `[1] text` on one line, Haiku
+ * sometimes dropped a number and carried the next cue on as a second line of
+ * the one before (first reply right 94% of the time on one video, against
+ * 99.5% with the number on its own line). Empty lines around the number
+ * brought back whole batches returned unchanged in English.
+ */
+export const NUMBERED_BATCH_TRANSLATE_PROMPT = `## Multi-segment Translation Rules
+The input segments are numbered. Each segment starts with a line holding only its number in brackets, [1], [2], [3] and so on, and its text follows on the next lines. Output the segments in the same order and in the same form: a line holding only the same number in brackets, then that segment's translation on the next lines, keeping its line breaks. Do not merge or split segments, and output nothing else.
+
+## Example
+
+### Input:
+[1]
+Segment A
+[2]
+Segment B, first line
+Segment B, second line
+[3]
+Segment C
+
+### Output:
+[1]
+Translation of segment A
+[2]
+Translation of segment B, first line
+Translation of segment B, second line
+[3]
+Translation of segment C
 `
 
 /**
