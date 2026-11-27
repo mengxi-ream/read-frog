@@ -89,6 +89,26 @@ describe("readBlockText", () => {
 
     expect(text).toBe("Run \nnow \ndone")
   })
+
+  it("reads a word under furigana or pinyin whole: the reading sits above it, not between words", () => {
+    for (const word of [
+      "<ruby>下<rt>げ</rt>駄<rt>た</rt>箱<rt>ばこ</rt></ruby>",
+      "<ruby>下<rp>(</rp><rt>げ</rt><rp>)</rp>駄<rp>(</rp><rt>た</rt><rp>)</rp>箱<rp>(</rp><rt>ばこ</rt><rp>)</rp></ruby>",
+      "<ruby>下<rt>げ</rt></ruby><ruby>駄<rt>た</rt></ruby><ruby>箱<rt>ばこ</rt></ruby>",
+      "<ruby>下駄箱<rt>げたばこ</rt></ruby>",
+    ]) {
+      mount(`<p id='p'>${word}に手紙が入っていた。</p>`)
+
+      const { text } = readBlockText(document.querySelector("#p")!, new BlockResolver())
+
+      expect(text).toBe("下駄箱に手紙が入っていた。")
+    }
+
+    mount("<p id='p'><ruby>蝴<rt>hú</rt>蝶<rt>dié</rt></ruby>飞来了<br>又飞走了</p>")
+    expect(readBlockText(document.querySelector("#p")!, new BlockResolver()).text).toBe(
+      "蝴蝶飞来了\n又飞走了",
+    )
+  })
 })
 
 describe("rangeForSpan", () => {
@@ -101,6 +121,19 @@ describe("rangeForSpan", () => {
     expect(range.toString()).toBe("unbelievable")
     expect(range.startContainer).toBe(blockText.nodes[0])
     expect(range.endContainer).toBe(blockText.nodes[2])
+  })
+
+  it("spans the characters of a word under furigana, from the first to the last", () => {
+    mount("<p id='p'><ruby>下<rt>げ</rt>駄<rt>た</rt>箱<rt>ばこ</rt></ruby>に手紙</p>")
+    const blockText = readBlockText(document.querySelector("#p")!, new BlockResolver())
+
+    const range = rangeForSpan(blockText, 0, 2)!
+
+    expect(blockText.nodes.map((node) => node.data)).toEqual(["下", "駄", "箱", "に手紙"])
+    expect(range.startContainer).toBe(blockText.nodes[0])
+    expect(range.startOffset).toBe(0)
+    expect(range.endContainer).toBe(blockText.nodes[1])
+    expect(range.endOffset).toBe(1)
   })
 
   it("refuses a span on a stand-in line break or outside the text", () => {

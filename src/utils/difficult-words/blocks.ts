@@ -5,6 +5,8 @@ import { isInlineDisplay, isSkippedSubtree } from "@/utils/annotate/text-offsets
 // nested inside it is a block of its own, not part of its text. Where a
 // nested block, a skipped element or a line break interrupts the text, a
 // line break stands in for it, so the words on either side stay apart.
+// Furigana and pinyin (rt, rp) are left out without a break: they sit above
+// the characters they read, not between words, so "下<rt>げ</rt>駄" is "下駄".
 
 /** Not prose to read: code, form controls, formulas and graphics. */
 const SCAN_SKIPPED_NAMES = new Set([
@@ -21,6 +23,9 @@ const SCAN_SKIPPED_NAMES = new Set([
   "svg",
   "math",
 ])
+
+/** A reading written above its characters: left out, but no break in the line. */
+const RUBY_ANNOTATION_NAMES = new Set(["rt", "rp"])
 
 /** Whether `element` and everything in it are left out of the scan. */
 export function isScanSkipped(element: Element): boolean {
@@ -94,14 +99,14 @@ export interface BlockText {
  */
 function createScanWalker(
   root: Node,
-  onSkipped?: () => void,
+  onSkipped?: (element: Element) => void,
   skips?: (element: Element) => boolean,
 ) {
   return document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT, {
     acceptNode(node) {
       if (node instanceof Element) {
         if (isScanSkipped(node) || skips?.(node)) {
-          onSkipped?.()
+          onSkipped?.(node)
           return NodeFilter.FILTER_REJECT
         }
         return node.localName === "br" ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP
@@ -120,8 +125,8 @@ export function readBlockText(block: Element, resolver: BlockResolver): BlockTex
   // otherwise walk all the paragraphs they hold each time they change.
   const walker = createScanWalker(
     block,
-    () => {
-      interrupted = true
+    (element) => {
+      if (!RUBY_ANNOTATION_NAMES.has(element.localName)) interrupted = true
     },
     (element) => resolver.blockOf(element) === element,
   )
