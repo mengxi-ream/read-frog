@@ -14,20 +14,28 @@ import { highlightName } from "./highlights"
  */
 export const DIFFICULT_WORD_HOVER_ATTRIBUTE = "data-read-frog-difficult-word-hover"
 
-function highlightRule(tone: MarkTone, hover: boolean) {
+function highlightRules(tone: MarkTone, hover: boolean) {
+  const name = highlightName(tone, hover)
   const token = `--read-frog-highlight-hard${hover ? "-hover" : ""}`
   // Light text on a dark page is lifted with the mark, so it stays readable on it.
   const declarations =
     tone === "dark"
       ? `background-color: var(${token}-dark); color: var(${token}-ink);`
       : `background-color: var(${token});`
-  return `::highlight(${highlightName(tone, hover)}) { ${declarations} }`
+  return [
+    `::highlight(${name}) { ${declarations} }`,
+    // A word under furigana or pinyin is marked from its first character to
+    // its last, taking in the readings between them: those keep their own
+    // look, as the reading over its last character does. Every element in a
+    // reading too, since the first rule paints each element on its own.
+    `:is(rt, rp, rt *, rp *)::highlight(${name}) { background-color: transparent; color: currentcolor; }`,
+  ]
 }
 
 export function buildDifficultWordsDocumentCss(): string {
   const rules = [hostThemeCss]
   for (const tone of ["light", "dark"] as const) {
-    rules.push(highlightRule(tone, false), highlightRule(tone, true))
+    rules.push(...highlightRules(tone, false), ...highlightRules(tone, true))
   }
   rules.push(
     `[${DIFFICULT_WORD_HOVER_ATTRIBUTE}], [${DIFFICULT_WORD_HOVER_ATTRIBUTE}] * { cursor: pointer !important; }`,
