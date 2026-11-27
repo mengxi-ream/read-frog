@@ -27,15 +27,21 @@ describe("batch formats", () => {
     expect(format.parse(format.join(texts))).toEqual(texts)
   })
 
-  it("writes one numbered line per text", () => {
-    expect(NUMBERED_BATCH_FORMAT.join(["so today", "I want to show you"])).toBe(
-      "[1] so today\n[2] I want to show you",
+  it("writes each number on a line of its own, followed by its text", () => {
+    expect(NUMBERED_BATCH_FORMAT.join(["so today", "- You okay?\n- Yeah."])).toBe(
+      "[1]\nso today\n[2]\n- You okay?\n- Yeah.",
     )
   })
 })
 
 describe("parseNumberedBatchResult", () => {
-  it("splits a reply on its numbered lines", () => {
+  it("splits a reply whose numbers sit on lines of their own", () => {
+    expect(
+      parseNumberedBatchResult("[1]\n所以今天\n[2]\n- 你还好吗？\n- 嗯。\n[3]\n调音台"),
+    ).toEqual(["所以今天", "- 你还好吗？\n- 嗯。", "调音台"])
+  })
+
+  it("also reads a reply with each text on its number's line", () => {
     expect(parseNumberedBatchResult("[1] 所以今天\n[2] 我想给你看\n[3] 调音台")).toEqual([
       "所以今天",
       "我想给你看",

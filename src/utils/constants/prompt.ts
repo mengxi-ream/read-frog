@@ -226,27 +226,36 @@ Direct translation without separators
  * keeps `%%`: its paragraphs are whole sentences, and page text carries its
  * own `[1]` citations and reference numbers, which models took for ours.
  *
- * A cue can span lines (Netflix dialogue `- A\n- B`, wrapped WebVTT cues), so
- * the rules and the example show a segment running over two lines. Asked for
- * "one line per input segment", Haiku numbered the second line of a dialogue
- * cue in about a quarter of such batches, and BatchQueue retried each one.
+ * Each number sits on a line of its own, with the cue's text on the lines
+ * after it, so a cue that spans lines (Netflix dialogue `- A\n- B`, wrapped
+ * WebVTT cues) needs no special case. With `[1] text` on one line, Haiku
+ * sometimes dropped a number and carried the next cue on as a second line of
+ * the one before (first reply right 94% of the time on one video, against
+ * 99.5% with the number on its own line). Empty lines around the number
+ * brought back whole batches returned unchanged in English.
  */
 export const NUMBERED_BATCH_TRANSLATE_PROMPT = `## Multi-segment Translation Rules
-The input segments are numbered [1], [2], [3] and so on. A segment starts with its number in brackets at the start of a line and can run over several lines. Output the segments in the same order, each starting with the same number in brackets followed by that segment's translation, and keep each segment's line breaks. Only the first line of a segment gets a number. Do not merge or split segments, and output nothing else.
+The input segments are numbered. Each segment starts with a line holding only its number in brackets, [1], [2], [3] and so on, and its text follows on the next lines. Output the segments in the same order and in the same form: a line holding only the same number in brackets, then that segment's translation on the next lines, keeping its line breaks. Do not merge or split segments, and output nothing else.
 
 ## Example
 
 ### Input:
-[1] Segment A
-[2] Segment B, first line
+[1]
+Segment A
+[2]
+Segment B, first line
 Segment B, second line
-[3] Segment C
+[3]
+Segment C
 
 ### Output:
-[1] Translation of segment A
-[2] Translation of segment B, first line
+[1]
+Translation of segment A
+[2]
+Translation of segment B, first line
 Translation of segment B, second line
-[3] Translation of segment C
+[3]
+Translation of segment C
 `
 
 /**

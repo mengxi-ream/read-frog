@@ -40,7 +40,8 @@ const SEGMENT_MARKER_PATTERN = /^[ \t]*\[(\d+)\][ \t]?/m
 
 /**
  * A segment runs from its `[n]` at the start of a line to the next one, so a
- * two-line text stays one segment. Markers out of order, or text before the
+ * two-line text stays one segment. The text may follow on the marker's own
+ * line too: models answer that way now and then. Markers out of order, or text before the
  * first one, give no segments. A reply with no marker at all is one segment,
  * as a `%%` reply with no separator is: models often answer a batch of one
  * that way. A line holding only `%%` is dropped: a custom prompt that asks for
@@ -59,9 +60,9 @@ export function parseNumberedBatchResult(result: string): string[] {
   return segments
 }
 
-/** Each text on its own line, starting with its number: `[1] …`, `[2] …`. */
+/** Each text after its number, which sits on a line of its own: `[1]`, then the text. */
 export const NUMBERED_BATCH_FORMAT: BatchFormat = {
   prompt: NUMBERED_BATCH_TRANSLATE_PROMPT,
-  join: (texts) => texts.map((text, i) => `[${i + 1}] ${text}`).join("\n"),
+  join: (texts) => texts.map((text, i) => `[${i + 1}]\n${text}`).join("\n"),
   parse: parseNumberedBatchResult,
 }
