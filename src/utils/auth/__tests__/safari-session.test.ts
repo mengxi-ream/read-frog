@@ -132,6 +132,7 @@ async function settle() {
 afterEach(async () => {
   // What a test started on its own ends before the next one fakes the browser.
   await settle()
+  vi.useRealTimers()
   vi.unstubAllGlobals()
 })
 
@@ -253,22 +254,51 @@ describe("fetchWithSessionToken", () => {
     })
   })
 
-  it("asks the API again next time when it couldn't be reached", async () => {
+  it("fails requests for ten seconds when the API can't be asked, then asks again", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] })
     const w = newWorld({ jar: [stagingCookie(), sessionCookie()] })
     w.respond = (request) =>
       request.url === GET_SESSION ? new Response("unavailable", { status: 503 }) : undefined
     const { fetchWithSessionToken } = await load(w)
 
-    await fetchWithSessionToken(RPC)
-    expect(w.requests.at(-1)).toEqual({ url: RPC, method: "GET", authorization: null })
+    await expect(fetchWithSessionToken(RPC)).rejects.toThrow(TypeError)
+    vi.setSystemTime(Date.now() + 9_999)
+    await expect(fetchWithSessionToken(RPC)).rejects.toThrow(TypeError)
+    // The API was asked about each cookie once, and nothing went out without a session.
+    expect(w.requests.map((request) => request.url)).toEqual([GET_SESSION, GET_SESSION])
 
     w.respond = undefined
     w.sessions.set(sessionCookie().value, SESSION_ENDS)
-    w.requests = []
+    vi.setSystemTime(Date.now() + 1)
     await fetchWithSessionToken(RPC)
 
-    expect(w.requests.filter((request) => request.url === GET_SESSION).length).toBeGreaterThan(0)
-    expect(w.requests.at(-1)?.authorization).toBe(`Bearer ${sessionCookie().value}`)
+    expect(w.requests.at(-1)).toEqual({
+      url: RPC,
+      method: "GET",
+      authorization: `Bearer ${sessionCookie().value}`,
+    })
+  })
+
+  it("stops waiting for the API's answer when the request is aborted", async () => {
+    const w = newWorld({ jar: [stagingCookie(), sessionCookie()] })
+    const { fetchWithSessionToken, mocks } = await load(w)
+    let answer: (response: Response) => void = () => {}
+    mocks.fetch.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          answer = resolve
+        }),
+    )
+    const controller = new AbortController()
+
+    const sent = fetchWithSessionToken(RPC, { signal: controller.signal })
+    await vi.waitFor(() => expect(mocks.fetch).toHaveBeenCalled())
+    controller.abort()
+
+    await expect(sent).rejects.toMatchObject({ name: "AbortError" })
+    answer(Response.json(null))
+    await settle()
+    expect(w.requests.filter((request) => request.url === RPC)).toEqual([])
   })
 
   it("asks the API once for requests going out together", async () => {

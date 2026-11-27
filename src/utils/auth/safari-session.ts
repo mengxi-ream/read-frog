@@ -179,8 +179,16 @@ async function saveChoice(choice: SessionCookieChoice) {
     .catch((error) => log.warn("Could not keep the session cookie choice", { error }))
 }
 
-/** Asks the API about each cookie in turn; never rejects. */
-async function ask(cookies: Browser.cookies.Cookie[], among: string): Promise<string | null> {
+/**
+ * Asks the API about each cookie in turn: the key of the one it took, null
+ * when it took none, or undefined when it couldn't be asked about one. An API
+ * that couldn't be asked took none for now, not for good, so only an answer is
+ * kept. Never rejects.
+ */
+async function ask(
+  cookies: Browser.cookies.Cookie[],
+  among: string,
+): Promise<string | null | undefined> {
   let unanswered = false
   for (const cookie of cookies) {
     const taken = await isTakenByApi(cookie)
@@ -190,12 +198,37 @@ async function ask(cookies: Browser.cookies.Cookie[], among: string): Promise<st
     }
     if (taken === undefined) unanswered = true
   }
-  // An API that couldn't be reached took none for now, not for good.
-  if (!unanswered) await saveChoice({ among, chosen: null })
+  if (unanswered) return undefined
+  await saveChoice({ among, chosen: null })
   return null
 }
 
-let asking: { among: string; chosen: Promise<string | null> } | undefined
+/** How long requests fail without asking again, once the API couldn't be asked. */
+const ASK_AGAIN_AFTER_MS = 10 * 1000
+
+interface Asking {
+  among: string
+  chosen: Promise<string | null | undefined>
+  /** When it turned out the API couldn't be asked, in milliseconds. */
+  failedAt?: number
+}
+
+let asking: Asking | undefined
+
+/** `promise`, unless `signal` aborts first: then the abort's reason, as `fetch` rejects with. */
+async function untilAborted<T>(promise: Promise<T>, signal: AbortSignal): Promise<T> {
+  signal.throwIfAborted()
+  let abort = () => {}
+  const aborted = new Promise<never>((_, reject) => {
+    abort = () => reject(signal.reason)
+  })
+  signal.addEventListener("abort", abort, { once: true })
+  try {
+    return await Promise.race([promise, aborted])
+  } finally {
+    signal.removeEventListener("abort", abort)
+  }
+}
 
 /**
  * The session cookie whose value goes to the API. Usually there is one. A
@@ -203,8 +236,17 @@ let asking: { among: string; chosen: Promise<string | null> } | undefined
  * site, and each API takes only its own; which one is ours can't be told from
  * the cookies, so the API is asked about each once. Its answer is kept by the
  * cookie's name, never its value, until the cookies change.
+ *
+ * When the API can't be asked, the requests waiting on it fail, as they would
+ * against an API that is down, and so does every request of the next ten
+ * seconds, without asking again: an API that is down or limiting requests
+ * isn't asked once more before each one. Going out without a session instead
+ * could leave a signed-out get-session in the auth cache for the rest of the
+ * browser session. A request that is aborted stops waiting.
  */
-async function pickSessionCookie(): Promise<Browser.cookies.Cookie | undefined> {
+async function pickSessionCookie(
+  signal?: AbortSignal,
+): Promise<Browser.cookies.Cookie | undefined> {
   const cookies = await readSessionCookies()
   if (cookies.length < 2) return cookies[0]
 
@@ -214,14 +256,20 @@ async function pickSessionCookie(): Promise<Browser.cookies.Cookie | undefined> 
 
   // Requests going out together ask the API once between them.
   let current = asking
-  if (current?.among !== among) {
-    const started = { among, chosen: ask(cookies, among) }
+  const askAgain =
+    current?.failedAt !== undefined && Date.now() - current.failedAt >= ASK_AGAIN_AFTER_MS
+  if (current?.among !== among || askAgain) {
+    const started: Asking = { among, chosen: ask(cookies, among) }
     asking = current = started
-    void started.chosen.then(() => {
-      if (asking === started) asking = undefined
+    void started.chosen.then((chosen) => {
+      if (asking !== started) return
+      if (chosen === undefined) started.failedAt = Date.now()
+      else asking = undefined
     })
   }
-  const chosen = await current.chosen
+  const chosen = await (signal ? untilAborted(current.chosen, signal) : current.chosen)
+  // A TypeError, as `fetch` rejects with when the network fails.
+  if (chosen === undefined) throw new TypeError("Couldn't ask the API which session cookie to send")
   return cookies.find((cookie) => keyOf(cookie) === chosen)
 }
 
@@ -256,7 +304,8 @@ async function askDailyForSession() {
  * `fetch`, but a request to the API carries the session in Safari, the way a
  * cookie would in other browsers, and what the response does to the session
  * cookie is done. The value is read for each request and kept nowhere; a
- * request anywhere else goes out as it came.
+ * request anywhere else goes out as it came. Rejects without sending when the
+ * API can't be asked which session cookie is ours (see `pickSessionCookie`).
  */
 export async function fetchWithSessionToken(
   input: RequestInfo | URL,
@@ -265,7 +314,7 @@ export async function fetchWithSessionToken(
   const request = new Request(input, init)
   if (new URL(request.url).origin !== new URL(env.WXT_API_URL).origin) return await fetch(request)
 
-  const cookie = await pickSessionCookie()
+  const cookie = await pickSessionCookie(request.signal)
   if (!cookie) return await fetch(request)
   const response = await sendWithSession(cookie, request)
   // Once the request is done, so it waits for nothing, and a sign-out has
