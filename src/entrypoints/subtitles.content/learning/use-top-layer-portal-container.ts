@@ -2,6 +2,7 @@ import { useLayoutEffect, useState } from "react"
 import themeCSS from "@/assets/styles/theme.css?inline"
 import { REACT_SHADOW_HOST_CLASS } from "@/utils/constants/dom-labels"
 import { ShadowHostBuilder } from "@/utils/react-shadow-host/shadow-host-builder"
+import { isolatePlayerEvents } from "../renderer/isolate-player-events"
 
 const TOP_LAYER_CONTAINER_CLASS =
   "pointer-events-none fixed inset-0 m-0 size-full max-h-none max-w-none overflow-visible border-0 bg-transparent p-0 text-inherit"
@@ -9,6 +10,11 @@ const TOP_LAYER_CONTAINER_CLASS =
 function createTopLayerHost() {
   const host = document.createElement("div")
   host.classList.add(REACT_SHADOW_HOST_CLASS)
+  // Out of the layout of whatever holds it, such as a player in fullscreen; the
+  // card itself shows in the top layer, wherever the host is.
+  host.style.position = "fixed"
+  // In fullscreen the host sits inside the player, whose handlers would take the card's clicks.
+  isolatePlayerEvents(host)
   const hostBuilder = new ShadowHostBuilder(host.attachShadow({ mode: "open" }), {
     position: "block",
     cssContent: [themeCSS],
@@ -25,7 +31,6 @@ export function useTopLayerPortalContainer(active: boolean) {
   const [{ host, hostBuilder, container }] = useState(createTopLayerHost)
 
   useLayoutEffect(() => {
-    document.body.append(host)
     return () => {
       host.remove()
       hostBuilder.cleanup()
@@ -33,27 +38,34 @@ export function useTopLayerPortalContainer(active: boolean) {
   }, [host, hostBuilder])
 
   useLayoutEffect(() => {
-    if (!active || !container.isConnected) {
-      return undefined
-    }
-
     const hide = () => {
       if (container.matches(":popover-open")) {
         container.hidePopover()
       }
     }
-    const showOnTop = () => {
-      hide()
-      container.showPopover()
+    // Chrome lets nothing outside the fullscreen element take a click, not even
+    // the top layer, so the host follows that element in and out. Only what
+    // was shown after the element went fullscreen sits above it, so the card
+    // shows again each time.
+    const place = () => {
+      const parent = document.fullscreenElement ?? document.body
+      if (host.parentElement !== parent) {
+        // Moving the host also hides the card.
+        parent.append(host)
+      }
+      if (active) {
+        hide()
+        container.showPopover()
+      }
     }
 
-    showOnTop()
-    document.addEventListener("fullscreenchange", showOnTop)
+    place()
+    document.addEventListener("fullscreenchange", place)
     return () => {
-      document.removeEventListener("fullscreenchange", showOnTop)
+      document.removeEventListener("fullscreenchange", place)
       hide()
     }
-  }, [active, container])
+  }, [active, container, host])
 
   return container
 }
