@@ -2,7 +2,7 @@ import type { SubtitlesTrack, SubtitlesTrackSource } from "../track"
 import { z } from "zod"
 import { NoSubtitlesError, TrackFileNotLoadedError } from "@/utils/subtitles/errors"
 import { getUdemyLectureId, parseUdemyLectureId } from "@/utils/subtitles/video-id"
-import { fetchWithRetry, readJson } from "../fetch-with-retry"
+import { fetchWithRetry, readJson, readText } from "../fetch-with-retry"
 import { parseWebVtt } from "../vtt"
 
 const courseSchema = z.object({ id: z.number(), locale: z.object({ locale: z.string() }) })
@@ -87,9 +87,8 @@ async function loadTrack(key: string): Promise<SubtitlesTrack> {
   const caption = pickCaption(parsedLecture.data.asset.captions, course.locale.locale)
   if (!caption) throw new NoSubtitlesError()
 
-  const response = await fetchWithRetry(caption.url)
   // `text()` drops a leading byte order mark, so a WebVTT file starts with its signature here.
-  const vtt = response?.ok ? await response.text().catch(() => null) : null
+  const vtt = await readText(await fetchWithRetry(caption.url))
   if (!vtt?.startsWith("WEBVTT")) throw new TrackFileNotLoadedError()
 
   return { language: caption.locale_id.replace("_", "-"), fragments: parseWebVtt(vtt) }

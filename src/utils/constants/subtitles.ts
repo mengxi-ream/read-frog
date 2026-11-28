@@ -112,6 +112,40 @@ export const NETFLIX_PAGE_POLL_INTERVAL_MS = 100
 export const NETFLIX_WATCH_POLL_INTERVAL_MS = 1000
 export const NETFLIX_TRANSLATE_BUTTON_ZOOM = 1.4
 
+// Prime Video specific
+// Outside these stores Prime Video plays on primevideo.com; in them, under `/gp/video`, after
+// `/-/<lang>` when the store is shown in another language.
+export const PRIME_VIDEO_AMAZON_HOSTS: readonly string[] = [
+  "www.amazon.com",
+  "www.amazon.co.uk",
+  "www.amazon.de",
+  "www.amazon.co.jp",
+]
+export const PRIME_VIDEO_MATCHES = [
+  "*://www.primevideo.com/*",
+  ...PRIME_VIDEO_AMAZON_HOSTS.flatMap((host) => [
+    `*://${host}/gp/video/*`,
+    `*://${host}/-/*/gp/video/*`,
+  ]),
+]
+// Holds the video and, beside it, the controls layer, which takes clicks over the whole video;
+// the overlay goes after both, so its menu stays above them.
+export const PRIME_VIDEO_PLAYER_SELECTOR = "#dv-web-player"
+export const PRIME_VIDEO_VIDEO_SELECTOR = `${PRIME_VIDEO_PLAYER_SELECTOR} video`
+export const PRIME_VIDEO_FULLSCREEN_BUTTON_SELECTOR = "#atvwebplayersdk-fullscreen-toggle-button"
+export const PRIME_VIDEO_SETTINGS_BUTTON_SELECTOR = "#atvwebplayersdk-settings-button"
+// Prime takes its controls out of the page while they hide, this handle with them.
+export const PRIME_VIDEO_PROGRESS_HANDLE_SELECTOR = ".atvwebplayersdk-progress-bar-handle"
+export const PRIME_VIDEO_NATIVE_SUBTITLES_SELECTOR = ".atvwebplayersdk-captions-text"
+export const PRIME_VIDEO_PLAYBACK_RESOURCES_URL_PATTERN =
+  /^https:\/\/[^/]+\/playback\/prs\/GetVodPlaybackResources\?/
+// The page script marks the player's video with the title it plays, which no url names.
+export const PRIME_VIDEO_TITLE_ID_ATTRIBUTE = "data-read-frog-title-id"
+export const PRIME_VIDEO_SUBTITLES_REQUEST_TYPE = "READ_FROG_PRIME_VIDEO_SUBTITLES"
+export const PRIME_VIDEO_SUBTITLES_RESPONSE_TYPE = "READ_FROG_PRIME_VIDEO_SUBTITLES_DONE"
+// A title's listed length and its video's may differ by this much and still be the same title.
+export const PRIME_VIDEO_DURATION_TOLERANCE_MS = 1000
+
 // edX specific
 export const EDX_VIDEO_SELECTOR = ".video[data-metadata]"
 export const EDX_HTML5_VIDEO_SELECTOR = ".video-player video"
@@ -254,4 +288,5 @@ export const SUBTITLES_PLATFORM_NAMES = {
   bilibili: "Bilibili",
   udemy: "Udemy",
   edx: "edX",
+  primevideo: "Prime Video",
 } as const satisfies Record<SubtitlesPlatform, string>

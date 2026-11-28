@@ -34,6 +34,13 @@ describe("TrackSubtitlesFetcher", () => {
     expect(fetcher.getSourceLanguage()).toBe("en")
   })
 
+  it("merges cues into sentences unless the source says each is a line already", () => {
+    expect(new TrackSubtitlesFetcher(source()).isPreSegmented()).toBe(false)
+    expect(new TrackSubtitlesFetcher({ ...source(), preSegmented: true }).isPreSegmented()).toBe(
+      true,
+    )
+  })
+
   it("reports no subtitles off a video, without asking the source", async () => {
     const trackSource = source()
     trackSource.key = null

@@ -8,7 +8,13 @@ import { subtitlesTranslateButtonAtom } from "../../atoms"
 import { useSubtitlesUI } from "../subtitles-ui-context"
 import { useControlsInfo } from "../use-controls-visible"
 import { useSubtitlesPanelDismiss } from "./components/use-subtitles-panel-dismiss"
-import { clampMenuLeft, getControlsRow, getMenuLeft, isMenuInControls } from "./menu-placement"
+import {
+  clampMenuLeft,
+  getControlsRow,
+  getMenuLeft,
+  isMenuInControls,
+  MENU_CONTROLS_GAP,
+} from "./menu-placement"
 
 type TransitionDirection = "back" | "forward"
 
@@ -93,33 +99,44 @@ function PanelContent({
   )
 }
 
+interface MenuPosition {
+  left: number
+  /** Just under the button, for a menu that opens down from controls at the top. */
+  top: number
+}
+
 // The button sits anywhere in the controls row, so the menu follows it instead of the video's edge.
-function useMenuLeft(
+function useMenuPosition(
   open: boolean,
   inControls: boolean,
   rootRef: React.RefObject<HTMLDivElement | null>,
   panelRef: React.RefObject<HTMLDivElement | null>,
-): number | null {
-  const [left, setLeft] = useState<number | null>(null)
+): MenuPosition | null {
+  const [position, setPosition] = useState<MenuPosition | null>(null)
   const button = useAtomValue(subtitlesTranslateButtonAtom)
 
   useLayoutEffect(() => {
     const root = rootRef.current
     if (!open || !root) {
-      setLeft(null)
+      setPosition(null)
       return undefined
     }
 
-    const place = (prev: number | null): number | null => {
+    const place = (prev: MenuPosition | null): MenuPosition | null => {
       const panel = panelRef.current
       if (!panel) return prev
       const box = inControls
-        ? { left: 0, width: document.documentElement.clientWidth }
+        ? { left: 0, top: 0, width: document.documentElement.clientWidth }
         : root.getBoundingClientRect()
       const buttonRect = button?.getBoundingClientRect()
-      if (buttonRect?.width) return getMenuLeft(buttonRect, box, panel.offsetWidth)
+      if (buttonRect?.width) {
+        return {
+          left: getMenuLeft(buttonRect, box, panel.offsetWidth),
+          top: buttonRect.bottom - box.top + MENU_CONTROLS_GAP,
+        }
+      }
       // A button gone with the hidden controls leaves the menu where it was, inside the video.
-      return prev === null ? null : clampMenuLeft(prev, box.width, panel.offsetWidth)
+      return prev && { ...prev, left: clampMenuLeft(prev.left, box.width, panel.offsetWidth) }
     }
 
     let row: Element | null = null
@@ -132,10 +149,10 @@ function useMenuLeft(
     const replace = () => {
       watchRow()
       // Commits before the resized frame paints, so the menu moves with the video, not a frame late.
-      flushSync(() => setLeft(place))
+      flushSync(() => setPosition(place))
     }
 
-    setLeft(place)
+    setPosition(place)
     const resizeObserver = new ResizeObserver(replace)
     resizeObserver.observe(root)
     // A remounted button registers before its host is in the page; its first box re-places the menu.
@@ -148,7 +165,7 @@ function useMenuLeft(
     }
   }, [open, inControls, button, rootRef, panelRef])
 
-  return left
+  return position
 }
 
 export function PanelShell({ children, open, onClose, header, transition }: PanelShellProps) {
@@ -157,9 +174,10 @@ export function PanelShell({ children, open, onClose, header, transition }: Pane
   const { controlsConfig, embedded, openBelow } = useSubtitlesUI()
   const { controlsHeight, controlsVisible } = useControlsInfo(rootRef, controlsConfig)
   const inControls = isMenuInControls(embedded)
-  const left = useMenuLeft(open, inControls, rootRef, panelRef)
+  const position = useMenuPosition(open, inControls, rootRef, panelRef)
 
-  const offset = controlsVisible ? controlsHeight + 18 : 22
+  const offset =
+    openBelow && position ? position.top : controlsVisible ? controlsHeight + MENU_CONTROLS_GAP : 22
 
   useSubtitlesPanelDismiss({
     enabled: open,
@@ -180,13 +198,13 @@ export function PanelShell({ children, open, onClose, header, transition }: Pane
       <div
         className={cn(
           inControls ? "fixed" : "absolute",
-          left === null && "right-4",
-          "z-40 transition-[bottom,top,opacity,transform] duration-200 ease-out",
+          position === null && "right-4",
+          "z-40 transition-[bottom,opacity,transform] duration-200 ease-out",
           open ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0",
         )}
         style={{
           ...(openBelow ? { top: `${offset}px` } : { bottom: `${offset}px` }),
-          ...(left !== null && { left: `${left}px` }),
+          ...(position && { left: `${position.left}px` }),
         }}
         hidden={!open}
       >

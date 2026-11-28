@@ -9,7 +9,7 @@ import {
 import { SubtitlesTranslateButton } from "../../subtitles-translate-button"
 import { SubtitlesProviders } from "../../subtitles-ui-context"
 import { SubtitlesSettingsPanel } from "../index"
-import { clampMenuLeft, getMenuLeft, MENU_EDGE_MARGIN } from "../menu-placement"
+import { clampMenuLeft, getMenuLeft, MENU_CONTROLS_GAP, MENU_EDGE_MARGIN } from "../menu-placement"
 
 const box = { left: 100, width: 1000 }
 const MENU_WIDTH = 272
@@ -38,7 +38,7 @@ describe("getMenuLeft", () => {
 })
 
 describe("settings panel placement", () => {
-  let videoBox = box
+  let videoBox: { left: number; width: number; top?: number } = box
   let observers: FakeResizeObserver[] = []
 
   class FakeResizeObserver {
@@ -67,9 +67,12 @@ describe("settings panel placement", () => {
     })
   }
 
-  function renderPanel(embedded = false) {
+  function renderPanel(embedded = false, openBelow = false) {
     render(
-      <SubtitlesProviders adapter={{ embedded, getControlsConfig: () => undefined } as any}>
+      <SubtitlesProviders
+        adapter={{ embedded, getControlsConfig: () => undefined } as any}
+        openBelow={openBelow}
+      >
         <SubtitlesSettingsPanel />
       </SubtitlesProviders>,
     )
@@ -127,6 +130,35 @@ describe("settings panel placement", () => {
 
     expect(menu.style.left).toBe(`${getMenuLeft({ left: 500, width: 48 }, box, MENU_WIDTH)}px`)
     expect(menu).not.toHaveClass("right-4")
+  })
+
+  it("opens down from a button in controls at the top, its left edge on the button's", () => {
+    videoBox = { ...box, top: 40 }
+    const button = fakeButton(500)
+    button.getBoundingClientRect = () => ({ left: 500, width: 48, bottom: 120 }) as DOMRect
+    subtitlesStore.set(subtitlesTranslateButtonAtom, button)
+
+    const menu = renderPanel(false, true)
+
+    // 120 - 40 puts the button's bottom 80px into the video; the menu leaves the gap under it.
+    expect(menu.style.top).toBe(`${80 + MENU_CONTROLS_GAP}px`)
+    expect(menu.style.left).toBe(`${getMenuLeft({ left: 500, width: 48 }, box, MENU_WIDTH)}px`)
+    expect(menu.style.bottom).toBe("")
+  })
+
+  it("keeps its place under the top controls while the button is gone with them", async () => {
+    videoBox = { ...box, top: 40 }
+    const button = fakeButton(500)
+    button.getBoundingClientRect = () => ({ left: 500, width: 48, bottom: 120 }) as DOMRect
+    subtitlesStore.set(subtitlesTranslateButtonAtom, button)
+    const menu = renderPanel(false, true)
+
+    button.getBoundingClientRect = () => ({ left: 0, width: 0, bottom: 0 }) as DOMRect
+    await act(async () => {
+      window.dispatchEvent(new Event("resize"))
+    })
+
+    expect(menu.style.top).toBe(`${80 + MENU_CONTROLS_GAP}px`)
   })
 
   it("keeps to the right edge when there is no button to follow", () => {

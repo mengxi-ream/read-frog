@@ -25,17 +25,3 @@ export function removeNetflixTranslateButton(): void {
     mountedButton = null
   }
 }
-
-export function watchNetflixControls(onChanged: () => void): () => void {
-  let scheduled = false
-  const observer = new MutationObserver(() => {
-    if (scheduled) return
-    scheduled = true
-    requestAnimationFrame(() => {
-      scheduled = false
-      onChanged()
-    })
-  })
-  observer.observe(document.body, { childList: true, subtree: true })
-  return () => observer.disconnect()
-}
