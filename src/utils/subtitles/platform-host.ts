@@ -1,4 +1,5 @@
 import type { SubtitlesPlatform, SubtitlesPlatformMode } from "@/types/config/subtitles"
+import { PRIME_VIDEO_AMAZON_HOSTS } from "@/utils/constants/subtitles"
 
 function isHostOrSubdomain(hostname: string, domain: string) {
   return hostname === domain || hostname.endsWith(`.${domain}`)
@@ -23,6 +24,9 @@ export function getSubtitlesPlatformForHostname(hostname: string): SubtitlesPlat
   if (hostname === "www.bilibili.com") return "bilibili"
   if (isHostOrSubdomain(hostname, "udemy.com")) return "udemy"
   if (hostname === "courses.edx.org") return "edx"
+  if (hostname === "www.primevideo.com" || PRIME_VIDEO_AMAZON_HOSTS.includes(hostname)) {
+    return "primevideo"
+  }
   return null
 }
 

@@ -5,6 +5,7 @@ import type { Config } from "@/types/config/config"
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import { MemoryRouter } from "react-router"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import { subtitlesPlatformSchema } from "@/types/config/subtitles"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { CustomPromptsSection } from "../custom-prompts"
 import { PreferenceSection } from "../preference"
@@ -102,7 +103,7 @@ describe("video subtitles page sections", () => {
     const logos = screen
       .getByRole("link", { name: /preference\.enable\.title/ })
       .querySelectorAll("svg")
-    expect(logos).toHaveLength(6)
+    expect(logos).toHaveLength(subtitlesPlatformSchema.options.length)
     expect([...logos].filter((logo) => logo.classList.contains("grayscale"))).toHaveLength(1)
   })
 

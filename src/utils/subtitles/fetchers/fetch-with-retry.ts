@@ -10,6 +10,11 @@ export async function fetchWithRetry(url: URL | string): Promise<Response | null
   }
 }
 
+/** The text of an ok response, or null for no response or a body that could not be read. */
+export async function readText(response: Response | null): Promise<string | null> {
+  return response?.ok ? response.text().catch(() => null) : null
+}
+
 /** The body of an ok response, or null for no response or a body that is not JSON. */
 export async function readJson(response: Response | null): Promise<unknown> {
   return response?.ok ? response.json().catch(() => null) : null

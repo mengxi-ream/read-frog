@@ -14,12 +14,16 @@ describe("getSubtitlesPlatformForHostname", () => {
     expect(getSubtitlesPlatformForHostname("www.udemy.com")).toBe("udemy")
     expect(getSubtitlesPlatformForHostname("acme.udemy.com")).toBe("udemy")
     expect(getSubtitlesPlatformForHostname("courses.edx.org")).toBe("edx")
+    expect(getSubtitlesPlatformForHostname("www.primevideo.com")).toBe("primevideo")
+    // The loader only goes into these stores under `/gp/video`.
+    expect(getSubtitlesPlatformForHostname("www.amazon.co.jp")).toBe("primevideo")
   })
 
   it("names no platform for other hosts, lookalikes included", () => {
     expect(getSubtitlesPlatformForHostname("blog.example")).toBeNull()
     expect(getSubtitlesPlatformForHostname("notyoutube.com")).toBeNull()
     expect(getSubtitlesPlatformForHostname("learning.edx.org")).toBeNull()
+    expect(getSubtitlesPlatformForHostname("www.amazon.fr")).toBeNull()
   })
 })
 
@@ -31,6 +35,7 @@ describe("isSubtitlesOffOnHost", () => {
     bilibili: "manual",
     udemy: "manual",
     edx: "manual",
+    primevideo: "manual",
   } as const
 
   it("goes by the mode of the host's platform", () => {
