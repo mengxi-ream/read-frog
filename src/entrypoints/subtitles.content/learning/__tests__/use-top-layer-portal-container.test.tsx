@@ -12,8 +12,7 @@ const showPopover = vi.fn<(this: HTMLElement) => void>(function () {
 // jsdom has no Fullscreen API either.
 let fullscreenElement: Element | null = null
 
-// The selection toolbar tells a selection made in the card from one on the page
-// by the press that starts it, which it hears on the document.
+// Outside a fullscreen player, the card's presses reach the page like any other.
 const onPageMouseDown = vi.fn<() => void>()
 
 function getHost(container: HTMLElement) {

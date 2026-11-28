@@ -14,8 +14,8 @@ function createTopLayerHost() {
   // card itself shows in the top layer, wherever the host is.
   host.style.position = "fixed"
   // Inside a fullscreen player, the player's handlers would take the card's
-  // clicks. Anywhere else the page has to see them: the selection toolbar knows
-  // a selection was made in the card, not on the page, from its mousedown.
+  // clicks. Anywhere else no player holds the card, and its presses reach the
+  // page like any other.
   isolatePlayerEvents(host, () => host.parentElement !== document.body)
   const hostBuilder = new ShadowHostBuilder(host.attachShadow({ mode: "open" }), {
     position: "block",

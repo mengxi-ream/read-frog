@@ -982,6 +982,43 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     expect(extensionRoot.querySelector(".absolute.z-2147483647")).toHaveClass("opacity-0")
   })
 
+  // The subtitle word card does this inside a fullscreen player, so that the
+  // player doesn't take its presses.
+  it("should not show toolbar when a press inside an overlay is stopped before it reaches the document", async () => {
+    render(
+      <div>
+        <SelectionToolbar />
+        <div data-testid="player" />
+      </div>,
+    )
+
+    await clearToolbarState()
+
+    const cardHost = document.createElement("div")
+    cardHost.addEventListener("mousedown", (event) => event.stopPropagation())
+    const cardRoot = cardHost.attachShadow({ mode: "open" })
+    cardRoot.innerHTML = `<div ${SELECTION_CONTENT_OVERLAY_ROOT_ATTRIBUTE}><p>${MOCK_SELECTED_TEXT}</p></div>`
+    screen.getByTestId("player").append(cardHost)
+    const cardText = cardRoot.querySelector("p")!
+
+    await act(async () => {
+      cardText.dispatchEvent(new MouseEvent("mousedown", { bubbles: true, composed: true }))
+    })
+    const { selection } = createShadowSelection(
+      {
+        startContainer: cardText.firstChild!,
+        startOffset: 0,
+        endContainer: cardText.firstChild!,
+        endOffset: MOCK_SELECTED_TEXT.length,
+      },
+      MOCK_SELECTED_TEXT,
+    )
+    window.getSelection = vi.fn<(...args: any[]) => any>(() => selection)
+    await triggerMouseUpWithSelection(cardHost)
+
+    expectToolbarHidden()
+  })
+
   it("should show toolbar when selection contains the click target", async () => {
     render(
       <div>

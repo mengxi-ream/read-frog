@@ -539,6 +539,21 @@ export function SelectionToolbar() {
       setIsSelectionToolbarOpen(false)
     }
 
+    // A press in an overlay doesn't always bubble up to handleMouseDown: the
+    // subtitle word card stops its presses inside a fullscreen player, so that
+    // the player doesn't take them. On its way down every press passes here.
+    const handleMouseDownCapture = (e: MouseEvent) => {
+      if (e.button === 2) {
+        return
+      }
+
+      const overlayShadowRoot = getSelectionOverlayShadowRoot(tooltipContainerRef.current)
+      if (isMouseEventInsideSelectionOverlay(e, tooltipContainerRef.current, overlayShadowRoot)) {
+        isPointerDownInsideOverlayRef.current = true
+        preserveSelectionStateRef.current = true
+      }
+    }
+
     const handleSelectionChange = () => {
       const selection = window.getSelection()
       const overlayShadowRoot = getSelectionOverlayShadowRoot(tooltipContainerRef.current)
@@ -591,6 +606,7 @@ export function SelectionToolbar() {
 
     document.addEventListener("mouseup", handleMouseUp)
     document.addEventListener("mousedown", handleMouseDown)
+    document.addEventListener("mousedown", handleMouseDownCapture, { capture: true })
     document.addEventListener("selectionchange", handleSelectionChange)
     window.addEventListener(DEFERRED_SELECTION_OPEN_EVENT, handleDeferredSelection)
     window.__READ_FROG_SELECTION_TOOLBAR_READY__ = true
@@ -601,6 +617,7 @@ export function SelectionToolbar() {
       window.removeEventListener(DEFERRED_SELECTION_OPEN_EVENT, handleDeferredSelection)
       document.removeEventListener("mouseup", handleMouseUp)
       document.removeEventListener("mousedown", handleMouseDown)
+      document.removeEventListener("mousedown", handleMouseDownCapture, { capture: true })
       document.removeEventListener("selectionchange", handleSelectionChange)
     }
   }, [clearSelectionState, placeHostForSelection, setIsSelectionToolbarOpen, setSelectionState])
