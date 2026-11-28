@@ -4,9 +4,10 @@ import type { Config } from "@/types/config/config"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import type { PendingCreateNotebaseSave, PendingNotebaseSave } from "@/utils/notebase/pending-save"
 import { ORPCError } from "@orpc/client"
-import { describe, expect, it, vi } from "vitest"
+import { afterEach, describe, expect, it, vi } from "vitest"
 import { browser } from "#imports"
 import { env } from "@/env"
+import { onSessionCookiesChange } from "@/utils/auth/safari-session"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { getBuiltInDictionaryAction } from "@/utils/custom-actions"
 import {
@@ -18,6 +19,11 @@ import {
   createNotebasePendingSaveProcessor,
   setupNotebasePendingSaveProcessor,
 } from "../notebase-pending-save"
+
+vi.mock("@/utils/auth/safari-session", () => ({
+  fetchWithSessionToken: vi.fn<typeof fetch>(),
+  onSessionCookiesChange: vi.fn<(listener: () => void) => void>(),
+}))
 
 function cloneConfig(config: Config): Config {
   return JSON.parse(JSON.stringify(config)) as Config
@@ -924,5 +930,26 @@ describe("setupNotebasePendingSaveProcessor", () => {
       cause: "explicit",
     })
     expect(waitUntilReady).toHaveBeenCalledTimes(2)
+    expect(onSessionCookiesChange).not.toHaveBeenCalled()
+  })
+
+  describe("in Safari", () => {
+    afterEach(() => {
+      vi.unstubAllEnvs()
+    })
+
+    it("retries when the session cookies change", async () => {
+      vi.stubEnv("BROWSER", "safari")
+      browser.cookies.onChanged.addListener = vi.fn<(...args: unknown[]) => void>()
+      const waitUntilReady = vi.fn<() => Promise<void>>(async () => {})
+      setupNotebasePendingSaveProcessor(waitUntilReady)
+      const onSessionChange = vi.mocked(onSessionCookiesChange).mock.calls.at(-1)?.[0]
+      if (!onSessionChange) throw new Error("Expected a session cookie listener")
+      await new Promise((resolve) => setTimeout(resolve, 0))
+      expect(waitUntilReady).toHaveBeenCalledOnce()
+
+      onSessionChange()
+      expect(waitUntilReady).toHaveBeenCalledTimes(2)
+    })
   })
 })

@@ -15,6 +15,7 @@ import {
 } from "@/utils/auth/host-permission"
 import { i18n } from "@/utils/i18n"
 import { sendMessage } from "@/utils/message"
+import { openInNewTab } from "@/utils/navigation"
 import { orpc } from "@/utils/orpc/client"
 import { cn } from "@/utils/styles/utils"
 
@@ -50,13 +51,19 @@ function showGrantAccessToast(anchor: HTMLElement | null, onGrant: () => void) {
     // Down, not up. The account row sits at the top edge of the popup, so the
     // default "above the anchor" has nowhere to render.
     ...(anchor && { positionerProps: { anchor, side: "bottom" as const, sideOffset: 6 } }),
-    actionProps: {
-      children: i18n.t("account.grantAccess"),
-      onClick: () => {
-        manager.close(toastId)
-        onGrant()
-      },
-    },
+    // Safari grants nothing through `permissions.request`: asked for one site it
+    // answers yes without asking the user or granting it. There the user allows
+    // the site in Safari itself, so the toast offers no button that does nothing.
+    actionProps:
+      import.meta.env.BROWSER === "safari"
+        ? undefined
+        : {
+            children: i18n.t("account.grantAccess"),
+            onClick: () => {
+              manager.close(toastId)
+              onGrant()
+            },
+          },
   })
 }
 
@@ -83,11 +90,11 @@ function getUserInitials(name: string | null | undefined) {
 }
 
 export function openLogIn() {
-  window.open(`${env.WXT_WEBSITE_URL}/log-in`, "_blank")
+  void openInNewTab(`${env.WXT_WEBSITE_URL}/log-in`)
 }
 
 export function openWebApp() {
-  window.open(`${env.WXT_WEBSITE_URL}/home`, "_blank")
+  void openInNewTab(`${env.WXT_WEBSITE_URL}/home`)
 }
 
 export function useUserAccountMenu() {

@@ -18,6 +18,7 @@ import { i18n } from "@/utils/i18n"
 import { resolveUiLocale } from "@/utils/i18n/locale-map"
 import { createLogger } from "@/utils/logging/logger"
 import { sendMessage } from "@/utils/message"
+import { openInNewTab } from "@/utils/navigation"
 import { cn } from "@/utils/styles/utils"
 import { getReviewUrl } from "@/utils/utils"
 import { useLatestBlogPost } from "./use-latest-blog-post"
@@ -30,7 +31,7 @@ const WECHAT_QR_URL = `${GITHUB_REPO_URL}/blob/main/assets/wechat-account.jpg`
 const log = createLogger("popup/more-menu")
 
 function openExternal(url: string) {
-  window.open(url, "_blank", "noopener,noreferrer")
+  void openInNewTab(url)
 }
 
 /** Opens the panel on the page itself, then gets out of its way. */

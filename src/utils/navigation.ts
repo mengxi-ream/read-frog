@@ -201,6 +201,19 @@ export function consumeCustomActionDeepLink(search: string): CustomActionDeepLin
   return { actionId, tab, remainingSearch: remaining ? `?${remaining}` : "" }
 }
 
+/**
+ * Opens `url` in a new tab from one of the extension's pages, then closes the
+ * popup if that is where it was called. In Safari, `window.open` in the popup
+ * opens a new window instead of a tab, and WebKit closes the popup only when
+ * the popup closes itself; other browsers close it as the tab takes focus.
+ */
+export async function openInNewTab(url: string) {
+  await browser.tabs.create({ url })
+  // Not `tabs.getCurrent()`: in the popup, Safari answers with the tab the
+  // popup belongs to, as it does in a tab.
+  if (browser.extension.getViews({ type: "popup" }).includes(window)) window.close()
+}
+
 export async function openOptionsPage(options?: OpenOptionsPageOptions) {
   const route = options?.route ?? ""
 

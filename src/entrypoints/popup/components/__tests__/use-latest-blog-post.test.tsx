@@ -9,6 +9,7 @@ const getBlogLocaleFromUILanguageMock = vi.fn<(...args: any[]) => any>(() => "zh
 const getLastViewedBlogDateMock = vi.fn<(...args: any[]) => any>()
 const getLatestBlogDateMock = vi.fn<(...args: any[]) => any>()
 const saveLastViewedBlogDateMock = vi.fn<(...args: any[]) => any>()
+const openInNewTabMock = vi.fn<(url: string) => Promise<void>>(async () => {})
 
 vi.mock("jotai", async (importOriginal) => ({
   ...(await importOriginal<typeof import("jotai")>()),
@@ -34,6 +35,10 @@ vi.mock("@/utils/blog", async () => {
     saveLastViewedBlogDate: (...args: unknown[]) => saveLastViewedBlogDateMock(...args),
   }
 })
+
+vi.mock("@/utils/navigation", () => ({
+  openInNewTab: (url: string) => openInNewTabMock(url),
+}))
 
 function renderLatestBlogPost() {
   const queryClient = new QueryClient({
@@ -80,7 +85,6 @@ describe("useLatestBlogPost", () => {
     getLastViewedBlogDateMock.mockResolvedValue(new Date("2026-11-01T00:00:00Z"))
     getLatestBlogDateMock.mockResolvedValue({ date, url: "/blog/simple-mode" })
     saveLastViewedBlogDateMock.mockResolvedValue(undefined)
-    const openSpy = vi.spyOn(window, "open").mockReturnValue(null)
 
     const { result } = renderLatestBlogPost()
     await waitFor(() => expect(result.current.hasNewPost).toBe(true))
@@ -89,10 +93,12 @@ describe("useLatestBlogPost", () => {
     await act(() => result.current.open())
 
     expect(saveLastViewedBlogDateMock).toHaveBeenCalledWith(date)
-    expect(openSpy).toHaveBeenCalledWith(
+    expect(openInNewTabMock).toHaveBeenCalledExactlyOnceWith(
       "https://www.readfrog.app/blog/simple-mode",
-      "_blank",
-      "noopener,noreferrer",
+    )
+    // Marked read before the tab opens, which closes the popup.
+    expect(saveLastViewedBlogDateMock.mock.invocationCallOrder[0]).toBeLessThan(
+      openInNewTabMock.mock.invocationCallOrder[0]!,
     )
     await waitFor(() => expect(result.current.hasNewPost).toBe(false))
   })

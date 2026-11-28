@@ -493,14 +493,35 @@ describe("difficult words handlers", () => {
       expect(statusMock).toHaveBeenCalledTimes(1)
     })
 
-    // Reading the cookies of a site Safari hasn't been allowed on asks the user.
-    it("does not look for the cookie in Safari", async () => {
+    // Reading the cookies of a site Safari hasn't been allowed on asks the user,
+    // and without them the request goes out signed out anyway.
+    it("in Safari, answers signed out without reading the cookies while the API's site isn't allowed", async () => {
       vi.stubEnv("BROWSER", "safari")
-      getCookiesMock.mockResolvedValue([])
-      statusMock.mockRejectedValue(new ORPCError("UNAUTHORIZED"))
+      browser.permissions.contains = vi.fn<() => Promise<boolean>>(async () => false)
 
       await expect(ask("getDifficultWordsAccess")).resolves.toBe("signedOut")
       expect(getCookiesMock).not.toHaveBeenCalled()
+      expect(statusMock).not.toHaveBeenCalled()
+    })
+
+    it("in Safari, asks the server while the API's site is allowed and has a session cookie", async () => {
+      vi.stubEnv("BROWSER", "safari")
+      browser.permissions.contains = vi.fn<() => Promise<boolean>>(async () => true)
+      // As Safari has them: the extension's own store first, which no tab uses,
+      // and the session cookie in the store of the tabs.
+      browser.cookies.getAllCookieStores = vi.fn<() => Promise<Browser.cookies.CookieStore[]>>(
+        async () => [
+          { id: "ephemeral-2", tabIds: [] },
+          { id: "persistent-2", tabIds: [1] },
+        ],
+      )
+      getCookiesMock.mockImplementation(async (details) =>
+        details.storeId === "persistent-2" ? [sessionCookie] : [],
+      )
+      statusMock.mockResolvedValue({ allowed: true })
+
+      await expect(ask("getDifficultWordsAccess")).resolves.toBe("allowed")
+      expect(getCookiesMock).toHaveBeenCalledWith({ url: env.WXT_API_URL, storeId: "persistent-2" })
       expect(statusMock).toHaveBeenCalledTimes(1)
     })
 

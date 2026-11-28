@@ -23,6 +23,7 @@ import { env } from "@/env"
 import { buildFeatureUsedEventProperties } from "@/utils/analytics"
 import { classifyFailureReason } from "@/utils/analytics-failure-reason"
 import { backgroundAuthClient } from "@/utils/auth/background-auth-client"
+import { onSessionCookiesChange } from "@/utils/auth/safari-session"
 import { getLocalConfig, setLocalConfig } from "@/utils/config/storage"
 import { patchSelectionToolbarAction } from "@/utils/custom-actions"
 import { createLogger } from "@/utils/logging/logger"
@@ -759,11 +760,15 @@ export function setupNotebasePendingSaveProcessor(waitUntilReady: () => Promise<
 
   if (browser.cookies?.onChanged) {
     // Safari calls this with no argument (webkit.org/b/267514), so there's no
-    // telling which cookie changed.
+    // telling which cookie changed. It watches its own way, below.
     browser.cookies.onChanged.addListener((changeInfo?: Browser.cookies.CookieChangeInfo) => {
       if (changeInfo && isAuthCookieChange(changeInfo.cookie)) {
         void processPendingNotebaseSave("auth-cookie-change")
       }
     })
+  }
+
+  if (import.meta.env.BROWSER === "safari") {
+    onSessionCookiesChange(() => void processPendingNotebaseSave("auth-cookie-change"))
   }
 }
