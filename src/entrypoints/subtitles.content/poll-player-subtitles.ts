@@ -14,6 +14,8 @@ interface PollPlayerOptions {
   /** Runs on every tick that finds the same player, for what the site changes silently. */
   onStay?: () => void
   onLeave?: () => void
+  /** For controls at the top of the player: the menu opens down from the button. */
+  menuBelow?: boolean
 }
 
 interface MountedPlayer {
@@ -24,7 +26,7 @@ interface MountedPlayer {
 /** Mounts subtitles on a site that changes videos without a page load or an event. */
 export function pollPlayerSubtitles(
   ctx: ContentScriptContext,
-  { adapter, config, selectPlayer, onStay, onLeave }: PollPlayerOptions,
+  { adapter, config, selectPlayer, onStay, onLeave, menuBelow }: PollPlayerOptions,
 ) {
   let initPromise: Promise<void> | null = null
   let initialized = false
@@ -32,7 +34,7 @@ export function pollPlayerSubtitles(
 
   const mount = async (current: MountedPlayer) => {
     mounted = current
-    await mountSubtitlesUI({ adapter, config })
+    await mountSubtitlesUI({ adapter, config, menuBelow })
   }
 
   const init = async (current: MountedPlayer) => {

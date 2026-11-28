@@ -1,3 +1,5 @@
+import { PRIME_VIDEO_MATCHES } from "@/utils/constants/subtitles"
+
 export const subtitlesContentScriptMatches = [
   "*://*.youtube.com/*",
   "*://*.youtube-nocookie.com/*",
@@ -9,4 +11,5 @@ export const subtitlesContentScriptMatches = [
   "*://www.bilibili.com/*",
   "*://*.udemy.com/*",
   "*://courses.edx.org/*",
+  ...PRIME_VIDEO_MATCHES,
 ]

@@ -10,7 +10,7 @@ import {
 import { i18n } from "@/utils/i18n"
 import { NoSubtitlesError, OverlaySubtitlesError } from "@/utils/subtitles/errors"
 import { postMessageRequest } from "../post-message-request"
-import { parseNetflixTtml } from "./ttml"
+import { parseTtml } from "../ttml"
 
 export type NetflixSubtitlesAction = "state" | "load" | "restore"
 
@@ -78,7 +78,7 @@ export class NetflixSubtitlesFetcher implements SubtitlesFetcher {
       throw new OverlaySubtitlesError(i18n.t("subtitles.errors.trackFileNotLoaded"))
     }
 
-    const parsed = parseNetflixTtml(response.ttml)
+    const parsed = parseTtml(response.ttml)
     if (!parsed.fragments.length) {
       throw new NoSubtitlesError()
     }

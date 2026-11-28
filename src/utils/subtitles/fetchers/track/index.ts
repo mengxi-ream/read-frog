@@ -14,6 +14,8 @@ export interface SubtitlesTrackSource {
   currentKey: () => string | null
   /** Throws a `SubtitlesError` when the track cannot be loaded. */
   load: (key: string) => Promise<SubtitlesTrack>
+  /** Each cue is already a subtitle line, as in a TTML file, so cues are not merged into sentences. */
+  preSegmented?: boolean
 }
 
 /** For sites that serve a whole subtitle file: one load per track, shared by check and fetch. */
@@ -43,6 +45,10 @@ export class TrackSubtitlesFetcher implements SubtitlesFetcher {
 
   getSourceLanguage(): string {
     return this.sourceLanguage
+  }
+
+  isPreSegmented(): boolean {
+    return this.source.preSegmented === true
   }
 
   // Only the file says whether a video has subtitles, so checking loads it, and `fetch` reuses that

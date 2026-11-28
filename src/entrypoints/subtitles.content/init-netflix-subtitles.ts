@@ -10,11 +10,11 @@ import { getNetflixConfig } from "./platforms/netflix/config"
 import {
   mountNetflixTranslateButton,
   removeNetflixTranslateButton,
-  watchNetflixControls,
 } from "./platforms/netflix/translate-button"
 import { mountSubtitlesSidebar } from "./renderer/mount-subtitles-sidebar"
 import { mountSubtitlesUI, unmountSubtitlesUI } from "./renderer/mount-subtitles-ui"
 import { UniversalVideoAdapter } from "./universal-adapter"
+import { watchDomChanges } from "./watch-dom-changes"
 
 export function initNetflixSubtitles(ctx: ContentScriptContext) {
   if (window.location.hostname !== "www.netflix.com") {
@@ -47,7 +47,7 @@ export function initNetflixSubtitles(ctx: ContentScriptContext) {
   }
 
   ctx.onInvalidated(
-    watchNetflixControls(() => {
+    watchDomChanges(() => {
       if (initialized) mountNetflixTranslateButton(adapter)
     }),
   )

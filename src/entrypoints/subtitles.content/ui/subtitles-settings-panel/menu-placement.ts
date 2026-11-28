@@ -5,6 +5,8 @@ export function isMenuInControls(embedded: boolean | undefined): boolean {
 }
 
 export const MENU_EDGE_MARGIN = 16
+// Between the menu and the controls it opens from, about what players leave under their own menus.
+export const MENU_CONTROLS_GAP = 18
 
 interface Span {
   left: number

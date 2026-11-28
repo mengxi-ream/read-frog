@@ -1,6 +1,7 @@
 import type { SubtitlesFragment } from "@/utils/subtitles/types"
 
 const DEFAULT_TICK_RATE = 10_000_000
+const CLOCK_TIME_PATTERN = /^(\d+):(\d{2}):(\d{2}(?:\.\d+)?)$/
 const DIALOGUE_LINE_PATTERN = /^[-‐–—]/
 const UNSPACED_LANGUAGE_PATTERN = /^(?:zh|ja|yue)\b/i
 
@@ -30,7 +31,16 @@ function readCueText(paragraph: Element, language: string): string {
   return trimmed.join(UNSPACED_LANGUAGE_PATTERN.test(language) ? "" : " ")
 }
 
-export function parseNetflixTtml(xml: string): {
+// Netflix counts in ticks (`1238400000t`), Prime Video in clock time (`00:02:03.840`).
+function toMs(value: string | null, tickRate: number): number {
+  const clock = value?.match(CLOCK_TIME_PATTERN)
+  const seconds = clock
+    ? Number(clock[1]) * 3600 + Number(clock[2]) * 60 + Number(clock[3])
+    : Number.parseInt(value ?? "", 10) / tickRate
+  return Math.round(seconds * 1000)
+}
+
+export function parseTtml(xml: string): {
   language: string
   fragments: SubtitlesFragment[]
 } {
@@ -42,8 +52,6 @@ export function parseNetflixTtml(xml: string): {
 
   const language = root.getAttribute("xml:lang") ?? ""
   const tickRate = Number(root.getAttribute("ttp:tickRate")) || DEFAULT_TICK_RATE
-  const toMs = (value: string | null) =>
-    Math.round((Number.parseInt(value ?? "", 10) / tickRate) * 1000)
   const regionY = new Map(
     Array.from(doc.getElementsByTagNameNS("*", "region"), (region) => [
       region.getAttribute("xml:id"),
@@ -53,8 +61,8 @@ export function parseNetflixTtml(xml: string): {
 
   const byTime = new Map<string, PositionedCue[]>()
   for (const paragraph of Array.from(doc.getElementsByTagNameNS("*", "p"))) {
-    const start = toMs(paragraph.getAttribute("begin"))
-    const end = toMs(paragraph.getAttribute("end"))
+    const start = toMs(paragraph.getAttribute("begin"), tickRate)
+    const end = toMs(paragraph.getAttribute("end"), tickRate)
     const text = readCueText(paragraph, language)
     if (!(end > start) || !text) continue
     const y = regionY.get(paragraph.getAttribute("region")) ?? Number.POSITIVE_INFINITY

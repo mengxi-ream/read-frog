@@ -55,6 +55,7 @@ export const subtitlesPlatformSchema = z.enum([
   "bilibili",
   "udemy",
   "edx",
+  "primevideo",
 ])
 
 /**
