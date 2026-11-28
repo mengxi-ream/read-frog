@@ -13,8 +13,10 @@ function createTopLayerHost() {
   // Out of the layout of whatever holds it, such as a player in fullscreen; the
   // card itself shows in the top layer, wherever the host is.
   host.style.position = "fixed"
-  // In fullscreen the host sits inside the player, whose handlers would take the card's clicks.
-  isolatePlayerEvents(host)
+  // Inside a fullscreen player, the player's handlers would take the card's
+  // clicks. Anywhere else the page has to see them: the selection toolbar knows
+  // a selection was made in the card, not on the page, from its mousedown.
+  isolatePlayerEvents(host, () => host.parentElement !== document.body)
   const hostBuilder = new ShadowHostBuilder(host.attachShadow({ mode: "open" }), {
     position: "block",
     cssContent: [themeCSS],
@@ -48,7 +50,13 @@ export function useTopLayerPortalContainer(active: boolean) {
     // was shown after the element went fullscreen sits above it, so the card
     // shows again each time.
     const place = () => {
-      const parent = document.fullscreenElement ?? document.body
+      const fullscreenElement = document.fullscreenElement
+      // A page that is fullscreen as a whole (YouTube makes <html> fullscreen)
+      // already holds body, so the host stays there, as outside fullscreen.
+      const parent =
+        fullscreenElement && !fullscreenElement.contains(document.body)
+          ? fullscreenElement
+          : document.body
       if (host.parentElement !== parent) {
         // Moving the host also hides the card.
         parent.append(host)

@@ -12,8 +12,18 @@ const showPopover = vi.fn<(this: HTMLElement) => void>(function () {
 // jsdom has no Fullscreen API either.
 let fullscreenElement: Element | null = null
 
+// The selection toolbar tells a selection made in the card from one on the page
+// by the press that starts it, which it hears on the document.
+const onPageMouseDown = vi.fn<() => void>()
+
 function getHost(container: HTMLElement) {
   return (container.getRootNode() as ShadowRoot).host
+}
+
+function pressInCard(container: HTMLElement) {
+  const text = document.createElement("p")
+  container.append(text)
+  text.dispatchEvent(new MouseEvent("mousedown", { bubbles: true, composed: true }))
 }
 
 function addPlayer() {
@@ -36,9 +46,12 @@ describe("useTopLayerPortalContainer", () => {
       configurable: true,
       get: () => fullscreenElement,
     })
+    document.addEventListener("mousedown", onPageMouseDown)
   })
 
   afterEach(() => {
+    document.removeEventListener("mousedown", onPageMouseDown)
+    onPageMouseDown.mockClear()
     showPopover.mockClear()
     shownIn.length = 0
     fullscreenElement = null
@@ -110,6 +123,38 @@ describe("useTopLayerPortalContainer", () => {
     pin.dispatchEvent(new MouseEvent("click", { bubbles: true, composed: true }))
 
     expect(onPlayerClick).not.toHaveBeenCalled()
+  })
+
+  it("lets the page see the card's presses outside fullscreen", () => {
+    const { result } = renderHook(() => useTopLayerPortalContainer(true))
+
+    pressInCard(result.current)
+
+    expect(onPageMouseDown).toHaveBeenCalledTimes(1)
+  })
+
+  it("lets the page see the card's presses again once fullscreen ends", () => {
+    const player = addPlayer()
+    fullscreenElement = player
+    const { result } = renderHook(() => useTopLayerPortalContainer(true))
+    pressInCard(result.current)
+    expect(onPageMouseDown).not.toHaveBeenCalled()
+
+    changeFullscreen(null)
+    pressInCard(result.current)
+
+    expect(onPageMouseDown).toHaveBeenCalledTimes(1)
+  })
+
+  it("stays in body when the whole page is fullscreen, as on YouTube", () => {
+    const { result } = renderHook(() => useTopLayerPortalContainer(true))
+
+    changeFullscreen(document.documentElement)
+
+    expect(getHost(result.current).parentElement).toBe(document.body)
+    expect(shownIn).toEqual([document.body, document.body])
+    pressInCard(result.current)
+    expect(onPageMouseDown).toHaveBeenCalledTimes(1)
   })
 
   it("leaves the page when the card unmounts", () => {
