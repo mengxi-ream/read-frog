@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { Button } from "@/components/ui/base-ui/button"
 import { getFeatureActiveDays } from "@/utils/feature-active-days"
 import { i18n } from "@/utils/i18n"
+import { openInNewTab } from "@/utils/navigation"
 import {
   dismissStoreReviewPrompt,
   isStoreReviewPromptDismissed,
@@ -41,9 +42,11 @@ export function StoreReviewPrompt() {
     await queryClient.invalidateQueries({ queryKey: STORE_REVIEW_PROMPT_QUERY_KEY })
   }
 
+  // Dismissed first: opening the tab closes the popup, and whatever is left to
+  // run with it.
   const handleRate = async (url: string) => {
-    window.open(url, "_blank", "noopener,noreferrer")
     await dismiss()
+    await openInNewTab(url)
   }
 
   if (!shouldShow || !reviewUrl) return null

@@ -9,6 +9,7 @@ import {
   hasNewBlogPost,
   saveLastViewedBlogDate,
 } from "@/utils/blog"
+import { openInNewTab } from "@/utils/navigation"
 import { version } from "../../../../package.json"
 
 /**
@@ -39,7 +40,7 @@ export function useLatestBlogPost() {
     const blogUrl = latestBlogPost?.url
       ? `${env.WXT_WEBSITE_URL}${latestBlogPost.url}`
       : `${env.WXT_WEBSITE_URL}/blog`
-    window.open(blogUrl, "_blank", "noopener,noreferrer")
+    await openInNewTab(blogUrl)
   }
 
   return {

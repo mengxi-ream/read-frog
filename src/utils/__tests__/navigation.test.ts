@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { browser } from "#imports"
 import {
   buildAddCustomActionOptionsRoute,
@@ -8,6 +8,7 @@ import {
   consumeCustomActionDeepLink,
   CUSTOM_ACTION_ADD_QUERY_PARAM,
   getRequestedProviderType,
+  openInNewTab,
   openOptionsPage,
   shouldHighlightApiKey,
 } from "../navigation"
@@ -45,6 +46,56 @@ describe("navigation", () => {
       active: true,
       url: "chrome-extension://test-extension-id/options.html#/custom-actions?actionId=action-1",
     })
+  })
+})
+
+describe("openInNewTab", () => {
+  const PAGE_URL = "https://www.readfrog.app/log-in"
+  /** The page `openInNewTab` runs in. */
+  const page = { close: vi.fn<() => void>() }
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.stubGlobal("window", page)
+    browser.tabs.create = vi.fn<(...args: any[]) => any>().mockResolvedValue({})
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it("opens the page in a new tab, then closes the popup it was called in", async () => {
+    browser.extension.getViews = vi.fn<(...args: any[]) => any>(() => [page])
+
+    await openInNewTab(PAGE_URL)
+
+    expect(browser.tabs.create).toHaveBeenCalledExactlyOnceWith({ url: PAGE_URL })
+    expect(browser.extension.getViews).toHaveBeenCalledWith({ type: "popup" })
+    expect(page.close).toHaveBeenCalledOnce()
+    expect(vi.mocked(browser.tabs.create).mock.invocationCallOrder[0]).toBeLessThan(
+      page.close.mock.invocationCallOrder[0]!,
+    )
+  })
+
+  it.each([
+    ["no popup is open", []],
+    ["the popup is open but this page is a tab", [{ close: vi.fn<() => void>() }]],
+  ])("leaves a page in a tab open when %s", async (_, popups) => {
+    browser.extension.getViews = vi.fn<(...args: any[]) => any>(() => popups)
+
+    await openInNewTab(PAGE_URL)
+
+    expect(browser.tabs.create).toHaveBeenCalledExactlyOnceWith({ url: PAGE_URL })
+    expect(page.close).not.toHaveBeenCalled()
+  })
+
+  it("leaves the popup open when the tab couldn't be opened", async () => {
+    browser.extension.getViews = vi.fn<(...args: any[]) => any>(() => [page])
+    browser.tabs.create = vi.fn<(...args: any[]) => any>().mockRejectedValue(new Error("failed"))
+
+    await expect(openInNewTab(PAGE_URL)).rejects.toThrow("failed")
+
+    expect(page.close).not.toHaveBeenCalled()
   })
 })
 
