@@ -1,5 +1,21 @@
 # @read-frog/extension
 
+## 1.63.1
+
+### Patch Changes
+
+- [#2615](https://github.com/mengxi-ream/read-frog/pull/2615) [`e56ed8a`](https://github.com/mengxi-ream/read-frog/commit/e56ed8a504cb71ee52483ef16c735b7bae454fab) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - perf(difficult-words): stop asking the server whether a signed-out reader can use difficult words
+  
+  When the browser has no Read Frog session cookie, the extension now answers "signed out" without sending a request. Opening the popup also uses the saved answer instead of asking the server each time; signing in or out still clears the saved answer.
+
+- [#2611](https://github.com/mengxi-ream/read-frog/pull/2611) [`189b277`](https://github.com/mengxi-ream/read-frog/commit/189b277b745510ae8db5c15dffcd43f165e82190) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(providers): add Qwen3.7 Max and move off the Gemini 2.5 models Google is retiring
+  
+  Add Qwen3.7 Max on Alibaba. Google stops serving `gemini-2.5-pro` and `gemini-2.5-flash` on 2026-12-01 and DeepSeek has retired `deepseek-v4-flash`, so saved providers that use them move to Gemini 3.8 Flash, Gemini 3.5 Flash-Lite and `deepseek-flash`.
+
+- [#2596](https://github.com/mengxi-ream/read-frog/pull/2596) [`100a559`](https://github.com/mengxi-ream/read-frog/commit/100a5598ac3d7a1f1660892be2d59a1e57cfa58b) Thanks [@taiiiyang](https://github.com/taiiiyang)! - feat(subtitles): translate Prime Video subtitles, on primevideo.com and on Amazon's US, UK, German and Japanese stores, starting from the subtitles in the language spoken and kept in time past the logo card that opens each title, with their own translate-on-open switch
+
+- [#2609](https://github.com/mengxi-ream/read-frog/pull/2609) [`566ed6d`](https://github.com/mengxi-ream/read-frog/commit/566ed6d599affc90f5daff7c7dea8c6b6506e4c8) Thanks [@iF2007](https://github.com/iF2007)! - fix(site-rules): translate X Articles in the updated Tailwind web app
+
 ## 1.63.0
 
 ### Minor Changes
