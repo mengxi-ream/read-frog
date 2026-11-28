@@ -507,10 +507,21 @@ describe("difficult words handlers", () => {
     it("in Safari, asks the server while the API's site is allowed and has a session cookie", async () => {
       vi.stubEnv("BROWSER", "safari")
       browser.permissions.contains = vi.fn<() => Promise<boolean>>(async () => true)
+      // As Safari has them: the extension's own store first, which no tab uses,
+      // and the session cookie in the store of the tabs.
+      browser.cookies.getAllCookieStores = vi.fn<() => Promise<Browser.cookies.CookieStore[]>>(
+        async () => [
+          { id: "ephemeral-2", tabIds: [] },
+          { id: "persistent-2", tabIds: [1] },
+        ],
+      )
+      getCookiesMock.mockImplementation(async (details) =>
+        details.storeId === "persistent-2" ? [sessionCookie] : [],
+      )
       statusMock.mockResolvedValue({ allowed: true })
 
       await expect(ask("getDifficultWordsAccess")).resolves.toBe("allowed")
-      expect(getCookiesMock).toHaveBeenCalledWith({ url: env.WXT_API_URL })
+      expect(getCookiesMock).toHaveBeenCalledWith({ url: env.WXT_API_URL, storeId: "persistent-2" })
       expect(statusMock).toHaveBeenCalledTimes(1)
     })
 

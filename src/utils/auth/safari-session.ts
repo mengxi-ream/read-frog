@@ -40,34 +40,69 @@ function authUrl(route: "get-session" | "sign-out"): URL {
   return new URL(`${env.WXT_API_URL}${AUTH_BASE_PATH}/${route}`)
 }
 
+/** A cookie store as Safari and Firefox describe it: Chrome's has no `incognito`. */
+type CookieStore = Browser.cookies.CookieStore & { incognito?: boolean }
+
+/** Each store's session cookies by the store's id: none for a store that couldn't be read. */
+type SessionCookiesByStore = Map<string, Browser.cookies.Cookie[] | undefined>
+
 /**
- * The session cookies a request to the API would carry, read only with access
- * to the API's site: without it, Safari asks the user before it lets them be
- * read. Safari also leaves out any cookie of a site it may not read, such as
- * one set on `readfrog.app` itself when only `api.readfrog.app` is allowed.
+ * The session cookies a request to the API would carry, store by store, read
+ * only with access to the API's site: without it, Safari asks the user before
+ * it lets them be read. Safari also leaves out any cookie of a site it may not
+ * read, such as one set on `readfrog.app` itself when only `api.readfrog.app`
+ * is allowed.
+ *
+ * Each store is read by its id. Asked without one, Safari reads the store of
+ * the extension's own pages, which no tab uses, so the website's cookies are
+ * never in it. Private windows' stores are left out, as other browsers'
+ * backgrounds see only normal windows' cookies. A store that can't be read has
+ * no session cookies, and the others are read all the same. Each cookie keeps
+ * the id of the store it was read from, so that the cookie is changed there.
  *
  * The API names its cookie `<prefix>.session_token`, and staging and preview
  * APIs set their own prefix in place of the default `better-auth`, so any
  * prefix counts.
  */
-export async function readSessionCookies(): Promise<Browser.cookies.Cookie[]> {
+async function readSessionCookiesByStore(): Promise<SessionCookiesByStore> {
   try {
     const api = new URL(env.WXT_API_URL)
     // Without a port: Safari refuses a match pattern with one, and one without
     // covers them all.
     const apiHosts = `${api.protocol}//${api.hostname}/*`
-    if (!(await browser.permissions.contains({ origins: [apiHosts] }))) return []
-    const cookies = await browser.cookies.getAll({ url: env.WXT_API_URL })
-    return cookies.filter((cookie) => cookie.name.endsWith(".session_token"))
+    if (!(await browser.permissions.contains({ origins: [apiHosts] }))) return new Map()
+    const stores: CookieStore[] = await browser.cookies.getAllCookieStores()
+    const reads = await Promise.all(
+      stores
+        .filter((store) => store.incognito !== true)
+        .map(async ({ id }): Promise<[string, Browser.cookies.Cookie[] | undefined]> => {
+          try {
+            const cookies = await browser.cookies.getAll({ url: env.WXT_API_URL, storeId: id })
+            const sessionCookies = cookies
+              .filter((cookie) => cookie.name.endsWith(".session_token"))
+              .map((cookie) => ({ ...cookie, storeId: id }))
+            return [id, sessionCookies]
+          } catch (error) {
+            log.warn("Could not read a cookie store", { store: id, error })
+            return [id, undefined]
+          }
+        }),
+    )
+    return new Map(reads)
   } catch (error) {
     log.warn("Could not read the session cookies", { error })
-    return []
+    return new Map()
   }
+}
+
+/** Every store's session cookies together: see `readSessionCookiesByStore`. */
+export async function readSessionCookies(): Promise<Browser.cookies.Cookie[]> {
+  return [...(await readSessionCookiesByStore()).values()].flatMap((cookies) => cookies ?? [])
 }
 
 /** A cookie as the browser tells it from others of the same name. */
 function keyOf(cookie: Browser.cookies.Cookie): string {
-  return `${cookie.name};${cookie.domain};${cookie.path}`
+  return `${cookie.storeId};${cookie.name};${cookie.domain};${cookie.path}`
 }
 
 async function digest(value: string): Promise<string> {
@@ -328,14 +363,23 @@ let checking: Promise<void> | null = null
 let checkAgain = false
 
 async function compareWithLastSeen() {
-  const seen = await describe(await readSessionCookies())
+  const byStore = await readSessionCookiesByStore()
+  const seen = await describe([...byStore.values()].flatMap((cookies) => cookies ?? []))
   const lastSeen = await storage.getItem<string>(SEEN_KEY)
   if (seen === lastSeen) return
   await storage.setItem(SEEN_KEY, seen)
-  // The first look of a browser session has nothing to compare with.
-  if (lastSeen === null) return
 
-  log.info("Session cookies changed")
+  // Each store read, and how many session cookies it holds: where a session
+  // went, without a name or a value.
+  const stores = Object.fromEntries(
+    [...byStore].map(([id, cookies]) => [id, cookies?.length ?? "unreadable"]),
+  )
+  // The first look of a browser session has nothing to compare with.
+  if (lastSeen === null) {
+    log.info("Session cookies first seen", { stores })
+    return
+  }
+  log.info("Session cookies changed", { stores })
   for (const listener of sessionChangeListeners) listener()
 }
 
